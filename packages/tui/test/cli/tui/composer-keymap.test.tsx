@@ -1,7 +1,8 @@
 /** @jsxImportSource @opentui/solid */
 import { testRender } from "@opentui/solid"
+import { TextAttributes } from "@opentui/core"
 import { expect, test } from "bun:test"
-import { onMount } from "solid-js"
+import { createSignal, onMount } from "solid-js"
 import { ConfigProvider } from "../../../src/config"
 import type { TuiKeybind } from "../../../src/config/keybind"
 import { ClientProvider } from "../../../src/context/client"
@@ -9,8 +10,13 @@ import { DataProvider, useData } from "../../../src/context/data"
 import { Keymap } from "../../../src/context/keymap"
 import { LocationProvider } from "../../../src/context/location"
 import { RouteProvider, useRoute } from "../../../src/context/route"
+import { TuiAppProvider } from "../../../src/context/runtime"
+import { SessionTerminalsProvider, useSessionTerminals } from "../../../src/context/session-terminals"
+import { StorageProvider, useStorage } from "../../../src/context/storage"
 import { ThemeProvider } from "../../../src/context/theme"
 import { Composer } from "../../../src/routes/session/composer"
+import { ToastProvider } from "../../../src/ui/toast"
+import { tmpdir } from "../../fixture/fixture"
 import { createApi, createEventStream, createFetch, directory, json } from "../../fixture/tui-client"
 import { TestTuiContexts } from "../../fixture/tui-environment"
 import { createTuiResolvedConfig } from "../../fixture/tui-runtime"
@@ -22,9 +28,22 @@ const sessions = {
 }
 
 const shells = [shell("sh-a", "bun test"), shell("sh-b", "bun dev")]
+const terminals = ["First terminal", "Second terminal"].map((title, index) => ({
+  id: `pty-${index}`,
+  title,
+  command: "/bin/sh",
+  args: [],
+  cwd: directory,
+  status: "running",
+  pid: index + 1,
+  sessionID: "parent",
+  foregroundProcess: null,
+  size: { cols: 100, rows: 20 },
+  output: { head: 0, tail: 0 },
+}))
 
 async function renderComposer(
-  defaultTab: "subagents" | "shell",
+  defaultTab: "subagents" | "shell" | "terminals",
   keybinds: Partial<TuiKeybind.Keybinds>,
   focusedTextarea = false,
 ) {
@@ -32,10 +51,14 @@ async function renderComposer(
   const interrupted: string[] = []
   const removed: string[] = []
   const ready = Promise.withResolvers<void>()
+  const [open, setOpen] = createSignal(true)
+  const temporary = await tmpdir()
   let closed = 0
   let dispatch!: ReturnType<typeof Keymap.use>["dispatch"]
   let route!: ReturnType<typeof useRoute>
+  let storage!: ReturnType<typeof useStorage>
   const calls = createFetch((url, request) => {
+    if (url.pathname === "/api/experimental/session/parent/terminal") return json({ data: terminals })
     if (url.pathname === "/api/session/active")
       return json({ data: { "child-a": { type: "running" }, "child-b": { type: "running" } } })
     const sessionID = url.pathname.match(/^\/api\/session\/([^/]+)$/)?.[1]
@@ -61,6 +84,8 @@ async function renderComposer(
 
   function Content() {
     const data = useData()
+    const terminals = useSessionTerminals()
+    storage = useStorage()
     route = useRoute()
     dispatch = Keymap.use().dispatch
     onMount(() => {
@@ -69,6 +94,7 @@ async function renderComposer(
         data.session.sync("child-a"),
         data.session.sync("child-b"),
         data.shell.sync(),
+        terminals.refresh("parent"),
       ])
         .then(() => wait(() => data.session.status("child-a") === "running"))
         .then(() => ready.resolve(), ready.reject)
@@ -76,7 +102,13 @@ async function renderComposer(
     return (
       <>
         {focusedTextarea && <textarea focused={true} initialValue="draft" />}
-        <Composer sessionID="parent" open={true} defaultTab={defaultTab} onClose={() => closed++} />
+        <Composer
+          sessionID="parent"
+          open={open()}
+          defaultTab={defaultTab}
+          visibleTerminalID="pty-0"
+          onClose={() => closed++}
+        />
       </>
     )
   }
@@ -92,23 +124,31 @@ async function renderComposer(
 
   const app = await testRender(
     () => (
-      <TestTuiContexts directory={directory}>
-        <ConfigProvider config={createTuiResolvedConfig({ keybinds, session: { terminal: false } })}>
-          <Keymap.Provider>
-            <ClientProvider api={createApi(calls.fetch)}>
-              <DataProvider directory={process.cwd()}>
-                <LocationProvider>
-                  <RouteProvider initialRoute={{ type: "session", sessionID: "parent" }}>
-                    <ThemeProvider mode="dark" source={{ discover: async () => ({}) }}>
-                      <Content />
-                    </ThemeProvider>
-                  </RouteProvider>
-                </LocationProvider>
-              </DataProvider>
-            </ClientProvider>
-            <AppExit />
-          </Keymap.Provider>
-        </ConfigProvider>
+      <TestTuiContexts directory={directory} paths={{ state: temporary.path }}>
+        <TuiAppProvider value={{ name: "test", version: "test", channel: "test" }}>
+          <StorageProvider>
+            <ConfigProvider config={createTuiResolvedConfig({ keybinds, session: { terminal: true } })}>
+              <Keymap.Provider>
+                <ClientProvider api={createApi(calls.fetch)}>
+                  <DataProvider directory={process.cwd()}>
+                    <LocationProvider>
+                      <RouteProvider initialRoute={{ type: "session", sessionID: "parent" }}>
+                        <ThemeProvider mode="dark" source={{ discover: async () => ({}) }}>
+                          <ToastProvider>
+                            <SessionTerminalsProvider>
+                              <Content />
+                            </SessionTerminalsProvider>
+                          </ToastProvider>
+                        </ThemeProvider>
+                      </RouteProvider>
+                    </LocationProvider>
+                  </DataProvider>
+                </ClientProvider>
+                <AppExit />
+              </Keymap.Provider>
+            </ConfigProvider>
+          </StorageProvider>
+        </TuiAppProvider>
       </TestTuiContexts>
     ),
     { width: 100, height: 20, kittyKeyboard: true },
@@ -122,8 +162,84 @@ async function renderComposer(
     route: () => route.data,
     dispatch: (command: string) => dispatch(command),
     closed: () => closed,
+    setOpen,
+    selected: () =>
+      app
+        .captureSpans()
+        .lines.flatMap((line) => line.spans)
+        .filter((span) => span.attributes & TextAttributes.BOLD)
+        .map((span) => span.text.trim()),
+    async dispose() {
+      app.renderer.destroy()
+      await storage.flush()
+      await temporary[Symbol.asyncDispose]()
+    },
   }
 }
+
+const tabs = [
+  { tab: "subagents", first: "Build: First", second: "Build: Second" },
+  { tab: "shell", first: "bun test", second: "bun dev" },
+  { tab: "terminals", first: "First terminal", second: "Second terminal" },
+] as const
+
+test.each([...tabs])("opening $tab under a stationary pointer preserves selection", async ({ tab, first, second }) => {
+  const composer = await renderComposer(tab, {})
+  try {
+    const row = composer.app
+      .captureCharFrame()
+      .split("\n")
+      .findIndex((line) => line.includes(second))
+    expect(row).toBeGreaterThan(0)
+    expect(composer.selected()).toContain(first)
+
+    composer.setOpen(false)
+    await composer.app.renderOnce()
+    await composer.app.mockMouse.moveTo(10, row)
+    composer.setOpen(true)
+    await composer.app.renderOnce()
+    await composer.app.renderOnce()
+
+    expect(composer.selected()).toContain(first)
+    expect(composer.selected()).not.toContain(second)
+  } finally {
+    await composer.dispose()
+  }
+})
+
+test.each([...tabs])("moving within a $tab row selects it after opening", async ({ tab, first, second }) => {
+  const composer = await renderComposer(tab, {})
+  try {
+    const row = composer.app
+      .captureCharFrame()
+      .split("\n")
+      .findIndex((line) => line.includes(second))
+    expect(row).toBeGreaterThan(0)
+
+    composer.setOpen(false)
+    await composer.app.renderOnce()
+    await composer.app.mockMouse.moveTo(10, row)
+    composer.setOpen(true)
+    await composer.app.renderOnce()
+    await composer.app.renderOnce()
+    await composer.app.mockMouse.moveTo(11, row)
+    await composer.app.renderOnce()
+
+    expect(composer.selected()).toContain(second)
+    expect(composer.selected()).not.toContain(first)
+
+    composer.app.mockInput.pressArrow("up")
+    await composer.app.renderOnce()
+    await composer.app.renderOnce()
+    expect(composer.selected()).toContain(first)
+
+    await composer.app.mockMouse.moveTo(12, row)
+    await composer.app.renderOnce()
+    expect(composer.selected()).toContain(second)
+  } finally {
+    await composer.dispose()
+  }
+})
 
 test("disabled subagent bindings have no component fallbacks", async () => {
   const composer = await renderComposer("subagents", {
@@ -146,7 +262,7 @@ test("disabled subagent bindings have no component fallbacks", async () => {
     composer.dispatch("composer.subagent.select")
     expect(composer.route()).toMatchObject({ type: "session", sessionID: "child-a" })
   } finally {
-    composer.app.renderer.destroy()
+    await composer.dispose()
   }
 })
 
@@ -169,7 +285,7 @@ test("disabled shell bindings have no component fallbacks", async () => {
     await wait(() => composer.removed.length === 1)
     expect(composer.removed).toEqual(["sh-a"])
   } finally {
-    composer.app.renderer.destroy()
+    await composer.dispose()
   }
 })
 
@@ -183,7 +299,7 @@ test("configured composer bindings work with a focused textarea", async () => {
     await wait(() => composer.removed.length === 1)
     expect(composer.removed).toEqual(["sh-a"])
   } finally {
-    composer.app.renderer.destroy()
+    await composer.dispose()
   }
 })
 
@@ -194,7 +310,7 @@ test("ctrl+c closes the active composer", async () => {
     composer.app.mockInput.pressKey("c", { ctrl: true })
     await composer.app.waitFor(() => composer.closed() === 1)
   } finally {
-    composer.app.renderer.destroy()
+    await composer.dispose()
   }
 })
 
