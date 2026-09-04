@@ -202,9 +202,17 @@ export const locationLayer = Layer.effect(
           })
         if (!selected) return yield* new ModelNotSelectedError({ sessionID: session.id })
         const provider = yield* catalog.provider.get(selected.providerID)
-        const connection = yield* integrations.connection.active(
-          provider?.integrationID ?? Integration.ID.make(selected.providerID),
-        )
+        const virtual = Catalog.parseVirtualID(selected.providerID)
+        const baseID = virtual?.base ?? selected.providerID
+        const fallback = provider?.integrationID ?? Integration.ID.make(baseID)
+        let connection
+        if (virtual) {
+          connection = (yield* integrations.get(Integration.ID.make(baseID)))?.connections.find(
+            (item) => item.type === "credential" && item.id === virtual.credentialID,
+          )
+        }
+        connection =
+          connection ?? (yield* integrations.connection.active(fallback))
         return yield* resolve(
           session,
           selected,

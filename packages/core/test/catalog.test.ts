@@ -47,6 +47,7 @@ describe("CatalogV2", () => {
 
   it.effect("derives availability from active credentials without changing provider state", () => {
     const integrationID = Integration.ID.make("test")
+    const providerID = ProviderV2.ID.make("test")
     const localCatalogLayer = Layer.fresh(
       AppNodeBuilder.build(LayerNode.group([Catalog.node, Credential.node]), [[Location.node, locationLayer]]),
     )
@@ -54,22 +55,31 @@ describe("CatalogV2", () => {
     return Effect.gen(function* () {
       const catalog = yield* Catalog.Service
       const credentials = yield* Credential.Service
-      yield* catalog.transform((editor) => editor.provider.update(ProviderV2.ID.make("test"), () => {}))
-      yield* credentials.create({
+      yield* catalog.transform((editor) => editor.provider.update(providerID, () => {}))
+      const first = yield* credentials.create({
         integrationID,
         label: "First",
         value: Credential.Key.make({ type: "key", key: "first", metadata: { tenant: "one" } }),
       })
+      const firstID = ProviderV2.ID.make(`${providerID}#${first.id}`)
 
-      expect((yield* catalog.provider.available()).map((provider) => provider.id)).toEqual([ProviderV2.ID.make("test")])
-      expect(required(yield* catalog.provider.get(ProviderV2.ID.make("test"))).request.body).toEqual({})
-      yield* credentials.create({
+      // Labeled credentials project virtual providers while the base remains.
+      expect(new Set((yield* catalog.provider.available()).map((provider) => provider.id))).toEqual(
+        new Set([providerID, firstID]),
+      )
+      expect(required(yield* catalog.provider.get(firstID)).name).toBe("test (First)")
+      expect(required(yield* catalog.provider.get(providerID)).request.body).toEqual({})
+      const second = yield* credentials.create({
         integrationID,
         label: "Second",
         value: Credential.Key.make({ type: "key", key: "second", metadata: { tenant: "two" } }),
       })
-      expect((yield* catalog.provider.available()).map((provider) => provider.id)).toEqual([ProviderV2.ID.make("test")])
-      expect(required(yield* catalog.provider.get(ProviderV2.ID.make("test"))).request.body).toEqual({})
+      const secondID = ProviderV2.ID.make(`${providerID}#${second.id}`)
+      expect(new Set((yield* catalog.provider.available()).map((provider) => provider.id))).toEqual(
+        new Set([providerID, firstID, secondID]),
+      )
+      expect(required(yield* catalog.provider.get(secondID)).name).toBe("test (Second)")
+      expect(required(yield* catalog.provider.get(providerID)).request.body).toEqual({})
     }).pipe(Effect.provide(localCatalogLayer))
   })
 

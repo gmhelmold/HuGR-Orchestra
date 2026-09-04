@@ -147,6 +147,8 @@ export const dict = {
   "provider.connect.apiKey.label": "{{provider}} API key",
   "provider.connect.apiKey.placeholder": "API key",
   "provider.connect.apiKey.required": "API key is required",
+  "provider.connect.apiKey.labelOptional": "Label (optional)",
+  "provider.connect.apiKey.labelPlaceholder": "e.g. personal, work, team",
   "provider.connect.opencodeZen.line1":
     "OpenCode Zen gives you access to a curated set of reliable optimized models for coding agents.",
   "provider.connect.opencodeZen.line2":
@@ -1070,6 +1072,7 @@ export const dict = {
   "settings.providers.tag.config": "Config",
   "settings.providers.tag.custom": "Custom",
   "settings.providers.tag.other": "Other",
+  "settings.providers.addKey": "Add key",
   "settings.models.title": "Models",
   "settings.models.description": "Model settings will be configurable here.",
   "settings.agents.title": "Agents",
