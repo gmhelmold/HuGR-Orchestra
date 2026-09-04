@@ -358,6 +358,76 @@ describe("tool.task", () => {
     }),
   )
 
+  it.instance("execute adds the resolved model to ask patterns when the session scopes task models", () =>
+    Effect.gen(function* () {
+      const sessions = yield* Session.Service
+      const tool = yield* TaskTool
+      const def = yield* tool.init()
+      const chat = yield* sessions.create({
+        title: "Scoped",
+        permission: [
+          { permission: "task", pattern: "*/*", action: "deny" },
+          { permission: "task", pattern: "openrouter/*", action: "allow" },
+        ],
+      })
+      const user = yield* sessions.updateMessage({
+        id: MessageID.ascending(),
+        role: "user",
+        sessionID: chat.id,
+        agent: "build",
+        model: ref,
+        time: { created: Date.now() },
+      })
+      const assistant: SessionV1.Assistant = {
+        id: MessageID.ascending(),
+        role: "assistant",
+        parentID: user.id,
+        sessionID: chat.id,
+        mode: "build",
+        agent: "build",
+        cost: 0,
+        path: { cwd: "/tmp", root: "/tmp" },
+        tokens: { input: 0, output: 0, reasoning: 0, cache: { read: 0, write: 0 } },
+        modelID: ref.modelID,
+        providerID: ref.providerID,
+        variant: "xhigh",
+        time: { created: Date.now() },
+      }
+      yield* sessions.updateMessage(assistant)
+      let seenAsk: { patterns: string[]; metadata: Record<string, unknown> } | undefined
+      const promptOps = stubOps({ text: "done" })
+
+      yield* def.execute(
+        {
+          description: "inspect bug",
+          prompt: "look into the cache key path",
+          subagent_type: "general",
+          model: "openrouter/deepseek/deepseek-chat",
+        },
+        {
+          sessionID: chat.id,
+          messageID: assistant.id,
+          agent: "build",
+          abort: new AbortController().signal,
+          extra: { promptOps },
+          messages: [],
+          metadata: () => Effect.void,
+          ask: (input) =>
+            Effect.sync(() => {
+              seenAsk = { patterns: input.patterns, metadata: input.metadata as Record<string, unknown> }
+            }),
+        },
+      )
+
+      expect(seenAsk?.patterns).toEqual(["general", "openrouter/deepseek/deepseek-chat"])
+      expect(seenAsk?.metadata).toMatchObject({
+        description: "inspect bug",
+        subagent_type: "general",
+        model: "openrouter/deepseek/deepseek-chat",
+      })
+    }),
+  )
+
   it.instance("execute surfaces child errors with a resumable task_id", () =>
     Effect.gen(function* () {
       const sessions = yield* Session.Service
