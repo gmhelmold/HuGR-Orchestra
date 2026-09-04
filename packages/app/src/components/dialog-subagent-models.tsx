@@ -65,16 +65,14 @@ export const DialogSubagentModels: Component<{ sessionID: string; directory: str
         {(item: ModelItem) => (
           <div class="w-full flex items-center gap-x-2 text-13-regular">
             <span class="truncate">{item.name}</span>
-            <span class="ml-auto">
-              <Switch
-                class="-mr-1"
-                checked={isAllowed(item.provider.id, item.id)}
-                onChange={(checked) => void setAllowed(item.provider.id, item.id, checked)}
-                hideLabel
-              >
-                {item.name}
-              </Switch>
-            </span>
+            <Switch
+              class="-mr-1 ml-auto"
+              checked={isAllowed(item.provider.id, item.id)}
+              onChange={(checked) => void setAllowed(item.provider.id, item.id, checked)}
+              hideLabel
+            >
+              {item.name}
+            </Switch>
           </div>
         )}
       </List>
