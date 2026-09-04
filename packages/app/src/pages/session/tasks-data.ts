@@ -153,7 +153,7 @@ export function createTasksData() {
           toolTitle(part.state) ??
           (typeof input.description === "string" && input.description.length > 0
             ? input.description
-            : "Subagent")
+            : "")
         const agent =
           typeof input.subagent_type === "string" && input.subagent_type.length > 0
             ? input.subagent_type
@@ -211,7 +211,7 @@ export function createTasksData() {
       const item: TasksItem = {
         key: child.id,
         kind: "agent",
-        headline: child.title || "Subagent",
+        headline: child.title || "",
         state: live,
         startTime: child.time.created ?? Date.now(),
         childId: child.id,
