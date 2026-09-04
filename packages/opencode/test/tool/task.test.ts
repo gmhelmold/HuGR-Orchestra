@@ -394,7 +394,7 @@ describe("tool.task", () => {
         time: { created: Date.now() },
       }
       yield* sessions.updateMessage(assistant)
-      let seenAsk: { patterns: string[]; metadata: Record<string, unknown> } | undefined
+      let seenAsk: { patterns: readonly string[]; metadata: Record<string, unknown> } | undefined
       const promptOps = stubOps({ text: "done" })
 
       yield* def.execute(
