@@ -7,6 +7,7 @@ import { Session } from "@/session/session"
 import { SessionID, MessageID } from "../session/schema"
 import { MessageV2 } from "../session/message-v2"
 import { Agent } from "../agent/agent"
+import { Provider } from "@/provider/provider"
 import { deriveSubagentSessionPermission } from "../agent/subagent-permissions"
 import type { SessionPrompt } from "../session/prompt"
 import { Config } from "@/config/config"
@@ -49,6 +50,10 @@ const BaseParameterFields = {
       "This should only be set if you mean to resume a previous task (you can pass a prior task_id and the task will continue the same subagent session as before instead of creating a fresh one)",
   }),
   command: Schema.optional(Schema.String).annotate({ description: "The command that triggered this task" }),
+  model: Schema.optional(Schema.String).annotate({
+    description:
+      "Run the subagent on a specific model as 'providerID/modelID' (e.g. 'openrouter/deepseek/deepseek-chat', 'groq/llama-3.3-70b-versatile'). Overrides the subagent's configured model and the parent session model. The provider part also selects credentials: OAuth subscriptions (Claude Max, ChatGPT) and API keys resolve per providerID at run time — use a custom provider alias in opencode.json to pin a second key for the same backend.",
+  }),
 }
 
 const BaseParameters = Schema.Struct(BaseParameterFields)
@@ -178,9 +183,22 @@ export const TaskTool = Tool.define(
       if (msg.info.role !== "assistant") return yield* Effect.fail(new Error("Not an assistant message"))
       const variant = msg.info.variant
 
-      const model = next.model ?? {
+      let explicitModel = false
+      let model = next.model ?? {
         modelID: msg.info.modelID,
         providerID: msg.info.providerID,
+      }
+      if (params.model) {
+        const parsed = Provider.parseModel(params.model)
+        if (!parsed.providerID || !parsed.modelID) {
+          return yield* Effect.fail(
+            new Error(
+              `Invalid model "${params.model}". Use the 'providerID/modelID' format, e.g. 'openrouter/deepseek/deepseek-chat'.`,
+            ),
+          )
+        }
+        explicitModel = true
+        model = { modelID: parsed.modelID, providerID: parsed.providerID }
       }
       const metadata = {
         parentSessionId: ctx.sessionID,
@@ -206,7 +224,7 @@ export const TaskTool = Tool.define(
             modelID: model.modelID,
             providerID: model.providerID,
           },
-          variant: next.model ? undefined : variant,
+          variant: next.model || explicitModel ? undefined : variant,
           agent: next.name,
           parts,
         })

@@ -284,6 +284,80 @@ describe("tool.task", () => {
     }),
   )
 
+  it.instance("execute forwards an explicit model to the subagent prompt", () =>
+    Effect.gen(function* () {
+      const sessions = yield* Session.Service
+      const { chat, assistant } = yield* seed()
+      const tool = yield* TaskTool
+      const def = yield* tool.init()
+      let seen: SessionPrompt.PromptInput | undefined
+      const promptOps = stubOps({ text: "done", onPrompt: (input) => (seen = input) })
+
+      const result = yield* def.execute(
+        {
+          description: "inspect bug",
+          prompt: "look into the cache key path",
+          subagent_type: "general",
+          model: "openrouter/deepseek/deepseek-chat",
+        },
+        {
+          sessionID: chat.id,
+          messageID: assistant.id,
+          agent: "build",
+          abort: new AbortController().signal,
+          extra: { promptOps },
+          messages: [],
+          metadata: () => Effect.void,
+          ask: () => Effect.void,
+        },
+      )
+
+      const child = (yield* sessions.children(chat.id))[0]
+      expect(child).toBeDefined()
+      expect(`${seen?.model?.providerID}/${seen?.model?.modelID}`).toBe(
+        "openrouter/deepseek/deepseek-chat",
+      )
+      expect(seen?.variant).toBeUndefined()
+      expect(result.metadata.sessionId).toBe(child?.id)
+    }),
+  )
+
+  it.instance("execute rejects a malformed model parameter", () =>
+    Effect.gen(function* () {
+      const { chat, assistant } = yield* seed()
+      const tool = yield* TaskTool
+      const def = yield* tool.init()
+
+      const exit = yield* def
+        .execute(
+          {
+            description: "inspect bug",
+            prompt: "look into the cache key path",
+            subagent_type: "general",
+            model: "nodivider",
+          },
+          {
+            sessionID: chat.id,
+            messageID: assistant.id,
+            agent: "build",
+            abort: new AbortController().signal,
+            extra: { promptOps: stubOps({}) },
+            messages: [],
+            metadata: () => Effect.void,
+            ask: () => Effect.void,
+          },
+        )
+        .pipe(Effect.exit)
+
+      expect(Exit.isFailure(exit)).toBe(true)
+      if (Exit.isSuccess(exit)) throw new Error("expected task failure")
+      const failure = Cause.squash(exit.cause)
+      expect(failure).toBeInstanceOf(Error)
+      if (!(failure instanceof Error)) throw new Error("expected Error defect")
+      expect(failure.message).toContain("Invalid model")
+    }),
+  )
+
   it.instance("execute surfaces child errors with a resumable task_id", () =>
     Effect.gen(function* () {
       const sessions = yield* Session.Service
