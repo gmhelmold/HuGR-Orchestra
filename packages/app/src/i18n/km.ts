@@ -704,6 +704,8 @@ export const dict = {
   "session.tab.session": "សម័យ",
   "session.tab.review": "ពិនិត្យ",
   "session.tab.context": "បរិបទ",
+  "session.tasks.models.label": "Subagents · {{count}}",
+  "session.tasks.models.all": "All",
   "command.tasks.models": "Subagent models…",
   "dialog.subagentModels.title": "Subagent models",
   "dialog.subagentModels.description": "Choose which models this session's subagents may use.",

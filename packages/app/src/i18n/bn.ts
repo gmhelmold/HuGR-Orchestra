@@ -706,6 +706,8 @@ export const dict: Record<string, string> = {
   "session.tab.session": "সেশন",
   "session.tab.review": "পর্যালোচনা",
   "session.tab.context": "প্রসঙ্গ",
+  "session.tasks.models.label": "Subagents · {{count}}",
+  "session.tasks.models.all": "All",
   "command.tasks.models": "Subagent models…",
   "dialog.subagentModels.title": "Subagent models",
   "dialog.subagentModels.description": "Choose which models this session's subagents may use.",

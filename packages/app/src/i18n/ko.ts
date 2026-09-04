@@ -479,6 +479,8 @@ export const dict = {
   "session.tab.session": "세션",
   "session.tab.review": "검토",
   "session.tab.context": "컨텍스트",
+  "session.tasks.models.label": "Subagents · {{count}}",
+  "session.tasks.models.all": "All",
   "command.tasks.models": "Subagent models…",
   "dialog.subagentModels.title": "Subagent models",
   "dialog.subagentModels.description": "Choose which models this session's subagents may use.",

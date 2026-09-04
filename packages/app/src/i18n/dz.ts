@@ -718,6 +718,8 @@ export const dict: Record<string, string> = {
   "session.tab.session": "ལཱ་ཡུན།",
   "session.tab.review": "བསྐྱར་ཞིབ",
   "session.tab.context": "སྐབས་དོན།",
+  "session.tasks.models.label": "Subagents · {{count}}",
+  "session.tasks.models.all": "All",
   "command.tasks.models": "Subagent models…",
   "dialog.subagentModels.title": "Subagent models",
   "dialog.subagentModels.description": "Choose which models this session's subagents may use.",

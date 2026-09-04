@@ -24,6 +24,9 @@ import { type ImageAttachmentPart, usePrompt } from "@/context/prompt"
 import { usePlatform } from "@/context/platform"
 import { useSDK } from "@/context/sdk"
 import { useSync } from "@/context/sync"
+import { useLocal } from "@/context/local"
+import { useParams } from "@solidjs/router"
+import { effectiveModelState, hasModelScope } from "@/components/subagent-model-rules"
 import { createSessionTabs } from "@/pages/session/helpers"
 import { showToast } from "@/utils/toast"
 import { PromptInputV2, type PromptInputV2Suggestion } from "@opencode-ai/session-ui/v2/prompt-input"
@@ -58,6 +61,7 @@ export function PromptInputV2Composer(props: PromptInputV2ComposerProps) {
         variantControlVisible={!props.controller.model.loading}
         attachKeybind={command.keybindParts("file.attach")}
         attachShortcut={command.keybind("file.attach")}
+        subagentModelsControl={<PromptInputV2SubagentModelsControl />}
         modelControl={
           <PromptInputV2ModelControl
             loading={props.controller.model.loading}
@@ -466,6 +470,62 @@ export function usePromptInputV2Controller(props: PromptInputV2ControllerProps):
   )
 
   return controller as PromptInputV2ComposerController
+}
+
+function PromptInputV2SubagentModelsControl() {
+  const dialog = useDialog()
+  const language = useLanguage()
+  const sdk = useSDK()
+  const sync = useSync()
+  const local = useLocal()
+  const params = useParams()
+
+  const rules = () => {
+    const id = params.id
+    if (!id) return []
+    const permission = sync().session.get(id)?.permission
+    return Array.isArray(permission) ? permission : []
+  }
+  const label = () => {
+    const scoped = hasModelScope(rules())
+    if (!scoped) return language.t("session.tasks.models.all")
+    const models = local.model
+      .list()
+      .filter((m) => local.model.visible({ modelID: m.id, providerID: m.provider.id }))
+    const allowed = models.filter(
+      (m) => effectiveModelState(rules(), m.provider.id, m.id) === "allow",
+    ).length
+    return `${allowed}`
+  }
+  const open = () => {
+    const sessionID = params.id
+    const directory = sdk().directory
+    if (!sessionID || !directory) return
+    void import("@/components/dialog-subagent-models").then((x) => {
+      dialog.show(() => <x.DialogSubagentModels sessionID={sessionID} directory={directory} />)
+    })
+  }
+
+  return (
+    <TooltipV2 placement="top" gutter={4} value={<>{language.t("dialog.subagentModels.title")}</>}>
+      <ButtonV2
+        variant="ghost-muted"
+        size="normal"
+        style={{ height: "28px" }}
+        class="min-w-0 max-w-[220px] justify-start ![font-weight:440] group"
+        data-action="prompt-subagent-models"
+        data-control-type="dialog"
+        onClick={open}
+      >
+        <span class="truncate leading-4">
+          {language.t("session.tasks.models.label", { count: label() })}
+        </span>
+        <span class="-ml-0.5 -mr-1 flex shrink-0">
+          <Icon name="chevron-down" />
+        </span>
+      </ButtonV2>
+    </TooltipV2>
+  )
 }
 
 function PromptInputV2ModelControl(props: {
