@@ -59,20 +59,24 @@ export const providerHandlers = HttpApiBuilder.group(InstanceHttpApi, "provider"
       const extras: Record<string, any> = {}
       for (const cred of yield* credentials.all()) {
         if (cred.value.type !== "key") continue
+        const label = cred.label && cred.label !== "default" ? cred.label : ""
+        if (!label) continue
         const base = baseProviders[cred.integrationID]
         if (!base) continue
-        const label = cred.label && cred.label !== "default" ? cred.label : ""
-        const id = label ? `${cred.integrationID}#${cred.id}` : cred.integrationID
+        const id = `${cred.integrationID}#${cred.id}`
         extras[id] = {
           ...base,
           id,
-          name: label ? `${base.name} (${label})` : base.name,
+          name: `${base.name} (${label})`,
           key: cred.value.key,
         }
       }
       const providers = Object.assign(baseProviders, extras)
       return {
-        all: Object.values(providers).map(Provider.toPublicInfo),
+        all: Object.values(providers).map((item) => {
+          const { key: _, ...rest } = item
+          return Provider.toPublicInfo(rest)
+        }),
         default: Provider.defaultModelIDs(providers),
         connected: Object.keys(providers).filter((id) => id in connected || legacy[id] || id in extras),
       }

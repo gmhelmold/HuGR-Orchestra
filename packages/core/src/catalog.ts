@@ -239,7 +239,7 @@ const layer = Layer.effect(
           const virtualByID = new Map(virtuals.map((entry) => [entry.provider.id, entry.provider]))
           const active = new Map((yield* integrations.list()).map((integration) => [integration.id, integration]))
           return (yield* result.provider.all()).filter((provider) => {
-            if (virtualByID.has(provider.id)) return true
+            if (virtualByID.has(provider.id)) return !provider.disabled
             return available(provider, active.get(provider.integrationID ?? Integration.ID.make(provider.id)))
           })
         }),

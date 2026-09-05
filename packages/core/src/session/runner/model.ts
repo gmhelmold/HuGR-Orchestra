@@ -31,6 +31,7 @@ export class ModelUnavailableError extends Schema.TaggedErrorClass<ModelUnavaila
   {
     providerID: ProviderV2.ID,
     modelID: ModelV2.ID,
+    cause: Schema.String.pipe(Schema.optional),
   },
 ) {
   override get message() {
@@ -210,6 +211,12 @@ export const locationLayer = Layer.effect(
           connection = (yield* integrations.get(Integration.ID.make(baseID)))?.connections.find(
             (item) => item.type === "credential" && item.id === virtual.credentialID,
           )
+          if (!connection)
+            return yield* new ModelUnavailableError({
+              providerID: selected.providerID,
+              modelID: selected.id,
+              cause: `credential ${virtual.credentialID} not found`,
+            })
         }
         connection =
           connection ?? (yield* integrations.connection.active(fallback))

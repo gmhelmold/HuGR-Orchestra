@@ -1777,7 +1777,8 @@ const layer = Layer.effect(
             typeof options["baseURL"] === "string" && options["baseURL"] !== "" ? options["baseURL"] : model.api.url
           if (!url) return
 
-          const loader = s.varsLoaders[model.providerID]
+          const loaderBase = parseVirtualID(model.providerID as ModelV2.ID)?.base ?? model.providerID
+          const loader = s.varsLoaders[loaderBase]
           if (loader) {
             const vars = loader(options)
             for (const [key, value] of Object.entries(vars)) {
@@ -1881,24 +1882,38 @@ const layer = Layer.effect(
       }
     }
 
-    const getProvider = Effect.fn("Provider.getProvider")((providerID: ProviderV2.ID) =>
-      InstanceState.use(state, (s) => s.providers[providerID]),
-    )
+    const getProvider = Effect.fn("Provider.getProvider")(function* (providerID: ProviderV2.ID) {
+      const s = yield* InstanceState.get(state)
+      const provider = yield* ensureProvider(s, providerID)
+      if (provider) return provider
+      return s.providers[providerID] ?? (yield* new NoProvidersError())
+    })
 
     const ensureProvider = Effect.fn("Provider.ensureProvider")(function* (s: State, providerID: ProviderV2.ID) {
-      const existing = s.providers[providerID]
-      if (existing) return existing
       const parsed = parseVirtualID(providerID)
-      if (!parsed) return undefined
-      const base = s.providers[parsed.baseID] ?? s.catalog[parsed.baseID]
+      if (!parsed) return s.providers[providerID]
+      let base = s.providers[parsed.baseID]
+      if (!base) {
+        const cfg = yield* config.get()
+        const disabled = new Set(cfg.disabled_providers ?? [])
+        const enabled = cfg.enabled_providers ? new Set(cfg.enabled_providers) : null
+        if (enabled && !enabled.has(parsed.baseID)) return undefined
+        if (disabled.has(parsed.baseID)) return undefined
+        base = s.catalog[parsed.baseID]
+      }
       const credential = yield* credentials.get(parsed.credentialID)
-      if (!base || credential?.value.type !== "key") return undefined
+      if (!base || credential?.value.type !== "key") {
+        delete s.providers[providerID]
+        return undefined
+      }
       const provider = {
         ...base,
         id: providerID,
         name: `${base.name} (${credential.label})`,
         key: credential.value.key,
       }
+      const stale = s.providers[providerID]
+      if (stale && stale.key === provider.key && stale.name === provider.name) return stale
       s.providers[providerID] = provider
       return provider
     })
@@ -1937,8 +1952,9 @@ const layer = Layer.effect(
       return yield* EffectPromise.refineRejection(
         async () => {
           const sdk = await resolveSDK(model, s, envs)
-          const language = s.modelLoaders[model.providerID]
-            ? await s.modelLoaders[model.providerID](
+          const loaderBase = parseVirtualID(model.providerID as ModelV2.ID)?.base ?? model.providerID
+          const language = s.modelLoaders[loaderBase]
+            ? await s.modelLoaders[loaderBase](
                 sdk,
                 model.api.id,
                 {
