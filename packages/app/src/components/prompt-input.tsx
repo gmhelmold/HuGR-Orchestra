@@ -49,6 +49,8 @@ import { DialogSelectModelUnpaidV2 } from "@/components/dialog-select-model-unpa
 import { useCommand } from "@/context/command"
 import { usePermission } from "@/context/permission"
 import { useLanguage } from "@/context/language"
+import { useLocal } from "@/context/local"
+import { effectiveModelState, hasModelScope } from "@/components/subagent-model-rules"
 import { usePlatform } from "@/context/platform"
 import { createSessionTabs } from "@/pages/session/helpers"
 import { createTextFragment, getCursorPosition, setCursorPosition, setRangeEdge } from "./prompt-input/editor-dom"
@@ -1192,6 +1194,29 @@ export const PromptInput: Component<PromptInputProps> = (props) => {
   const variants = createMemo(() => ["default", ...props.controls.model.selection.variant.list()])
   // Check provider variants directly: `variants` also includes the UI-only default option.
   const showVariantControl = createMemo(() => props.controls.model.selection.variant.list().length > 0)
+  const local = useLocal()
+  const subagentRules = createMemo(() => {
+    const id = props.controls.session.id
+    if (!id) return []
+    const permission = sync().session.get(id)?.permission
+    return Array.isArray(permission) ? permission : []
+  })
+  const subagentLabel = createMemo(() => {
+    if (!hasModelScope(subagentRules())) return language.t("session.tasks.models.all")
+    const allowed = local.model
+      .list()
+      .filter((m) => local.model.visible({ modelID: m.id, providerID: m.provider.id }))
+      .filter((m) => effectiveModelState(subagentRules(), m.provider.id, m.id) === "allow").length
+    return `${allowed}`
+  })
+  const openSubagentModels = () => {
+    const sessionID = props.controls.session.id
+    const directory = sdk().directory
+    if (!sessionID || !directory) return
+    void import("@/components/dialog-subagent-models").then((x) => {
+      dialog.show(() => <x.DialogSubagentModels sessionID={sessionID} directory={directory} />)
+    })
+  }
   const accepting = createMemo(() => {
     const id = props.controls.session.id
     if (!id) return permission.isAutoAcceptingDirectory(sdk().directory)
@@ -1780,6 +1805,25 @@ export const PromptInput: Component<PromptInputProps> = (props) => {
                           />
                         </TooltipKeybind>
                       </div>
+                    </Show>
+                    <Show when={props.controls.session.id}>
+                      <Tooltip
+                        placement="top"
+                        value={language.t("dialog.subagentModels.title")}
+                      >
+                        <Button
+                          variant="ghost"
+                          size="normal"
+                          class="min-w-0 max-w-[220px] text-13-regular text-text-base group"
+                          data-action="prompt-subagent-models"
+                          onClick={openSubagentModels}
+                        >
+                          <span class="truncate">
+                            {language.t("session.tasks.models.label", { count: subagentLabel() })}
+                          </span>
+                          <Icon name="chevron-down" size="small" class="shrink-0" />
+                        </Button>
+                      </Tooltip>
                     </Show>
                   </Show>
                 </Show>
