@@ -3,7 +3,7 @@ import { mkdir, unlink } from "fs/promises"
 import path from "path"
 import { LayerNode } from "@opencode-ai/core/effect/layer-node"
 import { AppNodeBuilder } from "@opencode-ai/core/effect/app-node-builder"
-import { Effect, Layer } from "effect"
+import { Effect, Exit, Layer } from "effect"
 import { ModelsDev } from "@opencode-ai/core/models-dev"
 import { FSUtil } from "@opencode-ai/core/fs-util"
 import { CrossSpawnSpawner } from "@opencode-ai/core/cross-spawn-spawner"
@@ -1200,10 +1200,10 @@ it.instance("ModelNotFoundError suggests catalog models for unloaded providers",
   }),
 )
 
-it.instance("getProvider returns undefined for nonexistent provider", () =>
+it.instance("getProvider fails for nonexistent provider", () =>
   Effect.gen(function* () {
-    const provider = yield* Provider.Service.use((svc) => svc.getProvider(ProviderV2.ID.make("nonexistent")))
-    expect(provider).toBeUndefined()
+    const exit = yield* Provider.Service.use((svc) => svc.getProvider(ProviderV2.ID.make("nonexistent"))).pipe(Effect.exit)
+    expect(Exit.isFailure(exit)).toBe(true)
   }),
 )
 
