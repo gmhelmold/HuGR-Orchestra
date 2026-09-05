@@ -3,6 +3,7 @@ import { Config } from "@/config/config"
 import { ModelsDev } from "@opencode-ai/core/models-dev"
 import { Provider } from "@/provider/provider"
 import { Auth } from "@/auth"
+import { Credential } from "@opencode-ai/core/credential"
 
 import { mapValues } from "remeda"
 import { Effect, Schema } from "effect"
@@ -38,6 +39,7 @@ export const providerHandlers = HttpApiBuilder.group(InstanceHttpApi, "provider"
     const provider = yield* Provider.Service
     const svc = yield* ProviderAuth.Service
     const authStore = yield* Auth.Service
+    const credentials = yield* Credential.Service
 
     const list = Effect.fn("ProviderHttpApi.list")(function* () {
       const config = yield* cfg.get()
@@ -49,15 +51,30 @@ export const providerHandlers = HttpApiBuilder.group(InstanceHttpApi, "provider"
         if ((enabled ? enabled.has(key) : true) && !disabled.has(key)) filtered[key] = value
       }
       const connected = yield* provider.list()
-      const credentials = yield* authStore.all().pipe(Effect.orDie)
-      const providers = Object.assign(
+      const legacy = yield* authStore.all().pipe(Effect.orDie)
+      const baseProviders = Object.assign(
         mapValues(filtered, (item) => Provider.fromModelsDevProvider(item)),
         connected,
       )
+      const extras: Record<string, any> = {}
+      for (const cred of yield* credentials.all()) {
+        if (cred.value.type !== "key") continue
+        const base = baseProviders[cred.integrationID]
+        if (!base) continue
+        const label = cred.label && cred.label !== "default" ? cred.label : ""
+        const id = label ? `${cred.integrationID}#${cred.id}` : cred.integrationID
+        extras[id] = {
+          ...base,
+          id,
+          name: label ? `${base.name} (${label})` : base.name,
+          key: cred.value.key,
+        }
+      }
+      const providers = Object.assign(baseProviders, extras)
       return {
         all: Object.values(providers).map(Provider.toPublicInfo),
         default: Provider.defaultModelIDs(providers),
-        connected: Object.keys(providers).filter((id) => id in connected || credentials[id]),
+        connected: Object.keys(providers).filter((id) => id in connected || legacy[id] || id in extras),
       }
     })
 
