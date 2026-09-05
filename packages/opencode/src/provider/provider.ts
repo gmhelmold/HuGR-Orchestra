@@ -1191,7 +1191,7 @@ export type Error = ModelNotFoundError | InitError | NoProvidersError | NoModels
 
 export interface Interface {
   readonly list: () => Effect.Effect<Record<ProviderV2.ID, Info>>
-  readonly getProvider: (providerID: ProviderV2.ID) => Effect.Effect<Info>
+  readonly getProvider: (providerID: ProviderV2.ID) => Effect.Effect<Info, NoProvidersError>
   readonly getModel: (providerID: ProviderV2.ID, modelID: ModelV2.ID) => Effect.Effect<Model, ModelNotFoundError>
   readonly getLanguage: (model: Model) => Effect.Effect<LanguageModelV3, ModelNotFoundError>
   readonly closest: (
@@ -1777,7 +1777,7 @@ const layer = Layer.effect(
             typeof options["baseURL"] === "string" && options["baseURL"] !== "" ? options["baseURL"] : model.api.url
           if (!url) return
 
-          const loaderBase = parseVirtualID(model.providerID as ModelV2.ID)?.base ?? model.providerID
+          const loaderBase = parseVirtualID(model.providerID)?.baseID ?? model.providerID
           const loader = s.varsLoaders[loaderBase]
           if (loader) {
             const vars = loader(options)
@@ -1901,7 +1901,7 @@ const layer = Layer.effect(
         if (disabled.has(parsed.baseID)) return undefined
         base = s.catalog[parsed.baseID]
       }
-      const credential = yield* credentials.get(parsed.credentialID)
+      const credential = yield* credentials.get(Credential.ID.make(parsed.credentialID))
       if (!base || credential?.value.type !== "key") {
         delete s.providers[providerID]
         return undefined
@@ -1952,7 +1952,7 @@ const layer = Layer.effect(
       return yield* EffectPromise.refineRejection(
         async () => {
           const sdk = await resolveSDK(model, s, envs)
-          const loaderBase = parseVirtualID(model.providerID as ModelV2.ID)?.base ?? model.providerID
+          const loaderBase = parseVirtualID(model.providerID)?.baseID ?? model.providerID
           const language = s.modelLoaders[loaderBase]
             ? await s.modelLoaders[loaderBase](
                 sdk,

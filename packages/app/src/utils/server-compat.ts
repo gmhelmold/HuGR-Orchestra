@@ -400,7 +400,8 @@ function createV1Api(input: CompatibleInput): CompatibleApi {
           try {
             await input.current.integration.connect.key(value)
             return
-          } catch {
+          } catch (error) {
+            if (!isMissingRoute(error)) throw error
             await legacy(value.location).auth.set({
               providerID: value.integrationID,
               auth: { type: "api", key: value.key },
@@ -520,4 +521,9 @@ function createV1Api(input: CompatibleInput): CompatibleApi {
       },
     },
   }
+}
+
+function isMissingRoute(error: unknown) {
+  const status = error instanceof Error && "cause" in error ? (error.cause as { status?: unknown } | null)?.status : undefined
+  return status === 404 || status === 405
 }
