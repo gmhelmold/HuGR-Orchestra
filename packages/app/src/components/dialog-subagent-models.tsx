@@ -9,22 +9,36 @@ import { useServerSDK } from "@/context/server-sdk"
 import { useSync } from "@/context/sync"
 import { ModelTooltip } from "./model-tooltip"
 import { effectiveModelState, toggleModelRules, type ModelRule } from "./subagent-model-rules"
+import { draftVersion, modelKey, pendingSelection, togglePending } from "./draft-subagent-models"
 
 type ModelItem = ReturnType<ReturnType<typeof useLocal>["model"]["list"]>[number]
 
-export const DialogSubagentModels: Component<{ sessionID: string; directory: string }> = (props) => {
+export const DialogSubagentModels: Component<{ sessionID?: string; directory: string }> = (props) => {
   const local = useLocal()
   const language = useLanguage()
   const serverSDK = useServerSDK()
   const sync = useSync()
 
-  const sessionRules = (): ModelRule[] =>
-    (sync().session.get(props.sessionID)?.permission ?? []) as ModelRule[]
+  const sessionRules = (): ModelRule[] => {
+    if (!props.sessionID) return []
+    return (sync().session.get(props.sessionID)?.permission ?? []) as ModelRule[]
+  }
 
-  const isAllowed = (providerID: string, modelID: string) =>
-    effectiveModelState(sessionRules(), providerID, modelID) === "allow"
+  const isAllowed = (providerID: string, modelID: string) => {
+    // Drafts have no session yet: truth is the pending selection.
+    // draftVersion() subscribes so plain-Set mutations re-render.
+    if (!props.sessionID) {
+      draftVersion()
+      return pendingSelection(props.directory).has(modelKey(providerID, modelID))
+    }
+    return effectiveModelState(sessionRules(), providerID, modelID) === "allow"
+  }
 
   const setAllowed = async (providerID: string, modelID: string, allow: boolean) => {
+    if (!props.sessionID) {
+      togglePending(props.directory, providerID, modelID)
+      return
+    }
     if ((await serverSDK().protocol) !== "v1") return
     await serverSDK().client.session.update({
       sessionID: props.sessionID,

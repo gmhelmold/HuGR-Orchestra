@@ -51,6 +51,7 @@ import { usePermission } from "@/context/permission"
 import { useLanguage } from "@/context/language"
 import { useLocal } from "@/context/local"
 import { effectiveModelState, hasModelScope } from "@/components/subagent-model-rules"
+import { draftVersion, pendingSelection } from "@/components/draft-subagent-models"
 import { usePlatform } from "@/context/platform"
 import { createSessionTabs } from "@/pages/session/helpers"
 import { createTextFragment, getCursorPosition, setCursorPosition, setRangeEdge } from "./prompt-input/editor-dom"
@@ -1202,6 +1203,11 @@ export const PromptInput: Component<PromptInputProps> = (props) => {
     return Array.isArray(permission) ? permission : []
   })
   const subagentLabel = createMemo(() => {
+    if (!props.controls.session.id) {
+      draftVersion()
+      const n = pendingSelection(sdk().directory ?? "").size
+      return n > 0 ? `${n}` : language.t("session.tasks.models.all")
+    }
     if (!hasModelScope(subagentRules())) return language.t("session.tasks.models.all")
     const allowed = local.model
       .list()
@@ -1210,11 +1216,12 @@ export const PromptInput: Component<PromptInputProps> = (props) => {
     return `${allowed}`
   })
   const openSubagentModels = () => {
-    const sessionID = props.controls.session.id
     const directory = sdk().directory
-    if (!sessionID || !directory) return
+    if (!directory) return
     void import("@/components/dialog-subagent-models").then((x) => {
-      dialog.show(() => <x.DialogSubagentModels sessionID={sessionID} directory={directory} />)
+      dialog.show(() => (
+        <x.DialogSubagentModels sessionID={props.controls.session.id} directory={directory} />
+      ))
     })
   }
   const accepting = createMemo(() => {
@@ -1806,25 +1813,23 @@ export const PromptInput: Component<PromptInputProps> = (props) => {
                         </TooltipKeybind>
                       </div>
                     </Show>
-                    <Show when={props.controls.session.id}>
-                      <Tooltip
-                        placement="top"
-                        value={language.t("dialog.subagentModels.title")}
+                    <Tooltip
+                      placement="top"
+                      value={language.t("dialog.subagentModels.title")}
+                    >
+                      <Button
+                        variant="ghost"
+                        size="normal"
+                        class="min-w-0 max-w-[220px] text-13-regular text-text-base group"
+                        data-action="prompt-subagent-models"
+                        onClick={openSubagentModels}
                       >
-                        <Button
-                          variant="ghost"
-                          size="normal"
-                          class="min-w-0 max-w-[220px] text-13-regular text-text-base group"
-                          data-action="prompt-subagent-models"
-                          onClick={openSubagentModels}
-                        >
-                          <span class="truncate">
-                            {language.t("session.tasks.models.label", { count: subagentLabel() })}
-                          </span>
-                          <Icon name="chevron-down" size="small" class="shrink-0" />
-                        </Button>
-                      </Tooltip>
-                    </Show>
+                        <span class="truncate">
+                          {language.t("session.tasks.models.label", { count: subagentLabel() })}
+                        </span>
+                        <Icon name="chevron-down" size="small" class="shrink-0" />
+                      </Button>
+                    </Tooltip>
                   </Show>
                 </Show>
               </div>
