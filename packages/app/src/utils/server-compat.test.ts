@@ -24,6 +24,9 @@ function setup(
       }
       if (request.method === "POST" && request.url.endsWith("/prompt_async"))
         return new Response(undefined, { status: 204 })
+      if (new URL(request.url).pathname.endsWith("/connect/key") && protocol === "v1") {
+        return new Response("not found", { status: 404 })
+      }
       if (request.method === "POST" && request.url.endsWith("/prompt")) {
         return Response.json({
           admittedSeq: 1,
@@ -207,12 +210,13 @@ describe("createCompatibleApi", () => {
     })
 
     expect(requests.map((request) => new URL(request.url).pathname)).toEqual([
+      "/api/integration/openrouter/connect/key",
       "/auth/openrouter",
       "/instance/dispose",
       "/instance/dispose",
     ])
-    expect(requests[1]!.headers.get("x-opencode-directory")).toBe("%2Frepo")
-    expect(requests[2]!.headers.get("x-opencode-directory")).toBeNull()
+    expect(requests[2]!.headers.get("x-opencode-directory")).toBe("%2Frepo")
+    expect(requests[3]!.headers.get("x-opencode-directory")).toBeNull()
   })
 
   test("disposes the V1 instance after completing provider OAuth", async () => {
