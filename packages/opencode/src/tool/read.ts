@@ -16,6 +16,13 @@ const MAX_LINE_LENGTH = 2000
 const MAX_LINE_SUFFIX = `... (line truncated to ${MAX_LINE_LENGTH} chars)`
 const MAX_BYTES = 50 * 1024
 const MAX_BYTES_LABEL = `${MAX_BYTES / 1024} KB`
+// Token budget per read (Grok parity). A read cuts (with a PARTIAL-view
+// footer) once the estimated token count crosses this budget; the 50 KB byte
+// cap remains a parallel floor. For ordinary code the two fire together
+// (~50 KB ≈ 25k tokens); for token-dense content (CJK, minified, data) the
+// token budget binds strictly first, so the model is never fed a context bomb.
+const MAX_TOKENS = 25_000
+const MAX_TOKENS_LABEL = `${MAX_TOKENS} tokens`
 const SAMPLE_BYTES = 4096
 const SUPPORTED_IMAGE_MIMES = new Set(["image/jpeg", "image/png", "image/gif", "image/webp"])
 
@@ -47,7 +54,7 @@ export const Parameters = Schema.Struct({
   }),
   symbol: Schema.optional(Schema.String).annotate({
     description:
-      "Read only the range of a named symbol (function/class/const) in the file. The output reports the symbol's total size so you can page through it with offset/limit if it is large. When no LSP server covers the file, falls back to an indentation heuristic and reports source=indent so you know the range may be approximate.",
+      "Read only the range of a named symbol (function/class/const) in the file. The output reports the symbol's total size so you can page through it with offset/limit if it is large. Resolves via LSP when available, else an indentation heuristic (reported as source=indent). If the symbol cannot be resolved at all, degrades to a normal file read with a note instead of failing.",
   }),
   depth: Schema.optional(Schema.Literals([0, 1])).annotate({
     description:
@@ -253,13 +260,13 @@ export const ReadTool = Tool.define<
     ) {
       const start = opts.offset - 1
       const raw: string[] = []
-      const flags = { bytes: 0, count: 0, cut: false, more: false, done: false }
+      const flags = { bytes: 0, tokens: 0, count: 0, cut: false, tokenCut: false, more: false, done: false }
 
       // Note: prefer manual TextDecoder over Stream.decodeText — when the source stream
       // ends without flushing, decodeText drops the final unterminated line. We also
       // avoid Stream.runForEachWhile (it currently swallows the final unterminated
       // line of the upstream splitLines pipeline) and use a tagged error to stop the
-      // upstream file stream as soon as the byte cap is reached.
+      // upstream file stream as soon as the cap is reached.
       const decoder = new TextDecoder("utf-8")
       yield* fs.stream(filepath).pipe(
         Stream.map((bytes) => decoder.decode(bytes, { stream: true })),
@@ -277,13 +284,24 @@ export const ReadTool = Tool.define<
 
             const line = text.length > MAX_LINE_LENGTH ? text.substring(0, MAX_LINE_LENGTH) + MAX_LINE_SUFFIX : text
             const size = Buffer.byteLength(line, "utf-8") + (raw.length > 0 ? 1 : 0)
-            if (opts.unbounded || flags.bytes + size <= MAX_BYTES) {
+            // Token estimate: ~2 bytes/token is a conservative upper bound
+            // for code, so the budget cuts in ~coincidence with the byte cap
+            // on ASCII and strictly before it on token-dense content (CJK,
+            // minified, data) — which gets a PARTIAL-view footer instead of
+            // dumping a token bomb into the model's context.
+            const lineTokens = Math.max(1, Math.ceil(size / 2))
+            if (
+              opts.unbounded ||
+              (flags.bytes + size <= MAX_BYTES && flags.tokens + lineTokens <= MAX_TOKENS)
+            ) {
               raw.push(line)
               flags.bytes += size
+              flags.tokens += lineTokens
               return
             }
 
             flags.cut = true
+            flags.tokenCut = flags.bytes + size <= MAX_BYTES
             flags.more = true
             flags.done = true
             return yield* new ReadStop()
@@ -292,7 +310,14 @@ export const ReadTool = Tool.define<
         Effect.catchTag("ReadStop", () => Effect.void),
       )
 
-      return { raw, count: flags.count, cut: flags.cut, more: flags.more, offset: opts.offset }
+      return {
+        raw,
+        count: flags.count,
+        cut: flags.cut,
+        tokenCut: flags.tokenCut,
+        more: flags.more,
+        offset: opts.offset,
+      }
     })
 
     const isBinaryFile = (filepath: string, bytes: Uint8Array) => {
@@ -446,8 +471,10 @@ export const ReadTool = Tool.define<
 
       // symbol-scoped read: resolve a named symbol to its line range, announce
       // its size, and page through it with offset/limit. Falls back to an
-      // indentation heuristic when no LSP server covers the file, and always
-      // reports `source` so the model knows how much to trust the range.
+      // indentation heuristic when no LSP server covers the file. If the
+      // symbol is genuinely unresolvable, DEGRADES to a normal file read with
+      // a note instead of failing — the model never pays a second round-trip.
+      let degradeNote = ""
       if (params.symbol) {
         const uri = pathToFileURL(filepath).href
         const hasClient = yield* Effect.catch(
@@ -476,12 +503,9 @@ export const ReadTool = Tool.define<
           }
         }
         if (!resolved) {
-          return yield* Effect.fail(
-            new Error(
-              `Symbol "${params.symbol}" not found in ${filepath}. Try listing symbols with the lsp tool (workspaceSymbol).`,
-            ),
-          )
+          degradeNote = `Symbol "${params.symbol}" not found via LSP or indentation in ${filepath} — continuing with a normal file read.`
         }
+        if (resolved) {
         const symbolSize = resolved.end - resolved.start + 1
         const startLine = resolved.start
         const rel = Math.max(0, startLine - 1)
@@ -560,6 +584,7 @@ export const ReadTool = Tool.define<
             saved: Math.max(0, symbolSize - part.length),
           },
         }
+        }
       }
 
       // tail: negative offset reads from the end of the file (Grok semantics).
@@ -584,7 +609,9 @@ export const ReadTool = Tool.define<
       const last = file.offset + file.raw.length - 1
       const next = last + 1
       const truncated = file.more || file.cut
-      if (file.cut) {
+      if (file.tokenCut) {
+        output += `\n\n(Output capped at ${MAX_TOKENS_LABEL}. PARTIAL view — showing lines ${file.offset}-${last}. Use offset=${next} to continue.)`
+      } else if (file.cut) {
         output += `\n\n(Output capped at ${MAX_BYTES_LABEL}. Showing lines ${file.offset}-${last}. Use offset=${next} to continue.)`
       } else if (file.more) {
         output += `\n\n(Showing lines ${file.offset}-${last} of ${file.count}. Use offset=${next} to continue.)`
@@ -592,6 +619,10 @@ export const ReadTool = Tool.define<
         output += `\n\n(End of file - total ${file.count} lines)`
       }
       output += "\n</content>"
+
+      if (degradeNote) {
+        output += `\n\n<system-note>${degradeNote}</system-note>`
+      }
 
       yield* warm(filepath)
 

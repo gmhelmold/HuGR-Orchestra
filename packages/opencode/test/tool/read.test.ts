@@ -328,6 +328,20 @@ describe("tool.read truncation", () => {
     }),
   )
 
+  it.instance("cuts with a PARTIAL view at the token budget", () =>
+    Effect.gen(function* () {
+      const test = yield* TestInstance
+      const content = `${"y".repeat(400)}\n`.repeat(300)
+      yield* put(path.join(test.directory, "big2.txt"), content)
+
+      const result = yield* run({ filePath: path.join(test.directory, "big2.txt") })
+      expect(result.metadata.truncated).toBe(true)
+      expect(result.output).toContain("PARTIAL view")
+      expect(result.output).toContain("tokens")
+      expect(result.output).toContain("Use offset=")
+    }),
+  )
+
   it.instance("stops streaming after the byte cap", () =>
     Effect.gen(function* () {
       const test = yield* TestInstance
@@ -656,14 +670,16 @@ describe("tool.read symbol scope", () => {
     }),
   )
 
-  it.live("fails when a symbol is not found", () =>
+  it.live("degrades to a file read when a symbol is not found", () =>
     Effect.gen(function* () {
       const dir = yield* tmpdirScoped()
       const file = path.join(dir, "sample.js")
-      yield* put(file, "function foo() { return 1 }")
+      yield* put(file, "function foo() {\n  return 1\n}\n")
 
-      const err = yield* fail(dir, { filePath: file, symbol: "nonexistent" })
-      expect(err.message).toContain('Symbol "nonexistent" not found')
+      const result = yield* exec(dir, { filePath: file, symbol: "nonexistent" })
+      expect(result.output).toContain("<type>file</type>")
+      expect(result.output).toContain('<system-note>Symbol "nonexistent" not found')
+      expect(result.output).toContain("function foo")
     }),
   )
 })
