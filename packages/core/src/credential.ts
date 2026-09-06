@@ -34,7 +34,7 @@ export interface Interface {
   readonly list: (integrationID: Integration.ID) => Effect.Effect<Info[]>
   /** Returns one stored credential by ID. */
   readonly get: (id: ID) => Effect.Effect<Info | undefined>
-  /** Replaces any credential for an integration and returns the new record. */
+  /** Stores a credential for an integration and returns the new record. */
   readonly create: (input: {
     readonly integrationID: Integration.ID
     readonly value: Value
@@ -99,23 +99,14 @@ const layer = Layer.effect(
           value: input.value,
         })
         yield* db
-          .transaction((tx) =>
-            Effect.gen(function* () {
-              yield* tx
-                .delete(CredentialTable)
-                .where(eq(CredentialTable.integration_id, credential.integrationID))
-                .run()
-              yield* tx
-                .insert(CredentialTable)
-                .values({
-                  id: credential.id,
-                  integration_id: credential.integrationID,
-                  label: credential.label,
-                  value: credential.value,
-                })
-                .run()
-            }),
-          )
+          .insert(CredentialTable)
+          .values({
+            id: credential.id,
+            integration_id: credential.integrationID,
+            label: credential.label,
+            value: credential.value,
+          })
+          .run()
           .pipe(Effect.orDie)
         return credential
       }),

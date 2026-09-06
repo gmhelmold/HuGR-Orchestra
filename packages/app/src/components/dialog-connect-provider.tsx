@@ -804,9 +804,11 @@ function ProviderConnection(props: {
 
   function ApiAuthView() {
     let apiKey: HTMLInputElement | undefined
+    let labelInput: HTMLInputElement | undefined
     const errorID = createUniqueId()
     const [formStore, setFormStore] = createStore({
       value: "",
+      label: "",
       error: undefined as string | undefined,
     })
 
@@ -821,6 +823,7 @@ function ProviderConnection(props: {
       const form = e.currentTarget as HTMLFormElement
       const formData = new FormData(form)
       const apiKey = formData.get("apiKey") as string
+      const label = formData.get("label") as string
 
       if (!apiKey?.trim()) {
         setFormStore("error", language.t("provider.connect.apiKey.required"))
@@ -832,6 +835,7 @@ function ProviderConnection(props: {
         integrationID: props.provider,
         location: location(),
         key: apiKey,
+        label: label || undefined,
       })
       await complete()
     }
@@ -873,6 +877,17 @@ function ProviderConnection(props: {
                 autocomplete="off"
                 spellcheck={false}
                 onInput={(event) => setFormStore("value", event.currentTarget.value)}
+              />
+            </label>
+            <label class="flex w-full flex-col gap-1 font-[530] leading-4 text-v2-text-text-base">
+              {language.t("provider.connect.apiKey.labelOptional")}
+              <TextInputV2
+                ref={labelInput}
+                class="!w-full"
+                name="label"
+                placeholder={language.t("provider.connect.apiKey.labelPlaceholder")}
+                value={formStore.label}
+                onInput={(event) => setFormStore("label", event.currentTarget.value)}
               />
             </label>
             <Show when={formStore.error}>
@@ -923,6 +938,15 @@ function ProviderConnection(props: {
             onChange={(v) => setFormStore("value", v)}
             validationState={formStore.error ? "invalid" : undefined}
             error={formStore.error}
+          />
+          <TextField
+            ref={labelInput}
+            type="text"
+            label={language.t("provider.connect.apiKey.labelOptional")}
+            placeholder={language.t("provider.connect.apiKey.labelPlaceholder")}
+            name="label"
+            value={formStore.label}
+            onChange={(v) => setFormStore("label", v)}
           />
           <Button class="w-auto" type="submit" size="large" variant="primary">
             {language.t("common.continue")}

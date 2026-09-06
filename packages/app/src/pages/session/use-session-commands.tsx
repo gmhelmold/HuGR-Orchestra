@@ -565,6 +565,32 @@ export const useSessionCommands = (actions: SessionCommandContext) => {
       keybind: "mod+shift+r",
       onSelect: () => view().reviewPanel.toggle(),
     }),
+    viewCommand({
+      id: "tasks.toggle",
+      title: language.t("command.tasks.toggle"),
+      onSelect: () => {
+        if (tabs().active() === "tasks") {
+          tabs().close("tasks")
+          return
+        }
+        tabs().open("tasks")
+        tabs().setActive("tasks")
+        view().reviewPanel.open()
+      },
+    }),
+    viewCommand({
+      id: "tasks.models",
+      title: language.t("command.tasks.models"),
+      onSelect: () => {
+        const sessionID = params.id
+        const directory = sdk().directory
+        if (!sessionID || !directory) return
+        void openDialog(
+          () => import("@/components/dialog-subagent-models"),
+          (x) => dialog.show(() => <x.DialogSubagentModels sessionID={sessionID} directory={directory} />),
+        )
+      },
+    }),
     ...(shown()
       ? [
           viewCommand({
