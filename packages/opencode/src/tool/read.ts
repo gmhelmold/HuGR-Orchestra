@@ -56,9 +56,17 @@ export const Parameters = Schema.Struct({
     description:
       "Read only the range of a named symbol (function/class/const) in the file. The output reports the symbol's total size so you can page through it with offset/limit if it is large. Resolves via LSP when available, else an indentation heuristic (reported as source=indent). If the symbol cannot be resolved at all, degrades to a normal file read with a note instead of failing.",
   }),
+  search: Schema.optional(Schema.String).annotate({
+    description:
+      "Find a function/class/const by name fragment within the file and read ONLY that symbol's range, without requiring the exact symbol name. Resolves via LSP when available; else finds the best indentation-anchored block containing the search text. Use this instead of a full-file read when you only need the code region around a name.",
+  }),
   depth: Schema.optional(Schema.Literals([0, 1])).annotate({
     description:
       "When symbol is set, depth=1 also returns the immediately called symbols (callees) with their signatures and locations, so you can understand the module in one read.",
+  }),
+  sparse: Schema.optional(Schema.Boolean).annotate({
+    description:
+      "When true, number only the first returned line and every 10th line (anchor + 10-step) instead of every line, to save tokens on large reads. Default false.",
   }),
 })
 
@@ -80,6 +88,8 @@ type Display =
       totalLines: number
       truncated: boolean
     }
+
+type ResolvedSymbol = { name: string; kind?: number; start: number; end: number; detail?: string }
 
 type Metadata = {
   preview: string
@@ -469,41 +479,56 @@ export const ReadTool = Tool.define<
         return yield* Effect.fail(new Error(`Cannot read binary file: ${filepath}`))
       }
 
+      // Render a line window with numbering. `sparse` numbers only the first line
+      // and every 10th (Grok-style anchors) to cut numbering tokens on huge reads.
+      const renderLines = (lines: string[], startLine: number, sparse: boolean) =>
+        lines
+          .map((line, i) => {
+            const n = startLine + i
+            const show = !sparse || i === 0 || n % 10 === 0
+            return show ? `${n}: ${line}` : line
+          })
+          .join("\n")
+
       // symbol-scoped read: resolve a named symbol to its line range, announce
       // its size, and page through it with offset/limit. Falls back to an
       // indentation heuristic when no LSP server covers the file. If the
       // symbol is genuinely unresolvable, DEGRADES to a normal file read with
       // a note instead of failing — the model never pays a second round-trip.
       let degradeNote = ""
-      if (params.symbol) {
-        const uri = pathToFileURL(filepath).href
-        const hasClient = yield* Effect.catch(
-          lsp.hasClients(filepath),
-          () => Effect.succeed(false),
-        )
-        let resolved:
-          | { name: string; kind?: number; start: number; end: number; detail?: string }
-          | undefined
-
-        if (hasClient) {
-          const symbols = yield* Effect.catch(
-            lsp.documentSymbol(uri),
-            () => Effect.succeed([] as unknown as (LspDocumentSymbol | LSP.Symbol)[]),
+      const resolveRange = (
+        query: string,
+      ): Effect.Effect<{ source: "lsp" | "indent"; resolved: ResolvedSymbol | undefined }, never, never> =>
+        Effect.gen(function* () {
+          const hasClient = yield* Effect.catch(
+            lsp.hasClients(filepath),
+            () => Effect.succeed(false),
           )
-          const raw = symbols as unknown as (LspDocumentSymbol | LSP.Symbol)[]
-          if (raw && raw.length > 0) {
-            resolved = resolveSymbolByLsp(raw, params.symbol ?? "")
+          let resolved: ResolvedSymbol | undefined
+          if (hasClient) {
+            const uri = pathToFileURL(filepath).href
+            const symbols = yield* Effect.catch(
+              lsp.documentSymbol(uri),
+              () => Effect.succeed([] as unknown as (LspDocumentSymbol | LSP.Symbol)[]),
+            )
+            const raw = symbols as unknown as (LspDocumentSymbol | LSP.Symbol)[]
+            if (raw && raw.length > 0) {
+              resolved = resolveSymbolByLsp(raw, query)
+            }
           }
-        }
-        const source: "lsp" | "indent" = hasClient && resolved ? "lsp" : "indent"
-        if (!resolved) {
-          const indent = yield* findSymbolByIndent(filepath, params.symbol ?? "")
-          if (indent) {
-            resolved = { ...indent }
+          const source: "lsp" | "indent" = hasClient && resolved ? "lsp" : "indent"
+          if (!resolved) {
+            const indent = yield* findSymbolByIndent(filepath, query)
+            if (indent) resolved = { ...indent }
           }
-        }
+          return { source, resolved }
+        })
+
+      const symbolQuery = params.symbol ?? params.search
+      if (symbolQuery) {
+        const { source, resolved } = yield* resolveRange(symbolQuery)
         if (!resolved) {
-          degradeNote = `Symbol "${params.symbol}" not found via LSP or indentation in ${filepath} — continuing with a normal file read.`
+          degradeNote = `Symbol "${symbolQuery}" not found via LSP or indentation in ${filepath} — continuing with a normal file read.`
         }
         if (resolved) {
         const symbolSize = resolved.end - resolved.start + 1
@@ -527,7 +552,7 @@ export const ReadTool = Tool.define<
           `<size>${symbolSize} lines</size>`,
           `<range>${resolved.start}-${resolved.end}</range>`,
           `<content>\n`,
-          ...part.map((line, i) => `${rel + pageOffset + i + 1}: ${line}`),
+          ...renderLines(part, rel + pageOffset + 1, params.sparse === true),
           `\n`,
           `</content>`,
           "</symbol>",
@@ -539,7 +564,7 @@ export const ReadTool = Tool.define<
 
         // depth=1: report callees with signatures + locations in one read.
         let callees: string[] = []
-        if (params.depth === 1 && hasClient && resolved.kind !== undefined) {
+        if (params.depth === 1 && source === "lsp" && resolved.kind !== undefined) {
           const calls = yield* Effect.catch(
             lsp.incomingCalls({ file: filepath, line: resolved.start, character: 1 }),
             () => Effect.succeed([] as any[]),
@@ -559,7 +584,7 @@ export const ReadTool = Tool.define<
 
         // diagnostics freshness: reports pending/stale instead of pretending clean.
         let diagStatus = "pending"
-        if (hasClient) {
+        if (source === "lsp") {
           const diags = yield* Effect.catch(
             lsp.diagnostics(),
             () => Effect.succeed({} as Record<string, { length: number }[]>),
@@ -604,7 +629,7 @@ export const ReadTool = Tool.define<
       }
 
       let output = [`<path>${filepath}</path>`, `<type>file</type>`, "<content>\n"].join("\n")
-      output += file.raw.map((line, i) => `${i + file.offset}: ${line}`).join("\n")
+      output += renderLines(file.raw, file.offset, params.sparse === true)
 
       const last = file.offset + file.raw.length - 1
       const next = last + 1

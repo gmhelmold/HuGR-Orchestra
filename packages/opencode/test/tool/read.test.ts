@@ -682,4 +682,46 @@ describe("tool.read symbol scope", () => {
       expect(result.output).toContain("function foo")
     }),
   )
+
+  it.live("search reads symbol range by fragment and reports source", () =>
+    Effect.gen(function* () {
+      const dir = yield* tmpdirScoped()
+      const file = path.join(dir, "mod.js")
+      yield* put(
+        file,
+        [
+          "const helper = () => 1",
+          "",
+          "function applySnapshot(state) {",
+          "  const copy = { ...state }",
+          "  return copy",
+          "}",
+          "",
+          "const other = 42",
+          "",
+        ].join("\n"),
+      )
+
+      const result = yield* exec(dir, { filePath: file, search: "applySnapshot" })
+      expect(result.output).toContain("<type>symbol</type>")
+      expect(result.output).toContain("source=\"indent\"")
+      expect(result.output).toContain("applySnapshot")
+      expect(result.metadata.symbol).toBe("applySnapshot")
+    }),
+  )
+
+  it.live("sparse numbering keeps anchors and every 10th line", () =>
+    Effect.gen(function* () {
+      const dir = yield* tmpdirScoped()
+      const file = path.join(dir, "big.txt")
+      const lines = Array.from({ length: 25 }, (_, i) => `line${i + 1}`)
+      yield* put(file, lines.join("\n"))
+
+      const result = yield* exec(dir, { filePath: file, sparse: true })
+      expect(result.output).toContain("1: line1")
+      expect(result.output).toContain("10: line10")
+      expect(result.output).toContain("20: line20")
+      expect(result.output).not.toContain("2: line2")
+    }),
+  )
 })
