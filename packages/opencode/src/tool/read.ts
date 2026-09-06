@@ -1,9 +1,10 @@
 import { Effect, Option, Schema, Scope, Stream } from "effect"
 import { NonNegativeInt } from "@opencode-ai/core/schema"
 import * as path from "path"
+import { pathToFileURL } from "url"
 import * as Tool from "./tool"
 import { FSUtil } from "@opencode-ai/core/fs-util"
-import { LSP } from "@/lsp/lsp"
+import { LSP, type DocumentSymbol as LspDocumentSymbol } from "@/lsp/lsp"
 import DESCRIPTION from "./read.txt"
 import { InstanceState } from "@/effect/instance-state"
 import { assertExternalDirectoryEffect } from "./external-directory"
@@ -27,11 +28,20 @@ class ReadStop extends Schema.TaggedErrorClass<ReadStop>()("ReadStop", {}) {}
 // unchanged; purely CLI-facing uses must now send numbers rather than strings.
 export const Parameters = Schema.Struct({
   filePath: Schema.String.annotate({ description: "The absolute path to the file or directory to read" }),
-  offset: Schema.optional(NonNegativeInt).annotate({
-    description: "The line number to start reading from (1-indexed)",
+  offset: Schema.optional(Schema.Int).annotate({
+    description:
+      "The line number to start reading from (1-indexed). Negative values read from the end (e.g. -3 reads the last 3 lines).",
   }),
   limit: Schema.optional(NonNegativeInt).annotate({
     description: "The maximum number of lines to read (defaults to 2000)",
+  }),
+  symbol: Schema.optional(Schema.String).annotate({
+    description:
+      "Read only the range of a named symbol (function/class/const) in the file. The output reports the symbol's total size so you can page through it with offset/limit if it is large. When no LSP server covers the file, falls back to an indentation heuristic and reports source=indent so you know the range may be approximate.",
+  }),
+  depth: Schema.optional(Schema.Literals([0, 1])).annotate({
+    description:
+      "When symbol is set, depth=1 also returns the immediately called symbols (callees) with their signatures and locations, so you can understand the module in one read.",
   }),
 })
 
@@ -125,13 +135,72 @@ export const ReadTool = Tool.define<
       sampleSize: number,
     ) {
       if (fileSize === 0) return new Uint8Array()
-
       return yield* Effect.scoped(
         Effect.gen(function* () {
           const file = yield* fs.open(filepath, { flag: "r" })
           return Option.getOrElse(yield* file.readAlloc(Math.min(sampleSize, fileSize)), () => new Uint8Array())
         }),
       )
+    })
+
+    // Normalize a symbol hit (DocumentSymbol has `range`; flat Symbol has
+// `location.range`) into line numbers.
+    const normalizeHit = (hit: LspDocumentSymbol | LSP.Symbol) => {
+      const range = "range" in hit ? hit.range : hit.location.range
+      const detail = "detail" in hit ? hit.detail : undefined
+      return {
+        name: hit.name,
+        kind: hit.kind,
+        start: range.start.line + 1,
+        end: range.end.line + 1,
+        detail,
+      }
+    }
+
+    // Resolve `query` over LSP documentSymbol results; returns the symbol
+    // range or undefined.
+    const resolveSymbolByLsp = (symbols: (LspDocumentSymbol | LSP.Symbol)[], query: string) => {
+      if (!symbols || symbols.length === 0) return undefined
+      const exact = symbols.find((s) => s.name === query)
+      const hit = exact ?? symbols.find((s) => s.name.includes(query))
+      return hit ? normalizeHit(hit) : undefined
+    }
+
+    // Fallback indentation heuristic (Codex-style): find the line whose
+    // indentation is minimal around the first line matching `query`, then
+    // extend while indentation is >= anchor indent (or blank/comment).
+    const findSymbolByIndent = (
+      filepath: string,
+      query: string,
+    ): Effect.Effect<{ name: string; start: number; end: number } | undefined, never, never> =>
+      Effect.catch(
+        Effect.gen(function* () {
+          if (!query) return undefined
+          const all = yield* lines(filepath, { offset: 1, limit: DEFAULT_READ_LIMIT })
+          const raw = all.raw
+        const anchor = raw.findIndex((l) => l.includes(query))
+        if (anchor === -1) return undefined
+        const indentOf = (line: string) => {
+          const ws = line.match(/^\s*/)?.[0] ?? ""
+          return ws.replace(/\t/g, "    ").length
+        }
+        const anchorIndent = indentOf(raw[anchor])
+        let start = anchor
+        while (start > 0 && (raw[start - 1].trim() === "" || indentOf(raw[start - 1]) > anchorIndent)) start--
+        let end = anchor
+        while (end + 1 < raw.length && (raw[end + 1].trim() === "" || indentOf(raw[end + 1]) > anchorIndent)) end++
+        if (raw[anchor].trim() === "") return undefined
+        return { name: query, start: start + 1, end: end + 1 }
+      }),
+      () => Effect.succeed(undefined as { name: string; start: number; end: number } | undefined),
+    )
+
+    // Read all lines of a file up to cap (shared by indent fallback + tail).
+    const readLines = Effect.fn("ReadTool.readLines")(function* (
+      filepath: string,
+      opts: { offset: number; limit: number },
+    ) {
+      return yield* lines(filepath, opts)
     })
 
     const lines = Effect.fn("ReadTool.lines")(function* (filepath: string, opts: { limit: number; offset: number }) {
@@ -328,7 +397,137 @@ export const ReadTool = Tool.define<
         return yield* Effect.fail(new Error(`Cannot read binary file: ${filepath}`))
       }
 
-      const file = yield* lines(filepath, { limit: params.limit ?? DEFAULT_READ_LIMIT, offset: params.offset || 1 })
+      // symbol-scoped read: resolve a named symbol to its line range, announce
+      // its size, and page through it with offset/limit. Falls back to an
+      // indentation heuristic when no LSP server covers the file, and always
+      // reports `source` so the model knows how much to trust the range.
+      if (params.symbol) {
+        const uri = pathToFileURL(filepath).href
+        const hasClient = yield* Effect.catch(
+          lsp.hasClients(filepath),
+          () => Effect.succeed(false),
+        )
+        let resolved:
+          | { name: string; kind?: number; start: number; end: number; detail?: string }
+          | undefined
+
+        if (hasClient) {
+          const symbols = yield* Effect.catch(
+            lsp.documentSymbol(uri),
+            () => Effect.succeed([] as unknown as (LspDocumentSymbol | LSP.Symbol)[]),
+          )
+          const raw = symbols as unknown as (LspDocumentSymbol | LSP.Symbol)[]
+          if (raw && raw.length > 0) {
+            resolved = resolveSymbolByLsp(raw, params.symbol ?? "")
+          }
+        }
+        const source = hasClient && resolved ? "lsp" : "indent"
+        if (!resolved) {
+          const indent = yield* findSymbolByIndent(filepath, params.symbol ?? "")
+          if (indent) {
+            resolved = { ...indent }
+          }
+        }
+        if (!resolved) {
+          return yield* Effect.fail(
+            new Error(
+              `Symbol "${params.symbol}" not found in ${filepath}. Try listing symbols with the lsp tool (workspaceSymbol).`,
+            ),
+          )
+        }
+        const symbolSize = resolved.end - resolved.start + 1
+        const startLine = resolved.start
+        const rel = Math.max(0, startLine - 1)
+
+        // `tail` is not meaningful for symbol mode; keep it legal by ignoring.
+        // Pagination inside the symbol: offset is relative to the symbol start.
+        const pageOffset = (params.offset ?? 1) - 1
+        const pageLimit = Math.min(params.limit ?? DEFAULT_READ_LIMIT, Math.max(1, symbolSize - pageOffset))
+        const file = yield* lines(filepath, {
+          offset: rel + pageOffset + 1,
+          limit: pageLimit,
+        })
+        const part = file.raw
+
+        let output = [
+          `<path>${filepath}</path>`,
+          `<type>symbol</type>`,
+          `<symbol name="${resolved.name}" source="${source}">`,
+          `<size>${symbolSize} lines</size>`,
+          `<range>${resolved.start}-${resolved.end}</range>`,
+          `<content>\n`,
+          ...part.map((line, i) => `${rel + pageOffset + i + 1}: ${line}`),
+          `\n`,
+          `</content>`,
+          "</symbol>",
+        ].join("\n")
+
+        if (pageOffset + part.length < symbolSize) {
+          output += `\n(Showing lines ${pageOffset + 1}-${pageOffset + part.length} of ${symbolSize}. Use offset=${pageOffset + part.length + 1} to continue within the symbol.)`
+        }
+
+        // depth=1: report callees with signatures + locations in one read.
+        let callees: string[] = []
+        if (params.depth === 1 && hasClient && resolved.kind !== undefined) {
+          const calls = yield* Effect.catch(
+            lsp.incomingCalls({ file: filepath, line: resolved.start, character: 1 }),
+            () => Effect.succeed([] as any[]),
+          )
+          callees = calls
+            .map((c) => {
+              const from = c?.from as { name?: string; range?: { start?: { line?: number } } } | undefined
+              const fromName = from?.name ?? "?"
+              const line = from?.range?.start?.line ?? 0
+              return `${fromName} (${path.relative(instance.worktree, filepath)}:${line + 1})`
+            })
+            .slice(0, 20)
+        }
+        if (callees.length > 0) {
+          output += `\n\n## Callees\n${callees.join("\n")}`
+        }
+
+        // diagnostics freshness: reports pending/stale instead of pretending clean.
+        let diagStatus = "pending"
+        if (hasClient) {
+          const diags = yield* Effect.catch(
+            lsp.diagnostics(),
+            () => Effect.succeed({} as Record<string, { length: number }[]>),
+          )
+          const fileDiags = diags?.[filepath]
+          if (fileDiags !== undefined) diagStatus = fileDiags.length > 0 ? "error" : "fresh"
+        }
+        output += `\n\n## Diagnostics: ${diagStatus}`
+
+        return {
+          title: `${resolved.name} (symbol)`,
+          output,
+          metadata: {
+            preview: part.slice(0, 20).join("\n"),
+            truncated: part.length < symbolSize || file.cut,
+            loaded: loaded.map((item) => item.filepath),
+            symbol: resolved.name,
+            source,
+            size: symbolSize,
+            lines_read: part.length,
+            // telemetry: how many lines the model would have read without symbol mode
+            saved: Math.max(0, symbolSize - part.length),
+          },
+        }
+      }
+
+      // tail: negative offset reads from the end of the file (Grok semantics).
+      let effectiveOffset = params.offset || 1
+      if (params.offset !== undefined && params.offset < 0) {
+        const total = yield* Effect.catch(
+          lines(filepath, { offset: 1, limit: DEFAULT_READ_LIMIT }).pipe(Effect.map((l) => l.count)),
+          () => Effect.succeed(0),
+        )
+        effectiveOffset = Math.max(1, total + 1 + params.offset)
+      }
+      const file = yield* lines(filepath, {
+        limit: params.limit ?? DEFAULT_READ_LIMIT,
+        offset: effectiveOffset,
+      })
       if (file.count < file.offset && !(file.count === 0 && file.offset === 1)) {
         return yield* Effect.fail(
           new Error(`Offset ${file.offset} is out of range for this file (${file.count} lines)`),
