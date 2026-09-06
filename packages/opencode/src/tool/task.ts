@@ -7,6 +7,7 @@ import { Session } from "@/session/session"
 import { SessionID, MessageID } from "../session/schema"
 import { MessageV2 } from "../session/message-v2"
 import { Agent } from "../agent/agent"
+import { Provider } from "@/provider/provider"
 import { deriveSubagentSessionPermission } from "../agent/subagent-permissions"
 import type { SessionPrompt } from "../session/prompt"
 import { Config } from "@/config/config"
@@ -49,6 +50,10 @@ const BaseParameterFields = {
       "This should only be set if you mean to resume a previous task (you can pass a prior task_id and the task will continue the same subagent session as before instead of creating a fresh one)",
   }),
   command: Schema.optional(Schema.String).annotate({ description: "The command that triggered this task" }),
+  model: Schema.optional(Schema.String).annotate({
+    description:
+      "Run the subagent on a specific model as 'providerID/modelID' (e.g. 'openrouter/deepseek/deepseek-chat', 'groq/llama-3.3-70b-versatile'). Overrides the subagent's configured model and the parent session model. The provider part also selects credentials: OAuth subscriptions (Claude Max, ChatGPT) and API keys resolve per providerID at run time — use a custom provider alias in opencode.json to pin a second key for the same backend.",
+  }),
 }
 
 const BaseParameters = Schema.Struct(BaseParameterFields)
@@ -116,21 +121,58 @@ export const TaskTool = Tool.define(
         )
       }
 
+      const next = yield* agent.get(params.subagent_type)
+      if (!next) {
+        return yield* Effect.fail(new Error(`Unknown agent type: ${params.subagent_type} is not a valid agent type`))
+      }
+
+      const msg = yield* MessageV2.get({ sessionID: ctx.sessionID, messageID: ctx.messageID }).pipe(
+        Effect.provideService(Database.Service, database),
+        Effect.orDie,
+      )
+      if (msg.info.role !== "assistant") return yield* Effect.fail(new Error("Not an assistant message"))
+      const variant = msg.info.variant
+
+      let explicitModel = false
+      let model = next.model ?? {
+        modelID: msg.info.modelID,
+        providerID: msg.info.providerID,
+      }
+      if (params.model) {
+        const parsed = Provider.parseModel(params.model)
+        if (!parsed.providerID || !parsed.modelID) {
+          return yield* Effect.fail(
+            new Error(
+              `Invalid model "${params.model}". Use the 'providerID/modelID' format, e.g. 'openrouter/deepseek/deepseek-chat'.`,
+            ),
+          )
+        }
+        explicitModel = true
+        model = { modelID: parsed.modelID, providerID: parsed.providerID }
+      }
+      const modelPattern = `${model.providerID}/${model.modelID}`
+
+      // Model-scoped task rules (written by the subagent-model picker panel)
+      // look like { permission: "task", pattern: "openrouter/*", action }.
+      // Only when the session carries them do we add the resolved model to
+      // the ask patterns — otherwise behavior is exactly as before (no
+      // extra prompt, no extra surface for the model to satisfy).
+      const modelRules = (parent.permission ?? []).filter(
+        (rule) => rule.permission === id && rule.pattern.includes("/"),
+      )
+
       if (!ctx.extra?.bypassAgentCheck) {
         yield* ctx.ask({
           permission: id,
-          patterns: [params.subagent_type],
+          patterns:
+            modelRules.length > 0 ? [params.subagent_type, modelPattern] : [params.subagent_type],
           always: ["*"],
           metadata: {
             description: params.description,
             subagent_type: params.subagent_type,
+            ...(modelRules.length > 0 ? { model: modelPattern } : {}),
           },
         })
-      }
-
-      const next = yield* agent.get(params.subagent_type)
-      if (!next) {
-        return yield* Effect.fail(new Error(`Unknown agent type: ${params.subagent_type} is not a valid agent type`))
       }
 
       const session = params.task_id
@@ -171,17 +213,6 @@ export const TaskTool = Tool.define(
           ],
         }))
 
-      const msg = yield* MessageV2.get({ sessionID: ctx.sessionID, messageID: ctx.messageID }).pipe(
-        Effect.provideService(Database.Service, database),
-        Effect.orDie,
-      )
-      if (msg.info.role !== "assistant") return yield* Effect.fail(new Error("Not an assistant message"))
-      const variant = msg.info.variant
-
-      const model = next.model ?? {
-        modelID: msg.info.modelID,
-        providerID: msg.info.providerID,
-      }
       const metadata = {
         parentSessionId: ctx.sessionID,
         sessionId: nextSession.id,
@@ -206,7 +237,7 @@ export const TaskTool = Tool.define(
             modelID: model.modelID,
             providerID: model.providerID,
           },
-          variant: next.model ? undefined : variant,
+          variant: next.model || explicitModel ? undefined : variant,
           agent: next.name,
           parts,
         })

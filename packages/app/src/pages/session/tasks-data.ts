@@ -121,12 +121,20 @@ export function createTasksData() {
     if (!sid) return { running: [] as TasksItem[], finished: [] as TasksItem[] }
     const data = sync().data
     const perms = pendingPermissions()
-    const nested = grandchildren()
-    const running: TasksItem[] = []
-    const finished: TasksItem[] = []
-    const seen = new Set<string>()
+const nested = grandchildren()
+  const running: TasksItem[] = []
+  const finished: TasksItem[] = []
+  // Agent cards are keyed by child session id. `children()` is the
+  // authoritative source; task tool parts enrich (description/agent/model)
+  // or fall back to an orphan card when the child session is not synced
+  // yet. Shells stay callID-keyed.
+  const agentByChild = new Map<string, TasksItem>()
+  const seen = new Set<string>()
 
-    const needsInput = (childId: string | undefined, callID: string): boolean =>
+  // Child session titles are titled "<description> (@<agent> subagent)".
+  const cleanTitle = (title: string) => title.replace(/ \(@[^)]* subagent\)$/, "")
+
+  const needsInput = (childId: string | undefined, callID: string): boolean =>
       (childId !== undefined && perms.sessions.has(childId)) || perms.calls.has(callID)
 
     const stateOf = (
@@ -140,14 +148,34 @@ export function createTasksData() {
       return "running"
     }
 
+    const push = (item: TasksItem) => {
+      if (item.state === "running" || item.state === "needs-input") running.push(item)
+      else finished.push(item)
+    }
+
+    for (const child of children()) {
+      const working = data.session_working(child.id)
+      const live = perms.sessions.has(child.id) ? "needs-input" : working ? "running" : "completed"
+      const item: TasksItem = {
+        key: child.id,
+        kind: "agent",
+        headline: cleanTitle(child.title || ""),
+        state: live,
+        startTime: child.time.created ?? Date.now(),
+        childId: child.id,
+        sessionId: sid,
+        nested: nested.get(child.id) || undefined,
+        stats: childStats(data, child.id),
+      }
+      agentByChild.set(child.id, item)
+      seen.add(child.id)
+    }
+
     for (const { part } of taskParts()) {
       const st = part.state.status
       if (part.tool === "task") {
         const meta = toolMetadata(part)
         const childId = typeof meta.sessionId === "string" ? meta.sessionId : undefined
-        const key = childId ?? part.callID
-        if (seen.has(key)) continue
-        seen.add(key)
         const input = (part.state.input ?? {}) as Record<string, unknown>
         const headline =
           toolTitle(part.state) ??
@@ -158,35 +186,48 @@ export function createTasksData() {
           typeof input.subagent_type === "string" && input.subagent_type.length > 0
             ? input.subagent_type
             : undefined
-        // task.ts records the resolved model in the tool call metadata —
-        // authoritative even before the child transcript syncs any message.
-        const toolModel = meta.model as { modelID?: string; providerID?: string } | undefined
-        const stats = childId ? childStats(data, childId) : undefined
-        if (stats && !stats.model && toolModel?.modelID && toolModel?.providerID) {
-          const short = toolModel.modelID.replace(/^(anthropic|openai|google|opencode)-/i, "")
-          stats.model = `${toolModel.providerID}/${short}`
+
+        if (childId) {
+          const existing = agentByChild.get(childId)
+          if (existing) {
+            // Enrich the children-derived card with task-call details.
+            if (headline) existing.headline = headline
+            if (agent) existing.agent = agent
+            if (!existing.stats?.model) {
+              const toolModel = meta.model as { modelID?: string; providerID?: string } | undefined
+              if (toolModel?.modelID && toolModel?.providerID) {
+                const stats = existing.stats ?? { toolCalls: 0, fails: 0, tokensIn: 0, tokensOut: 0, cost: 0 }
+                stats.model = shortModel(toolModel.providerID, toolModel.modelID)
+                existing.stats = stats
+              }
+            }
+            continue
+          }
+          // Child session not in the store yet — orphan card keyed by child id.
+          const orphan: TasksItem = {
+            key: childId,
+            kind: "agent",
+            headline: headline || childId,
+            agent,
+            state: stateOf(childId, part.callID, st),
+            startTime: toolStart(part.state) ?? Date.now(),
+            endTime:
+              st === "completed" || st === "error" ? (toolEnd(part.state) ?? Date.now()) : undefined,
+            childId,
+            sessionId: sid,
+            nested: nested.get(childId) || undefined,
+            stats: childStats(data, childId),
+          }
+          const toolModel = meta.model as { modelID?: string; providerID?: string } | undefined
+          if (!orphan.stats?.model && toolModel?.modelID && toolModel?.providerID) {
+            const s = orphan.stats ?? { toolCalls: 0, fails: 0, tokensIn: 0, tokensOut: 0, cost: 0 }
+            s.model = shortModel(toolModel.providerID, toolModel.modelID)
+            orphan.stats = s
+          }
+          agentByChild.set(childId, orphan)
+          seen.add(childId)
+          push(orphan)
         }
-        const item: TasksItem = {
-          key,
-          kind: "agent",
-          headline,
-          agent,
-          state: stateOf(childId, part.callID, st),
-          startTime: toolStart(part.state) ?? Date.now(),
-          endTime:
-            st === "completed" || st === "error" ? (toolEnd(part.state) ?? Date.now()) : undefined,
-          childId,
-          sessionId: sid,
-          nested: childId ? nested.get(childId) || undefined : undefined,
-          stats,
-        }
-        // A live child session outranks a stale completed part (resume via task_id reuses the id).
-        if (childId && (st === "completed" || st === "error") && data.session_working(childId)) {
-          item.state = perms.sessions.has(childId) ? "needs-input" : "running"
-          item.endTime = undefined
-        }
-        if (item.state === "running" || item.state === "needs-input") running.push(item)
-        else finished.push(item)
       } else {
         // Foreground shell tools surface as Shell cards while running.
         if (st !== "running" && st !== "pending") continue
@@ -203,24 +244,8 @@ export function createTasksData() {
       }
     }
 
-    for (const child of children()) {
-      if (seen.has(child.id)) continue
-      seen.add(child.id)
-      const working = data.session_working(child.id)
-      const live = perms.sessions.has(child.id) ? "needs-input" : working ? "running" : "completed"
-      const item: TasksItem = {
-        key: child.id,
-        kind: "agent",
-        headline: child.title || "",
-        state: live,
-        startTime: child.time.created ?? Date.now(),
-        childId: child.id,
-        sessionId: sid,
-        nested: nested.get(child.id) || undefined,
-        stats: childStats(data, child.id),
-      }
-      if (live === "running" || live === "needs-input") running.push(item)
-      else finished.push(item)
+    for (const item of agentByChild.values()) {
+      push(item)
     }
 
     running.sort((a, b) => b.startTime - a.startTime)
@@ -251,11 +276,11 @@ export function childStats(
   const messages = data.session_message[childId] ?? []
   for (const msg of messages) {
     const full = msg as unknown as {
+      type?: string
       role?: string
       modelID?: string
       providerID?: string
-      model?: string
-      provider?: string
+      model?: { id?: string; providerID?: string }
       modelId?: string
       providerId?: string
       model_id?: string
@@ -264,10 +289,12 @@ export function childStats(
       tokens?: { input?: number; output?: number }
       cost?: number
     }
-    if (full.role === "assistant") {
-      // Model fields vary across sync shapes — try every known spelling.
-      const modelID = full.modelID ?? full.modelId ?? full.model_id ?? full.model
-      const providerID = full.providerID ?? full.providerId ?? full.provider_id ?? full.provider
+    if (full.type === "assistant" || full.role === "assistant") {
+      // Two sync shapes coexist: promise-client messages carry
+      // `type: "assistant"` + `model: { id, providerID }`; the v1 shape
+      // carries flat `modelID/providerID`. Read both.
+      const modelID = full.model?.id ?? full.modelID ?? full.modelId ?? full.model_id
+      const providerID = full.model?.providerID ?? full.providerID ?? full.providerId ?? full.provider_id
       if (modelID && providerID) stats.model = shortModel(providerID, modelID)
       if (full.agent) stats.agent = full.agent
       stats.tokensIn += full.tokens?.input ?? 0

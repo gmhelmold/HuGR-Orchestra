@@ -262,7 +262,10 @@ const layer = Layer.effect(
       return (yield* all()).map((tool) => tool.id)
     })
 
-    const describeTask = Effect.fn("ToolRegistry.describeTask")(function* (agent: Agent.Info) {
+    const describeTask = Effect.fn("ToolRegistry.describeTask")(function* (
+      agent: Agent.Info,
+      sessionPermission?: PermissionV1.Ruleset,
+    ) {
       const items = (yield* agents.list()).filter((item) => item.mode !== "primary")
       const filtered = items.filter(
         (item) => Permission.evaluate("task", item.name, agent.permission).action !== "deny",
@@ -274,7 +277,18 @@ const layer = Layer.effect(
             `- ${item.name}: ${item.description ?? "This subagent should only be called manually by the user."}`,
         )
         .join("\n")
-      return ["Available agent types and the tools they have access to:", description].join("\n")
+      const sections = ["Available agent types and the tools they have access to:", description]
+      const allowed = allowedTaskModels(Permission.merge(agent.permission, sessionPermission ?? []))
+      if (allowed.length > 0) {
+        sections.push(
+          [
+            "Allowed subagent models in this session (picked in the Subagents panel; anything else will be denied):",
+            ...allowed.map((pattern) => `- ${pattern}`),
+            "Pass one as the task tool's `model` parameter.",
+          ].join("\n"),
+        )
+      }
+      return sections.join("\n")
     })
 
     const describeCodeMode = Effect.fn("ToolRegistry.describeCodeMode")(function* (input: {
@@ -324,7 +338,7 @@ const layer = Layer.effect(
             id: tool.id,
             description: [
               output.description,
-              tool.id === TaskTool.id ? yield* describeTask(input.agent) : undefined,
+              tool.id === TaskTool.id ? yield* describeTask(input.agent, input.permission) : undefined,
               tool.id === "execute" ? codeModeDescription : undefined,
             ]
               .filter(Boolean)
@@ -347,6 +361,20 @@ const layer = Layer.effect(
     return Service.of({ ids, all, named, tools })
   }),
 )
+
+// Model patterns the session allowlists for subagents: task rules whose
+// pattern carries a "/" (provider/model scope), resolved with the same
+// last-match-wins semantics the permission check enforces at call time.
+export function allowedTaskModels(ruleset: PermissionV1.Ruleset): string[] {
+  const candidates = new Set<string>()
+  for (const rule of ruleset) {
+    if (rule.permission !== "task" || !rule.pattern.includes("/")) continue
+    candidates.add(rule.pattern)
+  }
+  return [...candidates]
+    .filter((pattern) => Permission.evaluate("task", pattern, ruleset).action === "allow")
+    .toSorted()
+}
 
 function isZodType(value: unknown): value is z.ZodType {
   return typeof value === "object" && value !== null && "_zod" in value

@@ -284,6 +284,150 @@ describe("tool.task", () => {
     }),
   )
 
+  it.instance("execute forwards an explicit model to the subagent prompt", () =>
+    Effect.gen(function* () {
+      const sessions = yield* Session.Service
+      const { chat, assistant } = yield* seed()
+      const tool = yield* TaskTool
+      const def = yield* tool.init()
+      let seen: SessionPrompt.PromptInput | undefined
+      const promptOps = stubOps({ text: "done", onPrompt: (input) => (seen = input) })
+
+      const result = yield* def.execute(
+        {
+          description: "inspect bug",
+          prompt: "look into the cache key path",
+          subagent_type: "general",
+          model: "openrouter/deepseek/deepseek-chat",
+        },
+        {
+          sessionID: chat.id,
+          messageID: assistant.id,
+          agent: "build",
+          abort: new AbortController().signal,
+          extra: { promptOps },
+          messages: [],
+          metadata: () => Effect.void,
+          ask: () => Effect.void,
+        },
+      )
+
+      const child = (yield* sessions.children(chat.id))[0]
+      expect(child).toBeDefined()
+      expect(`${seen?.model?.providerID}/${seen?.model?.modelID}`).toBe(
+        "openrouter/deepseek/deepseek-chat",
+      )
+      expect(seen?.variant).toBeUndefined()
+      expect(result.metadata.sessionId).toBe(child?.id)
+    }),
+  )
+
+  it.instance("execute rejects a malformed model parameter", () =>
+    Effect.gen(function* () {
+      const { chat, assistant } = yield* seed()
+      const tool = yield* TaskTool
+      const def = yield* tool.init()
+
+      const exit = yield* def
+        .execute(
+          {
+            description: "inspect bug",
+            prompt: "look into the cache key path",
+            subagent_type: "general",
+            model: "nodivider",
+          },
+          {
+            sessionID: chat.id,
+            messageID: assistant.id,
+            agent: "build",
+            abort: new AbortController().signal,
+            extra: { promptOps: stubOps({}) },
+            messages: [],
+            metadata: () => Effect.void,
+            ask: () => Effect.void,
+          },
+        )
+        .pipe(Effect.exit)
+
+      expect(Exit.isFailure(exit)).toBe(true)
+      if (Exit.isSuccess(exit)) throw new Error("expected task failure")
+      const failure = Cause.squash(exit.cause)
+      expect(failure).toBeInstanceOf(Error)
+      if (!(failure instanceof Error)) throw new Error("expected Error defect")
+      expect(failure.message).toContain("Invalid model")
+    }),
+  )
+
+  it.instance("execute adds the resolved model to ask patterns when the session scopes task models", () =>
+    Effect.gen(function* () {
+      const sessions = yield* Session.Service
+      const tool = yield* TaskTool
+      const def = yield* tool.init()
+      const chat = yield* sessions.create({
+        title: "Scoped",
+        permission: [
+          { permission: "task", pattern: "*/*", action: "deny" },
+          { permission: "task", pattern: "openrouter/*", action: "allow" },
+        ],
+      })
+      const user = yield* sessions.updateMessage({
+        id: MessageID.ascending(),
+        role: "user",
+        sessionID: chat.id,
+        agent: "build",
+        model: ref,
+        time: { created: Date.now() },
+      })
+      const assistant: SessionV1.Assistant = {
+        id: MessageID.ascending(),
+        role: "assistant",
+        parentID: user.id,
+        sessionID: chat.id,
+        mode: "build",
+        agent: "build",
+        cost: 0,
+        path: { cwd: "/tmp", root: "/tmp" },
+        tokens: { input: 0, output: 0, reasoning: 0, cache: { read: 0, write: 0 } },
+        modelID: ref.modelID,
+        providerID: ref.providerID,
+        variant: "xhigh",
+        time: { created: Date.now() },
+      }
+      yield* sessions.updateMessage(assistant)
+      let seenAsk: { patterns: readonly string[]; metadata: Record<string, unknown> } | undefined
+      const promptOps = stubOps({ text: "done" })
+
+      yield* def.execute(
+        {
+          description: "inspect bug",
+          prompt: "look into the cache key path",
+          subagent_type: "general",
+          model: "openrouter/deepseek/deepseek-chat",
+        },
+        {
+          sessionID: chat.id,
+          messageID: assistant.id,
+          agent: "build",
+          abort: new AbortController().signal,
+          extra: { promptOps },
+          messages: [],
+          metadata: () => Effect.void,
+          ask: (input) =>
+            Effect.sync(() => {
+              seenAsk = { patterns: input.patterns, metadata: input.metadata as Record<string, unknown> }
+            }),
+        },
+      )
+
+      expect(seenAsk?.patterns).toEqual(["general", "openrouter/deepseek/deepseek-chat"])
+      expect(seenAsk?.metadata).toMatchObject({
+        description: "inspect bug",
+        subagent_type: "general",
+        model: "openrouter/deepseek/deepseek-chat",
+      })
+    }),
+  )
+
   it.instance("execute surfaces child errors with a resumable task_id", () =>
     Effect.gen(function* () {
       const sessions = yield* Session.Service
