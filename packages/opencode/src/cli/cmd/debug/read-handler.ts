@@ -4,7 +4,7 @@ import { ReadTool } from "../../../tool/read"
 import { Tool } from "../../../tool/tool"
 import { Session } from "../../../session/session"
 
-export const debugRead = (args: { params?: string }): Effect.Effect<{ ms: number }, never, any> =>
+export const debugRead = (args: { params?: string; metaOnly?: boolean }): Effect.Effect<{ ms: number }, never, any> =>
   Effect.scoped(
     Effect.gen(function* () {
     const read = yield* ReadTool
@@ -26,28 +26,51 @@ export const debugRead = (args: { params?: string }): Effect.Effect<{ ms: number
     ask: () => Effect.void,
   }
 
+  const emit = (payload: object): Effect.Effect<void, never, never> =>
+    Effect.promise<void>(
+      () =>
+        new Promise((resolve) => {
+          process.stdout.write(`${JSON.stringify(payload)}\n`, () => resolve())
+        }),
+    )
+
   const params = parseParams(args.params)
-  const before = Date.now()
-  const exit = yield* def.execute(params as never, ctx).pipe(
-    Effect.map((result) => ({ ok: true as const, result, ms: Date.now() - before })),
-    Effect.catchCause((cause) =>
-      Effect.succeed({ ok: false as const, error: String(Cause.squash(cause)), ms: Date.now() - before }),
-    ),
-  )
-  if ("error" in exit) {
-    console.log(JSON.stringify({ tool: "read", params, ok: false, ms: exit.ms, error: exit.error }))
-    return { ms: exit.ms }
+  const jobs: ReadonlyArray<Record<string, unknown>> = Array.isArray(params)
+    ? params
+    : [params]
+
+  let total = 0
+  for (let i = 0; i < jobs.length; i++) {
+    const jobParams = jobs[i]
+    const before = Date.now()
+    const exit = yield* def.execute(jobParams as never, ctx).pipe(
+      Effect.map((result) => ({ ok: true as const, result, ms: Date.now() - before })),
+      Effect.catchCause((cause) =>
+        Effect.succeed({ ok: false as const, error: String(Cause.squash(cause)), ms: Date.now() - before }),
+      ),
+    )
+    if ("error" in exit) {
+      total += exit.ms
+      yield* emit({ run_index: i, tool: "read", params: jobParams, ok: false, ms: exit.ms, error: exit.error })
+      continue
+    }
+    total += exit.ms
+    const out: Record<string, unknown> = {
+      run_index: i,
+      tool: "read",
+      params: jobParams,
+      ms: exit.ms,
+      title: exit.result.title,
+      metadata: exit.result.metadata,
+    }
+    if (args.metaOnly) {
+      out.output_chars = (exit.result.output ?? "").length
+    } else {
+      out.output = exit.result.output
+    }
+    yield* emit(out)
   }
-  const out = {
-    tool: "read",
-    params,
-    ms: exit.ms,
-    title: exit.result.title,
-    metadata: exit.result.metadata,
-    output: exit.result.output,
-  }
-  console.log(JSON.stringify(out, null, 2))
-  return { ms: exit.ms }
+  return { ms: total }
     }),
   )
 
@@ -73,8 +96,15 @@ function parseParams(input?: string) {
       )
     }
   }
-  if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
-    throw new Error("Tool params must be an object.")
+  if (!parsed || (typeof parsed !== "object" && !Array.isArray(parsed))) {
+    throw new Error("Tool params must be an object or an array of objects.")
+  }
+  if (Array.isArray(parsed)) {
+    for (const item of parsed) {
+      if (!item || typeof item !== "object" || Array.isArray(item)) {
+        throw new Error("Every element of the params array must be an object.")
+      }
+    }
   }
   return parsed as Record<string, unknown>
 }
