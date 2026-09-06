@@ -606,3 +606,64 @@ describe("tool.read binary detection", () => {
     }),
   )
 })
+
+describe("tool.read symbol scope", () => {
+  it.live("slices a symbol range via indentation fallback and reports size/source", () =>
+    Effect.gen(function* () {
+      const dir = yield* tmpdirScoped()
+      const file = path.join(dir, "sample.js")
+      yield* put(
+        file,
+        [
+          "function helper() {",
+          "  return 1",
+          "}",
+          "",
+          "function applySnapshot(x) {",
+          "  const a = helper()",
+          "  return a + x",
+          "}",
+          "",
+          "const other = 42",
+          "",
+        ].join("\n"),
+      )
+
+      const result = yield* exec(dir, { filePath: file, symbol: "applySnapshot" })
+      expect(result.output).toContain("<type>symbol</type>")
+      expect(result.output).toContain("source=\"indent\"")
+      expect(result.output).toContain("applySnapshot")
+      expect(result.metadata.symbol).toBe("applySnapshot")
+      expect(result.metadata.source).toBe("indent")
+      expect(result.metadata.size).toBe(4)
+    }),
+  )
+
+  it.live("reads from the end with negative offset", () =>
+    Effect.gen(function* () {
+      const dir = yield* tmpdirScoped()
+      const file = path.join(dir, "log.txt")
+      yield* put(
+        file,
+        ["line1", "line2", "line3", "line4", "line5", "line6", "line7", "line8", "line9", "line10"].join("\n"),
+      )
+
+      const result = yield* exec(dir, { filePath: file, offset: -3 })
+      expect(result.output).toContain("line10")
+      expect(result.output).toContain("line9")
+      expect(result.output).toContain("line8")
+      expect(result.output).not.toContain("1: line1")
+    }),
+  )
+
+  it.live("fails when a symbol is not found", () =>
+    Effect.gen(function* () {
+      const dir = yield* tmpdirScoped()
+      const file = path.join(dir, "sample.js")
+      yield* put(file, "function foo() { return 1 }")
+
+      const err = yield* fail(dir, { filePath: file, symbol: "nonexistent" })
+      expect(err.message).toContain('Symbol "nonexistent" not found')
+    }),
+  )
+})
