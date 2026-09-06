@@ -21,6 +21,16 @@ const SUPPORTED_IMAGE_MIMES = new Set(["image/jpeg", "image/png", "image/gif", "
 
 class ReadStop extends Schema.TaggedErrorClass<ReadStop>()("ReadStop", {}) {}
 
+// Memo cache for the whole-file scan used by the indent fallback AND the
+// tail line count. Keyed by path + mtime + size; invalidated whenever the
+// file changes. Keeps warm reads (repeated symbol lookups, repeated tails in
+// one session) from re-scanning the file.
+const indentScanCache = new Map<
+  string,
+  { mtimeMs: number; size: number; raw: string[] }
+>()
+const SCAN_CACHE_MAX_LINES = 200_000
+
 // `offset` and `limit` were originally `z.coerce.number()` — the runtime
 // coercion was useful when the tool was called from a shell but serves no
 // purpose in the LLM tool-call path (the model emits typed JSON). The JSON
@@ -69,6 +79,11 @@ type Metadata = {
   truncated: boolean
   loaded: string[]
   display?: Display
+  symbol?: string
+  source?: "lsp" | "indent"
+  size?: number
+  lines_read?: number
+  saved?: number
 }
 
 export const ReadTool = Tool.define<
@@ -166,9 +181,39 @@ export const ReadTool = Tool.define<
       return hit ? normalizeHit(hit) : undefined
     }
 
+    // Whole-file scan with memo cache (indent fallback + tail count).
+    const scanFile = (
+      filepath: string,
+    ): Effect.Effect<{ raw: string[]; count: number }, never, never> =>
+      Effect.catch(
+        Effect.gen(function* () {
+          const stat = yield* fs.stat(filepath).pipe(
+            Effect.catchIf(
+              (err) => "reason" in err && err.reason._tag === "NotFound",
+              () => Effect.succeed(undefined),
+            ),
+          )
+          const mtimeMs = stat ? Number(stat.mtime) : undefined
+          const size = stat ? Number(stat.size) : undefined
+          const cached = stat ? indentScanCache.get(filepath) : undefined
+          const valid = cached && stat && cached.mtimeMs === mtimeMs && cached.size === size
+          if (valid) {
+            return { raw: cached!.raw, count: cached!.raw.length }
+          }
+          const all = yield* lines(filepath, { offset: 1, limit: Number.MAX_SAFE_INTEGER, unbounded: true })
+          if (stat && all.raw.length <= SCAN_CACHE_MAX_LINES) {
+            indentScanCache.set(filepath, { mtimeMs: mtimeMs!, size: size!, raw: all.raw })
+          }
+          return { raw: all.raw, count: all.count }
+        }),
+        () => Effect.succeed({ raw: [] as string[], count: 0 }),
+      )
+
     // Fallback indentation heuristic (Codex-style): find the line whose
     // indentation is minimal around the first line matching `query`, then
     // extend while indentation is >= anchor indent (or blank/comment).
+    // Uses the memoized whole-file scan so symbols past line 2000 resolve
+    // and warm reads are cheap; the range is re-read with caps afterwards.
     const findSymbolByIndent = (
       filepath: string,
       query: string,
@@ -176,8 +221,7 @@ export const ReadTool = Tool.define<
       Effect.catch(
         Effect.gen(function* () {
           if (!query) return undefined
-          const all = yield* lines(filepath, { offset: 1, limit: DEFAULT_READ_LIMIT })
-          const raw = all.raw
+          const { raw } = yield* scanFile(filepath)
         const anchor = raw.findIndex((l) => l.includes(query))
         if (anchor === -1) return undefined
         const indentOf = (line: string) => {
@@ -203,7 +247,10 @@ export const ReadTool = Tool.define<
       return yield* lines(filepath, opts)
     })
 
-    const lines = Effect.fn("ReadTool.lines")(function* (filepath: string, opts: { limit: number; offset: number }) {
+    const lines = Effect.fn("ReadTool.lines")(function* (
+      filepath: string,
+      opts: { limit: number; offset: number; unbounded?: boolean },
+    ) {
       const start = opts.offset - 1
       const raw: string[] = []
       const flags = { bytes: 0, count: 0, cut: false, more: false, done: false }
@@ -230,7 +277,7 @@ export const ReadTool = Tool.define<
 
             const line = text.length > MAX_LINE_LENGTH ? text.substring(0, MAX_LINE_LENGTH) + MAX_LINE_SUFFIX : text
             const size = Buffer.byteLength(line, "utf-8") + (raw.length > 0 ? 1 : 0)
-            if (flags.bytes + size <= MAX_BYTES) {
+            if (opts.unbounded || flags.bytes + size <= MAX_BYTES) {
               raw.push(line)
               flags.bytes += size
               return
@@ -421,7 +468,7 @@ export const ReadTool = Tool.define<
             resolved = resolveSymbolByLsp(raw, params.symbol ?? "")
           }
         }
-        const source = hasClient && resolved ? "lsp" : "indent"
+        const source: "lsp" | "indent" = hasClient && resolved ? "lsp" : "indent"
         if (!resolved) {
           const indent = yield* findSymbolByIndent(filepath, params.symbol ?? "")
           if (indent) {
@@ -518,10 +565,7 @@ export const ReadTool = Tool.define<
       // tail: negative offset reads from the end of the file (Grok semantics).
       let effectiveOffset = params.offset || 1
       if (params.offset !== undefined && params.offset < 0) {
-        const total = yield* Effect.catch(
-          lines(filepath, { offset: 1, limit: DEFAULT_READ_LIMIT }).pipe(Effect.map((l) => l.count)),
-          () => Effect.succeed(0),
-        )
+        const total = yield* scanFile(filepath).pipe(Effect.map((l) => l.count))
         effectiveOffset = Math.max(1, total + 1 + params.offset)
       }
       const file = yield* lines(filepath, {
