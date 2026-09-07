@@ -322,6 +322,7 @@ describe("tool.read truncation", () => {
       expect(result.metadata.truncated).toBe(true)
       expect(result.output).toContain("PARTIAL view")
       expect(result.output).toContain("Use offset=")
+      expect(Buffer.byteLength(result.output, "utf-8")).toBeLessThanOrEqual(50 * 1024)
     }),
   )
 
@@ -432,6 +433,15 @@ describe("tool.read truncation", () => {
         totalEntries: 10,
         truncated: false,
       })
+    }),
+  )
+
+  it.live("rejects negative directory offsets", () =>
+    Effect.gen(function* () {
+      const dir = yield* tmpdirScoped()
+      yield* put(path.join(dir, "dir", "file.txt"), "content")
+      const err = yield* fail(dir, { filePath: path.join(dir, "dir"), offset: -1 })
+      expect(err.message).toBe("Negative offset is only supported for files.")
     }),
   )
 
@@ -590,6 +600,19 @@ describe("tool.read loaded instructions", () => {
       expect(result.output).toContain("Parent rule")
     }),
   )
+
+  it.live("caps rendered body with reminders", () =>
+    Effect.gen(function* () {
+      const dir = yield* tmpdirScoped()
+      yield* put(path.join(dir, "nested", "AGENTS.md"), "r".repeat(12 * 1024))
+      const file = path.join(dir, "nested", "deep", "body.txt")
+      yield* put(file, `${"x".repeat(500)}\n`.repeat(100))
+      const result = yield* exec(dir, { filePath: file })
+      expect(result.metadata.truncated).toBe(true)
+      expect(Buffer.byteLength(result.output, "utf-8")).toBeLessThanOrEqual(50 * 1024)
+      expect(result.output).toContain("system-reminder")
+    }),
+  )
 })
 
 describe("tool.read binary detection", () => {
@@ -630,6 +653,31 @@ describe("tool.read tail", () => {
       expect(result.output).toContain("line9")
       expect(result.output).toContain("line8")
       expect(result.output).not.toContain("1: line1")
+    }),
+  )
+
+  it.instance("uses seek reads without a forward stream", () =>
+    Effect.gen(function* () {
+      const test = yield* TestInstance
+      const file = path.join(test.directory, "tail.txt")
+      yield* put(file, `${"early\n".repeat(20_000)}tail-1\ntail-2\ntail-3`)
+      const fs = yield* FSUtil.Service
+      let streams = 0
+      const result = yield* run({ filePath: file, offset: -3 }).pipe(
+        Effect.provideService(
+          FSUtil.Service,
+          FSUtil.Service.of({
+            ...fs,
+            stream: (...args) => {
+              streams++
+              return fs.stream(...args)
+            },
+          }),
+        ),
+      )
+      expect(streams).toBe(0)
+      expect(result.output).toContain("tail-1")
+      expect(result.output).not.toContain("early")
     }),
   )
 })
