@@ -21,7 +21,7 @@ fixtures = []
 fixtures.append(write("lf-unicode.txt", ["alpha", "cafe: cafe", "emoji: rocket 🚀", "omega", "last"]))
 fixtures.append(write("crlf.txt", ["crlf one", "crlf two", "crlf three", "crlf four"], "\r\n"))
 fixtures.append(write("long-line.txt", ["short", "L" * 12000, "after long line", "end"]))
-fixtures.append(write("dense-large.txt", [f"dense line {i:05d}" for i in range(1, 3001)]))
+fixtures.append(write("dense-large.txt", [f"dense line {i:05d} " + "X" * 3000 for i in range(1, 3001)]))
 fixtures.append(write("sparse-large.txt", ["sparse marker" if i in (1, 1500, 3000) else "" for i in range(1, 3001)]))
 (out / "manifest.json").write_text(json.dumps({"fixtures": fixtures}, indent=2) + "\n")
 PY

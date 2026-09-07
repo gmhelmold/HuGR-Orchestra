@@ -54,14 +54,15 @@ def self_test():
     success = {"outcome": "success", "rows": [(1, "one")]}
     good = {"tool": "read", "params": params, "output": "<content>\n1: one\n\n(End)\n</content>"}
     if validate_envelope(good, params, success)[0] != "success": raise AssertionError("success self-test")
-    error = {"outcome": "error", "error_fragment": "Offset 4 is out of range"}
-    bad = {"tool": "read", "params": params, "ok": False, "error": "Offset 4 is out of range for this file (3 lines)"}
+    error = {"outcome": "error", "error_fragment": "Requested range exceeds 50 KB output limit"}
+    bad = {"tool": "read", "params": params, "ok": False, "error": "Requested range exceeds 50 KB output limit"}
     if validate_envelope(bad, params, error)[0] != "error": raise AssertionError("error self-test")
     probes = [
         (lambda: json.loads("not-json"), "malformed envelope"),
         (lambda: validate_envelope({**good, "output": "<content>\n1: wrong\n</content>"}, params, success), "oracle mismatch"),
         (lambda: validate_envelope(good, params, error), "unexpected successful outcome"),
         (lambda: validate_envelope({**bad, "ok": True}, params, error), "unexpected error outcome"),
+        (lambda: validate_envelope({**bad, "error": "Requested range exceeds 51 KB output limit"}, params, error), "expected-error fragment mismatch"),
         (lambda: parsed_content("<content>\n1: one\n</content><content>\n2: two\n</content>"), "duplicate delimiter"),
     ]
     for probe, name in probes:
@@ -87,8 +88,8 @@ cases = [
     {"mode": "default", "file": "lf-unicode.txt", "params": {}, "outcome": "success"},
     {"mode": "explicit_slice", "file": "lf-unicode.txt", "params": {"offset": 2, "limit": 2}, "outcome": "success"},
     {"mode": "tail", "file": "lf-unicode.txt", "params": {"offset": -2}, "outcome": "success"},
-    {"mode": "oversized_default", "file": "dense-large.txt", "params": {}, "outcome": "success"},
-    {"mode": "oversized_explicit_range", "file": "dense-large.txt", "params": {"offset": 3001, "limit": 1000}, "outcome": "error", "error_fragment": "Offset 3001 is out of range"},
+    {"mode": "oversized_default", "file": "sparse-large.txt", "params": {}, "outcome": "success"},
+    {"mode": "oversized_explicit_range", "file": "dense-large.txt", "params": {"offset": 1, "limit": 1000}, "outcome": "error", "error_fragment": "Requested range exceeds 50 KB output limit"},
 ]
 rows = []
 for case in cases:
