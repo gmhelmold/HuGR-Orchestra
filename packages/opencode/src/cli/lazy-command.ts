@@ -1,5 +1,6 @@
 import type { CommandModule } from "yargs"
 import type { Argv } from "yargs"
+import type { ArgumentsCamelCase } from "yargs"
 
 /**
  * Lazy command registration for the CLI entrypoint.
@@ -25,7 +26,7 @@ export const lazyCommand = <T, U>(
   const describe = input.describe
   const handle = async (args: unknown) => {
     const mod = await input.load()
-    return input.resolve(mod).handler?.(args as U)
+    return input.resolve(mod).handler?.(args as ArgumentsCamelCase<U>)
   }
   const build = async (args: Argv<T>) => {
     const mod = await input.load()
