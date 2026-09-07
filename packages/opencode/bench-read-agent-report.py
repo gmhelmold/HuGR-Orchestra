@@ -7,6 +7,7 @@ import os
 import signal
 import statistics
 import subprocess
+import sys
 import tempfile
 from pathlib import Path
 
@@ -255,6 +256,10 @@ def run_child(command, cwd, timeout):
         return True, process.returncode, stdout, stderr
 
 
+def diagnostic(value):
+    return value[-8192:]
+
+
 def run(args):
     models = args.models.split(",")
     if not models or any(not model or "/" not in model or model.startswith("/") or model.endswith("/") for model in models) or len(set(models)) != len(models):
@@ -277,15 +282,17 @@ def run(args):
         require(not event_path.exists(), f"orphan raw events for {(binary, model, task, trial)}; refuse overwrite")
         timeout, code, stdout, stderr = run_child([plan["binaries"][binary]["path"], "run", "--format", "json", "--auto", "--model", model, f"Find exact marker in {file}. Reply with marker only."], corpus, plan["timeout_sec"])
         event_path.write_text(stdout, encoding="utf-8")
-        row = {"binary": binary, "model": model, "task": task, "run": trial, "raw_events": str(event_path.relative_to(out))}
+        stderr_path = event_path.with_suffix(event_path.suffix + ".stderr")
+        stderr_path.write_text(stderr, encoding="utf-8")
+        row = {"binary": binary, "model": model, "task": task, "run": trial, "raw_events": str(event_path.relative_to(out)), "raw_stderr": str(stderr_path.relative_to(out))}
         if timeout:
-            row.update(outcome="timeout", error=f"timeout after {plan['timeout_sec']} seconds", read_calls=None, retries=None, tokens_input=None, tokens_output=None, cost=None)
+            row.update(outcome="timeout", error=f"timeout after {plan['timeout_sec']} seconds", stderr=diagnostic(stderr), read_calls=None, retries=None, tokens_input=None, tokens_output=None, cost=None)
         else:
             try:
                 require(code == 0, f"unknown model outcome: process exited {code}: {stderr.strip()}")
                 row.update(parse_trial(stdout, marker))
             except Invalid as error:
-                row.update(outcome="failed", error=str(error), read_calls=None, retries=None, tokens_input=None, tokens_output=None, cost=None)
+                row.update(outcome="failed", error=str(error), stderr=diagnostic(stderr), read_calls=None, retries=None, tokens_input=None, tokens_output=None, cost=None)
         append_row(out, row)
         complete.add(row_key(row))
         print(f"row {len(complete)}/{total} {binary} {model} {task} {trial} {row['outcome']}", flush=True)
@@ -310,6 +317,10 @@ def self_test():
     text = {"type": "text", "part": {"type": "text", "text": "MARKER"}}
     finish = {"type": "step_finish", "part": {"type": "step-finish", "cost": 1, "tokens": {"input": 2, "output": 3}}}
     assert parse_trial("\n".join(json.dumps(item) for item in (tool, text, finish)), "MARKER")["outcome"] == "success"
+    timed_out, code, stdout, stderr = run_child([sys.executable, "-c", "import sys; sys.stdout.write('out'); sys.stderr.write('err')"], ".", 1)
+    assert not timed_out and code == 0 and stdout == "out" and stderr == "err"
+    timed_out, _, _, _ = run_child([sys.executable, "-c", "import time; time.sleep(60)"], ".", 0.01)
+    assert timed_out
     with tempfile.TemporaryDirectory() as directory:
         out = Path(directory)
         plan = {"format": 1, "binaries": {}, "models": ["x/y"], "tasks": [{"id": "task", "file": "x", "answer": "MARKER"}], "fixtures": [], "manifest_sha256": hashlib.sha256(b"{}").hexdigest(), "runs": 1, "timeout_sec": 1}
