@@ -1,7 +1,7 @@
 import { PermissionV1 } from "@opencode-ai/core/v1/permission"
-import { afterEach, describe, expect } from "bun:test"
+import { afterEach, describe, expect, test } from "bun:test"
 import { LayerNode } from "@opencode-ai/core/effect/layer-node"
-import { Cause, Effect, Exit, Layer, Stream } from "effect"
+import { Cause, Effect, Exit, Layer, Schema } from "effect"
 import path from "path"
 import { Agent } from "../../src/agent/agent"
 import { CrossSpawnSpawner } from "@opencode-ai/core/cross-spawn-spawner"
@@ -10,11 +10,10 @@ import { Global } from "@opencode-ai/core/global"
 import { Config } from "@/config/config"
 import { RuntimeFlags } from "@/effect/runtime-flags"
 import { Ripgrep } from "@opencode-ai/core/ripgrep"
-import { LSP } from "@/lsp/lsp"
 import { Permission } from "../../src/permission"
 import { SessionID, MessageID } from "../../src/session/schema"
 import { Instruction } from "../../src/session/instruction"
-import { ReadTool } from "../../src/tool/read"
+import { Parameters, ReadTool } from "../../src/tool/read"
 import { Truncate } from "@/tool/truncate"
 import { Tool } from "@/tool/tool"
 import { Filesystem } from "@/util/filesystem"
@@ -46,15 +45,7 @@ const ctx = {
 
 const readLayer = (flags: Partial<RuntimeFlags.Info> = {}) =>
   LayerNode.compile(
-    LayerNode.group([
-      Agent.node,
-      FSUtil.node,
-      CrossSpawnSpawner.node,
-      Instruction.node,
-      LSP.node,
-      Ripgrep.node,
-      Truncate.node,
-    ]),
+    LayerNode.group([Agent.node, FSUtil.node, CrossSpawnSpawner.node, Instruction.node, Ripgrep.node, Truncate.node]),
   )
 
 const it = testEffect(Layer.mergeAll(readLayer(), testInstanceStoreLayer))
@@ -313,6 +304,12 @@ describe("tool.read env file permissions", () => {
 })
 
 describe("tool.read truncation", () => {
+  test("rejects zero offset and limit in schema", () => {
+    const decode = Schema.decodeUnknownResult(Parameters)
+    expect(decode({ filePath: "/a", offset: 0 })._tag).toBe("Failure")
+    expect(decode({ filePath: "/a", limit: 0 })._tag).toBe("Failure")
+  })
+
   it.instance("truncates large file by bytes and sets truncated metadata", () =>
     Effect.gen(function* () {
       const test = yield* TestInstance
@@ -323,54 +320,8 @@ describe("tool.read truncation", () => {
 
       const result = yield* run({ filePath: path.join(test.directory, "large.json") })
       expect(result.metadata.truncated).toBe(true)
-      expect(result.output).toContain("Output capped at")
-      expect(result.output).toContain("Use offset=")
-    }),
-  )
-
-  it.instance("cuts with a PARTIAL view at the token budget", () =>
-    Effect.gen(function* () {
-      const test = yield* TestInstance
-      const content = `${"y".repeat(400)}\n`.repeat(300)
-      yield* put(path.join(test.directory, "big2.txt"), content)
-
-      const result = yield* run({ filePath: path.join(test.directory, "big2.txt") })
-      expect(result.metadata.truncated).toBe(true)
       expect(result.output).toContain("PARTIAL view")
-      expect(result.output).toContain("tokens")
       expect(result.output).toContain("Use offset=")
-    }),
-  )
-
-  it.instance("stops streaming after the byte cap", () =>
-    Effect.gen(function* () {
-      const test = yield* TestInstance
-      const filepath = path.join(test.directory, "huge.txt")
-      const content = `${"x".repeat(80)}\n`.repeat(50_000)
-      yield* put(filepath, content)
-
-      const fs = yield* FSUtil.Service
-      const counter = { bytes: 0 }
-      const result = yield* run({ filePath: filepath }).pipe(
-        Effect.provideService(
-          FSUtil.Service,
-          FSUtil.Service.of({
-            ...fs,
-            stream: (file, options) =>
-              fs.stream(file, options).pipe(
-                Stream.tap((chunk) =>
-                  Effect.sync(() => {
-                    counter.bytes += chunk.length
-                  }),
-                ),
-              ),
-          }),
-        ),
-      )
-
-      expect(result.metadata.truncated).toBe(true)
-      expect(result.output).toContain("Output capped at")
-      expect(counter.bytes).toBeLessThan(Buffer.byteLength(content, "utf-8") / 2)
     }),
   )
 
@@ -382,7 +333,7 @@ describe("tool.read truncation", () => {
 
       const result = yield* run({ filePath: path.join(test.directory, "many-lines.txt"), limit: 10 })
       expect(result.metadata.truncated).toBe(true)
-      expect(result.output).toContain("Showing lines 1-10 of 100")
+      expect(result.output).toContain("PARTIAL view. Showing lines 1-10")
       expect(result.output).toContain("Use offset=11")
       expect(result.output).toContain("line0")
       expect(result.output).toContain("line9")
@@ -404,7 +355,6 @@ describe("tool.read truncation", () => {
         text: "hello world",
         lineStart: 1,
         lineEnd: 1,
-        totalLines: 1,
         truncated: false,
       })
     }),
@@ -446,7 +396,7 @@ describe("tool.read truncation", () => {
 
       const result = yield* exec(dir, { filePath: path.join(dir, "empty.txt") })
       expect(result.metadata.truncated).toBe(false)
-      expect(result.output).toContain("End of file - total 0 lines")
+      expect(result.output).toContain("End of file")
     }),
   )
 
@@ -493,6 +443,38 @@ describe("tool.read truncation", () => {
       const result = yield* exec(dir, { filePath: path.join(dir, "long-line.txt") })
       expect(result.output).toContain("(line truncated to 2000 chars)")
       expect(result.output.length).toBeLessThan(3000)
+    }),
+  )
+
+  it.live("errors for explicit ranges exceeding render budget", () =>
+    Effect.gen(function* () {
+      const dir = yield* tmpdirScoped()
+      const file = path.join(dir, "oversized.txt")
+      yield* put(file, `${"x".repeat(2000)}\n`.repeat(100))
+      const err = yield* fail(dir, { filePath: file, limit: 100 })
+      expect(err.message).toContain("Requested range exceeds 50 KB output limit")
+    }),
+  )
+
+  it.live("uses unicode-safe long-line truncation", () =>
+    Effect.gen(function* () {
+      const dir = yield* tmpdirScoped()
+      const file = path.join(dir, "unicode.txt")
+      yield* put(file, "😀".repeat(2001))
+      const result = yield* exec(dir, { filePath: file })
+      expect(result.output).toContain("😀".repeat(2000))
+      expect(result.output).not.toContain("�")
+    }),
+  )
+
+  it.live("handles CRLF and split UTF-8 chunks", () =>
+    Effect.gen(function* () {
+      const dir = yield* tmpdirScoped()
+      const file = path.join(dir, "utf8.txt")
+      yield* put(file, "one\r\ntwo 😀\r\nthree")
+      const result = yield* exec(dir, { filePath: file, limit: 3 })
+      expect(result.output).toContain("1: one\n2: two 😀\n3: three")
+      expect(result.output).not.toContain("\r")
     }),
   )
 
@@ -596,6 +578,18 @@ describe("tool.read loaded instructions", () => {
       expect(result.metadata.loaded).toContain(path.join(dir, "subdir", "AGENTS.md"))
     }),
   )
+
+  it.live("keeps reminders on non-default reads", () =>
+    Effect.gen(function* () {
+      const dir = yield* tmpdirScoped()
+      yield* put(path.join(dir, "subdir", "AGENTS.md"), "# Parent rule")
+      const file = path.join(dir, "subdir", "nested", "test.txt")
+      yield* put(file, "one\ntwo")
+      const result = yield* exec(dir, { filePath: file, offset: 2, limit: 1 })
+      expect(result.output).toContain("2: two")
+      expect(result.output).toContain("Parent rule")
+    }),
+  )
 })
 
 describe("tool.read binary detection", () => {
@@ -621,39 +615,7 @@ describe("tool.read binary detection", () => {
   )
 })
 
-describe("tool.read symbol scope", () => {
-  it.live("slices a symbol range via indentation fallback and reports size/source", () =>
-    Effect.gen(function* () {
-      const dir = yield* tmpdirScoped()
-      const file = path.join(dir, "sample.js")
-      yield* put(
-        file,
-        [
-          "function helper() {",
-          "  return 1",
-          "}",
-          "",
-          "function applySnapshot(x) {",
-          "  const a = helper()",
-          "  return a + x",
-          "}",
-          "",
-          "const other = 42",
-          "",
-        ].join("\n"),
-      )
-
-      const result = yield* exec(dir, { filePath: file, symbol: "applySnapshot" })
-      expect(result.output).toContain("<type>symbol</type>")
-      expect(result.output).toContain("source=\"indent\"")
-      expect(result.output).toContain("applySnapshot")
-      expect(result.output).not.toContain("a\np\np\nl\ny")
-      expect(result.metadata.symbol).toBe("applySnapshot")
-      expect(result.metadata.source).toBe("indent")
-      expect(result.metadata.size).toBe(4)
-    }),
-  )
-
+describe("tool.read tail", () => {
   it.live("reads from the end with negative offset", () =>
     Effect.gen(function* () {
       const dir = yield* tmpdirScoped()
@@ -668,61 +630,6 @@ describe("tool.read symbol scope", () => {
       expect(result.output).toContain("line9")
       expect(result.output).toContain("line8")
       expect(result.output).not.toContain("1: line1")
-    }),
-  )
-
-  it.live("degrades to a file read when a symbol is not found", () =>
-    Effect.gen(function* () {
-      const dir = yield* tmpdirScoped()
-      const file = path.join(dir, "sample.js")
-      yield* put(file, "function foo() {\n  return 1\n}\n")
-
-      const result = yield* exec(dir, { filePath: file, symbol: "nonexistent" })
-      expect(result.output).toContain("<type>file</type>")
-      expect(result.output).toContain('<system-note>Symbol "nonexistent" not found')
-      expect(result.output).toContain("function foo")
-    }),
-  )
-
-  it.live("search reads symbol range by fragment and reports source", () =>
-    Effect.gen(function* () {
-      const dir = yield* tmpdirScoped()
-      const file = path.join(dir, "mod.js")
-      yield* put(
-        file,
-        [
-          "const helper = () => 1",
-          "",
-          "function applySnapshot(state) {",
-          "  const copy = { ...state }",
-          "  return copy",
-          "}",
-          "",
-          "const other = 42",
-          "",
-        ].join("\n"),
-      )
-
-      const result = yield* exec(dir, { filePath: file, search: "applySnapshot" })
-      expect(result.output).toContain("<type>symbol</type>")
-      expect(result.output).toContain("source=\"indent\"")
-      expect(result.output).toContain("applySnapshot")
-      expect(result.metadata.symbol).toBe("applySnapshot")
-    }),
-  )
-
-  it.live("sparse numbering keeps anchors and every 10th line", () =>
-    Effect.gen(function* () {
-      const dir = yield* tmpdirScoped()
-      const file = path.join(dir, "big.txt")
-      const lines = Array.from({ length: 25 }, (_, i) => `line${i + 1}`)
-      yield* put(file, lines.join("\n"))
-
-      const result = yield* exec(dir, { filePath: file, sparse: true })
-      expect(result.output).toContain("1: line1")
-      expect(result.output).toContain("10: line10")
-      expect(result.output).toContain("20: line20")
-      expect(result.output).not.toContain("2: line2")
     }),
   )
 })
