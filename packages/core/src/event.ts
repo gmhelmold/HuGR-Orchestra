@@ -528,19 +528,17 @@ export const layerWith = (options?: LayerOptions) =>
               ownerID: options?.ownerID,
               strictOwner: options?.strictOwner,
             })
-            if (committed && options?.publish) {
-              yield* notify(
-                {
-                  ...payload,
-                  durable: {
-                    aggregateID: committed.aggregateID,
-                    seq: committed.seq,
-                    version: definition.durable.version,
-                  },
+              if (!committed) return
+              const result = {
+                ...payload,
+                durable: {
+                  aggregateID: committed.aggregateID,
+                  seq: committed.seq,
+                  version: definition.durable.version,
                 },
-                true,
-              )
-            }
+              } as Payload
+              if (options?.publish) yield* notify(result, true)
+              return result
           }
         })
       }
@@ -560,7 +558,7 @@ export const layerWith = (options?: LayerOptions) =>
               }),
             )
           }
-          yield* db
+          const committed = yield* db
             .transaction(
               () =>
                 Effect.gen(function* () {
@@ -576,13 +574,17 @@ export const layerWith = (options?: LayerOptions) =>
                       )
                     }
                   }
-                  for (const event of events) {
-                    yield* replay(event, options)
-                  }
+                  return yield* Effect.forEach(events, (event) => replay(event, { ...options, publish: false }))
                 }),
               { behavior: "immediate" },
             )
             .pipe(Effect.orDie)
+          if (options?.publish)
+            yield* Effect.forEach(
+              committed.filter((event): event is Payload => event !== undefined),
+              (event) => notify(event, true),
+              { discard: true },
+            )
           return source
         })
       }

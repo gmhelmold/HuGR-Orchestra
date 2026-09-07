@@ -1051,14 +1051,14 @@ describe("workspace CRUD", () => {
             yield* workspace.sessionWarp({ workspaceID: target.id, sessionID: session.id, copyChanges: true })
 
             expect(calls.map((call) => `${call.method} ${call.url.pathname}`)).toEqual([
-              "POST /warp-source/sync/history",
               "GET /warp-source/vcs/diff/raw",
               "POST /warp-target/vcs/apply",
+              "POST /warp-source/sync/history",
               "POST /warp-target/sync/replay",
               "POST /warp-target/sync/steal",
             ])
-            expect(calls[0].json).toEqual({ [session.id]: historyNextSeq - 1 })
-            expect(calls[2].json).toEqual({ patch: "remote patch" })
+            expect(calls[2].json).toEqual({ [session.id]: historyNextSeq - 1 })
+            expect(calls[1].json).toEqual({ patch: "remote patch" })
             expect(calls[3].json).toMatchObject({
               directory: "remote-target-dir",
               events: [
