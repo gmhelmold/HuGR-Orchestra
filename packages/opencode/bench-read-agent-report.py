@@ -203,7 +203,8 @@ def read_rows(out, plan):
 
 def require_complete(rows, plan):
     missing = pending_keys(plan, rows)
-    require(not missing, f"partial results: missing {len(missing)} keys, for example {sorted(missing)[0]}")
+    if missing:
+        raise Invalid(f"partial results: missing {len(missing)} keys, for example {sorted(missing)[0]}")
 
 
 def append_row(out, row):
@@ -226,15 +227,16 @@ def report(rows, plan, out):
             entry = {"model": model, "task": task["id"], "binaries": {}}
             for binary in ("baseline", "candidate"):
                 samples = [row for row in rows if row_key(row)[:3] == (binary, model, task["id"])]
-                entry["binaries"][binary] = {"success_rate": sum(row["outcome"] == "success" for row in samples) / len(samples), "median_read_calls": median([row.get("read_calls") for row in samples]), "median_retries": median([row.get("retries") for row in samples]), "median_tokens_input": median([row.get("tokens_input") for row in samples]), "median_tokens_output": median([row.get("tokens_output") for row in samples]), "median_cost": median([row.get("cost") for row in samples])}
+                entry["binaries"][binary] = {"outcomes": {outcome: sum(row["outcome"] == outcome for row in samples) for outcome in ("success", "failed", "timeout")}, "success_rate": sum(row["outcome"] == "success" for row in samples) / len(samples), "median_read_calls": median([row.get("read_calls") for row in samples]), "median_retries": median([row.get("retries") for row in samples]), "median_tokens_input": median([row.get("tokens_input") for row in samples]), "median_tokens_output": median([row.get("tokens_output") for row in samples]), "median_cost": median([row.get("cost") for row in samples])}
             summary.append(entry)
     (out / "results.json").write_text(json.dumps({"plan": plan, "rows": rows, "paired": summary}, indent=2) + "\n", encoding="utf-8")
-    lines = ["# Read Agent A/B", "", "| model | task | binary | success | median read calls | median retries | tokens in/out | cost |", "|---|---|---|---:|---:|---:|---:|---:|"]
+    lines = ["# Read Agent A/B", "", "| model | task | binary | outcomes | success | median read calls | median retries | tokens in/out | cost |", "|---|---|---|---|---:|---:|---:|---:|---:|"]
     for pair in summary:
         for binary in ("baseline", "candidate"):
             value = pair["binaries"][binary]
             tokens = "N/A" if value["median_tokens_input"] == "N/A" else f"{value['median_tokens_input']}/{value['median_tokens_output']}"
-            lines.append(f"| {pair['model']} | {pair['task']} | {binary} | {value['success_rate']:.0%} | {value['median_read_calls']} | {value['median_retries']} | {tokens} | {value['median_cost']} |")
+            outcomes = ", ".join(f"{name}:{count}" for name, count in value["outcomes"].items() if count)
+            lines.append(f"| {pair['model']} | {pair['task']} | {binary} | {outcomes} | {value['success_rate']:.0%} | {value['median_read_calls']} | {value['median_retries']} | {tokens} | {value['median_cost']} |")
     (out / "report.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
@@ -273,7 +275,7 @@ def run(args):
         file = next(item["file"] for item in plan["tasks"] if item["id"] == task)
         event_path = raw / f"{binary}--{model.replace('/', '_')}--{task}--{trial}.jsonl"
         require(not event_path.exists(), f"orphan raw events for {(binary, model, task, trial)}; refuse overwrite")
-        timeout, code, stdout, stderr = run_child([plan["binaries"][binary]["path"], "run", "--format", "json", "--model", model, f"Find exact marker in {file}. Reply with marker only."], corpus, plan["timeout_sec"])
+        timeout, code, stdout, stderr = run_child([plan["binaries"][binary]["path"], "run", "--format", "json", "--auto", "--model", model, f"Find exact marker in {file}. Reply with marker only."], corpus, plan["timeout_sec"])
         event_path.write_text(stdout, encoding="utf-8")
         row = {"binary": binary, "model": model, "task": task, "run": trial, "raw_events": str(event_path.relative_to(out))}
         if timeout:
@@ -290,7 +292,7 @@ def run(args):
     rows = read_rows(out, plan)
     report(rows, plan, out)
     if any(row["outcome"] != "success" for row in rows):
-        raise SystemExit("one or more trials failed closed; inspect raw-results.jsonl")
+        raise SystemExit("trials failed closed; inspect raw-results.jsonl")
 
 
 def report_only(args):
@@ -299,6 +301,8 @@ def report_only(args):
     validate_corpus(out / "corpus", plan)
     rows = read_rows(out, plan)
     report(rows, plan, out)
+    if any(row["outcome"] != "success" for row in rows):
+        raise SystemExit("trials failed closed; inspect raw-results.jsonl")
 
 
 def self_test():
@@ -337,6 +341,19 @@ def self_test():
         else:
             raise AssertionError("partial report refusal")
         assert pending_keys(plan, rows) == {("candidate", "x/y", "task", 0)}
+        all_timeout = [
+            {"binary": binary, "model": "x/y", "task": "task", "run": 0, "outcome": "timeout", "error": "timeout", "read_calls": None, "retries": None, "tokens_input": None, "tokens_output": None, "cost": None}
+            for binary in ("baseline", "candidate")
+        ]
+        report(all_timeout, plan, out)
+        assert "timeout:1" in (out / "report.md").read_text(encoding="utf-8")
+        mixed = [
+            {"binary": "baseline", "model": "x/y", "task": "task", "run": 0, "outcome": "success", "final": "MARKER", "tool_calls": [], "read_calls": 1, "retries": None, "tokens_input": None, "tokens_output": None, "cost": None},
+            all_timeout[1],
+        ]
+        report(mixed, plan, out)
+        report_text = (out / "report.md").read_text(encoding="utf-8")
+        assert "success:1" in report_text and "timeout:1" in report_text
     print("bench-read-agent self-test: pass")
 
 
