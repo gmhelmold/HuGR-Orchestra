@@ -711,7 +711,11 @@ const SNAPSHOT_COMPACTION_MARKER = "event_snapshot_compaction"
 export function hasCompactedSnapshotEvents(db: Pick<Database.Interface["db"], "get">) {
   return Effect.gen(function* () {
     return Boolean(
-      yield* db.get(sql`SELECT name FROM data_migration WHERE name = ${SNAPSHOT_COMPACTION_MARKER}`).pipe(Effect.orDie),
+      yield* db
+        .get(
+          sql`SELECT 1 WHERE EXISTS (SELECT 1 FROM data_migration WHERE name = ${SNAPSHOT_COMPACTION_MARKER}) OR EXISTS (SELECT 1 FROM event GROUP BY aggregate_id HAVING COUNT(*) != MAX(seq) - MIN(seq) + 1)`,
+        )
+        .pipe(Effect.orDie),
     )
   })
 }

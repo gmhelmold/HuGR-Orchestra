@@ -403,43 +403,52 @@ const layer = Layer.effect(
 
           setStatus(space.id, "connected")
 
-          yield* parseSSE(stream, (evt) =>
-            Effect.gen(function* () {
-              if (yield* EventV2.hasCompactedSnapshotEvents(db))
-                return yield* Effect.fail(new Error("Workspace sync disabled after snapshot compaction"))
+          yield* parseSSE(
+            stream,
+            (evt) =>
+              Effect.gen(function* () {
+                if (yield* EventV2.hasCompactedSnapshotEvents(db))
+                  return yield* Effect.fail(new Error("Workspace sync disabled after snapshot compaction"))
 
-              if (!evt || typeof evt !== "object" || !("payload" in evt)) return
-              const payload = evt.payload as { type?: string; syncEvent?: EventV2.SerializedEvent }
-              if (payload.type === "server.heartbeat") return
+                if (!evt || typeof evt !== "object" || !("payload" in evt)) return
+                const payload = evt.payload as { type?: string; syncEvent?: EventV2.SerializedEvent }
+                if (payload.type === "server.heartbeat") return
 
-              if (payload.type === "sync" && payload.syncEvent) {
-                const failed = yield* events.replay(payload.syncEvent, { publish: true, ownerID: space.id }).pipe(
-                  Effect.as(false),
-                  Effect.catchCause((error) =>
-                    Effect.logWarning("failed to replay global event", error).pipe(
-                      Effect.annotateLogs({ workspaceID: space.id }),
-                      Effect.as(true),
+                if (payload.type === "sync" && payload.syncEvent) {
+                  const failed = yield* events.replay(payload.syncEvent, { publish: true, ownerID: space.id }).pipe(
+                    Effect.as(false),
+                    Effect.catchCause((error) =>
+                      Effect.logWarning("failed to replay global event", error).pipe(
+                        Effect.annotateLogs({ workspaceID: space.id }),
+                        Effect.as(true),
+                      ),
                     ),
-                  ),
-                )
-                if (failed) return
-              }
+                  )
+                  if (failed) return
+                }
 
-              try {
-                const event = evt as { directory?: string; project?: string; payload: unknown }
-                GlobalBus.emit("event", {
-                  directory: event.directory,
-                  project: event.project,
-                  workspace: space.id,
-                  payload: event.payload,
-                })
-              } catch (error) {
-                yield* Effect.logWarning("failed to emit global event", {
-                  workspaceID: space.id,
-                  error: errorData(error),
-                })
-              }
-            }),
+                try {
+                  const event = evt as { directory?: string; project?: string; payload: unknown }
+                  GlobalBus.emit("event", {
+                    directory: event.directory,
+                    project: event.project,
+                    workspace: space.id,
+                    payload: event.payload,
+                  })
+                } catch (error) {
+                  yield* Effect.logWarning("failed to emit global event", {
+                    workspaceID: space.id,
+                    error: errorData(error),
+                  })
+                }
+              }),
+          ).pipe(
+            Effect.catch((error) =>
+              Effect.logWarning("workspace event stream ended", {
+                workspaceID: space.id,
+                error: errorData(error),
+              }),
+            ),
           )
 
           setStatus(space.id, "disconnected")
@@ -586,38 +595,26 @@ const layer = Layer.effect(
           .get()
           .pipe(Effect.orDie)
 
-        if (current?.workspaceID) {
-          const previous = yield* get(current.workspaceID)
-          if (previous) {
-            const target = yield* WorkspaceAdapterRuntime.target(previous)
+        const previous = current?.workspaceID ? yield* get(current.workspaceID) : undefined
+        if (previous) {
+          const target = yield* WorkspaceAdapterRuntime.target(previous)
 
-            if (target.type === "remote") {
-              yield* syncHistory(previous, target.url, target.headers).pipe(
-                Effect.catch((error) => {
-                  if (error instanceof SyncHttpError && error.status === 400)
-                    return Effect.fail(
-                      new SessionWarpHttpError({
-                        message: `Failed to sync source workspace ${previous.id} before warp: ${error.message}`,
-                        workspaceID: previous.id,
-                        sessionID: input.sessionID,
-                        status: error.status,
-                        body: error.body ?? "",
-                      }),
-                    )
-                  return Effect.logWarning("session warp final source sync failed", {
+          if (target.type === "remote") {
+            yield* syncHistory(previous, target.url, target.headers).pipe(
+              Effect.catch((error) =>
+                Effect.fail(
+                  new SessionWarpHttpError({
+                      message: `Failed to sync source workspace ${previous.id} before warp: ${String(errorData(error))}`,
                     workspaceID: previous.id,
                     sessionID: input.sessionID,
-                    error: errorData(error),
-                  })
-                }),
-              )
-            } else {
-              yield* prompt.cancel(input.sessionID)
-            }
-
-            // "claim" this session so any future events coming from
-            // the old workspace are ignored
-            yield* events.claim(input.sessionID, input.workspaceID ?? previous.projectID)
+                    status: error instanceof SyncHttpError ? error.status : 502,
+                      body: error instanceof SyncHttpError ? (error.body ?? "") : String(errorData(error)),
+                  }),
+                ),
+              ),
+            )
+          } else {
+            yield* prompt.cancel(input.sessionID)
           }
         }
 
@@ -652,6 +649,7 @@ const layer = Layer.effect(
         }
 
         if (input.workspaceID === null) {
+          if (previous) yield* events.claim(input.sessionID, previous.projectID)
           yield* session.setWorkspace({ sessionID: input.sessionID, workspaceID: undefined })
 
           return
@@ -668,6 +666,7 @@ const layer = Layer.effect(
         const target = yield* WorkspaceAdapterRuntime.target(space)
 
         if (target.type === "local") {
+          if (previous) yield* events.claim(input.sessionID, input.workspaceID ?? previous.projectID)
           yield* session.setWorkspace({ sessionID: input.sessionID, workspaceID: input.workspaceID })
 
           return
@@ -749,6 +748,7 @@ const layer = Layer.effect(
           })
         }
 
+        if (previous) yield* events.claim(input.sessionID, input.workspaceID ?? previous.projectID)
         yield* session.setWorkspace({ sessionID: input.sessionID, workspaceID: input.workspaceID })
       })
     })
