@@ -272,53 +272,67 @@ export const ReadTool = Tool.define<
       const raw: string[] = []
       const flags = { bytes: 0, tokens: 0, count: 0, cut: false, tokenCut: false, more: false, done: false }
 
-      // Note: prefer manual TextDecoder over Stream.decodeText — when the source stream
-      // ends without flushing, decodeText drops the final unterminated line. We also
-      // avoid Stream.runForEachWhile (it currently swallows the final unterminated
-      // line of the upstream splitLines pipeline) and use a tagged error to stop the
-      // upstream file stream as soon as the cap is reached.
+      // Manual streaming line accumulator. We do NOT rely on Stream.splitLines:
+      // in Effect 4.0.0-beta.83 it can deliver per-byte "lines" for streamed
+      // content (which corrupts line-based reads at offset>1). Instead we
+      // accumulate decoded chunks into a buffer and split on real '\n'
+      // ourselves, so every element of `raw` is a genuine full line.
+      let buffer = ""
+      const flushLine = (line: string): Effect.Effect<void, never, never> =>
+        Effect.gen(function* () {
+          if (flags.done) return
+          flags.count += 1
+          if (flags.count <= start) return
+
+          if (raw.length >= opts.limit) {
+            flags.more = true
+            return
+          }
+
+          const trimmed = line.length > MAX_LINE_LENGTH ? line.substring(0, MAX_LINE_LENGTH) + MAX_LINE_SUFFIX : line
+          const size = Buffer.byteLength(trimmed, "utf-8") + (raw.length > 0 ? 1 : 0)
+          // Token estimate: ~2 bytes/token is a conservative upper bound
+          // for code, so the budget cuts in ~coincidence with the byte cap
+          // on ASCII and strictly before it on token-dense content (CJK,
+          // minified, data) — which gets a PARTIAL-view footer instead of
+          // dumping a token bomb into the model's context.
+          const lineTokens = Math.max(1, Math.ceil(size / 2))
+          if (
+            opts.unbounded ||
+            (flags.bytes + size <= MAX_BYTES && flags.tokens + lineTokens <= MAX_TOKENS)
+          ) {
+            raw.push(trimmed)
+            flags.bytes += size
+            flags.tokens += lineTokens
+            return
+          }
+
+          flags.cut = true
+          flags.tokenCut = flags.bytes + size <= MAX_BYTES
+          flags.more = true
+          flags.done = true
+        })
+
       const decoder = new TextDecoder("utf-8")
       yield* fs.stream(filepath).pipe(
         Stream.map((bytes) => decoder.decode(bytes, { stream: true })),
-        Stream.splitLines,
-        Stream.runForEach((text) =>
+        Stream.runForEach((chunk) =>
           Effect.gen(function* () {
-            if (flags.done) return yield* new ReadStop()
-            flags.count += 1
-            if (flags.count <= start) return
-
-            if (raw.length >= opts.limit) {
-              flags.more = true
-              return
+            buffer += chunk
+            let nl: number
+            while ((nl = buffer.indexOf("\n")) !== -1) {
+              const line = buffer.slice(0, nl)
+              buffer = buffer.slice(nl + 1)
+              if (flags.done) return yield* new ReadStop()
+              yield* flushLine(line)
             }
-
-            const line = text.length > MAX_LINE_LENGTH ? text.substring(0, MAX_LINE_LENGTH) + MAX_LINE_SUFFIX : text
-            const size = Buffer.byteLength(line, "utf-8") + (raw.length > 0 ? 1 : 0)
-            // Token estimate: ~2 bytes/token is a conservative upper bound
-            // for code, so the budget cuts in ~coincidence with the byte cap
-            // on ASCII and strictly before it on token-dense content (CJK,
-            // minified, data) — which gets a PARTIAL-view footer instead of
-            // dumping a token bomb into the model's context.
-            const lineTokens = Math.max(1, Math.ceil(size / 2))
-            if (
-              opts.unbounded ||
-              (flags.bytes + size <= MAX_BYTES && flags.tokens + lineTokens <= MAX_TOKENS)
-            ) {
-              raw.push(line)
-              flags.bytes += size
-              flags.tokens += lineTokens
-              return
-            }
-
-            flags.cut = true
-            flags.tokenCut = flags.bytes + size <= MAX_BYTES
-            flags.more = true
-            flags.done = true
-            return yield* new ReadStop()
           }),
         ),
         Effect.catchTag("ReadStop", () => Effect.void),
       )
+      if (buffer.length > 0) {
+        yield* flushLine(buffer)
+      }
 
       return {
         raw,
@@ -551,9 +565,7 @@ export const ReadTool = Tool.define<
           `<symbol name="${resolved.name}" source="${source}">`,
           `<size>${symbolSize} lines</size>`,
           `<range>${resolved.start}-${resolved.end}</range>`,
-          `<content>\n`,
-          ...renderLines(part, rel + pageOffset + 1, params.sparse === true),
-          `\n`,
+          `<content>\n${renderLines(part, rel + pageOffset + 1, params.sparse === true)}\n`,
           `</content>`,
           "</symbol>",
         ].join("\n")
