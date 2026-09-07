@@ -21,8 +21,8 @@ Run self-tests with `BENCH_SELF_TEST=1 ./bench-hardcore.sh`. They prove malforme
 `bench-performance.sh` is separate from correctness corpus and harness. It creates deterministic 1MiB and 100MiB text fixtures only under `--corpus` (default `/tmp/opencode-read-performance-corpus`); `--large` adds 1GiB. It never writes correctness corpus.
 
 ```bash
-./bench-performance.sh <compiled-opencode-binary> --corpus /tmp/opencode-read-performance-corpus --out /tmp/opencode-read-performance-result
+./bench-performance.sh <compiled-opencode-binary> --runs 3 --corpus /tmp/opencode-read-performance-corpus --out /tmp/opencode-read-performance-result
 BENCH_PERFORMANCE_SELF_TEST=1 ./bench-performance.sh
 ```
 
-Rows are serial `default`, `explicit_small_slice`, and `tail_offset_minus_5` calls. JSON/Markdown record `process_elapsed_ms` (startup included), envelope `operation_ms`, peak RSS bytes, OS/CPU/runtime/binary identity, and fixture hashes. macOS parses `/usr/bin/time -l`; Linux parses `/usr/bin/time -v` kbytes into bytes; other OSes fail `unsupported-platform`. 1GiB is opt-in: require at least 1GiB free disk plus overhead; do not use during active workload.
+`--runs N` defaults to 3 and requires positive integer. Rows are serial `default`, `explicit_small_slice`, and `tail_offset_minus_5` calls. JSON/Markdown record raw per-run rows plus min/avg/p50/p95 for `process_elapsed_ms` (startup included), envelope `operation_ms`, and peak RSS bytes. With one run, p50/p95 are `n/a`. Missing/duplicate cell rows, invalid metrics, or missing modes fail before report. macOS parses `/usr/bin/time -l`; Linux parses `/usr/bin/time -v` kbytes into bytes; other OSes fail `unsupported-platform`. 1GiB is opt-in: require at least 1GiB free disk plus overhead; do not use during active workload.
