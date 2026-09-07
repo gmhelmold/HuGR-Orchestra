@@ -311,6 +311,13 @@ describe("tool.read truncation", () => {
     expect(decode({ filePath: "/a", limit: 0 })._tag).toBe("Failure")
   })
 
+  test("accepts numeric strings for offset and limit", () => {
+    const decode = Schema.decodeUnknownSync(Parameters)
+    expect(decode({ filePath: "/a", offset: "-20", limit: "10" })).toMatchObject({ offset: -20, limit: 10 })
+    expect(() => decode({ filePath: "/a", offset: "0" })).toThrow()
+    expect(() => decode({ filePath: "/a", limit: "1.5" })).toThrow()
+  })
+
   it.instance("truncates large file by bytes and sets truncated metadata", () =>
     Effect.gen(function* () {
       const test = yield* TestInstance

@@ -18,14 +18,18 @@ const SAMPLE_BYTES = 4096
 const CHUNK_BYTES = 64 * 1024
 const SUPPORTED_IMAGE_MIMES = new Set(["image/jpeg", "image/png", "image/gif", "image/webp"])
 const SignedNonZeroInt = Schema.Union([PositiveInt, Schema.Int.check(Schema.isLessThan(0))])
+const NumericInput = <A, I>(schema: Schema.Schema<A, I>) =>
+  Schema.Union([schema, Schema.NumberFromString.pipe(Schema.decodeTo(schema))])
 
 export const Parameters = Schema.Struct({
   filePath: Schema.String.annotate({ description: "The absolute path to the file or directory to read" }),
-  offset: Schema.optional(SignedNonZeroInt).annotate({
+  offset: Schema.optional(NumericInput(SignedNonZeroInt)).annotate({
     description:
       "Line number to start reading from (1-indexed). Negative values read from end (for example, -3 reads last 3 lines).",
   }),
-  limit: Schema.optional(PositiveInt).annotate({ description: "Maximum number of lines to read (defaults to 2000)" }),
+  limit: Schema.optional(NumericInput(PositiveInt)).annotate({
+    description: "Maximum number of lines to read (defaults to 2000)",
+  }),
 })
 
 type Display =
