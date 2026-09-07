@@ -15,6 +15,19 @@ Modes: default, explicit slice, tail, oversized default, oversized explicit rang
 
 `output_chars` means JavaScript string character count, not bytes or tokens. `elapsed_ms` includes CLI startup. p50/p95 only shown where sample size >=2.
 
+## Model Read Agent A/B
+
+`bench-read-agent.sh` compares two compiled binaries through real `opencode run --format json` sessions. Model IDs must be explicit `provider/model` values. It never embeds credentials; normal provider configuration supplies them.
+
+```bash
+./bench-read-agent.sh --baseline /path/to/baseline --candidate /path/to/candidate --models openai/gpt-5.6-luna --runs 1 --out /tmp/read-agent-ab
+./bench-read-agent.sh --self-test
+```
+
+Corpus is deterministic and written only to `<out>/corpus`: 20,000-decoy tail marker, middle marker, and long-line marker. `manifest.json` stores each fixture SHA-256 plus exact task answer. Every binary/model/task/run saves raw JSON events under `<out>/raw-events`; `trials.jsonl`, `results.json`, and `report.md` contain parsed evidence and paired rows.
+
+Parser accepts current CLI event schema only (`tool_use`, `text`, `step_start`, `step_finish`, `error`). Malformed or unsupported streams, process/model errors, missing final response, no `read` call, missing exact marker, duplicate tool result, and incomplete pairs fail closed. Tool calls include inputs and actual output/error results. Retry telemetry is `N/A` because current CLI JSON emits no retry event; token input/output and cost are `N/A` unless `step_finish` exposes them. `N/A` never means zero.
+
 Run self-tests with `BENCH_SELF_TEST=1 ./bench-hardcore.sh`. They prove malformed envelope, zero rows, oracle mismatch, exact expected-error fragment mismatch, unexpected success/error outcomes fail closed. Out-of-range offsets are outside this benchmark scope. No symbol, search, depth, sparse, token, byte, or accuracy claim. No LSP oracle. Debug params JSON-only. Debug runner removes throwaway session in finalizer. Report records expected/observed outcomes, test count/cell completeness, runtime platform/Python/binary, and states missing CPU/memory/disk/load controls.
 ## Performance
 
