@@ -1,20 +1,24 @@
 #!/usr/bin/env bash
 # Isolated latency and RSS harness; does not use correctness corpus.
 set -euo pipefail
-BIN="${1:-}"
-shift $(( $# > 0 ? 1 : 0 ))
+BIN=""
 CORPUS="/tmp/opencode-read-performance-corpus"
 OUT="/tmp/opencode-read-performance-result"
 LARGE=0
 RUNS=3
+SIZES="1MiB,100MiB"
+REPORT_ONLY=0
 valid_runs() { [[ "$1" =~ ^[1-9][0-9]*$ ]]; }
+if [[ "${1:-}" != --* && -n "${1:-}" ]]; then BIN="$1"; shift; fi
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --corpus) CORPUS="${2:-}"; shift 2 ;;
     --out) OUT="${2:-}"; shift 2 ;;
     --runs) RUNS="${2:-}"; shift 2 ;;
+    --sizes) SIZES="${2:-}"; shift 2 ;;
     --large) LARGE=1; shift ;;
-    *) echo "usage: $0 <compiled-binary> [--corpus DIR] [--out DIR] [--runs N] [--large]" >&2; exit 2 ;;
+    --report-only) REPORT_ONLY=1; shift ;;
+    *) echo "usage: $0 <compiled-binary> [--corpus DIR] [--out DIR] [--runs N] [--sizes CSV] [--large] | $0 --report-only [--corpus DIR] [--out DIR] [--runs N] [--sizes CSV] [--large]" >&2; exit 2 ;;
   esac
 done
 valid_runs "$RUNS" || { echo "runs must be positive integer" >&2; exit 2; }
@@ -24,6 +28,11 @@ if [[ "${BENCH_PERFORMANCE_SELF_TEST:-}" == 1 ]]; then
   python3 - <<'PY'
 import re
 import statistics
+def sizes(value, large):
+    allowed = {"1MiB", "100MiB", "1GiB"}; result = value.split(",")
+    if not result or any(item not in allowed for item in result) or len(set(result)) != len(result): raise ValueError("invalid sizes")
+    if "1GiB" in result and not large: raise ValueError("1GiB requires --large")
+    return result
 def rss(text, os_name):
     if os_name == "Darwin":
         match = re.search(r"^\s*(\d+)\s+maximum resident set size\s*$", text, re.M)
@@ -72,16 +81,35 @@ for rows in (good[:-1], good + [good[0]], [{**good[0], "process_elapsed_ms": Non
     except ValueError: continue
     raise AssertionError("row validator did not fail closed")
 if summary([1])["p95"] is not None: raise AssertionError("N=1 percentile")
+def persisted(text):
+    rows = []
+    for number, line in enumerate(text.splitlines(), 1):
+        if not line: raise ValueError(f"blank raw row: {number}")
+        try: row = json.loads(line)
+        except json.JSONDecodeError as error: raise ValueError(f"malformed raw row {number}: {error}")
+        if not isinstance(row, dict): raise ValueError(f"raw row {number} is not object")
+        rows.append(row)
+    return rows
+if persisted('{"x":1}\n') != [{"x": 1}]: raise AssertionError("persisted row parser")
+for value in ("\n", "not-json\n", "[]\n"):
+    try: persisted(value)
+    except ValueError: continue
+    raise AssertionError("persisted row parser did not fail closed")
+if sizes("1MiB,100MiB", False) != ["1MiB", "100MiB"]: raise AssertionError("size parser")
+for value, large in (("1MiB,1MiB", False), ("2MiB", False), ("1GiB", False)):
+    try: sizes(value, large)
+    except ValueError: continue
+    raise AssertionError("size parser did not fail closed")
 print("bench-performance self-test: pass")
 PY
   exit 0
 fi
-[[ -n "$BIN" && -x "$BIN" ]] || { echo "missing executable binary: $BIN" >&2; exit 2; }
+[[ "$REPORT_ONLY" == 1 || ( -n "$BIN" && -x "$BIN" ) ]] || { echo "missing executable binary: $BIN" >&2; exit 2; }
 [[ -n "$CORPUS" && "$CORPUS" != / ]] || { echo "invalid performance corpus: $CORPUS" >&2; exit 2; }
 mkdir -p "$CORPUS" "$OUT"
 CORPUS="$(cd "$CORPUS" && pwd -P)"
 OUT="$(cd "$OUT" && pwd -P)"
-export BIN CORPUS OUT LARGE RUNS
+export BIN CORPUS OUT LARGE RUNS SIZES REPORT_ONLY
 python3 - <<'PY'
 import hashlib, json, os, platform, re, statistics, subprocess, sys, time
 from pathlib import Path
@@ -129,30 +157,57 @@ def stats(values):
     ordered = sorted(values); result = {"min": ordered[0], "avg": statistics.mean(ordered), "p50": None, "p95": None}
     if len(ordered) >= 2: result.update(p50=ordered[(len(ordered)-1)//2], p95=ordered[((len(ordered)-1)*95)//100])
     return result
+def parse_sizes(value, large):
+    sizes = value.split(","); allowed = {"1MiB": 1 << 20, "100MiB": 100 << 20, "1GiB": 1 << 30}
+    if not sizes or any(size not in allowed for size in sizes) or len(set(sizes)) != len(sizes): fail("invalid sizes; supported: 1MiB,100MiB,1GiB")
+    if "1GiB" in sizes and not large: fail("1GiB requires both --large and --sizes 1GiB")
+    return [(size, allowed[size]) for size in sizes]
+def read_rows(path):
+    if not path.is_file(): fail(f"raw evidence missing: {path}")
+    rows = []
+    for number, line in enumerate(path.open(), 1):
+        if not line.strip(): fail(f"blank raw row: {number}")
+        try: row = json.loads(line)
+        except json.JSONDecodeError as error: fail(f"malformed raw row {number}: {error}")
+        if not isinstance(row, dict): fail(f"raw row {number} is not object")
+        rows.append(row)
+    return rows
 
 os_name = platform.system()
 if os_name not in {"Darwin", "Linux"}: raise SystemExit(f"unsupported-platform: {os_name}; supported: Darwin, Linux")
 corpus, out, binary = Path(os.environ["CORPUS"]), Path(os.environ["OUT"]), Path(os.environ["BIN"])
 runs = int(os.environ["RUNS"])
-fixtures = [write(corpus / "read-1MiB.txt", 1 << 20), write(corpus / "read-100MiB.txt", 100 << 20)]
-if os.environ["LARGE"] == "1": fixtures.append(write(corpus / "read-1GiB.txt", 1 << 30))
-(corpus / "manifest.json").write_text(json.dumps({"fixtures": fixtures}, indent=2) + "\n")
-rows = []
-for fixture in fixtures:
-    path = corpus / fixture["file"]
-    if hashlib.sha256(path.read_bytes()).hexdigest() != fixture["sha256"]: raise SystemExit(f"invalid performance fixture: {path}")
-    for mode, extra in (("default", {}), ("explicit_small_slice", {"offset": 2, "limit": 3}), ("tail_offset_minus_5", {"offset": -5})):
-        params = {"filePath": str(path), **extra}
-        for run in range(runs):
-            command = ["/usr/bin/time", "-l" if os_name == "Darwin" else "-v", str(binary), "debug", "read", "--params", json.dumps(params)]
-            before = time.monotonic_ns(); proc = subprocess.run(command, text=True, capture_output=True)
-            if proc.returncode != 0: raise SystemExit(f"read process failed {fixture['file']}/{mode}/{run}: {proc.stderr.strip()}")
-            try: result, peak = envelope(proc.stdout, params), rss(proc.stderr, os_name)
-            except ValueError as error: raise SystemExit(f"invalid result {fixture['file']}/{mode}/{run}: {error}")
-            rows.append({"file": fixture["file"], "mode": mode, "run": run, "process_elapsed_ms": (time.monotonic_ns() - before) / 1_000_000, "operation_ms": result["ms"], "peak_rss_bytes": peak})
+selected = parse_sizes(os.environ["SIZES"], os.environ["LARGE"] == "1")
+raw_path = out / "raw.jsonl"
+if os.environ["REPORT_ONLY"] == "1":
+    try: fixtures = json.loads((corpus / "manifest.json").read_text())["fixtures"]
+    except (OSError, json.JSONDecodeError, KeyError, TypeError) as error: raise SystemExit(f"invalid performance manifest: {error}")
+    if [fixture.get("file") for fixture in fixtures] != [f"read-{size}.txt" for size, _ in selected]: raise SystemExit("manifest does not match requested size plan")
+else:
+    fixtures = [write(corpus / f"read-{size}.txt", bytes) for size, bytes in selected]
+    (corpus / "manifest.json").write_text(json.dumps({"fixtures": fixtures}, indent=2) + "\n")
+    raw_path.write_text("")  # Deliberate new-run truncation; interrupted rows remain afterwards.
+    expected_rows = len(fixtures) * 3 * runs; complete = 0
+    with raw_path.open("a") as raw:
+        for fixture in fixtures:
+            path = corpus / fixture["file"]
+            if hashlib.sha256(path.read_bytes()).hexdigest() != fixture["sha256"]: raise SystemExit(f"invalid performance fixture: {path}")
+            for mode, extra in (("default", {}), ("explicit_small_slice", {"offset": 2, "limit": 3}), ("tail_offset_minus_5", {"offset": -5})):
+                params = {"filePath": str(path), **extra}
+                for run in range(runs):
+                    command = ["/usr/bin/time", "-l" if os_name == "Darwin" else "-v", str(binary), "debug", "read", "--params", json.dumps(params)]
+                    before = time.monotonic_ns(); proc = subprocess.run(command, text=True, capture_output=True)
+                    if proc.returncode != 0: raise SystemExit(f"read process failed {fixture['file']}/{mode}/{run}: {proc.stderr.strip()}")
+                    try: result, peak = envelope(proc.stdout, params), rss(proc.stderr, os_name)
+                    except ValueError as error: raise SystemExit(f"invalid result {fixture['file']}/{mode}/{run}: {error}")
+                    row = {"file": fixture["file"], "mode": mode, "run": run, "process_elapsed_ms": (time.monotonic_ns() - before) / 1_000_000, "operation_ms": result["ms"], "peak_rss_bytes": peak}
+                    raw.write(json.dumps(row) + "\n"); raw.flush(); os.fsync(raw.fileno())
+                    complete += 1; print(f"row {complete}/{expected_rows} {fixture['file']} {mode} run={run}", flush=True)
+try: rows = read_rows(raw_path)
+except ValueError as error: raise SystemExit(str(error))
 try: validate(rows, fixtures, runs)
 except ValueError as error: raise SystemExit(str(error))
-identity = {"path": str(binary.resolve()), "bytes": binary.stat().st_size, "sha256": hashlib.sha256(binary.read_bytes()).hexdigest()}
+identity = {"path": str(binary.resolve()), "bytes": binary.stat().st_size, "sha256": hashlib.sha256(binary.read_bytes()).hexdigest()} if os.environ["REPORT_ONLY"] != "1" else {"path": "unknown (report-only)"}
 system = {"os": platform.platform(), "cpu": platform.processor() or platform.machine(), "runtime": sys.version.split()[0], "binary": identity, "rss_tool": "/usr/bin/time -l" if os_name == "Darwin" else "/usr/bin/time -v", "fixtures": fixtures}
 cells = {}
 for fixture in fixtures:
