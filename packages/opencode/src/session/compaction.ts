@@ -495,8 +495,9 @@ const layer = Layer.effect(
         }
 
         if (!replay) {
-          const info = yield* provider.getProvider(userMessage.model.providerID)
+          const info = yield* provider.getProvider(userMessage.model.providerID).pipe(Effect.option)
           if (
+            info._tag === "Some" &&
             (yield* plugin.trigger(
               "experimental.compaction.autocontinue",
               {
@@ -506,9 +507,9 @@ const layer = Layer.effect(
                   .getModel(userMessage.model.providerID, userMessage.model.modelID)
                   .pipe(Effect.orDie),
                 provider: {
-                  source: info.source,
-                  info,
-                  options: info.options,
+                  source: info.value.source,
+                  info: info.value,
+                  options: info.value.options,
                 },
                 message: userMessage,
                 overflow: input.overflow === true,
