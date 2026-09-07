@@ -1,130 +1,59 @@
 #!/usr/bin/env bash
-# Hardcore benchmark for the read tool.
-#
-# Measures per-file x per-mode latency AND token economics, cold vs warm LSP,
-# and cross-mode deltas. Emits:
-#   - raw CSV of every envelope
-#   - consolidated results JSON
-#   - human-readable report (markdown)
-#
-# Usage:  ./bench-hardcore.sh <binary> [corpus_dir] [warm_runs] [out_dir]
-#   binary    path to `opencode` binary (default: dist/opencode-darwin-x64/bin/opencode)
-#   corpus    dir of target *.js files (default: /tmp/bench-corpus)
-#   warm_runs jobs per warm process (default 9)
-#   out_dir   where results land (default /tmp/bench-result)
+# Correctness-first benchmark for filePath/offset/limit read modes.
+# Usage: ./bench-hardcore.sh <binary> [corpus_dir] [runs] [out_dir]
 set -euo pipefail
-
-BIN="${1:-}"
+BIN="${1:?usage: $0 <binary> [corpus_dir] [runs] [out_dir]}"
 CORPUS="${2:-/tmp/bench-corpus}"
-WARM="${3:-9}"
+RUNS="${3:-5}"
 OUT="${4:-/tmp/bench-result}"
-
-if [[ -z "$BIN" || ! -x "$BIN" ]]; then
-  BIN="$(cd "$(dirname "$0")/.." && echo "$PWD")/dist/opencode-darwin-x64/bin/opencode"
-  echo "using default binary: $BIN" >&2
-fi
-if [[ ! -d "$CORPUS" ]]; then
-  echo "corpus missing: $CORPUS (run bench-corpus.sh first)" >&2
-  exit 2
-fi
+[[ -x "$BIN" ]] || { echo "binary not executable: $BIN" >&2; exit 2; }
+[[ -f "$CORPUS/manifest.json" ]] || { echo "corpus manifest missing: $CORPUS/manifest.json (run bench-corpus.sh)" >&2; exit 2; }
+[[ "$RUNS" =~ ^[1-9][0-9]*$ ]] || { echo "runs must be positive integer" >&2; exit 2; }
 mkdir -p "$OUT"
-RAW="$OUT/raw.csv"
-RES="$OUT/results.json"
-REP="$OUT/report.md"
-
-: > "$RAW"
-
-FILES=("$CORPUS"/*.js)
-RUNS_PER_CELL=$((WARM + 1)) # 1 cold + N warm, same process for warm
-
-cold_job() { # file mode -> params JSON
-  local file="$1" mode="$2"
-  case "$mode" in
-    whole)  echo "{\"filePath\":\"$file\"}" ;;
-    symbol) echo "{\"filePath\":\"$file\",\"symbol\":\"targetFunc\"}" ;;
-    search) echo "{\"filePath\":\"$file\",\"search\":\"targetFunc\"}" ;;
-    tail)   echo "{\"filePath\":\"$file\",\"offset\":-5}" ;;
-    depth)  echo "{\"filePath\":\"$file\",\"symbol\":\"targetFunc\",\"depth\":1}" ;;
-  esac
-}
-
-# Build the warm params array: WARM identical jobs, comma-joined.
-warm_array() {
-  local file="$1" mode="$2" jobs=() j
-  for ((j = 0; j < WARM; j++)); do
-    jobs+=("$(cold_job "$file" "$mode")")
-  done
-  local IFS=,
-  echo "[${jobs[*]}]"
-}
-
-run_process() { # file mode phase (cold|warm) -> envelopes on stdout
-  local file="$1" mode="$2" phase="$3"
-  if [[ "$phase" == "cold" ]]; then
-    "$BIN" debug read --meta-only --params "$(cold_job "$file" "$mode")" 2>/dev/null
-  else
-    "$BIN" debug read --meta-only --params "$(warm_array "$file" "$mode")" 2>/dev/null
-  fi
-}
-
-declare -A SLOT
-slot_metric() { # file mode phase metric
-  local file="$1" mode="$2" phase="$3" metric="$4"
-  printf '%s' "${SLOT["$(basename "$file")|$mode|$phase|$metric"]}"
-}
-
-FILE_LIST=""
-for FILE in "${FILES[@]}"; do
-  b="$(basename "$FILE")"
-  total_lines="$(wc -l < "$FILE" | tr -d ' ')"
-  FILE_LIST+="$b:$total_lines "
-  for MODE in whole symbol search tail depth; do
-    for PHASE in cold warm; do
-      ENVS="$(run_process "$FILE" "$MODE" "$PHASE")"
-      # parse into raw.csv lines tagged with file|mode|phase
-      printf '%s' "$ENVS" | python3 -c '
-import json, sys
-file, mode, phase = sys.argv[1], sys.argv[2], sys.argv[3]
-tlines = int(sys.argv[4])
-total_chars = 0
-ms_list, chars_list, size_list, lr_list, saved_list, src_list, ok_count = [], [], [], [], [], [], 0
-for line in sys.stdin:
-    line = line.strip()
-    if not line: continue
-    try: e = json.loads(line)
-    except Exception: continue
-    ri = e.get("run_index", 0)
-    ms = e.get("ms", -1)
-    ok = e.get("ok", True)
-    meta = e.get("metadata") or {}
-    out = e.get("output") or ""
-    ochars = e.get("output_chars", len(out))
-    src = meta.get("source", "")
-    size = meta.get("size", 0)
-    lr = meta.get("lines_read", 0)
-    saved = meta.get("saved", 0)
-    print(f"{file}|{mode}|{phase}|{ri}|{ms}|{ochars}|{size}|{lr}|{saved}|{src}|{int(ok)}", file=sys.stderr)
-    if ok:
-        ms_list.append(ms); chars_list.append(ochars); size_list.append(size)
-        lr_list.append(lr); saved_list.append(saved); src_list.append(src); ok_count += 1
-        total_chars += ochars
-if not ok_count:
-    print(f"NO_OK {file} {mode} {phase}", file=sys.stderr)
-' "$b" "$MODE" "$PHASE" "$total_lines" 2>>"$RAW"
-
-      # Aggregate per-slot metrics into SLOT via python (single pass over RAW tail)
-      # Simpler: recompute aggregates from RAW with awk/python after each slot.
-      SLOT["$b|$MODE|$PHASE|rows"]="$(rg -c "^$b\|$MODE\|$PHASE\|" "$RAW" || true)"
-    done
-  done
-done
-
-echo "raw rows: $(wc -l < "$RAW")"
-
-# ---- aggregate into results.json + report ----
-python3 "$(dirname "$0")/bench-report.py" "$RAW" "$RES" "$REP" "$FILE_LIST"
-
-echo "=== saved artifacts ==="
-echo "raw:   $RAW"
-echo "json:  $RES"
-echo "report:$REP"
+export BIN CORPUS RUNS OUT
+# One process per invocation. Serial avoids SQLite database-locked artifacts.
+python3 - <<'PY'
+import hashlib, json, os, platform, subprocess, sys, time
+from pathlib import Path
+bin_path, corpus, runs, out = os.environ["BIN"], Path(os.environ["CORPUS"]), int(os.environ["RUNS"]), Path(os.environ["OUT"])
+manifest = json.loads((corpus / "manifest.json").read_text())
+for fixture in manifest.get("fixtures", []):
+    path = corpus / fixture["file"]
+    if not path.is_file() or hashlib.sha256(path.read_bytes()).hexdigest() != fixture["sha256"]: raise SystemExit(f"invalid corpus fixture: {path}")
+cases = [("default", "lf-unicode.txt", {}), ("explicit_slice", "lf-unicode.txt", {"offset": 2, "limit": 2}), ("tail", "lf-unicode.txt", {"offset": -2}), ("oversized_default", "dense-large.txt", {}), ("oversized_explicit_range", "dense-large.txt", {"offset": 2500, "limit": 1000})]
+def oracle(path, params):
+    lines = path.read_text(encoding="utf-8").splitlines(); offset, limit = params.get("offset", 1), params.get("limit", 2000)
+    start = max(1, len(lines) + 1 + offset) if offset < 0 else offset
+    return [(start + i, line) for i, line in enumerate(lines[start - 1:start - 1 + limit])]
+def parsed(output):
+    if not isinstance(output, str) or "<content>\n" not in output: raise ValueError("missing content envelope")
+    body = output.split("<content>\n", 1)[1].split("\n\n(", 1)[0]; got = []
+    for line in body.splitlines():
+        number, sep, text = line.partition(": ")
+        if not sep or not number.isdecimal(): raise ValueError(f"malformed numbered content line: {line!r}")
+        got.append((int(number), text))
+    if not got: raise ValueError("no numbered content rows")
+    return got
+rows = []
+for mode, name, extra in cases:
+    path, want = corpus / name, oracle(corpus / name, extra)
+    if not want: raise SystemExit(f"oracle produced no rows: {mode}")
+    for run in range(runs):
+        params = {"filePath": str(path), **extra}; before = time.monotonic_ns()
+        proc = subprocess.run([bin_path, "debug", "read", "--params", json.dumps(params)], text=True, capture_output=True)
+        elapsed_ms = (time.monotonic_ns() - before) / 1_000_000
+        if proc.returncode != 0: raise SystemExit(f"unsuccessful run {name}/{mode}/{run}: {proc.stderr.strip()}")
+        lines = [line for line in proc.stdout.splitlines() if line.strip()]
+        if len(lines) != 1: raise SystemExit(f"invalid envelope count {name}/{mode}/{run}: {len(lines)}")
+        try: envelope = json.loads(lines[0])
+        except json.JSONDecodeError as err: raise SystemExit(f"malformed JSON envelope {name}/{mode}/{run}: {err}")
+        if envelope.get("tool") != "read" or envelope.get("params") != params or "output" not in envelope: raise SystemExit(f"invalid read envelope {name}/{mode}/{run}")
+        try: actual = parsed(envelope["output"])
+        except ValueError as err: raise SystemExit(f"invalid read output {name}/{mode}/{run}: {err}")
+        if actual != want: raise SystemExit(f"oracle mismatch {name}/{mode}/{run}: expected {want[:2]!r}, got {actual[:2]!r}")
+        rows.append({"file": name, "mode": mode, "run": run, "elapsed_ms": elapsed_ms, "output_chars": len(envelope["output"]), "range": [actual[0][0], actual[-1][0]]})
+(out / "raw.jsonl").write_text("".join(json.dumps(row, ensure_ascii=False) + "\n" for row in rows), encoding="utf-8")
+(out / "expected.json").write_text(json.dumps({"runs_per_cell": runs, "cases": [{"file": n, "mode": m} for m, n, _ in cases]}, indent=2) + "\n")
+(out / "system.json").write_text(json.dumps({"platform": platform.platform(), "python": sys.version.split()[0], "binary": bin_path}, indent=2) + "\n")
+PY
+python3 "$(dirname "$0")/bench-report.py" "$OUT/raw.jsonl" "$OUT/expected.json" "$OUT/system.json" "$OUT/results.json" "$OUT/report.md"

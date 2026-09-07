@@ -14,6 +14,7 @@ export const debugRead = (args: { params?: string; metaOnly?: boolean }): Effect
   // instruction resolution and metadata callbacks behave like a real turn.
   const sessionSvc = yield* Session.Service
   const session = yield* sessionSvc.create({ title: "Debug read benchmark" })
+  yield* Effect.addFinalizer(() => sessionSvc.remove(session.id).pipe(Effect.catchCause(() => Effect.void)))
   const messageID = MessageID.ascending()
   const ctx: Tool.Context = {
     sessionID: session.id,
@@ -87,15 +88,7 @@ function parseParams(input?: string) {
       return e
     }
   })
-  if (jsonError !== undefined) {
-    try {
-      parsed = new Function(`return (${trimmed})`)()
-    } catch (evalError) {
-      throw new Error(
-        `Failed to parse params. Use JSON or a JS object literal. JSON error: ${String(jsonError)}. Eval error: ${String(evalError)}.`,
-      )
-    }
-  }
+  if (jsonError !== undefined) throw new Error(`Failed to parse params as JSON: ${String(jsonError)}.`)
   if (!parsed || (typeof parsed !== "object" && !Array.isArray(parsed))) {
     throw new Error("Tool params must be an object or an array of objects.")
   }
