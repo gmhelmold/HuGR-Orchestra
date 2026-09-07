@@ -125,7 +125,8 @@ export interface PublishOptions {
    * When false, the durable event is projected locally but NOT persisted to the
    * event table or sequence. The payload is still notified to in-process
    * listeners (SSE, UI) but carries no `durable` envelope, so cross-instance
-   * sync does not observe it. Defaults to true (full event sourcing).
+   * sync does not observe it. Cannot be combined with `commit`. Defaults to
+   * true (full event sourcing).
    */
   readonly persist?: boolean
 }
@@ -415,6 +416,13 @@ export const layerWith = (options?: LayerOptions) =>
         persist = true,
       ) {
         return Effect.gen(function* () {
+          if (!persist && commit)
+            return yield* Effect.die(
+              new InvalidDurableEventError({
+                type: event.type,
+                message: "Local commit hooks cannot be combined with persist:false",
+              }),
+            )
           if (!definition?.durable && commit)
             return yield* Effect.die(
               new InvalidDurableEventError({
@@ -686,6 +694,15 @@ const layer = layerWith()
 export const node = makeGlobalNode({ service: Service, layer: layer, deps: [Database.node] })
 
 export const SNAPSHOT_TYPES = ["message.updated", "message.part.updated"] as const
+const SNAPSHOT_COMPACTION_MARKER = "event_snapshot_compaction"
+
+export const hasCompactedSnapshotEvents = Effect.fn("EventV2.hasCompactedSnapshotEvents")(function* (
+  db: Database.Interface["db"],
+) {
+  return Boolean(
+    yield* db.get(sql`SELECT name FROM data_migration WHERE name = ${SNAPSHOT_COMPACTION_MARKER}`).pipe(Effect.orDie),
+  )
+})
 
 /**
  * Compact snapshot-like durable events, keeping only the latest occurrence per
@@ -709,6 +726,10 @@ export const SNAPSHOT_TYPES = ["message.updated", "message.part.updated"] as con
 export const compactSnapshotEvents = Effect.fn("EventV2.compactSnapshotEvents")(function* (
   db: Database.Interface["db"],
 ) {
+  if (yield* hasCompactedSnapshotEvents(db))
+    return yield* Effect.die(
+      new Error("Snapshot compaction already ran; refusing to compact a database that may have sync sequence gaps."),
+    )
   const snapshotTypes = SNAPSHOT_TYPES.map((type) => versionedType(type, 1))
   const stats = yield* db
     .select({
@@ -760,8 +781,13 @@ export const compactSnapshotEvents = Effect.fn("EventV2.compactSnapshotEvents")(
     .where(inArray(EventTable.type, snapshotTypes))
     .get()
     .pipe(Effect.orDie)
-  return {
-    removed: (stats?.rows ?? 0) - (remaining?.rows ?? 0),
-    bytes: (stats?.bytes ?? 0) - (remaining?.bytes ?? 0),
-  }
+  const removed = (stats?.rows ?? 0) - (remaining?.rows ?? 0)
+  const bytes = (stats?.bytes ?? 0) - (remaining?.bytes ?? 0)
+  if (removed > 0)
+    yield* db
+      .run(
+        sql`INSERT OR REPLACE INTO data_migration (name, time_completed) VALUES (${SNAPSHOT_COMPACTION_MARKER}, ${Date.now()})`,
+      )
+      .pipe(Effect.orDie)
+  return { removed, bytes }
 })

@@ -40,6 +40,23 @@ test.serial("reconnects after MCP child exits", async () => {
   }
 })
 
+test.serial("closes a child after the normal tool timeout", async () => {
+  await using tmp = await tmpdir()
+  const marker = path.join(tmp.path, "timed-out")
+  const client = new HugrComposerClient(process.cwd(), process.cwd(), {
+    command: process.execPath,
+    args: [server, "hang-call", "exit-after-call", marker],
+    timeout: 25,
+    hardTimeout: 250,
+  })
+  try {
+    await expect(client.callTool("test", {}, new AbortController().signal)).rejects.toThrow()
+    await waitForFile(marker)
+  } finally {
+    await client.close()
+  }
+})
+
 async function waitForFile(file: string) {
   for (let attempt = 0; attempt < 100; attempt++) {
     if (

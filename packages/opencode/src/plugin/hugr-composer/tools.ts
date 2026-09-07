@@ -1,5 +1,5 @@
 import path from "node:path"
-import { realpath } from "node:fs/promises"
+import { lstat, realpath } from "node:fs/promises"
 import { tool, type ToolContext } from "@opencode-ai/plugin"
 import type { HugrComposerClient } from "./client"
 
@@ -149,6 +149,11 @@ async function resolveOutputDirectory(value: string, context: Pick<ToolContext, 
 }
 
 async function resolvePhysicalPath(value: string): Promise<string> {
+  const stats = await lstat(value).catch((error) => {
+    if (isMissingPath(error)) return undefined
+    throw error
+  })
+  if (stats?.isSymbolicLink()) throw new Error(`output_dir cannot contain symlinks: ${value}`)
   const physical = await realpath(value).catch((error) => {
     if (isMissingPath(error)) return undefined
     throw error

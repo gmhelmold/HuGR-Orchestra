@@ -41,6 +41,7 @@ function handle(request: Request) {
     return
   }
   if (request.method !== "tools/call") return
+  if (process.argv.includes("hang-call")) return
   calls += 1
   write({ jsonrpc: "2.0", id: request.id, result: { content: [{ type: "text", text: `call-${calls}` }] } })
   if (exitMarker) setImmediate(() => process.exit(0))

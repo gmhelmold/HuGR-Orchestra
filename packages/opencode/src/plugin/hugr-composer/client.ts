@@ -9,6 +9,13 @@ import { withTimeout } from "@/util/timeout"
 const DEFAULT_TIMEOUT = 30_000
 const MAX_CALL_TIMEOUT = 5 * 60_000
 
+type ComposerCommand = {
+  command: string
+  args?: string[]
+  timeout?: number
+  hardTimeout?: number
+}
+
 export class HugrComposerClient {
   #client: Client | undefined
   #connecting: Promise<Client> | undefined
@@ -18,13 +25,17 @@ export class HugrComposerClient {
   readonly #worktree: string
   readonly #command: string | undefined
   readonly #args: string[]
+  readonly #timeout: number
+  readonly #hardTimeout: number
 
-  constructor(directory: string, worktree?: string, command?: { command: string; args?: string[] }) {
+  constructor(directory: string, worktree?: string, command?: ComposerCommand) {
     this.#directory = directory
     this.#worktree = worktree ?? directory
-    if (command && !path.isAbsolute(command.command)) throw new Error("HuGR Composer test command must be absolute")
+    if (command && !path.isAbsolute(command.command)) throw new Error("HuGR Composer command must be absolute")
     this.#command = command?.command
     this.#args = command?.args ?? []
+    this.#timeout = command?.timeout ?? DEFAULT_TIMEOUT
+    this.#hardTimeout = command?.hardTimeout ?? MAX_CALL_TIMEOUT
   }
 
   async callTool(
@@ -46,24 +57,30 @@ export class HugrComposerClient {
     if (signal.aborted) throw signal.reason ?? new Error("HuGR Composer connection aborted")
     const client = await withAbort(this.#getClient(), signal, "HuGR Composer connection aborted", () => this.close())
     const result = await withTimeout(
-      client.callTool({ name, arguments: arguments_ }, CallToolResultSchema, {
-        resetTimeoutOnProgress: true,
+      withAbort(
+        client.callTool({ name, arguments: arguments_ }, CallToolResultSchema, {
+          resetTimeoutOnProgress: true,
+          signal,
+          timeout: this.#timeout,
+          onprogress: () => {},
+        }),
         signal,
-        timeout: DEFAULT_TIMEOUT,
-        onprogress: () => {},
-      }),
-      MAX_CALL_TIMEOUT,
+        "HuGR Composer call aborted",
+        () => this.close(),
+      ),
+      this.#hardTimeout,
       "HuGR Composer call exceeded hard deadline",
-    ).catch(async (error) => {
-      if (isHardDeadline(error)) {
+    )
+      .catch(async (error) => {
+        if (!retry || !isConnectionClosed(error)) throw error
+        if (this.#client === client) this.#client = undefined
+        await client.close().catch(() => undefined)
+        return this.#callTool(name, arguments_, signal, false)
+      })
+      .catch(async (error) => {
         await this.close()
         throw error
-      }
-      if (!retry || !isConnectionClosed(error)) throw error
-      if (this.#client === client) this.#client = undefined
-      await client.close().catch(() => undefined)
-      return this.#callTool(name, arguments_, signal, false)
-    })
+      })
     if (!result.isError) return result
     throw new Error(
       result.content
@@ -149,17 +166,7 @@ function composerEnvironment(command: string, worktree: string) {
     PYTHONUNBUFFERED: "1",
     HUGR_WORKTREE_ROOT: worktree,
   }
-  for (const key of [
-    "HOME",
-    "TMPDIR",
-    "TEMP",
-    "TMP",
-    "LANG",
-    "LC_ALL",
-    "HUGR_GATE",
-    "HUGR_AUTH_URL",
-    "HUGR_DEV_LICENSE_KEYS",
-  ]) {
+  for (const key of ["HOME", "TMPDIR", "TEMP", "TMP", "LANG", "LC_ALL", "HUGR_GATE"]) {
     const value = process.env[key]
     if (value !== undefined) environment[key] = value
   }
@@ -195,8 +202,4 @@ function withAbort<T>(promise: Promise<T>, signal: AbortSignal, message: string,
 
 function isConnectionClosed(error: unknown) {
   return error instanceof Error && /connection closed|stdio transport/i.test(error.message)
-}
-
-function isHardDeadline(error: unknown) {
-  return error instanceof Error && error.message === "HuGR Composer call exceeded hard deadline"
 }

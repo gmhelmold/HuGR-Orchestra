@@ -222,6 +222,24 @@ describe("EventV2", () => {
     }),
   )
 
+  it.effect("rejects commit hooks on local-only durable events", () =>
+    Effect.gen(function* () {
+      const events = yield* EventV2.Service
+      const exit = yield* events
+        .publish(
+          SyncMessage,
+          { id: EventV2.ID.create(), text: "hello" },
+          {
+            persist: false,
+            commit: () => Effect.void,
+          },
+        )
+        .pipe(Effect.exit)
+
+      expect(String(exit)).toContain("cannot be combined with persist:false")
+    }),
+  )
+
   it.effect("runs projectors before publishing to streams", () =>
     Effect.gen(function* () {
       const events = yield* EventV2.Service

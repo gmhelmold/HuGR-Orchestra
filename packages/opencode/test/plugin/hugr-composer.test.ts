@@ -17,7 +17,12 @@ test("rejects Composer writes outside worktree and symlink escapes", async () =>
     "inside worktree",
   )
   await expect(tools["hugr-compose"].execute({ output_dir: link, dry_run: true }, context)).rejects.toThrow(
-    "inside worktree",
+    /inside worktree|symlinks/,
+  )
+  const dangling = path.join(root.path, "dangling")
+  await fs.symlink(path.join(outside.path, "missing"), dangling)
+  await expect(tools["hugr-compose"].execute({ output_dir: dangling, dry_run: true }, context)).rejects.toThrow(
+    "symlinks",
   )
   expect(calls).toHaveLength(0)
   expect(asks).toHaveLength(0)

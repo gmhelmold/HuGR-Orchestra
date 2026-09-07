@@ -202,7 +202,7 @@ const layer = Layer.effect(
 
     const parseSSE = Effect.fn("Workspace.parseSSE")(function* (
       stream: Stream.Stream<Uint8Array, unknown>,
-      onEvent: (event: unknown) => Effect.Effect<void>,
+      onEvent: (event: unknown) => Effect.Effect<void, unknown>,
     ) {
       yield* stream.pipe(
         Stream.decodeText(),
@@ -309,6 +309,9 @@ const layer = Layer.effect(
       url: URL | string,
       headers: HeadersInit | undefined,
     ) {
+      if (yield* EventV2.hasCompactedSnapshotEvents(db))
+        return yield* Effect.fail(new Error("Workspace sync disabled after snapshot compaction"))
+
       const sessionIDs = (yield* db
         .select({ id: SessionTable.id })
         .from(SessionTable)
@@ -344,6 +347,9 @@ const layer = Layer.effect(
 
       const history = (yield* response.json) as HistoryEvent[]
 
+      if (yield* EventV2.hasCompactedSnapshotEvents(db))
+        return yield* Effect.fail(new Error("Workspace sync disabled after snapshot compaction"))
+
       yield* Effect.forEach(
         history,
         (event) =>
@@ -371,6 +377,11 @@ const layer = Layer.effect(
       let attempt = 0
 
       while (true) {
+        if (yield* EventV2.hasCompactedSnapshotEvents(db)) {
+          setStatus(space.id, "error")
+          return
+        }
+
         setStatus(space.id, "connecting")
 
         const stream = yield* connectSSE(target.url, target.headers).pipe(
@@ -394,6 +405,9 @@ const layer = Layer.effect(
 
           yield* parseSSE(stream, (evt) =>
             Effect.gen(function* () {
+              if (yield* EventV2.hasCompactedSnapshotEvents(db))
+                return yield* Effect.fail(new Error("Workspace sync disabled after snapshot compaction"))
+
               if (!evt || typeof evt !== "object" || !("payload" in evt)) return
               const payload = evt.payload as { type?: string; syncEvent?: EventV2.SerializedEvent }
               if (payload.type === "server.heartbeat") return
@@ -440,6 +454,13 @@ const layer = Layer.effect(
 
     const startSync = Effect.fn("Workspace.startSync")(function* (space: Info) {
       if (!flags.experimentalWorkspaces) return
+      if (yield* EventV2.hasCompactedSnapshotEvents(db)) {
+        setStatus(space.id, "error")
+        yield* Effect.logWarning("workspace sync disabled after snapshot compaction", {
+          workspaceID: space.id,
+        })
+        return
+      }
 
       const target = yield* WorkspaceAdapterRuntime.target(space).pipe(
         Effect.catch((error) =>

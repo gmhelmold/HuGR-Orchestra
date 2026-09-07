@@ -66,11 +66,18 @@ const CompactCommand = effectCmd({
     }
     const { db } = yield* Database.Service
     const EventV2 = yield* Effect.promise(() => import("@opencode-ai/core/event"))
+    if (yield* EventV2.hasCompactedSnapshotEvents(db)) {
+      return yield* fail(
+        "db compact is permanently disabled after snapshot compaction: enabling workspace sync could not reconstruct deleted sequence gaps.",
+      )
+    }
     const result = yield* EventV2.compactSnapshotEvents(db)
     console.log(
       `Removed ${result.removed} redundant snapshot events (${(result.bytes / 1024 / 1024).toFixed(1)} MiB of JSON payload).`,
     )
-    const sizeBefore = (yield* db.all(sql.raw(`PRAGMA page_count;`)).pipe(Effect.orDie)) as Array<{ page_count: number }>
+    const sizeBefore = (yield* db.all(sql.raw(`PRAGMA page_count;`)).pipe(Effect.orDie)) as Array<{
+      page_count: number
+    }>
     yield* db.run(sql.raw(`VACUUM;`)).pipe(Effect.orDie)
     const sizeAfter = (yield* db.all(sql.raw(`PRAGMA page_count;`)).pipe(Effect.orDie)) as Array<{ page_count: number }>
     if (sizeBefore.length > 0 && sizeAfter.length > 0) {
