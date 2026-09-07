@@ -613,6 +613,18 @@ describe("tool.read loaded instructions", () => {
       expect(result.output).toContain("system-reminder")
     }),
   )
+
+  it.live("rejects empty partial view when reminder leaves no line budget", () =>
+    Effect.gen(function* () {
+      const dir = yield* tmpdirScoped()
+      yield* put(path.join(dir, "nested", "AGENTS.md"), "r".repeat(48 * 1024))
+      const file = path.join(dir, "nested", "deep", "body.txt")
+      yield* put(file, "x".repeat(2000))
+      const err = yield* fail(dir, { filePath: file })
+      expect(err.message).toContain("One complete rendered line cannot fit")
+      expect(err.message).not.toContain("Showing lines 1-0")
+    }),
+  )
 })
 
 describe("tool.read binary detection", () => {
@@ -653,6 +665,31 @@ describe("tool.read tail", () => {
       expect(result.output).toContain("line9")
       expect(result.output).toContain("line8")
       expect(result.output).not.toContain("1: line1")
+    }),
+  )
+
+  for (const [name, content] of [
+    ["non-trailing newline", "one\ntwo\nthree"],
+    ["trailing newline", "one\ntwo\nthree\n"],
+  ] as const) {
+    it.live(`returns exact last lines with ${name}`, () =>
+      Effect.gen(function* () {
+        const dir = yield* tmpdirScoped()
+        const file = path.join(dir, "tail.txt")
+        yield* put(file, content)
+        const result = yield* exec(dir, { filePath: file, offset: -2 })
+        expect(result.output).toContain("<content>\n2: two\n3: three\n(End of file - total 3 lines)\n</content>")
+      }),
+    )
+  }
+
+  it.live("clamps negative offset beyond file to first line", () =>
+    Effect.gen(function* () {
+      const dir = yield* tmpdirScoped()
+      const file = path.join(dir, "tail.txt")
+      yield* put(file, "one\ntwo\nthree")
+      const result = yield* exec(dir, { filePath: file, offset: -10 })
+      expect(result.output).toContain("<content>\n1: one\n2: two\n3: three\n(End of file - total 3 lines)\n</content>")
     }),
   )
 
