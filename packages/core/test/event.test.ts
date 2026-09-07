@@ -791,6 +791,42 @@ describe("EventV2", () => {
     }),
   )
 
+  it.effect("replayAll rolls back the whole batch on failure", () =>
+    Effect.gen(function* () {
+      const events = yield* EventV2.Service
+      const { db } = yield* Database.Service
+      const aggregateID = Session.ID.create()
+
+      const exit = yield* events
+        .replayAll([
+          {
+            id: EventV2.ID.create(),
+            type: EventV2.versionedType(DurableMessage.type, 1),
+            seq: 0,
+            aggregateID,
+            data: durableData(aggregateID, "one"),
+          },
+          {
+            id: EventV2.ID.create(),
+            type: "unknown.event.1",
+            seq: 1,
+            aggregateID,
+            data: {},
+          },
+        ])
+        .pipe(Effect.exit)
+      const rows = yield* db
+        .select()
+        .from(EventTable)
+        .where(eq(EventTable.aggregate_id, aggregateID))
+        .all()
+        .pipe(Effect.orDie)
+
+      expect(String(exit)).toContain("Unknown durable event type")
+      expect(rows).toHaveLength(0)
+    }),
+  )
+
   it.effect("claim fences replay owners", () =>
     Effect.gen(function* () {
       const events = yield* EventV2.Service

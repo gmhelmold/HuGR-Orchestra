@@ -1,6 +1,6 @@
 import { LayerNode } from "@opencode-ai/core/effect/layer-node"
 import { httpClient } from "@opencode-ai/core/effect/app-node-platform"
-import { Context, Effect, FiberMap, Iterable, Layer, Schema, Stream } from "effect"
+import { Context, Effect, Exit, FiberMap, Iterable, Layer, Schema, Stream } from "effect"
 import { serviceUse } from "@opencode-ai/core/effect/service-use"
 import { FetchHttpClient, HttpBody, HttpClient, HttpClientError, HttpClientRequest } from "effect/unstable/http"
 import { Database } from "@opencode-ai/core/database/database"
@@ -640,7 +640,15 @@ const layer = Layer.effect(
         }
 
         if (input.workspaceID === null) {
-          if (previous) yield* events.claim(input.sessionID, previous.projectID)
+          if (previous) {
+            yield* events.claim(input.sessionID, previous.projectID)
+            const result = yield* Effect.exit(session.setWorkspace({ sessionID: input.sessionID, workspaceID: undefined }))
+            if (Exit.isFailure(result)) {
+              yield* events.claim(input.sessionID, previous.id)
+              return yield* Effect.failCause(result.cause)
+            }
+            return result.value
+          }
           yield* session.setWorkspace({ sessionID: input.sessionID, workspaceID: undefined })
 
           return
@@ -657,90 +665,107 @@ const layer = Layer.effect(
         const target = yield* WorkspaceAdapterRuntime.target(space)
 
         if (target.type === "local") {
-          if (previous) yield* events.claim(input.sessionID, input.workspaceID ?? previous.projectID)
+          if (previous) {
+            yield* events.claim(input.sessionID, input.workspaceID ?? previous.projectID)
+            const result = yield* Effect.exit(session.setWorkspace({ sessionID: input.sessionID, workspaceID: input.workspaceID }))
+            if (Exit.isFailure(result)) {
+              yield* events.claim(input.sessionID, previous.id)
+              return yield* Effect.failCause(result.cause)
+            }
+            return result.value
+          }
           yield* session.setWorkspace({ sessionID: input.sessionID, workspaceID: input.workspaceID })
 
           return
         }
 
-        if (yield* EventV2.hasCompactedSnapshotEvents(db))
-          return yield* new SessionWarpHttpError({
-            message: "Workspace sync disabled after snapshot compaction",
-            workspaceID,
-            sessionID: input.sessionID,
-            status: 400,
-            body: "Workspace sync disabled after snapshot compaction",
-          })
+        if (previous) yield* events.claim(input.sessionID, input.workspaceID ?? previous.projectID)
 
-        const rows = yield* db
-          .select({
-            id: EventTable.id,
-            aggregateID: EventTable.aggregate_id,
-            seq: EventTable.seq,
-            type: EventTable.type,
-            data: EventTable.data,
-          })
-          .from(EventTable)
-          .where(eq(EventTable.aggregate_id, input.sessionID))
-          .orderBy(asc(EventTable.seq))
-          .all()
-          .pipe(Effect.orDie)
-        if (rows.length === 0)
-          return yield* new SessionEventsNotFoundError({
-            message: `No events found for session: ${input.sessionID}`,
-            sessionID: input.sessionID,
-          })
+        const result = yield* Effect.exit(
+          Effect.gen(function* () {
+            if (yield* EventV2.hasCompactedSnapshotEvents(db))
+              return yield* new SessionWarpHttpError({
+                message: "Workspace sync disabled after snapshot compaction",
+                workspaceID,
+                sessionID: input.sessionID,
+                status: 400,
+                body: "Workspace sync disabled after snapshot compaction",
+              })
 
-        const batches = Iterable.chunksOf(rows, 10)
-        const total = Iterable.size(batches)
+            const rows = yield* db
+              .select({
+                id: EventTable.id,
+                aggregateID: EventTable.aggregate_id,
+                seq: EventTable.seq,
+                type: EventTable.type,
+                data: EventTable.data,
+              })
+              .from(EventTable)
+              .where(eq(EventTable.aggregate_id, input.sessionID))
+              .orderBy(asc(EventTable.seq))
+              .all()
+              .pipe(Effect.orDie)
+            if (rows.length === 0)
+              return yield* new SessionEventsNotFoundError({
+                message: `No events found for session: ${input.sessionID}`,
+                sessionID: input.sessionID,
+              })
 
-        yield* Effect.forEach(
-          batches,
-          (events, i) =>
-            Effect.gen(function* () {
-              const response = yield* http.execute(
-                HttpClientRequest.post(route(target.url, "/sync/replay"), {
-                  headers: new Headers(target.headers),
-                  body: HttpBody.jsonUnsafe({
-                    directory: space.directory ?? "",
-                    events,
-                  }),
+            const batches = Iterable.chunksOf(rows, 10)
+
+            yield* Effect.forEach(
+              batches,
+              (events) =>
+                Effect.gen(function* () {
+                  const response = yield* http.execute(
+                    HttpClientRequest.post(route(target.url, "/sync/replay"), {
+                      headers: new Headers(target.headers),
+                      body: HttpBody.jsonUnsafe({
+                        directory: space.directory ?? "",
+                        events,
+                      }),
+                    }),
+                  )
+
+                  if (response.status < 200 || response.status >= 300) {
+                    const body = yield* response.text
+                    return yield* new SessionWarpHttpError({
+                      message: `Failed to warp session ${input.sessionID} into workspace ${workspaceID}: HTTP ${response.status} ${body}`,
+                      workspaceID,
+                      sessionID: input.sessionID,
+                      status: response.status,
+                      body,
+                    })
+                  }
                 }),
-              )
+              { discard: true },
+            )
 
-              if (response.status < 200 || response.status >= 300) {
-                const body = yield* response.text
-                return yield* new SessionWarpHttpError({
-                  message: `Failed to warp session ${input.sessionID} into workspace ${workspaceID}: HTTP ${response.status} ${body}`,
-                  workspaceID,
-                  sessionID: input.sessionID,
-                  status: response.status,
-                  body,
-                })
-              }
-            }),
-          { discard: true },
-        )
+            const response = yield* http.execute(
+              HttpClientRequest.post(route(target.url, "/sync/steal"), {
+                headers: new Headers(target.headers),
+                body: HttpBody.jsonUnsafe({ sessionID: input.sessionID }),
+              }),
+            )
+            if (response.status < 200 || response.status >= 300) {
+              const body = yield* response.text
+              return yield* new SessionWarpHttpError({
+                message: `Failed to steal session ${input.sessionID} into workspace ${workspaceID}: HTTP ${response.status} ${body}`,
+                workspaceID,
+                sessionID: input.sessionID,
+                status: response.status,
+                body,
+              })
+            }
 
-        const response = yield* http.execute(
-          HttpClientRequest.post(route(target.url, "/sync/steal"), {
-            headers: new Headers(target.headers),
-            body: HttpBody.jsonUnsafe({ sessionID: input.sessionID }),
+            yield* session.setWorkspace({ sessionID: input.sessionID, workspaceID })
           }),
         )
-        if (response.status < 200 || response.status >= 300) {
-          const body = yield* response.text
-          return yield* new SessionWarpHttpError({
-            message: `Failed to steal session ${input.sessionID} into workspace ${workspaceID}: HTTP ${response.status} ${body}`,
-            workspaceID,
-            sessionID: input.sessionID,
-            status: response.status,
-            body,
-          })
+        if (Exit.isFailure(result)) {
+          if (previous) yield* events.claim(input.sessionID, previous.id)
+          return yield* Effect.failCause(result.cause)
         }
-
-        if (previous) yield* events.claim(input.sessionID, input.workspaceID ?? previous.projectID)
-        yield* session.setWorkspace({ sessionID: input.sessionID, workspaceID: input.workspaceID })
+        return result.value
       })
     })
 

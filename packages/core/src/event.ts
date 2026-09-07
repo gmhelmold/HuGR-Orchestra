@@ -560,21 +560,29 @@ export const layerWith = (options?: LayerOptions) =>
               }),
             )
           }
-          const start = events[0]?.seq ?? 0
-          for (const [index, event] of events.entries()) {
-            const seq = start + index
-            if (event.seq !== seq) {
-              yield* Effect.die(
-                new InvalidDurableEventError({
-                  type: event.type,
-                  message: `Replay sequence mismatch at index ${index}: expected ${seq}, got ${event.seq}`,
+          yield* db
+            .transaction(
+              () =>
+                Effect.gen(function* () {
+                  const start = events[0]?.seq ?? 0
+                  for (const [index, event] of events.entries()) {
+                    const seq = start + index
+                    if (event.seq !== seq) {
+                      yield* Effect.die(
+                        new InvalidDurableEventError({
+                          type: event.type,
+                          message: `Replay sequence mismatch at index ${index}: expected ${seq}, got ${event.seq}`,
+                        }),
+                      )
+                    }
+                  }
+                  for (const event of events) {
+                    yield* replay(event, options)
+                  }
                 }),
-              )
-            }
-          }
-          for (const event of events) {
-            yield* replay(event, options)
-          }
+              { behavior: "immediate" },
+            )
+            .pipe(Effect.orDie)
           return source
         })
       }
