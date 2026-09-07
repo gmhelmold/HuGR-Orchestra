@@ -713,7 +713,7 @@ export function hasCompactedSnapshotEvents(db: Pick<Database.Interface["db"], "g
     return Boolean(
       yield* db
         .get(
-          sql`SELECT 1 WHERE EXISTS (SELECT 1 FROM data_migration WHERE name = ${SNAPSHOT_COMPACTION_MARKER}) OR EXISTS (SELECT 1 FROM event GROUP BY aggregate_id HAVING COUNT(*) != MAX(seq) - MIN(seq) + 1)`,
+          sql`SELECT 1 WHERE EXISTS (SELECT 1 FROM data_migration WHERE name = ${SNAPSHOT_COMPACTION_MARKER}) OR EXISTS (SELECT 1 FROM event_sequence AS sequence WHERE NOT EXISTS (SELECT 1 FROM event WHERE aggregate_id = sequence.aggregate_id AND seq = 0) OR NOT EXISTS (SELECT 1 FROM event WHERE aggregate_id = sequence.aggregate_id AND seq = sequence.seq) OR EXISTS (SELECT 1 FROM event WHERE aggregate_id = sequence.aggregate_id GROUP BY aggregate_id HAVING COUNT(*) != MAX(seq) - MIN(seq) + 1))`,
         )
         .pipe(Effect.orDie),
     )

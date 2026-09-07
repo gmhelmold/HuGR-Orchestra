@@ -46,65 +46,65 @@ describe("EventV2.compactSnapshotEvents", () => {
       const { db } = yield* Database.Service
       yield* db
         .insert(EventSequenceTable)
-        .values([{ aggregate_id: "ses_a", seq: 10 }])
+        .values([{ aggregate_id: "ses_a", seq: 9 }])
         .run()
         .pipe(Effect.orDie)
       yield* insert(db)([
         {
           id: "e1",
           aggregateID: "ses_a",
-          seq: 1,
+          seq: 0,
           type: "message.updated.1",
           data: { info: { id: "msg_m1", text: "v1" } },
         },
-        { id: "e9", aggregateID: "ses_a", seq: 9, type: "session.created.1", data: { sessionID: "ses_a" } },
-        { id: "e10", aggregateID: "ses_a", seq: 10, type: "session.updated.1", data: { sessionID: "ses_a" } },
+        { id: "e9", aggregateID: "ses_a", seq: 8, type: "session.created.1", data: { sessionID: "ses_a" } },
+        { id: "e10", aggregateID: "ses_a", seq: 9, type: "session.updated.1", data: { sessionID: "ses_a" } },
         {
           id: "e2",
           aggregateID: "ses_a",
-          seq: 2,
+          seq: 1,
           type: "message.updated.1",
           data: { info: { id: "msg_m1", text: "v2" } },
         },
         {
           id: "e3",
           aggregateID: "ses_a",
-          seq: 3,
+          seq: 2,
           type: "message.updated.1",
           data: { info: { id: "msg_m1", text: "v3" } },
         },
         {
           id: "e4",
           aggregateID: "ses_a",
-          seq: 4,
+          seq: 3,
           type: "message.updated.1",
           data: { info: { id: "msg_m2", text: "x" } },
         },
         {
           id: "e5",
           aggregateID: "ses_a",
-          seq: 5,
+          seq: 4,
           type: "message.part.updated.1",
           data: { part: { id: "prt_p1", text: "a" } },
         },
         {
           id: "e6",
           aggregateID: "ses_a",
-          seq: 6,
+          seq: 5,
           type: "message.part.updated.1",
           data: { part: { id: "prt_p1", text: "ab" } },
         },
         {
           id: "e7",
           aggregateID: "ses_a",
-          seq: 7,
+          seq: 6,
           type: "message.part.updated.1",
           data: { part: { id: "prt_p1", text: "abc" } },
         },
         {
           id: "e8",
           aggregateID: "ses_a",
-          seq: 8,
+          seq: 7,
           type: "message.removed.1",
           data: { sessionID: "ses_a", messageID: "msg_m9" },
         },
@@ -139,14 +139,14 @@ describe("EventV2.compactSnapshotEvents", () => {
       const { db } = yield* Database.Service
       yield* db
         .insert(EventSequenceTable)
-        .values([{ aggregate_id: "ses_b", seq: 1 }])
+        .values([{ aggregate_id: "ses_b", seq: 0 }])
         .run()
         .pipe(Effect.orDie)
       yield* insert(db)([
         {
           id: "e1",
           aggregateID: "ses_b",
-          seq: 1,
+          seq: 0,
           type: "message.updated.1",
           data: { info: { id: "msg_m1", text: "only" } },
         },
@@ -160,10 +160,10 @@ describe("EventV2.compactSnapshotEvents", () => {
   it.effect("detects a pre-existing sequence gap", () =>
     Effect.gen(function* () {
       const { db } = yield* Database.Service
-      yield* db.insert(EventSequenceTable).values([{ aggregate_id: "ses_c", seq: 3 }]).run().pipe(Effect.orDie)
+      yield* db.insert(EventSequenceTable).values([{ aggregate_id: "ses_c", seq: 2 }]).run().pipe(Effect.orDie)
       yield* insert(db)([
-        { id: "e1", aggregateID: "ses_c", seq: 1, type: "session.created.1", data: { sessionID: "ses_c" } },
-        { id: "e3", aggregateID: "ses_c", seq: 3, type: "session.updated.1", data: { sessionID: "ses_c" } },
+        { id: "e1", aggregateID: "ses_c", seq: 0, type: "session.created.1", data: { sessionID: "ses_c" } },
+        { id: "e3", aggregateID: "ses_c", seq: 2, type: "session.updated.1", data: { sessionID: "ses_c" } },
       ])
 
       expect(yield* EventV2.hasCompactedSnapshotEvents(db)).toBe(true)

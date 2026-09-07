@@ -415,16 +415,7 @@ const layer = Layer.effect(
                 if (payload.type === "server.heartbeat") return
 
                 if (payload.type === "sync" && payload.syncEvent) {
-                  const failed = yield* events.replay(payload.syncEvent, { publish: true, ownerID: space.id }).pipe(
-                    Effect.as(false),
-                    Effect.catchCause((error) =>
-                      Effect.logWarning("failed to replay global event", error).pipe(
-                        Effect.annotateLogs({ workspaceID: space.id }),
-                        Effect.as(true),
-                      ),
-                    ),
-                  )
-                  if (failed) return
+                  yield* events.replay(payload.syncEvent, { publish: true, ownerID: space.id })
                 }
 
                 try {
@@ -443,11 +434,11 @@ const layer = Layer.effect(
                 }
               }),
           ).pipe(
-            Effect.catch((error) =>
+            Effect.catchCause((error) =>
               Effect.logWarning("workspace event stream ended", {
                 workspaceID: space.id,
                 error: errorData(error),
-              }),
+              }).pipe(Effect.asVoid),
             ),
           )
 
