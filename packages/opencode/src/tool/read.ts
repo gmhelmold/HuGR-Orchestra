@@ -1,4 +1,4 @@
-import { Effect, Option, Schema, Stream } from "effect"
+import { Effect, Option, Schema } from "effect"
 import { PositiveInt } from "@opencode-ai/core/schema"
 import * as path from "path"
 import * as Tool from "./tool"
@@ -146,7 +146,7 @@ export const ReadTool = Tool.define<typeof Parameters, Metadata, FSUtil.Service 
       filepath: string,
       start: number,
       limit: number,
-      budget: number,
+      reserve: (lineCount: number) => number,
       byteStart = 0,
     ) {
       const lines: string[] = []
@@ -156,6 +156,7 @@ export const ReadTool = Tool.define<typeof Parameters, Metadata, FSUtil.Service 
       let more = false
       let capped = false
       let done = false
+      let bytes = 0
       const take = (raw: string) => {
         if (line++ < start) return
         if (lines.length >= limit) {
@@ -165,13 +166,15 @@ export const ReadTool = Tool.define<typeof Parameters, Metadata, FSUtil.Service 
         }
         const value = trim(raw)
         const rendered = `${start + lines.length}: ${value}`
-        if (Buffer.byteLength(lines.concat(rendered).join("\n"), "utf-8") > budget) {
+        const size = Buffer.byteLength(rendered, "utf-8") + (lines.length ? 1 : 0)
+        if (bytes + size + reserve(lines.length + 1) > MAX_BYTES) {
           more = true
           capped = true
           done = true
           return
         }
         lines.push(value)
+        bytes += size
       }
       const consume = (chunk: string) => {
         pending += chunk
@@ -201,46 +204,29 @@ export const ReadTool = Tool.define<typeof Parameters, Metadata, FSUtil.Service 
       return { lines, start, more, capped, ...(lines.length ? {} : { total: line - 1 }) } satisfies Page
     })
 
-    const tailStart = Effect.fn("ReadTool.tailStart")(function* (filepath: string, size: number, count: number) {
+    const tail = Effect.fn("ReadTool.tail")(function* (filepath: string, size: number, count: number) {
       return yield* Effect.scoped(
         Effect.gen(function* () {
           const file = yield* fs.open(filepath, { flag: "r" })
-          yield* file.seek(Math.max(0, size - 1), "start")
-          const last = Option.getOrElse(yield* file.readAlloc(1), () => new Uint8Array())
           let position = size
-          let newlines = 0
-          const needed = count + (last[0] === 10 ? 1 : 0)
+          let total = 0
+          let start: number | undefined
+          let trailing = false
           while (position > 0) {
             const width = Math.min(CHUNK_BYTES, position)
             position -= width
             yield* file.seek(position, "start")
             const bytes = Option.getOrElse(yield* file.readAlloc(width), () => new Uint8Array())
+            if (position + bytes.length === size) trailing = bytes[bytes.length - 1] === 10
             for (let index = bytes.length - 1; index >= 0; index--) {
               if (bytes[index] !== 10) continue
-              newlines++
-              if (newlines === needed) return position + index + 1
+              total++
+              if (start === undefined && total === count + (trailing ? 1 : 0)) start = position + index + 1
             }
           }
-          return 0
+          return { start: start ?? 0, total: size === 0 ? 0 : total + (trailing ? 0 : 1) }
         }),
       )
-    })
-
-    const countLines = Effect.fn("ReadTool.countLines")(function* (filepath: string, size: number) {
-      if (size === 0) return 0
-      let breaks = 0
-      let last = 0
-      yield* fs.stream(filepath).pipe(
-        Stream.runForEach((bytes) =>
-          Effect.sync(() => {
-            for (const byte of bytes) {
-              if (byte === 10) breaks++
-              last = byte
-            }
-          }),
-        ),
-      )
-      return breaks + (last === 10 ? 0 : 1)
     })
 
     const run = Effect.fn("ReadTool.execute")(function* (
@@ -274,6 +260,7 @@ export const ReadTool = Tool.define<typeof Parameters, Metadata, FSUtil.Service 
       if (stat.type === "Directory") {
         const items = yield* list(filepath)
         const offset = params.offset ?? 1
+        if (offset < 0) return yield* Effect.fail(new Error("Negative offset is only supported for files."))
         const limit = params.limit ?? DEFAULT_READ_LIMIT
         const entries = items.slice(offset - 1, offset - 1 + limit)
         const truncated = offset - 1 + entries.length < items.length
@@ -293,7 +280,14 @@ export const ReadTool = Tool.define<typeof Parameters, Metadata, FSUtil.Service 
             preview: entries.slice(0, 20).join("\n"),
             truncated,
             loaded: [],
-            display: { type: "directory" as const, path: filepath, entries, offset, totalEntries: items.length, truncated },
+            display: {
+              type: "directory" as const,
+              path: filepath,
+              entries,
+              offset,
+              totalEntries: items.length,
+              truncated,
+            },
           },
         }
       }
@@ -318,43 +312,53 @@ export const ReadTool = Tool.define<typeof Parameters, Metadata, FSUtil.Service 
       const explicit = params.offset !== undefined || params.limit !== undefined
       const limit = params.limit ?? DEFAULT_READ_LIMIT
       const negative = (params.offset ?? 1) < 0
-      const total = negative ? yield* countLines(filepath, Number(stat.size)) : undefined
+      const tailInfo = negative ? yield* tail(filepath, Number(stat.size), -params.offset!) : undefined
+      const total = tailInfo?.total
       const start = negative ? Math.max(1, total! + 1 + params.offset!) : (params.offset ?? 1)
       if (negative && total === 0)
         return yield* Effect.fail(new Error(`Offset ${params.offset} is out of range for this file (0 lines)`))
-      const byteStart = negative ? yield* tailStart(filepath, Number(stat.size), -params.offset!) : 0
+      const byteStart = tailInfo?.start ?? 0
+      const reminder = loaded.length
+        ? `\n<system-reminder>\n${loaded.map((item) => item.content).join("\n\n")}\n</system-reminder>`
+        : ""
+      const prefix = `<path>${filepath}</path>\n<type>file</type>\n<content>\n`
+      const finish = (lines: string[], more: boolean) => {
+        const last = start + lines.length - 1
+        const footer = more
+          ? `(PARTIAL view. Showing lines ${start}-${last}. Use offset=${last + 1} to continue.)`
+          : total === undefined
+            ? "(End of file)"
+            : `(End of file - total ${total} lines)`
+        return (
+          prefix +
+          lines.map((line, index) => `${start + index}: ${line}`).join("\n") +
+          `\n${footer}\n</content>${reminder}`
+        )
+      }
+      if (Buffer.byteLength(finish([], false), "utf-8") > MAX_BYTES)
+        return yield* Effect.fail(new Error(`System reminders exceed ${MAX_BYTES / 1024} KB output limit.`))
       const page = yield* forward(
         filepath,
         start,
         limit,
-        MAX_BYTES - Buffer.byteLength(filepath, "utf-8") - 1024,
+        (lineCount) => {
+          const last = start + lineCount - 1
+          const footer = `(PARTIAL view. Showing lines ${start}-${last}. Use offset=${last + 1} to continue.)`
+          return Buffer.byteLength(`${prefix}\n${footer}\n</content>${reminder}`, "utf-8")
+        },
         byteStart,
       )
       if (!page.lines.length && start !== 1)
-        return yield* Effect.fail(new Error(`Offset ${start} is out of range for this file (${total ?? page.total ?? 0} lines)`))
+        return yield* Effect.fail(
+          new Error(`Offset ${start} is out of range for this file (${total ?? page.total ?? 0} lines)`),
+        )
       if (page.capped && explicit)
         return yield* Effect.fail(
           new Error(`Requested range exceeds ${MAX_BYTES / 1024} KB output limit. Use a smaller limit or offset.`),
         )
 
       const last = start + page.lines.length - 1
-      const next = last + 1
-      const footer = page.more
-        ? `(PARTIAL view. Showing lines ${start}-${last}. Use offset=${next} to continue.)`
-        : total === undefined
-          ? "(End of file)"
-          : `(End of file - total ${total} lines)`
-      const output = [
-        `<path>${filepath}</path>`,
-        "<type>file</type>",
-        "<content>",
-        page.lines.map((line, index) => `${start + index}: ${line}`).join("\n"),
-        footer,
-        "</content>",
-        ...(loaded.length
-          ? ["<system-reminder>", loaded.map((item) => item.content).join("\n\n"), "</system-reminder>"]
-          : []),
-      ].join("\n")
+      const output = finish(page.lines, page.more)
       return {
         title,
         output,
@@ -362,8 +366,8 @@ export const ReadTool = Tool.define<typeof Parameters, Metadata, FSUtil.Service 
           preview: page.lines.slice(0, 20).join("\n"),
           truncated: page.more,
           loaded: loaded.map((item) => item.filepath),
-            display: {
-              type: "file" as const,
+          display: {
+            type: "file" as const,
             path: filepath,
             text: page.lines.join("\n"),
             lineStart: start,
