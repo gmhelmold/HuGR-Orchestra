@@ -10,10 +10,11 @@ const DEFAULT_TIMEOUT = 30_000
 const MAX_CALL_TIMEOUT = 5 * 60_000
 
 type ComposerCommand = {
-  command: string
+  command?: string
   args?: string[]
   timeout?: number
   hardTimeout?: number
+  forwardAuth?: boolean
 }
 
 export class HugrComposerClient {
@@ -27,15 +28,17 @@ export class HugrComposerClient {
   readonly #args: string[]
   readonly #timeout: number
   readonly #hardTimeout: number
+  readonly #forwardAuth: boolean
 
   constructor(directory: string, worktree?: string, command?: ComposerCommand) {
     this.#directory = directory
     this.#worktree = worktree ?? directory
-    if (command && !path.isAbsolute(command.command)) throw new Error("HuGR Composer command must be absolute")
+    if (command?.command && !path.isAbsolute(command.command)) throw new Error("HuGR Composer command must be absolute")
     this.#command = command?.command
     this.#args = command?.args ?? []
     this.#timeout = command?.timeout ?? DEFAULT_TIMEOUT
     this.#hardTimeout = command?.hardTimeout ?? MAX_CALL_TIMEOUT
+    this.#forwardAuth = command?.forwardAuth ?? false
   }
 
   async callTool(
@@ -123,7 +126,7 @@ export class HugrComposerClient {
       args: this.#args,
       cwd: this.#directory,
       stderr: "pipe",
-      env: composerEnvironment(command, this.#worktree),
+      env: composerEnvironment(command, this.#worktree, this.#forwardAuth),
     })
     transport.stderr?.on("data", () => {})
     transport.onclose = () => {
@@ -152,7 +155,7 @@ export class HugrComposerClient {
   }
 }
 
-function composerEnvironment(command: string, worktree: string) {
+function composerEnvironment(command: string, worktree: string, forwardAuth: boolean) {
   const inheritedPath = process.env.PATH?.split(path.delimiter) ?? []
   const pathEntries = [
     path.dirname(command),
@@ -169,6 +172,12 @@ function composerEnvironment(command: string, worktree: string) {
   for (const key of ["HOME", "TMPDIR", "TEMP", "TMP", "LANG", "LC_ALL", "HUGR_GATE"]) {
     const value = process.env[key]
     if (value !== undefined) environment[key] = value
+  }
+  if (forwardAuth) {
+    for (const key of ["HUGR_AUTH_URL", "HUGR_DEV_LICENSE_KEYS"]) {
+      const value = process.env[key]
+      if (value !== undefined) environment[key] = value
+    }
   }
   if (process.platform === "win32") {
     for (const key of ["SYSTEMROOT", "PATHEXT"]) {

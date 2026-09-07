@@ -714,10 +714,8 @@ export const hasCompactedSnapshotEvents = Effect.fn("EventV2.hasCompactedSnapsho
  * final projection (the projector upserts by id), while intermediate rows are
  * pure write amplification.
  *
- * Deleting rows leaves `seq` gaps; sequence stream readers (`readAfter`,
- * `history`) use `seq > after` so gaps are transparent. Replay packets are
- * re-cost in the sender and validated against their own emitted `seq` order,
- * not against DB adjacency, so gaps are also safe for sync replay.
+ * Deleting rows leaves `seq` gaps. Compaction records a durable marker in the
+ * same transaction so workspace sync can permanently refuse unsafe replay.
  *
  * Non-snapshot lifecycle rows (`session.created`, `message.removed`,
  * `message.part.delta`, ...) are never touched, and `event_sequence` is left
@@ -740,9 +738,12 @@ export const compactSnapshotEvents = Effect.fn("EventV2.compactSnapshotEvents")(
     .where(inArray(EventTable.type, snapshotTypes))
     .get()
     .pipe(Effect.orDie)
-  yield* db
-    .run(
-      sql.raw(`
+  const result = yield* db
+    .transaction((tx) =>
+      Effect.gen(function* () {
+        yield* tx
+          .run(
+            sql.raw(`
         DELETE FROM "event"
         WHERE "type" IN ('message.updated.1', 'message.part.updated.1')
           AND "id" NOT IN (
@@ -768,26 +769,30 @@ export const compactSnapshotEvents = Effect.fn("EventV2.compactSnapshotEvents")(
               )
             )
             WHERE "rn" = 1
+           )
+       `),
           )
-      `),
+          .pipe(Effect.orDie)
+        const remaining = yield* tx
+          .select({
+            rows: sql<number>`count(*)`,
+            bytes: sql<number>`sum(length(data))`,
+          })
+          .from(EventTable)
+          .where(inArray(EventTable.type, snapshotTypes))
+          .get()
+          .pipe(Effect.orDie)
+        const removed = (stats?.rows ?? 0) - (remaining?.rows ?? 0)
+        const bytes = (stats?.bytes ?? 0) - (remaining?.bytes ?? 0)
+        if (removed > 0)
+          yield* tx
+            .run(
+              sql`INSERT OR REPLACE INTO data_migration (name, time_completed) VALUES (${SNAPSHOT_COMPACTION_MARKER}, ${Date.now()})`,
+            )
+            .pipe(Effect.orDie)
+        return { removed, bytes }
+      }),
     )
     .pipe(Effect.orDie)
-  const remaining = yield* db
-    .select({
-      rows: sql<number>`count(*)`,
-      bytes: sql<number>`sum(length(data))`,
-    })
-    .from(EventTable)
-    .where(inArray(EventTable.type, snapshotTypes))
-    .get()
-    .pipe(Effect.orDie)
-  const removed = (stats?.rows ?? 0) - (remaining?.rows ?? 0)
-  const bytes = (stats?.bytes ?? 0) - (remaining?.bytes ?? 0)
-  if (removed > 0)
-    yield* db
-      .run(
-        sql`INSERT OR REPLACE INTO data_migration (name, time_completed) VALUES (${SNAPSHOT_COMPACTION_MARKER}, ${Date.now()})`,
-      )
-      .pipe(Effect.orDie)
-  return { removed, bytes }
+  return result
 })

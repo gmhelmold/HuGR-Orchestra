@@ -24,6 +24,10 @@ export const syncHandlers = HttpApiBuilder.group(InstanceHttpApi, "sync", (handl
     const events = yield* EventV2Bridge.Service
     const { db } = yield* Database.Service
 
+    const ensureSyncAvailable = Effect.fn("SyncHttpApi.ensureSyncAvailable")(function* () {
+      if (yield* EventV2.hasCompactedSnapshotEvents(db)) return yield* new HttpApiError.BadRequest({})
+    })
+
     const start = Effect.fn("SyncHttpApi.start")(function* () {
       yield* workspace
         .startWorkspaceSyncing((yield* InstanceState.context).project.id)
@@ -32,6 +36,7 @@ export const syncHandlers = HttpApiBuilder.group(InstanceHttpApi, "sync", (handl
     })
 
     const replay = Effect.fn("SyncHttpApi.replay")(function* (ctx: { payload: typeof ReplayPayload.Type }) {
+      yield* ensureSyncAvailable()
       const payload: EventV2.SerializedEvent[] = ctx.payload.events.map((event) => ({
         id: event.id,
         aggregateID: event.aggregateID,
@@ -70,6 +75,7 @@ export const syncHandlers = HttpApiBuilder.group(InstanceHttpApi, "sync", (handl
     })
 
     const history = Effect.fn("SyncHttpApi.history")(function* (ctx: { payload: typeof HistoryPayload.Type }) {
+      yield* ensureSyncAvailable()
       const exclude = Object.entries(ctx.payload)
       return yield* db
         .select()
