@@ -647,6 +647,7 @@ describe("tool.read symbol scope", () => {
       expect(result.output).toContain("<type>symbol</type>")
       expect(result.output).toContain("source=\"indent\"")
       expect(result.output).toContain("applySnapshot")
+      expect(result.output).not.toContain("a\np\np\nl\ny")
       expect(result.metadata.symbol).toBe("applySnapshot")
       expect(result.metadata.source).toBe("indent")
       expect(result.metadata.size).toBe(4)

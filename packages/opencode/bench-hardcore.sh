@@ -42,6 +42,7 @@ cold_job() { # file mode -> params JSON
   case "$mode" in
     whole)  echo "{\"filePath\":\"$file\"}" ;;
     symbol) echo "{\"filePath\":\"$file\",\"symbol\":\"targetFunc\"}" ;;
+    search) echo "{\"filePath\":\"$file\",\"search\":\"targetFunc\"}" ;;
     tail)   echo "{\"filePath\":\"$file\",\"offset\":-5}" ;;
     depth)  echo "{\"filePath\":\"$file\",\"symbol\":\"targetFunc\",\"depth\":1}" ;;
   esac
@@ -77,7 +78,7 @@ for FILE in "${FILES[@]}"; do
   b="$(basename "$FILE")"
   total_lines="$(wc -l < "$FILE" | tr -d ' ')"
   FILE_LIST+="$b:$total_lines "
-  for MODE in whole symbol tail depth; do
+  for MODE in whole symbol search tail depth; do
     for PHASE in cold warm; do
       ENVS="$(run_process "$FILE" "$MODE" "$PHASE")"
       # parse into raw.csv lines tagged with file|mode|phase
