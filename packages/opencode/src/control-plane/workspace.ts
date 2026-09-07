@@ -593,13 +593,23 @@ const layer = Layer.effect(
 
             if (target.type === "remote") {
               yield* syncHistory(previous, target.url, target.headers).pipe(
-                Effect.catch((error) =>
-                  Effect.logWarning("session warp final source sync failed", {
+                Effect.catch((error) => {
+                  if (error instanceof SyncHttpError && error.status === 400)
+                    return Effect.fail(
+                      new SessionWarpHttpError({
+                        message: `Failed to sync source workspace ${previous.id} before warp: ${error.message}`,
+                        workspaceID: previous.id,
+                        sessionID: input.sessionID,
+                        status: error.status,
+                        body: error.body ?? "",
+                      }),
+                    )
+                  return Effect.logWarning("session warp final source sync failed", {
                     workspaceID: previous.id,
                     sessionID: input.sessionID,
                     error: errorData(error),
-                  }),
-                ),
+                  })
+                }),
               )
             } else {
               yield* prompt.cancel(input.sessionID)
@@ -662,6 +672,15 @@ const layer = Layer.effect(
 
           return
         }
+
+        if (yield* EventV2.hasCompactedSnapshotEvents(db))
+          return yield* new SessionWarpHttpError({
+            message: "Workspace sync disabled after snapshot compaction",
+            workspaceID,
+            sessionID: input.sessionID,
+            status: 400,
+            body: "Workspace sync disabled after snapshot compaction",
+          })
 
         const rows = yield* db
           .select({

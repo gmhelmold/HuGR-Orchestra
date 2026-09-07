@@ -283,6 +283,18 @@ export const layerWith = (options?: LayerOptions) =>
                     .transaction(
                       () =>
                         Effect.gen(function* () {
+                          if (
+                            input &&
+                            (yield* db
+                              .get(sql`SELECT name FROM data_migration WHERE name = ${SNAPSHOT_COMPACTION_MARKER}`)
+                              .pipe(Effect.orDie))
+                          )
+                            yield* Effect.die(
+                              new InvalidDurableEventError({
+                                type: event.type,
+                                message: "Workspace sync disabled after snapshot compaction",
+                              }),
+                            )
                           const row = yield* db
                             .select({ seq: EventSequenceTable.seq, ownerID: EventSequenceTable.owner_id })
                             .from(EventSequenceTable)
@@ -696,13 +708,13 @@ export const node = makeGlobalNode({ service: Service, layer: layer, deps: [Data
 export const SNAPSHOT_TYPES = ["message.updated", "message.part.updated"] as const
 const SNAPSHOT_COMPACTION_MARKER = "event_snapshot_compaction"
 
-export const hasCompactedSnapshotEvents = Effect.fn("EventV2.hasCompactedSnapshotEvents")(function* (
-  db: Database.Interface["db"],
-) {
-  return Boolean(
-    yield* db.get(sql`SELECT name FROM data_migration WHERE name = ${SNAPSHOT_COMPACTION_MARKER}`).pipe(Effect.orDie),
-  )
-})
+export function hasCompactedSnapshotEvents(db: Pick<Database.Interface["db"], "get">) {
+  return Effect.gen(function* () {
+    return Boolean(
+      yield* db.get(sql`SELECT name FROM data_migration WHERE name = ${SNAPSHOT_COMPACTION_MARKER}`).pipe(Effect.orDie),
+    )
+  })
+}
 
 /**
  * Compact snapshot-like durable events, keeping only the latest occurrence per
@@ -729,18 +741,19 @@ export const compactSnapshotEvents = Effect.fn("EventV2.compactSnapshotEvents")(
       new Error("Snapshot compaction already ran; refusing to compact a database that may have sync sequence gaps."),
     )
   const snapshotTypes = SNAPSHOT_TYPES.map((type) => versionedType(type, 1))
-  const stats = yield* db
-    .select({
-      rows: sql<number>`count(*)`,
-      bytes: sql<number>`sum(length(data))`,
-    })
-    .from(EventTable)
-    .where(inArray(EventTable.type, snapshotTypes))
-    .get()
-    .pipe(Effect.orDie)
   const result = yield* db
-    .transaction((tx) =>
-      Effect.gen(function* () {
+    .transaction(
+      (tx) =>
+        Effect.gen(function* () {
+        const stats = yield* tx
+          .select({
+            rows: sql<number>`count(*)`,
+            bytes: sql<number>`sum(length(data))`,
+          })
+          .from(EventTable)
+          .where(inArray(EventTable.type, snapshotTypes))
+          .get()
+          .pipe(Effect.orDie)
         yield* tx
           .run(
             sql.raw(`
@@ -791,7 +804,8 @@ export const compactSnapshotEvents = Effect.fn("EventV2.compactSnapshotEvents")(
             )
             .pipe(Effect.orDie)
         return { removed, bytes }
-      }),
+        }),
+      { behavior: "immediate" },
     )
     .pipe(Effect.orDie)
   return result

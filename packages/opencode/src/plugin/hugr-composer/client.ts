@@ -98,6 +98,7 @@ export class HugrComposerClient {
     const transport = this.#transport
     this.#client = undefined
     this.#transport = undefined
+    this.#connecting = undefined
     if (client) {
       await client.close().catch(() => undefined)
       return
@@ -156,10 +157,8 @@ export class HugrComposerClient {
 }
 
 function composerEnvironment(command: string, worktree: string, forwardAuth: boolean) {
-  const inheritedPath = process.env.PATH?.split(path.delimiter) ?? []
   const pathEntries = [
     path.dirname(command),
-    ...inheritedPath,
     ...(process.platform === "win32"
       ? []
       : ["/usr/local/bin", "/opt/homebrew/bin", "/usr/bin", "/bin", "/usr/sbin", "/sbin"]),
