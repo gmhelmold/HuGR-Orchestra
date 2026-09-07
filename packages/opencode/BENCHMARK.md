@@ -16,3 +16,13 @@ Modes: default, explicit slice, tail, oversized default, oversized explicit rang
 `output_chars` means JavaScript string character count, not bytes or tokens. `elapsed_ms` includes CLI startup. p50/p95 only shown where sample size >=2.
 
 Run self-tests with `BENCH_SELF_TEST=1 ./bench-hardcore.sh`. They prove malformed envelope, zero rows, oracle mismatch, exact expected-error fragment mismatch, unexpected success/error outcomes fail closed. Out-of-range offsets are outside this benchmark scope. No symbol, search, depth, sparse, token, byte, or accuracy claim. No LSP oracle. Debug params JSON-only. Debug runner removes throwaway session in finalizer. Report records expected/observed outcomes, test count/cell completeness, runtime platform/Python/binary, and states missing CPU/memory/disk/load controls.
+## Performance
+
+`bench-performance.sh` is separate from correctness corpus and harness. It creates deterministic 1MiB and 100MiB text fixtures only under `--corpus` (default `/tmp/opencode-read-performance-corpus`); `--large` adds 1GiB. It never writes correctness corpus.
+
+```bash
+./bench-performance.sh <compiled-opencode-binary> --corpus /tmp/opencode-read-performance-corpus --out /tmp/opencode-read-performance-result
+BENCH_PERFORMANCE_SELF_TEST=1 ./bench-performance.sh
+```
+
+Rows are serial `default`, `explicit_small_slice`, and `tail_offset_minus_5` calls. JSON/Markdown record `process_elapsed_ms` (startup included), envelope `operation_ms`, peak RSS bytes, OS/CPU/runtime/binary identity, and fixture hashes. macOS parses `/usr/bin/time -l`; Linux parses `/usr/bin/time -v` kbytes into bytes; other OSes fail `unsupported-platform`. 1GiB is opt-in: require at least 1GiB free disk plus overhead; do not use during active workload.
