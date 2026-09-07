@@ -352,6 +352,10 @@ export const ReadTool = Tool.define<typeof Parameters, Metadata, FSUtil.Service 
         return yield* Effect.fail(
           new Error(`Offset ${start} is out of range for this file (${total ?? page.total ?? 0} lines)`),
         )
+      if (page.capped && !page.lines.length)
+        return yield* Effect.fail(
+          new Error(`One complete rendered line cannot fit under ${MAX_BYTES / 1024} KB output cap. Reduce system reminder or path size.`),
+        )
       if (page.capped && explicit)
         return yield* Effect.fail(
           new Error(`Requested range exceeds ${MAX_BYTES / 1024} KB output limit. Use a smaller limit or offset.`),
