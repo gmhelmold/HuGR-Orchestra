@@ -1,15 +1,17 @@
 #!/usr/bin/env bash
 # Correctness-first benchmark for filePath/offset/limit read modes.
 # Usage: ./bench-hardcore.sh <binary> [corpus_dir] [runs] [out_dir]
-# Self-test: BENCH_SELF_TEST=1 ./bench-hardcore.sh "$(command -v true)"
+# Self-test: BENCH_SELF_TEST=1 ./bench-hardcore.sh
 set -euo pipefail
-BIN="${1:?usage: $0 <binary> [corpus_dir] [runs] [out_dir]}"
+BIN="${1:-}"
 CORPUS="${2:-/tmp/bench-corpus}"
 RUNS="${3:-5}"
 OUT="${4:-/tmp/bench-result}"
-[[ -x "$BIN" ]] || { echo "binary not executable: $BIN" >&2; exit 2; }
-[[ -f "$CORPUS/manifest.json" || "${BENCH_SELF_TEST:-}" == 1 ]] || { echo "corpus manifest missing: $CORPUS/manifest.json (run bench-corpus.sh)" >&2; exit 2; }
-[[ "$RUNS" =~ ^[1-9][0-9]*$ ]] || { echo "runs must be positive integer" >&2; exit 2; }
+if [[ "${BENCH_SELF_TEST:-}" != 1 ]]; then
+  [[ -n "$BIN" && -x "$BIN" ]] || { echo "usage: $0 <binary> [corpus_dir] [runs] [out_dir]" >&2; exit 2; }
+  [[ -f "$CORPUS/manifest.json" ]] || { echo "corpus manifest missing: $CORPUS/manifest.json (run bench-corpus.sh)" >&2; exit 2; }
+  [[ "$RUNS" =~ ^[1-9][0-9]*$ ]] || { echo "runs must be positive integer" >&2; exit 2; }
+fi
 mkdir -p "$OUT"
 export BIN CORPUS RUNS OUT BENCH_SELF_TEST
 # One process per invocation. Serial avoids SQLite database-locked artifacts.
