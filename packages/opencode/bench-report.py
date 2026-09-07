@@ -1,165 +1,50 @@
 #!/usr/bin/env python3
-"""Aggregate a bench-hardcore raw.csv into results.json + report.md.
-
-Usage: bench-report.py <raw.csv> <results.json> <report.md> <"file:tlines ...">
-"""
+"""Validate correctness-checked rows. Usage: raw expected system results report."""
 import json
 import statistics
 import sys
 
+def percentile(values, p):
+    values = sorted(values)
+    return values[min((len(values) - 1) * p // 100, len(values) - 1)]
 
-def main() -> None:
-    raw, res_path, rep_path = sys.argv[1], sys.argv[2], sys.argv[3]
-    file_list = sys.argv[4].split()
-
+def main():
+    if len(sys.argv) != 6: raise SystemExit("usage: bench-report.py raw.jsonl expected.json system.json results.json report.md")
+    raw_path, expected_path, system_path, results_path, report_path = sys.argv[1:]
+    expected, system = json.load(open(expected_path, encoding="utf-8")), json.load(open(system_path, encoding="utf-8"))
     rows = []
-    with open(raw) as f:
-        for line in f:
-            line = line.rstrip("\n")
-            if not line:
-                continue
-            try:
-                file, mode, phase, ri, ms, ochars, size, lr, saved, src, ok = line.split("|")
-            except ValueError:
-                continue
-            rows.append(
-                dict(
-                    file=file,
-                    mode=mode,
-                    phase=phase,
-                    ri=int(ri),
-                    ms=int(ms),
-                    ochars=int(ochars),
-                    size=int(size),
-                    lr=int(lr),
-                    saved=int(saved),
-                    src=src,
-                    ok=ok == "1",
-                )
-            )
-
-    def stats(xs):
-        if not xs:
-            return {}
-        xs = sorted(xs)
-        n = len(xs)
-        return dict(
-            n=n,
-            min=xs[0],
-            p50=xs[n * 50 // 100],
-            p95=xs[min(n * 95 // 100, n - 1)],
-            max=xs[-1],
-            avg=statistics.mean(xs),
-            std=statistics.pstdev(xs) if n > 1 else 0,
-        )
-
-    cells: dict = {}
-    for r in rows:
-        key = (r["file"], r["mode"], r["phase"])
-        cells.setdefault(
-            key,
-            {"ms": [], "ochars": [], "size": [], "lr": [], "saved": [], "src": [], "ok": 0, "total": 0},
-        )
-        c = cells[key]
-        c["total"] += 1
-        if r["ok"]:
-            c["ok"] += 1
-            c["ms"].append(r["ms"])
-            c["ochars"].append(r["ochars"])
-            c["size"].append(r["size"])
-            c["lr"].append(r["lr"])
-            c["saved"].append(r["saved"])
-            c["src"].append(r["src"])
-
-    out_cells = {}
-    for (file, mode, phase), c in cells.items():
-        out_cells[f"{file}|{mode}|{phase}"] = dict(
-            ok=c["ok"],
-            total=c["total"],
-            ms=stats(c["ms"]),
-            ochars=stats(c["ochars"]),
-            size=stats(c["size"]),
-            lr=stats(c["lr"]),
-            saved=stats(c["saved"]),
-            src_lsp=sum(1 for s in c["src"] if s == "lsp"),
-            src_indent=sum(1 for s in c["src"] if s == "indent"),
-        )
-
-    def cell(file, mode, phase="warm"):
-        return out_cells.get(f"{file}|{mode}|{phase}", {})
-
-    def f(x, d="\u2013"):
-        return f"{x:,.0f}" if isinstance(x, (int, float)) else d
-
-    def sp(base, v):
-        if not base or not v:
-            return "\u2013"
-        return f"{base / v:.1f}x"
-
-    def red(base, v):
-        if not base or not v:
-            return "\u2013"
-        if v >= base:
-            return "\u2248"
-        return f"-{(1 - v / base) * 100:.0f}%"
-
-    lines = ["# read tool \u2014 hardcore benchmark", ""]
-
-    # --- latency: warm p50 per mode, delta vs whole ---
-    lines += ["## Latency (warm p50 ms)", "", "| file | whole | symbol | tail | depth | \u0394 symbol | \u0394 tail | \u0394 depth |"]
-    lines += ["|---|---|---|---|---|---|---|---|"]
-    for entry in file_list:
-        file, tlines = entry.rsplit(":", 1)
-        w = cell(file, "whole").get("ms", {}).get("p50")
-        s = cell(file, "symbol").get("ms", {}).get("p50")
-        t = cell(file, "tail").get("ms", {}).get("p50")
-        d = cell(file, "depth").get("ms", {}).get("p50")
-        lines += [f"| {file} ({tlines}L) | {f(w)} | {f(s)} | {f(t)} | {f(d)} | {sp(w, s)} | {sp(w, t)} | {sp(w, d)} |"]
-
-    # --- token economics: output bytes, delta vs whole ---
-    lines += ["", "## Output bytes (warm avg)", "", "| file | whole | symbol | tail | \u0394 symbol | \u0394 tail |"]
-    lines += ["|---|---|---|---|---|---|"]
-    for entry in file_list:
-        file, _ = entry.rsplit(":", 1)
-        w = cell(file, "whole").get("ochars", {}).get("avg")
-        s = cell(file, "symbol").get("ochars", {}).get("avg")
-        t = cell(file, "tail").get("ochars", {}).get("avg")
-        lines += [f"| {file} | {f(w)} | {f(s)} | {f(t)} | {red(w, s)} | {red(w, t)} |"]
-
-    # --- cold vs warm: symbol mode latency (p50 — robust to bench-runner noise) ---
-    lines += ["", "## Cold \u2192 warm (p50 ms, symbol res)", "", "| file | cold | warm | \u0394 |"]
-    lines += ["|---|---|---|---|"]
-    for entry in file_list:
-        file, _ = entry.rsplit(":", 1)
-        c = cell(file, "symbol", "cold").get("ms", {}).get("p50")
-        w = cell(file, "symbol").get("ms", {}).get("p50")
-        lines += [f"| {file} | {f(c)} | {f(w)} | {sp(c, w)} |"]
-
-    # --- resolution accuracy (lsp vs indent heuristic) ---
-    lines += ["", "## Symbol resolution (source, warm)", "", "| file | lsp | indent | accuracy |"]
-    lines += ["|---|---|---|---|"]
-    for entry in file_list:
-        file, _ = entry.rsplit(":", 1)
-        c = cell(file, "symbol")
-        n = c.get("src_lsp", 0) + c.get("src_indent", 0)
-        acc = f"{c.get('src_lsp', 0) / n * 100:.0f}%" if n else "\u2013"
-        lines += [f"| {file} | {c.get('src_lsp', 0)} | {c.get('src_indent', 0)} | {acc} |"]
-
-    # --- symbol slice economics: lines read vs full file ---
-    lines += ["", "## Symbol slice (warm, symbol mode)", "", "| file | full lines | lines_read | saved |"]
-    lines += ["|---|---|---|---|"]
-    for entry in file_list:
-        file, tlines = entry.rsplit(":", 1)
-        c = cell(file, "symbol")
-        lr = c.get("lr", {}).get("avg")
-        saved = int(tlines) - lr if lr else None
-        lines += [f"| {file} | {tlines} | {f(lr)} | {f(saved)} |"]
-
-    report = "\n".join(lines) + "\n"
-    open(rep_path, "w").write(report)
-    json.dump({"cells": out_cells, "file_list": file_list}, open(res_path, "w"), indent=1)
-    print(report)
-
-
-if __name__ == "__main__":
-    main()
+    for line_number, line in enumerate(open(raw_path, encoding="utf-8"), 1):
+        if not line.strip(): continue
+        try:
+            row = json.loads(line)
+            if not isinstance(row, dict) or not isinstance(row.get("elapsed_ms"), (int, float)) or not isinstance(row.get("output_chars"), int): raise ValueError("missing measurements")
+        except (json.JSONDecodeError, ValueError) as err: raise SystemExit(f"malformed raw row {line_number}: {err}")
+        rows.append(row)
+    if not rows: raise SystemExit("no valid rows")
+    cells = {(case["file"], case["mode"]): [] for case in expected.get("cases", [])}
+    if not cells: raise SystemExit("no expected cells")
+    for row in rows:
+        key = (row.get("file"), row.get("mode"))
+        if key not in cells: raise SystemExit(f"unexpected cell: {key}")
+        cells[key].append(row)
+    runs = expected.get("runs_per_cell")
+    if not isinstance(runs, int) or runs < 1: raise SystemExit("invalid expected run count")
+    missing = [key for key, values in cells.items() if len(values) != runs]
+    if missing: raise SystemExit(f"missing expected cells or rows: {missing}")
+    summary = {}
+    for key, values in sorted(cells.items()):
+        elapsed, chars = [r["elapsed_ms"] for r in values], [r["output_chars"] for r in values]
+        ms = {"min": min(elapsed), "max": max(elapsed), "avg": statistics.mean(elapsed)}
+        if len(values) >= 2: ms.update(p50=percentile(elapsed, 50), p95=percentile(elapsed, 95))
+        summary["|".join(key)] = {"successful_rows": len(values), "elapsed_ms": ms, "output_chars": {"min": min(chars), "max": max(chars), "avg": statistics.mean(chars)}}
+    results = {"scope": "filePath, offset, limit only", "system": system, "successful_rows": len(rows), "expected_rows": len(cells) * runs, "cells": summary}
+    json.dump(results, open(results_path, "w", encoding="utf-8"), indent=2)
+    lines = ["# Read Benchmark", "", "Correctness-first, reproducible harness for `filePath`, `offset`, `limit`.", "", "## Scope", "", "Modes: default, explicit slice, tail, oversized default, oversized explicit range. Every row passed numbered-line range and exact-content oracle.", "", "No symbol, search, depth, sparse, token, byte, or accuracy measurement. No LSP oracle.", "", "## System", "", f"- Platform: `{system['platform']}`", f"- Python: `{system['python']}`", f"- Binary: `{system['binary']}`", f"- Successful/expected rows: {len(rows)}/{len(cells) * runs}", "", "## Results", "", "| fixture | mode | rows | elapsed ms avg | p50 | p95 | output chars avg |", "|---|---|---:|---:|---:|---:|---:|"]
+    for key, metric in summary.items():
+        file, mode = key.split("|", 1); ms = metric["elapsed_ms"]
+        p50 = f"{ms['p50']:.1f}" if "p50" in ms else "n/a (n<2)"; p95 = f"{ms['p95']:.1f}" if "p95" in ms else "n/a (n<2)"
+        lines.append(f"| {file} | {mode} | {metric['successful_rows']} | {ms['avg']:.1f} | {p50} | {p95} | {metric['output_chars']['avg']:.1f} |")
+    lines += ["", "## Limits", "", "Elapsed time includes one serial CLI process per row. `output_chars` is JavaScript string character count, not bytes or tokens. Corpus contains LF, CRLF, Unicode/emoji, long-line, dense-large, sparse-large fixtures; cases use range-relevant fixtures. Debug runner removes its throwaway session through `Session.remove` finalizer."]
+    open(report_path, "w", encoding="utf-8").write("\n".join(lines) + "\n")
+    print("\n".join(lines))
+if __name__ == "__main__": main()
