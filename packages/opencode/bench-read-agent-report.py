@@ -133,8 +133,15 @@ def binary_info(binary):
     return {"path": str(path), "sha256": sha256(path), "version": version_text}
 
 
-def build_plan(args, manifest, manifest_sha):
-    return {"format": 1, "binaries": {"baseline": binary_info(args.baseline), "candidate": binary_info(args.candidate)}, "models": args.models.split(","), "tasks": manifest["tasks"], "fixtures": manifest["fixtures"], "manifest_sha256": manifest_sha, "runs": args.runs, "timeout_sec": args.timeout_sec}
+def selected_tasks(value, manifest):
+    selected = [task["id"] for task in manifest["tasks"]] if value is None else value.split(",")
+    known = {task["id"] for task in manifest["tasks"]}
+    require(selected and all(task in known for task in selected) and len(set(selected)) == len(selected), "--tasks must contain unique known task IDs")
+    return [next(task for task in manifest["tasks"] if task["id"] == selected_id) for selected_id in selected]
+
+
+def build_plan(args, manifest, manifest_sha, tasks):
+    return {"format": 1, "binaries": {"baseline": binary_info(args.baseline), "candidate": binary_info(args.candidate)}, "models": args.models.split(","), "tasks": tasks, "fixtures": manifest["fixtures"], "manifest_sha256": manifest_sha, "runs": args.runs, "timeout_sec": args.timeout_sec}
 
 
 def load_plan(path):
@@ -270,7 +277,7 @@ def run(args):
     out = Path(args.out).resolve()
     out.mkdir(parents=True, exist_ok=True)
     contents, manifest, manifest_sha = corpus_spec()
-    plan = create_or_match_plan(out, build_plan(args, manifest, manifest_sha), args.resume)
+    plan = create_or_match_plan(out, build_plan(args, manifest, manifest_sha, selected_tasks(args.tasks, manifest)), args.resume)
     corpus = out / "corpus" if args.resume else write_corpus(out, contents, manifest)
     validate_corpus(corpus, plan)
     rows = read_rows(out, plan)
@@ -327,6 +334,14 @@ def self_test():
     assert timed_out
     prompt = task_prompt(Path("/tmp/read-agent/corpus/tail-marker.txt"))
     assert "/tmp/read-agent/corpus/tail-marker.txt" in prompt and "offset" not in prompt and "limit" not in prompt
+    manifest = {"tasks": [{"id": "tail"}, {"id": "middle"}]}
+    assert [task["id"] for task in selected_tasks("middle", manifest)] == ["middle"]
+    for value in ("", "missing", "tail,tail"):
+        try:
+            selected_tasks(value, manifest)
+        except Invalid:
+            continue
+        raise AssertionError(f"invalid task selection: {value}")
     with tempfile.TemporaryDirectory() as directory:
         out = Path(directory)
         plan = {"format": 1, "binaries": {}, "models": ["x/y"], "tasks": [{"id": "task", "file": "x", "answer": "MARKER"}], "fixtures": [], "manifest_sha256": hashlib.sha256(b"{}").hexdigest(), "runs": 1, "timeout_sec": 1}
@@ -358,6 +373,20 @@ def self_test():
         else:
             raise AssertionError("partial report refusal")
         assert pending_keys(plan, rows) == {("candidate", "x/y", "task", 0)}
+        subset_plan = {**plan, "tasks": [{"id": "task", "file": "x", "answer": "MARKER"}]}
+        subset_rows = [
+            {"binary": binary, "model": "x/y", "task": "task", "run": 0, "outcome": "timeout", "error": "timeout"}
+            for binary in ("baseline", "candidate")
+        ]
+        malformed.write_text("".join(json.dumps(row) + "\n" for row in subset_rows), encoding="utf-8")
+        require_complete(read_rows(out, subset_plan), subset_plan)
+        malformed.write_text(json.dumps({**subset_rows[0], "task": "unselected"}) + "\n", encoding="utf-8")
+        try:
+            read_rows(out, subset_plan)
+        except Invalid:
+            pass
+        else:
+            raise AssertionError("subset expected-row validation")
         all_timeout = [
             {"binary": binary, "model": "x/y", "task": "task", "run": 0, "outcome": "timeout", "error": "timeout", "read_calls": None, "retries": None, "tokens_input": None, "tokens_output": None, "cost": None}
             for binary in ("baseline", "candidate")
@@ -380,6 +409,7 @@ def main():
     parser.add_argument("--baseline")
     parser.add_argument("--candidate")
     parser.add_argument("--models")
+    parser.add_argument("--tasks")
     parser.add_argument("--runs", type=int, default=1)
     parser.add_argument("--timeout-sec", type=int, default=180)
     parser.add_argument("--out")
