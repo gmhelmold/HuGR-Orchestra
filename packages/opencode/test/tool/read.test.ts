@@ -1,7 +1,7 @@
 import { PermissionV1 } from "@opencode-ai/core/v1/permission"
 import { afterEach, describe, expect, test } from "bun:test"
 import { LayerNode } from "@opencode-ai/core/effect/layer-node"
-import { Cause, Effect, Exit, Layer, Schema } from "effect"
+import { Cause, Effect, Exit, FileSystem, Layer, Schema } from "effect"
 import path from "path"
 import { Agent } from "../../src/agent/agent"
 import { CrossSpawnSpawner } from "@opencode-ai/core/cross-spawn-spawner"
@@ -27,6 +27,7 @@ import {
 import { testEffect } from "../lib/effect"
 
 const FIXTURES_DIR = path.join(import.meta.dir, "fixtures")
+const MAX_MEDIA_BYTES = 20 * 1024 * 1024
 
 afterEach(async () => {
   await disposeAllInstances()
@@ -488,16 +489,33 @@ describe("tool.read truncation", () => {
     }),
   )
 
-  it.live("image files set truncated to false", () =>
+  it.instance("attaches images at media size cap", () =>
     Effect.gen(function* () {
-      const dir = yield* tmpdirScoped()
+      const test = yield* TestInstance
       const png = Buffer.from(
         "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8DwHwAFBQIAX8jx0gAAAABJRU5ErkJggg==",
         "base64",
       )
-      yield* put(path.join(dir, "image.png"), png)
+      const file = path.join(test.directory, "image.png")
+      yield* put(file, png)
+      const fs = yield* FSUtil.Service
 
-      const result = yield* exec(dir, { filePath: path.join(dir, "image.png") })
+      const result = yield* run({ filePath: file }).pipe(
+        Effect.provideService(
+          FSUtil.Service,
+          FSUtil.Service.of({
+            ...fs,
+            stat: (filepath) =>
+              fs
+                .stat(filepath)
+                .pipe(
+                  Effect.map((info) =>
+                    filepath === file ? { ...info, size: FileSystem.Size(MAX_MEDIA_BYTES) } : info,
+                  ),
+                ),
+          }),
+        ),
+      )
       expect(result.metadata.truncated).toBe(false)
       expect(result.attachments).toBeDefined()
       expect(result.attachments?.length).toBe(1)
@@ -506,6 +524,53 @@ describe("tool.read truncation", () => {
       expect(result.attachments?.[0]).not.toHaveProperty("messageID")
     }),
   )
+
+  for (const [name, bytes, mime] of [
+    [
+      "image",
+      Buffer.from(
+        "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8DwHwAFBQIAX8jx0gAAAABJRU5ErkJggg==",
+        "base64",
+      ),
+      "image/png",
+    ],
+    ["PDF", Buffer.from("%PDF-1.4"), "application/pdf"],
+  ] as const) {
+    it.instance(`rejects over-cap ${name} before reading attachment bytes`, () =>
+      Effect.gen(function* () {
+        const test = yield* TestInstance
+        const file = path.join(test.directory, `oversized-${name}`)
+        yield* put(file, bytes)
+        const fs = yield* FSUtil.Service
+        let reads = 0
+
+        const err = yield* fail(test.directory, { filePath: file }).pipe(
+          Effect.provideService(
+            FSUtil.Service,
+            FSUtil.Service.of({
+              ...fs,
+              stat: (filepath) =>
+                fs
+                  .stat(filepath)
+                  .pipe(
+                    Effect.map((info) =>
+                      filepath === file ? { ...info, size: FileSystem.Size(MAX_MEDIA_BYTES + 1) } : info,
+                    ),
+                  ),
+              readFile: (filepath) => {
+                reads++
+                return Effect.die(`readFile called for over-cap attachment: ${filepath}`)
+              },
+            }),
+          ),
+        )
+        expect(err.message).toBe(
+          `Cannot read ${mime} attachment at ${file}: ${MAX_MEDIA_BYTES + 1} bytes exceeds maximum ${MAX_MEDIA_BYTES} bytes. Use a file at or below ${MAX_MEDIA_BYTES} bytes.`,
+        )
+        expect(reads).toBe(0)
+      }),
+    )
+  }
 
   it.live("detects attachment media from file contents", () =>
     Effect.gen(function* () {

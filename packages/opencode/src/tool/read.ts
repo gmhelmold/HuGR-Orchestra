@@ -13,6 +13,7 @@ const DEFAULT_READ_LIMIT = 2000
 const MAX_LINE_LENGTH = 2000
 const MAX_LINE_SUFFIX = `... (line truncated to ${MAX_LINE_LENGTH} chars)`
 const MAX_BYTES = 50 * 1024
+const MAX_MEDIA_BYTES = 20 * 1024 * 1024
 const SAMPLE_BYTES = 4096
 const CHUNK_BYTES = 64 * 1024
 const SUPPORTED_IMAGE_MIMES = new Set(["image/jpeg", "image/png", "image/gif", "image/webp"])
@@ -296,6 +297,12 @@ export const ReadTool = Tool.define<typeof Parameters, Metadata, FSUtil.Service 
       const first = yield* sample(filepath, Number(stat.size))
       const mime = sniffAttachmentMime(first, FSUtil.mimeType(filepath))
       if (SUPPORTED_IMAGE_MIMES.has(mime) || isPdfAttachment(mime)) {
+        if (Number(stat.size) > MAX_MEDIA_BYTES)
+          return yield* Effect.fail(
+            new Error(
+              `Cannot read ${mime} attachment at ${filepath}: ${stat.size} bytes exceeds maximum ${MAX_MEDIA_BYTES} bytes. Use a file at or below ${MAX_MEDIA_BYTES} bytes.`,
+            ),
+          )
         const bytes = yield* fs.readFile(filepath)
         const output = isPdfAttachment(mime) ? "PDF read successfully" : "Image read successfully"
         return {
