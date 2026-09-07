@@ -6,18 +6,24 @@ shift $(( $# > 0 ? 1 : 0 ))
 CORPUS="/tmp/opencode-read-performance-corpus"
 OUT="/tmp/opencode-read-performance-result"
 LARGE=0
+RUNS=3
+valid_runs() { [[ "$1" =~ ^[1-9][0-9]*$ ]]; }
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --corpus) CORPUS="${2:-}"; shift 2 ;;
     --out) OUT="${2:-}"; shift 2 ;;
+    --runs) RUNS="${2:-}"; shift 2 ;;
     --large) LARGE=1; shift ;;
-    *) echo "usage: $0 <compiled-binary> [--corpus DIR] [--out DIR] [--large]" >&2; exit 2 ;;
+    *) echo "usage: $0 <compiled-binary> [--corpus DIR] [--out DIR] [--runs N] [--large]" >&2; exit 2 ;;
   esac
 done
+valid_runs "$RUNS" || { echo "runs must be positive integer" >&2; exit 2; }
 if [[ "${BENCH_PERFORMANCE_SELF_TEST:-}" == 1 ]]; then
+  if valid_runs 0; then echo "invalid runs self-test failed" >&2; exit 1; fi
   export BENCH_PERFORMANCE_SELF_TEST
   python3 - <<'PY'
 import re
+import statistics
 def rss(text, os_name):
     if os_name == "Darwin":
         match = re.search(r"^\s*(\d+)\s+maximum resident set size\s*$", text, re.M)
@@ -47,6 +53,25 @@ for value in ("", "not-json\n", '{"ms":null,"output":"x"}\n', '{"ms":1}\n'):
     try: envelope(value)
     except ValueError: continue
     raise AssertionError("envelope parser did not fail closed")
+def validate(rows, fixtures, runs):
+    expected = {(fixture, mode, run) for fixture in fixtures for mode in ("default", "explicit_small_slice", "tail_offset_minus_5") for run in range(runs)}
+    seen = set()
+    for row in rows:
+        key = (row.get("file"), row.get("mode"), row.get("run"))
+        if key not in expected or key in seen: raise ValueError("missing, unexpected, or duplicate row")
+        if not all(isinstance(row.get(name), (int, float)) and row[name] >= 0 for name in ("process_elapsed_ms", "operation_ms", "peak_rss_bytes")): raise ValueError("invalid metric")
+        seen.add(key)
+    if seen != expected: raise ValueError("missing expected mode row")
+def summary(values):
+    if len(values) == 1: return {"min": values[0], "avg": values[0], "p50": None, "p95": None}
+    values = sorted(values); return {"min": values[0], "avg": statistics.mean(values), "p50": values[(len(values)-1)//2], "p95": values[((len(values)-1)*95)//100]}
+good = [{"file": "x", "mode": mode, "run": 0, "process_elapsed_ms": 1, "operation_ms": 1, "peak_rss_bytes": 1} for mode in ("default", "explicit_small_slice", "tail_offset_minus_5")]
+validate(good, ["x"], 1)
+for rows in (good[:-1], good + [good[0]], [{**good[0], "process_elapsed_ms": None}] + good[1:]):
+    try: validate(rows, ["x"], 1)
+    except ValueError: continue
+    raise AssertionError("row validator did not fail closed")
+if summary([1])["p95"] is not None: raise AssertionError("N=1 percentile")
 print("bench-performance self-test: pass")
 PY
   exit 0
@@ -56,9 +81,9 @@ fi
 mkdir -p "$CORPUS" "$OUT"
 CORPUS="$(cd "$CORPUS" && pwd -P)"
 OUT="$(cd "$OUT" && pwd -P)"
-export BIN CORPUS OUT LARGE
+export BIN CORPUS OUT LARGE RUNS
 python3 - <<'PY'
-import hashlib, json, os, platform, re, subprocess, sys, time
+import hashlib, json, os, platform, re, statistics, subprocess, sys, time
 from pathlib import Path
 
 def fail(message): raise ValueError(message)
@@ -89,10 +114,26 @@ def envelope(stdout, params):
     if result.get("ok") is False or not isinstance(result.get("output"), str): fail("invalid read output")
     if not isinstance(result.get("ms"), (int, float)) or result["ms"] < 0: fail("missing or invalid operation ms")
     return result
+def validate(rows, fixtures, runs):
+    modes = ("default", "explicit_small_slice", "tail_offset_minus_5")
+    expected = {(fixture["file"], mode, run) for fixture in fixtures for mode in modes for run in range(runs)}
+    seen = set()
+    for row in rows:
+        key = (row.get("file"), row.get("mode"), row.get("run"))
+        if key not in expected or key in seen: fail("missing, unexpected, or duplicate row")
+        for metric in ("process_elapsed_ms", "operation_ms", "peak_rss_bytes"):
+            if not isinstance(row.get(metric), (int, float)) or row[metric] < 0: fail(f"invalid {metric}: {key}")
+        seen.add(key)
+    if seen != expected: fail("missing expected mode row")
+def stats(values):
+    ordered = sorted(values); result = {"min": ordered[0], "avg": statistics.mean(ordered), "p50": None, "p95": None}
+    if len(ordered) >= 2: result.update(p50=ordered[(len(ordered)-1)//2], p95=ordered[((len(ordered)-1)*95)//100])
+    return result
 
 os_name = platform.system()
 if os_name not in {"Darwin", "Linux"}: raise SystemExit(f"unsupported-platform: {os_name}; supported: Darwin, Linux")
 corpus, out, binary = Path(os.environ["CORPUS"]), Path(os.environ["OUT"]), Path(os.environ["BIN"])
+runs = int(os.environ["RUNS"])
 fixtures = [write(corpus / "read-1MiB.txt", 1 << 20), write(corpus / "read-100MiB.txt", 100 << 20)]
 if os.environ["LARGE"] == "1": fixtures.append(write(corpus / "read-1GiB.txt", 1 << 30))
 (corpus / "manifest.json").write_text(json.dumps({"fixtures": fixtures}, indent=2) + "\n")
@@ -102,18 +143,30 @@ for fixture in fixtures:
     if hashlib.sha256(path.read_bytes()).hexdigest() != fixture["sha256"]: raise SystemExit(f"invalid performance fixture: {path}")
     for mode, extra in (("default", {}), ("explicit_small_slice", {"offset": 2, "limit": 3}), ("tail_offset_minus_5", {"offset": -5})):
         params = {"filePath": str(path), **extra}
-        command = ["/usr/bin/time", "-l" if os_name == "Darwin" else "-v", str(binary), "debug", "read", "--params", json.dumps(params)]
-        before = time.monotonic_ns(); proc = subprocess.run(command, text=True, capture_output=True)
-        if proc.returncode != 0: raise SystemExit(f"read process failed {fixture['file']}/{mode}: {proc.stderr.strip()}")
-        try: result, peak = envelope(proc.stdout, params), rss(proc.stderr, os_name)
-        except ValueError as error: raise SystemExit(f"invalid result {fixture['file']}/{mode}: {error}")
-        rows.append({"file": fixture["file"], "mode": mode, "process_elapsed_ms": (time.monotonic_ns() - before) / 1_000_000, "operation_ms": result["ms"], "peak_rss_bytes": peak})
+        for run in range(runs):
+            command = ["/usr/bin/time", "-l" if os_name == "Darwin" else "-v", str(binary), "debug", "read", "--params", json.dumps(params)]
+            before = time.monotonic_ns(); proc = subprocess.run(command, text=True, capture_output=True)
+            if proc.returncode != 0: raise SystemExit(f"read process failed {fixture['file']}/{mode}/{run}: {proc.stderr.strip()}")
+            try: result, peak = envelope(proc.stdout, params), rss(proc.stderr, os_name)
+            except ValueError as error: raise SystemExit(f"invalid result {fixture['file']}/{mode}/{run}: {error}")
+            rows.append({"file": fixture["file"], "mode": mode, "run": run, "process_elapsed_ms": (time.monotonic_ns() - before) / 1_000_000, "operation_ms": result["ms"], "peak_rss_bytes": peak})
+try: validate(rows, fixtures, runs)
+except ValueError as error: raise SystemExit(str(error))
 identity = {"path": str(binary.resolve()), "bytes": binary.stat().st_size, "sha256": hashlib.sha256(binary.read_bytes()).hexdigest()}
 system = {"os": platform.platform(), "cpu": platform.processor() or platform.machine(), "runtime": sys.version.split()[0], "binary": identity, "rss_tool": "/usr/bin/time -l" if os_name == "Darwin" else "/usr/bin/time -v", "fixtures": fixtures}
-results = {"system": system, "rows": rows}
+cells = {}
+for fixture in fixtures:
+    for mode in ("default", "explicit_small_slice", "tail_offset_minus_5"):
+        values = [row for row in rows if row["file"] == fixture["file"] and row["mode"] == mode]
+        cells[f"{fixture['file']}|{mode}"] = {metric: stats([row[metric] for row in values]) for metric in ("process_elapsed_ms", "operation_ms", "peak_rss_bytes")}
+results = {"system": system, "runs_per_cell": runs, "rows": rows, "cells": cells}
 (out / "results.json").write_text(json.dumps(results, indent=2) + "\n")
-lines = ["# Read Performance", "", f"System: `{system}`", "", "| fixture | mode | process elapsed ms | operation ms | peak RSS bytes |", "|---|---|---:|---:|---:|"]
-lines += [f"| {row['file']} | {row['mode']} | {row['process_elapsed_ms']:.1f} | {row['operation_ms']:.1f} | {row['peak_rss_bytes']} |" for row in rows]
+lines = ["# Read Performance", "", f"System: `{system}`", "", f"Runs per cell: {runs}", "", "| fixture | mode | process min/avg/p50/p95 ms | operation min/avg/p50/p95 ms | peak RSS min/avg/p50/p95 bytes |", "|---|---|---:|---:|---:|"]
+def format_stats(value):
+    return "/".join("n/a" if value[name] is None else f"{value[name]:.1f}" for name in ("min", "avg", "p50", "p95"))
+for key, value in cells.items():
+    fixture, mode = key.split("|", 1)
+    lines.append(f"| {fixture} | {mode} | {format_stats(value['process_elapsed_ms'])} | {format_stats(value['operation_ms'])} | {format_stats(value['peak_rss_bytes'])} |")
 (out / "report.md").write_text("\n".join(lines) + "\n")
 print("\n".join(lines))
 PY
