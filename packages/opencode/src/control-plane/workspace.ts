@@ -611,7 +611,7 @@ const layer = Layer.effect(
           // Attempt to apply the file changes to the new workspace.
           // We intentionally do first so if it fails we don't warp
           // the session.
-          yield* runInWorkspace({
+          const applied = yield* runInWorkspace({
             workspaceID: input.workspaceID ?? undefined,
             local: () => vcs.apply({ patch: sourcePatch }),
             remote: ({ target }) =>
@@ -621,6 +621,14 @@ const layer = Layer.effect(
               }),
             fallback: { applied: false },
           }).pipe(Effect.provide(AppNodeBuilderV1.build(InstanceStore.node)))
+          if (!applied.applied)
+            return yield* new SessionWarpHttpError({
+              message: `Failed to apply source changes to workspace ${input.workspaceID ?? previous?.id ?? "unknown"}`,
+              workspaceID: WorkspaceV2.ID.ascending(input.workspaceID ?? previous?.id),
+              sessionID: input.sessionID,
+              status: 502,
+              body: "Target workspace rejected source changes",
+            })
         }
 
         if (input.workspaceID === null) {
