@@ -222,6 +222,24 @@ describe("EventV2", () => {
     }),
   )
 
+  it.effect("rejects commit hooks on local-only durable events", () =>
+    Effect.gen(function* () {
+      const events = yield* EventV2.Service
+      const exit = yield* events
+        .publish(
+          SyncMessage,
+          { id: EventV2.ID.create(), text: "hello" },
+          {
+            persist: false,
+            commit: () => Effect.void,
+          },
+        )
+        .pipe(Effect.exit)
+
+      expect(String(exit)).toContain("cannot be combined with persist:false")
+    }),
+  )
+
   it.effect("runs projectors before publishing to streams", () =>
     Effect.gen(function* () {
       const events = yield* EventV2.Service
@@ -770,6 +788,42 @@ describe("EventV2", () => {
       expect(one).toBe(aggregateID)
       expect(two).toBe(aggregateID)
       expect(rows.map((row) => row.seq)).toEqual([0, 1, 2, 3])
+    }),
+  )
+
+  it.effect("replayAll rolls back the whole batch on failure", () =>
+    Effect.gen(function* () {
+      const events = yield* EventV2.Service
+      const { db } = yield* Database.Service
+      const aggregateID = Session.ID.create()
+
+      const exit = yield* events
+        .replayAll([
+          {
+            id: EventV2.ID.create(),
+            type: EventV2.versionedType(DurableMessage.type, 1),
+            seq: 0,
+            aggregateID,
+            data: durableData(aggregateID, "one"),
+          },
+          {
+            id: EventV2.ID.create(),
+            type: "unknown.event.1",
+            seq: 1,
+            aggregateID,
+            data: {},
+          },
+        ])
+        .pipe(Effect.exit)
+      const rows = yield* db
+        .select()
+        .from(EventTable)
+        .where(eq(EventTable.aggregate_id, aggregateID))
+        .all()
+        .pipe(Effect.orDie)
+
+      expect(String(exit)).toContain("Unknown durable event type")
+      expect(rows).toHaveLength(0)
     }),
   )
 

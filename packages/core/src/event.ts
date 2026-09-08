@@ -125,7 +125,8 @@ export interface PublishOptions {
    * When false, the durable event is projected locally but NOT persisted to the
    * event table or sequence. The payload is still notified to in-process
    * listeners (SSE, UI) but carries no `durable` envelope, so cross-instance
-   * sync does not observe it. Defaults to true (full event sourcing).
+   * sync does not observe it. Cannot be combined with `commit`. Defaults to
+   * true (full event sourcing).
    */
   readonly persist?: boolean
 }
@@ -282,6 +283,18 @@ export const layerWith = (options?: LayerOptions) =>
                     .transaction(
                       () =>
                         Effect.gen(function* () {
+                          if (
+                            input &&
+                            (yield* db
+                              .get(sql`SELECT name FROM data_migration WHERE name = ${SNAPSHOT_COMPACTION_MARKER}`)
+                              .pipe(Effect.orDie))
+                          )
+                            yield* Effect.die(
+                              new InvalidDurableEventError({
+                                type: event.type,
+                                message: "Workspace sync disabled after snapshot compaction",
+                              }),
+                            )
                           const row = yield* db
                             .select({ seq: EventSequenceTable.seq, ownerID: EventSequenceTable.owner_id })
                             .from(EventSequenceTable)
@@ -415,6 +428,13 @@ export const layerWith = (options?: LayerOptions) =>
         persist = true,
       ) {
         return Effect.gen(function* () {
+          if (!persist && commit)
+            return yield* Effect.die(
+              new InvalidDurableEventError({
+                type: event.type,
+                message: "Local commit hooks cannot be combined with persist:false",
+              }),
+            )
           if (!definition?.durable && commit)
             return yield* Effect.die(
               new InvalidDurableEventError({
@@ -508,19 +528,17 @@ export const layerWith = (options?: LayerOptions) =>
               ownerID: options?.ownerID,
               strictOwner: options?.strictOwner,
             })
-            if (committed && options?.publish) {
-              yield* notify(
-                {
-                  ...payload,
-                  durable: {
-                    aggregateID: committed.aggregateID,
-                    seq: committed.seq,
-                    version: definition.durable.version,
-                  },
+              if (!committed) return
+              const result = {
+                ...payload,
+                durable: {
+                  aggregateID: committed.aggregateID,
+                  seq: committed.seq,
+                  version: definition.durable.version,
                 },
-                true,
-              )
-            }
+              } as Payload
+              if (options?.publish) yield* notify(result, true)
+              return result
           }
         })
       }
@@ -540,21 +558,33 @@ export const layerWith = (options?: LayerOptions) =>
               }),
             )
           }
-          const start = events[0]?.seq ?? 0
-          for (const [index, event] of events.entries()) {
-            const seq = start + index
-            if (event.seq !== seq) {
-              yield* Effect.die(
-                new InvalidDurableEventError({
-                  type: event.type,
-                  message: `Replay sequence mismatch at index ${index}: expected ${seq}, got ${event.seq}`,
+          const committed = yield* db
+            .transaction(
+              () =>
+                Effect.gen(function* () {
+                  const start = events[0]?.seq ?? 0
+                  for (const [index, event] of events.entries()) {
+                    const seq = start + index
+                    if (event.seq !== seq) {
+                      yield* Effect.die(
+                        new InvalidDurableEventError({
+                          type: event.type,
+                          message: `Replay sequence mismatch at index ${index}: expected ${seq}, got ${event.seq}`,
+                        }),
+                      )
+                    }
+                  }
+                  return yield* Effect.forEach(events, (event) => replay(event, { ...options, publish: false }))
                 }),
-              )
-            }
-          }
-          for (const event of events) {
-            yield* replay(event, options)
-          }
+              { behavior: "immediate" },
+            )
+            .pipe(Effect.orDie)
+          if (options?.publish)
+            yield* Effect.forEach(
+              committed.filter((event): event is Payload => event !== undefined),
+              (event) => notify(event, true),
+              { discard: true },
+            )
           return source
         })
       }
@@ -686,6 +716,19 @@ const layer = layerWith()
 export const node = makeGlobalNode({ service: Service, layer: layer, deps: [Database.node] })
 
 export const SNAPSHOT_TYPES = ["message.updated", "message.part.updated"] as const
+const SNAPSHOT_COMPACTION_MARKER = "event_snapshot_compaction"
+
+export function hasCompactedSnapshotEvents(db: Pick<Database.Interface["db"], "get">) {
+  return Effect.gen(function* () {
+    return Boolean(
+      yield* db
+        .get(
+          sql`SELECT 1 WHERE EXISTS (SELECT 1 FROM data_migration WHERE name = ${SNAPSHOT_COMPACTION_MARKER}) OR EXISTS (SELECT 1 FROM event_sequence AS sequence WHERE NOT EXISTS (SELECT 1 FROM event WHERE aggregate_id = sequence.aggregate_id AND seq = 0) OR NOT EXISTS (SELECT 1 FROM event WHERE aggregate_id = sequence.aggregate_id AND seq = sequence.seq) OR EXISTS (SELECT 1 FROM event WHERE aggregate_id = sequence.aggregate_id GROUP BY aggregate_id HAVING COUNT(*) != MAX(seq) - MIN(seq) + 1))`,
+        )
+        .pipe(Effect.orDie),
+    )
+  })
+}
 
 /**
  * Compact snapshot-like durable events, keeping only the latest occurrence per
@@ -697,10 +740,8 @@ export const SNAPSHOT_TYPES = ["message.updated", "message.part.updated"] as con
  * final projection (the projector upserts by id), while intermediate rows are
  * pure write amplification.
  *
- * Deleting rows leaves `seq` gaps; sequence stream readers (`readAfter`,
- * `history`) use `seq > after` so gaps are transparent. Replay packets are
- * re-cost in the sender and validated against their own emitted `seq` order,
- * not against DB adjacency, so gaps are also safe for sync replay.
+ * Deleting rows leaves `seq` gaps. Compaction records a durable marker in the
+ * same transaction so workspace sync can permanently refuse unsafe replay.
  *
  * Non-snapshot lifecycle rows (`session.created`, `message.removed`,
  * `message.part.delta`, ...) are never touched, and `event_sequence` is left
@@ -709,19 +750,27 @@ export const SNAPSHOT_TYPES = ["message.updated", "message.part.updated"] as con
 export const compactSnapshotEvents = Effect.fn("EventV2.compactSnapshotEvents")(function* (
   db: Database.Interface["db"],
 ) {
+  if (yield* hasCompactedSnapshotEvents(db))
+    return yield* Effect.die(
+      new Error("Snapshot compaction already ran; refusing to compact a database that may have sync sequence gaps."),
+    )
   const snapshotTypes = SNAPSHOT_TYPES.map((type) => versionedType(type, 1))
-  const stats = yield* db
-    .select({
-      rows: sql<number>`count(*)`,
-      bytes: sql<number>`sum(length(data))`,
-    })
-    .from(EventTable)
-    .where(inArray(EventTable.type, snapshotTypes))
-    .get()
-    .pipe(Effect.orDie)
-  yield* db
-    .run(
-      sql.raw(`
+  const result = yield* db
+    .transaction(
+      (tx) =>
+        Effect.gen(function* () {
+        const stats = yield* tx
+          .select({
+            rows: sql<number>`count(*)`,
+            bytes: sql<number>`sum(length(data))`,
+          })
+          .from(EventTable)
+          .where(inArray(EventTable.type, snapshotTypes))
+          .get()
+          .pipe(Effect.orDie)
+        yield* tx
+          .run(
+            sql.raw(`
         DELETE FROM "event"
         WHERE "type" IN ('message.updated.1', 'message.part.updated.1')
           AND "id" NOT IN (
@@ -747,21 +796,31 @@ export const compactSnapshotEvents = Effect.fn("EventV2.compactSnapshotEvents")(
               )
             )
             WHERE "rn" = 1
+           )
+       `),
           )
-      `),
+          .pipe(Effect.orDie)
+        const remaining = yield* tx
+          .select({
+            rows: sql<number>`count(*)`,
+            bytes: sql<number>`sum(length(data))`,
+          })
+          .from(EventTable)
+          .where(inArray(EventTable.type, snapshotTypes))
+          .get()
+          .pipe(Effect.orDie)
+        const removed = (stats?.rows ?? 0) - (remaining?.rows ?? 0)
+        const bytes = (stats?.bytes ?? 0) - (remaining?.bytes ?? 0)
+        if (removed > 0)
+          yield* tx
+            .run(
+              sql`INSERT OR REPLACE INTO data_migration (name, time_completed) VALUES (${SNAPSHOT_COMPACTION_MARKER}, ${Date.now()})`,
+            )
+            .pipe(Effect.orDie)
+        return { removed, bytes }
+        }),
+      { behavior: "immediate" },
     )
     .pipe(Effect.orDie)
-  const remaining = yield* db
-    .select({
-      rows: sql<number>`count(*)`,
-      bytes: sql<number>`sum(length(data))`,
-    })
-    .from(EventTable)
-    .where(inArray(EventTable.type, snapshotTypes))
-    .get()
-    .pipe(Effect.orDie)
-  return {
-    removed: (stats?.rows ?? 0) - (remaining?.rows ?? 0),
-    bytes: (stats?.bytes ?? 0) - (remaining?.bytes ?? 0),
-  }
+  return result
 })
