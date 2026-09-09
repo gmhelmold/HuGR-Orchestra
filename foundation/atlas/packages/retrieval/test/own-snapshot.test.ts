@@ -4,7 +4,7 @@ import { exportOwnSnapshot, materializeStaticOwnSnapshot, parseOwnSnapshot, veri
 const snapshotText = JSON.stringify({
   schemaVersion: 1,
   snapshot: 'genesis-v1',
-  sourceRevision: 'revision-1',
+  sourceRevision: 'abcdef0123456789abcdef0123456789abcdef01',
   units: [{
     unit: { level: 'module', id: 'packages/genesis', grounding: null },
     sourceBlobs: { 'packages/genesis/src/index.ts': '0123456789abcdef0123456789abcdef01234567' },
@@ -37,6 +37,12 @@ describe('static Own snapshot', () => {
     const duplicate = JSON.parse(snapshotText);
     duplicate.units.push({ ...duplicate.units[0], sourceBlobs: { 'packages/genesis/src/other.ts': '0123456789abcdef0123456789abcdef01234567' } });
     expect(parseOwnSnapshot(JSON.stringify(duplicate))).toBeUndefined();
+  });
+
+  it.each(['HEAD', 'abcdef0', 'ABCDEF0123456789ABCDEF0123456789ABCDEF01', 'abcdef0123456789abcdef0123456789abcdef01^'])('refuses symbolic or non-canonical source revision %s', (sourceRevision) => {
+    const value = JSON.parse(snapshotText);
+    value.sourceRevision = sourceRevision;
+    expect(parseOwnSnapshot(JSON.stringify(value))).toBeUndefined();
   });
 
   it('accepts fresh reviewed input deterministically', () => {

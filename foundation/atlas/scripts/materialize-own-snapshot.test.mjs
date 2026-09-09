@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { execFileSync, spawnSync } from 'node:child_process';
-import { lstatSync, mkdtempSync, mkdirSync, readFileSync, readdirSync, renameSync, rmSync, writeFileSync } from 'node:fs';
+import { lstatSync, mkdtempSync, mkdirSync, readFileSync, readdirSync, renameSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -173,6 +173,33 @@ test('source mutation refuses stale input and preserves prior output bytes', (t)
   assert.deepEqual(tree(fx.root, '.opencode/skills/own'), beforeTree);
 });
 
+test('symlinked source anchor is refused before hashing', (t) => {
+  const fx = fixture();
+  t.after(() => rmSync(fx.root, { recursive: true, force: true }));
+  writeSnapshot(fx.root, 'reviewed.json', snapshot(fx));
+  writeFileSync(join(fx.root, 'src/linked.txt'), 'reviewed\n');
+  rmSync(join(fx.root, 'src/unit.txt'));
+  symlinkSync('linked.txt', join(fx.root, 'src/unit.txt'));
+
+  const result = run(fx.root, ['reviewed.json']);
+
+  assert.equal(result.status, 1);
+  assert.match(result.stderr, /source anchor is not a regular file: unit\/one -> src\/unit\.txt/);
+});
+
+test('symbolic source revision is refused even when injected contract accepts it', (t) => {
+  const fx = fixture();
+  t.after(() => rmSync(fx.root, { recursive: true, force: true }));
+  const value = snapshot(fx);
+  value.sourceRevision = 'HEAD';
+  writeSnapshot(fx.root, 'reviewed.json', value);
+
+  const result = run(fx.root, ['reviewed.json']);
+
+  assert.equal(result.status, 1);
+  assert.match(result.stderr, /sourceRevision is not an immutable lowercase full Git OID: HEAD/);
+});
+
 test('replacement removes obsolete skills', (t) => {
   const fx = fixture();
   t.after(() => rmSync(fx.root, { recursive: true, force: true }));
@@ -184,6 +211,34 @@ test('replacement removes obsolete skills', (t) => {
 
   assert.equal(result.status, 0, result.stderr);
   assert.deepEqual(tree(fx.root, '.opencode/skills/own').map(([path]) => path).sort(), ['OWN-COVERAGE.json', 'dW5pdC9vbmU/SKILL.md']);
+});
+
+test('backup cleanup failure preserves successful install and returns warning', (t) => {
+  const root = mkdtempSync(join(tmpdir(), 'own-cleanup-'));
+  t.after(() => rmSync(root, { recursive: true, force: true }));
+  const paths = {
+    snapshotTarget: join(root, 'OWN-SNAPSHOT.json'), snapshotTemp: join(root, '.OWN-SNAPSHOT.json.tmp'), snapshotBackup: join(root, '.OWN-SNAPSHOT.json.bak'),
+    skillsTarget: join(root, 'own'), skillsTemp: join(root, '.own.tmp'), skillsBackup: join(root, '.own.bak'),
+  };
+  writeFileSync(paths.snapshotTarget, 'prior snapshot\n');
+  writeFileSync(paths.snapshotTemp, 'next snapshot\n');
+  mkdirSync(paths.skillsTarget);
+  writeFileSync(join(paths.skillsTarget, 'old.md'), 'prior skill\n');
+  mkdirSync(paths.skillsTemp);
+  writeFileSync(join(paths.skillsTemp, 'new.md'), 'next skill\n');
+
+  const warnings = replaceOwnTargets(paths, {
+    lstatSync,
+    renameSync,
+    rmSync(path, options) {
+      if (path === paths.snapshotBackup) throw new Error('injected cleanup failure');
+      rmSync(path, options);
+    },
+  });
+
+  assert.equal(readFileSync(paths.snapshotTarget, 'utf8'), 'next snapshot\n');
+  assert.deepEqual(tree(root, 'own').map(([path]) => path), ['new.md']);
+  assert.deepEqual(warnings, ['snapshot backup cleanup failed: injected cleanup failure']);
 });
 
 test('snapshot input inside .atlas is refused without reading it', (t) => {

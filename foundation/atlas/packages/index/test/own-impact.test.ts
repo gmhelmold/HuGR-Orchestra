@@ -54,4 +54,15 @@ describe('Own PR impact receipt', () => {
     expect(receipt.removedUnits).toContain('b.ts');
     expect(receipt.impactedUnits).toContain('b.ts');
   });
+
+  it('identifies endpoint units and reverse blast for dependency-only graph delta', () => {
+    const files = tree({ 'a.ts': 'a1', 'b.ts': 'b1' });
+    const before = build(files, scip('unresolved'));
+    const after = build(files, scip('resolved'));
+    const receipt = ownImpact({ before, after, baseSnapshot: 'base', headSnapshot: 'head', knowledgeChangedUnits: [] });
+
+    expect(receipt.changedUnits).toEqual(['a.ts', 'b.ts']);
+    expect(receipt.reverseBlast).toContainEqual(expect.objectContaining({ origin: 'b.ts', closure: ['a.ts'] }));
+    expect(receipt.impactedUnits).toEqual(expect.arrayContaining(['.', 'a.ts', 'b.ts']));
+  });
 });

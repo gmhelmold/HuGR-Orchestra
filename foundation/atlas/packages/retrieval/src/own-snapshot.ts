@@ -108,7 +108,7 @@ function isSnapshotUnit(value: unknown): value is OwnSnapshotUnit {
 export function parseOwnSnapshot(content: string): OwnSnapshot | undefined {
   try {
     const value = JSON.parse(content) as unknown;
-    if (!isRecord(value) || value.schemaVersion !== OWN_SNAPSHOT_SCHEMA || typeof value.snapshot !== 'string' || value.snapshot.length === 0 || typeof value.sourceRevision !== 'string' || value.sourceRevision.length === 0 || !Array.isArray(value.units) || value.units.length === 0 || !value.units.every(isSnapshotUnit)) return undefined;
+    if (!isRecord(value) || value.schemaVersion !== OWN_SNAPSHOT_SCHEMA || typeof value.snapshot !== 'string' || value.snapshot.length === 0 || !isBlob(value.sourceRevision) || !Array.isArray(value.units) || value.units.length === 0 || !value.units.every(isSnapshotUnit)) return undefined;
     const ids = value.units.map((unit) => unit.unit.id);
     if (new Set(ids).size !== ids.length) return undefined;
     return value as unknown as OwnSnapshot;

@@ -77,8 +77,19 @@ export function replaceOwnTargets(paths, operations = {}) {
     throw new Error(`replacement failed: ${detail}${rollbackIssues.length === 0 ? '' : `; ${rollbackIssues.join('; ')}`}`);
   }
 
-  if (snapshotBackedUp) remove(paths.snapshotBackup, { recursive: true, force: true });
-  if (skillsBackedUp) remove(paths.skillsBackup, { recursive: true, force: true });
+  const cleanupWarnings = [];
+  for (const [backedUp, path, label] of [
+    [snapshotBackedUp, paths.snapshotBackup, 'snapshot'],
+    [skillsBackedUp, paths.skillsBackup, 'skills'],
+  ]) {
+    if (!backedUp) continue;
+    try {
+      remove(path, { recursive: true, force: true });
+    } catch (error) {
+      cleanupWarnings.push(`${label} backup cleanup failed: ${error instanceof Error ? error.message : String(error)}`);
+    }
+  }
+  return cleanupWarnings;
 }
 
 function containsAtlasDirectory(path) {
@@ -151,6 +162,10 @@ async function main() {
   }
   const snapshotBytes = `${JSON.stringify(snapshot, null, 2)}\n`;
 
+  if (!/^(?:[a-f0-9]{40}|[a-f0-9]{64})$/.test(snapshot.sourceRevision)) {
+    fail(`sourceRevision is not an immutable lowercase full Git OID: ${snapshot.sourceRevision}`);
+  }
+
   try {
     git(['cat-file', '-e', `${snapshot.sourceRevision}^{commit}`]);
     git(['merge-base', '--is-ancestor', snapshot.sourceRevision, 'HEAD']);
@@ -163,6 +178,15 @@ async function main() {
     for (const [path, blob] of Object.entries(entry.sourceBlobs)) {
       if (path.split('/').includes('.atlas')) {
         anchorIssues.push(`refusing .atlas source anchor: ${entry.unit.id} -> ${path}`);
+        continue;
+      }
+      try {
+        if (!lstatSync(join(ROOT, path)).isFile()) {
+          anchorIssues.push(`source anchor is not a regular file: ${entry.unit.id} -> ${path}`);
+          continue;
+        }
+      } catch {
+        anchorIssues.push(`source anchor is not a regular file: ${entry.unit.id} -> ${path}`);
         continue;
       }
       if (revisionBlob(snapshot.sourceRevision, path) !== blob) {
@@ -203,6 +227,7 @@ async function main() {
   const skillsTemp = join(skillsParent, `.own.tmp-${nonce}`);
   const skillsBackup = join(skillsParent, `.own.bak-${nonce}`);
   let transactionError;
+  let cleanupWarnings = [];
 
   try {
     mkdirSync(skillsParent, { recursive: true });
@@ -213,7 +238,7 @@ async function main() {
       mkdirSync(dirname(destination), { recursive: true });
       writeFileSync(destination, file.content, { flag: 'wx' });
     }
-    replaceOwnTargets({ snapshotTarget: SNAPSHOT_TARGET, skillsTarget: SKILLS_TARGET, snapshotTemp, skillsTemp, snapshotBackup, skillsBackup });
+    cleanupWarnings = replaceOwnTargets({ snapshotTarget: SNAPSHOT_TARGET, skillsTarget: SKILLS_TARGET, snapshotTemp, skillsTemp, snapshotBackup, skillsBackup });
   } catch (error) {
     transactionError = error instanceof Error ? error.message : String(error);
   } finally {
@@ -222,6 +247,7 @@ async function main() {
   }
 
   if (transactionError !== undefined) fail(transactionError);
+  for (const warning of cleanupWarnings) console.warn(`materialize-own-snapshot: warning: ${warning}`);
 
   console.log(`materialize-own-snapshot: wrote ${relative(ROOT, SNAPSHOT_TARGET)} and ${files.length} file(s) under ${relative(ROOT, SKILLS_TARGET)}; replacement uses transactional rollback, not crash-atomic commit`);
 }

@@ -87,7 +87,7 @@ export function availableOwnUnits(axes: Axes): readonly OwnUnit[] {
     for (const child of node.children) walk(child);
   };
   walk(axes.spatial);
-  return units.sort((a, b) => a.id.localeCompare(b.id));
+  return units.sort((a, b) => a.id < b.id ? -1 : a.id > b.id ? 1 : 0);
 }
 
 /** `Hash` and `NodeKey` are same-string DISTINCT brands (contracts/hash.ts). One cast helper, as

@@ -156,7 +156,7 @@ function receiptOf(input: StaticOwnInput, skillName: string, content: string): S
     snapshot: input.snapshot,
     sourceRevision: input.sourceRevision,
     graphCoverage: input.graphCoverage,
-    sourceBlobs: Object.fromEntries(Object.entries(input.sourceBlobs).sort(([a], [b]) => a.localeCompare(b))),
+    sourceBlobs: Object.fromEntries(Object.entries(input.sourceBlobs).sort(([a], [b]) => a < b ? -1 : a > b ? 1 : 0)),
     factIds,
     drillUnits,
     contentHash: String(id({ unit: input.unit.id, skillName, snapshot: input.snapshot, sourceRevision: input.sourceRevision, graphCoverage: input.graphCoverage, content })),

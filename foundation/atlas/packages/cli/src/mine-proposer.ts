@@ -153,6 +153,7 @@ export function defaultProposer(): SiteProposer {
  */
 export type TaskProposal = Omit<SeedProposal, 'cand'>;
 export const TASK_PROPOSALS_ENV = 'ATLAS_TASK_PROPOSALS';
+export const TASK_PROPOSER_IDENTITY = 'task-proposals:operator-supplied';
 
 export function createTaskProposer(proposals: ReadonlyMap<string, TaskProposal>): SiteProposer {
   return {

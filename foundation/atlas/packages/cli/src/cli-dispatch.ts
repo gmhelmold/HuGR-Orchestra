@@ -20,8 +20,8 @@ import { headSha } from '@atlas/adapter-io';
 import type { Hash } from '@atlas/contracts';
 import type { PromoteOut } from '@atlas/adapter-io';
 import type { DeriveRelationsRun } from '@atlas/adapter-io';
-import { runMineArms } from './mine.js';
-import { loadTaskProposer } from './mine-proposer.js';
+import { runMine, runMineArms } from './mine.js';
+import { loadTaskProposer, resolveMineSlot, TASK_PROPOSER_IDENTITY } from './mine-proposer.js';
 import { runReverify } from './reverify.js';
 import { renderRefusal } from './render.js';
 import { emit, emitCli, errorVerdict, refusalVerdict } from './cli-verdict.js';
@@ -73,7 +73,11 @@ import type { CliVerdict } from './render.js';
 export async function dispatchMine(): Promise<number> {
   try {
     const proposer = loadTaskProposer();
-    return emitCli(await runMineArms(process.cwd(), { history: createHistorySource(process.cwd(), 'HEAD'), ...(proposer === undefined ? {} : { proposer }) }));
+    const deps = { history: createHistorySource(process.cwd(), 'HEAD') };
+    if (proposer !== undefined) {
+      return emitCli(await runMine(process.cwd(), { ...deps, proposer, slot: resolveMineSlot({}), modelIdentity: TASK_PROPOSER_IDENTITY }));
+    }
+    return emitCli(await runMineArms(process.cwd(), deps));
   } catch (e) {
     const name = (e as { name?: unknown } | null)?.name;
     if (

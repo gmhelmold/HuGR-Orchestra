@@ -46,6 +46,10 @@ function uniqueSorted(values: Iterable<string>): readonly string[] {
   return [...new Set(values)].sort();
 }
 
+function edgeKey(edge: Axes['edges'][number]): string {
+  return `${String(edge.from)}\0${edge.to === null ? '' : String(edge.to)}\0${edge.kind}`;
+}
+
 /** Files are the only units with dependency-axis identities. Sub-file refinements remain structural-only. */
 function isDependencyUnit(unit: string): boolean {
   return !unit.includes('::');
@@ -63,7 +67,6 @@ export function ownImpact(input: OwnImpactInput): OwnImpactReceipt {
   const beforeParents = new Map(beforeUnits.map((unit) => [unit.key, unit.parent]));
   const afterParents = new Map(afterUnits.map((unit) => [unit.key, unit.parent]));
   const d = delta(input.before, input.after);
-  const changedUnits = uniqueSorted(d.changedBuckets.filter((bucket) => known.has(bucket)));
   const beforeSet = new Set(beforeUnits.map((unit) => unit.key));
   const afterSet = new Set(afterUnits.map((unit) => unit.key));
   const removedUnits = uniqueSorted([...beforeSet].filter((unit) => !afterSet.has(unit)));
@@ -71,6 +74,15 @@ export function ownImpact(input: OwnImpactInput): OwnImpactReceipt {
   for (const unit of known) {
     if (isDependencyUnit(unit)) byHash.set(String(nodeHashOfPath(unit)), unit);
   }
+  const beforeEdges = new Map(input.before.edges.map((edge) => [edgeKey(edge), edge]));
+  const afterEdges = new Map(input.after.edges.map((edge) => [edgeKey(edge), edge]));
+  const changedEdges = [
+    ...[...beforeEdges].filter(([key]) => !afterEdges.has(key)),
+    ...[...afterEdges].filter(([key]) => !beforeEdges.has(key)),
+  ];
+  const changedEdgeUnits = changedEdges
+    .flatMap(([, edge]) => [edge.from, edge.to].flatMap((hash) => hash === null ? [] : [byHash.get(String(hash))]).filter((unit): unit is string => unit !== undefined));
+  const changedUnits = uniqueSorted([...d.changedBuckets.filter((bucket) => known.has(bucket)), ...changedEdgeUnits]);
 
   let coverage: OwnImpactCoverage = 'COMPLETE';
   const impacted = new Set<string>([...changedUnits, ...input.knowledgeChangedUnits]);
@@ -117,7 +129,7 @@ export function ownImpact(input: OwnImpactInput): OwnImpactReceipt {
     changedUnits,
     removedUnits,
     impactedUnits: uniqueSorted(impacted),
-    reverseBlast: blasts.sort((a, b) => a.origin.localeCompare(b.origin)),
+    reverseBlast: blasts.sort((a, b) => a.origin < b.origin ? -1 : a.origin > b.origin ? 1 : 0),
     coverage,
   };
 }

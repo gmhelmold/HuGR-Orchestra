@@ -1,5 +1,5 @@
 import { execFileSync } from 'node:child_process';
-import { mkdtempSync, mkdirSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdtempSync, mkdirSync, readFileSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { fileURLToPath, pathToFileURL } from 'node:url';
@@ -73,6 +73,12 @@ describe('own-snapshot-guard', () => {
     write('packages/genesis/src/index.ts', 'export const genesis = false;\n');
     expect(runGate().out).toMatch(/source blob drift: packages\/genesis -> packages\/genesis\/src\/index.ts/);
   });
+  it('fails symlinked source anchor before hashing it', () => {
+    write('packages/genesis/src/linked.ts', 'export const genesis = true;\n');
+    rmSync(join(root, 'packages/genesis/src/index.ts'));
+    symlinkSync('linked.ts', join(root, 'packages/genesis/src/index.ts'));
+    expect(runGate().out).toMatch(/source anchor is not a regular file: packages\/genesis -> packages\/genesis\/src\/index\.ts/);
+  });
   it('fails unit drift', () => {
     const value = snapshot();
     value.units[0].unit.id = 'packages/other';
@@ -106,6 +112,14 @@ describe('own-snapshot-guard', () => {
   it('fails unexpected static Own file', () => {
     write('.opencode/skills/own/EXTRA.md', 'unexpected\n');
     expect(runGate().out).toMatch(/unexpected static Own file: \.opencode\/skills\/own\/EXTRA.md/);
+  });
+  it('fails symlinked static Own skill instead of ignoring or following it', () => {
+    const skill = contract.materializeStaticOwnSnapshot(snapshot()).skills[0].path;
+    const target = join(root, skill);
+    write('linked-skill.md', readFileSync(target, 'utf8'));
+    rmSync(target);
+    symlinkSync(join(root, 'linked-skill.md'), target);
+    expect(runGate().out).toMatch(/static Own tree contains symlink or special entry: .*SKILL\.md/);
   });
   it.each([
     ['empty', ''],

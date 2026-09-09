@@ -4,7 +4,7 @@
 // and files outside snapshot projection. It does not judge fact quality.
 
 import { execFileSync } from 'node:child_process';
-import { existsSync, readdirSync, readFileSync } from 'node:fs';
+import { existsSync, lstatSync, readdirSync, readFileSync } from 'node:fs';
 import { join, relative } from 'node:path';
 import { pathToFileURL, fileURLToPath } from 'node:url';
 
@@ -18,10 +18,12 @@ const IMPLEMENTATION = process.env.OWN_SNAPSHOT_GUARD_IMPL ?? join(ROOT, 'packag
 function files(dir) {
   if (!existsSync(dir)) return [];
   const out = [];
-  for (const entry of readdirSync(dir, { withFileTypes: true }).sort((a, b) => a.name.localeCompare(b.name))) {
+  for (const entry of readdirSync(dir, { withFileTypes: true }).sort((a, b) => a.name < b.name ? -1 : a.name > b.name ? 1 : 0)) {
     const path = join(dir, entry.name);
-    if (entry.isDirectory()) out.push(...files(path));
-    else if (entry.isFile()) out.push({ path: relative(ROOT, path), content: readFileSync(path, 'utf8') });
+    const stat = lstatSync(path);
+    if (stat.isDirectory()) out.push(...files(path));
+    else if (stat.isFile()) out.push({ path: relative(ROOT, path), content: readFileSync(path, 'utf8') });
+    else fail([`static Own tree contains symlink or special entry: ${relative(ROOT, path)}`]);
   }
   return out;
 }
@@ -61,6 +63,7 @@ try {
 
 const snapshot = contract.parseOwnSnapshot(readFileSync(SNAPSHOT, 'utf8'));
 if (snapshot === undefined) fail([`${SNAPSHOT_REL} is malformed, empty, or has invalid units/source blobs`]);
+if (!/^(?:[a-f0-9]{40}|[a-f0-9]{64})$/.test(snapshot.sourceRevision)) fail([`snapshot sourceRevision is not an immutable lowercase full Git OID: ${snapshot.sourceRevision}`]);
 
 try {
   execFileSync('git', ['-C', ROOT, 'cat-file', '-e', `${snapshot.sourceRevision}^{commit}`], { stdio: 'ignore' });
@@ -72,6 +75,15 @@ try {
 const revisionIssues = [];
 for (const entry of snapshot.units) {
   for (const [path, blob] of Object.entries(entry.sourceBlobs)) {
+    try {
+      if (!lstatSync(join(ROOT, path)).isFile()) {
+        revisionIssues.push(`source anchor is not a regular file: ${entry.unit.id} -> ${path}`);
+        continue;
+      }
+    } catch {
+      revisionIssues.push(`source anchor is not a regular file: ${entry.unit.id} -> ${path}`);
+      continue;
+    }
     if (revisionBlob(snapshot.sourceRevision, path) !== blob) {
       revisionIssues.push(`snapshot revision blob drift: ${entry.unit.id} -> ${path}`);
     }
