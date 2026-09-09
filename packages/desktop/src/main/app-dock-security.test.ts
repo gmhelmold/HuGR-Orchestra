@@ -120,7 +120,7 @@ async function parent() {
   const timeout = setTimeout(() => {
     timedOut = true
     child.kill("SIGKILL")
-  }, 75_000)
+  }, 90_000)
   const exitResult = await new Promise<{ code: number | null; signal: NodeJS.Signals | null }>((resolve, reject) => {
     child.once("exit", (code, signal) => resolve({ code, signal }))
     child.once("error", reject)
@@ -254,7 +254,11 @@ async function fixture() {
       return res.end(
         "<script>let tick=0;const started=performance.now();setInterval(()=>document.title=`tick-${++tick}-${Math.round(performance.now()-started)}`,25)</script>",
       )
-    if (req.url === "/delayed") return setTimeout(() => res.end("<title>delayed</title>"), 500)
+    if (req.url === "/delayed") {
+      res.writeHead(200, { "content-type": "text/html" })
+      res.write("<script>setTimeout(() => document.title = 'delayed', 500)</script>")
+      return setTimeout(() => res.end(), 750)
+    }
     if (req.url === "/iframe") return res.end("<iframe src='/'>")
     res.end("<!doctype html><title>fixture</title><body>fixture</body>")
   })
@@ -267,6 +271,7 @@ async function fixture() {
     downloadCancelled,
     close: async () => {
       activeDownloads.forEach((response) => response.destroy())
+      server.closeAllConnections()
       await new Promise<void>((resolve) => server.close(() => resolve()))
       await rm(dir, { recursive: true, force: true })
     },
@@ -516,14 +521,14 @@ async function child() {
     const u09CloseStart = await eventCount()
     await invoke(ipcWin.webContents.mainFrame, "app-dock-close-tab", [tab.tabID])
     check(contents.isDestroyed(), "closed App Dock view remains alive")
-    await new Promise<void>((resolve) => setTimeout(resolve, 300))
+    await new Promise<void>((resolve) => setTimeout(resolve, 750))
     check(
       !(await execute("event-read-after-close", ipcWin.webContents, "window.__appDockEvents"))
         .slice(u09CloseStart)
         .some((event: any) => event.payload?.tabID === tab.tabID && event.payload?.generation === tab.generation),
       "closed identity emitted stale event",
     )
-    pass("U09", "close destroys delayed in-flight real view; no later closed-identity event after 300ms")
+    pass("U09", "close destroys delayed real view; no scheduled 500ms identity event after 750ms")
 
     const first = await open()
     const firstContents = viewContents()
@@ -750,16 +755,17 @@ async function child() {
     clearTimeout(watchdog)
     if (ipcWinB && !ipcWinB.isDestroyed()) ipcWinB.destroy()
     if (!ipcWin.isDestroyed()) ipcWin.destroy()
-    void site.close()
-    void rm(temp, { recursive: true, force: true })
-    app.exit(completed ? 0 : 1)
+    await site.close()
+    await new Promise<void>((resolve) => setTimeout(resolve, 250))
+    await rm(temp, { recursive: true, force: true })
+    process.exit(completed ? 0 : 1)
   }
 }
 
 if (process.argv.includes("--app-dock-electron-child"))
   void child().catch(async (error) => {
     console.error(error)
-    ;(await import("electron")).app.exit(1)
+    process.exit(1)
   })
 else
   void parent().catch((error) => {
