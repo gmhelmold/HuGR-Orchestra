@@ -7,7 +7,7 @@ import { createRequire } from "node:module"
 
 const required = ["U01", "U02", "U03", "U04", "U05", "U06", "U07", "U08", "U09", "U10", "U11", "U12", "U13", "U15", "U16", "U17", "U18"]
 const root = resolve(import.meta.dir, "../..")
-const artifact = join(root, "artifacts/app-dock/s1.json")
+const artifact = join(process.env.APP_DOCK_ARTIFACT_ROOT ?? root, "artifacts/app-dock/s1.json")
 const schemes = ["http://127.0.0.1/", "file:///etc/passwd", "javascript:document.title='pwned'", "data:text/html,pwned"]
 type Case = { id: string; status: "pass"; detail: string }
 const cases: Case[] = []
@@ -46,7 +46,7 @@ async function parent() {
   const { ELECTRON_RUN_AS_NODE: _electronRunAsNode, NODE_OPTIONS, ...env } = process.env
   const safeNodeOptions = NODE_OPTIONS?.includes("ELECTRON_RUN_AS_NODE") ? undefined : NODE_OPTIONS
   const entry = join(import.meta.dir, "app-dock-security.child.cjs")
-  const child = spawn(electron, startupOnly ? [entry, "--startup-only"] : [entry, output, "--app-dock-electron-child"], { stdio: ["ignore", "pipe", "pipe"], env: { ...env, ...(safeNodeOptions ? { NODE_OPTIONS: safeNodeOptions } : {}), ELECTRON_DISABLE_SECURITY_WARNINGS: "true" } })
+  const child = spawn(electron, startupOnly ? [entry, "--startup-only"] : [entry, output, "--app-dock-electron-child"], { stdio: ["ignore", "pipe", "pipe"], env: { ...env, ...(safeNodeOptions ? { NODE_OPTIONS: safeNodeOptions } : {}), APP_DOCK_ARTIFACT_ROOT: root, ELECTRON_DISABLE_SECURITY_WARNINGS: "true" } })
   let stdout = ""
   let stderr = ""
   child.stdout.on("data", (chunk) => { stdout += chunk })
@@ -87,6 +87,7 @@ async function fixture() {
 
 async function child() {
   const diagnostic = (phase: string) => process.stderr.write(`${JSON.stringify({ phase, argv: process.argv, electronVersion: process.versions.electron, pid: process.pid })}\n`)
+  process.on("uncaughtException", (error) => diagnostic(`uncaught:${error.message}`))
   diagnostic("entry")
   const startupWatchdog = setTimeout(() => { diagnostic("startup-timeout"); process.exit(1) }, 15_000)
   diagnostic("before-import-electron")
@@ -118,11 +119,22 @@ async function child() {
     exportDebugLogs: async () => "", recordFatalRendererError() {}, setNativeTranslations() {},
   })
   const ipcWin = new BrowserWindow({ show: false, webPreferences: { nodeIntegration: true, contextIsolation: false } })
+  const execute = async (phase: string, frame: { executeJavaScript: (code: string) => Promise<any> }, code: string) => {
+    diagnostic(`renderer:${phase}:start`)
+    try {
+      const result = await frame.executeJavaScript(code)
+      diagnostic(`renderer:${phase}:ok`)
+      return result
+    } catch (error) {
+      diagnostic(`renderer:${phase}:error:${error instanceof Error ? error.message : String(error)}`)
+      throw error
+    }
+  }
   const invoke = (frame: { executeJavaScript: (code: string) => Promise<any> }, channel: string, args: unknown[]) =>
-    frame.executeJavaScript(`require('electron').ipcRenderer.invoke(${JSON.stringify(channel)}, ...${JSON.stringify(args)})`)
+    execute(`ipc:${channel}`, frame, `require('electron').ipcRenderer.invoke(${JSON.stringify(channel)}, ...${JSON.stringify(args)})`)
   let events: any[] = []
-  const installEventStore = () => ipcWin.webContents.executeJavaScript("window.__appDockEvents = []; require('electron').ipcRenderer.on('app-dock-event', (_event, value) => window.__appDockEvents.push(value))")
-  const readEvents = async () => events = await ipcWin.webContents.executeJavaScript("window.__appDockEvents")
+  const installEventStore = () => execute("event-store", ipcWin.webContents, "window.__appDockEvents = []; window.onerror = (message, source, line, column, error) => console.error('app-dock-renderer-error', message, source, line, column, error?.stack); require('electron').ipcRenderer.on('app-dock-event', (_event, value) => window.__appDockEvents.push(value)); undefined")
+  const readEvents = async () => events = await execute("event-read", ipcWin.webContents, "window.__appDockEvents")
   const waitEvent = (predicate: (event: any) => boolean, label: string) => {
     const deadline = Date.now() + 5_000
     return new Promise<any>((resolve, reject) => {
@@ -136,7 +148,9 @@ async function child() {
       void poll()
     })
   }
-  await ipcWin.loadURL(site.base)
+    diagnostic("renderer:load:fixture:start")
+    await ipcWin.loadURL(site.base)
+    diagnostic("renderer:load:fixture:ok")
   await installEventStore()
   const profile = "e2e-profile"
   const bounds = { x: 0, y: 0, width: 400, height: 300 }
@@ -190,17 +204,19 @@ async function child() {
 
     const first = await open()
     const firstContents = viewContents()
-    await firstContents.executeJavaScript("localStorage.setItem('app-dock-e2e', 'present')")
+    await execute("view:storage-set", firstContents, "localStorage.setItem('app-dock-e2e', 'present')")
     await invoke(ipcWin.webContents.mainFrame, "app-dock-delete-profile", [{ profileID: profile }])
     check(firstContents.isDestroyed(), "profile delete did not detach/destroy view")
     check(!(ipcWin.contentView as unknown as { children: unknown[] }).children.includes(firstContents as unknown), "deleted view remains attached")
     const fresh = await open()
     const freshContents = viewContents()
-    check(await freshContents.executeJavaScript("localStorage.getItem('app-dock-e2e')") === null, "profile storage reused after deletion")
+    check(await execute("view:storage-get", freshContents, "localStorage.getItem('app-dock-e2e')") === null, "profile storage reused after deletion")
     await invoke(ipcWin.webContents.mainFrame, "app-dock-close-tab", [fresh.tabID])
     pass("U10", "profile delete destroys view and clears storage before profile reuse")
 
+    diagnostic("renderer:load:iframe:start")
     await ipcWin.loadURL(`${site.base}/iframe`)
+    diagnostic("renderer:load:iframe:ok")
     await installEventStore()
     await rejects(() => invoke(ipcWin.webContents.mainFrame, "app-dock-open", [site.base, { x: 0, y: 0, width: 0, height: 1 }]), "Invalid App Dock bounds")
     await rejects(() => invoke(ipcWin.webContents.mainFrame, "app-dock-open", [site.base, { x: 0, y: 0, width: "1", height: 1 }]), "Invalid App Dock bounds")
