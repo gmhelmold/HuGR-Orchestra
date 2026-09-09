@@ -570,8 +570,13 @@
 }
 
 .zen-error {
+  position: relative;
+  z-index: 1;
   padding: 4px 8px;
-  color: var(--text-weak);
+  border: 1px solid var(--border-weak);
+  border-radius: 8px;
+  color: var(--text-strong);
+  background: var(--v2-background-bg-layer-01, var(--surface-raised-base));
   font-size: 12px;
 }
 

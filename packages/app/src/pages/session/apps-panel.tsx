@@ -3,11 +3,12 @@ import "./apps-panel.css"
 
 type Bounds = { x: number; y: number; width: number; height: number }
 type AppDockAPI = {
-  appDockOpen: (url: string, bounds: Bounds, profile?: string) => Promise<{ id: string; url: string }>
+  appDockOpen: (url: string, bounds: Bounds, profile?: string) => Promise<{ id: string; generation: number; url: string }>
   appDockResize: (bounds: Bounds) => Promise<void>
   appDockHide: () => Promise<void>
   appDockClose: () => Promise<void>
   appDockCloseTab: (id: string) => Promise<void>
+  appDockCloseTabs: (id: string, scope: "others" | "right") => Promise<void>
   appDockSelect: (id: string, bounds: Bounds) => Promise<void>
   appDockNavigate: (id: string, url: string) => Promise<void>
   appDockCommand: (id: string, command: "back" | "forward" | "reload") => Promise<void>
@@ -25,9 +26,9 @@ type AppDockAPI = {
   appDockFullscreenChanged: (callback: (state: { tabID: string; enabled: boolean }) => void) => () => void
 }
 type AppDockEvent =
-  | { type: "state"; payload: { tabID: string; url: string; title: string; favicon?: string; loading: boolean; audible: boolean } }
-  | { type: "navigation-error"; payload: { identity: { tabID: string }; code: "blocked" | "failed"; url: string } }
-type Tab = { id: string; url: string; title?: string; favicon?: string; loading?: boolean; audible?: boolean; pinned?: boolean }
+  | { type: "state"; payload: { tabID: string; generation: number; url: string; title: string; favicon?: string; loading: boolean; audible: boolean } }
+  | { type: "navigation-error"; payload: { identity: { tabID: string; generation: number }; code: "blocked" | "failed"; url: string } }
+type Tab = { id: string; generation?: number; url: string; title?: string; favicon?: string; loading?: boolean; audible?: boolean; pinned?: boolean }
 type Profile = { id: string; name: string }
 type Bookmark = { url: string; title: string }
 type HistoryEntry = Bookmark & { visitedAt: number }
@@ -93,7 +94,7 @@ export function AppsPanel() {
   const [tabs, setTabs] = createSignal<Tab[]>(storedTabs(profile()).map((tab, index) => ({ ...tab, id: `restore-${index}` })))
   const [active, setActive] = createSignal<string>()
   const [error, setError] = createSignal<string>()
-  const [navigationError, setNavigationError] = createSignal<{ tabID: string; url: string }>()
+  const [navigationError, setNavigationError] = createSignal<{ tabID: string; generation: number; url: string }>()
   const [bookmarks, setBookmarks] = createSignal<Bookmark[]>(storedList(profileBookmarksKey(profile())))
   const [history, setHistory] = createSignal<HistoryEntry[]>(storedList(profileHistoryKey(profile())))
   const [libraryOpen, setLibraryOpen] = createSignal<"bookmarks" | "history">()
@@ -167,16 +168,16 @@ export function AppsPanel() {
     }
   }
   onMount(() => {
-    const applyState = (state: { id: string; url: string; title: string; favicon?: string; loading: boolean; audible: boolean; error?: string }) => {
-       const known = tabs().some((tab) => tab.id === state.id)
-       if (!known) return
-       setTabs((items) => items.map((tab) => tab.id === state.id ? { ...tab, ...state } : tab))
-       if (state.id === active()) setURL(state.url)
+    const applyState = (state: { id: string; generation?: number; url: string; title: string; favicon?: string; loading: boolean; audible: boolean; error?: string }) => {
+        const known = tabs().find((tab) => tab.id === state.id)
+        if (!known || (state.generation !== undefined && known.generation !== undefined && state.generation < known.generation)) return
+        setTabs((items) => items.map((tab) => tab.id === state.id ? { ...tab, ...state } : tab))
+        if (state.id === active()) setURL(state.url)
         if (state.id === active() && state.error) setError(state.error)
         const failed = navigationError()
-        if (!state.loading && failed?.tabID === state.id && failed.url === state.url) {
-          setError(undefined)
-          setNavigationError(undefined)
+        if (state.id === active() && !state.loading && state.generation !== undefined && failed?.tabID === state.id && failed.generation === state.generation && failed.url === state.url) {
+           setError(undefined)
+           setNavigationError(undefined)
         }
        if (!state.error && !state.loading) {
          const entry = { url: state.url, title: state.title || new URL(state.url).hostname, visitedAt: Date.now() }
@@ -189,11 +190,15 @@ export function AppsPanel() {
     }
     const unsubscribe = api()?.appDockEvent ? undefined : api()?.appDockState?.(applyState)
     const unsubscribeEvent = api()?.appDockEvent?.((event) => {
-      if (event.type === "state") applyState({ ...event.payload, id: event.payload.tabID })
-      if (event.type === "navigation-error") {
-        const { tabID } = event.payload.identity
-        if (tabID === active()) setError(event.payload.code === "blocked" ? "Navigation blocked" : "Navigation failed")
-        setNavigationError({ tabID, url: event.payload.url })
+       if (event.type === "state") applyState({ ...event.payload, id: event.payload.tabID })
+       if (event.type === "navigation-error") {
+         const { tabID, generation } = event.payload.identity
+         const tab = tabs().find((item) => item.id === tabID)
+         if (!tab || tab.generation !== generation) return
+         if (tabID === active()) {
+           setError(event.payload.code === "blocked" ? "Navigation blocked" : "Navigation failed")
+           setNavigationError({ tabID, generation, url: event.payload.url })
+         }
       }
     })
     const unsubscribePopup = api()?.appDockTabOpened?.((tab) => {
@@ -297,6 +302,20 @@ export function AppsPanel() {
     setActive(next?.id)
     setURL(next?.url ?? "https://opencode.ai")
     if (next && host) await api()?.appDockSelect(next.id, bounds(host))
+  }
+  const closeTabs = async (tab: Tab, scope: "others" | "right") => {
+    const items = tabs()
+    const index = items.findIndex((item) => item.id === tab.id)
+    if (index < 0 || (scope === "others" ? items.length < 2 : index === items.length - 1)) return
+    await api()?.appDockCloseTabs(tab.id, scope)
+    const remaining = scope === "others" ? [tab] : items.slice(0, index + 1)
+    setTabs(remaining)
+    if (!remaining.some((item) => item.id === active())) {
+      const next = remaining.at(-1)
+      setActive(next?.id)
+      setURL(next?.url ?? "https://opencode.ai")
+      if (next && host) await api()?.appDockSelect(next.id, bounds(host))
+    }
   }
   const selectTab = (tab: Tab) => {
     setActive(tab.id)
@@ -467,7 +486,7 @@ export function AppsPanel() {
           </div>}
          {!api() && <div class="zen-empty-state"><strong>Browser needs OpenCode Desktop.</strong><span>Native browser tabs are unavailable in web app.</span></div>}
           <div ref={host} class="zen-browser-host" />
-          {menu() && <TabMenu tab={menu()!.tab} x={menu()!.x} y={menu()!.y} canDuplicate={capability("appDockOpen")} canReload={capability("appDockCommand")} canClose={capability("appDockCloseTab")} onDuplicate={() => { void duplicateTab(menu()!.tab); closeMenu() }} onTogglePin={() => { const tab = menu()!.tab; setTabs((items) => items.map((item) => item.id === tab.id ? { ...item, pinned: !item.pinned } : item)); closeMenu() }} onReload={() => { const id = menu()!.tab.id; void api()?.appDockCommand(id, "reload"); closeMenu() }} onClose={() => { void close(menu()!.tab.id); closeMenu() }} />}
+          {menu() && <TabMenu tab={menu()!.tab} x={menu()!.x} y={menu()!.y} hasOthers={tabs().length > 1} hasRight={tabs().at(-1)?.id !== menu()!.tab.id} onDuplicate={() => { void duplicateTab(menu()!.tab); closeMenu() }} onTogglePin={() => { const tab = menu()!.tab; setTabs((items) => items.map((item) => item.id === tab.id ? { ...item, pinned: !item.pinned } : item)); closeMenu() }} onReload={() => { const id = menu()!.tab.id; void api()?.appDockCommand(id, "reload"); closeMenu() }} onClose={() => { void close(menu()!.tab.id); closeMenu() }} onCloseOthers={() => { void closeTabs(menu()!.tab, "others"); closeMenu() }} onCloseRight={() => { void closeTabs(menu()!.tab, "right"); closeMenu() }} />}
       </main>
     </div>
   )
@@ -493,13 +512,14 @@ function TabButton(props: {
   return <button class={`zen-tab ${props.active() === props.tab.id ? "is-active" : ""}`} type="button" role="tab" aria-selected={props.active() === props.tab.id} onClick={() => props.select(props.tab)} onContextMenu={(event) => { event.preventDefault(); openMenu(event.clientX, event.clientY, event.currentTarget) }} onKeyDown={keydown}><span class={`zen-tab-icon ${props.tab.loading ? "is-loading" : ""}`}>{props.tab.favicon ? <img src={props.tab.favicon} alt="" /> : new URL(props.tab.url).hostname.slice(0, 1).toUpperCase()}</span><span class="zen-tab-title">{tabLabel(props.tab)}</span>{props.tab.pinned ? "Pinned" : ""}{props.tab.audible && <span class="zen-tab-audio">&#9835;</span>}</button>
 }
 
-function TabMenu(props: { tab: Tab; x: number; y: number; canDuplicate: boolean; canReload: boolean; canClose: boolean; onDuplicate: () => void; onTogglePin: () => void; onReload: () => void; onClose: () => void }) {
+function TabMenu(props: { tab: Tab; x: number; y: number; hasOthers: boolean; hasRight: boolean; onDuplicate: () => void; onTogglePin: () => void; onReload: () => void; onClose: () => void; onCloseOthers: () => void; onCloseRight: () => void }) {
+  let firstItem: HTMLButtonElement | undefined
   return <div class="zen-tab-menu" role="menu" aria-label={`Actions for ${tabLabel(props.tab)}`} style={{ left: `${props.x}px`, top: `${props.y}px` }}>
-    <button type="button" role="menuitem" disabled={!props.canDuplicate} onClick={props.onDuplicate}>Duplicate</button>
+    <button ref={(element) => { firstItem = element; requestAnimationFrame(() => firstItem?.focus()) }} type="button" role="menuitem" onClick={props.onDuplicate}>Duplicate</button>
     <button type="button" role="menuitem" onClick={props.onTogglePin}>{props.tab.pinned ? "Unpin" : "Pin"}</button>
-    <button type="button" role="menuitem" disabled={!props.canReload} onClick={props.onReload}>Reload</button>
-    <button type="button" role="menuitem" disabled={!props.canClose} onClick={props.onClose}>Close</button>
-    <button type="button" role="menuitem" disabled title="Native close-others API unavailable">Close others (unavailable)</button>
-    <button type="button" role="menuitem" disabled title="Native close-right API unavailable">Close right (unavailable)</button>
+    <button type="button" role="menuitem" onClick={props.onReload}>Reload</button>
+    <button type="button" role="menuitem" onClick={props.onClose}>Close</button>
+    <button type="button" role="menuitem" disabled={!props.hasOthers} onClick={props.onCloseOthers}>Close others</button>
+    <button type="button" role="menuitem" disabled={!props.hasRight} onClick={props.onCloseRight}>Close right</button>
   </div>
 }
