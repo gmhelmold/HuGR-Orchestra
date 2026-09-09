@@ -83,7 +83,7 @@ export type EvaluateReplyInput = {
 }
 
 export function renderPresentation(input: ApprovalPresentation) {
-  const fields = [
+  return [
     "Maestro plan approval",
     `Plan revision: ${input.planRevisionID}`,
     `Validation record: ${input.validationRecordID}`,
@@ -225,7 +225,7 @@ function sameBinding(decision: ApprovalDecision, presentation: ApprovalPresentat
 
 function validPresentation(presentation: ApprovalPresentation) {
   if (presentation.actor.sessionId !== presentation.sessionID) return false
-  return [
+  const fields = [
     presentation.id,
     presentation.sessionID,
     presentation.assistantMessageID,

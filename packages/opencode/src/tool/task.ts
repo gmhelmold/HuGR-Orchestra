@@ -118,6 +118,7 @@ export const TaskTool = Tool.define(
     const scope = yield* Scope.Scope
     const flags = yield* RuntimeFlags.Service
     const database = yield* Database.Service
+    const events = yield* EventV2Bridge.Service
 
     const run = Effect.fn("TaskTool.execute")(function* (
       params: Schema.Schema.Type<typeof Parameters>,
@@ -144,13 +145,15 @@ export const TaskTool = Tool.define(
         return yield* Effect.fail(new Error("Task resume denied: task is not direct child for selected agent"))
       }
       if (params.governed) {
+        const governed = params.governed
         const caller = yield* agent.get(ctx.agent)
         if (caller?.id !== "maestro") return yield* Effect.fail(new Error("Governed Task requires Maestro"))
         if (!ctx.callID) return yield* Effect.fail(new Error("Governed Task denied: missing-call-id"))
-        if (params.governed.sessionID !== ctx.sessionID || params.governed.projectID !== parent.projectID) {
+        const callID = ctx.callID
+        if (governed.sessionID !== ctx.sessionID || governed.projectID !== parent.projectID) {
           return yield* Effect.fail(new Error("Governed Task denied: request-context-mismatch"))
         }
-        if (params.governed.memberID !== caller.id) {
+        if (governed.memberID !== caller.id) {
           return yield* Effect.fail(new Error("Governed Task denied: request-actor-mismatch"))
         }
         const expectedTaskHash = taskHash({
@@ -158,9 +161,9 @@ export const TaskTool = Tool.define(
           prompt: params.prompt,
           model: params.model,
           taskID: params.task_id,
-          ...params.governed,
+          ...governed,
         })
-        if (params.governed.taskHash !== expectedTaskHash) {
+        if (governed.taskHash !== expectedTaskHash) {
           return yield* Effect.fail(new Error("Governed Task denied: task-hash-mismatch"))
         }
         const decisions = yield* database.db
@@ -168,7 +171,7 @@ export const TaskTool = Tool.define(
           .from(EventTable)
           .where(
             and(
-              eq(EventTable.aggregate_id, params.governed.sessionID),
+              eq(EventTable.aggregate_id, governed.sessionID),
               eq(EventTable.type, EventV2.versionedType(MaestroEvent.Approval.Decided.type, 1)),
             ),
           )
@@ -180,7 +183,7 @@ export const TaskTool = Tool.define(
           .from(EventTable)
           .where(
             and(
-              eq(EventTable.aggregate_id, params.governed.sessionID),
+              eq(EventTable.aggregate_id, governed.sessionID),
               eq(EventTable.type, EventV2.versionedType(MaestroEvent.Approval.Presented.type, 1)),
             ),
           )
@@ -194,7 +197,7 @@ export const TaskTool = Tool.define(
           ? Schema.decodeUnknownSync(MaestroEvent.Approval.Presented.data)(presentations.at(-1)!.data).id
           : undefined
         const verdict = verifyGovernedTask({
-          request: params.governed,
+          request: governed,
           decisions: decisionEvents,
           newestPresentationID,
         })
@@ -205,7 +208,7 @@ export const TaskTool = Tool.define(
           .from(EventTable)
           .where(
             and(
-              eq(EventTable.aggregate_id, params.governed.sessionID),
+              eq(EventTable.aggregate_id, governed.sessionID),
               eq(EventTable.type, EventV2.versionedType(MaestroEvent.Approval.Consumed.type, 1)),
             ),
           )
@@ -218,11 +221,11 @@ export const TaskTool = Tool.define(
               data.presentationID ===
                 decisionEvents.find(
                   (decision) =>
-                    decision.approvalMessageID === params.governed!.approvalMessageID &&
-                    decision.taskHash === params.governed!.taskHash,
+                    decision.approvalMessageID === governed.approvalMessageID &&
+                    decision.taskHash === governed.taskHash,
                 )?.presentationID &&
-              data.approvalMessageID === params.governed.approvalMessageID &&
-              data.taskHash === params.governed.taskHash
+              data.approvalMessageID === governed.approvalMessageID &&
+              data.taskHash === governed.taskHash
             )
           })
         ) {
@@ -230,27 +233,21 @@ export const TaskTool = Tool.define(
         }
         const consumeID = EventV2.ID.make(
           `evt_maestro_approval_consumed_${createHash("sha256")
-            .update(
-              [params.governed.sessionID, params.governed.approvalMessageID, params.governed.taskHash, ctx.callID].join(
-                "\u0000",
-              ),
-            )
+            .update([governed.sessionID, governed.approvalMessageID, governed.taskHash, callID].join("\u0000"))
             .digest("hex")}`,
         )
-        const events = yield* EventV2Bridge.Service
         yield* events.publish(
           MaestroEvent.Approval.Consumed,
           {
-            sessionID: params.governed.sessionID,
+            sessionID: governed.sessionID,
             presentationID:
               decisionEvents.find(
                 (decision) =>
-                  decision.approvalMessageID === params.governed!.approvalMessageID &&
-                  decision.taskHash === params.governed!.taskHash,
+                  decision.approvalMessageID === governed.approvalMessageID && decision.taskHash === governed.taskHash,
               )?.presentationID ?? "",
-            approvalMessageID: params.governed.approvalMessageID,
-            taskHash: params.governed.taskHash,
-            callID: ctx.callID,
+            approvalMessageID: governed.approvalMessageID,
+            taskHash: governed.taskHash,
+            callID,
           },
           { id: consumeID },
         )
