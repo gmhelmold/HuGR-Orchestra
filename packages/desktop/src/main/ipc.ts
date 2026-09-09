@@ -154,6 +154,18 @@ const toCloneableAppDockEvent = (event: unknown): CloneableAppDockEvent => {
       },
     }
   }
+  if (source.type === "tab-crashed") {
+    if (!hasExactKeys(payload, ["identity", "reason"])) throw new Error("Invalid App Dock event")
+    const identity = appDockEventIdentity(payload.identity)
+    const reason = appDockEventString(payload.reason)
+    if (reason !== "crashed" && reason !== "killed" && reason !== "oom") throw new Error("Invalid App Dock event")
+    return { type: "tab-crashed", payload: { identity: { ...identity }, reason } }
+  }
+  if (source.type === "tab-recovered") {
+    if (!hasExactKeys(payload, ["tabID", "generation", "url"])) throw new Error("Invalid App Dock event")
+    const identity = appDockEventIdentity(payload)
+    return { type: "tab-recovered", payload: { ...identity, url: appDockEventString(payload.url) } }
+  }
   if (source.type === "download") {
     if (!hasExactKeys(payload, ["id", "tabID", "generation", "filename", "receivedBytes", "totalBytes", "state"]))
       throw new Error("Invalid App Dock event")
@@ -302,6 +314,10 @@ export function registerIpcHandlers(deps: Deps) {
   })
   ipcMain.handle("app-dock-close-tab", (event: IpcMainInvokeEvent, tabID: unknown) => {
     appDock.close(event.sender.id, appDockSender(event), appDockID(tabID, "tab"))
+  })
+  ipcMain.handle("app-dock-recover-tab", (event: IpcMainInvokeEvent, tabID: unknown) => {
+    appDockSender(event)
+    return appDock.recover(event.sender.id, appDockID(tabID, "tab"))
   })
   ipcMain.handle(
     "app-dock-close-tabs",

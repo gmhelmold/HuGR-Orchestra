@@ -31,6 +31,11 @@ export type AppDockDownload = AppDockIdentity & {
 export type AppDockEvent =
   | Readonly<{ type: "state"; payload: AppDockState }>
   | Readonly<{ type: "tab-opened"; payload: AppDockTab }>
+  | Readonly<{
+      type: "tab-crashed"
+      payload: { identity: AppDockIdentity; reason: "crashed" | "killed" | "oom" }
+    }>
+  | Readonly<{ type: "tab-recovered"; payload: AppDockTab }>
   | Readonly<{ type: "download"; payload: AppDockDownload }>
   | Readonly<{ type: "fullscreen"; payload: { identity: AppDockIdentity; enabled: boolean } }>
   | Readonly<{
@@ -113,9 +118,10 @@ export function createAppDock() {
     bounds: DockBounds,
     notify: (event: AppDockEvent) => void,
     profileStorage: ProfileStorage,
+    replacement?: Readonly<{ tabID: string; selected: boolean }>,
   ): Promise<AppDockTab> => {
     if (!validBounds(bounds)) throw new Error("Invalid App Dock bounds")
-    const id = randomUUID()
+    const id = replacement?.tabID ?? randomUUID()
     const tabGeneration = ++generation
     let target: string
     try {
@@ -211,6 +217,21 @@ export function createAppDock() {
     })
     listen("did-navigate", (_event, navigatedURL) => update({ url: navigatedURL }))
     listen("did-navigate-in-page", (_event, navigatedURL) => update({ url: navigatedURL }))
+    let crashed = false
+    const reportCrash = (reason: "crashed" | "killed" | "oom") => {
+      if (crashed || !isCurrent(senderID, id, tabGeneration)) return
+      crashed = true
+      notify(
+        Object.freeze({
+          type: "tab-crashed",
+          payload: Object.freeze({ identity: identity(id, tabGeneration), reason }),
+        }),
+      )
+    }
+    listen("render-process-gone", (_event, details) =>
+      reportCrash(details.reason === "killed" ? "killed" : details.reason === "oom" ? "oom" : "crashed"),
+    )
+    listen("crashed", (_event, killed) => reportCrash(killed ? "killed" : "crashed"))
     listen("media-started-playing", () => update({ audible: true }))
     listen("media-paused", () => update({ audible: false }))
     view.webContents.setWindowOpenHandler(({ url }) => {
@@ -265,21 +286,24 @@ export function createAppDock() {
         }),
       ),
     )
-    win.contentView.addChildView(view)
     view.setBounds(bounds)
-    view.setVisible(true)
-    view.webContents.setBackgroundThrottling(false)
     const senderTabs = tabs.get(senderID) ?? new Map<string, AppDockRecord>()
+    senderTabs.set(id, { view, win, storageKey, generation: tabGeneration, state: snapshot, notify, cleanups })
+    tabByContents.set(view.webContents.id, { senderID, tabID: id, generation: tabGeneration })
+    tabs.set(senderID, senderTabs)
+    if (replacement?.selected ?? true) {
+      win.contentView.addChildView(view)
+      view.setVisible(true)
+      view.webContents.setBackgroundThrottling(false)
+      active.set(senderID, id)
+    }
     for (const [tabID, other] of senderTabs) {
-      if (tabID !== id) {
+      if ((replacement?.selected ?? true) && tabID !== id) {
         win.contentView.removeChildView(other.view)
         markInactive(senderID, tabID, other)
       }
     }
-    senderTabs.set(id, { view, win, storageKey, generation: tabGeneration, state: snapshot, notify, cleanups })
-    tabByContents.set(view.webContents.id, { senderID, tabID: id, generation: tabGeneration })
-    tabs.set(senderID, senderTabs)
-    active.set(senderID, id)
+    if (!(replacement?.selected ?? true)) markInactive(senderID, id, senderTabs.get(id)!)
     while (inactive.size > 20) {
       const oldest = inactive.values().next().value
       if (!oldest) break
@@ -353,6 +377,27 @@ export function createAppDock() {
         )
         throw new Error("Navigation failed")
       })
+    },
+    async recover(senderID: number, tabID: string) {
+      const record = tabs.get(senderID)?.get(tabID)
+      if (!record) throw new Error("Unknown App Dock tab")
+      const url = record.view.webContents.getURL()
+      let target: string
+      try {
+        target = appDockURL(url)
+      } catch {
+        throw new Error("App Dock only supports HTTPS URLs")
+      }
+      const bounds = record.view.getBounds()
+      const selected = active.get(senderID) === tabID
+      remove(senderID, tabID)
+      const tab = await open(senderID, record.win, target, bounds, record.notify, { storageKey: record.storageKey }, {
+        tabID,
+        selected,
+      })
+      if (isCurrent(senderID, tabID, tab.generation))
+        record.notify(Object.freeze({ type: "tab-recovered", payload: tab }))
+      return tab
     },
     command(senderID: number, tabID: string, command: "back" | "forward" | "reload") {
       const record = tabs.get(senderID)?.get(tabID)

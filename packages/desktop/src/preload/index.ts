@@ -17,6 +17,7 @@ const api: ElectronAPI = {
   appDockHide: () => ipcRenderer.invoke("app-dock-hide"),
   appDockClose: () => ipcRenderer.invoke("app-dock-close"),
   appDockCloseTab: (tabID) => ipcRenderer.invoke("app-dock-close-tab", tabID),
+  appDockRecoverTab: (tabID) => ipcRenderer.invoke("app-dock-recover-tab", tabID),
   appDockCloseTabs: (tabID, scope, order) => ipcRenderer.invoke("app-dock-close-tabs", tabID, scope, order),
   appDockSelect: (tabID, bounds) => ipcRenderer.invoke("app-dock-select", tabID, bounds),
   appDockNavigate: (tabID, url) => ipcRenderer.invoke("app-dock-navigate", tabID, url),

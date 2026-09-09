@@ -57,6 +57,11 @@ export type AppDockEvent =
     }
   | { type: "tab-opened"; payload: { tabID: string; generation: number; url: string } }
   | {
+      type: "tab-crashed"
+      payload: { identity: { tabID: string; generation: number }; reason: "crashed" | "killed" | "oom" }
+    }
+  | { type: "tab-recovered"; payload: { tabID: string; generation: number; url: string } }
+  | {
       type: "download"
       payload: {
         id: string
@@ -97,6 +102,7 @@ export type ElectronAPI = {
   appDockHide: () => Promise<void>
   appDockClose: () => Promise<void>
   appDockCloseTab: (tabID: string) => Promise<void>
+  appDockRecoverTab: (tabID: string) => Promise<{ tabID: string; generation: number; url: string }>
   appDockCloseTabs: (tabID: string, scope: "others" | "right", order?: string[]) => Promise<void>
   appDockSelect: (tabID: string, bounds: { x: number; y: number; width: number; height: number }) => Promise<void>
   appDockNavigate: (tabID: string, url: string) => Promise<void>
