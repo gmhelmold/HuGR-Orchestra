@@ -734,4 +734,3 @@ normative-clause: "a shipped command is absent from the README table"
 source: INV-MEMRING-12 @ reference/atlas-adapters.md#adapt-mem-12
 If the README table advertises a command that does not run, then the memory ring shall refuse rather than proceed.
 normative-clause: "the README table advertises a command that does not run"
-

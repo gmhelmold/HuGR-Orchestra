@@ -203,7 +203,7 @@ invariant: RETR-12: `own_<scope>` is composed by INDEX READS ALONE — 0 LLM, 0 
 own: own_lib — 0 invariant(s), 0 gotcha(s), 0 advisory; tokenEstimate 12
   role: lib
   grounding: tree
-  owner: 
+  owner:
   tier: T2
   contains lib/spare.ts
   advisoryDropped: 0

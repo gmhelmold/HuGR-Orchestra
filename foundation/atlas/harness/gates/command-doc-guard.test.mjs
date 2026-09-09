@@ -468,4 +468,3 @@ describe('the parallel-path oracle — the defect this gate had on the day it wa
     expect(runGate().out).toMatch(/could not be listed/);
   });
 });
-

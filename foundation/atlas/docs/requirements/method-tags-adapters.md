@@ -280,4 +280,3 @@ fspec: —
 up-property: "the surface is finite and enumerable, so correspondence is checked exhaustively rather than sampled"
 down-model: "`COMMANDS` is the oracle; the reference tree and the README region are compared against it in both directions"
 anti-rot: the guard's README leg is the mock; removing it lets the table drift, which is exactly how it reached ten rows against twenty-three commands
-

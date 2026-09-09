@@ -168,4 +168,3 @@ describe('provenance comes FIRST — the totality is about the filesystem, not a
     expect(audit()).toMatchObject({ objects: 1, referenced: 1, sound: true });
   });
 });
-

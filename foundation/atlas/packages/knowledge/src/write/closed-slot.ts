@@ -124,4 +124,3 @@ export class ClosedSlotError extends Error {
 export function isClosedSlotError(e: unknown): e is ClosedSlotError {
   return (e as { reason?: unknown } | null | undefined)?.reason === CLOSED_SLOT_DISCRIMINANT;
 }
-

@@ -1384,4 +1384,3 @@ Then the README table advertises a command that does not run
 teeth: breaks-on "the guard's README leg is the mock; removing it lets the table drift, which is exactly how it reached ten rows against twenty-three commands"
 witness: harness/gates/command-doc-guard.mjs
 gen: exhaustive
-

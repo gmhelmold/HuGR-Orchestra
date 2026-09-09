@@ -212,4 +212,3 @@ exit_predicate: all acceptance SCNs green ∧ the named witness tests pass ∧ a
 rationale:
   - source: ../invariant-register-adapters.md#INV-MEMRING-11
   - source: ../invariant-register-adapters.md#INV-MEMRING-12
-

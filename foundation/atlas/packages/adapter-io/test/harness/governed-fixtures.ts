@@ -137,4 +137,3 @@ export function predicate(scope: string, tier: GroundedFact['tier'] = 'T2'): Gro
 export const realKey = (f: GroundedFact): string => nodeKey(f as unknown as Candidate) as unknown as string;
 
 export const AT = asHash('deadbeef');
-

@@ -289,4 +289,3 @@ describe('doc-transcript-guard — an insertion cannot silently re-attach a decl
     expect(out).toMatch(/STALE DECLARATION|output diverged/);
   });
 });
-

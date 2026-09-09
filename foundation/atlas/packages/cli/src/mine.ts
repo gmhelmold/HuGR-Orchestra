@@ -472,4 +472,3 @@ export async function runMine(repoPath: string, deps?: Partial<MineDeps>): Promi
   const pass = driveMinePass(repoPath, deps);
   return foldVerdict(pass, deps?.budget?.ceiling);
 }
-

@@ -59,4 +59,3 @@ describe('stripComments — the ONE stripper, reused instead of rewritten', () =
     expect(out).toContain('const y = 2;');
   });
 });
-

@@ -317,4 +317,3 @@ text: "the memory ring MUST: every shipped memory command has a reference page; 
 clauses: [ "every shipped memory command has a reference page", "every shipped memory command has a README table row", "neither names a command that does not ship" ]
 unwanted: [ "a shipped command is absent from the README table", "the README table advertises a command that does not run" ]
 method-tag: exhaustive
-

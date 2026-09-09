@@ -579,4 +579,3 @@ export async function main(argv: string[], deps: CliDeps = {}): Promise<number> 
   // exit code: neither one makes the command's own outcome wrong, both are legibility ADDED to it.
   return emitCli(withNote(withNote(renderVerdict(verdict), ignoreNote), deps.readAdvisory));
 }
-

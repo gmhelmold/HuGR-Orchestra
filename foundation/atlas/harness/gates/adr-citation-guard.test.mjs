@@ -193,4 +193,3 @@ describe('adr-citation-guard — anti-vacuity: every way of checking nothing is 
     expect(roots.map((r) => refusal(run(r).out))).toEqual(['A-0', 'A-2', 'A-1', 'A-3']);
   });
 });
-

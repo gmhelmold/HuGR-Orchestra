@@ -420,4 +420,3 @@ describe('a COMMITTED store whose proven fact has no bytes is COUNTED, not dropp
     }
   });
 });
-

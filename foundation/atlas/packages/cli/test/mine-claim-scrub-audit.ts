@@ -341,4 +341,3 @@ export function auditNegationScrub(source: string, fileName = 'mine-decide.ts'):
   violations.push(...auditIdentityFromScrubbedFact(sf));
   return violations;
 }
-
