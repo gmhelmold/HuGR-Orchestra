@@ -8,7 +8,7 @@ type AppDockAPI = {
   appDockHide: () => Promise<void>
   appDockClose: () => Promise<void>
   appDockCloseTab: (id: string) => Promise<void>
-  appDockCloseTabs: (id: string, scope: "others" | "right") => Promise<void>
+  appDockCloseTabs: (id: string, scope: "others" | "right", order?: string[]) => Promise<void>
   appDockSelect: (id: string, bounds: Bounds) => Promise<void>
   appDockNavigate: (id: string, url: string) => Promise<void>
   appDockCommand: (id: string, command: "back" | "forward" | "reload") => Promise<void>
@@ -321,11 +321,11 @@ export function AppsPanel() {
   }
   const closeTabs = async (tab: Tab, scope: "others" | "right") => {
     const items = tabs()
-    const index = items.findIndex((item) => item.id === tab.id)
-    if (index < 0 || (scope === "others" ? items.length < 2 : index === items.length - 1)) return
-    await api()?.appDockCloseTabs(tab.id, scope)
-    // Native "right" follows creation order; pinned tabs only change display order.
-    const closedIDs = new Set((scope === "others" ? items.filter((item) => item.id !== tab.id) : items.slice(index + 1)).map((item) => item.id))
+    const visual = [...items.filter((item) => item.pinned), ...items.filter((item) => !item.pinned)]
+    const index = visual.findIndex((item) => item.id === tab.id)
+    if (index < 0 || (scope === "others" ? items.length < 2 : index === visual.length - 1)) return
+    await api()?.appDockCloseTabs(tab.id, scope, scope === "right" ? visual.map((item) => item.id) : undefined)
+    const closedIDs = new Set((scope === "others" ? items.filter((item) => item.id !== tab.id) : visual.slice(index + 1)).map((item) => item.id))
     const remaining = items.filter((item) => !closedIDs.has(item.id))
     setTabs(remaining)
     if (!remaining.some((item) => item.id === active())) {
@@ -504,7 +504,7 @@ export function AppsPanel() {
           </div>}
          {!api() && <div class="zen-empty-state"><strong>Browser needs OpenCode Desktop.</strong><span>Native browser tabs are unavailable in web app.</span></div>}
           <div ref={host} class="zen-browser-host" />
-          {menu() && <TabMenu tab={menu()!.tab} x={menu()!.x} y={menu()!.y} setElement={(element) => menuElement = element} canDuplicate={capability("appDockOpen")} canReload={capability("appDockCommand")} canClose={capability("appDockCloseTab")} hasOthers={tabs().length > 1} hasRight={tabs().findIndex((item) => item.id === menu()!.tab.id) < tabs().length - 1} onDuplicate={() => { void duplicateTab(menu()!.tab); closeMenu() }} onTogglePin={() => { const tab = menu()!.tab; setTabs((items) => items.map((item) => item.id === tab.id ? { ...item, pinned: !item.pinned } : item)); closeMenu() }} onReload={() => { const id = menu()!.tab.id; void api()?.appDockCommand(id, "reload"); closeMenu() }} onClose={() => { void close(menu()!.tab.id); closeMenu() }} onCloseOthers={() => { void closeTabs(menu()!.tab, "others"); closeMenu() }} onCloseRight={() => { void closeTabs(menu()!.tab, "right"); closeMenu() }} />}
+           {menu() && <TabMenu tab={menu()!.tab} x={menu()!.x} y={menu()!.y} setElement={(element) => menuElement = element} canDuplicate={capability("appDockOpen")} canReload={capability("appDockCommand")} canClose={capability("appDockCloseTab")} hasOthers={tabs().length > 1} hasRight={[...tabs().filter((item) => item.pinned), ...tabs().filter((item) => !item.pinned)].findIndex((item) => item.id === menu()!.tab.id) < tabs().length - 1} onDuplicate={() => { void duplicateTab(menu()!.tab); closeMenu() }} onTogglePin={() => { const tab = menu()!.tab; setTabs((items) => items.map((item) => item.id === tab.id ? { ...item, pinned: !item.pinned } : item)); closeMenu() }} onReload={() => { const id = menu()!.tab.id; void api()?.appDockCommand(id, "reload"); closeMenu() }} onClose={() => { void close(menu()!.tab.id); closeMenu() }} onCloseOthers={() => { void closeTabs(menu()!.tab, "others"); closeMenu() }} onCloseRight={() => { void closeTabs(menu()!.tab, "right"); closeMenu() }} />}
       </main>
     </div>
   )

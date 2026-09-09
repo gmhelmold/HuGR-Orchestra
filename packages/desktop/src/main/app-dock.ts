@@ -440,8 +440,10 @@ export function createAppDock() {
     close,
     closeTabs(senderID: number, tabID: string, scope: "others" | "right", order?: string[]) {
       const senderTabs = tabs.get(senderID)
-      if (!senderTabs?.has(tabID)) throw new Error("Unknown App Dock tab")
-      const ids = [...senderTabs.keys()]
+      if (!senderTabs) throw new Error("Unknown App Dock tab")
+      const targetRecord = senderTabs.get(tabID)
+      if (!targetRecord) throw new Error("Unknown App Dock tab")
+      const ids = [...senderTabs].filter(([, record]) => record.storageKey === targetRecord.storageKey).map(([id]) => id)
       if (scope === "others" && order !== undefined) throw new Error("Invalid App Dock tab order")
       if (
         order !== undefined &&
