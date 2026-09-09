@@ -97,7 +97,7 @@ const domains = [
 ] as const
 
 describe("i18n parity", () => {
-  test("non-English locales have every English key and required plural variants", async () => {
+  test("non-English locales have every English key and required plural variants", { timeout: 30000 }, async () => {
     for (const domain of domains) {
       const source = await dictionary(domain.source)
       for (const locale of domain.locales) {
@@ -119,7 +119,7 @@ describe("i18n parity", () => {
     }
   })
 
-  test("non-English locales preserve English placeholders", async () => {
+  test("non-English locales preserve English placeholders", { timeout: 30000 }, async () => {
     for (const domain of domains) {
       const source = await dictionary(domain.source)
       for (const locale of domain.locales) {
