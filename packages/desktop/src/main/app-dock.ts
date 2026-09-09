@@ -1,15 +1,23 @@
 import { session, shell, WebContentsView } from "electron"
 import type { BrowserWindow, Session } from "electron"
 import { randomUUID } from "node:crypto"
+import type { EventEmitter } from "node:events"
 import { appDockURL, appDockZoom, panelBoundsToContent, type DockBounds } from "./app-dock-utils"
 export type { DockBounds } from "./app-dock-utils"
 
 export type AppDockIdentity = Readonly<{ tabID: string; generation: number }>
-export type AppDockTab = AppDockIdentity & { url: string }
-export type AppDockState = AppDockIdentity & { url: string; title: string; favicon?: string; loading: boolean; audible: boolean; error?: { code: "blocked" | "failed"; url: string } }
+// Remove `id` after bridge migrates to `tabID` in App Dock S2.
+export type AppDockTab = AppDockIdentity & { id: string; url: string }
+export type ProfileStorage = Readonly<{ storageKey: string }>
+export type AppDockState = AppDockIdentity & { url: string; title: string; favicon?: string; loading: boolean; audible: boolean }
 export type AppDockFindResult = AppDockIdentity & { requestID: number; activeMatchOrdinal: number; matches: number; finalUpdate: boolean }
 export type AppDockDownload = AppDockIdentity & { id: string; filename: string; receivedBytes: number; totalBytes: number; state: "progressing" | "paused" | "completed" | "cancelled" | "interrupted" }
-type AppDockRecord = { view: WebContentsView; storageKey: string; generation: number; state: () => AppDockState; notify: (state: AppDockState) => void; notifyDownload: (download: AppDockDownload) => void; notifyFullscreen: (identity: AppDockIdentity, enabled: boolean) => void; cleanups: (() => void)[] }
+export type AppDockEvent =
+  | Readonly<{ type: "state"; payload: AppDockState }>
+  | Readonly<{ type: "download"; payload: AppDockDownload }>
+  | Readonly<{ type: "fullscreen"; payload: { identity: AppDockIdentity; enabled: boolean } }>
+  | Readonly<{ type: "navigation-error"; payload: { identity: AppDockIdentity; code: "blocked" | "failed"; url: string } }>
+type AppDockRecord = { view: WebContentsView; win: BrowserWindow; storageKey: string; generation: number; state: () => AppDockState; notify: (event: AppDockEvent) => void; cleanups: (() => void)[] }
 
 const storagePartition = (storageKey: string) => {
   if (!/^[A-Za-z0-9_-]{16,128}$/.test(storageKey)) throw new Error("Invalid App Dock storage key")
@@ -41,7 +49,8 @@ export function createAppDock() {
   const remove = (senderID: number, tabID: string, win?: BrowserWindow) => {
     const record = tabs.get(senderID)?.get(tabID)
     if (!record) return
-    win?.contentView.removeChildView(record.view)
+    const owner = win ?? record.win
+    if (!owner.isDestroyed()) owner.contentView.removeChildView(record.view)
     inactive.delete(`${senderID}:${tabID}`)
     tabByContents.delete(record.view.webContents.id)
     record.cleanups.forEach((cleanup) => cleanup())
@@ -66,11 +75,8 @@ export function createAppDock() {
       win: BrowserWindow,
       address: string,
       bounds: DockBounds,
-      notify: (state: AppDockState) => void,
-      storageKey?: string,
-      onTabOpened?: (tab: AppDockTab) => void,
-      onDownload?: (download: AppDockDownload) => void,
-      onFullscreen?: (identity: AppDockIdentity, enabled: boolean) => void,
+      notify: (event: AppDockEvent) => void,
+      profileStorage: ProfileStorage,
     ): Promise<AppDockTab> => {
       if (!validBounds(bounds)) throw new Error("Invalid App Dock bounds")
       const id = randomUUID()
@@ -79,10 +85,11 @@ export function createAppDock() {
       try {
         target = appDockURL(address)
       } catch {
-        notify(Object.freeze({ ...identity(id, tabGeneration), url: address, title: address, loading: false, audible: false, error: { code: "blocked", url: address } }))
+        const tabIdentity = identity(id, tabGeneration)
+        notify(Object.freeze({ type: "navigation-error", payload: Object.freeze({ identity: tabIdentity, code: "blocked", url: address }) }))
         throw new Error("App Dock only supports HTTPS URLs")
       }
-      if (!storageKey) throw new Error("App Dock storage key is required")
+      const { storageKey } = profileStorage
       if (retiredStorageKeys.has(storageKey)) throw new Error("App Dock storage key is retired")
       const partition = storagePartition(storageKey)
       const browserSession = browserSessions.get(partition) ?? session.fromPartition(partition)
@@ -99,7 +106,7 @@ export function createAppDock() {
             if (!isCurrent(source.senderID, source.tabID, source.generation)) return
             const download = Object.freeze({ ...identity(source.tabID, source.generation), id, filename: item.getFilename(), receivedBytes: item.getReceivedBytes(), totalBytes: item.getTotalBytes(), state })
             downloads.set(id, { senderID: source.senderID, storageKey: record.storageKey, item, state: download })
-            record.notifyDownload(download)
+            record.notify(Object.freeze({ type: "download", payload: download }))
           }
           item.on("updated", () => updateDownload(item.isPaused() ? "paused" : "progressing"))
           item.once("done", (_doneEvent, state) => updateDownload(state === "completed" ? "completed" : state === "cancelled" ? "cancelled" : "interrupted"))
@@ -113,12 +120,13 @@ export function createAppDock() {
       const update = (patch: Partial<Omit<AppDockState, "tabID" | "generation">>) => {
         if (!isCurrent(senderID, id, tabGeneration)) return
         state = { ...state, ...patch }
-        notify(snapshot())
+        notify(Object.freeze({ type: "state", payload: snapshot() }))
       }
       const cleanups: (() => void)[] = []
-      const listen = <T extends Parameters<typeof view.webContents.on>[0]>(event: T, listener: (...args: any[]) => void) => {
-        view.webContents.on(event, listener)
-        cleanups.push(() => view.webContents.removeListener(event, listener))
+      const contents = view.webContents as unknown as EventEmitter
+      const listen = (event: string, listener: (...args: any[]) => void) => {
+        contents.on(event, listener)
+        cleanups.push(() => contents.removeListener(event, listener))
       }
       listen("page-title-updated", (_event, title) => update({ title }))
       listen("page-favicon-updated", (_event, favicons) => update({ favicon: favicons[0] }))
@@ -126,7 +134,8 @@ export function createAppDock() {
       listen("did-stop-loading", () => update({ loading: false, url: view.webContents.getURL() || target }))
       listen("did-fail-load", (_event, errorCode, _errorDescription, validatedURL, isMainFrame) => {
         if (!isMainFrame || errorCode === -3) return
-        update({ loading: false, url: validatedURL || state.url, error: { code: "failed", url: validatedURL || state.url } })
+        update({ loading: false, url: validatedURL || state.url })
+        notify(Object.freeze({ type: "navigation-error", payload: Object.freeze({ identity: identity(id, tabGeneration), code: "failed", url: validatedURL || state.url }) }))
       })
       listen("did-navigate", (_event, navigatedURL) => update({ url: navigatedURL }))
       listen("did-navigate-in-page", (_event, navigatedURL) => update({ url: navigatedURL }))
@@ -135,24 +144,24 @@ export function createAppDock() {
       view.webContents.setWindowOpenHandler(({ url }) => {
         try {
           const popupURL = appDockURL(url)
-          void open(senderID, win, popupURL, bounds, notify, storageKey, onTabOpened, onDownload, onFullscreen).then(onTabOpened)
+          void open(senderID, win, popupURL, bounds, notify, profileStorage)
         } catch {
-          update({ loading: false, error: { code: "blocked", url } })
+          notify(Object.freeze({ type: "navigation-error", payload: Object.freeze({ identity: identity(id, tabGeneration), code: "blocked", url }) }))
         }
         return { action: "deny" }
       })
       listen("will-navigate", (event, url) => {
         if (URL.canParse(url) && new URL(url).protocol === "https:") return
         event.preventDefault()
-        update({ loading: false, error: { code: "blocked", url } })
+        notify(Object.freeze({ type: "navigation-error", payload: Object.freeze({ identity: identity(id, tabGeneration), code: "blocked", url }) }))
       })
       listen("will-redirect", (event, url) => {
         if (URL.canParse(url) && new URL(url).protocol === "https:") return
         event.preventDefault()
-        update({ loading: false, error: { code: "blocked", url } })
+        notify(Object.freeze({ type: "navigation-error", payload: Object.freeze({ identity: identity(id, tabGeneration), code: "blocked", url }) }))
       })
-      listen("enter-html-full-screen", () => (onFullscreen ?? (() => {}))(identity(id, tabGeneration), true))
-      listen("leave-html-full-screen", () => (onFullscreen ?? (() => {}))(identity(id, tabGeneration), false))
+      listen("enter-html-full-screen", () => notify(Object.freeze({ type: "fullscreen", payload: Object.freeze({ identity: identity(id, tabGeneration), enabled: true }) })))
+      listen("leave-html-full-screen", () => notify(Object.freeze({ type: "fullscreen", payload: Object.freeze({ identity: identity(id, tabGeneration), enabled: false }) })))
       win.contentView.addChildView(view)
       view.setBounds(bounds)
       view.setVisible(true)
@@ -164,7 +173,7 @@ export function createAppDock() {
           markInactive(senderID, tabID, other)
         }
       }
-      senderTabs.set(id, { view, storageKey, generation: tabGeneration, state: snapshot, notify, notifyDownload: onDownload ?? (() => {}), notifyFullscreen: onFullscreen ?? (() => {}), cleanups })
+      senderTabs.set(id, { view, win, storageKey, generation: tabGeneration, state: snapshot, notify, cleanups })
       tabByContents.set(view.webContents.id, { senderID, tabID: id, generation: tabGeneration })
       tabs.set(senderID, senderTabs)
       active.set(senderID, id)
@@ -173,9 +182,9 @@ export function createAppDock() {
         if (!oldest) break
         remove(oldest.senderID, oldest.tabID)
       }
-      void view.webContents.loadURL(target).catch(() => update({ loading: false, error: { code: "failed", url: target } }))
+      void view.webContents.loadURL(target).catch(() => notify(Object.freeze({ type: "navigation-error", payload: Object.freeze({ identity: identity(id, tabGeneration), code: "failed", url: target }) })))
       update({})
-      return Object.freeze({ ...identity(id, tabGeneration), url: target })
+      return Object.freeze({ ...identity(id, tabGeneration), id, url: target })
     }
   return {
     open,
@@ -215,11 +224,11 @@ export function createAppDock() {
       try {
         target = appDockURL(address)
       } catch {
-        record.notify(Object.freeze({ ...record.state(), loading: false, error: { code: "blocked", url: address } }))
+        record.notify(Object.freeze({ type: "navigation-error", payload: Object.freeze({ identity: identity(tabID, record.generation), code: "blocked", url: address }) }))
         throw new Error("App Dock only supports HTTPS URLs")
       }
       return record.view.webContents.loadURL(target).catch(() => {
-        record.notify(Object.freeze({ ...record.state(), loading: false, error: { code: "failed", url: target } }))
+        record.notify(Object.freeze({ type: "navigation-error", payload: Object.freeze({ identity: identity(tabID, record.generation), code: "failed", url: target }) }))
         throw new Error("Navigation failed")
       })
     },
@@ -261,7 +270,7 @@ export function createAppDock() {
       const record = tabs.get(senderID)?.get(tabID)
       if (!record) throw new Error("Unknown App Dock tab")
       win.setFullScreen(enabled)
-      record.notifyFullscreen(identity(tabID, record.generation), enabled)
+      record.notify(Object.freeze({ type: "fullscreen", payload: Object.freeze({ identity: identity(tabID, record.generation), enabled }) }))
     },
     cancelDownload(senderID: number, id: string) {
       const download = downloads.get(id)
@@ -273,12 +282,12 @@ export function createAppDock() {
       if (!download || download.senderID !== senderID || download.state.state !== "completed") throw new Error("Unknown App Dock download")
       return shell.openPath(download.item.getSavePath())
     },
-    async deleteStorage(storageKey: string) {
+    async deleteStorage(storageKey: string, win?: BrowserWindow) {
       const partition = storagePartition(storageKey)
       if (retiredStorageKeys.has(storageKey)) throw new Error("App Dock storage key is retired")
       retiredStorageKeys.add(storageKey)
       for (const [senderID, senderTabs] of tabs) {
-        for (const [tabID, record] of senderTabs) if (record.storageKey === storageKey) remove(senderID, tabID)
+        for (const [tabID, record] of senderTabs) if (record.storageKey === storageKey) remove(senderID, tabID, win ?? record.win)
       }
       for (const [downloadID, download] of downloads) {
         if (download.storageKey === storageKey) {
