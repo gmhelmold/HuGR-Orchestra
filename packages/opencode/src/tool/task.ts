@@ -255,6 +255,10 @@ export const TaskTool = Tool.define(
         })
         if (verdict.status !== "APPROVED")
           return yield* Effect.fail(new Error(`Governed Task denied: ${verdict.reason}`))
+        const approvedDecision = decisionEvents.find(
+          (decision) =>
+            decision.approvalMessageID === governed.approvalMessageID && decision.taskHash === governed.taskHash,
+        )!
         const consumed = yield* database.db
           .select({ data: EventTable.data })
           .from(EventTable)
@@ -269,23 +273,14 @@ export const TaskTool = Tool.define(
         if (
           consumed.some((event) => {
             const data = Schema.decodeUnknownSync(MaestroEvent.Approval.Consumed.data)(event.data)
-            return (
-              data.presentationID ===
-                decisionEvents.find(
-                  (decision) =>
-                    decision.approvalMessageID === governed.approvalMessageID &&
-                    decision.taskHash === governed.taskHash,
-                )?.presentationID &&
-              data.approvalMessageID === governed.approvalMessageID &&
-              data.taskHash === governed.taskHash
-            )
+            return data.presentationID === approvedDecision.presentationID && data.taskHash === governed.taskHash
           })
         ) {
           return yield* Effect.fail(new Error("Governed Task denied: approval-consumed"))
         }
         const consumeID = EventV2.ID.make(
           `evt_maestro_approval_consumed_${createHash("sha256")
-            .update([governed.sessionID, governed.approvalMessageID, governed.taskHash].join("\u0000"))
+            .update([governed.sessionID, approvedDecision.presentationID, governed.taskHash].join("\u0000"))
             .digest("hex")}`,
         )
         yield* events
@@ -293,12 +288,7 @@ export const TaskTool = Tool.define(
             MaestroEvent.Approval.Consumed,
             {
               sessionID: governed.sessionID,
-              presentationID:
-                decisionEvents.find(
-                  (decision) =>
-                    decision.approvalMessageID === governed.approvalMessageID &&
-                    decision.taskHash === governed.taskHash,
-                )?.presentationID ?? "",
+              presentationID: approvedDecision.presentationID,
               approvalMessageID: governed.approvalMessageID,
               taskHash: governed.taskHash,
               callID,

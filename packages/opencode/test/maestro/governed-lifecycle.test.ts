@@ -396,6 +396,38 @@ describe("Maestro governed lifecycle", () => {
         },
       )
       expect(yield* sessions.children(chat.id)).toHaveLength(1)
+      const repeated = { ...governed, approvalMessageID: "msg_approve_again" }
+      yield* events.publish(MaestroEvent.Approval.Decided, {
+        ...repeated,
+        presentationID: "apr_01",
+        presentationMessageID: "msg_presentation",
+        methodVersion: "request-approval-v1",
+        outcome: "APPROVED",
+        decisionTime: Date.now() + 1,
+      })
+      const duplicate = yield* Effect.exit(
+        def.execute(
+          {
+            description: "implement dark mode",
+            prompt: "implement dark mode",
+            subagent_type: "general",
+            governed: repeated,
+          },
+          {
+            sessionID: chat.id,
+            messageID: assistant.id,
+            callID: "call_task_repeated_approval",
+            agent: "maestro",
+            abort: new AbortController().signal,
+            extra: { promptOps: stubOps() },
+            messages: [],
+            metadata: () => Effect.void,
+            ask: () => Effect.void,
+          },
+        ),
+      )
+      expect(Exit.isFailure(duplicate)).toBe(true)
+      expect(yield* sessions.children(chat.id)).toHaveLength(1)
     }),
   )
 })
