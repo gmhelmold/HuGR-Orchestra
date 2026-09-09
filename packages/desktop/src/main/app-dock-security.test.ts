@@ -150,12 +150,13 @@ async function child() {
   let events: any[] = []
   const installEventStore = () => execute("event-store", ipcWin.webContents, "window.__appDockEvents = []; window.onerror = (message, source, line, column, error) => console.error('app-dock-renderer-error', message, source, line, column, error?.stack); require('electron').ipcRenderer.on('app-dock-event', (_event, value) => window.__appDockEvents.push(value)); undefined")
   const readEvents = async () => events = await execute("event-read", ipcWin.webContents, "window.__appDockEvents")
-  const waitEvent = (predicate: (event: any) => boolean, label: string) => {
+  const eventCount = async () => { await readEvents(); return events.length }
+  const waitEvent = (after: number, predicate: (event: any) => boolean, label: string) => {
     const deadline = Date.now() + 5_000
     return new Promise<any>((resolve, reject) => {
       const poll = async () => {
         await readEvents()
-        const event = events.find(predicate)
+        const event = events.slice(after).find(predicate)
         if (event) return resolve(event)
         if (Date.now() >= deadline) return reject(new Error(`Timed out waiting for ${label}`))
         setTimeout(poll, 25)
@@ -174,25 +175,30 @@ async function child() {
   const viewContents = () => webContents.getAllWebContents().filter((item) => item !== ipcWin.webContents && !item.isDestroyed()).at(-1)
   let completed = false
   try {
+    const u01Start = await eventCount()
     await Promise.all(schemes.map((url) => rejects(() => open(url), "App Dock only supports HTTPS URLs")))
-    await Promise.all(schemes.map((url) => waitEvent((event) => event.type === "navigation-error" && event.payload.url === url, `open block ${url}`)))
+    await Promise.all(schemes.map((url) => waitEvent(u01Start, (event) => event.type === "navigation-error" && event.payload.code === "blocked" && event.payload.url === url, `open block ${url}`)))
     pass("U01", "open rejects http/file/javascript/data")
 
     const tab = await open()
+    const u02Start = await eventCount()
     await Promise.all(schemes.map((url) => rejects(() => navigate(tab.tabID, url), "App Dock only supports HTTPS URLs")))
-    await Promise.all(schemes.map((url) => waitEvent((event) => event.type === "navigation-error" && event.payload.url === url, `navigate block ${url}`)))
+    await Promise.all(schemes.map((url) => waitEvent(u02Start, (event) => event.type === "navigation-error" && event.payload.code === "blocked" && event.payload.url === url, `navigate block ${url}`)))
     pass("U02", "navigate rejects http/file/javascript/data")
 
+    const u03Start = await eventCount()
     await navigate(tab.tabID, `${site.base}/popup`)
-    await waitEvent((event) => event.type === "navigation-error" && event.payload.url === "http://127.0.0.1/popup-blocked", "popup block")
+    await waitEvent(u03Start, (event) => event.type === "navigation-error" && event.payload.code === "blocked" && event.payload.url === "http://127.0.0.1/popup-blocked", "popup block")
     pass("U03", "real window.open blocked")
 
+    const u04Start = await eventCount()
     await navigate(tab.tabID, `${site.base}/navigate`)
-    await waitEvent((event) => event.type === "navigation-error" && event.payload.url === "http://127.0.0.1/navigate-blocked", "will-navigate block")
+    await waitEvent(u04Start, (event) => event.type === "navigation-error" && event.payload.code === "blocked" && event.payload.url === "http://127.0.0.1/navigate-blocked", "will-navigate block")
     pass("U04", "real main-frame navigation blocked")
 
+    const u05Start = await eventCount()
     await rejects(() => navigate(tab.tabID, `${site.base}/redirect-http`), "Navigation failed")
-    await waitEvent((event) => event.type === "navigation-error" && event.payload.url === "http://127.0.0.1/redirect-blocked", "will-redirect block")
+    await waitEvent(u05Start, (event) => event.type === "navigation-error" && event.payload.code === "blocked" && event.payload.url === "http://127.0.0.1/redirect-blocked", "will-redirect block")
     pass("U05", "real HTTPS redirect to HTTP blocked")
 
     const contents = viewContents()
@@ -201,8 +207,9 @@ async function child() {
     check(preferences.sandbox === true && preferences.contextIsolation === true && preferences.nodeIntegration === false, "unsafe App Dock webPreferences")
     pass("U06", "real view has sandbox/contextIsolation/nodeIntegration policy")
 
+    const u07Start = await eventCount()
     await navigate(tab.tabID, `${site.base}/permission`)
-    await waitEvent((event) => event.type === "state" && event.payload.tabID === tab.tabID && event.payload.title === "denied", "permission denial state")
+    await waitEvent(u07Start, (event) => event.type === "state" && event.payload.tabID === tab.tabID && event.payload.title === "denied", "permission denial state")
     check(await contents.session.cookies.get({ url: site.base }).then(() => true), "partition session unavailable")
     pass("U07", "permission request denied in real partition")
 
