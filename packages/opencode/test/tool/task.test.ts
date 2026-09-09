@@ -249,7 +249,7 @@ describe("tool.task", () => {
     Effect.gen(function* () {
       const sessions = yield* Session.Service
       const { chat, assistant } = yield* seed()
-      const child = yield* sessions.create({ parentID: chat.id, title: "Existing child" })
+      const child = yield* sessions.create({ parentID: chat.id, title: "Existing child", agent: "general" })
       const tool = yield* TaskTool
       const def = yield* tool.init()
       let seen: SessionPrompt.PromptInput | undefined
