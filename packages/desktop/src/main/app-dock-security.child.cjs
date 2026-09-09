@@ -5,9 +5,9 @@ diagnostic("before-import-electron")
 const { app } = require("electron")
 diagnostic("after-import-electron")
 diagnostic("before-whenReady")
-app.whenReady().then(() => {
+const ready = app.whenReady().then(() => {
   diagnostic("after-whenReady")
   clearTimeout(startupWatchdog)
   if (process.argv.includes("--startup-only")) app.exit()
-  else require(process.argv[2])
 }).catch((error) => { console.error(error); app.exit(1) })
+if (!process.argv.includes("--startup-only")) require(process.argv[2])

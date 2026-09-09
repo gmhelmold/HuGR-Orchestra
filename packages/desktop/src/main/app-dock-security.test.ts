@@ -93,6 +93,7 @@ async function child() {
   const { app, BrowserWindow, ipcMain, webContents } = await import("electron")
   diagnostic("after-import-electron")
   if (!process.versions.electron) throw new Error("Electron child not started")
+  const ipcModule = await import("./ipc")
   app.commandLine.appendSwitch("ignore-certificate-errors")
   diagnostic("before-whenReady")
   await app.whenReady()
@@ -107,7 +108,7 @@ async function child() {
   const temp = await mkdtemp(join(tmpdir(), "app-dock-user-data-"))
   app.setPath("userData", temp)
   const site = await fixture()
-  const { registerIpcHandlers } = await import("./ipc")
+  const { registerIpcHandlers } = ipcModule
   registerIpcHandlers({
     killSidecar() {}, relaunch() {}, awaitInitialization: async () => ({ serverUrl: site.base }), consumeInitialDeepLinks: () => [],
     getDefaultServerUrl: () => null, setDefaultServerUrl() {}, isFirstLaunchOnboardingPending: () => false,
