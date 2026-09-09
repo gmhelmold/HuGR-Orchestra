@@ -11,6 +11,7 @@ const ready = app.whenReady().then(() => {
   if (process.argv.includes("--startup-only")) app.exit()
 }).catch((error) => { console.error(error); app.exit(1) })
 if (!process.argv.includes("--startup-only")) {
+  process.env.APP_DOCK_TEST_PRELOAD = require("node:path").join(__dirname, "app-dock-security.preload.cjs")
   app.on("window-all-closed", (event) => event.preventDefault())
   require(process.argv[2])
 }

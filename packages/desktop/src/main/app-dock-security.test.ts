@@ -132,7 +132,8 @@ async function child() {
     updater: { subscribe: () => () => {}, check: async () => {}, install: async () => {} }, showUpdater() {}, setBackgroundColor() {},
     exportDebugLogs: async () => "", recordFatalRendererError() {}, setNativeTranslations() {},
   })
-  const ipcWin = new BrowserWindow({ show: false, webPreferences: { nodeIntegration: true, contextIsolation: false } })
+  if (!process.env.APP_DOCK_TEST_PRELOAD || !isAbsolute(process.env.APP_DOCK_TEST_PRELOAD)) throw new Error("Invalid App Dock test preload")
+  const ipcWin = new BrowserWindow({ show: false, webPreferences: { nodeIntegration: true, nodeIntegrationInSubFrames: true, contextIsolation: false, preload: process.env.APP_DOCK_TEST_PRELOAD } })
   const execute = async (phase: string, frame: { executeJavaScript: (code: string) => Promise<any> }, code: string) => {
     diagnostic(`renderer:${phase}:start`)
     try {
@@ -145,7 +146,7 @@ async function child() {
     }
   }
   const invoke = (frame: { executeJavaScript: (code: string) => Promise<any> }, channel: string, args: unknown[]) =>
-    execute(`ipc:${channel}`, frame, `require('electron').ipcRenderer.invoke(${JSON.stringify(channel)}, ...${JSON.stringify(args)})`)
+    execute(`ipc:${channel}`, frame, `window.__testIpcInvoke(${JSON.stringify(channel)}, ${JSON.stringify(args)})`)
   let events: any[] = []
   const installEventStore = () => execute("event-store", ipcWin.webContents, "window.__appDockEvents = []; window.onerror = (message, source, line, column, error) => console.error('app-dock-renderer-error', message, source, line, column, error?.stack); require('electron').ipcRenderer.on('app-dock-event', (_event, value) => window.__appDockEvents.push(value)); undefined")
   const readEvents = async () => events = await execute("event-read", ipcWin.webContents, "window.__appDockEvents")
