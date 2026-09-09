@@ -79,6 +79,17 @@ export interface OwnDispatch {
  *  no index unit yields an empty briefing, never a throw). */
 export type OwnLeg = (scope: string) => OwnDispatch;
 
+/** Atlas availability for post-Genesis Own materialization. Every listed ID is structural, canonical, and exact. */
+export function availableOwnUnits(axes: Axes): readonly OwnUnit[] {
+  const units: OwnUnit[] = [];
+  const walk = (node: IndexNode): void => {
+    units.push({ level: 'module', id: node.key, grounding: node.subtreeHash });
+    for (const child of node.children) walk(child);
+  };
+  walk(axes.spatial);
+  return units.sort((a, b) => a.id.localeCompare(b.id));
+}
+
 /** `Hash` and `NodeKey` are same-string DISTINCT brands (contracts/hash.ts). One cast helper, as
  *  index-adapter.ts does at the same kind of seam — a structural key crossing into the fact vocabulary. */
 const asNodeKey = (s: string): NodeKey => s as unknown as NodeKey;

@@ -140,7 +140,7 @@ export type { GroundingComputerConfig, WarmGroundingComputer } from './grounding
 // first caller outside its own test file. Exported because the CLI entrypoint threads it on the same injected
 // seam `promote` rides, and because a test must be able to drive the FEED (`buildOwnSources`) directly rather
 // than only through the composed runtime. It opens no governed surface: it is a read.
-export { buildOwnSources, createOwnLeg } from './own-source.js';
+export { availableOwnUnits, buildOwnSources, createOwnLeg } from './own-source.js';
 export type { OwnDispatch, OwnLeg, OwnSourceDeps } from './own-source.js';
 export { createDoctorSource, regroundTemplate, retireTemplate } from './doctor-source.js';
 // The grounded-relation READ leg (#99a) — the production edge for `relationsOf`, plus the SHARED verdict

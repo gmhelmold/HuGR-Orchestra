@@ -1,0 +1,65 @@
+{
+  "schemaVersion": 1,
+  "snapshot": "genesis-own-v1",
+  "sourceRevision": "10285a830054bbf9fae0180b81d08f3df27b88a0",
+  "units": [
+    {
+      "unit": {
+        "level": "module",
+        "id": "packages/genesis",
+        "grounding": null
+      },
+      "sourceBlobs": {
+        "packages/genesis/src/extract.ts": "e6eef86a095cb1f59c24450d701215d415704d14",
+        "packages/genesis/src/index.ts": "aaf1be6da91ee3594ab7a5208077a24957ea372f",
+        "packages/genesis/src/types.ts": "4141743edcff40a8033acea005787e60841f61a7"
+      },
+      "pack": {
+        "unit": "Genesis owns deterministic bootstrap and governed fact seeding.",
+        "invariants": [
+          {
+            "nodeId": "genesis:deterministic-bootstrap",
+            "tier": "T1",
+            "claim": "Genesis builds deterministic structural state before governed fact seeding.",
+            "freshness": "FRESH"
+          }
+        ],
+        "shape": {
+          "contents": [
+            "packages/genesis/src/index.ts",
+            "packages/genesis/src/types.ts",
+            "packages/genesis/src/extract.ts"
+          ],
+          "owner": "atlas-foundation",
+          "tier": "T1"
+        },
+        "edges": {
+          "dependents": [],
+          "dependencies": []
+        },
+        "gotchas": [],
+        "memory": null,
+        "drill": {
+          "finer": [],
+          "refresh": {
+            "pull": "poke:own_packages_genesis"
+          },
+          "complement": {
+            "pull": "relate:packages/genesis"
+          }
+        },
+        "grounding": {
+          "source": "tree"
+        },
+        "tokenEstimate": 42,
+        "manifest": {
+          "pointers": [],
+          "truncated": false
+        },
+        "pullReachable": [],
+        "advisory": [],
+        "advisoryDropped": 0
+      }
+    }
+  ]
+}

@@ -5,6 +5,7 @@
 // composition; this file keeps the proposer resolution.
 
 import { execFileSync } from 'node:child_process';
+import { readFileSync } from 'node:fs';
 
 import { join } from 'node:path';
 
@@ -34,7 +35,7 @@ import {
 } from '@atlas/adapter-io';
 import type { CandidateReader, ClaimParser, ModelCommand } from '@atlas/adapter-io';
 import { cappedBudget } from '@atlas/genesis';
-import type { GenesisBudget, SiteProposer } from '@atlas/genesis';
+import type { Candidate, GenesisBudget, SeedProposal, SiteProposer } from '@atlas/genesis';
 import type { StructRef } from '@atlas/contracts';
 
 /** The sentinel `modelIdentity` for the fail-closed default: no model was wired, so nothing produced a
@@ -143,6 +144,45 @@ export function resolveMineSlots(env: NodeJS.ProcessEnv): readonly MineSlot[] {
  *  reports it rather than implying the repo held nothing (WP-F6). */
 export function defaultProposer(): SiteProposer {
   return { propose: () => null };
+}
+
+/**
+ * Adapter for an external proposal producer, including a Task agent. The producer supplies only the
+ * proposal body keyed by structural site; Genesis always reattaches the candidate it ranked and still
+ * sends the result through the normal admission gate and candidate staging door.
+ */
+export type TaskProposal = Omit<SeedProposal, 'cand'>;
+export const TASK_PROPOSALS_ENV = 'ATLAS_TASK_PROPOSALS';
+
+export function createTaskProposer(proposals: ReadonlyMap<string, TaskProposal>): SiteProposer {
+  return {
+    propose(cand: Candidate): SeedProposal | null {
+      const proposal = proposals.get(cand.site.qualifiedPath);
+      return proposal === undefined ? null : { ...proposal, cand } as SeedProposal;
+    },
+  };
+}
+
+/** Load provider-neutral Task output. Transport accepts advisory claims only; Genesis still gates them. */
+export function loadTaskProposer(env: NodeJS.ProcessEnv = process.env): SiteProposer | undefined {
+  const path = env[TASK_PROPOSALS_ENV];
+  if (path === undefined || path.trim() === '') return undefined;
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(readFileSync(path, 'utf8'));
+  } catch {
+    throw new Error(`${TASK_PROPOSALS_ENV} must name readable JSON`);
+  }
+  if (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed)) throw new Error(`${TASK_PROPOSALS_ENV} must be a site-to-proposal object`);
+  const proposals = new Map<string, TaskProposal>();
+  for (const [site, proposal] of Object.entries(parsed)) {
+    if (site.length === 0 || typeof proposal !== 'object' || proposal === null || Array.isArray(proposal) || typeof (proposal as { claim?: unknown }).claim !== 'string' || (proposal as { claim: string }).claim.trim() === '') {
+      throw new Error(`${TASK_PROPOSALS_ENV} contains malformed proposal for ${JSON.stringify(site)}`);
+    }
+    proposals.set(site, { claim: (proposal as { claim: string }).claim.trim() });
+  }
+  if (proposals.size === 0) throw new Error(`${TASK_PROPOSALS_ENV} contains no proposals`);
+  return createTaskProposer(proposals);
 }
 
 /**

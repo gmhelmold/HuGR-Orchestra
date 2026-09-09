@@ -18,6 +18,7 @@ export * from './unit-exports.js'; // #196c           — a unit's externally-ca
 export * from './unit-defs.js';    // #196d           — a unit's OWN global definitions: the DEFINITION candidate-grounded RECALL source (UnitDefsApi)
 export * from './rollup.js';       // WP-2.7-a.INDEX — structural rollup, leaf→root re-hash (RollupApi)
 export * from './fold.js';         // WP-2.7-a/2.7-b — delta + drift, dirty-bit/lazy rState/MaxHops (FoldApi)
+export * from './own-impact.js';   // Static Own PR impact receipt: delta + reverse blast + Knowledge drift input
 export * from './resolve.js';      // WP-2.8-a.INDEX — three-mode resolve (ResolveApi)
 export * from './retrieval.js';    // WP-2.8-a.INDEX — read-model retrieval (RetrievalApi/Fact)
 export * from './territory.js';    // WP-2.9-a.INDEX — territory assignment (TerritoryApi/TerritoryAssignment)

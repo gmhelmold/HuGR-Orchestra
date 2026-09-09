@@ -24,6 +24,7 @@
     "ears-coamend-guard": "node harness/gates/ears-coamend-guard.mjs",
     "doc-transcript-guard": "node harness/gates/doc-transcript-guard.mjs",
     "service-gate-guard": "node harness/gates/service-gate-guard.mjs",
+    "own-snapshot-guard": "node harness/gates/own-snapshot-guard.mjs",
     "wp-audit": "node scripts/wp-audit.mjs"
   },
   "engines": {
