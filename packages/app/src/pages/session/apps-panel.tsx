@@ -3,11 +3,16 @@ import "./apps-panel.css"
 
 type Bounds = { x: number; y: number; width: number; height: number }
 type AppDockAPI = {
-  appDockOpen: (url: string, bounds: Bounds, profile?: string) => Promise<{ tabID: string; generation: number; url: string }>
+  appDockOpen: (
+    url: string,
+    bounds: Bounds,
+    profile?: string,
+  ) => Promise<{ tabID: string; generation: number; url: string }>
   appDockResize: (bounds: Bounds) => Promise<void>
   appDockHide: () => Promise<void>
   appDockClose: () => Promise<void>
   appDockCloseTab: (tabID: string) => Promise<void>
+  appDockRecoverTab: (tabID: string) => Promise<{ tabID: string; generation: number; url: string }>
   appDockCloseTabs: (tabID: string, scope: "others" | "right", order?: string[]) => Promise<void>
   appDockSelect: (tabID: string, bounds: Bounds) => Promise<void>
   appDockNavigate: (tabID: string, url: string) => Promise<void>
@@ -15,7 +20,16 @@ type AppDockAPI = {
   appDockEvent: (callback: (event: AppDockEvent) => void) => () => void
   appDockFind: (tabID: string, text: string, forward: boolean) => Promise<number>
   appDockStopFind: (tabID: string) => Promise<void>
-  appDockFindResult: (callback: (result: { tabID: string; generation: number; requestID: number; activeMatchOrdinal: number; matches: number; finalUpdate: boolean }) => void) => () => void
+  appDockFindResult: (
+    callback: (result: {
+      tabID: string
+      generation: number
+      requestID: number
+      activeMatchOrdinal: number
+      matches: number
+      finalUpdate: boolean
+    }) => void,
+  ) => () => void
   appDockZoom: (tabID: string, factor?: number) => Promise<number>
   appDockCancelDownload: (downloadID: string) => Promise<void>
   appDockOpenDownload: (downloadID: string) => Promise<void>
@@ -37,6 +51,8 @@ type AppDockEvent =
       }
     }
   | { type: "tab-opened"; payload: { tabID: string; generation: number; url: string } }
+  | { type: "tab-crashed"; payload: { identity: TabIdentity; reason: "crashed" | "killed" | "oom" } }
+  | { type: "tab-recovered"; payload: { tabID: string; generation: number; url: string } }
   | { type: "download"; payload: Download }
   | { type: "fullscreen"; payload: { identity: TabIdentity; enabled: boolean } }
   | {
@@ -51,6 +67,7 @@ type Tab = TabIdentity & {
   loading?: boolean
   audible?: boolean
   pinned?: boolean
+  crashed?: { identity: TabIdentity; reason: "crashed" | "killed" | "oom" }
 }
 type Profile = { id: string; name: string }
 type Bookmark = { url: string; title: string }
@@ -77,10 +94,12 @@ const sidebarCollapsedKey = "opencode.app-dock.sidebar-collapsed"
 const defaultProfiles: Profile[] = [{ id: "default", name: "Personal" }]
 
 const tabLabel = (tab: Tab) => tab.title || new URL(tab.url).hostname
-const sameTab = (left: TabIdentity | undefined, right: TabIdentity | undefined) => !!left && !!right && left.tabID === right.tabID && left.generation === right.generation
+const sameTab = (left: TabIdentity | undefined, right: TabIdentity | undefined) =>
+  !!left && !!right && left.tabID === right.tabID && left.generation === right.generation
 
 const isHTTPS = (url: string) => URL.canParse(url) && new URL(url).protocol === "https:"
-const libraryEntries = (urls: string[]): Bookmark[] => urls.filter(isHTTPS).map((url) => ({ url, title: new URL(url).hostname }))
+const libraryEntries = (urls: string[]): Bookmark[] =>
+  urls.filter(isHTTPS).map((url) => ({ url, title: new URL(url).hostname }))
 
 const bounds = (element: HTMLElement): Bounds => {
   const rect = element.getBoundingClientRect()
@@ -113,6 +132,7 @@ export function AppsPanel() {
   const [downloads, setDownloads] = createSignal<Download[]>([])
   const [downloadsOpen, setDownloadsOpen] = createSignal(false)
   const [fullscreen, setFullscreen] = createSignal(false)
+  const [recovering, setRecovering] = createSignal<TabIdentity>()
   const [sidebarCollapsed, setSidebarCollapsed] = createSignal(localStorage.getItem(sidebarCollapsedKey) === "true")
   const [menu, setMenu] = createSignal<{ tab: Tab; x: number; y: number; invoker: HTMLButtonElement }>()
   let findRequestID: number | undefined
@@ -157,17 +177,26 @@ export function AppsPanel() {
       setError("App Dock changed in another window")
     }
     const pending = manifestWrite.then(run, run)
-    manifestWrite = pending.then(() => undefined, () => undefined)
+    manifestWrite = pending.then(
+      () => undefined,
+      () => undefined,
+    )
     return pending
   }
   const saveTabs = (items = tabs(), profileID = profile()) =>
     updateManifest((current) => ({
       ...current,
-      tabs: { ...current.tabs, [profileID]: items.filter((tab) => isHTTPS(tab.url)).map((tab) => ({ url: tab.url, pinned: !!tab.pinned })) },
+      tabs: {
+        ...current.tabs,
+        [profileID]: items.filter((tab) => isHTTPS(tab.url)).map((tab) => ({ url: tab.url, pinned: !!tab.pinned })),
+      },
     }))
   const saveHistory = (url: string) => {
     if (!isHTTPS(url)) return
-    void updateManifest((current) => ({ ...current, history: [url, ...current.history.filter((item) => item !== url)].slice(0, 100) }))
+    void updateManifest((current) => ({
+      ...current,
+      history: [url, ...current.history.filter((item) => item !== url)].slice(0, 100),
+    }))
   }
   const resize = () => {
     if (resizeFrame !== undefined) return
@@ -214,7 +243,13 @@ export function AppsPanel() {
       if (sameTab(state, active())) setURL(state.url)
       if (sameTab(state, active()) && state.error) setError(state.error)
       const failed = navigationError()
-      if (sameTab(state, active()) && !state.loading && failed?.tabID === state.tabID && failed.generation === state.generation && failed.url === state.url) {
+      if (
+        sameTab(state, active()) &&
+        !state.loading &&
+        failed?.tabID === state.tabID &&
+        failed.generation === state.generation &&
+        failed.url === state.url
+      ) {
         setError(undefined)
         setNavigationError(undefined)
       }
@@ -237,7 +272,27 @@ export function AppsPanel() {
         setActive(tab)
         setURL(tab.url)
       }
-      if (event.type === "navigation-error") {
+      if (event.type === "tab-crashed") {
+        const { identity, reason } = event.payload
+        if (!tabs().some((tab) => sameTab(tab, identity))) return
+        setTabs((items) =>
+          items.map((tab) => (sameTab(tab, identity) ? { ...tab, crashed: { identity, reason } } : tab)),
+        )
+      } else if (event.type === "tab-recovered") {
+        const recovered = event.payload
+        const crashed = tabs().find(
+          (tab) => tab.tabID === recovered.tabID && tab.crashed && sameTab(tab, tab.crashed.identity),
+        )
+        if (!crashed) return
+        setTabs((items) =>
+          items.map((tab) => (sameTab(tab, crashed) ? { ...tab, ...recovered, crashed: undefined } : tab)),
+        )
+        if (sameTab(crashed, active())) {
+          setActive(recovered)
+          setURL(recovered.url)
+        }
+        if (sameTab(recovering(), crashed)) setRecovering(undefined)
+      } else if (event.type === "navigation-error") {
         const { tabID, generation } = event.payload.identity
         if (!tabs().some((tab) => sameTab(tab, { tabID, generation }))) return
         if (sameTab({ tabID, generation }, active())) {
@@ -387,7 +442,7 @@ export function AppsPanel() {
   const selectTab = (tab: Tab) => {
     setActive(tab)
     setURL(tab.url)
-    if (host) void api()?.appDockSelect(tab.tabID, bounds(host))
+    if (!tab.crashed && host) void api()?.appDockSelect(tab.tabID, bounds(host))
   }
   const duplicateTab = async (tab: Tab) => {
     if (!host || !capability("appDockOpen")) return
@@ -416,7 +471,11 @@ export function AppsPanel() {
       .replace(/^-|-$/g, "")
       .slice(0, 32)
     if (!id || profiles().some((item) => item.id === id)) return
-    void updateManifest((current) => ({ ...current, profiles: [...current.profiles, { id, name }], tabs: { ...current.tabs, [id]: [] } }))
+    void updateManifest((current) => ({
+      ...current,
+      profiles: [...current.profiles, { id, name }],
+      tabs: { ...current.tabs, [id]: [] },
+    }))
     setProfileDraft("")
     setProfileCreating(false)
   }
@@ -436,12 +495,27 @@ export function AppsPanel() {
     })()
   }
   const activeTab = () => tabs().find((tab) => sameTab(tab, active()))
+  const activeCrashed = () => activeTab()?.crashed
+  const recover = async () => {
+    const tab = activeTab()
+    if (!tab?.crashed || !capability("appDockRecoverTab") || recovering()) return
+    setRecovering(tab)
+    try {
+      await api()!.appDockRecoverTab(tab.tabID)
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : "Could not recover tab")
+    } finally {
+      setRecovering(undefined)
+    }
+  }
   const bookmarked = () => !!activeTab() && bookmarks().some((item) => item.url === activeTab()!.url)
   const toggleBookmark = () => {
     const tab = activeTab()
     if (!tab) return
     const current = bookmarks()
-    const next = current.some((item) => item.url === tab.url) ? current.filter((item) => item.url !== tab.url) : [{ url: tab.url, title: tabLabel(tab) }, ...current]
+    const next = current.some((item) => item.url === tab.url)
+      ? current.filter((item) => item.url !== tab.url)
+      : [{ url: tab.url, title: tabLabel(tab) }, ...current]
     setBookmarks(next)
     void updateManifest((current) => ({ ...current, bookmarks: next.map((item) => item.url) }))
   }
@@ -483,22 +557,45 @@ export function AppsPanel() {
     <div ref={root} class={`zen-browser-shell ${sidebarCollapsed() ? "is-sidebar-collapsed" : ""}`}>
       <aside class="zen-browser-sidebar" aria-label="Browser workspaces">
         <div class="zen-workspace-indicator" aria-label="Current workspace">
-          <button class="zen-sidebar-toggle" type="button" aria-label={sidebarCollapsed() ? "Expand sidebar" : "Collapse sidebar"} aria-pressed={sidebarCollapsed()} onClick={toggleSidebar}>
+          <button
+            class="zen-sidebar-toggle"
+            type="button"
+            aria-label={sidebarCollapsed() ? "Expand sidebar" : "Collapse sidebar"}
+            aria-pressed={sidebarCollapsed()}
+            onClick={toggleSidebar}
+          >
             ||
           </button>
           <span class="zen-workspace-indicator-dot" aria-hidden="true" />
-          <select class="zen-workspace-indicator-name" value={profile()} aria-label="Browser profile" disabled={switching()} onChange={(event) => switchProfile(event.currentTarget.value)}>
+          <select
+            class="zen-workspace-indicator-name"
+            value={profile()}
+            aria-label="Browser profile"
+            disabled={switching()}
+            onChange={(event) => switchProfile(event.currentTarget.value)}
+          >
             {profiles().map((item) => (
               <option value={item.id}>{item.name}</option>
             ))}
           </select>
-          <button class="zen-profile-add" type="button" aria-label="Create browser profile" onClick={() => setProfileCreating(true)}>
+          <button
+            class="zen-profile-add"
+            type="button"
+            aria-label="Create browser profile"
+            onClick={() => setProfileCreating(true)}
+          >
             +
           </button>
         </div>
         {profileCreating() && (
           <form class="zen-profile-form" onSubmit={createProfile}>
-            <input autofocus value={profileDraft()} onInput={(event) => setProfileDraft(event.currentTarget.value)} placeholder="Profile name" aria-label="New profile name" />
+            <input
+              autofocus
+              value={profileDraft()}
+              onInput={(event) => setProfileDraft(event.currentTarget.value)}
+              placeholder="Profile name"
+              aria-label="New profile name"
+            />
             <button type="submit" aria-label="Save profile">
               +
             </button>
@@ -536,7 +633,7 @@ export function AppsPanel() {
             class="zen-nav-button"
             type="button"
             aria-label="Back"
-            disabled={!active() || !capability("appDockCommand")}
+            disabled={!active() || !!activeCrashed() || !capability("appDockCommand")}
             onClick={() => {
               const tab = active()
               if (tab) void api()?.appDockCommand(tab.tabID, "back")
@@ -548,7 +645,7 @@ export function AppsPanel() {
             class="zen-nav-button"
             type="button"
             aria-label="Forward"
-            disabled={!active() || !capability("appDockCommand")}
+            disabled={!active() || !!activeCrashed() || !capability("appDockCommand")}
             onClick={() => {
               const tab = active()
               if (tab) void api()?.appDockCommand(tab.tabID, "forward")
@@ -556,35 +653,86 @@ export function AppsPanel() {
           >
             &#8594;
           </button>
-          <button class={`zen-nav-button ${bookmarked() ? "is-active" : ""}`} type="button" aria-label={bookmarked() ? "Remove bookmark" : "Add bookmark"} onClick={toggleBookmark}>
+          <button
+            class={`zen-nav-button ${bookmarked() ? "is-active" : ""}`}
+            type="button"
+            aria-label={bookmarked() ? "Remove bookmark" : "Add bookmark"}
+            disabled={!!activeCrashed()}
+            onClick={toggleBookmark}
+          >
             &#9733;
           </button>
-          <input ref={addressInput} value={url()} onInput={(event) => setURL(event.currentTarget.value)} aria-label="Address" />
-          <button class="zen-nav-button" type="button" aria-label="Bookmarks" onClick={() => setLibraryOpen(libraryOpen() === "bookmarks" ? undefined : "bookmarks")}>
+          <input
+            ref={addressInput}
+            value={url()}
+            onInput={(event) => setURL(event.currentTarget.value)}
+            aria-label="Address"
+            disabled={!!activeCrashed()}
+          />
+          <button
+            class="zen-nav-button"
+            type="button"
+            aria-label="Bookmarks"
+            onClick={() => setLibraryOpen(libraryOpen() === "bookmarks" ? undefined : "bookmarks")}
+          >
             &#9734;
           </button>
-          <button class="zen-nav-button" type="button" aria-label="History" onClick={() => setLibraryOpen(libraryOpen() === "history" ? undefined : "history")}>
+          <button
+            class="zen-nav-button"
+            type="button"
+            aria-label="History"
+            onClick={() => setLibraryOpen(libraryOpen() === "history" ? undefined : "history")}
+          >
             &#8986;
           </button>
-          <button class="zen-nav-button" type="button" aria-label="Find in page" onClick={() => setFindOpen(true)}>
+          <button
+            class="zen-nav-button"
+            type="button"
+            aria-label="Find in page"
+            disabled={!!activeCrashed()}
+            onClick={() => setFindOpen(true)}
+          >
             &#8981;
           </button>
-          <button class="zen-nav-button" type="button" aria-label="Zoom out" onClick={() => zoom(-0.1)}>
+          <button
+            class="zen-nav-button"
+            type="button"
+            aria-label="Zoom out"
+            disabled={!!activeCrashed()}
+            onClick={() => zoom(-0.1)}
+          >
             A-
           </button>
-          <button class="zen-nav-button" type="button" aria-label="Zoom in" onClick={() => zoom(0.1)}>
+          <button
+            class="zen-nav-button"
+            type="button"
+            aria-label="Zoom in"
+            disabled={!!activeCrashed()}
+            onClick={() => zoom(0.1)}
+          >
             A+
           </button>
-          <button class="zen-nav-button" type="button" aria-label="Downloads" onClick={() => setDownloadsOpen(!downloadsOpen())}>
+          <button
+            class="zen-nav-button"
+            type="button"
+            aria-label="Downloads"
+            onClick={() => setDownloadsOpen(!downloadsOpen())}
+          >
             &#8595;
           </button>
-          <button class="zen-nav-button" type="button" aria-label={fullscreen() ? "Exit fullscreen" : "Enter fullscreen"} onClick={toggleFullscreen}>
+          <button
+            class="zen-nav-button"
+            type="button"
+            aria-label={fullscreen() ? "Exit fullscreen" : "Enter fullscreen"}
+            disabled={!!activeCrashed()}
+            onClick={toggleFullscreen}
+          >
             {fullscreen() ? "Exit" : "Full"}
           </button>
           <button
             class="zen-open-button"
             type="button"
-            disabled={!active() || !capability("appDockCommand")}
+            disabled={!active() || !!activeCrashed() || !capability("appDockCommand")}
             onClick={() => {
               const tab = active()
               if (tab) void api()?.appDockCommand(tab.tabID, "reload")
@@ -592,7 +740,7 @@ export function AppsPanel() {
           >
             {activeTab()?.loading ? "Loading" : "Reload"}
           </button>
-          <button class="zen-open-button" type="submit" disabled={!api()}>
+          <button class="zen-open-button" type="submit" disabled={!api() || !!activeCrashed()}>
             {activeTab()?.loading ? "Loading" : "Open"}
           </button>
           {active() && (
@@ -604,6 +752,18 @@ export function AppsPanel() {
         {error() && (
           <div class="zen-error" role="alert" aria-live="assertive">
             {error()}
+          </div>
+        )}
+        {activeCrashed() && (
+          <div class="zen-tab-crash" role="alert" aria-live="assertive">
+            <span>Tab crashed ({activeCrashed()!.reason}).</span>
+            <button
+              type="button"
+              disabled={!capability("appDockRecoverTab") || !!recovering()}
+              onClick={() => void recover()}
+            >
+              {recovering() ? "Recovering" : "Recover"}
+            </button>
           </div>
         )}
         {libraryOpen() && (
@@ -626,7 +786,13 @@ export function AppsPanel() {
               void find(true)
             }}
           >
-            <input autofocus value={findText()} onInput={(event) => setFindText(event.currentTarget.value)} aria-label="Find in page" placeholder="Find in page" />
+            <input
+              autofocus
+              value={findText()}
+              onInput={(event) => setFindText(event.currentTarget.value)}
+              aria-label="Find in page"
+              placeholder="Find in page"
+            />
             <span>{findResult() ? `${findResult()!.activeMatchOrdinal}/${findResult()!.matches}` : ""}</span>
             <button type="button" aria-label="Previous match" onClick={() => void find(false)}>
               &#8593;
@@ -645,7 +811,11 @@ export function AppsPanel() {
             {downloads().map((download) => (
               <div class="zen-download">
                 <span>{download.filename}</span>
-                <small>{download.state === "progressing" && download.totalBytes > 0 ? `${Math.round((download.receivedBytes / download.totalBytes) * 100)}%` : download.state}</small>
+                <small>
+                  {download.state === "progressing" && download.totalBytes > 0
+                    ? `${Math.round((download.receivedBytes / download.totalBytes) * 100)}%`
+                    : download.state}
+                </small>
                 {download.state === "completed" ? (
                   <button type="button" onClick={() => void api()?.appDockOpenDownload(download.id)}>
                     Open
@@ -673,11 +843,16 @@ export function AppsPanel() {
             x={menu()!.x}
             y={menu()!.y}
             setElement={(element) => (menuElement = element)}
-            canDuplicate={capability("appDockOpen")}
-            canReload={capability("appDockCommand")}
+            canDuplicate={capability("appDockOpen") && !menu()!.tab.crashed}
+            canReload={capability("appDockCommand") && !menu()!.tab.crashed}
             canClose={capability("appDockCloseTab")}
             hasOthers={tabs().length > 1}
-            hasRight={[...tabs().filter((item) => item.pinned), ...tabs().filter((item) => !item.pinned)].findIndex((item) => sameTab(item, menu()!.tab)) < tabs().length - 1}
+            hasRight={
+              [...tabs().filter((item) => item.pinned), ...tabs().filter((item) => !item.pinned)].findIndex((item) =>
+                sameTab(item, menu()!.tab),
+              ) <
+              tabs().length - 1
+            }
             onDuplicate={() => {
               void duplicateTab(menu()!.tab)
               closeMenu()
@@ -713,8 +888,14 @@ export function AppsPanel() {
   )
 }
 
-function TabButton(props: { tab: Tab; active: () => TabIdentity | undefined; select: (tab: Tab) => void; setMenu: (menu: { tab: Tab; x: number; y: number; invoker: HTMLButtonElement }) => void }) {
-  const openMenu = (x: number, y: number, invoker: HTMLButtonElement) => props.setMenu({ tab: props.tab, x, y, invoker })
+function TabButton(props: {
+  tab: Tab
+  active: () => TabIdentity | undefined
+  select: (tab: Tab) => void
+  setMenu: (menu: { tab: Tab; x: number; y: number; invoker: HTMLButtonElement }) => void
+}) {
+  const openMenu = (x: number, y: number, invoker: HTMLButtonElement) =>
+    props.setMenu({ tab: props.tab, x, y, invoker })
   const keydown = (event: KeyboardEvent) => {
     const current = event.currentTarget
     if (!(current instanceof HTMLButtonElement)) return
@@ -729,7 +910,12 @@ function TabButton(props: { tab: Tab; active: () => TabIdentity | undefined; sel
       const tabs = [...(current.parentElement?.querySelectorAll<HTMLButtonElement>("[role='tab']") ?? [])]
       const index = tabs.indexOf(current)
       if (index < 0) return
-      const next = event.key === "Home" ? tabs[0] : event.key === "End" ? tabs.at(-1) : tabs[(index + (event.key === "ArrowRight" ? 1 : -1) + tabs.length) % tabs.length]
+      const next =
+        event.key === "Home"
+          ? tabs[0]
+          : event.key === "End"
+            ? tabs.at(-1)
+            : tabs[(index + (event.key === "ArrowRight" ? 1 : -1) + tabs.length) % tabs.length]
       event.preventDefault()
       next?.focus()
       next?.click()
@@ -749,7 +935,13 @@ function TabButton(props: { tab: Tab; active: () => TabIdentity | undefined; sel
       }}
       onKeyDown={keydown}
     >
-      <span class={`zen-tab-icon ${props.tab.loading ? "is-loading" : ""}`}>{props.tab.favicon ? <img src={props.tab.favicon} alt="" /> : new URL(props.tab.url).hostname.slice(0, 1).toUpperCase()}</span>
+      <span class={`zen-tab-icon ${props.tab.loading ? "is-loading" : ""}`}>
+        {props.tab.favicon ? (
+          <img src={props.tab.favicon} alt="" />
+        ) : (
+          new URL(props.tab.url).hostname.slice(0, 1).toUpperCase()
+        )}
+      </span>
       <span class="zen-tab-title">{tabLabel(props.tab)}</span>
       {props.tab.pinned ? "Pinned" : ""}
       {props.tab.audible && <span class="zen-tab-audio">&#9835;</span>}
@@ -757,10 +949,32 @@ function TabButton(props: { tab: Tab; active: () => TabIdentity | undefined; sel
   )
 }
 
-function TabMenu(props: { tab: Tab; x: number; y: number; setElement: (element: HTMLDivElement) => void; canDuplicate: boolean; canReload: boolean; canClose: boolean; hasOthers: boolean; hasRight: boolean; onDuplicate: () => void; onTogglePin: () => void; onReload: () => void; onClose: () => void; onCloseOthers: () => void; onCloseRight: () => void }) {
+function TabMenu(props: {
+  tab: Tab
+  x: number
+  y: number
+  setElement: (element: HTMLDivElement) => void
+  canDuplicate: boolean
+  canReload: boolean
+  canClose: boolean
+  hasOthers: boolean
+  hasRight: boolean
+  onDuplicate: () => void
+  onTogglePin: () => void
+  onReload: () => void
+  onClose: () => void
+  onCloseOthers: () => void
+  onCloseRight: () => void
+}) {
   let firstItem: HTMLButtonElement | undefined
   return (
-    <div ref={props.setElement} class="zen-tab-menu" role="menu" aria-label={`Actions for ${tabLabel(props.tab)}`} style={{ left: `${props.x}px`, top: `${props.y}px` }}>
+    <div
+      ref={props.setElement}
+      class="zen-tab-menu"
+      role="menu"
+      aria-label={`Actions for ${tabLabel(props.tab)}`}
+      style={{ left: `${props.x}px`, top: `${props.y}px` }}
+    >
       <button
         ref={(element) => {
           firstItem = element
