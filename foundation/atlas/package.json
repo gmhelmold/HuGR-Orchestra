@@ -25,6 +25,7 @@
     "doc-transcript-guard": "node harness/gates/doc-transcript-guard.mjs",
     "service-gate-guard": "node harness/gates/service-gate-guard.mjs",
     "own-snapshot-guard": "node harness/gates/own-snapshot-guard.mjs",
+    "own-snapshot-materialize": "node scripts/materialize-own-snapshot.mjs",
     "wp-audit": "node scripts/wp-audit.mjs"
   },
   "engines": {
