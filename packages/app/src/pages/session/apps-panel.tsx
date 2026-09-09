@@ -1,4 +1,4 @@
-import { createEffect, createSignal, onCleanup, onMount } from "solid-js"
+import { createSignal, onCleanup, onMount } from "solid-js"
 import "./apps-panel.css"
 
 type Bounds = { x: number; y: number; width: number; height: number }
@@ -20,6 +20,8 @@ type AppDockAPI = {
   appDockCancelDownload: (downloadID: string) => Promise<void>
   appDockOpenDownload: (downloadID: string) => Promise<void>
   appDockFullscreen: (tabID: string, enabled: boolean) => Promise<void>
+  appDockGetManifest: () => Promise<AppDockManifest>
+  appDockUpdateManifest: (expectedRevision: number, manifest: AppDockManifest) => Promise<AppDockManifestUpdate>
 }
 type AppDockEvent =
   | {
@@ -53,6 +55,16 @@ type Tab = TabIdentity & {
 type Profile = { id: string; name: string }
 type Bookmark = { url: string; title: string }
 type HistoryEntry = Bookmark & { visitedAt: number }
+type AppDockManifest = {
+  version: 1
+  revision: number
+  profiles: Profile[]
+  activeProfileID: string
+  tabs: Record<string, { url: string; pinned: boolean }[]>
+  bookmarks: string[]
+  history: string[]
+}
+type AppDockManifestUpdate = { status: "updated" | "conflict"; manifest: AppDockManifest }
 type Download = TabIdentity & {
   id: string
   filename: string
@@ -61,50 +73,14 @@ type Download = TabIdentity & {
   state: "progressing" | "paused" | "completed" | "cancelled" | "interrupted"
 }
 
-const profilesKey = "opencode.app-dock.profiles"
-const activeProfileKey = "opencode.app-dock.profile"
 const sidebarCollapsedKey = "opencode.app-dock.sidebar-collapsed"
-const profileTabsKey = (profile: string) => `opencode.app-dock.tabs.${profile}`
-const profileBookmarksKey = (profile: string) => `opencode.app-dock.bookmarks.${profile}`
-const profileHistoryKey = (profile: string) => `opencode.app-dock.history.${profile}`
 const defaultProfiles: Profile[] = [{ id: "default", name: "Personal" }]
-
-const storedProfiles = (): Profile[] => {
-  try {
-    const value = JSON.parse(localStorage.getItem(profilesKey) ?? "null")
-    if (!Array.isArray(value)) return defaultProfiles
-    const valid = value.filter((profile) => /^[a-z0-9][a-z0-9-]{0,31}$/.test(profile?.id) && typeof profile.name === "string")
-    return valid.length > 0 ? valid : defaultProfiles
-  } catch {
-    return defaultProfiles
-  }
-}
-
-const storedTabs = (profile: string): Omit<Tab, "tabID" | "generation">[] => {
-  try {
-    const value = JSON.parse(localStorage.getItem(profileTabsKey(profile)) ?? "[]")
-    return Array.isArray(value)
-      ? value.filter((tab) => {
-          if (typeof tab?.url !== "string" || !URL.canParse(tab.url)) return false
-          return new URL(tab.url).protocol === "https:"
-        })
-      : []
-  } catch {
-    return []
-  }
-}
 
 const tabLabel = (tab: Tab) => tab.title || new URL(tab.url).hostname
 const sameTab = (left: TabIdentity | undefined, right: TabIdentity | undefined) => !!left && !!right && left.tabID === right.tabID && left.generation === right.generation
 
-const storedList = <T,>(key: string): T[] => {
-  try {
-    const value = JSON.parse(localStorage.getItem(key) ?? "[]")
-    return Array.isArray(value) ? value : []
-  } catch {
-    return []
-  }
-}
+const isHTTPS = (url: string) => URL.canParse(url) && new URL(url).protocol === "https:"
+const libraryEntries = (urls: string[]): Bookmark[] => urls.filter(isHTTPS).map((url) => ({ url, title: new URL(url).hostname }))
 
 const bounds = (element: HTMLElement): Bounds => {
   const rect = element.getBoundingClientRect()
@@ -119,17 +95,17 @@ const bounds = (element: HTMLElement): Bounds => {
 }
 
 export function AppsPanel() {
-  const [profiles, setProfiles] = createSignal<Profile[]>(storedProfiles())
-  const [profile, setProfile] = createSignal(profiles().some((item) => item.id === localStorage.getItem(activeProfileKey)) ? localStorage.getItem(activeProfileKey)! : "default")
+  const [profiles, setProfiles] = createSignal<Profile[]>(defaultProfiles)
+  const [profile, setProfile] = createSignal("default")
   const [profileCreating, setProfileCreating] = createSignal(false)
   const [profileDraft, setProfileDraft] = createSignal("")
   const [url, setURL] = createSignal("https://opencode.ai")
-  const [tabs, setTabs] = createSignal<Tab[]>(storedTabs(profile()).map((tab, index) => ({ ...tab, tabID: `restore-${index}`, generation: 0 })))
+  const [tabs, setTabs] = createSignal<Tab[]>([])
   const [active, setActive] = createSignal<TabIdentity>()
   const [error, setError] = createSignal<string>()
   const [navigationError, setNavigationError] = createSignal<{ tabID: string; generation: number; url: string }>()
-  const [bookmarks, setBookmarks] = createSignal<Bookmark[]>(storedList(profileBookmarksKey(profile())))
-  const [history, setHistory] = createSignal<HistoryEntry[]>(storedList(profileHistoryKey(profile())))
+  const [bookmarks, setBookmarks] = createSignal<Bookmark[]>([])
+  const [history, setHistory] = createSignal<HistoryEntry[]>([])
   const [libraryOpen, setLibraryOpen] = createSignal<"bookmarks" | "history">()
   const [findOpen, setFindOpen] = createSignal(false)
   const [findText, setFindText] = createSignal("")
@@ -145,11 +121,11 @@ export function AppsPanel() {
   let menuElement: HTMLDivElement | undefined
   let addressInput: HTMLInputElement | undefined
   let resizeFrame: number | undefined
-  let persistTimer: ReturnType<typeof setTimeout> | undefined
   const [switching, setSwitching] = createSignal(false)
   let restoreGeneration = 0
   let disposed = false
-  const profileRuntime = new Map<string, { tabs: Tab[]; active?: TabIdentity; url: string }>()
+  let manifest: AppDockManifest | undefined
+  let manifestWrite = Promise.resolve()
   const api = () => window.api as AppDockAPI | undefined
   const capability = (name: keyof AppDockAPI) => typeof api()?.[name] === "function"
   const closeMenu = (restoreFocus = true) => {
@@ -157,16 +133,42 @@ export function AppsPanel() {
     setMenu(undefined)
     if (restoreFocus) requestAnimationFrame(() => invoker?.focus())
   }
-  createEffect(() => {
-    const currentProfile = profile()
-    const value = JSON.stringify(tabs().map(({ tabID, generation, loading, audible, ...tab }) => tab))
-    if (switching()) return
-    if (persistTimer) clearTimeout(persistTimer)
-    persistTimer = setTimeout(() => {
-      localStorage.setItem(profileTabsKey(currentProfile), value)
-      localStorage.setItem(profilesKey, JSON.stringify(profiles()))
-    }, 250)
-  })
+  const applyManifest = (next: AppDockManifest) => {
+    manifest = next
+    setProfiles(next.profiles)
+    setProfile(next.activeProfileID)
+    setBookmarks(libraryEntries(next.bookmarks))
+    setHistory(libraryEntries(next.history).map((entry) => ({ ...entry, visitedAt: Date.now() })))
+  }
+  const updateManifest = (change: (current: AppDockManifest) => AppDockManifest) => {
+    const run = async () => {
+      const dock = api()
+      if (!dock || !manifest) return
+      let current = manifest
+      for (let attempt = 0; attempt < 2; attempt++) {
+        const result = await dock.appDockUpdateManifest(current.revision, change(current))
+        if (result.status === "updated") {
+          applyManifest(result.manifest)
+          return result.manifest
+        }
+        current = await dock.appDockGetManifest()
+        applyManifest(current)
+      }
+      setError("App Dock changed in another window")
+    }
+    const pending = manifestWrite.then(run, run)
+    manifestWrite = pending.then(() => undefined, () => undefined)
+    return pending
+  }
+  const saveTabs = (items = tabs(), profileID = profile()) =>
+    updateManifest((current) => ({
+      ...current,
+      tabs: { ...current.tabs, [profileID]: items.filter((tab) => isHTTPS(tab.url)).map((tab) => ({ url: tab.url, pinned: !!tab.pinned })) },
+    }))
+  const saveHistory = (url: string) => {
+    if (!isHTTPS(url)) return
+    void updateManifest((current) => ({ ...current, history: [url, ...current.history.filter((item) => item !== url)].slice(0, 100) }))
+  }
   const resize = () => {
     if (resizeFrame !== undefined) return
     resizeFrame = requestAnimationFrame(() => {
@@ -174,8 +176,8 @@ export function AppsPanel() {
       if (active() && host) void api()?.appDockResize(bounds(host))
     })
   }
-  const restoreProfile = async (profileID: string, generation: number) => {
-    const saved = storedTabs(profileID)
+  const restoreProfile = async (profileID: string, generation: number, snapshot: AppDockManifest) => {
+    const saved = (snapshot.tabs[profileID] ?? []).filter((tab) => isHTTPS(tab.url))
     setTabs([])
     setActive(undefined)
     setURL("https://opencode.ai")
@@ -206,7 +208,9 @@ export function AppsPanel() {
     const applyState = (state: Tab & { error?: string }) => {
       const known = tabs().find((tab) => sameTab(tab, state))
       if (!known) return
-      setTabs((items) => items.map((tab) => (sameTab(tab, state) ? { ...tab, ...state } : tab)))
+      const next = tabs().map((tab) => (sameTab(tab, state) ? { ...tab, ...state } : tab))
+      setTabs(next)
+      if (known.url !== state.url && !switching()) void saveTabs(next)
       if (sameTab(state, active())) setURL(state.url)
       if (sameTab(state, active()) && state.error) setError(state.error)
       const failed = navigationError()
@@ -218,7 +222,7 @@ export function AppsPanel() {
         const entry = { url: state.url, title: state.title || new URL(state.url).hostname, visitedAt: Date.now() }
         setHistory((items) => {
           const next = [entry, ...items.filter((item) => item.url !== entry.url)].slice(0, 100)
-          localStorage.setItem(profileHistoryKey(profile()), JSON.stringify(next))
+          if (!switching()) saveHistory(entry.url)
           return next
         })
       }
@@ -227,7 +231,9 @@ export function AppsPanel() {
       if (event.type === "state") applyState(event.payload)
       if (event.type === "tab-opened") {
         const tab = event.payload
-        setTabs((items) => (items.some((item) => sameTab(item, tab)) ? items : [...items, tab]))
+        const next = tabs().some((item) => sameTab(item, tab)) ? tabs() : [...tabs(), tab]
+        setTabs(next)
+        if (!switching()) void saveTabs(next)
         setActive(tab)
         setURL(tab.url)
       }
@@ -287,16 +293,24 @@ export function AppsPanel() {
     }
     window.addEventListener("pointerdown", onPointerDown)
     window.addEventListener("focusin", onFocusIn)
-    const generation = ++restoreGeneration
-    setSwitching(true)
-    void restoreProfile(profile(), generation).finally(() => {
-      if (generation === restoreGeneration) setSwitching(false)
-    })
+    void (async () => {
+      if (!api()) return
+      try {
+        const snapshot = await api()!.appDockGetManifest()
+        if (disposed) return
+        applyManifest(snapshot)
+        const generation = ++restoreGeneration
+        setSwitching(true)
+        await restoreProfile(snapshot.activeProfileID, generation, snapshot)
+        if (generation === restoreGeneration) setSwitching(false)
+      } catch (cause) {
+        setError(cause instanceof Error ? cause.message : "Could not load App Dock")
+      }
+    })()
     onCleanup(() => {
       disposed = true
       observer.disconnect()
       if (resizeFrame !== undefined) cancelAnimationFrame(resizeFrame)
-      if (persistTimer) clearTimeout(persistTimer)
       window.removeEventListener("keydown", onKeyDown)
       window.removeEventListener("pointerdown", onPointerDown)
       window.removeEventListener("focusin", onFocusIn)
@@ -311,11 +325,15 @@ export function AppsPanel() {
       const current = active()
       if (current) {
         await api()!.appDockNavigate(current.tabID, url())
-        setTabs((items) => items.map((tab) => (sameTab(tab, current) ? { ...tab, url: url() } : tab)))
+        const next = tabs().map((tab) => (sameTab(tab, current) ? { ...tab, url: url() } : tab))
+        setTabs(next)
+        void saveTabs(next)
         return
       }
       const tab = await api()!.appDockOpen(url(), bounds(host), profile())
-      setTabs((current) => [...current, tab])
+      const next = [...tabs(), tab]
+      setTabs(next)
+      void saveTabs(next)
       setActive(tab)
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : "Could not open App Dock")
@@ -325,7 +343,9 @@ export function AppsPanel() {
     if (!host || !api()) return
     try {
       const tab = await api()!.appDockOpen("https://opencode.ai", bounds(host), profile())
-      setTabs((current) => [...current, tab])
+      const next = [...tabs(), tab]
+      setTabs(next)
+      void saveTabs(next)
       setActive(tab)
       setURL(tab.url)
     } catch (cause) {
@@ -339,7 +359,9 @@ export function AppsPanel() {
     if (index < 0) return
     const next = items[index + 1] ?? items[index - 1]
     await api()?.appDockCloseTab(requested.tabID)
-    setTabs((current) => current.filter((tab) => !sameTab(tab, requested)))
+    const remaining = tabs().filter((tab) => !sameTab(tab, requested))
+    setTabs(remaining)
+    void saveTabs(remaining)
     if (!sameTab(requested, active())) return
     setActive(next)
     setURL(next?.url ?? "https://opencode.ai")
@@ -354,6 +376,7 @@ export function AppsPanel() {
     const closed = scope === "others" ? items.filter((item) => !sameTab(item, tab)) : visual.slice(index + 1)
     const remaining = items.filter((item) => !closed.some((item) => sameTab(item, tab)))
     setTabs(remaining)
+    void saveTabs(remaining)
     if (!remaining.some((item) => sameTab(item, active()))) {
       const next = remaining.at(-1)
       setActive(next)
@@ -370,7 +393,9 @@ export function AppsPanel() {
     if (!host || !capability("appDockOpen")) return
     try {
       const copy = await api()!.appDockOpen(tab.url, bounds(host), profile())
-      setTabs((items) => [...items, copy])
+      const next = [...tabs(), copy]
+      setTabs(next)
+      void saveTabs(next)
       selectTab(copy)
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : "Could not duplicate tab")
@@ -391,45 +416,23 @@ export function AppsPanel() {
       .replace(/^-|-$/g, "")
       .slice(0, 32)
     if (!id || profiles().some((item) => item.id === id)) return
-    const next = [...profiles(), { id, name }]
-    setProfiles(next)
-    localStorage.setItem(profilesKey, JSON.stringify(next))
+    void updateManifest((current) => ({ ...current, profiles: [...current.profiles, { id, name }], tabs: { ...current.tabs, [id]: [] } }))
     setProfileDraft("")
     setProfileCreating(false)
   }
   const switchProfile = (next: string) => {
     if (next === profile() || switching()) return
-    const previous = profile()
-    if (persistTimer) clearTimeout(persistTimer)
-    const previousTabs = tabs()
-    profileRuntime.set(previous, { tabs: previousTabs, active: active(), url: url() })
-    localStorage.setItem(profileTabsKey(previous), JSON.stringify(previousTabs.map(({ tabID, generation, loading, audible, ...tab }) => tab)))
-    localStorage.setItem(profilesKey, JSON.stringify(profiles()))
-    localStorage.setItem(activeProfileKey, next)
     setSwitching(true)
     const generation = ++restoreGeneration
-    setProfile(next)
-    setBookmarks(storedList<Bookmark>(profileBookmarksKey(next)))
-    setHistory(storedList<HistoryEntry>(profileHistoryKey(next)))
     setLibraryOpen(undefined)
     void (async () => {
       await api()?.appDockHide()
       if (disposed || generation !== restoreGeneration) return
-      const cached = profileRuntime.get(next)
-      if (cached) {
-        setTabs(cached.tabs)
-        setActive(cached.active)
-        setURL(cached.url)
-        if (cached.active && host) await api()?.appDockSelect(cached.active.tabID, bounds(host))
-        if (generation === restoreGeneration) setSwitching(false)
-        return
-      }
-      await restoreProfile(next, generation)
-      if (generation === restoreGeneration) {
-        profileRuntime.set(next, { tabs: tabs(), active: active(), url: url() })
-        setSwitching(false)
-        localStorage.setItem(profileTabsKey(next), JSON.stringify(tabs().map(({ tabID, generation, loading, audible, ...tab }) => tab)))
-      }
+      const snapshot = await updateManifest((current) => ({ ...current, activeProfileID: next }))
+      if (!snapshot || disposed || generation !== restoreGeneration) return
+      setProfile(snapshot.activeProfileID)
+      await restoreProfile(snapshot.activeProfileID, generation, snapshot)
+      if (generation === restoreGeneration) setSwitching(false)
     })()
   }
   const activeTab = () => tabs().find((tab) => sameTab(tab, active()))
@@ -440,7 +443,7 @@ export function AppsPanel() {
     const current = bookmarks()
     const next = current.some((item) => item.url === tab.url) ? current.filter((item) => item.url !== tab.url) : [{ url: tab.url, title: tabLabel(tab) }, ...current]
     setBookmarks(next)
-    localStorage.setItem(profileBookmarksKey(profile()), JSON.stringify(next))
+    void updateManifest((current) => ({ ...current, bookmarks: next.map((item) => item.url) }))
   }
   const find = async (forward: boolean) => {
     const tab = active()
@@ -471,7 +474,9 @@ export function AppsPanel() {
     setURL(entry.url)
     if (!host || !api()) return
     const tab = await api()!.appDockOpen(entry.url, bounds(host), profile())
-    setTabs((items) => [...items, tab])
+    const next = [...tabs(), tab]
+    setTabs(next)
+    void saveTabs(next)
     setActive(tab)
   }
   return (
@@ -679,7 +684,9 @@ export function AppsPanel() {
             }}
             onTogglePin={() => {
               const tab = menu()!.tab
-              setTabs((items) => items.map((item) => (sameTab(item, tab) ? { ...item, pinned: !item.pinned } : item)))
+              const next = tabs().map((item) => (sameTab(item, tab) ? { ...item, pinned: !item.pinned } : item))
+              setTabs(next)
+              void saveTabs(next)
               closeMenu()
             }}
             onReload={() => {
