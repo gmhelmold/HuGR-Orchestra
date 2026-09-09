@@ -7,7 +7,12 @@ import type { IpcMainEvent, IpcMainInvokeEvent } from "electron"
 import type { DesktopMenuAction } from "@opencode-ai/app/desktop-menu"
 import { parseDesktopNativeBundle, type DesktopNativeBundle } from "@opencode-ai/app/i18n/desktop-native"
 
-import type { FatalRendererError, ServerReadyData, TitlebarTheme } from "../preload/types"
+import type {
+  AppDockEvent as CloneableAppDockEvent,
+  FatalRendererError,
+  ServerReadyData,
+  TitlebarTheme,
+} from "../preload/types"
 import { runDesktopMenuAction } from "./desktop-menu-actions"
 import { setForceFocus } from "./debug"
 import { assertAttachmentBudget, createPickedFileAuthorizations } from "./attachment-picker"
@@ -28,7 +33,7 @@ import { nativeT } from "./native-translations"
 import {
   createAppDock,
   panelBoundsToContent,
-  type AppDockEvent,
+  type AppDockEvent as NativeAppDockEvent,
   type AppDockFindResult,
   type DockBounds,
   type ProfileStorage,
@@ -63,6 +68,104 @@ const appDockBounds = (value: unknown): DockBounds => {
     throw new Error("Invalid App Dock bounds")
   }
   return bounds as DockBounds
+}
+
+const appDockEventRecord = (value: unknown) => {
+  if (!value || typeof value !== "object" || Array.isArray(value)) throw new Error("Invalid App Dock event")
+  return value as Record<string, unknown>
+}
+
+const appDockEventString = (value: unknown) => {
+  if (typeof value !== "string") throw new Error("Invalid App Dock event")
+  return value
+}
+
+const appDockEventNumber = (value: unknown) => {
+  if (typeof value !== "number" || !Number.isFinite(value)) throw new Error("Invalid App Dock event")
+  return value
+}
+
+const appDockEventBoolean = (value: unknown) => {
+  if (typeof value !== "boolean") throw new Error("Invalid App Dock event")
+  return value
+}
+
+const appDockEventOptionalString = (value: unknown) => {
+  if (value === undefined) return undefined
+  return appDockEventString(value)
+}
+
+const toCloneableAppDockEvent = (event: unknown): CloneableAppDockEvent => {
+  const source = appDockEventRecord(event)
+  const payload = appDockEventRecord(source.payload)
+  if (source.type === "state") {
+    return {
+      type: "state",
+      payload: {
+        tabID: appDockEventString(payload.tabID),
+        generation: appDockEventNumber(payload.generation),
+        url: appDockEventString(payload.url),
+        title: appDockEventString(payload.title),
+        favicon: appDockEventOptionalString(payload.favicon),
+        loading: appDockEventBoolean(payload.loading),
+        audible: appDockEventBoolean(payload.audible),
+      },
+    }
+  }
+  if (source.type === "download") {
+    const state = appDockEventString(payload.state)
+    if (
+      state !== "progressing" &&
+      state !== "paused" &&
+      state !== "completed" &&
+      state !== "cancelled" &&
+      state !== "interrupted"
+    ) {
+      throw new Error("Invalid App Dock event")
+    }
+    return {
+      type: "download",
+      payload: {
+        id: appDockEventString(payload.id),
+        tabID: appDockEventString(payload.tabID),
+        generation: appDockEventNumber(payload.generation),
+        filename: appDockEventString(payload.filename),
+        receivedBytes: appDockEventNumber(payload.receivedBytes),
+        totalBytes: appDockEventNumber(payload.totalBytes),
+        state,
+      },
+    }
+  }
+  if (source.type === "fullscreen") {
+    const identity = appDockEventRecord(payload.identity)
+    return {
+      type: "fullscreen",
+      payload: {
+        identity: {
+          tabID: appDockEventString(identity.tabID),
+          generation: appDockEventNumber(identity.generation),
+        },
+        enabled: appDockEventBoolean(payload.enabled),
+      },
+    }
+  }
+  if (source.type === "navigation-error") {
+    const identity = appDockEventRecord(payload.identity)
+    const code = appDockEventString(payload.code)
+    if (code !== "blocked" && code !== "failed") throw new Error("Invalid App Dock event")
+    return {
+      type: "navigation-error",
+      payload: {
+        identity: {
+          tabID: appDockEventString(identity.tabID),
+          generation: appDockEventNumber(identity.generation),
+        },
+        code,
+        url: appDockEventString(payload.url),
+      },
+    }
+  }
+  throw new Error("Unknown App Dock event")
 }
 
 type Deps = {
@@ -134,8 +237,8 @@ export function registerIpcHandlers(deps: Deps) {
         win,
         address,
         panelBoundsToContent(appDockBounds(bounds), event.sender.getZoomFactor()),
-        (appDockEvent: AppDockEvent) => {
-          if (!event.sender.isDestroyed()) event.sender.send("app-dock-event", appDockEvent)
+        (appDockEvent: NativeAppDockEvent) => {
+          if (!event.sender.isDestroyed()) event.sender.send("app-dock-event", toCloneableAppDockEvent(appDockEvent))
         },
         profileStorage,
       )
