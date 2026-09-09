@@ -52,9 +52,9 @@ const validName = (value: unknown) =>
   value.trim() === value &&
   !/[\0-\x1f\x7f]/.test(value)
 
-const manifestName = (value: unknown) => {
+const manifestName = (value: unknown): string => {
   if (!validName(value)) throw manifestError()
-  return value
+  return value as string
 }
 
 const manifestURL = (value: unknown) => {
@@ -278,10 +278,12 @@ export class AppDockProfileRegistry {
   }
 
   replaceManifest(expectedRevision: unknown, value: unknown): AppDockManifestUpdate {
-    if (!Number.isSafeInteger(expectedRevision) || expectedRevision < 0) throw manifestError()
-    if (expectedRevision !== this.#manifest.revision) return { status: "conflict", manifest: this.manifest() }
+    if (typeof expectedRevision !== "number" || !Number.isSafeInteger(expectedRevision) || expectedRevision < 0)
+      throw manifestError()
+    const revision = expectedRevision
+    if (revision !== this.#manifest.revision) return { status: "conflict", manifest: this.manifest() }
     const manifest = parseManifest(value)
-    if (manifest.revision !== expectedRevision) throw manifestError()
+    if (manifest.revision !== revision) throw manifestError()
     const active = Object.keys(this.#registry.profiles).filter((id) => this.#registry.profiles[id].status === "active")
     if (manifest.profiles.length !== active.length || manifest.profiles.some((profile) => !active.includes(profile.id)))
       throw manifestError()
