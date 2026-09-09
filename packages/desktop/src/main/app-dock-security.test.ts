@@ -3,7 +3,7 @@ import { mkdir, mkdtemp, rename, rm, writeFile, access } from "node:fs/promises"
 import { createServer } from "node:https"
 import { tmpdir } from "node:os"
 import { dirname, join, resolve } from "node:path"
-import { fileURLToPath } from "node:url"
+import { createRequire } from "node:module"
 
 const required = ["U01", "U02", "U03", "U04", "U05", "U06", "U07", "U08", "U09", "U10", "U11", "U12", "U13", "U15", "U16", "U17", "U18"]
 const root = resolve(import.meta.dir, "../..")
@@ -28,12 +28,19 @@ const rejects = async (fn: () => unknown | Promise<unknown>, text: string) => {
 
 async function parent() {
   const startupOnly = process.env.APP_DOCK_STARTUP_ONLY === "1"
-  const output = join(await mkdtemp(join(tmpdir(), "app-dock-e2e-")), "harness.cjs")
+  const buildDir = await mkdtemp(join(tmpdir(), "app-dock-e2e-"))
+  let output = ""
   if (!startupOnly) {
-    const result = await Bun.build({ entrypoints: [import.meta.path], outfile: output, target: "node", format: "cjs", external: ["electron", "node:sqlite"], write: true })
-    if (!result.success) throw new Error(result.logs.map(String).join("\n"))
+    const result = await Bun.build({ entrypoints: [import.meta.path], outdir: buildDir, naming: "[name].cjs", target: "node", format: "cjs", external: ["electron", "node:sqlite"], write: true })
+    output = result.outputs[0]?.path ?? ""
+    if (!result.success || !output) throw new Error(JSON.stringify({ phase: "build-failure", output, outputs: result.outputs.map((item) => item.path), logs: result.logs.map(String) }))
+    try {
+      await access(output)
+    } catch {
+      throw new Error(JSON.stringify({ phase: "build-output-missing", output, outputs: result.outputs.map((item) => item.path), logs: result.logs.map(String) }))
+    }
   }
-  const electronModule = fileURLToPath(import.meta.resolve("electron"))
+  const electronModule = createRequire(join(process.cwd(), "package.json")).resolve("electron")
   const electron = join(dirname(electronModule), "dist/Electron.app/Contents/MacOS/Electron")
   await access(electron)
   const { ELECTRON_RUN_AS_NODE: _electronRunAsNode, NODE_OPTIONS, ...env } = process.env
@@ -48,8 +55,8 @@ async function parent() {
   const timeout = setTimeout(() => { timedOut = true; child.kill("SIGKILL") }, 20_000)
   const exitResult = await new Promise<{ code: number | null; signal: NodeJS.Signals | null }>((resolve, reject) => { child.once("exit", (code, signal) => resolve({ code, signal })); child.once("error", reject) })
   clearTimeout(timeout)
-  await rm(dirname(output), { recursive: true, force: true })
-  if (startupOnly) console.error(JSON.stringify({ phase: "parent-startup", electron, executable: true, ...exitResult, stdout, stderr }))
+  await rm(buildDir, { recursive: true, force: true })
+  if (startupOnly || process.env.APP_DOCK_LOAD_ONLY === "1") console.error(JSON.stringify({ phase: "parent-startup", electron, executable: true, ...exitResult, stdout, stderr }))
   if (exitResult.code !== 0 || timedOut) {
     console.error(JSON.stringify({ phase: "parent-child-failure", electron, executable: true, timedOut, ...exitResult, stdout, stderr }))
     process.exitCode = exitResult.code ?? 1
@@ -91,6 +98,11 @@ async function child() {
   await app.whenReady()
   diagnostic("after-whenReady")
   clearTimeout(startupWatchdog)
+  if (process.env.APP_DOCK_LOAD_ONLY === "1") {
+    diagnostic("harness-entry")
+    app.exit()
+    return
+  }
   const watchdog = setTimeout(() => { console.error("App Dock acceptance watchdog expired"); app.exit(1) }, 30_000)
   const temp = await mkdtemp(join(tmpdir(), "app-dock-user-data-"))
   app.setPath("userData", temp)
