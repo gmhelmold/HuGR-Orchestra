@@ -937,10 +937,11 @@ async function child() {
     pass("U26", "separate profiles retain isolated storage across fresh Electron main process")
 
     const crashed = await open(`${site.base}/ticker`, "crash-profile")
-    const crashedContents = viewContents()
     const unaffected = await open(`${site.base}/ticker`, "unaffected-profile")
-    const unaffectedContents = viewContents()
+    const unaffectedContents = attachedContents(ipcWin)
     await invoke(ipcWin.webContents.mainFrame, "app-dock-select", [crashed.tabID, bounds])
+    const crashedContents = attachedContents(ipcWin)
+    check(crashedContents && unaffectedContents && crashedContents !== unaffectedContents, "U27 App Dock views missing")
     await execute("view:crash-storage-set", crashedContents, "localStorage.setItem('recovery', 'present')")
     const u27CrashStart = await eventCount()
     crashedContents.forcefullyCrashRenderer()
