@@ -28,3 +28,4 @@ native/build/
 resources/opencode-cli*
 resources/icons
 resources/*.metainfo.xml
+artifacts/
