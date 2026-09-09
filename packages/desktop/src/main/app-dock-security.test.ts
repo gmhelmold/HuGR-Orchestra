@@ -631,7 +631,8 @@ async function child() {
       () => invoke(ipcWin.webContents.mainFrame, "app-dock-cancel-download", [download.payload.id]),
       "Unknown App Dock download",
     )
-    const fresh = await open()
+    await rejects(() => open(site.base, profile), "App Dock profile is not active")
+    const fresh = await open(site.base, "e2e-profile-fresh")
     const freshContents = viewContents()
     await waitFor(
       async () =>
@@ -644,10 +645,10 @@ async function child() {
     )
     check(
       (await execute("view:storage-get", freshContents, "localStorage.getItem('app-dock-e2e')")) === null,
-      "profile storage reused after deletion",
+      "fresh profile inherited deleted profile storage",
     )
     await invoke(ipcWin.webContents.mainFrame, "app-dock-close-tab", [fresh.tabID])
-    pass("U10", "profile delete cancels/removes real download and clears localStorage before reuse")
+    pass("U10", "profile delete cancels/removes real download, tombstones old profile, and leaves fresh profile storage empty")
 
     diagnostic("renderer:load:iframe:start")
     await ipcWin.loadURL(`${site.base}/iframe`)
@@ -683,7 +684,7 @@ async function child() {
       "Invalid App Dock command",
     )
     pass("U15", "invalid IPC command enum rejected")
-    const ticker = await open(`${site.base}/ticker`)
+    const ticker = await open(`${site.base}/ticker`, "e2e-profile-fresh")
     const tickerContents = viewContents()
     check(attached(ipcWin, tickerContents), "open App Dock view is not attached")
     const tickerSample = async () => {
