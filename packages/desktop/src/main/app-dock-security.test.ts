@@ -28,6 +28,7 @@ const required = [
   "U19",
   "U20",
   "U21",
+  "U22",
 ]
 const root = resolve(import.meta.dir, "../..")
 const artifact = join(process.env.APP_DOCK_ARTIFACT_ROOT ?? root, "artifacts/app-dock/s1.json")
@@ -511,7 +512,10 @@ async function child() {
     await readEvents()
     const error = events.find((event) => event.type === "navigation-error")
     check(
-      error?.type === "navigation-error" && (error.payload.code === "blocked" || error.payload.code === "failed"),
+      error?.type === "navigation-error" &&
+        typeof error.payload.identity?.tabID === "string" &&
+        Number.isSafeInteger(error.payload.identity?.generation) &&
+        (error.payload.code === "blocked" || error.payload.code === "failed"),
       "navigation error envelope not discriminated",
     )
     check(
@@ -783,14 +787,15 @@ async function child() {
       "HTTPS popup tab-opened",
     )
     check(
-      Object.keys(popupOpened.payload).length === 4 &&
-        typeof popupOpened.payload.id === "string" &&
-        popupOpened.payload.id.length > 0 &&
-        popupOpened.payload.id === popupOpened.payload.tabID &&
+      Object.keys(popupOpened.payload).length === 3 &&
+        typeof popupOpened.payload.tabID === "string" &&
+        popupOpened.payload.tabID.length > 0 &&
         Number.isSafeInteger(popupOpened.payload.generation) &&
         popupOpened.payload.generation >= 1 &&
         popupOpened.payload.url === popupTarget &&
-        !Object.keys(popupOpened.payload).some((key) => key === "storageKey" || /path/i.test(key)) &&
+        !Object.keys(popupOpened.payload).some(
+          (key) => key === "id" || key === "storageKey" || /path|adapter/i.test(key),
+        ) &&
         JSON.stringify(structuredClone(popupOpened.payload)) === JSON.stringify(popupOpened.payload),
       "HTTPS popup event is not cloneable public tab identity",
     )
@@ -814,6 +819,52 @@ async function child() {
     await invoke(ipcWin.webContents.mainFrame, "app-dock-close-tab", [rightC.tabID])
     await invoke(ipcWin.webContents.mainFrame, "app-dock-close-tab", [rightTarget.tabID])
     await invoke(ipcWin.webContents.mainFrame, "app-dock-close-tab", [closeTarget.tabID])
+
+    await readEvents()
+    check(
+      [tab, ipcTab, sharedA, sharedB, popupSource, popupOpened.payload].every(
+        (opened) =>
+          Object.keys(opened).length === 3 &&
+          typeof opened.tabID === "string" &&
+          opened.tabID.length > 0 &&
+          Number.isSafeInteger(opened.generation) &&
+          opened.generation >= 1 &&
+          typeof opened.url === "string" &&
+          !Object.keys(opened).some((key) => key === "id" || key === "storageKey" || /path|adapter/i.test(key)),
+      ) &&
+        events
+          .filter((event) => event.type === "tab-opened")
+          .every(
+            (event) =>
+              Object.keys(event.payload).length === 3 &&
+              typeof event.payload.tabID === "string" &&
+              event.payload.tabID.length > 0 &&
+              Number.isSafeInteger(event.payload.generation) &&
+              event.payload.generation >= 1 &&
+              typeof event.payload.url === "string" &&
+              !Object.keys(event.payload).some(
+                (key) => key === "id" || key === "storageKey" || /path|adapter/i.test(key),
+              ),
+          ) &&
+        events
+          .filter((event) => event.type === "navigation-error")
+          .every(
+            (event) =>
+              Object.keys(event.payload).length === 3 &&
+              Object.keys(event.payload.identity).length === 2 &&
+              typeof event.payload.identity.tabID === "string" &&
+              event.payload.identity.tabID.length > 0 &&
+              Number.isSafeInteger(event.payload.identity.generation) &&
+              event.payload.identity.generation >= 1 &&
+              !Object.keys(event.payload).some((key) => key === "id" || /adapter/i.test(key)),
+          ) &&
+        events.every((event) => !Object.keys(event).some((key) => key === "id" || /adapter/i.test(key))),
+      "open/event contract exposes legacy id or adapter fields",
+    )
+    pass(
+      "U22",
+      "open and tab-opened contracts expose only tabID, generation, and URL; event envelopes omit legacy fields",
+    )
 
     check(
       cases.length === required.length &&
