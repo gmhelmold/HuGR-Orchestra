@@ -2,7 +2,7 @@ import { execFileSync, spawn } from "node:child_process"
 import { mkdir, mkdtemp, rename, rm, writeFile, access, readFile } from "node:fs/promises"
 import { createServer } from "node:https"
 import { tmpdir } from "node:os"
-import { dirname, join, resolve } from "node:path"
+import { dirname, isAbsolute, join, resolve } from "node:path"
 import { createRequire } from "node:module"
 
 const required = ["U01", "U02", "U03", "U04", "U05", "U06", "U07", "U08", "U09", "U10", "U11", "U12", "U13", "U15", "U16", "U17", "U18"]
@@ -28,6 +28,7 @@ const rejects = async (fn: () => unknown | Promise<unknown>, text: string) => {
 
 async function parent() {
   const startupOnly = process.env.APP_DOCK_STARTUP_ONLY === "1"
+  const loadOnly = process.env.APP_DOCK_LOAD_ONLY === "1"
   const buildDir = await mkdtemp(join(tmpdir(), "app-dock-e2e-"))
   let output = ""
   if (!startupOnly) {
@@ -43,10 +44,10 @@ async function parent() {
   const electronModule = createRequire(join(process.cwd(), "package.json")).resolve("electron")
   const electron = join(dirname(electronModule), "dist/Electron.app/Contents/MacOS/Electron")
   await access(electron)
-  const { ELECTRON_RUN_AS_NODE: _electronRunAsNode, NODE_OPTIONS, ...env } = process.env
+  const { ELECTRON_RUN_AS_NODE: _electronRunAsNode, NODE_OPTIONS, APP_DOCK_LOAD_ONLY: _loadOnly, ...env } = process.env
   const safeNodeOptions = NODE_OPTIONS?.includes("ELECTRON_RUN_AS_NODE") ? undefined : NODE_OPTIONS
   const entry = join(import.meta.dir, "app-dock-security.child.cjs")
-  const child = spawn(electron, startupOnly ? [entry, "--startup-only"] : [entry, output, "--app-dock-electron-child"], { stdio: ["ignore", "pipe", "pipe"], env: { ...env, ...(safeNodeOptions ? { NODE_OPTIONS: safeNodeOptions } : {}), APP_DOCK_ARTIFACT_ROOT: root, ELECTRON_DISABLE_SECURITY_WARNINGS: "true" } })
+  const child = spawn(electron, startupOnly ? [entry, "--startup-only"] : [entry, output, "--app-dock-electron-child"], { stdio: ["ignore", "pipe", "pipe"], env: { ...env, ...(safeNodeOptions ? { NODE_OPTIONS: safeNodeOptions } : {}), ...(loadOnly ? { APP_DOCK_LOAD_ONLY: "1" } : {}), APP_DOCK_ARTIFACT_ROOT: root, ELECTRON_DISABLE_SECURITY_WARNINGS: "true" } })
   let stdout = ""
   let stderr = ""
   child.stdout.on("data", (chunk) => { stdout += chunk })
@@ -55,8 +56,19 @@ async function parent() {
   const timeout = setTimeout(() => { timedOut = true; child.kill("SIGKILL") }, 20_000)
   const exitResult = await new Promise<{ code: number | null; signal: NodeJS.Signals | null }>((resolve, reject) => { child.once("exit", (code, signal) => resolve({ code, signal })); child.once("error", reject) })
   clearTimeout(timeout)
+  if (!startupOnly && !loadOnly && exitResult.code === 0) {
+    const reportPath = join(root, "artifacts/app-dock/s1.json")
+    try {
+      const report = JSON.parse(await readFile(reportPath, "utf8"))
+      check(report.version === 1 && typeof report.electronVersion === "string" && Array.isArray(report.screenshots), "Invalid App Dock artifact schema")
+      check(Array.isArray(report.cases) && report.cases.length === required.length && new Set(report.cases.map((item: Case) => item.id)).size === required.length && required.every((id) => report.cases.some((item: Case) => item.id === id && item.status === "pass")), "Invalid App Dock artifact cases")
+    } catch (error) {
+      console.error(JSON.stringify({ phase: "parent-artifact-failure", reportPath, root, error: String(error), stderr }))
+      process.exitCode = 1
+    }
+  }
   await rm(buildDir, { recursive: true, force: true })
-  if (startupOnly || process.env.APP_DOCK_LOAD_ONLY === "1") console.error(JSON.stringify({ phase: "parent-startup", electron, executable: true, ...exitResult, stdout, stderr }))
+  if (startupOnly || loadOnly) console.error(JSON.stringify({ phase: "parent-startup", electron, executable: true, ...exitResult, stdout, stderr }))
   if (exitResult.code !== 0 || timedOut) {
     console.error(JSON.stringify({ phase: "parent-child-failure", electron, executable: true, timedOut, ...exitResult, stdout, stderr }))
     process.exitCode = exitResult.code ?? 1
@@ -94,6 +106,8 @@ async function child() {
   const { app, BrowserWindow, webContents } = await import("electron")
   diagnostic("after-import-electron")
   if (!process.versions.electron) throw new Error("Electron child not started")
+  if (!process.env.APP_DOCK_ARTIFACT_ROOT || !isAbsolute(process.env.APP_DOCK_ARTIFACT_ROOT)) throw new Error("Invalid App Dock artifact root")
+  const childArtifact = join(process.env.APP_DOCK_ARTIFACT_ROOT, "artifacts/app-dock/s1.json")
   const ipcModule = await import("./ipc")
   app.commandLine.appendSwitch("ignore-certificate-errors")
   diagnostic("before-whenReady")
@@ -157,6 +171,7 @@ async function child() {
   const open = async (url = site.base) => invoke(ipcWin.webContents.mainFrame, "app-dock-open", [url, bounds, profile])
   const navigate = (tabID: string, url: string) => invoke(ipcWin.webContents.mainFrame, "app-dock-navigate", [tabID, url])
   const viewContents = () => webContents.getAllWebContents().filter((item) => item !== ipcWin.webContents && !item.isDestroyed()).at(-1)
+  let completed = false
   try {
     await Promise.all(schemes.map((url) => rejects(() => open(url), "App Dock only supports HTTPS URLs")))
     await Promise.all(schemes.map((url) => waitEvent((event) => event.type === "navigation-error" && event.payload.url === url, `open block ${url}`)))
@@ -241,19 +256,21 @@ async function child() {
     pass("U18", "fixture is local HTTPS")
 
     check(cases.length === required.length && new Set(cases.map((item) => item.id)).size === required.length && required.every((id) => cases.some((item) => item.id === id && item.status === "pass")), "required acceptance cases incomplete")
-    await mkdir(dirname(artifact), { recursive: true })
-    const screenshot = join(dirname(artifact), "s1-main.png")
+    diagnostic(`artifact:${childArtifact}`)
+    await mkdir(dirname(childArtifact), { recursive: true })
+    const screenshot = join(dirname(childArtifact), "s1-main.png")
     await writeFile(screenshot, (await ipcWin.capturePage()).toPNG())
     const payload = JSON.stringify({ version: 1, electronVersion: process.versions.electron, cases, screenshots: [screenshot] }, null, 2)
-    const temporary = `${artifact}.${process.pid}.tmp`
+    const temporary = `${childArtifact}.${process.pid}.tmp`
     await writeFile(temporary, payload)
-    await rename(temporary, artifact)
+    await rename(temporary, childArtifact)
+    completed = true
   } finally {
     clearTimeout(watchdog)
     if (!ipcWin.isDestroyed()) ipcWin.destroy()
     await site.close()
     await rm(temp, { recursive: true, force: true })
-    app.exit()
+    app.exit(completed ? 0 : 1)
   }
 }
 
