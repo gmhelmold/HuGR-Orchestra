@@ -284,6 +284,43 @@ describe("tool.task", () => {
     }),
   )
 
+  it.instance(
+    "execute resumes renamed agents by stable id",
+    () =>
+      Effect.gen(function* () {
+        const sessions = yield* Session.Service
+        const { chat, assistant } = yield* seed()
+        const child = yield* sessions.create({ parentID: chat.id, title: "Existing child", agent: "custom" })
+        const tool = yield* TaskTool
+        const def = yield* tool.init()
+        let seen: SessionPrompt.PromptInput | undefined
+
+        yield* def.execute(
+          {
+            description: "inspect bug",
+            prompt: "look into the cache key path",
+            subagent_type: "custom",
+            task_id: child.id,
+          },
+          {
+            sessionID: chat.id,
+            messageID: assistant.id,
+            agent: "build",
+            abort: new AbortController().signal,
+            extra: { promptOps: stubOps({ onPrompt: (input) => (seen = input) }) },
+            messages: [],
+            metadata: () => Effect.void,
+            ask: () => Effect.void,
+          },
+        )
+
+        expect(seen?.agent).toBe("custom")
+      }),
+    {
+      config: { agent: { custom: { name: "Display only", mode: "subagent" } } },
+    },
+  )
+
   it.instance("execute forwards an explicit model to the subagent prompt", () =>
     Effect.gen(function* () {
       const sessions = yield* Session.Service

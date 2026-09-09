@@ -145,6 +145,58 @@ export const TaskTool = Tool.define(
         return yield* Effect.fail(new Error("Task resume denied: task is not direct child for selected agent"))
       }
       if (params.governed) {
+        const message = yield* MessageV2.get({ sessionID: ctx.sessionID, messageID: ctx.messageID }).pipe(
+          Effect.provideService(Database.Service, database),
+          Effect.orDie,
+        )
+        if (message.info.role !== "assistant") return yield* Effect.fail(new Error("Not an assistant message"))
+        if (params.model) {
+          const parsed = Provider.parseModel(params.model)
+          if (!parsed.providerID || !parsed.modelID) {
+            return yield* Effect.fail(
+              new Error(
+                `Invalid model "${params.model}". Use the 'providerID/modelID' format, e.g. 'openrouter/deepseek/deepseek-chat'.`,
+              ),
+            )
+          }
+        }
+        let ancestor = parent
+        let ancestorDepth = 0
+        while (ancestor.parentID) {
+          ancestorDepth++
+          ancestor = yield* sessions.get(ancestor.parentID)
+        }
+        if (ancestorDepth >= (cfg.subagent_depth ?? 1)) {
+          return yield* Effect.fail(
+            new Error(
+              `Subagent depth limit reached (${cfg.subagent_depth ?? 1}). Increase "subagent_depth" to allow nested subagents.`,
+            ),
+          )
+        }
+        const selectedModel = params.model
+          ? Provider.parseModel(params.model)
+          : (next.model ?? { modelID: message.info.modelID, providerID: message.info.providerID })
+        const modelRules = (parent.permission ?? []).filter(
+          (rule) => rule.permission === id && rule.pattern.includes("/"),
+        )
+        if (!ctx.extra?.bypassAgentCheck) {
+          yield* ctx.ask({
+            permission: id,
+            patterns:
+              modelRules.length > 0
+                ? [params.subagent_type, `${selectedModel.providerID}/${selectedModel.modelID}`]
+                : [params.subagent_type],
+            always: ["*"],
+            metadata: {
+              description: params.description,
+              subagent_type: params.subagent_type,
+              ...(modelRules.length > 0 ? { model: `${selectedModel.providerID}/${selectedModel.modelID}` } : {}),
+            },
+          })
+        }
+        if (!ctx.extra?.promptOps) return yield* Effect.fail(new Error("TaskTool requires promptOps in ctx.extra"))
+      }
+      if (params.governed) {
         const governed = params.governed
         const caller = yield* agent.get(ctx.agent)
         if (caller?.id !== "maestro") return yield* Effect.fail(new Error("Governed Task requires Maestro"))
@@ -233,24 +285,39 @@ export const TaskTool = Tool.define(
         }
         const consumeID = EventV2.ID.make(
           `evt_maestro_approval_consumed_${createHash("sha256")
-            .update([governed.sessionID, governed.approvalMessageID, governed.taskHash, callID].join("\u0000"))
+            .update([governed.sessionID, governed.approvalMessageID, governed.taskHash].join("\u0000"))
             .digest("hex")}`,
         )
-        yield* events.publish(
-          MaestroEvent.Approval.Consumed,
-          {
-            sessionID: governed.sessionID,
-            presentationID:
-              decisionEvents.find(
-                (decision) =>
-                  decision.approvalMessageID === governed.approvalMessageID && decision.taskHash === governed.taskHash,
-              )?.presentationID ?? "",
-            approvalMessageID: governed.approvalMessageID,
-            taskHash: governed.taskHash,
-            callID,
-          },
-          { id: consumeID },
-        )
+        yield* events
+          .publish(
+            MaestroEvent.Approval.Consumed,
+            {
+              sessionID: governed.sessionID,
+              presentationID:
+                decisionEvents.find(
+                  (decision) =>
+                    decision.approvalMessageID === governed.approvalMessageID &&
+                    decision.taskHash === governed.taskHash,
+                )?.presentationID ?? "",
+              approvalMessageID: governed.approvalMessageID,
+              taskHash: governed.taskHash,
+              callID,
+            },
+            { id: consumeID },
+          )
+          .pipe(
+            Effect.catchCause(() =>
+              database.db
+                .select({ id: EventTable.id })
+                .from(EventTable)
+                .where(eq(EventTable.id, consumeID))
+                .get()
+                .pipe(
+                  Effect.orDie,
+                  Effect.flatMap(() => Effect.fail(new Error("Governed Task denied: approval-consumed"))),
+                ),
+            ),
+          )
       }
       let current = parent
       let depth = 0
@@ -301,7 +368,7 @@ export const TaskTool = Tool.define(
         (rule) => rule.permission === id && rule.pattern.includes("/"),
       )
 
-      if (!ctx.extra?.bypassAgentCheck) {
+      if (!ctx.extra?.bypassAgentCheck && !params.governed) {
         yield* ctx.ask({
           permission: id,
           patterns: modelRules.length > 0 ? [params.subagent_type, modelPattern] : [params.subagent_type],
