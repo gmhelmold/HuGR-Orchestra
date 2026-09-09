@@ -121,8 +121,8 @@ const toCloneableAppDockEvent = (event: unknown): CloneableAppDockEvent => {
       typeof payload.tabID !== "string" ||
       payload.tabID.length === 0 ||
       payload.id !== payload.tabID ||
-      !Number.isSafeInteger(payload.generation) ||
-      payload.generation < 1 ||
+        !Number.isSafeInteger(payload.generation) ||
+        appDockEventNumber(payload.generation) < 1 ||
       typeof payload.url !== "string"
     ) {
       throw new Error("Invalid App Dock event")
@@ -132,7 +132,7 @@ const toCloneableAppDockEvent = (event: unknown): CloneableAppDockEvent => {
       payload: {
         id: payload.id,
         tabID: payload.tabID,
-        generation: payload.generation,
+        generation: appDockEventNumber(payload.generation),
         url: payload.url,
       },
     }

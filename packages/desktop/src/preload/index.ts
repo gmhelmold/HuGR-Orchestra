@@ -53,6 +53,7 @@ const api: ElectronAPI = {
         typeof tab.tabID !== "string" ||
         tab.tabID.length === 0 ||
         tab.id !== tab.tabID ||
+        typeof tab.generation !== "number" ||
         !Number.isSafeInteger(tab.generation) ||
         tab.generation < 1 ||
         typeof tab.url !== "string"
