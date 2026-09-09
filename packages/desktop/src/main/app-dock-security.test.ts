@@ -1,5 +1,5 @@
 import { execFileSync, spawn } from "node:child_process"
-import { mkdir, mkdtemp, rename, rm, writeFile, access } from "node:fs/promises"
+import { mkdir, mkdtemp, rename, rm, writeFile, access, readFile } from "node:fs/promises"
 import { createServer } from "node:https"
 import { tmpdir } from "node:os"
 import { dirname, join, resolve } from "node:path"
@@ -68,7 +68,7 @@ async function fixture() {
   const key = join(dir, "key.pem")
   const cert = join(dir, "cert.pem")
   execFileSync("openssl", ["req", "-x509", "-newkey", "rsa:2048", "-nodes", "-keyout", key, "-out", cert, "-subj", "/CN=127.0.0.1", "-days", "1"], { stdio: "ignore" })
-  const server = createServer({ key: await Bun.file(key).text(), cert: await Bun.file(cert).text() }, (req, res) => {
+  const server = createServer({ key: await readFile(key), cert: await readFile(cert) }, (req, res) => {
     if (req.url === "/redirect-http") {
       res.writeHead(302, { location: "http://127.0.0.1/redirect-blocked" })
       return res.end()
