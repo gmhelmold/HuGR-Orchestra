@@ -63,7 +63,6 @@ const validBounds = (bounds: DockBounds) =>
   [bounds.x, bounds.y, bounds.width, bounds.height].every(Number.isSafeInteger) && bounds.width > 0 && bounds.height > 0
 
 const MAX_INACTIVE_TABS = 20
-const MAX_TABS_PER_SENDER = 24
 const MAX_PROGRESSING_DOWNLOADS_PER_PROFILE = 8
 const MAX_TERMINAL_DOWNLOADS_PER_SENDER = 20
 
@@ -128,9 +127,6 @@ export function createAppDock() {
     return false
   }
   const ensureViewCapacity = (senderID: number, selected: boolean) => {
-    while ((tabs.get(senderID)?.size ?? 0) >= MAX_TABS_PER_SENDER) {
-      if (!evictOldestInactive(senderID)) throw new Error("App Dock tab limit reached")
-    }
     const inactiveNeeded = selected ? Number(active.has(senderID)) : 1
     while (inactive.size + inactiveNeeded > MAX_INACTIVE_TABS) {
       if (!evictOldestInactive()) throw new Error("App Dock tab limit reached")
