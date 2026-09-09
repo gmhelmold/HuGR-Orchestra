@@ -12,6 +12,7 @@ const updaterHandler = (_: unknown, state: UpdaterState) => {
 
 const api: ElectronAPI = {
   appDockOpen: (url, bounds, profile) => ipcRenderer.invoke("app-dock-open", url, bounds, profile),
+  appDockDeleteProfile: (profileID) => ipcRenderer.invoke("app-dock-delete-profile", { profileID }),
   appDockResize: (bounds) => ipcRenderer.invoke("app-dock-resize", bounds),
   appDockHide: () => ipcRenderer.invoke("app-dock-hide"),
   appDockClose: () => ipcRenderer.invoke("app-dock-close"),
@@ -19,15 +20,20 @@ const api: ElectronAPI = {
   appDockSelect: (id, bounds) => ipcRenderer.invoke("app-dock-select", id, bounds),
   appDockNavigate: (id, url) => ipcRenderer.invoke("app-dock-navigate", id, url),
   appDockCommand: (id, command) => ipcRenderer.invoke("app-dock-command", id, command),
+  appDockEvent: (callback) => {
+    const handler = (_event: unknown, appDockEvent: Parameters<typeof callback>[0]) => callback(appDockEvent)
+    ipcRenderer.on("app-dock-event", handler)
+    return () => ipcRenderer.removeListener("app-dock-event", handler)
+  },
+  // Legacy adapters exist for apps-panel until its S2 event-envelope migration.
   appDockState: (callback) => {
-    const handler = (_event: unknown, state: Parameters<typeof callback>[0]) => callback(state)
-    ipcRenderer.on("app-dock-state", handler)
-    return () => ipcRenderer.removeListener("app-dock-state", handler)
+    return api.appDockEvent((appDockEvent) => {
+      if (appDockEvent.type === "state") callback({ ...appDockEvent.payload, id: appDockEvent.payload.tabID })
+    })
   },
   appDockTabOpened: (callback) => {
-    const handler = (_event: unknown, tab: Parameters<typeof callback>[0]) => callback(tab)
-    ipcRenderer.on("app-dock-tab-opened", handler)
-    return () => ipcRenderer.removeListener("app-dock-tab-opened", handler)
+    void callback
+    return () => {}
   },
   appDockFind: (id, text, forward) => ipcRenderer.invoke("app-dock-find", id, text, forward),
   appDockStopFind: (id) => ipcRenderer.invoke("app-dock-stop-find", id),
@@ -40,15 +46,16 @@ const api: ElectronAPI = {
   appDockCancelDownload: (id) => ipcRenderer.invoke("app-dock-cancel-download", id),
   appDockOpenDownload: (id) => ipcRenderer.invoke("app-dock-open-download", id),
   appDockDownload: (callback) => {
-    const handler = (_event: unknown, download: Parameters<typeof callback>[0]) => callback(download)
-    ipcRenderer.on("app-dock-download", handler)
-    return () => ipcRenderer.removeListener("app-dock-download", handler)
+    return api.appDockEvent((appDockEvent) => {
+      if (appDockEvent.type === "download") callback(appDockEvent.payload)
+    })
   },
   appDockFullscreen: (id, enabled) => ipcRenderer.invoke("app-dock-fullscreen", id, enabled),
   appDockFullscreenChanged: (callback) => {
-    const handler = (_event: unknown, state: Parameters<typeof callback>[0]) => callback(state)
-    ipcRenderer.on("app-dock-fullscreen", handler)
-    return () => ipcRenderer.removeListener("app-dock-fullscreen", handler)
+    return api.appDockEvent((appDockEvent) => {
+      if (appDockEvent.type === "fullscreen")
+        callback({ tabID: appDockEvent.payload.identity.tabID, enabled: appDockEvent.payload.enabled })
+    })
   },
   killSidecar: () => ipcRenderer.invoke("kill-sidecar"),
   installCli: () => ipcRenderer.invoke("install-cli"),
