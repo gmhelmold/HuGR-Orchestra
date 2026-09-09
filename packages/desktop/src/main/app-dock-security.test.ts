@@ -1,7 +1,8 @@
 import { execFileSync, spawn } from "node:child_process"
 import { mkdir, mkdtemp, rename, rm, writeFile, access, readFile } from "node:fs/promises"
 import { createServer } from "node:https"
-import type { ServerResponse } from "node:http"
+import type { IncomingMessage, ServerResponse } from "node:http"
+import type { AddressInfo } from "node:net"
 import { tmpdir } from "node:os"
 import { dirname, isAbsolute, join, resolve } from "node:path"
 import { createRequire } from "node:module"
@@ -34,6 +35,7 @@ const required = [
   "U25",
   "U26",
   "U27",
+  "U28",
 ]
 const root = resolve(import.meta.dir, "../..")
 const artifact = join(process.env.APP_DOCK_ARTIFACT_ROOT ?? root, "artifacts/app-dock/s1.json")
@@ -272,11 +274,13 @@ async function fixture() {
   )
   const activeDownloads = new Set<ServerResponse>()
   let cacheableRequests = 0
+  let downloadRequests = 0
+  let cancelledDownloads = 0
   let resolveDownloadCancelled: () => void = () => {}
   const downloadCancelled = new Promise<void>((resolve) => {
     resolveDownloadCancelled = resolve
   })
-  const server = createServer({ key: await readFile(key), cert: await readFile(cert) }, (req, res) => {
+  const handler = (req: IncomingMessage, res: ServerResponse) => {
     if (req.url === "/redirect-http") {
       res.writeHead(302, { location: "http://127.0.0.1/redirect-blocked" })
       return res.end()
@@ -301,7 +305,8 @@ async function fixture() {
       })
       return res.end(cacheableBody)
     }
-    if (req.url === "/download") {
+    if (req.url?.startsWith("/download")) {
+      downloadRequests += 1
       res.writeHead(200, {
         "content-disposition": "attachment; filename=fixture-download.txt",
         "content-type": "text/plain",
@@ -311,6 +316,7 @@ async function fixture() {
       return res.on("close", () => {
         clearInterval(interval)
         activeDownloads.delete(res)
+        cancelledDownloads += 1
         resolveDownloadCancelled()
       })
     }
@@ -325,18 +331,25 @@ async function fixture() {
     }
     if (req.url === "/iframe") return res.end("<iframe src='/'>")
     res.end("<!doctype html><title>fixture</title><body>fixture</body>")
-  })
-  await new Promise<void>((resolve) => server.listen(0, "127.0.0.1", resolve))
-  const address = server.address()
-  if (!address || typeof address === "string") throw new Error("HTTPS fixture did not bind")
+  }
+  const tls = { key: await readFile(key), cert: await readFile(cert) }
+  const servers = Array.from({ length: 9 }, () => createServer(tls, handler))
+  await Promise.all(servers.map((server) => new Promise<void>((resolve) => server.listen(0, "127.0.0.1", resolve))))
+  const addresses = servers.map((server) => server.address())
+  if (addresses.some((address) => !address || typeof address === "string")) throw new Error("HTTPS fixture did not bind")
+  const ports = addresses.map((address) => (address as AddressInfo).port)
   return {
-    base: `https://127.0.0.1:${address.port}`,
+    base: `https://127.0.0.1:${ports[0]!}`,
+    downloadURL: (index: number) => `https://127.0.0.1:${ports[index]!}/download?u28=${index}`,
     cacheableRequests: () => cacheableRequests,
+    downloadRequests: () => downloadRequests,
+    cancelledDownloads: () => cancelledDownloads,
+    activeDownloadCount: () => activeDownloads.size,
     downloadCancelled,
     close: async () => {
       activeDownloads.forEach((response) => response.destroy())
-      server.closeAllConnections()
-      await new Promise<void>((resolve) => server.close(() => resolve()))
+      servers.forEach((server) => server.closeAllConnections())
+      await Promise.all(servers.map((server) => new Promise<void>((resolve) => server.close(() => resolve()))))
       await rm(dir, { recursive: true, force: true })
     },
   }
@@ -649,7 +662,10 @@ async function child() {
       "fresh profile inherited deleted profile storage",
     )
     await invoke(ipcWin.webContents.mainFrame, "app-dock-close-tab", [fresh.tabID])
-    pass("U10", "profile delete cancels/removes real download, tombstones old profile, and leaves fresh profile storage empty")
+    pass(
+      "U10",
+      "profile delete cancels/removes real download, tombstones old profile, and leaves fresh profile storage empty",
+    )
 
     diagnostic("renderer:load:iframe:start")
     await ipcWin.loadURL(`${site.base}/iframe`)
@@ -781,8 +797,14 @@ async function child() {
     await invoke(ipcWin.webContents.mainFrame, "app-dock-select", [closeTarget.tabID, bounds])
     await invoke(ipcWin.webContents.mainFrame, "app-dock-close-tabs", [closeTarget.tabID, "others"])
     check(!closeTargetContents.isDestroyed(), "close-tabs others destroyed target")
-    await rejects(() => invoke(ipcWin.webContents.mainFrame, "app-dock-select", [closeA.tabID, bounds]), "Unknown App Dock tab")
-    await rejects(() => invoke(ipcWin.webContents.mainFrame, "app-dock-select", [closeC.tabID, bounds]), "Unknown App Dock tab")
+    await rejects(
+      () => invoke(ipcWin.webContents.mainFrame, "app-dock-select", [closeA.tabID, bounds]),
+      "Unknown App Dock tab",
+    )
+    await rejects(
+      () => invoke(ipcWin.webContents.mainFrame, "app-dock-select", [closeC.tabID, bounds]),
+      "Unknown App Dock tab",
+    )
     const rightA = await open(site.base, "close-tabs-right-profile")
     const rightAContents = viewContents()
     const rightTarget = await open(site.base, "close-tabs-right-profile")
@@ -824,7 +846,10 @@ async function child() {
     await invoke(ipcWin.webContents.mainFrame, "app-dock-select", [rightTarget.tabID, bounds])
     await invoke(ipcWin.webContents.mainFrame, "app-dock-select", [rightA.tabID, bounds])
     await invoke(ipcWin.webContents.mainFrame, "app-dock-select", [rightC.tabID, bounds])
-    await rejects(() => invoke(ipcWin.webContents.mainFrame, "app-dock-select", [rightD.tabID, bounds]), "Unknown App Dock tab")
+    await rejects(
+      () => invoke(ipcWin.webContents.mainFrame, "app-dock-select", [rightD.tabID, bounds]),
+      "Unknown App Dock tab",
+    )
     diagnostic("u20:right-verified")
     pass("U20", "real close-tabs validates complete visual order; closes only visual-right tab")
     diagnostic("u20:passed")
@@ -881,6 +906,7 @@ async function child() {
     await invoke(ipcWin.webContents.mainFrame, "app-dock-close-tab", [rightC.tabID])
     await invoke(ipcWin.webContents.mainFrame, "app-dock-close-tab", [rightTarget.tabID])
     await invoke(ipcWin.webContents.mainFrame, "app-dock-close-tab", [closeTarget.tabID])
+    await invoke(ipcWin.webContents.mainFrame, "app-dock-close-tab", [ipcTab.tabID])
 
     await readEvents()
     check(
@@ -1005,6 +1031,115 @@ async function child() {
     pass(
       "U27",
       "real selected renderer crash emits old identity; IPC recovery creates same tabID/URL/profile newer generation, selects usable view, preserves other tab, and ignores old generation events",
+    )
+
+    const u28Profile = "u28-capacity-profile"
+    const u28TabsA = [] as { tabID: string }[]
+    const u28TabsB = [] as { tabID: string }[]
+    for (let index = 0; index < 11; index++)
+      u28TabsA.push(await open(`${site.base}/ticker?capacity=a${index}`, u28Profile))
+    for (let index = 0; index < 11; index++)
+      u28TabsB.push(
+        await invoke(ipcWinB.webContents.mainFrame, "app-dock-open", [
+          `${site.base}/ticker?capacity=b${index}`,
+          bounds,
+          u28Profile,
+        ]),
+      )
+    const u28ActiveB = attachedContents(ipcWinB)
+    await invoke(ipcWin.webContents.mainFrame, "app-dock-select", [u28TabsA[0]!.tabID, bounds])
+    const u28ActiveContents = attachedContents(ipcWin)
+    check(u28ActiveContents && u28ActiveB, "U28 active App Dock views missing")
+    await waitFor(
+      async () =>
+        (await execute("u28:active-a0", u28ActiveContents, "location.href")) === `${site.base}/ticker?capacity=a0` &&
+        (await execute("u28:active-b10", u28ActiveB, "location.href")) === `${site.base}/ticker?capacity=b10`,
+      "U28 active tab loads",
+    )
+    const u28Extra = await open(`${site.base}/ticker?capacity=extra`, u28Profile)
+    const u28ExtraContents = attachedContents(ipcWin)
+    check(u28ExtraContents, "U28 extra active App Dock view missing")
+    await rejects(
+      () => invoke(ipcWinB.webContents.mainFrame, "app-dock-select", [u28TabsB[0]!.tabID, bounds]),
+      "Unknown App Dock tab",
+    )
+    check(
+      attached(ipcWin, u28ExtraContents) &&
+        (await execute("u28:active-extra", u28ExtraContents, "location.href")) === `${site.base}/ticker?capacity=extra` &&
+        attached(ipcWinB, u28ActiveB) &&
+        !u28ActiveB.isDestroyed(),
+      "U28 capacity eviction displaced an active view",
+    )
+    await invoke(ipcWin.webContents.mainFrame, "app-dock-select", [u28TabsA[0]!.tabID, bounds])
+    await waitFor(
+      async () =>
+        (await execute("u28:retained-lru", attachedContents(ipcWin), "location.href")) === `${site.base}/ticker?capacity=a0`,
+      "U28 recently selected tab remains usable",
+    )
+
+    const u28DownloadStart = await eventCount()
+    const u28CancelledStart = site.cancelledDownloads()
+    const u28RequestsStart = site.downloadRequests()
+    for (let index = 0; index < 8; index++) {
+      await execute(
+        `u28:parallel-download-${index}`,
+        u28ActiveContents,
+        `(() => { const link = document.createElement('a'); link.href = ${JSON.stringify(site.downloadURL(index))}; document.body.append(link); link.click() })()`,
+      )
+      await waitFor(async () => {
+        await readEvents()
+        return (
+          new Set(
+            events
+              .slice(u28DownloadStart)
+              .filter((event) => event.type === "download" && event.payload.state === "progressing")
+              .map((event) => event.payload.id),
+          ).size >= index + 1
+        )
+      }, `U28 accepted profile download ${index + 1}`)
+    }
+    check(
+      site.downloadRequests() === u28RequestsStart + 8,
+      `U28 started ${site.downloadRequests() - u28RequestsStart} profile downloads, expected 8`,
+    )
+    await execute(
+      "u28:ninth-download",
+      u28ActiveContents,
+      `(() => { const link = document.createElement('a'); link.href = ${JSON.stringify(site.downloadURL(8))}; document.body.append(link); link.click() })()`,
+    )
+    await waitFor(() => site.downloadRequests() === u28RequestsStart + 9, "U28 ninth profile download request")
+    await waitFor(() => site.cancelledDownloads() > u28CancelledStart, "U28 refused ninth profile download")
+    await readEvents()
+    const u28Events = events.slice(u28DownloadStart)
+    const u28Progressing = new Map(
+      u28Events
+        .filter((event) => event.type === "download" && event.payload.state === "progressing")
+        .map((event) => [event.payload.id, event]),
+    )
+    check(u28Progressing.size === 8, `U28 accepted ${u28Progressing.size} progressing downloads, expected 8`)
+    check(
+      u28Events.some((event) => event.type === "navigation-error" && event.payload.code === "failed"),
+      "U28 refused download did not emit failure event",
+    )
+    await Promise.all(
+      [...u28Progressing.values()].map((event) =>
+        invoke(ipcWin.webContents.mainFrame, "app-dock-cancel-download", [event.payload.id]),
+      ),
+    )
+    await readEvents()
+    const u28FinalEvents = events.slice(u28DownloadStart)
+    check(
+      !JSON.stringify(u28FinalEvents).includes(temp) &&
+        !u28FinalEvents.some((event) => Object.keys(event.payload ?? {}).some((key) => /path|save/i.test(key))),
+      "U28 download event exposes filesystem path",
+    )
+    for (const tab of [...u28TabsA, u28Extra])
+      await invoke(ipcWin.webContents.mainFrame, "app-dock-close-tab", [tab.tabID])
+    for (const tab of u28TabsB.slice(1))
+      await invoke(ipcWinB.webContents.mainFrame, "app-dock-close-tab", [tab.tabID])
+    pass(
+      "U28",
+      "20 inactive views across two windows use global LRU: selecting A0 retains it while opening one more evicts older B0; active views remain usable; nine real same-profile slow downloads admit eight, cancel one, and expose no filesystem path",
     )
 
     check(
