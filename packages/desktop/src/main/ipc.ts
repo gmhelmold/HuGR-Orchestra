@@ -101,7 +101,6 @@ const hasExactKeys = (value: Record<string, unknown>, keys: string[]) =>
 const appDockEventIdentity = (value: unknown) => {
   const identity = appDockEventRecord(value)
   if (
-    !hasExactKeys(identity, ["tabID", "generation"]) ||
     typeof identity.tabID !== "string" ||
     identity.tabID.length === 0 ||
     !Number.isSafeInteger(identity.generation) ||
@@ -109,7 +108,7 @@ const appDockEventIdentity = (value: unknown) => {
   ) {
     throw new Error("Invalid App Dock event")
   }
-  return { tabID: identity.tabID, generation: identity.generation }
+  return { tabID: identity.tabID, generation: appDockEventNumber(identity.generation) }
 }
 
 const toCloneableAppDockEvent = (event: unknown): CloneableAppDockEvent => {
