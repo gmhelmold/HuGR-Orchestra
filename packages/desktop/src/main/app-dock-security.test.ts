@@ -27,6 +27,7 @@ const required = [
   "U18",
   "U19",
   "U20",
+  "U21",
 ]
 const root = resolve(import.meta.dir, "../..")
 const artifact = join(process.env.APP_DOCK_ARTIFACT_ROOT ?? root, "artifacts/app-dock/s1.json")
@@ -221,6 +222,8 @@ async function fixture() {
       return res.end()
     }
     if (req.url === "/popup") return res.end("<script>window.open('http://127.0.0.1/popup-blocked')</script>")
+    if (req.url === "/popup-https") return res.end("<script>window.open(`${location.origin}/popup-target`)</script>")
+    if (req.url === "/popup-target") return res.end("<!doctype html><title>popup target</title><body>popup target</body>")
     if (req.url === "/navigate")
       return res.end("<a id=n href='http://127.0.0.1/navigate-blocked'>go</a><script>n.click()</script>")
     if (req.url === "/permission")
@@ -727,7 +730,56 @@ async function child() {
     diagnostic("u20:right-verified")
     pass("U20", "real close-tabs IPC rejects bad scope, preserves target, destroys others/right siblings")
     diagnostic("u20:passed")
+
+    const popupSource = await open(site.base, "popup-https-profile")
+    const popupSourceContents = attachedContents(ipcWin)
+    check(popupSourceContents && attached(ipcWin, popupSourceContents), "popup source view is not attached")
+    await waitFor(
+      async () =>
+        (await execute(
+          "view:popup-source-ready",
+          popupSourceContents,
+          "document.readyState === 'complete' && location.origin === " + JSON.stringify(site.base),
+        )) === true,
+      "popup source load",
+    )
+    const u21Start = await eventCount()
+    const popupTarget = `${site.base}/popup-target`
+    await navigate(popupSource.tabID, `${site.base}/popup-https`)
+    const popupOpened = await waitEvent(
+      u21Start,
+      (event) => event.type === "tab-opened" && event.payload.url === popupTarget,
+      "HTTPS popup tab-opened",
+    )
+    check(
+      Object.keys(popupOpened.payload).length === 4 &&
+        typeof popupOpened.payload.id === "string" &&
+        popupOpened.payload.id.length > 0 &&
+        popupOpened.payload.id === popupOpened.payload.tabID &&
+        Number.isSafeInteger(popupOpened.payload.generation) &&
+        popupOpened.payload.generation >= 1 &&
+        popupOpened.payload.url === popupTarget &&
+        !Object.keys(popupOpened.payload).some((key) => key === "storageKey" || /path/i.test(key)) &&
+        JSON.stringify(structuredClone(popupOpened.payload)) === JSON.stringify(popupOpened.payload),
+      "HTTPS popup event is not cloneable public tab identity",
+    )
+    const popupContents = attachedContents(ipcWin)
+    check(popupContents && popupContents !== popupSourceContents, "HTTPS popup did not create second WebContentsView")
+    await waitFor(
+      async () =>
+        (await execute("view:popup-target-ready", popupContents, "location.href")) === popupTarget,
+      "HTTPS popup target load",
+    )
+    check(attached(ipcWin, popupContents), "HTTPS popup view is not selected and attached")
+    check(
+      !popupSourceContents.isDestroyed() && !attached(ipcWin, popupSourceContents),
+      "HTTPS popup source view is not hidden and detached",
+    )
+    pass("U21", "real HTTPS popup emits cloneable public tab identity and selects second WebContentsView")
+
     await invoke(ipcWin.webContents.mainFrame, "app-dock-hide", [])
+    await invoke(ipcWin.webContents.mainFrame, "app-dock-close-tab", [popupOpened.payload.tabID])
+    await invoke(ipcWin.webContents.mainFrame, "app-dock-close-tab", [popupSource.tabID])
     await invoke(ipcWin.webContents.mainFrame, "app-dock-close-tab", [rightTarget.tabID])
     await invoke(ipcWin.webContents.mainFrame, "app-dock-close-tab", [closeTarget.tabID])
 
@@ -757,7 +809,7 @@ async function child() {
     if (!ipcWin.isDestroyed()) ipcWin.destroy()
     await site.close()
     await new Promise<void>((resolve) => setTimeout(resolve, 250))
-    await rm(temp, { recursive: true, force: true })
+    await rm(temp, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 })
     process.exit(completed ? 0 : 1)
   }
 }
