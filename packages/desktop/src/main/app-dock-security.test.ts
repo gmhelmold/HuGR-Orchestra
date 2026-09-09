@@ -27,15 +27,19 @@ const rejects = async (fn: () => unknown | Promise<unknown>, text: string) => {
 }
 
 async function parent() {
+  const startupOnly = process.env.APP_DOCK_STARTUP_ONLY === "1"
   const output = join(await mkdtemp(join(tmpdir(), "app-dock-e2e-")), "harness.cjs")
-  const result = await Bun.build({ entrypoints: [import.meta.path], outfile: output, target: "node", format: "cjs", external: ["electron", "node:sqlite"] })
-  if (!result.success) throw new Error(result.logs.map(String).join("\n"))
+  if (!startupOnly) {
+    const result = await Bun.build({ entrypoints: [import.meta.path], outfile: output, target: "node", format: "cjs", external: ["electron", "node:sqlite"], write: true })
+    if (!result.success) throw new Error(result.logs.map(String).join("\n"))
+  }
   const electronModule = fileURLToPath(import.meta.resolve("electron"))
   const electron = join(dirname(electronModule), "dist/Electron.app/Contents/MacOS/Electron")
   await access(electron)
   const { ELECTRON_RUN_AS_NODE: _electronRunAsNode, NODE_OPTIONS, ...env } = process.env
   const safeNodeOptions = NODE_OPTIONS?.includes("ELECTRON_RUN_AS_NODE") ? undefined : NODE_OPTIONS
-  const child = spawn(electron, [output, "--app-dock-electron-child"], { stdio: ["ignore", "pipe", "pipe"], env: { ...env, ...(safeNodeOptions ? { NODE_OPTIONS: safeNodeOptions } : {}), ELECTRON_DISABLE_SECURITY_WARNINGS: "true" } })
+  const entry = join(import.meta.dir, "app-dock-security.child.cjs")
+  const child = spawn(electron, startupOnly ? [entry, "--startup-only"] : [entry, output, "--app-dock-electron-child"], { stdio: ["ignore", "pipe", "pipe"], env: { ...env, ...(safeNodeOptions ? { NODE_OPTIONS: safeNodeOptions } : {}), ELECTRON_DISABLE_SECURITY_WARNINGS: "true" } })
   let stdout = ""
   let stderr = ""
   child.stdout.on("data", (chunk) => { stdout += chunk })
@@ -45,6 +49,7 @@ async function parent() {
   const exitResult = await new Promise<{ code: number | null; signal: NodeJS.Signals | null }>((resolve, reject) => { child.once("exit", (code, signal) => resolve({ code, signal })); child.once("error", reject) })
   clearTimeout(timeout)
   await rm(dirname(output), { recursive: true, force: true })
+  if (startupOnly) console.error(JSON.stringify({ phase: "parent-startup", electron, executable: true, ...exitResult, stdout, stderr }))
   if (exitResult.code !== 0 || timedOut) {
     console.error(JSON.stringify({ phase: "parent-child-failure", electron, executable: true, timedOut, ...exitResult, stdout, stderr }))
     process.exitCode = exitResult.code ?? 1

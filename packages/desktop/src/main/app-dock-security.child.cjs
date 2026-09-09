@@ -1,0 +1,13 @@
+const diagnostic = (phase) => process.stderr.write(`${JSON.stringify({ phase, argv: process.argv, electronVersion: process.versions.electron, pid: process.pid })}\n`)
+diagnostic("entry")
+const startupWatchdog = setTimeout(() => { diagnostic("startup-timeout"); process.exit(1) }, 15_000)
+diagnostic("before-import-electron")
+const { app } = require("electron")
+diagnostic("after-import-electron")
+diagnostic("before-whenReady")
+app.whenReady().then(() => {
+  diagnostic("after-whenReady")
+  clearTimeout(startupWatchdog)
+  if (process.argv.includes("--startup-only")) app.exit()
+  else require(process.argv[2])
+}).catch((error) => { console.error(error); app.exit(1) })
