@@ -114,23 +114,21 @@ describe('PROP-MCP-4 — draft door: serialize(cli(draft, x)) ≡ serialize(mcp(
   }, 60_000); // matches the e2e-blackbox project budget (60s, §2.8/#311): 8 subprocess pairs measured 37s quiet.
 
   it('SCN-MCP-4c-1 (partially-populated — the divergence-teeth): absent optional string + empty optional array agree', async () => {
-    // A T2 advisory draft on CREATE routes `auto-accept`, so `DraftOut.requires` is ABSENT (dropped, not null),
-    // and `fact.claims` is ALWAYS `[]`. These are the two shapes a re-serialization differs on; assert BOTH
-    // that the bytes agree AND that the shared shape is exactly this — so a door that emitted `requires: null`
-    // or dropped `claims` would RED even if it otherwise round-tripped.
+    // Draft conservatively routes through full ratification and carries `requires`; `fact.claims` remains an
+    // explicit empty array. Assert byte parity and both optional-field shapes.
     const cli = cliDraftBytes(repo, 'src/app.ts', 'gotcha', 'a symbol-free file anchor, fast-path route');
     const { bytes: mcp, data } = await mcpDraftBytes(repo, 'src/app.ts', 'gotcha', 'a symbol-free file anchor, fast-path route');
     expect(mcp).toBe(cli); // byte parity across transports, on the partially-populated shape
 
     // the divergence-teeth themselves, asserted on the observed payload:
-    expect(data.route).toBe('auto-accept'); // the fast path that OMITS `requires`
-    expect(Object.prototype.hasOwnProperty.call(data, 'requires')).toBe(false); // ABSENT optional string — not null, not ''
+    expect(data.route).toBe('full-ratify');
+    expect(data.requires).toBe('ATLAS_RATIFY_TOKEN');
     const fact = data.fact as { claims?: unknown };
     expect(Array.isArray(fact.claims)).toBe(true);
     expect(fact.claims).toEqual([]); // EMPTY optional array — present as `[]`, never dropped
     // and the CLI bytes literally carry the same two shapes (a reconstruction would leak here):
     expect(cli).toContain('"claims":[]');
-    expect(cli).not.toContain('"requires"');
+    expect(cli).toContain('"requires":"ATLAS_RATIFY_TOKEN"');
   }, 20_000);
 });
 

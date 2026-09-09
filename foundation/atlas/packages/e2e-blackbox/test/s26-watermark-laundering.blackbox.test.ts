@@ -107,7 +107,7 @@ describe('S26 — an unrelated write cannot LAUNDER the freshness watermark (it 
     // door finally says the same thing on A's own row. Fact B, derived at HEAD, says FRESH. Before this WP
     // the read door had no way to say either: it had one pack-wide boolean and both rows looked alike.
     expect(invLines(q.stdout)).toEqual([
-      ...[`  inv T1 ${factA} [DRIFTED]: foo is one`, `  inv T1 ${factB} [FRESH]: other is two`].sort(),
+      ...[`  inv T1 ${factA} [STALE]: foo is one`, `  inv T1 ${factB} [FRESH]: other is two`].sort(),
     ]);
     // BEFORE THE FIX this read said `stale: false` — one unrelated emit laundered the whole projection's
     // watermark, so the drifted fact A was served as verified-fresh while doctor printed its drift.
@@ -117,7 +117,7 @@ describe('S26 — an unrelated write cannot LAUNDER the freshness watermark (it 
   it('PER-SCOPE ACCURACY: the drifted sub-tree is stale, the just-verified sub-tree is not', () => {
     const app = runAtlas(repo.repoPath, ['query', 'src/app']);
     expect(app.exitCode).toBe(0);
-    expect(invLines(app.stdout)).toEqual([`  inv T1 ${factA} [DRIFTED]: foo is one`]);
+    expect(invLines(app.stdout)).toEqual([`  inv T1 ${factA} [STALE]: foo is one`]);
     expect(staleOf(app.stdout)).toBe('stale: true'); // A's row was derived at C1, HEAD is C2
 
     const lib = runAtlas(repo.repoPath, ['query', 'src/lib']);
