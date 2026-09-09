@@ -84,6 +84,7 @@ export type ElectronAPI = {
   appDockHide: () => Promise<void>
   appDockClose: () => Promise<void>
   appDockCloseTab: (id: string) => Promise<void>
+  appDockCloseTabs: (id: string, scope: "others" | "right") => Promise<void>
   appDockSelect: (id: string, bounds: { x: number; y: number; width: number; height: number }) => Promise<void>
   appDockNavigate: (id: string, url: string) => Promise<void>
   appDockCommand: (id: string, command: "back" | "forward" | "reload") => Promise<void>

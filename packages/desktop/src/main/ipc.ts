@@ -259,6 +259,12 @@ export function registerIpcHandlers(deps: Deps) {
   ipcMain.handle("app-dock-close-tab", (event: IpcMainInvokeEvent, tabID: unknown) => {
     appDock.close(event.sender.id, appDockSender(event), appDockID(tabID, "tab"))
   })
+  ipcMain.handle("app-dock-close-tabs", (event: IpcMainInvokeEvent, tabID: unknown, scope: unknown) => {
+    appDockSender(event)
+    const id = appDockID(tabID, "tab")
+    if (scope !== "others" && scope !== "right") throw new Error("Invalid App Dock close scope")
+    appDock.closeTabs(event.sender.id, id, scope)
+  })
   ipcMain.handle("app-dock-select", (event: IpcMainInvokeEvent, tabID: unknown, bounds: unknown) => {
     const win = appDockSender(event)
     appDock.select(

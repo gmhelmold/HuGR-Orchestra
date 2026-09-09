@@ -300,5 +300,14 @@ export function createAppDock() {
       browserSessions.delete(partition)
     },
     close,
+    closeTabs(senderID: number, tabID: string, scope: "others" | "right") {
+      const senderTabs = tabs.get(senderID)
+      if (!senderTabs?.has(tabID)) throw new Error("Unknown App Dock tab")
+      const ids = [...senderTabs.keys()]
+      const target = ids.indexOf(tabID)
+      const closing = scope === "others" ? ids.filter((id) => id !== tabID) : ids.slice(target + 1)
+      closing.forEach((id) => remove(senderID, id))
+      if (senderTabs.size === 0) tabs.delete(senderID)
+    },
   }
 }
