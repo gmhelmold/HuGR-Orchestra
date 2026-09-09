@@ -1,0 +1,60 @@
+node_modules/
+dist/
+*.tsbuildinfo
+.DS_Store
+.orchestra/
+
+# agent worktrees (ephemeral, created by the Agent tool isolation)
+.claude/worktrees/
+
+# ── `.atlas/staging` is DATA that must never travel — `projection`/`cas` now MAY (TRAVEL-BY-REPROOF, task
+#    #90 amended, owner-authorized 2026-08-18) ─────────────────────────────────────────────────────────────
+# THIS RULE USED TO DENY `projection`/`cas` TOO, and the amendment is deliberate, not a relaxation of the
+# guard it replaces: a `seal:'proven'` fact now carries its OWN derivation (`witness`, #195) and
+# `atlas verify-store` replays it through the sound oracle (#196), so a committed `projection`/`cas` no
+# longer has to be TRUSTED — every fact it serves is RE-PROVED against the live index on every read
+# (`read-access.ts`); trust moved from the committer to the oracle. `.atlas/staging.json` (ADR-0008) is
+# different IN KIND, not degree: unratified LLM-proposed candidate material that never passed a door and
+# carries no witness to replay, so there is nothing to re-prove it against — committing it is still
+# committing raw, unauthenticated trust, and if it is committed anyway (`git add -f`) it is STILL flatly
+# refused at read time, unchanged (`store-provenance.ts`).
+# Deny-by-default, then re-include: `.atlas/*` ignores EVERY child (so a sidecar added later is ignored the
+# day it appears, not the day someone remembers), and the negations below re-admit the files that are now
+# trackable-by-design. Order matters — a negation must come AFTER the pattern it overrides. Note that
+# `.atlas/` itself is deliberately NOT ignored: git cannot re-include a path under an excluded directory, so
+# ignoring the directory would make the negations below unreachable.
+.atlas/*
+# `projection.json` + `cas/**` — the re-provable half of the durable store (see above). ADMIT vs RECOGNIZE
+# are deliberately different widths: only the CURRENT projection (`projection.json`) is admitted to travel —
+# reads rehydrate from it alone (`knowledge/read/sameas.ts`). The numbered generations `projection.<N>.json`
+# are local sidecar backups for recovery (`governed-emit-reasons.ts`: "Restore `.atlas/projection.*.json`
+# from a backup"), redundant with the current one and NOT admitted, so a bare `git add .atlas/` cannot drag a
+# stack of growing snapshots into history. Provenance still RECOGNIZES `projection.<N>.json` as a provable
+# store member (`store-provenance.ts` regex) so a force-committed generation is classified correctly, not
+# misdiagnosed — recognition stays broad on purpose; only admission narrows. `staging*.json` is NOT
+# re-admitted and stays denied by the blanket rule above — the one population this amendment leaves refused.
+!.atlas/projection.json
+!.atlas/cas/
+# `memory.jsonl` — the per-seat Memory log. MEM-10a REQUIRES it to travel at every commit / PR / branch /
+# fork, so it is admitted like the projection is. It is safe to admit for a reason the projection cannot
+# claim: the file is append-only and content-keyed one record per line (KERNEL-12b/12c), so a plain git text
+# merge can only union or duplicate whole lines — never splice two records — and a duplicate is deduped by
+# content id on the fold. There are no numbered generations to drag in, because nothing is ever replaced.
+!.atlas/memory.jsonl
+# `orientation.jsonl` — the derived-channel event log the Orientation slab folds. Admitted for a REQUIREMENT,
+# not a convenience: MEM-6 says the slab is byte-identical across all members, members work in different
+# clones, so a log that stayed local would fold to a different Orientation per machine and the invariant
+# would be false by construction. Same append-only content-keyed form, same safe line merge.
+!.atlas/orientation.jsonl
+# …and the admin-owned policy, as before: the ratified config the doors READ, reviewable in the same place
+# as the code.
+!.atlas/policy.json
+
+# staging must never travel at ANY depth. The root-anchored `.atlas/*` above only matches the repo-root
+# store; test runs create scratch `.atlas/` dirs under packages/*/ (e.g. packages/grounding/.atlas/) whose
+# staging*.json slips that anchor. This unanchored rule denies staging everywhere — same intent as above,
+# closing the nested-dir gap so `git add -A` after a test run cannot drag candidate material into history.
+**/.atlas/staging*.json
+
+# runtime telemetry from the orchestrator harness — not product source
+.maestro/
