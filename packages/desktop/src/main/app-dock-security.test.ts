@@ -29,6 +29,10 @@ const required = [
   "U20",
   "U21",
   "U22",
+  "U23",
+  "U24",
+  "U25",
+  "U26",
 ]
 const root = resolve(import.meta.dir, "../..")
 const artifact = join(process.env.APP_DOCK_ARTIFACT_ROOT ?? root, "artifacts/app-dock/s1.json")
@@ -92,10 +96,63 @@ async function parent() {
   const electronModule = createRequire(join(process.cwd(), "package.json")).resolve("electron")
   const electron = join(dirname(electronModule), "dist/Electron.app/Contents/MacOS/Electron")
   await access(electron)
-  await rm(artifact, { force: true })
   const { ELECTRON_RUN_AS_NODE: _electronRunAsNode, NODE_OPTIONS, APP_DOCK_LOAD_ONLY: _loadOnly, ...env } = process.env
   const safeNodeOptions = NODE_OPTIONS?.includes("ELECTRON_RUN_AS_NODE") ? undefined : NODE_OPTIONS
   const entry = join(import.meta.dir, "app-dock-security.child.cjs")
+  const restartStages: string[] = []
+  if (!startupOnly && !loadOnly) {
+    const restartUserData = await mkdtemp(join(tmpdir(), "app-dock-restart-user-data-"))
+    const restartSite = await fixture()
+    const runRestartStage = async (stage: string) => {
+    const child = spawn(electron, [entry, output, "--app-dock-electron-child"], {
+      stdio: ["ignore", "pipe", "pipe"],
+      env: {
+        ...env,
+        ...(safeNodeOptions ? { NODE_OPTIONS: safeNodeOptions } : {}),
+        APP_DOCK_ARTIFACT_ROOT: root,
+        APP_DOCK_RESTART_STAGE: stage,
+        APP_DOCK_RESTART_SITE: restartSite.base,
+        APP_DOCK_RESTART_USER_DATA: restartUserData,
+        ELECTRON_DISABLE_SECURITY_WARNINGS: "true",
+      },
+    })
+    let stdout = ""
+    let stderr = ""
+    child.stdout.on("data", (chunk) => {
+      stdout += chunk
+    })
+    child.stderr.on("data", (chunk) => {
+      stderr += chunk
+    })
+    const result = await new Promise<{ code: number | null }>((resolve, reject) => {
+      child.once("exit", (code) => resolve({ code }))
+      child.once("error", reject)
+    })
+    if (result.code !== 0 || !stdout.includes(`app-dock-restart:${stage}:pass`))
+      throw new Error(JSON.stringify({ phase: "restart-stage-failure", stage, ...result, stdout, stderr }))
+    restartStages.push(stage)
+    }
+    try {
+      await runRestartStage("u23-write")
+      await runRestartStage("u23-read")
+      await runRestartStage("u24-delete")
+      await runRestartStage("u24-read")
+      const registryPath = join(restartUserData, "app-dock-profile-registry.json")
+      const corruptRegistry = "{corrupt native registry"
+      await writeFile(registryPath, corruptRegistry)
+      await runRestartStage("u25-corrupt")
+      check((await readFile(registryPath, "utf8")) === corruptRegistry, "corrupt registry was modified")
+      await rm(restartUserData, { recursive: true, force: true })
+      await mkdir(restartUserData)
+      await runRestartStage("u26-write")
+      await runRestartStage("u26-read")
+    } finally {
+      await restartSite.close()
+      await rm(restartUserData, { recursive: true, force: true })
+    }
+    check(restartStages.length === 7, "restart acceptance stages incomplete")
+  }
+  await rm(artifact, { force: true })
   const child = spawn(
     electron,
     startupOnly ? [entry, "--startup-only"] : [entry, output, "--app-dock-electron-child"],
@@ -105,6 +162,7 @@ async function parent() {
         ...env,
         ...(safeNodeOptions ? { NODE_OPTIONS: safeNodeOptions } : {}),
         ...(loadOnly ? { APP_DOCK_LOAD_ONLY: "1" } : {}),
+        APP_DOCK_RESTART_CASES: restartStages.join(","),
         APP_DOCK_ARTIFACT_ROOT: root,
         ELECTRON_DISABLE_SECURITY_WARNINGS: "true",
       },
@@ -298,6 +356,8 @@ async function child() {
   const { app, BrowserWindow, webContents } = await import("electron")
   diagnostic("after-import-electron")
   if (!process.versions.electron) throw new Error("Electron child not started")
+  const restartStage = process.env.APP_DOCK_RESTART_STAGE
+  if (restartStage) return restartChild(restartStage, app, BrowserWindow, webContents)
   if (!process.env.APP_DOCK_ARTIFACT_ROOT || !isAbsolute(process.env.APP_DOCK_ARTIFACT_ROOT))
     throw new Error("Invalid App Dock artifact root")
   const childArtifact = join(process.env.APP_DOCK_ARTIFACT_ROOT, "artifacts/app-dock/s1.json")
@@ -865,6 +925,14 @@ async function child() {
       "U22",
       "open and tab-opened contracts expose only tabID, generation, and URL; event envelopes omit legacy fields",
     )
+    check(
+      process.env.APP_DOCK_RESTART_CASES === "u23-write,u23-read,u24-delete,u24-read,u25-corrupt,u26-write,u26-read",
+      "restart acceptance cases incomplete",
+    )
+    pass("U23", "fresh Electron main process preserves same profile localStorage and cookie")
+    pass("U24", "deleted profile tombstone survives restart and blocks old partition access")
+    pass("U25", "corrupt native registry fails closed without rebind and remains unchanged")
+    pass("U26", "separate profiles retain isolated storage across fresh Electron main process")
 
     check(
       cases.length === required.length &&
@@ -894,6 +962,109 @@ async function child() {
     await new Promise<void>((resolve) => setTimeout(resolve, 250))
     await rm(temp, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 })
     process.exit(completed ? 0 : 1)
+  }
+}
+
+async function restartChild(
+  stage: string,
+  app: Electron.App,
+  BrowserWindow: typeof Electron.BrowserWindow,
+  webContents: typeof Electron.webContents,
+) {
+  const userData = process.env.APP_DOCK_RESTART_USER_DATA
+  const site = process.env.APP_DOCK_RESTART_SITE
+  if (!userData || !isAbsolute(userData) || !site?.startsWith("https://")) throw new Error("Invalid restart fixture")
+  app.setPath("userData", userData)
+  const { registerIpcHandlers } = await import("./ipc")
+  app.commandLine.appendSwitch("ignore-certificate-errors")
+  await app.whenReady()
+  registerIpcHandlers({
+    killSidecar() {},
+    relaunch() {},
+    awaitInitialization: async () => ({ serverUrl: site }),
+    consumeInitialDeepLinks: () => [],
+    getDefaultServerUrl: () => null,
+    setDefaultServerUrl() {},
+    isFirstLaunchOnboardingPending: () => false,
+    finishFirstLaunchOnboarding: () => null,
+    isOldLayoutEligible: () => false,
+    getDisplayBackend: async () => null,
+    setDisplayBackend: async () => {},
+    checkAppExists: () => false,
+    resolveAppPath: async () => null,
+    updater: { subscribe: () => () => {}, check: async () => {}, install: async () => {} },
+    showUpdater() {},
+    setBackgroundColor() {},
+    exportDebugLogs: async () => "",
+    recordFatalRendererError() {},
+    setNativeTranslations() {},
+  })
+  const win = new BrowserWindow({
+    show: false,
+    webPreferences: { nodeIntegration: true, contextIsolation: false, preload: process.env.APP_DOCK_TEST_PRELOAD },
+  })
+  const invoke = (channel: string, args: unknown[]) =>
+    win.webContents.executeJavaScript(`require('electron').ipcRenderer.invoke(${JSON.stringify(channel)}, ${JSON.stringify(args)})`)
+  const bounds = { x: 0, y: 0, width: 400, height: 300 }
+  const open = (profileID: string) => invoke("app-dock-open", [site, bounds, profileID])
+  const view = () =>
+    webContents
+      .getAllWebContents()
+      .filter((item) => item !== win.webContents && !item.isDestroyed())
+      .at(-1)
+  const waitForView = async () => {
+    const deadline = Date.now() + 5_000
+    while (!view()) {
+      if (Date.now() > deadline) throw new Error("App Dock restart view missing")
+      await new Promise<void>((resolve) => setTimeout(resolve, 25))
+    }
+    return view()!
+  }
+  try {
+    await win.loadURL(site)
+    if (stage === "u23-write") {
+      await open("restart-profile")
+      const contents = await waitForView()
+      await contents.executeJavaScript("localStorage.setItem('restart-local', 'present'); document.cookie = 'restart-cookie=present; path=/'")
+      await contents.session.flushStorageData()
+      await contents.session.cookies.flushStore()
+    } else if (stage === "u23-read") {
+      await open("restart-profile")
+      const contents = await waitForView()
+      check(
+        (await contents.executeJavaScript("({ local: localStorage.getItem('restart-local'), cookie: document.cookie })")).local ===
+          "present" &&
+          (await contents.executeJavaScript("document.cookie")).includes("restart-cookie=present"),
+        "profile storage did not survive main-process restart",
+      )
+    } else if (stage === "u24-delete") {
+      await open("tombstone-profile")
+      await invoke("app-dock-delete-profile", [{ profileID: "tombstone-profile" }])
+    } else if (stage === "u24-read") {
+      await rejects(() => open("tombstone-profile"), "App Dock profile is not active")
+      check(!view(), "deleted profile accessed old partition")
+    } else if (stage === "u25-corrupt") {
+      await rejects(() => open("corrupt-profile"), "Invalid App Dock profile registry")
+      check(!view(), "corrupt registry rebound profile partition")
+    } else if (stage === "u26-write") {
+      await open("isolation-alpha")
+      const alpha = await waitForView()
+      await alpha.executeJavaScript("localStorage.setItem('isolation', 'alpha')")
+      await alpha.session.flushStorageData()
+      await open("isolation-beta")
+      const beta = await waitForView()
+      await beta.executeJavaScript("localStorage.setItem('isolation', 'beta')")
+      await beta.session.flushStorageData()
+    } else if (stage === "u26-read") {
+      await open("isolation-alpha")
+      check((await (await waitForView()).executeJavaScript("localStorage.getItem('isolation')")) === "alpha", "alpha storage changed")
+      await open("isolation-beta")
+      check((await (await waitForView()).executeJavaScript("localStorage.getItem('isolation')")) === "beta", "beta storage changed")
+    } else throw new Error(`Unknown restart stage: ${stage}`)
+    console.log(`app-dock-restart:${stage}:pass`)
+  } finally {
+    if (!win.isDestroyed()) win.destroy()
+    app.exit()
   }
 }
 
