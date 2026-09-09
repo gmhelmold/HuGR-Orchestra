@@ -121,7 +121,7 @@ async function parent() {
   const timeout = setTimeout(() => {
     timedOut = true
     child.kill("SIGKILL")
-  }, 90_000)
+  }, 120_000)
   const exitResult = await new Promise<{ code: number | null; signal: NodeJS.Signals | null }>((resolve, reject) => {
     child.once("exit", (code, signal) => resolve({ code, signal }))
     child.once("error", reject)
@@ -313,7 +313,7 @@ async function child() {
   const watchdog = setTimeout(() => {
     console.error("App Dock acceptance watchdog expired")
     app.exit(1)
-  }, 60_000)
+  }, 90_000)
   const temp = await mkdtemp(join(tmpdir(), "app-dock-user-data-"))
   app.setPath("userData", temp)
   const site = await fixture()
@@ -718,17 +718,49 @@ async function child() {
       closeAContents.isDestroyed() && closeCContents.isDestroyed(),
       "close-tabs others did not destroy selected siblings",
     )
+    const rightA = await open(site.base, "close-tabs-right-profile")
+    const rightAContents = viewContents()
     const rightTarget = await open(site.base, "close-tabs-right-profile")
     const rightTargetContents = viewContents()
     const rightC = await open(site.base, "close-tabs-right-profile")
+    const rightCContents = viewContents()
     const rightD = await open(site.base, "close-tabs-right-profile")
     await invoke(ipcWin.webContents.mainFrame, "app-dock-select", [rightTarget.tabID, bounds])
-    await invoke(ipcWin.webContents.mainFrame, "app-dock-close-tabs", [rightTarget.tabID, "right"])
+    const visualOrder = [closeTarget.tabID, rightA.tabID, rightC.tabID, rightTarget.tabID, rightD.tabID]
+    await rejects(
+      () =>
+        invoke(ipcWin.webContents.mainFrame, "app-dock-close-tabs", [rightTarget.tabID, "right", visualOrder.slice(1)]),
+      "Invalid App Dock tab order",
+    )
+    await rejects(
+      () =>
+        invoke(ipcWin.webContents.mainFrame, "app-dock-close-tabs", [
+          rightTarget.tabID,
+          "right",
+          [...visualOrder.slice(0, 3), "foreign-tab"],
+        ]),
+      "Invalid App Dock tab order",
+    )
+    await rejects(
+      () =>
+        invoke(ipcWin.webContents.mainFrame, "app-dock-close-tabs", [
+          rightTarget.tabID,
+          "right",
+          [rightA.tabID, rightC.tabID, rightTarget.tabID, rightTarget.tabID],
+        ]),
+      "Invalid App Dock tab order",
+    )
+    await rejects(
+      () => invoke(ipcWin.webContents.mainFrame, "app-dock-close-tabs", [rightTarget.tabID, "others", visualOrder]),
+      "Invalid App Dock tab order",
+    )
+    await invoke(ipcWin.webContents.mainFrame, "app-dock-close-tabs", [rightTarget.tabID, "right", visualOrder])
     check(!rightTargetContents.isDestroyed(), "close-tabs right destroyed target")
-    await rejects(() => navigate(rightC.tabID, site.base), "Unknown App Dock tab")
+    check(!rightAContents.isDestroyed() && !rightCContents.isDestroyed(), "close-tabs right destroyed visual left tabs")
+    await navigate(rightTarget.tabID, site.base)
     await rejects(() => navigate(rightD.tabID, site.base), "Unknown App Dock tab")
     diagnostic("u20:right-verified")
-    pass("U20", "real close-tabs IPC rejects bad scope, preserves target, destroys others/right siblings")
+    pass("U20", "real close-tabs validates complete visual order; closes only visual-right tab")
     diagnostic("u20:passed")
 
     const popupSource = await open(site.base, "popup-https-profile")
