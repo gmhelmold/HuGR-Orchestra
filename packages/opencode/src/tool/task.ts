@@ -15,6 +15,11 @@ import { Effect, Exit, Schema, Scope } from "effect"
 import { EffectBridge } from "@/effect/bridge"
 import { RuntimeFlags } from "@/effect/runtime-flags"
 import { Database } from "@opencode-ai/core/database/database"
+import { EventV2 } from "@opencode-ai/core/event"
+import { EventTable } from "@opencode-ai/core/event/sql"
+import { MaestroEvent } from "@opencode-ai/schema/maestro-event"
+import { and, asc, eq } from "drizzle-orm"
+import { verifyGovernedTask } from "@/maestro/governed-task"
 
 export interface TaskPromptOps {
   cancel(sessionID: SessionID): Effect.Effect<void>
@@ -53,6 +58,22 @@ const BaseParameterFields = {
   model: Schema.optional(Schema.String).annotate({
     description:
       "Run the subagent on a specific model as 'providerID/modelID' (e.g. 'openrouter/deepseek/deepseek-chat', 'groq/llama-3.3-70b-versatile'). Overrides the subagent's configured model and the parent session model. The provider part also selects credentials: OAuth subscriptions (Claude Max, ChatGPT) and API keys resolve per providerID at run time — use a custom provider alias in opencode.json to pin a second key for the same backend.",
+  }),
+  governed: Schema.optional(
+    Schema.Struct({
+      sessionID: Schema.String,
+      projectID: Schema.String,
+      memberID: Schema.String,
+      approvalMessageID: Schema.String,
+      planRevisionID: Schema.String,
+      revisionHash: Schema.String,
+      validationRecordID: Schema.String,
+      validationHash: Schema.String,
+      contextHash: Schema.String,
+      policyHash: Schema.String,
+    }),
+  ).annotate({
+    description: "Exact approval binding required only for an explicit governed Task.",
   }),
 }
 
@@ -107,6 +128,29 @@ export const TaskTool = Tool.define(
       }
 
       const parent = yield* sessions.get(ctx.sessionID)
+      if (params.governed) {
+        if (ctx.agent !== "maestro") return yield* Effect.fail(new Error("Governed Task requires Maestro"))
+        if (params.governed.sessionID !== ctx.sessionID || params.governed.projectID !== parent.projectID) {
+          return yield* Effect.fail(new Error("Governed Task denied: request-context-mismatch"))
+        }
+        const decisions = yield* database.db
+          .select({ data: EventTable.data })
+          .from(EventTable)
+          .where(
+            and(
+              eq(EventTable.aggregate_id, params.governed.sessionID),
+              eq(EventTable.type, EventV2.versionedType(MaestroEvent.Approval.Decided.type, 1)),
+            ),
+          )
+          .orderBy(asc(EventTable.seq))
+          .all()
+          .pipe(Effect.orDie)
+        const verdict = verifyGovernedTask({
+          request: params.governed,
+          decisions: decisions.map((decision) => Schema.decodeUnknownSync(MaestroEvent.Approval.Decided.data)(decision.data)),
+        })
+        if (verdict.status !== "APPROVED") return yield* Effect.fail(new Error(`Governed Task denied: ${verdict.reason}`))
+      }
       let current = parent
       let depth = 0
       while (current.parentID) {
