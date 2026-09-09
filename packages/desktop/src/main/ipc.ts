@@ -1,5 +1,4 @@
 import { execFile } from "node:child_process"
-import { randomUUID } from "node:crypto"
 import { stat } from "node:fs/promises"
 import { basename, join } from "node:path"
 import { app, BrowserWindow, clipboard, dialog, ipcMain, shell } from "electron"
@@ -36,8 +35,8 @@ import {
   type AppDockEvent as NativeAppDockEvent,
   type AppDockFindResult,
   type DockBounds,
-  type ProfileStorage,
 } from "./app-dock"
+import { AppDockProfileRegistry } from "./app-dock-profile-registry"
 
 const pickerFilters = (ext?: string[]) => {
   if (!ext || ext.length === 0) return undefined
@@ -237,7 +236,8 @@ type Deps = {
 
 export function registerIpcHandlers(deps: Deps) {
   const appDock = createAppDock()
-  const appDockProfiles = new Map<string, ProfileStorage>([["default", Object.freeze({ storageKey: randomUUID() })]])
+  const appDockProfiles = AppDockProfileRegistry.load(app.getPath("userData"))
+  appDockProfiles.ensureActive("default")
   const drafts = createDesktopDraftStore(join(app.getPath("userData"), "drafts.sqlite"))
   const updaterSubscriptions = createUpdaterSubscriptions()
   app.once("will-quit", updaterSubscriptions.clear)
@@ -275,8 +275,7 @@ export function registerIpcHandlers(deps: Deps) {
       const win = appDockSender(event)
       if (typeof address !== "string") throw new Error("Invalid App Dock address")
       const profileID = appDockProfileID(profile)
-      const profileStorage = appDockProfiles.get(profileID) ?? Object.freeze({ storageKey: randomUUID() })
-      appDockProfiles.set(profileID, profileStorage)
+      const profileStorage = appDockProfiles.ensureActive(profileID)
       const tab = await appDock.open(
         event.sender.id,
         win,
@@ -377,10 +376,9 @@ export function registerIpcHandlers(deps: Deps) {
       throw new Error("Invalid App Dock profile deletion")
     }
     const profileID = appDockProfileID((payload as { profileID?: unknown }).profileID)
-    const profileStorage = appDockProfiles.get(profileID)
-    if (!profileStorage) throw new Error("Unknown App Dock profile")
+    const profileStorage = appDockProfiles.markDeleting(profileID)
     await appDock.deleteStorage(profileStorage.storageKey, win)
-    appDockProfiles.delete(profileID)
+    appDockProfiles.markDeleted(profileID)
   })
   ipcMain.handle("updater-subscribe", (event) => {
     const id = event.sender.id
