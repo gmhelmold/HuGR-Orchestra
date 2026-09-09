@@ -223,7 +223,8 @@ async function fixture() {
     }
     if (req.url === "/popup") return res.end("<script>window.open('http://127.0.0.1/popup-blocked')</script>")
     if (req.url === "/popup-https") return res.end("<script>window.open(`${location.origin}/popup-target`)</script>")
-    if (req.url === "/popup-target") return res.end("<!doctype html><title>popup target</title><body>popup target</body>")
+    if (req.url === "/popup-target")
+      return res.end("<!doctype html><title>popup target</title><body>popup target</body>")
     if (req.url === "/navigate")
       return res.end("<a id=n href='http://127.0.0.1/navigate-blocked'>go</a><script>n.click()</script>")
     if (req.url === "/permission")
@@ -726,7 +727,7 @@ async function child() {
     const rightCContents = viewContents()
     const rightD = await open(site.base, "close-tabs-right-profile")
     await invoke(ipcWin.webContents.mainFrame, "app-dock-select", [rightTarget.tabID, bounds])
-    const visualOrder = [closeTarget.tabID, rightA.tabID, rightC.tabID, rightTarget.tabID, rightD.tabID]
+    const visualOrder = [rightA.tabID, rightC.tabID, rightTarget.tabID, rightD.tabID]
     await rejects(
       () =>
         invoke(ipcWin.webContents.mainFrame, "app-dock-close-tabs", [rightTarget.tabID, "right", visualOrder.slice(1)]),
@@ -798,8 +799,7 @@ async function child() {
     const popupContents = attachedContents(ipcWin)
     check(popupContents && popupContents !== popupSourceContents, "HTTPS popup did not create second WebContentsView")
     await waitFor(
-      async () =>
-        (await execute("view:popup-target-ready", popupContents, "location.href")) === popupTarget,
+      async () => (await execute("view:popup-target-ready", popupContents, "location.href")) === popupTarget,
       "HTTPS popup target load",
     )
     check(attached(ipcWin, popupContents), "HTTPS popup view is not selected and attached")
@@ -812,6 +812,8 @@ async function child() {
     await invoke(ipcWin.webContents.mainFrame, "app-dock-hide", [])
     await invoke(ipcWin.webContents.mainFrame, "app-dock-close-tab", [popupOpened.payload.tabID])
     await invoke(ipcWin.webContents.mainFrame, "app-dock-close-tab", [popupSource.tabID])
+    await invoke(ipcWin.webContents.mainFrame, "app-dock-close-tab", [rightA.tabID])
+    await invoke(ipcWin.webContents.mainFrame, "app-dock-close-tab", [rightC.tabID])
     await invoke(ipcWin.webContents.mainFrame, "app-dock-close-tab", [rightTarget.tabID])
     await invoke(ipcWin.webContents.mainFrame, "app-dock-close-tab", [closeTarget.tabID])
 

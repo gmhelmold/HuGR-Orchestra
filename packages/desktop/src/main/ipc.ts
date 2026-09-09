@@ -121,8 +121,8 @@ const toCloneableAppDockEvent = (event: unknown): CloneableAppDockEvent => {
       typeof payload.tabID !== "string" ||
       payload.tabID.length === 0 ||
       payload.id !== payload.tabID ||
-        !Number.isSafeInteger(payload.generation) ||
-        appDockEventNumber(payload.generation) < 1 ||
+      !Number.isSafeInteger(payload.generation) ||
+      appDockEventNumber(payload.generation) < 1 ||
       typeof payload.url !== "string"
     ) {
       throw new Error("Invalid App Dock event")
@@ -284,12 +284,17 @@ export function registerIpcHandlers(deps: Deps) {
   ipcMain.handle("app-dock-close-tab", (event: IpcMainInvokeEvent, tabID: unknown) => {
     appDock.close(event.sender.id, appDockSender(event), appDockID(tabID, "tab"))
   })
-  ipcMain.handle("app-dock-close-tabs", (event: IpcMainInvokeEvent, tabID: unknown, scope: unknown) => {
-    appDockSender(event)
-    const id = appDockID(tabID, "tab")
-    if (scope !== "others" && scope !== "right") throw new Error("Invalid App Dock close scope")
-    appDock.closeTabs(event.sender.id, id, scope)
-  })
+  ipcMain.handle(
+    "app-dock-close-tabs",
+    (event: IpcMainInvokeEvent, tabID: unknown, scope: unknown, order?: unknown) => {
+      appDockSender(event)
+      const id = appDockID(tabID, "tab")
+      if (scope !== "others" && scope !== "right") throw new Error("Invalid App Dock close scope")
+      if (order !== undefined && (!Array.isArray(order) || order.some((item) => typeof item !== "string")))
+        throw new Error("Invalid App Dock tab order")
+      appDock.closeTabs(event.sender.id, id, scope, order)
+    },
+  )
   ipcMain.handle("app-dock-select", (event: IpcMainInvokeEvent, tabID: unknown, bounds: unknown) => {
     const win = appDockSender(event)
     appDock.select(
