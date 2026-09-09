@@ -34,6 +34,7 @@ import { Location } from "@opencode-ai/core/location"
 import { PluginV2 } from "@opencode-ai/core/plugin"
 
 export const Info = Schema.Struct({
+  id: Schema.optional(Schema.String),
   name: Schema.String,
   description: Schema.optional(Schema.String),
   mode: Schema.Literals(["subagent", "primary", "all"]),
@@ -140,6 +141,7 @@ const layer = Layer.effect(
 
         const agents: Record<string, Info> = {
           build: {
+            id: "build",
             name: "build",
             description: "The default agent. Executes tools based on configured permissions.",
             options: {},
@@ -155,6 +157,7 @@ const layer = Layer.effect(
             native: true,
           },
           plan: {
+            id: "plan",
             name: "plan",
             description: "Plan mode. Disallows all edit tools.",
             options: {},
@@ -181,6 +184,7 @@ const layer = Layer.effect(
             native: true,
           },
           maestro: {
+            id: "maestro",
             name: "maestro",
             description: "High-agency development orchestrator. Uses governed approval only when explicitly requested.",
             prompt: PROMPT_MAESTRO,
@@ -196,6 +200,7 @@ const layer = Layer.effect(
             native: true,
           },
           general: {
+            id: "general",
             name: "general",
             description: `General-purpose agent for researching complex questions and executing multi-step tasks. Use this agent to execute multiple units of work in parallel.`,
             permission: Permission.merge(
@@ -210,6 +215,7 @@ const layer = Layer.effect(
             native: true,
           },
           explore: {
+            id: "explore",
             name: "explore",
             permission: Permission.merge(
               defaults,
@@ -233,6 +239,7 @@ const layer = Layer.effect(
             native: true,
           },
           compaction: {
+            id: "compaction",
             name: "compaction",
             mode: "primary",
             native: true,
@@ -248,6 +255,7 @@ const layer = Layer.effect(
             options: {},
           },
           title: {
+            id: "title",
             name: "title",
             mode: "primary",
             options: {},
@@ -264,6 +272,7 @@ const layer = Layer.effect(
             prompt: PROMPT_TITLE,
           },
           summary: {
+            id: "summary",
             name: "summary",
             mode: "primary",
             options: {},
@@ -288,6 +297,7 @@ const layer = Layer.effect(
           let item = agents[key]
           if (!item)
             item = agents[key] = {
+              id: key,
               name: key,
               mode: "all",
               permission: Permission.merge(defaults, user),
@@ -335,7 +345,7 @@ const layer = Layer.effect(
             agents,
             values(),
             sortBy(
-              [(x) => (cfg.default_agent ? x.name === cfg.default_agent : x.name === "build"), "desc"],
+              [(x) => (cfg.default_agent ? x.id === cfg.default_agent : x.id === "build"), "desc"],
               [(x) => x.name, "asc"],
             ),
           )
@@ -356,7 +366,8 @@ const layer = Layer.effect(
         })
 
         const defaultAgent = Effect.fnUntraced(function* () {
-          return (yield* defaultInfo()).name
+          const agent = yield* defaultInfo()
+          return agent.id ?? agent.name
         })
 
         return {
@@ -413,12 +424,10 @@ const layer = Layer.effect(
           messages: [
             ...(isOpenaiOauth
               ? []
-              : system.map(
-                  (item): ModelMessage => ({
-                    role: "system",
-                    content: item,
-                  }),
-                )),
+              : system.map((item): ModelMessage => ({
+                  role: "system",
+                  content: item,
+                }))),
             {
               role: "user",
               content: `Create an agent configuration based on this request: "${input.description}".\n\nIMPORTANT: The following identifiers already exist and must NOT be used: ${existing.map((i) => i.name).join(", ")}\n  Return ONLY the JSON object, no other text, do not wrap in backticks`,

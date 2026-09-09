@@ -18,6 +18,8 @@ const presentation: ApprovalPresentation = {
   validationHash: "validation-v3-hash",
   contextHash: "context-v3-hash",
   policyHash: "policy-v3-hash",
+  taskHash: "task-v3-hash",
+  intent: { subagentType: "general", prompt: "Implement bounded scoped retrieval.", model: "test/model" },
   methodVersion: "maestro-v2",
   plan: "Implement bounded scoped retrieval.",
   provenance: "request msg_before; validation val_v3",
@@ -30,6 +32,7 @@ function message(input: Partial<ApprovalMessage> & Pick<ApprovalMessage, "id" | 
   return {
     sessionID: "ses_01",
     text: "",
+    synthetic: false,
     ...input,
   }
 }
@@ -79,6 +82,7 @@ describe("Maestro approval", () => {
       validationHash: presentation.validationHash,
       contextHash: presentation.contextHash,
       policyHash: presentation.policyHash,
+      taskHash: presentation.taskHash,
       methodVersion: presentation.methodVersion,
       outcome: "APPROVED",
       time: { created: 123 },
@@ -91,7 +95,9 @@ describe("Maestro approval", () => {
   })
 
   test("keeps questions and sentiment pending", () => {
-    expect(evaluate(message({ id: "msg_question", seq: 3, role: "user", text: "what changes after approval?" }))).toEqual({
+    expect(
+      evaluate(message({ id: "msg_question", seq: 3, role: "user", text: "what changes after approval?" })),
+    ).toEqual({
       status: "PENDING",
       kind: "question",
     })
@@ -110,10 +116,18 @@ describe("Maestro approval", () => {
     }
   })
 
+  test("mutation probe: synthetic user text cannot approve", () => {
+    expect(evaluate(message({ id: "msg_synthetic", seq: 3, role: "user", text: "approve", synthetic: true }))).toEqual({
+      status: "HOLD",
+      reason: "reply-synthetic",
+    })
+  })
+
   test("mutation probe: reply must follow exact visible presentation in same session", () => {
-    expect(
-      evaluate(message({ id: "msg_early", seq: 1, role: "user", text: "approve" })),
-    ).toEqual({ status: "HOLD", reason: "reply-not-after-presentation" })
+    expect(evaluate(message({ id: "msg_early", seq: 1, role: "user", text: "approve" }))).toEqual({
+      status: "HOLD",
+      reason: "reply-not-after-presentation",
+    })
     expect(
       evaluate(message({ id: "msg_other_session", seq: 3, role: "user", sessionID: "ses_02", text: "approve" })),
     ).toEqual({ status: "HOLD", reason: "reply-session-mismatch" })
@@ -171,7 +185,9 @@ describe("Maestro approval", () => {
   })
 
   test("holds when revision evidence no longer current", () => {
-    expect(evaluate(message({ id: "msg_reply", seq: 3, role: "user", text: "approve" }), { presentationCurrent: false })).toEqual({
+    expect(
+      evaluate(message({ id: "msg_reply", seq: 3, role: "user", text: "approve" }), { presentationCurrent: false }),
+    ).toEqual({
       status: "HOLD",
       reason: "presentation-not-current",
     })

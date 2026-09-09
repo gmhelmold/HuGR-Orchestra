@@ -4,6 +4,7 @@ export type ApprovalMessage = {
   seq: number
   role: "user" | "assistant" | "tool"
   text: string
+  synthetic: boolean
 }
 
 export type ComposedActor = {
@@ -23,6 +24,13 @@ export type ApprovalPresentation = {
   validationHash: string
   contextHash: string
   policyHash: string
+  taskHash: string
+  intent: {
+    subagentType: string
+    prompt: string
+    model?: string
+    taskID?: string
+  }
   methodVersion: string
   plan: string
   provenance: string
@@ -42,6 +50,7 @@ export type ApprovalDecision = {
   validationHash: string
   contextHash: string
   policyHash: string
+  taskHash: string
   methodVersion: string
   outcome: "APPROVED" | "DECLINED"
   time: { created: number }
@@ -58,6 +67,7 @@ type HoldReason =
   | "reply-not-found"
   | "reply-session-mismatch"
   | "reply-not-direct-user"
+  | "reply-synthetic"
   | "reply-not-after-presentation"
   | "reply-already-bound"
   | "presentation-identity-invalid"
@@ -73,7 +83,7 @@ export type EvaluateReplyInput = {
 }
 
 export function renderPresentation(input: ApprovalPresentation) {
-  return [
+  const fields = [
     "Maestro plan approval",
     `Plan revision: ${input.planRevisionID}`,
     `Validation record: ${input.validationRecordID}`,
@@ -93,6 +103,8 @@ export function renderPresentation(input: ApprovalPresentation) {
     `Validation hash: ${input.validationHash}`,
     `Context hash: ${input.contextHash}`,
     `Policy hash: ${input.policyHash}`,
+    `Task hash: ${input.taskHash}`,
+    `Task intent: ${JSON.stringify(input.intent)}`,
     `Method version: ${input.methodVersion}`,
     "Reply approve or aprovo to approve this exact plan. Reply decline, declino, cancel, or cancelar to decline.",
   ].join("\n")
@@ -123,10 +135,12 @@ export function evaluateReply(input: EvaluateReplyInput): ApprovalResult {
   if (!reply) return { status: "HOLD", reason: "reply-not-found" }
   if (reply.sessionID !== input.presentation.sessionID) return { status: "HOLD", reason: "reply-session-mismatch" }
   if (reply.role !== "user") return { status: "HOLD", reason: "reply-not-direct-user" }
+  if (reply.synthetic) return { status: "HOLD", reason: "reply-synthetic" }
   if (reply.seq <= presentationMessage.seq) return { status: "HOLD", reason: "reply-not-after-presentation" }
 
   const existing = input.decisions.find(
-    (decision) => decision.approvalMessageID === reply.id && decision.methodVersion === input.presentation.methodVersion,
+    (decision) =>
+      decision.approvalMessageID === reply.id && decision.methodVersion === input.presentation.methodVersion,
   )
   if (existing) {
     if (sameBinding(existing, input.presentation)) return { status: existing.outcome, decision: existing }
@@ -149,6 +163,7 @@ export function evaluateReply(input: EvaluateReplyInput): ApprovalResult {
       validationHash: input.presentation.validationHash,
       contextHash: input.presentation.contextHash,
       policyHash: input.presentation.policyHash,
+      taskHash: input.presentation.taskHash,
       methodVersion: input.presentation.methodVersion,
       outcome,
       time: { created: input.decisionTime },
@@ -203,6 +218,7 @@ function sameBinding(decision: ApprovalDecision, presentation: ApprovalPresentat
     decision.validationHash === presentation.validationHash &&
     decision.contextHash === presentation.contextHash &&
     decision.policyHash === presentation.policyHash &&
+    decision.taskHash === presentation.taskHash &&
     decision.methodVersion === presentation.methodVersion
   )
 }
@@ -221,8 +237,14 @@ function validPresentation(presentation: ApprovalPresentation) {
     presentation.validationHash,
     presentation.contextHash,
     presentation.policyHash,
+    presentation.taskHash,
+    presentation.intent.subagentType,
+    presentation.intent.prompt,
     presentation.methodVersion,
-  ].every((field) => field.trim().length > 0)
+  ]
+  if (presentation.intent.model !== undefined) fields.push(presentation.intent.model)
+  if (presentation.intent.taskID !== undefined) fields.push(presentation.intent.taskID)
+  return fields.every((field) => field.trim().length > 0)
 }
 
 function validDecisionTime(time: number) {

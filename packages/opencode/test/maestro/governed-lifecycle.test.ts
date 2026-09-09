@@ -27,6 +27,7 @@ import { MaestroEvent } from "@opencode-ai/schema/maestro-event"
 import { recordAdmission } from "../../src/maestro/admission-record"
 import { presentApprovalFromSession, recordApproval } from "../../src/maestro/approval-record"
 import { renderPresentation } from "../../src/maestro/approval"
+import { taskHash } from "../../src/maestro/task-hash"
 
 afterEach(async () => {
   await disposeAllInstances()
@@ -151,6 +152,17 @@ describe("Maestro governed lifecycle", () => {
         validationHash: "validation-hash",
         contextHash: "context-hash",
         policyHash: "policy-hash",
+        taskHash: taskHash({
+          subagentType: "general",
+          prompt: "implement dark mode",
+          planRevisionID: "plan_v1",
+          revisionHash: "revision-hash",
+          validationRecordID: "val_v1",
+          validationHash: "validation-hash",
+          contextHash: "context-hash",
+          policyHash: "policy-hash",
+        }),
+        intent: { subagentType: "general", prompt: "implement dark mode" },
         methodVersion: "request-approval-v1",
         plan: "Add dark mode to settings.",
         provenance: `request ${user.id}`,
@@ -225,11 +237,13 @@ describe("Maestro governed lifecycle", () => {
             validationHash: approval.decision.validationHash,
             contextHash: approval.decision.contextHash,
             policyHash: approval.decision.policyHash,
+            taskHash: approval.decision.taskHash,
           },
         },
         {
           sessionID: chat.id,
           messageID: dispatchMessage.id,
+          callID: "call_task_01",
           agent: "maestro",
           abort: new AbortController().signal,
           extra: { promptOps: stubOps() },
@@ -282,11 +296,13 @@ describe("Maestro governed lifecycle", () => {
               validationHash: "val-hash",
               contextHash: "context-hash",
               policyHash: "policy-hash",
+              taskHash: "task-hash",
             },
           },
           {
             sessionID: chat.id,
             messageID: assistant.id,
+            callID: "call_task_missing",
             agent: "maestro",
             abort: new AbortController().signal,
             extra: { promptOps: stubOps() },
@@ -316,12 +332,45 @@ describe("Maestro governed lifecycle", () => {
         validationHash: "val-hash",
         contextHash: "context-hash",
         policyHash: "policy-hash",
+        taskHash: taskHash({
+          subagentType: "general",
+          prompt: "implement dark mode",
+          planRevisionID: "plan_v1",
+          revisionHash: "rev-hash",
+          validationRecordID: "val_01",
+          validationHash: "val-hash",
+          contextHash: "context-hash",
+          policyHash: "policy-hash",
+        }),
       }
+      yield* events.publish(MaestroEvent.Approval.Presented, {
+        id: "apr_01",
+        sessionID: chat.id,
+        assistantMessageID: assistant.id,
+        callID: "call_present",
+        planRevisionID: governed.planRevisionID,
+        validationRecordID: governed.validationRecordID,
+        projectID: governed.projectID,
+        memberID: governed.memberID,
+        revisionHash: governed.revisionHash,
+        validationHash: governed.validationHash,
+        contextHash: governed.contextHash,
+        policyHash: governed.policyHash,
+        taskHash: governed.taskHash,
+        intent: { subagentType: "general", prompt: "implement dark mode" },
+        methodVersion: "request-approval-v1",
+        plan: "implement dark mode",
+        provenance: "test",
+        assumptions: [],
+        validationLedger: "VALID",
+        contextState: "CURRENT",
+      })
       yield* events.publish(MaestroEvent.Approval.Decided, {
         ...governed,
         presentationID: "apr_01",
         presentationMessageID: "msg_presentation",
         methodVersion: "request-approval-v1",
+        taskHash: governed.taskHash,
         outcome: "APPROVED",
         decisionTime: Date.now(),
       })
@@ -337,6 +386,7 @@ describe("Maestro governed lifecycle", () => {
         {
           sessionID: chat.id,
           messageID: assistant.id,
+          callID: "call_task_exact",
           agent: "maestro",
           abort: new AbortController().signal,
           extra: { promptOps: stubOps() },

@@ -279,13 +279,13 @@ const layer = Layer.effect(
     ) {
       const items = (yield* agents.list()).filter((item) => item.mode !== "primary")
       const filtered = items.filter(
-        (item) => Permission.evaluate("task", item.name, agent.permission).action !== "deny",
+        (item) => Permission.evaluate("task", item.id ?? item.name, agent.permission).action !== "deny",
       )
-      const list = filtered.toSorted((a, b) => a.name.localeCompare(b.name))
+      const list = filtered.toSorted((a, b) => (a.id ?? a.name).localeCompare(b.id ?? b.name))
       const description = list
         .map(
           (item) =>
-            `- ${item.name}: ${item.description ?? "This subagent should only be called manually by the user."}`,
+            `- ${item.id ?? item.name}: ${item.description ?? "This subagent should only be called manually by the user."}`,
         )
         .join("\n")
       const sections = ["Available agent types and the tools they have access to:", description]
@@ -319,7 +319,7 @@ const layer = Layer.effect(
           (tool.id === MaestroPresentApprovalTool.id ||
             tool.id === MaestroRecordApprovalTool.id ||
             tool.id === MaestroRecordAdmissionTool.id) &&
-          input.agent.name !== "maestro"
+          input.agent.id !== "maestro"
         ) {
           return false
         }

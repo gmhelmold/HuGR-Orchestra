@@ -21,6 +21,13 @@ export namespace Approval {
       validationHash: Schema.String,
       contextHash: Schema.String,
       policyHash: Schema.String,
+      taskHash: Schema.String,
+      intent: Schema.Struct({
+        subagentType: Schema.String,
+        prompt: Schema.String,
+        model: Schema.optional(Schema.String),
+        taskID: Schema.optional(Schema.String),
+      }),
       methodVersion: Schema.String,
       plan: Schema.String,
       provenance: Schema.String,
@@ -47,12 +54,26 @@ export namespace Approval {
       validationHash: Schema.String,
       contextHash: Schema.String,
       policyHash: Schema.String,
+      taskHash: Schema.String,
       methodVersion: Schema.String,
       outcome: Schema.Literals(["APPROVED", "DECLINED"]),
       decisionTime: NonNegativeInt,
     },
   })
   export type Decided = typeof Decided.Type
+
+  export const Consumed = Event.define({
+    type: "maestro.approval.consumed",
+    durable: { version: 1, aggregate: "sessionID" },
+    schema: {
+      sessionID: Schema.String,
+      presentationID: Schema.String,
+      approvalMessageID: Schema.String,
+      taskHash: Schema.String,
+      callID: Schema.String,
+    },
+  })
+  export type Consumed = typeof Consumed.Type
 }
 
 export namespace Admission {
@@ -92,4 +113,4 @@ export namespace Admission {
   export type Decided = typeof Decided.Type
 }
 
-export const Definitions = Event.inventory(Approval.Presented, Approval.Decided, Admission.Decided)
+export const Definitions = Event.inventory(Approval.Presented, Approval.Decided, Approval.Consumed, Admission.Decided)

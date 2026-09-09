@@ -20,6 +20,9 @@ import { EventTable } from "@opencode-ai/core/event/sql"
 import { MaestroEvent } from "@opencode-ai/schema/maestro-event"
 import { and, asc, eq } from "drizzle-orm"
 import { verifyGovernedTask } from "@/maestro/governed-task"
+import { taskHash } from "@/maestro/task-hash"
+import { createHash } from "node:crypto"
+import { EventV2Bridge } from "@/event-v2-bridge"
 
 export interface TaskPromptOps {
   cancel(sessionID: SessionID): Effect.Effect<void>
@@ -71,6 +74,7 @@ const BaseParameterFields = {
       validationHash: Schema.String,
       contextHash: Schema.String,
       policyHash: Schema.String,
+      taskHash: Schema.String,
     }),
   ).annotate({
     description: "Exact approval binding required only for an explicit governed Task.",
@@ -128,10 +132,36 @@ export const TaskTool = Tool.define(
       }
 
       const parent = yield* sessions.get(ctx.sessionID)
+      const next = yield* agent.get(params.subagent_type)
+      if (!next) {
+        return yield* Effect.fail(new Error(`Unknown agent type: ${params.subagent_type} is not a valid agent type`))
+      }
+      const nextID = next.id ?? params.subagent_type
+      const resumed = params.task_id
+        ? yield* sessions.get(SessionID.make(params.task_id)).pipe(Effect.catchCause(() => Effect.succeed(undefined)))
+        : undefined
+      if (resumed && (resumed.parentID !== ctx.sessionID || resumed.agent !== nextID)) {
+        return yield* Effect.fail(new Error("Task resume denied: task is not direct child for selected agent"))
+      }
       if (params.governed) {
-        if (ctx.agent !== "maestro") return yield* Effect.fail(new Error("Governed Task requires Maestro"))
+        const caller = yield* agent.get(ctx.agent)
+        if (caller?.id !== "maestro") return yield* Effect.fail(new Error("Governed Task requires Maestro"))
+        if (!ctx.callID) return yield* Effect.fail(new Error("Governed Task denied: missing-call-id"))
         if (params.governed.sessionID !== ctx.sessionID || params.governed.projectID !== parent.projectID) {
           return yield* Effect.fail(new Error("Governed Task denied: request-context-mismatch"))
+        }
+        if (params.governed.memberID !== caller.id) {
+          return yield* Effect.fail(new Error("Governed Task denied: request-actor-mismatch"))
+        }
+        const expectedTaskHash = taskHash({
+          subagentType: params.subagent_type,
+          prompt: params.prompt,
+          model: params.model,
+          taskID: params.task_id,
+          ...params.governed,
+        })
+        if (params.governed.taskHash !== expectedTaskHash) {
+          return yield* Effect.fail(new Error("Governed Task denied: task-hash-mismatch"))
         }
         const decisions = yield* database.db
           .select({ data: EventTable.data })
@@ -145,11 +175,85 @@ export const TaskTool = Tool.define(
           .orderBy(asc(EventTable.seq))
           .all()
           .pipe(Effect.orDie)
+        const presentations = yield* database.db
+          .select({ data: EventTable.data, seq: EventTable.seq })
+          .from(EventTable)
+          .where(
+            and(
+              eq(EventTable.aggregate_id, params.governed.sessionID),
+              eq(EventTable.type, EventV2.versionedType(MaestroEvent.Approval.Presented.type, 1)),
+            ),
+          )
+          .orderBy(asc(EventTable.seq))
+          .all()
+          .pipe(Effect.orDie)
+        const decisionEvents = decisions.map((decision) =>
+          Schema.decodeUnknownSync(MaestroEvent.Approval.Decided.data)(decision.data),
+        )
+        const newestPresentationID = presentations.at(-1)
+          ? Schema.decodeUnknownSync(MaestroEvent.Approval.Presented.data)(presentations.at(-1)!.data).id
+          : undefined
         const verdict = verifyGovernedTask({
           request: params.governed,
-          decisions: decisions.map((decision) => Schema.decodeUnknownSync(MaestroEvent.Approval.Decided.data)(decision.data)),
+          decisions: decisionEvents,
+          newestPresentationID,
         })
-        if (verdict.status !== "APPROVED") return yield* Effect.fail(new Error(`Governed Task denied: ${verdict.reason}`))
+        if (verdict.status !== "APPROVED")
+          return yield* Effect.fail(new Error(`Governed Task denied: ${verdict.reason}`))
+        const consumed = yield* database.db
+          .select({ data: EventTable.data })
+          .from(EventTable)
+          .where(
+            and(
+              eq(EventTable.aggregate_id, params.governed.sessionID),
+              eq(EventTable.type, EventV2.versionedType(MaestroEvent.Approval.Consumed.type, 1)),
+            ),
+          )
+          .all()
+          .pipe(Effect.orDie)
+        if (
+          consumed.some((event) => {
+            const data = Schema.decodeUnknownSync(MaestroEvent.Approval.Consumed.data)(event.data)
+            return (
+              data.presentationID ===
+                decisionEvents.find(
+                  (decision) =>
+                    decision.approvalMessageID === params.governed!.approvalMessageID &&
+                    decision.taskHash === params.governed!.taskHash,
+                )?.presentationID &&
+              data.approvalMessageID === params.governed.approvalMessageID &&
+              data.taskHash === params.governed.taskHash
+            )
+          })
+        ) {
+          return yield* Effect.fail(new Error("Governed Task denied: approval-consumed"))
+        }
+        const consumeID = EventV2.ID.make(
+          `evt_maestro_approval_consumed_${createHash("sha256")
+            .update(
+              [params.governed.sessionID, params.governed.approvalMessageID, params.governed.taskHash, ctx.callID].join(
+                "\u0000",
+              ),
+            )
+            .digest("hex")}`,
+        )
+        const events = yield* EventV2Bridge.Service
+        yield* events.publish(
+          MaestroEvent.Approval.Consumed,
+          {
+            sessionID: params.governed.sessionID,
+            presentationID:
+              decisionEvents.find(
+                (decision) =>
+                  decision.approvalMessageID === params.governed!.approvalMessageID &&
+                  decision.taskHash === params.governed!.taskHash,
+              )?.presentationID ?? "",
+            approvalMessageID: params.governed.approvalMessageID,
+            taskHash: params.governed.taskHash,
+            callID: ctx.callID,
+          },
+          { id: consumeID },
+        )
       }
       let current = parent
       let depth = 0
@@ -163,11 +267,6 @@ export const TaskTool = Tool.define(
             `Subagent depth limit reached (${cfg.subagent_depth ?? 1}). Increase "subagent_depth" to allow nested subagents.`,
           ),
         )
-      }
-
-      const next = yield* agent.get(params.subagent_type)
-      if (!next) {
-        return yield* Effect.fail(new Error(`Unknown agent type: ${params.subagent_type} is not a valid agent type`))
       }
 
       const msg = yield* MessageV2.get({ sessionID: ctx.sessionID, messageID: ctx.messageID }).pipe(
@@ -208,8 +307,7 @@ export const TaskTool = Tool.define(
       if (!ctx.extra?.bypassAgentCheck) {
         yield* ctx.ask({
           permission: id,
-          patterns:
-            modelRules.length > 0 ? [params.subagent_type, modelPattern] : [params.subagent_type],
+          patterns: modelRules.length > 0 ? [params.subagent_type, modelPattern] : [params.subagent_type],
           always: ["*"],
           metadata: {
             description: params.description,
@@ -219,9 +317,7 @@ export const TaskTool = Tool.define(
         })
       }
 
-      const session = params.task_id
-        ? yield* sessions.get(SessionID.make(params.task_id)).pipe(Effect.catchCause(() => Effect.succeed(undefined)))
-        : undefined
+      const session = resumed
       const childPermission = deriveSubagentSessionPermission({
         parentSessionPermission: parent.permission ?? [],
         subagent: next,
@@ -244,7 +340,7 @@ export const TaskTool = Tool.define(
         (yield* sessions.create({
           parentID: ctx.sessionID,
           title: params.description + ` (@${next.name} subagent)`,
-          agent: next.name,
+          agent: nextID,
           permission: [
             ...childPermission,
             ...childToolDenies.filter(
@@ -282,7 +378,7 @@ export const TaskTool = Tool.define(
             providerID: model.providerID,
           },
           variant: next.model || explicitModel ? undefined : variant,
-          agent: next.name,
+          agent: nextID,
           parts,
         })
         if (result.info.role === "assistant" && result.info.error) {

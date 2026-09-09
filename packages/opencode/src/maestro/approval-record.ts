@@ -42,11 +42,15 @@ function hash(parts: readonly string[]) {
 }
 
 function presentationEventID(input: Pick<PresentApprovalInput, "sessionID" | "assistantMessageID" | "callID">) {
-  return EventV2.ID.make(`evt_maestro_approval_presentation_${hash([input.sessionID, input.assistantMessageID, input.callID])}`)
+  return EventV2.ID.make(
+    `evt_maestro_approval_presentation_${hash([input.sessionID, input.assistantMessageID, input.callID])}`,
+  )
 }
 
 function decisionEventID(input: Pick<ApprovalDecision, "sessionID" | "approvalMessageID" | "methodVersion">) {
-  return EventV2.ID.make(`evt_maestro_approval_decision_${hash([input.sessionID, input.approvalMessageID, input.methodVersion])}`)
+  return EventV2.ID.make(
+    `evt_maestro_approval_decision_${hash([input.sessionID, input.approvalMessageID, input.methodVersion])}`,
+  )
 }
 
 function presentationFromEvent(input: PresentedData): ApprovalPresentation {
@@ -61,6 +65,8 @@ function presentationFromEvent(input: PresentedData): ApprovalPresentation {
     validationHash: input.validationHash,
     contextHash: input.contextHash,
     policyHash: input.policyHash,
+    taskHash: input.taskHash,
+    intent: input.intent,
     methodVersion: input.methodVersion,
     plan: input.plan,
     provenance: input.provenance,
@@ -82,6 +88,7 @@ function decisionFromEvent(input: DecidedData): ApprovalDecision {
     validationHash: input.validationHash,
     contextHash: input.contextHash,
     policyHash: input.policyHash,
+    taskHash: input.taskHash,
     methodVersion: input.methodVersion,
     outcome: input.outcome,
     time: { created: input.decisionTime },
@@ -92,10 +99,7 @@ function text(parts: ReadonlyArray<{ type: string; text?: string }>) {
   return parts.flatMap((part) => (part.type === "text" ? [part.text ?? ""] : [])).join("")
 }
 
-function visiblePresentation(input: {
-  presentation: PresentedData
-  message: SessionV1.WithParts | undefined
-}) {
+function visiblePresentation(input: { presentation: PresentedData; message: SessionV1.WithParts | undefined }) {
   const { presentation, message } = input
   return (
     message?.info.role === "assistant" &&
@@ -125,6 +129,8 @@ export const presentApproval = Effect.fn("MaestroApproval.present")(function* (i
     validationHash: input.validationHash,
     contextHash: input.contextHash,
     policyHash: input.policyHash,
+    taskHash: input.taskHash,
+    intent: input.intent,
     methodVersion: input.methodVersion,
     plan: input.plan,
     provenance: input.provenance,
@@ -141,7 +147,10 @@ export const presentApproval = Effect.fn("MaestroApproval.present")(function* (i
     .pipe(Effect.orDie)
   if (existing) {
     const recorded = Schema.decodeUnknownSync(MaestroEvent.Approval.Presented.data)(existing.data)
-    if (existing.type === EventV2.versionedType(MaestroEvent.Approval.Presented.type, 1) && isDeepStrictEqual(recorded, presentation)) {
+    if (
+      existing.type === EventV2.versionedType(MaestroEvent.Approval.Presented.type, 1) &&
+      isDeepStrictEqual(recorded, presentation)
+    ) {
       return presentationFromEvent(recorded)
     }
     return yield* new ApprovalConflictError(input)
@@ -185,7 +194,9 @@ export const recordApproval = Effect.fn("MaestroApproval.record")(function* (ses
   const presentations = presented.map(presentationFromEvent)
   const conversation: ApprovalMessage[] = messages
     .filter((message) => message.info.role === "user" || message.info.role === "assistant")
-    .sort((left, right) => left.info.time.created - right.info.time.created || left.info.id.localeCompare(right.info.id))
+    .sort(
+      (left, right) => left.info.time.created - right.info.time.created || left.info.id.localeCompare(right.info.id),
+    )
     .map((message, index) => {
       const presentation = presentations.find((item) => item.assistantMessageID === message.info.id)
       return {
@@ -193,14 +204,19 @@ export const recordApproval = Effect.fn("MaestroApproval.record")(function* (ses
         sessionID: message.info.sessionID,
         seq: index,
         role: message.info.role,
-        text:
-          presentation && visible.get(message.info.id) ? renderPresentation(presentation) : text(message.parts),
+        text: presentation && visible.get(message.info.id) ? renderPresentation(presentation) : text(message.parts),
+        synthetic: message.parts.some((part) => "synthetic" in part && part.synthetic === true),
       }
     })
   const reply = conversation.findLast((message) => message.role === "user")
   const current = presentations
-    .map((presentation) => ({ presentation, message: conversation.find((message) => message.id === presentation.assistantMessageID) }))
-    .filter((item): item is { presentation: ApprovalPresentation; message: ApprovalMessage } => item.message !== undefined)
+    .map((presentation) => ({
+      presentation,
+      message: conversation.find((message) => message.id === presentation.assistantMessageID),
+    }))
+    .filter(
+      (item): item is { presentation: ApprovalPresentation; message: ApprovalMessage } => item.message !== undefined,
+    )
     .sort((left, right) => right.message.seq - left.message.seq || right.message.id.localeCompare(left.message.id))[0]
   if (!reply) return { status: "HOLD", reason: "reply-not-found" } as const
   if (!current) return { status: "HOLD", reason: "presentation-not-current" } as const
@@ -241,6 +257,7 @@ export const recordApproval = Effect.fn("MaestroApproval.record")(function* (ses
       validationHash: result.decision.validationHash,
       contextHash: result.decision.contextHash,
       policyHash: result.decision.policyHash,
+      taskHash: result.decision.taskHash,
       methodVersion: result.decision.methodVersion,
       outcome: result.decision.outcome,
       decisionTime: result.decision.time.created,

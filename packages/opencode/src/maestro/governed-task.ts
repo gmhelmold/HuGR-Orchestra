@@ -9,10 +9,12 @@ export type GovernedTaskRequest = {
   validationHash: string
   contextHash: string
   policyHash: string
+  taskHash: string
 }
 
 export type ApprovalDecisionEvent = GovernedTaskRequest & {
   presentationMessageID: string
+  presentationID: string
   validationRecordID: string
   validationHash: string
   contextHash: string
@@ -23,7 +25,8 @@ export type ApprovalDecisionEvent = GovernedTaskRequest & {
 export function verifyGovernedTask(input: {
   request: GovernedTaskRequest
   decisions: readonly ApprovalDecisionEvent[]
-}): { status: "APPROVED" } | { status: "HOLD"; reason: "approval-missing" | "approval-ambiguous" } {
+  newestPresentationID?: string
+}): { status: "APPROVED" } | { status: "HOLD"; reason: "approval-missing" | "approval-ambiguous" | "approval-stale" } {
   const matches = input.decisions.filter(
     (decision) =>
       decision.sessionID === input.request.sessionID &&
@@ -35,11 +38,15 @@ export function verifyGovernedTask(input: {
       decision.validationRecordID === input.request.validationRecordID &&
       decision.validationHash === input.request.validationHash &&
       decision.contextHash === input.request.contextHash &&
-      decision.policyHash === input.request.policyHash,
+      decision.policyHash === input.request.policyHash &&
+      decision.taskHash === input.request.taskHash,
   )
   if (matches.length === 0) return { status: "HOLD", reason: "approval-missing" }
   if (matches.length !== 1 || matches[0]?.outcome !== "APPROVED") {
     return { status: "HOLD", reason: "approval-ambiguous" }
+  }
+  if (input.newestPresentationID !== undefined && matches[0].presentationID !== input.newestPresentationID) {
+    return { status: "HOLD", reason: "approval-stale" }
   }
   return { status: "APPROVED" }
 }

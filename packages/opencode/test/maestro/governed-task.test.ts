@@ -16,11 +16,13 @@ const request: GovernedTaskRequest = {
   validationHash: "validation-v3-hash",
   contextHash: "context-v3-hash",
   policyHash: "policy-v3-hash",
+  taskHash: "task-v3-hash",
 }
 
 const decision: ApprovalDecisionEvent = {
   ...request,
   presentationMessageID: "msg_presentation",
+  presentationID: "apr_01",
   outcome: "APPROVED",
 }
 
@@ -44,6 +46,14 @@ describe("Maestro governed Task guard", () => {
       reason: "approval-missing",
     })
     expect(verifyGovernedTask({ request: { ...request, contextHash: "other" }, decisions: [decision] })).toEqual({
+      status: "HOLD",
+      reason: "approval-missing",
+    })
+    expect(verifyGovernedTask({ request, decisions: [decision], newestPresentationID: "apr_newer" })).toEqual({
+      status: "HOLD",
+      reason: "approval-stale",
+    })
+    expect(verifyGovernedTask({ request: { ...request, taskHash: "other" }, decisions: [decision] })).toEqual({
       status: "HOLD",
       reason: "approval-missing",
     })

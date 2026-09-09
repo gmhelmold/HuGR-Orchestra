@@ -18,7 +18,9 @@ afterEach(async () => {
   await disposeAllInstances()
 })
 
-const it = testEffect(LayerNode.compile(LayerNode.group([Database.node, EventV2Bridge.node, Session.node, SessionProjector.node])))
+const it = testEffect(
+  LayerNode.compile(LayerNode.group([Database.node, EventV2Bridge.node, Session.node, SessionProjector.node])),
+)
 
 const model = { providerID: ProviderV2.ID.make("test"), modelID: ModelV2.ID.make("test-model") }
 
@@ -60,6 +62,8 @@ function seed(presentationOutput?: (output: string) => string) {
       validationHash: "validation-hash",
       contextHash: "context-hash",
       policyHash: "policy-hash",
+      taskHash: "task-hash",
+      intent: { subagentType: "general", prompt: "Add dark mode." },
       methodVersion: "request-approval-v1",
       plan: "Add dark mode.",
       provenance: "request msg_01",
