@@ -46,11 +46,10 @@ export function createAppDock() {
     inactive.delete(`${senderID}:${tabID}`)
     inactive.set(`${senderID}:${tabID}`, { senderID, tabID })
   }
-  const remove = (senderID: number, tabID: string, win?: BrowserWindow) => {
+  const remove = (senderID: number, tabID: string) => {
     const record = tabs.get(senderID)?.get(tabID)
     if (!record) return
-    const owner = win ?? record.win
-    if (!owner.isDestroyed()) owner.contentView.removeChildView(record.view)
+    if (!record.win.isDestroyed()) record.win.contentView.removeChildView(record.view)
     inactive.delete(`${senderID}:${tabID}`)
     tabByContents.delete(record.view.webContents.id)
     record.cleanups.forEach((cleanup) => cleanup())
@@ -65,9 +64,9 @@ export function createAppDock() {
     generation++
     if (active.get(senderID) === tabID) active.delete(senderID)
   }
-  const close = (senderID: number, win?: BrowserWindow, tabID?: string) => {
+  const close = (senderID: number, _win?: BrowserWindow, tabID?: string) => {
     const ids = tabID ? [tabID] : [...(tabs.get(senderID)?.keys() ?? [])]
-    ids.forEach((id) => remove(senderID, id, win))
+    ids.forEach((id) => remove(senderID, id))
     if ((tabs.get(senderID)?.size ?? 0) === 0) tabs.delete(senderID)
   }
   const open = async (
@@ -193,9 +192,9 @@ export function createAppDock() {
       const tabID = active.get(senderID)
       if (tabID) tabs.get(senderID)?.get(tabID)?.view.setBounds(bounds)
     },
-    hide(senderID: number, win: BrowserWindow) {
+    hide(senderID: number, _win: BrowserWindow) {
       for (const [tabID, record] of tabs.get(senderID) ?? []) {
-        win.contentView.removeChildView(record.view)
+        if (!record.win.isDestroyed()) record.win.contentView.removeChildView(record.view)
         markInactive(senderID, tabID, record)
       }
       active.delete(senderID)
@@ -282,12 +281,12 @@ export function createAppDock() {
       if (!download || download.senderID !== senderID || download.state.state !== "completed") throw new Error("Unknown App Dock download")
       return shell.openPath(download.item.getSavePath())
     },
-    async deleteStorage(storageKey: string, win?: BrowserWindow) {
+    async deleteStorage(storageKey: string, _win?: BrowserWindow) {
       const partition = storagePartition(storageKey)
       if (retiredStorageKeys.has(storageKey)) throw new Error("App Dock storage key is retired")
       retiredStorageKeys.add(storageKey)
       for (const [senderID, senderTabs] of tabs) {
-        for (const [tabID, record] of senderTabs) if (record.storageKey === storageKey) remove(senderID, tabID, win ?? record.win)
+        for (const [tabID, record] of senderTabs) if (record.storageKey === storageKey) remove(senderID, tabID)
       }
       for (const [downloadID, download] of downloads) {
         if (download.storageKey === storageKey) {
