@@ -1,6 +1,19 @@
 # Maestro V2 Session State
 
-Updated: 2026-09-08. Status: active design; approval kernel implemented, no durable Maestro V2 runtime yet.
+Updated: 2026-09-09. Status: clean rebuild staged on `fork/dev`; Maestro governed runtime, Atlas Own snapshot pipeline, and CI gates integrated. No push, PR, or merge.
+
+## Recovery Snapshot
+
+- Integration worktree: `/Users/gustavoschneiter/Documents/HuGR/_worktrees/orchestra-maestro-rebuild-clean`
+- Branch: `maestro/rebuild-fork-dev-clean`; base: `fork/dev` at `46ac922a88`.
+- Canonical checkout `/Users/gustavoschneiter/Documents/HuGR/orchestra-canonical` remains on external dirty branch `perf-lazy-persist-gate`; do not modify it.
+- Clean Atlas vendor commit `e03736f521` imports Atlas `b319723` while excluding root `foundation/atlas/.atlas/**` Genesis output. `git ls-tree -r HEAD -- foundation/atlas/.atlas` returns `0`.
+- Own commits end at `4859d9effb`: snapshot provenance binds to reachable vendor commit `e03736f521`; `npm run typecheck`, materializer tests 10/10, focused Own tests 35/35, and guard tests 14/14 pass.
+- Maestro commits end at `b298eaee50`: `packages/opencode` typecheck passes; Maestro lifecycle 29/29 and task/reminders 28/28 pass.
+- Atlas baseline test expectations corrected at `44216b11fe`; three formerly failing files now pass 22/22.
+- Vendor whitespace corrected at `35d197bad8`; `git diff --check fork/dev..HEAD` passes.
+- CI/Godfile commit `4035d51621`; explicit lifecycle waiver update `46210c7e9`. `GODFILE_BASE_REF=fork/dev bun run check:godfile` reports 0 errors; Godfile tests 9/9 pass.
+- Remaining work: remove isolated `atlas-b319-baseline` worktree/branch, run independent cold review of `fork/dev..HEAD`, then push branch and open PR against `fork/dev`. Do not self-approve or merge.
 
 ## Goal
 
