@@ -33,6 +33,7 @@ const required = [
   "U24",
   "U25",
   "U26",
+  "U27",
 ]
 const root = resolve(import.meta.dir, "../..")
 const artifact = join(process.env.APP_DOCK_ARTIFACT_ROOT ?? root, "artifacts/app-dock/s1.json")
@@ -934,6 +935,76 @@ async function child() {
     pass("U24", "deleted profile tombstone survives restart and blocks old partition access")
     pass("U25", "corrupt native registry fails closed without rebind and remains unchanged")
     pass("U26", "separate profiles retain isolated storage across fresh Electron main process")
+
+    const crashed = await open(`${site.base}/ticker`, "crash-profile")
+    const crashedContents = viewContents()
+    const unaffected = await open(`${site.base}/ticker`, "unaffected-profile")
+    const unaffectedContents = viewContents()
+    await invoke(ipcWin.webContents.mainFrame, "app-dock-select", [crashed.tabID, bounds])
+    await execute("view:crash-storage-set", crashedContents, "localStorage.setItem('recovery', 'present')")
+    const u27CrashStart = await eventCount()
+    crashedContents.forcefullyCrashRenderer()
+    const crash = await waitEvent(
+      u27CrashStart,
+      (event) =>
+        event.type === "tab-crashed" &&
+        event.payload.identity.tabID === crashed.tabID &&
+        event.payload.identity.generation === crashed.generation,
+      "real selected renderer crash",
+    )
+    check(crash.payload.reason === "crashed" || crash.payload.reason === "killed", "unexpected renderer crash reason")
+    check(
+      !unaffectedContents.isDestroyed() &&
+        (await execute("view:unaffected-url", unaffectedContents, "location.href")) === `${site.base}/ticker`,
+      "other App Dock tab changed after selected renderer crash",
+    )
+    const knownContents = new Set([crashedContents.id, unaffectedContents.id])
+    const u27RecoverStart = await eventCount()
+    const recovered = await invoke(ipcWin.webContents.mainFrame, "app-dock-recover-tab", [crashed.tabID])
+    const recoveredEvent = await waitEvent(
+      u27RecoverStart,
+      (event) =>
+        event.type === "tab-recovered" &&
+        event.payload.tabID === crashed.tabID &&
+        event.payload.generation === recovered.generation,
+      "real crashed tab recovery",
+    )
+    let recoveredContents: Electron.WebContents | undefined
+    await waitFor(() => {
+      recoveredContents = webContents
+        .getAllWebContents()
+        .find((item) => item !== ipcWin.webContents && !item.isDestroyed() && !knownContents.has(item.id))
+      return recoveredContents !== undefined
+    }, "recovered App Dock WebContents")
+    check(
+      recovered.tabID === crashed.tabID &&
+        recovered.generation > crashed.generation &&
+        recovered.url === `${site.base}/ticker` &&
+        recoveredEvent.payload.url === recovered.url,
+      "recovery did not replace crashed tab identity with newer same-URL generation",
+    )
+    check(
+      attached(ipcWin, recoveredContents) &&
+        (await execute("view:recovered-url", recoveredContents, "location.href")) === `${site.base}/ticker` &&
+        (await execute("view:recovered-storage", recoveredContents, "localStorage.getItem('recovery')")) === "present",
+      "recovered selected tab is not usable with original profile",
+    )
+    await new Promise<void>((resolve) => setTimeout(resolve, 250))
+    await readEvents()
+    check(
+      !events.slice(u27RecoverStart).some((event) => {
+        const identity = event.payload?.identity ?? event.payload
+        return identity?.tabID === crashed.tabID && identity?.generation === crashed.generation
+      }),
+      "old crashed generation emitted event after recovery",
+    )
+    check(!unaffectedContents.isDestroyed(), "other App Dock tab changed during recovery")
+    await invoke(ipcWin.webContents.mainFrame, "app-dock-close-tab", [recovered.tabID])
+    await invoke(ipcWin.webContents.mainFrame, "app-dock-close-tab", [unaffected.tabID])
+    pass(
+      "U27",
+      "real selected renderer crash emits old identity; IPC recovery creates same tabID/URL/profile newer generation, selects usable view, preserves other tab, and ignores old generation events",
+    )
 
     check(
       cases.length === required.length &&
