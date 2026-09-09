@@ -109,6 +109,7 @@ export function AppsPanel() {
   let findRequestID: number | undefined
   let root: HTMLDivElement | undefined
   let host: HTMLDivElement | undefined
+  let menuElement: HTMLDivElement | undefined
   let addressInput: HTMLInputElement | undefined
   let resizeFrame: number | undefined
   let persistTimer: ReturnType<typeof setTimeout> | undefined
@@ -118,10 +119,10 @@ export function AppsPanel() {
   const profileRuntime = new Map<string, { tabs: Tab[]; active?: string; url: string }>()
   const api = () => window.api as AppDockAPI | undefined
   const capability = (name: keyof AppDockAPI) => typeof api()?.[name] === "function"
-  const closeMenu = () => {
+  const closeMenu = (restoreFocus = true) => {
     const invoker = menu()?.invoker
     setMenu(undefined)
-    requestAnimationFrame(() => invoker?.focus())
+    if (restoreFocus) requestAnimationFrame(() => invoker?.focus())
   }
   createEffect(() => {
     const currentProfile = profile()
@@ -246,6 +247,15 @@ export function AppsPanel() {
       }
     }
     window.addEventListener("keydown", onKeyDown)
+    const insideMenu = (target: EventTarget | null) => target instanceof Node && menuElement?.contains(target)
+    const onPointerDown = (event: PointerEvent) => {
+      if (menu() && !insideMenu(event.target)) closeMenu(false)
+    }
+    const onFocusIn = (event: FocusEvent) => {
+      if (menu() && !insideMenu(event.target)) closeMenu(false)
+    }
+    window.addEventListener("pointerdown", onPointerDown)
+    window.addEventListener("focusin", onFocusIn)
     const generation = ++restoreGeneration
     setSwitching(true)
     void restoreProfile(profile(), generation).finally(() => {
@@ -257,6 +267,8 @@ export function AppsPanel() {
       if (resizeFrame !== undefined) cancelAnimationFrame(resizeFrame)
       if (persistTimer) clearTimeout(persistTimer)
       window.removeEventListener("keydown", onKeyDown)
+      window.removeEventListener("pointerdown", onPointerDown)
+      window.removeEventListener("focusin", onFocusIn)
       unsubscribe?.()
       unsubscribeEvent?.()
       unsubscribePopup?.()
@@ -492,7 +504,7 @@ export function AppsPanel() {
           </div>}
          {!api() && <div class="zen-empty-state"><strong>Browser needs OpenCode Desktop.</strong><span>Native browser tabs are unavailable in web app.</span></div>}
           <div ref={host} class="zen-browser-host" />
-          {menu() && <TabMenu tab={menu()!.tab} x={menu()!.x} y={menu()!.y} canDuplicate={capability("appDockOpen")} canReload={capability("appDockCommand")} canClose={capability("appDockCloseTab")} hasOthers={tabs().length > 1} hasRight={tabs().findIndex((item) => item.id === menu()!.tab.id) < tabs().length - 1} onDuplicate={() => { void duplicateTab(menu()!.tab); closeMenu() }} onTogglePin={() => { const tab = menu()!.tab; setTabs((items) => items.map((item) => item.id === tab.id ? { ...item, pinned: !item.pinned } : item)); closeMenu() }} onReload={() => { const id = menu()!.tab.id; void api()?.appDockCommand(id, "reload"); closeMenu() }} onClose={() => { void close(menu()!.tab.id); closeMenu() }} onCloseOthers={() => { void closeTabs(menu()!.tab, "others"); closeMenu() }} onCloseRight={() => { void closeTabs(menu()!.tab, "right"); closeMenu() }} />}
+          {menu() && <TabMenu tab={menu()!.tab} x={menu()!.x} y={menu()!.y} setElement={(element) => menuElement = element} canDuplicate={capability("appDockOpen")} canReload={capability("appDockCommand")} canClose={capability("appDockCloseTab")} hasOthers={tabs().length > 1} hasRight={tabs().findIndex((item) => item.id === menu()!.tab.id) < tabs().length - 1} onDuplicate={() => { void duplicateTab(menu()!.tab); closeMenu() }} onTogglePin={() => { const tab = menu()!.tab; setTabs((items) => items.map((item) => item.id === tab.id ? { ...item, pinned: !item.pinned } : item)); closeMenu() }} onReload={() => { const id = menu()!.tab.id; void api()?.appDockCommand(id, "reload"); closeMenu() }} onClose={() => { void close(menu()!.tab.id); closeMenu() }} onCloseOthers={() => { void closeTabs(menu()!.tab, "others"); closeMenu() }} onCloseRight={() => { void closeTabs(menu()!.tab, "right"); closeMenu() }} />}
       </main>
     </div>
   )
@@ -528,9 +540,9 @@ function TabButton(props: {
   return <button class={`zen-tab ${props.active() === props.tab.id ? "is-active" : ""}`} type="button" role="tab" tabindex={props.active() === props.tab.id ? 0 : -1} aria-selected={props.active() === props.tab.id} onClick={() => props.select(props.tab)} onContextMenu={(event) => { event.preventDefault(); openMenu(event.clientX, event.clientY, event.currentTarget) }} onKeyDown={keydown}><span class={`zen-tab-icon ${props.tab.loading ? "is-loading" : ""}`}>{props.tab.favicon ? <img src={props.tab.favicon} alt="" /> : new URL(props.tab.url).hostname.slice(0, 1).toUpperCase()}</span><span class="zen-tab-title">{tabLabel(props.tab)}</span>{props.tab.pinned ? "Pinned" : ""}{props.tab.audible && <span class="zen-tab-audio">&#9835;</span>}</button>
 }
 
-function TabMenu(props: { tab: Tab; x: number; y: number; canDuplicate: boolean; canReload: boolean; canClose: boolean; hasOthers: boolean; hasRight: boolean; onDuplicate: () => void; onTogglePin: () => void; onReload: () => void; onClose: () => void; onCloseOthers: () => void; onCloseRight: () => void }) {
+function TabMenu(props: { tab: Tab; x: number; y: number; setElement: (element: HTMLDivElement) => void; canDuplicate: boolean; canReload: boolean; canClose: boolean; hasOthers: boolean; hasRight: boolean; onDuplicate: () => void; onTogglePin: () => void; onReload: () => void; onClose: () => void; onCloseOthers: () => void; onCloseRight: () => void }) {
   let firstItem: HTMLButtonElement | undefined
-  return <div class="zen-tab-menu" role="menu" aria-label={`Actions for ${tabLabel(props.tab)}`} style={{ left: `${props.x}px`, top: `${props.y}px` }}>
+  return <div ref={props.setElement} class="zen-tab-menu" role="menu" aria-label={`Actions for ${tabLabel(props.tab)}`} style={{ left: `${props.x}px`, top: `${props.y}px` }}>
     <button ref={(element) => { firstItem = element; requestAnimationFrame(() => firstItem?.focus()) }} type="button" role="menuitem" disabled={!props.canDuplicate} onClick={props.onDuplicate}>Duplicate</button>
     <button type="button" role="menuitem" onClick={props.onTogglePin}>{props.tab.pinned ? "Unpin" : "Pin"}</button>
     <button type="button" role="menuitem" disabled={!props.canReload} onClick={props.onReload}>Reload</button>
