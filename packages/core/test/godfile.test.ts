@@ -95,6 +95,32 @@ describe("godfile", () => {
     )
   })
 
+  test("marks a valid waiver used when unchanged legacy handling accepts the file", () => {
+    const cwd = repo()
+    writeFileSync(
+      join(cwd, "godfile-waivers.json"),
+      JSON.stringify({
+        waivers: {
+          "legacy.ts": {
+            maximumLines: HARD_LIMIT_LOC + 1,
+            reason: "Human-authorized legacy exception",
+            authorizedBy: "stakeholder",
+            authorizedAt: "2026-09-08",
+          },
+        },
+      }),
+    )
+
+    const report = runGodfileGate({ cwd, baseRef: "HEAD" })
+    expect(report.errors).toEqual([])
+    expect(report.warnings).toContainEqual({
+      file: "legacy.ts",
+      lines: HARD_LIMIT_LOC + 1,
+      baseLines: HARD_LIMIT_LOC + 1,
+      kind: "legacy",
+    })
+  })
+
   test("fails a stale or malformed waiver ledger", () => {
     const cwd = repo()
     writeFileSync(join(cwd, "godfile-waivers.json"), JSON.stringify({ waivers: {} }))

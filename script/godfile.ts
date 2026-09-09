@@ -131,14 +131,14 @@ export function runGodfileGate(input: { cwd: string; baseRef: string }): Report 
     }
 
     const baseLines = baseFileLoc(input.cwd, base, file)
+    const waiver = waiverLedger.entries[file]
+    if (waiver && baseLines !== undefined) seenWaivers.add(file)
     if (baseLines !== undefined && lines <= baseLines) {
       warnings.push({ file, lines, baseLines, kind: "legacy" })
       continue
     }
 
-    const waiver = waiverLedger.entries[file]
     if (waiver && baseLines !== undefined) {
-      seenWaivers.add(file)
       if (lines <= waiver.maximumLines) {
         warnings.push({ file, lines, baseLines, kind: "waiver", reason: waiver.reason })
         continue
