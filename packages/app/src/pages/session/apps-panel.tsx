@@ -11,6 +11,7 @@ type AppDockAPI = {
   appDockSelect: (id: string, bounds: Bounds) => Promise<void>
   appDockNavigate: (id: string, url: string) => Promise<void>
   appDockCommand: (id: string, command: "back" | "forward" | "reload") => Promise<void>
+  appDockEvent?: (callback: (event: AppDockEvent) => void) => () => void
   appDockState: (callback: (state: { id: string; url: string; title: string; favicon?: string; loading: boolean; audible: boolean; error?: string }) => void) => () => void
   appDockTabOpened: (callback: (tab: { id: string; url: string }) => void) => () => void
   appDockFind: (id: string, text: string, forward: boolean) => Promise<number>
@@ -23,6 +24,9 @@ type AppDockAPI = {
   appDockFullscreen: (id: string, enabled: boolean) => Promise<void>
   appDockFullscreenChanged: (callback: (state: { tabID: string; enabled: boolean }) => void) => () => void
 }
+type AppDockEvent =
+  | { type: "state"; payload: { tabID: string; url: string; title: string; favicon?: string; loading: boolean; audible: boolean } }
+  | { type: "navigation-error"; payload: { identity: { tabID: string }; code: "blocked" | "failed"; url: string } }
 type Tab = { id: string; url: string; title?: string; favicon?: string; loading?: boolean; audible?: boolean; pinned?: boolean }
 type Profile = { id: string; name: string }
 type Bookmark = { url: string; title: string }
@@ -31,6 +35,7 @@ type Download = { id: string; tabID: string; filename: string; receivedBytes: nu
 
 const profilesKey = "opencode.app-dock.profiles"
 const activeProfileKey = "opencode.app-dock.profile"
+const sidebarCollapsedKey = "opencode.app-dock.sidebar-collapsed"
 const profileTabsKey = (profile: string) => `opencode.app-dock.tabs.${profile}`
 const profileBookmarksKey = (profile: string) => `opencode.app-dock.bookmarks.${profile}`
 const profileHistoryKey = (profile: string) => `opencode.app-dock.history.${profile}`
@@ -88,6 +93,7 @@ export function AppsPanel() {
   const [tabs, setTabs] = createSignal<Tab[]>(storedTabs(profile()).map((tab, index) => ({ ...tab, id: `restore-${index}` })))
   const [active, setActive] = createSignal<string>()
   const [error, setError] = createSignal<string>()
+  const [navigationError, setNavigationError] = createSignal<{ tabID: string; url: string }>()
   const [bookmarks, setBookmarks] = createSignal<Bookmark[]>(storedList(profileBookmarksKey(profile())))
   const [history, setHistory] = createSignal<HistoryEntry[]>(storedList(profileHistoryKey(profile())))
   const [libraryOpen, setLibraryOpen] = createSignal<"bookmarks" | "history">()
@@ -97,6 +103,8 @@ export function AppsPanel() {
   const [downloads, setDownloads] = createSignal<Download[]>([])
   const [downloadsOpen, setDownloadsOpen] = createSignal(false)
   const [fullscreen, setFullscreen] = createSignal(false)
+  const [sidebarCollapsed, setSidebarCollapsed] = createSignal(localStorage.getItem(sidebarCollapsedKey) === "true")
+  const [menu, setMenu] = createSignal<{ tab: Tab; x: number; y: number; invoker: HTMLButtonElement }>()
   let findRequestID: number | undefined
   let host: HTMLDivElement | undefined
   let addressInput: HTMLInputElement | undefined
@@ -107,6 +115,12 @@ export function AppsPanel() {
   let disposed = false
   const profileRuntime = new Map<string, { tabs: Tab[]; active?: string; url: string }>()
   const api = () => window.api as AppDockAPI | undefined
+  const capability = (name: keyof AppDockAPI) => typeof api()?.[name] === "function"
+  const closeMenu = () => {
+    const invoker = menu()?.invoker
+    setMenu(undefined)
+    requestAnimationFrame(() => invoker?.focus())
+  }
   createEffect(() => {
     const currentProfile = profile()
     const value = JSON.stringify(tabs().map(({ id, loading, audible, ...tab }) => tab))
@@ -153,12 +167,17 @@ export function AppsPanel() {
     }
   }
   onMount(() => {
-    const unsubscribe = api()?.appDockState?.((state) => {
+    const applyState = (state: { id: string; url: string; title: string; favicon?: string; loading: boolean; audible: boolean; error?: string }) => {
        const known = tabs().some((tab) => tab.id === state.id)
        if (!known) return
        setTabs((items) => items.map((tab) => tab.id === state.id ? { ...tab, ...state } : tab))
        if (state.id === active()) setURL(state.url)
-       if (state.id === active()) setError(state.error)
+        if (state.id === active() && state.error) setError(state.error)
+        const failed = navigationError()
+        if (!state.loading && failed?.tabID === state.id && failed.url === state.url) {
+          setError(undefined)
+          setNavigationError(undefined)
+        }
        if (!state.error && !state.loading) {
          const entry = { url: state.url, title: state.title || new URL(state.url).hostname, visitedAt: Date.now() }
          setHistory((items) => {
@@ -167,6 +186,15 @@ export function AppsPanel() {
            return next
          })
        }
+    }
+    const unsubscribe = api()?.appDockEvent ? undefined : api()?.appDockState?.(applyState)
+    const unsubscribeEvent = api()?.appDockEvent?.((event) => {
+      if (event.type === "state") applyState({ ...event.payload, id: event.payload.tabID })
+      if (event.type === "navigation-error") {
+        const { tabID } = event.payload.identity
+        if (tabID === active()) setError(event.payload.code === "blocked" ? "Navigation blocked" : "Navigation failed")
+        setNavigationError({ tabID, url: event.payload.url })
+      }
     })
     const unsubscribePopup = api()?.appDockTabOpened?.((tab) => {
       setTabs((items) => items.some((item) => item.id === tab.id) ? items : [...items, tab])
@@ -185,6 +213,18 @@ export function AppsPanel() {
     const observer = new ResizeObserver(resize)
     if (host) observer.observe(host)
     const onKeyDown = (event: KeyboardEvent) => {
+      const target = event.target as HTMLElement | null
+      const editable = !!target?.closest("input, textarea, select, [contenteditable='true']")
+      if (event.key === "Escape") {
+        if (menu()) closeMenu()
+        else if (findOpen()) closeFind()
+        else if (libraryOpen()) setLibraryOpen(undefined)
+        else if (downloadsOpen()) setDownloadsOpen(false)
+        else return
+        event.preventDefault()
+        return
+      }
+      if (editable) return
       if (!(event.metaKey || event.ctrlKey)) return
       if (event.key.toLowerCase() === "l") {
         event.preventDefault()
@@ -211,6 +251,7 @@ export function AppsPanel() {
       if (persistTimer) clearTimeout(persistTimer)
       window.removeEventListener("keydown", onKeyDown)
       unsubscribe?.()
+      unsubscribeEvent?.()
       unsubscribePopup?.()
       unsubscribeFind?.()
       unsubscribeDownloads?.()
@@ -220,11 +261,9 @@ export function AppsPanel() {
   })
   const launch = async () => {
     if (!host || !api()) return
-    setError(undefined)
     try {
       const current = active()
       if (current) {
-        setError(undefined)
         await api()!.appDockNavigate(current, url())
         setTabs((items) => items.map((tab) => tab.id === current ? { ...tab, url: url() } : tab))
         return
@@ -238,7 +277,6 @@ export function AppsPanel() {
   }
   const openNewTab = async () => {
     if (!host || !api()) return
-    setError(undefined)
     try {
       const tab = await api()!.appDockOpen("https://opencode.ai", bounds(host), profile())
       setTabs((current) => [...current, tab])
@@ -248,8 +286,8 @@ export function AppsPanel() {
       setError(cause instanceof Error ? cause.message : "Could not open App Dock")
     }
   }
-  const close = async () => {
-    const id = active()
+  const close = async (requestedID = active()) => {
+    const id = requestedID
     if (!id) return
     const items = tabs()
     const index = items.findIndex((tab) => tab.id === id)
@@ -259,6 +297,26 @@ export function AppsPanel() {
     setActive(next?.id)
     setURL(next?.url ?? "https://opencode.ai")
     if (next && host) await api()?.appDockSelect(next.id, bounds(host))
+  }
+  const selectTab = (tab: Tab) => {
+    setActive(tab.id)
+    setURL(tab.url)
+    if (host) void api()?.appDockSelect(tab.id, bounds(host))
+  }
+  const duplicateTab = async (tab: Tab) => {
+    if (!host || !capability("appDockOpen")) return
+    try {
+      const copy = await api()!.appDockOpen(tab.url, bounds(host), profile())
+      setTabs((items) => [...items, copy])
+      selectTab(copy)
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : "Could not duplicate tab")
+    }
+  }
+  const toggleSidebar = () => {
+    const next = !sidebarCollapsed()
+    setSidebarCollapsed(next)
+    localStorage.setItem(sidebarCollapsedKey, String(next))
   }
   const createProfile = (event: SubmitEvent) => {
     event.preventDefault()
@@ -350,9 +408,10 @@ export function AppsPanel() {
     setActive(tab.id)
   }
   return (
-    <div class="zen-browser-shell">
+    <div class={`zen-browser-shell ${sidebarCollapsed() ? "is-sidebar-collapsed" : ""}`}>
       <aside class="zen-browser-sidebar" aria-label="Browser workspaces">
         <div class="zen-workspace-indicator" aria-label="Current workspace">
+          <button class="zen-sidebar-toggle" type="button" aria-label={sidebarCollapsed() ? "Expand sidebar" : "Collapse sidebar"} aria-pressed={sidebarCollapsed()} onClick={toggleSidebar}>||</button>
           <span class="zen-workspace-indicator-dot" aria-hidden="true" />
             <select class="zen-workspace-indicator-name" value={profile()} aria-label="Browser profile" disabled={switching()} onChange={(event) => switchProfile(event.currentTarget.value)}>
             {profiles().map((item) => <option value={item.id}>{item.name}</option>)}
@@ -366,15 +425,15 @@ export function AppsPanel() {
         </form>}
         <div class="zen-tabs" aria-label="Tabs">
           {tabs().filter((tab) => tab.pinned).length > 0 && <div class="zen-tab-section-label">Pinned</div>}
-          {tabs().filter((tab) => tab.pinned).map((tab) => <TabButton tab={tab} active={active} setActive={setActive} setURL={setURL} host={host} api={api} close={close} setTabs={setTabs} />)}
-          {tabs().filter((tab) => !tab.pinned).map((tab) => <TabButton tab={tab} active={active} setActive={setActive} setURL={setURL} host={host} api={api} close={close} setTabs={setTabs} />)}
+          {tabs().filter((tab) => tab.pinned).map((tab) => <TabButton tab={tab} active={active} select={selectTab} setMenu={setMenu} />)}
+          {tabs().filter((tab) => !tab.pinned).map((tab) => <TabButton tab={tab} active={active} select={selectTab} setMenu={setMenu} />)}
           <button class="zen-new-tab" type="button" onClick={() => void openNewTab()}>+ New tab</button>
         </div>
       </aside>
       <main class="zen-browser-content">
         <form class="zen-urlbar" onSubmit={(event) => { event.preventDefault(); void launch() }}>
-           <button class="zen-nav-button" type="button" aria-label="Back" onClick={() => { const id = active(); if (id) void api()?.appDockCommand(id, "back") }}>&#8592;</button>
-            <button class="zen-nav-button" type="button" aria-label="Forward" onClick={() => { const id = active(); if (id) void api()?.appDockCommand(id, "forward") }}>&#8594;</button>
+            <button class="zen-nav-button" type="button" aria-label="Back" disabled={!active() || !capability("appDockCommand")} onClick={() => { const id = active(); if (id) void api()?.appDockCommand(id, "back") }}>&#8592;</button>
+             <button class="zen-nav-button" type="button" aria-label="Forward" disabled={!active() || !capability("appDockCommand")} onClick={() => { const id = active(); if (id) void api()?.appDockCommand(id, "forward") }}>&#8594;</button>
             <button class={`zen-nav-button ${bookmarked() ? "is-active" : ""}`} type="button" aria-label={bookmarked() ? "Remove bookmark" : "Add bookmark"} onClick={toggleBookmark}>&#9733;</button>
             <input ref={addressInput} value={url()} onInput={(event) => setURL(event.currentTarget.value)} aria-label="Address" />
             <button class="zen-nav-button" type="button" aria-label="Bookmarks" onClick={() => setLibraryOpen(libraryOpen() === "bookmarks" ? undefined : "bookmarks")}>&#9734;</button>
@@ -384,11 +443,11 @@ export function AppsPanel() {
             <button class="zen-nav-button" type="button" aria-label="Zoom in" onClick={() => zoom(0.1)}>A+</button>
             <button class="zen-nav-button" type="button" aria-label="Downloads" onClick={() => setDownloadsOpen(!downloadsOpen())}>&#8595;</button>
             <button class="zen-nav-button" type="button" aria-label={fullscreen() ? "Exit fullscreen" : "Enter fullscreen"} onClick={toggleFullscreen}>{fullscreen() ? "Exit" : "Full"}</button>
-          <button class="zen-open-button" type="button" onClick={() => { const id = active(); if (id) void api()?.appDockCommand(id, "reload") }}>Reload</button>
-          <button class="zen-open-button" type="submit">Open</button>
+           <button class="zen-open-button" type="button" disabled={!active() || !capability("appDockCommand")} onClick={() => { const id = active(); if (id) void api()?.appDockCommand(id, "reload") }}>{activeTab()?.loading ? "Loading" : "Reload"}</button>
+           <button class="zen-open-button" type="submit" disabled={!api()}>{activeTab()?.loading ? "Loading" : "Open"}</button>
           {active() && <button class="zen-nav-button" type="button" onClick={() => void close()} aria-label="Close tab">x</button>}
         </form>
-         {error() && <div class="zen-error">{error()}</div>}
+          {error() && <div class="zen-error" role="alert" aria-live="assertive">{error()}</div>}
          {libraryOpen() && <div class="zen-library" role="dialog" aria-label={libraryOpen() === "bookmarks" ? "Bookmarks" : "History"}>
            <div class="zen-library-title">{libraryOpen() === "bookmarks" ? "Bookmarks" : "History"}</div>
            {(libraryOpen() === "bookmarks" ? bookmarks() : history()).map((entry) => <button type="button" onClick={() => void openLibraryItem(entry)}><span>{entry.title}</span><small>{new URL(entry.url).hostname}</small></button>)}
@@ -407,7 +466,8 @@ export function AppsPanel() {
             {downloads().length === 0 && <p>No downloads yet.</p>}
           </div>}
          {!api() && <div class="zen-empty-state"><strong>Browser needs OpenCode Desktop.</strong><span>Native browser tabs are unavailable in web app.</span></div>}
-         <div ref={host} class="zen-browser-host" />
+          <div ref={host} class="zen-browser-host" />
+          {menu() && <TabMenu tab={menu()!.tab} x={menu()!.x} y={menu()!.y} canDuplicate={capability("appDockOpen")} canReload={capability("appDockCommand")} canClose={capability("appDockCloseTab")} onDuplicate={() => { void duplicateTab(menu()!.tab); closeMenu() }} onTogglePin={() => { const tab = menu()!.tab; setTabs((items) => items.map((item) => item.id === tab.id ? { ...item, pinned: !item.pinned } : item)); closeMenu() }} onReload={() => { const id = menu()!.tab.id; void api()?.appDockCommand(id, "reload"); closeMenu() }} onClose={() => { void close(menu()!.tab.id); closeMenu() }} />}
       </main>
     </div>
   )
@@ -416,27 +476,30 @@ export function AppsPanel() {
 function TabButton(props: {
   tab: Tab
   active: () => string | undefined
-  setActive: (id: string) => void
-  setURL: (url: string) => void
-  host: HTMLDivElement | undefined
-  api: () => AppDockAPI | undefined
-  close: () => Promise<void>
-  setTabs: (update: (tabs: Tab[]) => Tab[]) => void
+  select: (tab: Tab) => void
+  setMenu: (menu: { tab: Tab; x: number; y: number; invoker: HTMLButtonElement }) => void
 }) {
-  const togglePinned = (event: MouseEvent) => {
-    event.stopPropagation()
-    props.setTabs((tabs) => tabs.map((tab) => tab.id === props.tab.id ? { ...tab, pinned: !tab.pinned } : tab))
-  }
-  const select = () => {
-    props.setActive(props.tab.id)
-    props.setURL(props.tab.url)
-    if (props.host) void props.api()?.appDockSelect(props.tab.id, bounds(props.host))
-  }
+  const openMenu = (x: number, y: number, invoker: HTMLButtonElement) => props.setMenu({ tab: props.tab, x, y, invoker })
   const keydown = (event: KeyboardEvent) => {
     if (event.key === "Enter" || event.key === " ") {
       event.preventDefault()
-      select()
+      props.select(props.tab)
+    } else if (event.key === "ContextMenu" || (event.shiftKey && event.key === "F10")) {
+      event.preventDefault()
+      const rect = event.currentTarget.getBoundingClientRect()
+      openMenu(rect.left + 8, rect.bottom + 4, event.currentTarget)
     }
   }
-  return <div class={`zen-tab ${props.active() === props.tab.id ? "is-active" : ""}`} role="tab" tabindex="0" aria-selected={props.active() === props.tab.id} onClick={select} onKeyDown={keydown}><span class={`zen-tab-icon ${props.tab.loading ? "is-loading" : ""}`}>{props.tab.favicon ? <img src={props.tab.favicon} alt="" /> : new URL(props.tab.url).hostname.slice(0, 1).toUpperCase()}</span><span class="zen-tab-title">{tabLabel(props.tab)}</span>{props.tab.pinned ? <button class="zen-tab-pin" type="button" onClick={togglePinned} title="Unpin tab">&#9733;</button> : <button class="zen-tab-pin zen-tab-pin-hidden" type="button" onClick={togglePinned} title="Pin tab">&#9734;</button>}{props.tab.audible && <span class="zen-tab-audio">&#9835;</span>}<button class="zen-tab-close" type="button" aria-label={`Close ${tabLabel(props.tab)}`} onClick={(event) => { event.stopPropagation(); props.setActive(props.tab.id); void props.close() }}>x</button></div>
+  return <button class={`zen-tab ${props.active() === props.tab.id ? "is-active" : ""}`} type="button" role="tab" aria-selected={props.active() === props.tab.id} onClick={() => props.select(props.tab)} onContextMenu={(event) => { event.preventDefault(); openMenu(event.clientX, event.clientY, event.currentTarget) }} onKeyDown={keydown}><span class={`zen-tab-icon ${props.tab.loading ? "is-loading" : ""}`}>{props.tab.favicon ? <img src={props.tab.favicon} alt="" /> : new URL(props.tab.url).hostname.slice(0, 1).toUpperCase()}</span><span class="zen-tab-title">{tabLabel(props.tab)}</span>{props.tab.pinned ? "Pinned" : ""}{props.tab.audible && <span class="zen-tab-audio">&#9835;</span>}</button>
+}
+
+function TabMenu(props: { tab: Tab; x: number; y: number; canDuplicate: boolean; canReload: boolean; canClose: boolean; onDuplicate: () => void; onTogglePin: () => void; onReload: () => void; onClose: () => void }) {
+  return <div class="zen-tab-menu" role="menu" aria-label={`Actions for ${tabLabel(props.tab)}`} style={{ left: `${props.x}px`, top: `${props.y}px` }}>
+    <button type="button" role="menuitem" disabled={!props.canDuplicate} onClick={props.onDuplicate}>Duplicate</button>
+    <button type="button" role="menuitem" onClick={props.onTogglePin}>{props.tab.pinned ? "Unpin" : "Pin"}</button>
+    <button type="button" role="menuitem" disabled={!props.canReload} onClick={props.onReload}>Reload</button>
+    <button type="button" role="menuitem" disabled={!props.canClose} onClick={props.onClose}>Close</button>
+    <button type="button" role="menuitem" disabled title="Native close-others API unavailable">Close others (unavailable)</button>
+    <button type="button" role="menuitem" disabled title="Native close-right API unavailable">Close right (unavailable)</button>
+  </div>
 }

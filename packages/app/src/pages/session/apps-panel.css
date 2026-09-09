@@ -33,6 +33,19 @@
   background: var(--v2-background-bg-layer-01, var(--surface-raised-base));
 }
 
+.zen-browser-shell.is-sidebar-collapsed {
+  --zen-sidebar-width: 48px;
+}
+
+.zen-browser-shell.is-sidebar-collapsed .zen-workspace-indicator-name,
+.zen-browser-shell.is-sidebar-collapsed .zen-profile-add,
+.zen-browser-shell.is-sidebar-collapsed .zen-profile-form,
+.zen-browser-shell.is-sidebar-collapsed .zen-tab-title,
+.zen-browser-shell.is-sidebar-collapsed .zen-tab-section-label,
+.zen-browser-shell.is-sidebar-collapsed .zen-new-tab {
+  display: none;
+}
+
 .zen-workspaces {
   display: flex;
   align-items: center;
@@ -95,6 +108,22 @@
   background: transparent;
   font-size: 16px;
   cursor: pointer;
+}
+
+.zen-sidebar-toggle {
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: 0;
+  border-radius: 6px;
+  color: var(--text-weak);
+  background: transparent;
+  cursor: pointer;
+}
+
+.zen-sidebar-toggle:hover {
+  color: var(--text-strong);
+  background: var(--surface-raised-stronger);
 }
 
 .zen-profile-add:hover {
@@ -366,6 +395,13 @@
   background: var(--surface-base);
 }
 
+.zen-nav-button:disabled,
+.zen-open-button:disabled,
+.zen-tab-menu button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
 .zen-nav-button.is-active {
   color: var(--text-strong);
 }
@@ -537,6 +573,46 @@
   padding: 4px 8px;
   color: var(--text-weak);
   font-size: 12px;
+}
+
+.zen-tab-menu {
+  position: fixed;
+  z-index: 2;
+  display: flex;
+  min-width: 180px;
+  flex-direction: column;
+  gap: 2px;
+  padding: 5px;
+  border: 1px solid var(--border-weak);
+  border-radius: 10px;
+  background: var(--v2-background-bg-layer-01, var(--surface-raised-base));
+  box-shadow: 0 12px 36px rgb(0 0 0 / 0.22);
+}
+
+.zen-tab-menu button {
+  min-height: 28px;
+  padding: 4px 7px;
+  border: 0;
+  border-radius: 6px;
+  color: var(--text-strong);
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+}
+
+.zen-tab-menu button:not(:disabled):hover {
+  background: var(--surface-raised-stronger);
+}
+
+.zen-sidebar-toggle:focus-visible,
+.zen-profile-add:focus-visible,
+.zen-profile-form button:focus-visible,
+.zen-tab-menu button:focus-visible,
+.zen-findbar input:focus-visible,
+.zen-findbar button:focus-visible,
+.zen-library button:focus-visible {
+  outline: 2px solid var(--text-strong);
+  outline-offset: 1px;
 }
 
 @media (max-width: 640px) {
