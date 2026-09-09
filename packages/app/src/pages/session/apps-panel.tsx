@@ -502,16 +502,18 @@ function TabButton(props: {
 }) {
   const openMenu = (x: number, y: number, invoker: HTMLButtonElement) => props.setMenu({ tab: props.tab, x, y, invoker })
   const keydown = (event: KeyboardEvent) => {
+    const current = event.currentTarget
+    if (!(current instanceof HTMLButtonElement)) return
     if (event.key === "Enter" || event.key === " ") {
       event.preventDefault()
       props.select(props.tab)
     } else if (event.key === "ContextMenu" || (event.shiftKey && event.key === "F10")) {
       event.preventDefault()
-      const rect = event.currentTarget.getBoundingClientRect()
-      openMenu(rect.left + 8, rect.bottom + 4, event.currentTarget)
+      const rect = current.getBoundingClientRect()
+      openMenu(rect.left + 8, rect.bottom + 4, current)
     } else if (["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) {
-      const tabs = [...(event.currentTarget.parentElement?.querySelectorAll<HTMLButtonElement>("[role='tab']") ?? [])]
-      const index = tabs.indexOf(event.currentTarget)
+      const tabs = [...(current.parentElement?.querySelectorAll<HTMLButtonElement>("[role='tab']") ?? [])]
+      const index = tabs.indexOf(current)
       if (index < 0) return
       const next = event.key === "Home" ? tabs[0] : event.key === "End" ? tabs.at(-1) : tabs[(index + (event.key === "ArrowRight" ? 1 : -1) + tabs.length) % tabs.length]
       event.preventDefault()
