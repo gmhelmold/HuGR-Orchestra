@@ -1,8 +1,9 @@
 import { execFileSync, spawn } from "node:child_process"
-import { mkdir, mkdtemp, rename, rm, writeFile } from "node:fs/promises"
+import { mkdir, mkdtemp, rename, rm, writeFile, access } from "node:fs/promises"
 import { createServer } from "node:https"
 import { tmpdir } from "node:os"
 import { dirname, join, resolve } from "node:path"
+import { fileURLToPath } from "node:url"
 
 const required = ["U01", "U02", "U03", "U04", "U05", "U06", "U07", "U08", "U09", "U10", "U11", "U12", "U13", "U15", "U16", "U17", "U18"]
 const root = resolve(import.meta.dir, "../..")
@@ -29,11 +30,25 @@ async function parent() {
   const output = join(await mkdtemp(join(tmpdir(), "app-dock-e2e-")), "harness.cjs")
   const result = await Bun.build({ entrypoints: [import.meta.path], outfile: output, target: "node", format: "cjs", external: ["electron", "node:sqlite"] })
   if (!result.success) throw new Error(result.logs.map(String).join("\n"))
-  const { ELECTRON_RUN_AS_NODE: _electronRunAsNode, ...env } = process.env
-  const child = spawn(process.execPath, ["x", "electron", output, "--app-dock-electron-child"], { stdio: "inherit", env: { ...env, ELECTRON_DISABLE_SECURITY_WARNINGS: "true" } })
-  const code = await new Promise<number | null>((resolve, reject) => { child.once("exit", resolve); child.once("error", reject) })
+  const electronModule = fileURLToPath(import.meta.resolve("electron"))
+  const electron = join(dirname(electronModule), "dist/Electron.app/Contents/MacOS/Electron")
+  await access(electron)
+  const { ELECTRON_RUN_AS_NODE: _electronRunAsNode, NODE_OPTIONS, ...env } = process.env
+  const safeNodeOptions = NODE_OPTIONS?.includes("ELECTRON_RUN_AS_NODE") ? undefined : NODE_OPTIONS
+  const child = spawn(electron, [output, "--app-dock-electron-child"], { stdio: ["ignore", "pipe", "pipe"], env: { ...env, ...(safeNodeOptions ? { NODE_OPTIONS: safeNodeOptions } : {}), ELECTRON_DISABLE_SECURITY_WARNINGS: "true" } })
+  let stdout = ""
+  let stderr = ""
+  child.stdout.on("data", (chunk) => { stdout += chunk })
+  child.stderr.on("data", (chunk) => { stderr += chunk })
+  let timedOut = false
+  const timeout = setTimeout(() => { timedOut = true; child.kill("SIGKILL") }, 20_000)
+  const exitResult = await new Promise<{ code: number | null; signal: NodeJS.Signals | null }>((resolve, reject) => { child.once("exit", (code, signal) => resolve({ code, signal })); child.once("error", reject) })
+  clearTimeout(timeout)
   await rm(dirname(output), { recursive: true, force: true })
-  if (code !== 0) process.exitCode = code ?? 1
+  if (exitResult.code !== 0 || timedOut) {
+    console.error(JSON.stringify({ phase: "parent-child-failure", electron, executable: true, timedOut, ...exitResult, stdout, stderr }))
+    process.exitCode = exitResult.code ?? 1
+  }
 }
 
 async function fixture() {
@@ -59,10 +74,18 @@ async function fixture() {
 }
 
 async function child() {
-  if (!process.versions.electron) throw new Error("Electron child not started")
+  const diagnostic = (phase: string) => process.stderr.write(`${JSON.stringify({ phase, argv: process.argv, electronVersion: process.versions.electron, pid: process.pid })}\n`)
+  diagnostic("entry")
+  const startupWatchdog = setTimeout(() => { diagnostic("startup-timeout"); process.exit(1) }, 15_000)
+  diagnostic("before-import-electron")
   const { app, BrowserWindow, ipcMain, webContents } = await import("electron")
+  diagnostic("after-import-electron")
+  if (!process.versions.electron) throw new Error("Electron child not started")
   app.commandLine.appendSwitch("ignore-certificate-errors")
+  diagnostic("before-whenReady")
   await app.whenReady()
+  diagnostic("after-whenReady")
+  clearTimeout(startupWatchdog)
   const watchdog = setTimeout(() => { console.error("App Dock acceptance watchdog expired"); app.exit(1) }, 30_000)
   const temp = await mkdtemp(join(tmpdir(), "app-dock-user-data-"))
   app.setPath("userData", temp)
