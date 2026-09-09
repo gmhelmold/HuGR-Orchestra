@@ -272,6 +272,25 @@ declare global {
       deepLinks?: string[]
     }
     api?: {
+      appDockOpen?: (url: string, bounds: { x: number; y: number; width: number; height: number }, profile?: string) => Promise<{ id: string; url: string }>
+      appDockResize?: (bounds: { x: number; y: number; width: number; height: number }) => Promise<void>
+      appDockHide?: () => Promise<void>
+      appDockClose?: () => Promise<void>
+      appDockCloseTab?: (id: string) => Promise<void>
+      appDockSelect?: (id: string, bounds: { x: number; y: number; width: number; height: number }) => Promise<void>
+      appDockNavigate?: (id: string, url: string) => Promise<void>
+      appDockCommand?: (id: string, command: "back" | "forward" | "reload") => Promise<void>
+      appDockState?: (callback: (state: { id: string; url: string; title: string; favicon?: string; loading: boolean; audible: boolean; error?: string }) => void) => () => void
+      appDockTabOpened?: (callback: (tab: { id: string; url: string }) => void) => () => void
+      appDockFind?: (id: string, text: string, forward: boolean) => Promise<number>
+      appDockStopFind?: (id: string) => Promise<void>
+      appDockFindResult?: (callback: (result: { tabID: string; requestID: number; activeMatchOrdinal: number; matches: number; finalUpdate: boolean }) => void) => () => void
+      appDockZoom?: (id: string, factor?: number) => Promise<number>
+      appDockCancelDownload?: (id: string) => Promise<void>
+      appDockOpenDownload?: (id: string) => Promise<string>
+      appDockDownload?: (callback: (download: { id: string; tabID: string; filename: string; receivedBytes: number; totalBytes: number; state: "progressing" | "paused" | "completed" | "cancelled" | "interrupted" }) => void) => () => void
+      appDockFullscreen?: (id: string, enabled: boolean) => Promise<void>
+      appDockFullscreenChanged?: (callback: (state: { tabID: string; enabled: boolean }) => void) => () => void
       setTitlebar?: (theme: { mode: "light" | "dark"; scheme?: "system" | "light" | "dark" }) => Promise<void>
       exportDebugLogs?: () => Promise<string>
     }

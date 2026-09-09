@@ -24,6 +24,7 @@ import type { UpdaterController } from "./updater-controller"
 import { createUpdaterSubscriptions } from "./updater-subscriptions"
 import { createDesktopDraftStore } from "./draft-store"
 import { nativeT } from "./native-translations"
+import { createAppDock, panelBoundsToContent, type AppDockDownload, type AppDockFindResult, type AppDockState, type DockBounds } from "./app-dock"
 
 const pickerFilters = (ext?: string[]) => {
   if (!ext || ext.length === 0) return undefined
@@ -55,6 +56,7 @@ type Deps = {
 }
 
 export function registerIpcHandlers(deps: Deps) {
+  const appDock = createAppDock()
   const drafts = createDesktopDraftStore(join(app.getPath("userData"), "drafts.sqlite"))
   const updaterSubscriptions = createUpdaterSubscriptions()
   app.once("will-quit", updaterSubscriptions.clear)
@@ -80,6 +82,88 @@ export function registerIpcHandlers(deps: Deps) {
   )
   ipcMain.handle("check-app-exists", (_event: IpcMainInvokeEvent, appName: string) => deps.checkAppExists(appName))
   ipcMain.handle("resolve-app-path", (_event: IpcMainInvokeEvent, appName: string) => deps.resolveAppPath(appName))
+  const appDockSender = (event: IpcMainInvokeEvent) => {
+    const win = BrowserWindow.fromWebContents(event.sender)
+    if (!win || win.isDestroyed() || win.webContents !== event.sender || event.senderFrame !== event.sender.mainFrame)
+      throw new Error("Invalid App Dock sender")
+    return win
+  }
+  ipcMain.handle("app-dock-open", async (event: IpcMainInvokeEvent, address: string, bounds: DockBounds, profile?: string) => {
+    const win = appDockSender(event)
+    const tab = await appDock.open(
+      event.sender.id,
+      win,
+      address,
+      panelBoundsToContent(bounds, event.sender.getZoomFactor()),
+      (state: AppDockState) => {
+        if (!event.sender.isDestroyed()) event.sender.send("app-dock-state", state)
+      },
+      profile,
+      (popup) => {
+        if (!event.sender.isDestroyed()) event.sender.send("app-dock-tab-opened", popup)
+      },
+      (download: AppDockDownload) => {
+        if (!event.sender.isDestroyed()) event.sender.send("app-dock-download", download)
+      },
+      (tabID, enabled) => {
+        if (!event.sender.isDestroyed()) event.sender.send("app-dock-fullscreen", { tabID, enabled })
+      },
+    )
+    event.sender.once("destroyed", () => appDock.close(event.sender.id, win))
+    return tab
+  })
+  ipcMain.handle("app-dock-resize", (event: IpcMainInvokeEvent, bounds: DockBounds) => {
+    appDock.resize(event.sender.id, panelBoundsToContent(bounds, event.sender.getZoomFactor()))
+  })
+  ipcMain.handle("app-dock-hide", (event: IpcMainInvokeEvent) => {
+    appDock.hide(event.sender.id, appDockSender(event))
+  })
+  ipcMain.handle("app-dock-close", (event: IpcMainInvokeEvent) => {
+    appDock.close(event.sender.id, appDockSender(event))
+  })
+  ipcMain.handle("app-dock-close-tab", (event: IpcMainInvokeEvent, tabID: string) => {
+    appDock.close(event.sender.id, appDockSender(event), tabID)
+  })
+  ipcMain.handle("app-dock-select", (event: IpcMainInvokeEvent, tabID: string, bounds: DockBounds) => {
+    const win = appDockSender(event)
+    appDock.select(event.sender.id, win, tabID, panelBoundsToContent(bounds, event.sender.getZoomFactor()))
+  })
+  ipcMain.handle("app-dock-navigate", (event: IpcMainInvokeEvent, tabID: string, address: string) => {
+    appDockSender(event)
+    return appDock.navigate(event.sender.id, tabID, address)
+  })
+  ipcMain.handle("app-dock-command", (event: IpcMainInvokeEvent, tabID: string, command: "back" | "forward" | "reload") => {
+    appDockSender(event)
+    if (!["back", "forward", "reload"].includes(command)) throw new Error("Invalid App Dock command")
+    return appDock.command(event.sender.id, tabID, command)
+  })
+  ipcMain.handle("app-dock-find", (event: IpcMainInvokeEvent, tabID: string, text: string, forward: boolean) => {
+    appDockSender(event)
+    return appDock.find(event.sender.id, tabID, text, forward, (result: AppDockFindResult) => {
+      if (!event.sender.isDestroyed()) event.sender.send("app-dock-find-result", result)
+    })
+  })
+  ipcMain.handle("app-dock-stop-find", (event: IpcMainInvokeEvent, tabID: string) => {
+    appDockSender(event)
+    appDock.stopFind(event.sender.id, tabID)
+  })
+  ipcMain.handle("app-dock-zoom", (event: IpcMainInvokeEvent, tabID: string, factor?: number) => {
+    appDockSender(event)
+    return appDock.zoom(event.sender.id, tabID, factor)
+  })
+  ipcMain.handle("app-dock-cancel-download", (event: IpcMainInvokeEvent, id: string) => {
+    appDockSender(event)
+    appDock.cancelDownload(event.sender.id, id)
+  })
+  ipcMain.handle("app-dock-open-download", (event: IpcMainInvokeEvent, id: string) => {
+    appDockSender(event)
+    return appDock.openDownload(event.sender.id, id)
+  })
+  ipcMain.handle("app-dock-fullscreen", (event: IpcMainInvokeEvent, tabID: string, enabled: boolean) => {
+    const win = appDockSender(event)
+    if (typeof enabled !== "boolean") throw new Error("Invalid App Dock fullscreen state")
+    appDock.fullscreen(event.sender.id, win, tabID, enabled)
+  })
   ipcMain.handle("updater-subscribe", (event) => {
     const id = event.sender.id
     updaterSubscriptions.set(
