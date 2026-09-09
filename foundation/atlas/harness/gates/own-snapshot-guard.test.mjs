@@ -85,4 +85,41 @@ describe('own-snapshot-guard', () => {
     write('OWN-SNAPSHOT.json', `${JSON.stringify(value)}\n`);
     expect(runGate().out).toMatch(/sourceRevision is not a Git commit reachable from HEAD/);
   });
+  it('fails valid sourceRevision that is not an ancestor of HEAD', () => {
+    const tree = execFileSync('git', ['-C', root, 'rev-parse', 'HEAD^{tree}'], { encoding: 'utf8' }).trim();
+    const sourceRevision = execFileSync('git', ['-C', root, '-c', 'user.name=Own Test', '-c', 'user.email=own@test.invalid', 'commit-tree', tree, '-m', 'unrelated'], { encoding: 'utf8' }).trim();
+    const value = snapshot();
+    value.sourceRevision = sourceRevision;
+    write('OWN-SNAPSHOT.json', `${JSON.stringify(value)}\n`);
+    expect(runGate().out).toMatch(/sourceRevision is not a Git commit reachable from HEAD/);
+  });
+  it('fails anchored blob drift even when current source matches declared blob', () => {
+    const sourceRevision = execFileSync('git', ['-C', root, 'rev-parse', 'HEAD'], { encoding: 'utf8' }).trim();
+    write('packages/genesis/src/index.ts', 'export const genesis = false;\n');
+    execFileSync('git', ['-C', root, 'add', 'packages/genesis/src/index.ts'], { stdio: 'ignore' });
+    execFileSync('git', ['-C', root, '-c', 'user.name=Own Test', '-c', 'user.email=own@test.invalid', 'commit', '-m', 'change source'], { stdio: 'ignore' });
+    const value = snapshot();
+    value.sourceRevision = sourceRevision;
+    materialize(value);
+    expect(runGate().out).toMatch(/snapshot revision blob drift: packages\/genesis -> packages\/genesis\/src\/index.ts/);
+  });
+  it('fails unexpected static Own file', () => {
+    write('.opencode/skills/own/EXTRA.md', 'unexpected\n');
+    expect(runGate().out).toMatch(/unexpected static Own file: \.opencode\/skills\/own\/EXTRA.md/);
+  });
+  it.each([
+    ['empty', ''],
+    ['malformed', '{'],
+  ])('fails %s snapshot', (_label, content) => {
+    write('OWN-SNAPSHOT.json', content);
+    expect(runGate().out).toMatch(/OWN-SNAPSHOT.json is malformed, empty, or has invalid units\/source blobs/);
+  });
+  it('fails duplicate static Own path at verifier boundary', () => {
+    const value = snapshot();
+    const output = contract.materializeStaticOwnSnapshot(value);
+    const files = [...output.skills, output.coverage, output.skills[0]];
+    const result = contract.verifyStaticOwnSnapshot(value, files, (path) => value.units[0].sourceBlobs[path]);
+    expect(result).toMatchObject({ status: 'HOLD' });
+    expect(result.issues).toContain(`duplicate static Own file: ${output.skills[0].path}`);
+  });
 });
