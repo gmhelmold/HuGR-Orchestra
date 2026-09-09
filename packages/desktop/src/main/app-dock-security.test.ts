@@ -90,7 +90,7 @@ async function child() {
   diagnostic("entry")
   const startupWatchdog = setTimeout(() => { diagnostic("startup-timeout"); process.exit(1) }, 15_000)
   diagnostic("before-import-electron")
-  const { app, BrowserWindow, ipcMain, webContents } = await import("electron")
+  const { app, BrowserWindow, webContents } = await import("electron")
   diagnostic("after-import-electron")
   if (!process.versions.electron) throw new Error("Electron child not started")
   const ipcModule = await import("./ipc")
@@ -120,25 +120,24 @@ async function child() {
   const ipcWin = new BrowserWindow({ show: false, webPreferences: { nodeIntegration: true, contextIsolation: false } })
   const invoke = (frame: { executeJavaScript: (code: string) => Promise<any> }, channel: string, args: unknown[]) =>
     frame.executeJavaScript(`require('electron').ipcRenderer.invoke(${JSON.stringify(channel)}, ...${JSON.stringify(args)})`)
-  const events: any[] = []
-  const waiters = new Set<(event: any) => void>()
-  ipcMain.on("app-dock-test-event", (_event, event) => { events.push(event); waiters.forEach((notify) => notify(event)) })
+  let events: any[] = []
+  const installEventStore = () => ipcWin.webContents.executeJavaScript("window.__appDockEvents = []; require('electron').ipcRenderer.on('app-dock-event', (_event, value) => window.__appDockEvents.push(value))")
+  const readEvents = async () => events = await ipcWin.webContents.executeJavaScript("window.__appDockEvents")
   const waitEvent = (predicate: (event: any) => boolean, label: string) => {
-    const prior = events.find(predicate)
-    if (prior) return Promise.resolve(prior)
+    const deadline = Date.now() + 5_000
     return new Promise<any>((resolve, reject) => {
-      const timer = setTimeout(() => { waiters.delete(notify); reject(new Error(`Timed out waiting for ${label}`)) }, 5_000)
-      const notify = (event: any) => {
-        if (!predicate(event)) return
-        clearTimeout(timer)
-        waiters.delete(notify)
-        resolve(event)
+      const poll = async () => {
+        await readEvents()
+        const event = events.find(predicate)
+        if (event) return resolve(event)
+        if (Date.now() >= deadline) return reject(new Error(`Timed out waiting for ${label}`))
+        setTimeout(poll, 25)
       }
-      waiters.add(notify)
+      void poll()
     })
   }
   await ipcWin.loadURL(site.base)
-  await ipcWin.webContents.executeJavaScript("require('electron').ipcRenderer.on('app-dock-event', (_event, value) => require('electron').ipcRenderer.send('app-dock-test-event', value))")
+  await installEventStore()
   const profile = "e2e-profile"
   const bounds = { x: 0, y: 0, width: 400, height: 300 }
   const open = async (url = site.base) => invoke(ipcWin.webContents.mainFrame, "app-dock-open", [url, bounds, profile])
@@ -151,6 +150,7 @@ async function child() {
 
     const tab = await open()
     await Promise.all(schemes.map((url) => rejects(() => navigate(tab.tabID, url), "App Dock only supports HTTPS URLs")))
+    await Promise.all(schemes.map((url) => waitEvent((event) => event.type === "navigation-error" && event.payload.url === url, `navigate block ${url}`)))
     pass("U02", "navigate rejects http/file/javascript/data")
 
     await navigate(tab.tabID, `${site.base}/popup`)
@@ -176,6 +176,7 @@ async function child() {
     check(await contents.session.cookies.get({ url: site.base }).then(() => true), "partition session unavailable")
     pass("U07", "permission request denied in real partition")
 
+    await readEvents()
     const error = events.find((event) => event.type === "navigation-error")
     check(error?.type === "navigation-error" && (error.payload.code === "blocked" || error.payload.code === "failed"), "navigation error envelope not discriminated")
     check(!JSON.stringify(events).includes("storageKey") && !JSON.stringify(events).includes(temp), "renderer event exposes storage path/key")
@@ -200,7 +201,7 @@ async function child() {
     pass("U10", "profile delete destroys view and clears storage before profile reuse")
 
     await ipcWin.loadURL(`${site.base}/iframe`)
-    await ipcWin.webContents.executeJavaScript("require('electron').ipcRenderer.on('app-dock-event', (_event, value) => require('electron').ipcRenderer.send('app-dock-test-event', value))")
+    await installEventStore()
     await rejects(() => invoke(ipcWin.webContents.mainFrame, "app-dock-open", [site.base, { x: 0, y: 0, width: 0, height: 1 }]), "Invalid App Dock bounds")
     await rejects(() => invoke(ipcWin.webContents.mainFrame, "app-dock-open", [site.base, { x: 0, y: 0, width: "1", height: 1 }]), "Invalid App Dock bounds")
     pass("U11", "malformed bounds rejected")
