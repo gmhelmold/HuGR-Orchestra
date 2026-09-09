@@ -112,6 +112,31 @@ const toCloneableAppDockEvent = (event: unknown): CloneableAppDockEvent => {
       },
     }
   }
+  if (source.type === "tab-opened") {
+    if (
+      Object.keys(source).length !== 2 ||
+      Object.keys(payload).length !== 4 ||
+      typeof payload.id !== "string" ||
+      payload.id.length === 0 ||
+      typeof payload.tabID !== "string" ||
+      payload.tabID.length === 0 ||
+      payload.id !== payload.tabID ||
+      !Number.isSafeInteger(payload.generation) ||
+      payload.generation < 1 ||
+      typeof payload.url !== "string"
+    ) {
+      throw new Error("Invalid App Dock event")
+    }
+    return {
+      type: "tab-opened",
+      payload: {
+        id: payload.id,
+        tabID: payload.tabID,
+        generation: payload.generation,
+        url: payload.url,
+      },
+    }
+  }
   if (source.type === "download") {
     const state = appDockEventString(payload.state)
     if (

@@ -14,6 +14,7 @@ export type AppDockFindResult = AppDockIdentity & { requestID: number; activeMat
 export type AppDockDownload = AppDockIdentity & { id: string; filename: string; receivedBytes: number; totalBytes: number; state: "progressing" | "paused" | "completed" | "cancelled" | "interrupted" }
 export type AppDockEvent =
   | Readonly<{ type: "state"; payload: AppDockState }>
+  | Readonly<{ type: "tab-opened"; payload: AppDockTab }>
   | Readonly<{ type: "download"; payload: AppDockDownload }>
   | Readonly<{ type: "fullscreen"; payload: { identity: AppDockIdentity; enabled: boolean } }>
   | Readonly<{ type: "navigation-error"; payload: { identity: AppDockIdentity; code: "blocked" | "failed"; url: string } }>
@@ -143,7 +144,9 @@ export function createAppDock() {
       view.webContents.setWindowOpenHandler(({ url }) => {
         try {
           const popupURL = appDockURL(url)
-          void open(senderID, win, popupURL, bounds, notify, profileStorage)
+          void open(senderID, win, popupURL, bounds, notify, profileStorage).then((tab) =>
+            notify(Object.freeze({ type: "tab-opened", payload: tab })),
+          )
         } catch {
           notify(Object.freeze({ type: "navigation-error", payload: Object.freeze({ identity: identity(id, tabGeneration), code: "blocked", url }) }))
         }

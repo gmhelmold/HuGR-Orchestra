@@ -55,6 +55,7 @@ export type AppDockEvent =
         audible: boolean
       }
     }
+  | { type: "tab-opened"; payload: { id: string; tabID: string; generation: number; url: string } }
   | {
       type: "download"
       payload: {
@@ -100,7 +101,7 @@ export type ElectronAPI = {
       error?: string
     }) => void,
   ) => () => void
-  appDockTabOpened: (callback: (tab: { id: string; url: string }) => void) => () => void
+  appDockTabOpened: (callback: (tab: { id: string; tabID: string; generation: number; url: string }) => void) => () => void
   appDockFind: (id: string, text: string, forward: boolean) => Promise<number>
   appDockStopFind: (id: string) => Promise<void>
   appDockFindResult: (

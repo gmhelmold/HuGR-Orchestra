@@ -33,8 +33,36 @@ const api: ElectronAPI = {
     })
   },
   appDockTabOpened: (callback) => {
-    void callback
-    return () => {}
+    const handler = (_event: unknown, appDockEvent: unknown) => {
+      if (!appDockEvent || typeof appDockEvent !== "object" || Array.isArray(appDockEvent)) return
+      const event = appDockEvent as Record<string, unknown>
+      if (
+        Object.keys(event).length !== 2 ||
+        event.type !== "tab-opened" ||
+        !event.payload ||
+        typeof event.payload !== "object" ||
+        Array.isArray(event.payload)
+      ) {
+        return
+      }
+      const tab = event.payload as Record<string, unknown>
+      if (
+        Object.keys(tab).length !== 4 ||
+        typeof tab.id !== "string" ||
+        tab.id.length === 0 ||
+        typeof tab.tabID !== "string" ||
+        tab.tabID.length === 0 ||
+        tab.id !== tab.tabID ||
+        !Number.isSafeInteger(tab.generation) ||
+        tab.generation < 1 ||
+        typeof tab.url !== "string"
+      ) {
+        return
+      }
+      callback({ id: tab.id, tabID: tab.tabID, generation: tab.generation, url: tab.url })
+    }
+    ipcRenderer.on("app-dock-event", handler)
+    return () => ipcRenderer.removeListener("app-dock-event", handler)
   },
   appDockFind: (id, text, forward) => ipcRenderer.invoke("app-dock-find", id, text, forward),
   appDockStopFind: (id) => ipcRenderer.invoke("app-dock-stop-find", id),
