@@ -12,9 +12,12 @@ const snapshotText = JSON.stringify({
       unit: 'Genesis owns bootstrap.',
       invariants: [{ nodeId: 'genesis:bootstrap', tier: 'T1', claim: 'Genesis bootstrap is deterministic.', freshness: 'FRESH' }],
       shape: { contents: ['packages/genesis/src/index.ts'], owner: 'atlas-foundation', tier: 'T1' },
-      edges: { dependents: [], dependencies: [] }, gotchas: [], memory: null,
+      edges: { dependents: [], dependencies: [] },
+      gotchas: [{ id: 'genesis:gotcha', kind: 'advisory', tier: 'T1', claimNorm: 'Bootstrap ordering matters.', freshness: 'FRESH' }],
+      memory: null,
       drill: { finer: [], refresh: { pull: 'poke:own_packages_genesis' }, complement: { pull: 'relate:packages/genesis' } },
-      grounding: { source: 'tree' }, tokenEstimate: 12, manifest: { pointers: [], truncated: false }, pullReachable: [], advisory: [], advisoryDropped: 0,
+      grounding: { source: 'tree' }, tokenEstimate: 12, manifest: { pointers: [], truncated: false }, pullReachable: [],
+      advisory: [{ nodeId: 'genesis:advisory', tier: 'T2', claim: 'Review bootstrap changes.', freshness: 'FRESH' }], advisoryDropped: 0,
     },
   }],
 });
@@ -36,11 +39,56 @@ describe('static Own snapshot', () => {
     expect(parseOwnSnapshot(JSON.stringify(duplicate))).toBeUndefined();
   });
 
-  it('exports only fresh reviewed packs, never an empty oracle', () => {
-    const value = JSON.parse(snapshotText);
-    expect(exportOwnSnapshot({ snapshot: value.snapshot, sourceRevision: value.sourceRevision, units: value.units })).toMatchObject({ schemaVersion: 1 });
-    value.units[0].pack.invariants[0].freshness = 'DRIFTED';
-    expect(() => exportOwnSnapshot({ snapshot: value.snapshot, sourceRevision: value.sourceRevision, units: value.units })).toThrow('Own snapshot export requires fresh reviewed packs');
+  it('accepts fresh reviewed input deterministically', () => {
+    const { snapshot, sourceRevision, units } = JSON.parse(snapshotText);
+    const input = { snapshot, sourceRevision, units };
+    const first = exportOwnSnapshot(input);
+    expect(first).toEqual({ schemaVersion: 1, ...input });
+    expect(exportOwnSnapshot(input)).toEqual(first);
+  });
+
+  it('refuses empty unit coverage', () => {
+    const { snapshot, sourceRevision } = JSON.parse(snapshotText);
+    expect(() => exportOwnSnapshot({ snapshot, sourceRevision, units: [] })).toThrow('Own snapshot export requires non-empty, unique units with fresh packs and source blobs');
+  });
+
+  it('refuses duplicate units', () => {
+    const { snapshot, sourceRevision, units } = JSON.parse(snapshotText);
+    expect(() => exportOwnSnapshot({ snapshot, sourceRevision, units: [units[0], structuredClone(units[0])] })).toThrow('Own snapshot export requires non-empty, unique units with fresh packs and source blobs');
+  });
+
+  it.each([
+    ['empty', {}],
+    ['malformed hash', { 'packages/genesis/src/index.ts': 'not-a-git-blob' }],
+    ['malformed path', { '../outside.ts': '0123456789abcdef0123456789abcdef01234567' }],
+  ])('refuses %s source blobs', (_case, sourceBlobs) => {
+    const { snapshot, sourceRevision, units } = JSON.parse(snapshotText);
+    units[0].sourceBlobs = sourceBlobs;
+    expect(() => exportOwnSnapshot({ snapshot, sourceRevision, units })).toThrow('Own snapshot export requires non-empty, unique units with fresh packs and source blobs');
+  });
+
+  it.each(['DRIFTED', 'STALE'])('refuses %s invariants', (freshness) => {
+    const { snapshot, sourceRevision, units } = JSON.parse(snapshotText);
+    units[0].pack.invariants[0].freshness = freshness;
+    expect(() => exportOwnSnapshot({ snapshot, sourceRevision, units })).toThrow('Own snapshot export requires fresh reviewed packs');
+  });
+
+  it.each(['DRIFTED', 'STALE'])('refuses %s advisory facts', (freshness) => {
+    const { snapshot, sourceRevision, units } = JSON.parse(snapshotText);
+    units[0].pack.advisory[0].freshness = freshness;
+    expect(() => exportOwnSnapshot({ snapshot, sourceRevision, units })).toThrow('Own snapshot export requires fresh reviewed packs');
+  });
+
+  it.each(['DRIFTED', 'STALE'])('refuses %s gotchas', (freshness) => {
+    const { snapshot, sourceRevision, units } = JSON.parse(snapshotText);
+    units[0].pack.gotchas[0].freshness = freshness;
+    expect(() => exportOwnSnapshot({ snapshot, sourceRevision, units })).toThrow('Own snapshot export requires fresh reviewed packs');
+  });
+
+  it('refuses malformed packs', () => {
+    const { snapshot, sourceRevision, units } = JSON.parse(snapshotText);
+    delete units[0].pack.shape;
+    expect(() => exportOwnSnapshot({ snapshot, sourceRevision, units })).toThrow('Own snapshot export requires non-empty, unique units with fresh packs and source blobs');
   });
 
   it('names prose and source-blob drift', () => {
