@@ -631,6 +631,10 @@
     padding: 4px;
   }
 
+  .zen-browser-shell.is-sidebar-collapsed .zen-browser-sidebar {
+    width: 48px;
+  }
+
   .zen-workspace:not(.is-active):not(.zen-workspace-add) {
     display: none;
   }
@@ -671,6 +675,10 @@
   .zen-browser-sidebar {
     width: auto;
     max-height: 150px;
+  }
+
+  .zen-browser-shell.is-sidebar-collapsed .zen-browser-sidebar {
+    width: 48px;
   }
 
   .zen-tabs {

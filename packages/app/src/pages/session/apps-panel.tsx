@@ -107,6 +107,7 @@ export function AppsPanel() {
   const [sidebarCollapsed, setSidebarCollapsed] = createSignal(localStorage.getItem(sidebarCollapsedKey) === "true")
   const [menu, setMenu] = createSignal<{ tab: Tab; x: number; y: number; invoker: HTMLButtonElement }>()
   let findRequestID: number | undefined
+  let root: HTMLDivElement | undefined
   let host: HTMLDivElement | undefined
   let addressInput: HTMLInputElement | undefined
   let resizeFrame: number | undefined
@@ -219,7 +220,8 @@ export function AppsPanel() {
     if (host) observer.observe(host)
     const onKeyDown = (event: KeyboardEvent) => {
       const target = event.target as HTMLElement | null
-      const editable = !!target?.closest("input, textarea, select, [contenteditable='true']")
+      if (!target || !root?.contains(target)) return
+      const editable = !!target.closest("input, textarea, select, [contenteditable]")
       if (event.key === "Escape") {
         if (menu()) closeMenu()
         else if (findOpen()) closeFind()
@@ -427,7 +429,7 @@ export function AppsPanel() {
     setActive(tab.id)
   }
   return (
-    <div class={`zen-browser-shell ${sidebarCollapsed() ? "is-sidebar-collapsed" : ""}`}>
+    <div ref={root} class={`zen-browser-shell ${sidebarCollapsed() ? "is-sidebar-collapsed" : ""}`}>
       <aside class="zen-browser-sidebar" aria-label="Browser workspaces">
         <div class="zen-workspace-indicator" aria-label="Current workspace">
           <button class="zen-sidebar-toggle" type="button" aria-label={sidebarCollapsed() ? "Expand sidebar" : "Collapse sidebar"} aria-pressed={sidebarCollapsed()} onClick={toggleSidebar}>||</button>
@@ -442,7 +444,7 @@ export function AppsPanel() {
           <button type="submit" aria-label="Save profile">+</button>
           <button type="button" aria-label="Cancel profile creation" onClick={() => setProfileCreating(false)}>x</button>
         </form>}
-        <div class="zen-tabs" aria-label="Tabs">
+        <div class="zen-tabs" role="tablist" aria-label="Tabs">
           {tabs().filter((tab) => tab.pinned).length > 0 && <div class="zen-tab-section-label">Pinned</div>}
           {tabs().filter((tab) => tab.pinned).map((tab) => <TabButton tab={tab} active={active} select={selectTab} setMenu={setMenu} />)}
           {tabs().filter((tab) => !tab.pinned).map((tab) => <TabButton tab={tab} active={active} select={selectTab} setMenu={setMenu} />)}
@@ -507,9 +509,17 @@ function TabButton(props: {
       event.preventDefault()
       const rect = event.currentTarget.getBoundingClientRect()
       openMenu(rect.left + 8, rect.bottom + 4, event.currentTarget)
+    } else if (["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) {
+      const tabs = [...(event.currentTarget.parentElement?.querySelectorAll<HTMLButtonElement>("[role='tab']") ?? [])]
+      const index = tabs.indexOf(event.currentTarget)
+      if (index < 0) return
+      const next = event.key === "Home" ? tabs[0] : event.key === "End" ? tabs.at(-1) : tabs[(index + (event.key === "ArrowRight" ? 1 : -1) + tabs.length) % tabs.length]
+      event.preventDefault()
+      next?.focus()
+      next?.click()
     }
   }
-  return <button class={`zen-tab ${props.active() === props.tab.id ? "is-active" : ""}`} type="button" role="tab" aria-selected={props.active() === props.tab.id} onClick={() => props.select(props.tab)} onContextMenu={(event) => { event.preventDefault(); openMenu(event.clientX, event.clientY, event.currentTarget) }} onKeyDown={keydown}><span class={`zen-tab-icon ${props.tab.loading ? "is-loading" : ""}`}>{props.tab.favicon ? <img src={props.tab.favicon} alt="" /> : new URL(props.tab.url).hostname.slice(0, 1).toUpperCase()}</span><span class="zen-tab-title">{tabLabel(props.tab)}</span>{props.tab.pinned ? "Pinned" : ""}{props.tab.audible && <span class="zen-tab-audio">&#9835;</span>}</button>
+  return <button class={`zen-tab ${props.active() === props.tab.id ? "is-active" : ""}`} type="button" role="tab" tabindex={props.active() === props.tab.id ? 0 : -1} aria-selected={props.active() === props.tab.id} onClick={() => props.select(props.tab)} onContextMenu={(event) => { event.preventDefault(); openMenu(event.clientX, event.clientY, event.currentTarget) }} onKeyDown={keydown}><span class={`zen-tab-icon ${props.tab.loading ? "is-loading" : ""}`}>{props.tab.favicon ? <img src={props.tab.favicon} alt="" /> : new URL(props.tab.url).hostname.slice(0, 1).toUpperCase()}</span><span class="zen-tab-title">{tabLabel(props.tab)}</span>{props.tab.pinned ? "Pinned" : ""}{props.tab.audible && <span class="zen-tab-audio">&#9835;</span>}</button>
 }
 
 function TabMenu(props: { tab: Tab; x: number; y: number; hasOthers: boolean; hasRight: boolean; onDuplicate: () => void; onTogglePin: () => void; onReload: () => void; onClose: () => void; onCloseOthers: () => void; onCloseRight: () => void }) {
