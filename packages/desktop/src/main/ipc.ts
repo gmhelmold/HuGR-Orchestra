@@ -364,6 +364,17 @@ export function registerIpcHandlers(deps: Deps) {
     if (typeof enabled !== "boolean") throw new Error("Invalid App Dock fullscreen state")
     appDock.fullscreen(event.sender.id, win, appDockID(tabID, "tab"), enabled)
   })
+  ipcMain.handle("app-dock-get-manifest", (event: IpcMainInvokeEvent) => {
+    appDockSender(event)
+    return appDockProfiles.manifest()
+  })
+  ipcMain.handle(
+    "app-dock-update-manifest",
+    (event: IpcMainInvokeEvent, expectedRevision: unknown, manifest: unknown) => {
+      appDockSender(event)
+      return appDockProfiles.replaceManifest(expectedRevision, manifest)
+    },
+  )
   ipcMain.handle("app-dock-delete-profile", async (event: IpcMainInvokeEvent, payload: unknown) => {
     const win = appDockSender(event)
     if (

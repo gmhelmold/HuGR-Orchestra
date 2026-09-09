@@ -74,6 +74,18 @@ export type AppDockEvent =
       payload: { identity: { tabID: string; generation: number }; code: "blocked" | "failed"; url: string }
     }
 
+export type AppDockManifest = {
+  version: 1
+  revision: number
+  profiles: { id: string; name: string }[]
+  activeProfileID: string
+  tabs: Record<string, { url: string; pinned: boolean }[]>
+  bookmarks: string[]
+  history: string[]
+}
+
+export type AppDockManifestUpdate = { status: "updated" | "conflict"; manifest: AppDockManifest }
+
 export type ElectronAPI = {
   appDockOpen: (
     url: string,
@@ -106,6 +118,8 @@ export type ElectronAPI = {
   appDockCancelDownload: (downloadID: string) => Promise<void>
   appDockOpenDownload: (downloadID: string) => Promise<void>
   appDockFullscreen: (tabID: string, enabled: boolean) => Promise<void>
+  appDockGetManifest: () => Promise<AppDockManifest>
+  appDockUpdateManifest: (expectedRevision: number, manifest: AppDockManifest) => Promise<AppDockManifestUpdate>
   killSidecar: () => Promise<void>
   installCli: () => Promise<string>
   awaitInitialization: () => Promise<ServerReadyData>

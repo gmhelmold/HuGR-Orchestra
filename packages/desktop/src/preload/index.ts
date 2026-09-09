@@ -37,6 +37,9 @@ const api: ElectronAPI = {
   appDockCancelDownload: (downloadID) => ipcRenderer.invoke("app-dock-cancel-download", downloadID),
   appDockOpenDownload: (downloadID) => ipcRenderer.invoke("app-dock-open-download", downloadID),
   appDockFullscreen: (tabID, enabled) => ipcRenderer.invoke("app-dock-fullscreen", tabID, enabled),
+  appDockGetManifest: () => ipcRenderer.invoke("app-dock-get-manifest"),
+  appDockUpdateManifest: (expectedRevision, manifest) =>
+    ipcRenderer.invoke("app-dock-update-manifest", expectedRevision, manifest),
   killSidecar: () => ipcRenderer.invoke("kill-sidecar"),
   installCli: () => ipcRenderer.invoke("install-cli"),
   awaitInitialization: () => ipcRenderer.invoke("await-initialization"),
