@@ -54,6 +54,7 @@ type AppDockEvent =
   | { type: "tab-crashed"; payload: { identity: TabIdentity; reason: "crashed" | "killed" | "oom" } }
   | { type: "tab-recovered"; payload: { tabID: string; generation: number; url: string } }
   | { type: "download"; payload: Download }
+  | { type: "permission"; payload: { identity: TabIdentity; permission: string; state: "denied" } }
   | { type: "fullscreen"; payload: { identity: TabIdentity; enabled: boolean } }
   | {
       type: "navigation-error"
@@ -131,6 +132,7 @@ export function AppsPanel() {
   const [findResult, setFindResult] = createSignal<{ requestID: number; activeMatchOrdinal: number; matches: number }>()
   const [downloads, setDownloads] = createSignal<Download[]>([])
   const [downloadsOpen, setDownloadsOpen] = createSignal(false)
+  const [permission, setPermission] = createSignal<{ permission: string; state: "denied" }>()
   const [fullscreen, setFullscreen] = createSignal(false)
   const [recovering, setRecovering] = createSignal<TabIdentity>()
   const [sidebarCollapsed, setSidebarCollapsed] = createSignal(localStorage.getItem(sidebarCollapsedKey) === "true")
@@ -302,6 +304,8 @@ export function AppsPanel() {
       } else if (event.type === "download") {
         if (!tabs().some((tab) => sameTab(tab, event.payload))) return
         setDownloads((items) => [event.payload, ...items.filter((item) => item.id !== event.payload.id)].slice(0, 20))
+      } else if (event.type === "permission" && sameTab(event.payload.identity, active())) {
+        setPermission({ permission: event.payload.permission, state: event.payload.state })
       } else if (event.type === "fullscreen" && sameTab(event.payload.identity, active())) {
         setFullscreen(event.payload.enabled)
       }
@@ -752,6 +756,11 @@ export function AppsPanel() {
         {error() && (
           <div class="zen-error" role="alert" aria-live="assertive">
             {error()}
+          </div>
+        )}
+        {permission() && (
+          <div class="zen-error" role="status" aria-live="polite">
+            {`${permission()!.permission} permission ${permission()!.state}`}
           </div>
         )}
         {activeCrashed() && (

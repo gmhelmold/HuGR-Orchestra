@@ -192,6 +192,13 @@ const toCloneableAppDockEvent = (event: unknown): CloneableAppDockEvent => {
       },
     }
   }
+  if (source.type === "permission") {
+    if (!hasExactKeys(payload, ["identity", "permission", "state"])) throw new Error("Invalid App Dock event")
+    const identity = appDockEventIdentity(payload.identity)
+    const permission = appDockEventString(payload.permission)
+    if (!/^[a-z-]{1,64}$/.test(permission) || payload.state !== "denied") throw new Error("Invalid App Dock event")
+    return { type: "permission", payload: { identity: { ...identity }, permission, state: "denied" } }
+  }
   if (source.type === "fullscreen") {
     if (!hasExactKeys(payload, ["identity", "enabled"])) throw new Error("Invalid App Dock event")
     const identity = appDockEventIdentity(payload.identity)

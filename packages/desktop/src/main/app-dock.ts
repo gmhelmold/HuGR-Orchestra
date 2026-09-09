@@ -1,4 +1,4 @@
-import { session, shell, WebContentsView } from "electron"
+import { app, session, shell, WebContentsView } from "electron"
 import type { BrowserWindow, Session } from "electron"
 import { randomUUID } from "node:crypto"
 import type { EventEmitter } from "node:events"
@@ -37,6 +37,10 @@ export type AppDockEvent =
     }>
   | Readonly<{ type: "tab-recovered"; payload: AppDockTab }>
   | Readonly<{ type: "download"; payload: AppDockDownload }>
+  | Readonly<{
+      type: "permission"
+      payload: { identity: AppDockIdentity; permission: string; state: "denied" }
+    }>
   | Readonly<{ type: "fullscreen"; payload: { identity: AppDockIdentity; enabled: boolean } }>
   | Readonly<{
       type: "navigation-error"
@@ -66,7 +70,8 @@ const MAX_INACTIVE_TABS = 20
 const MAX_PROGRESSING_DOWNLOADS_PER_PROFILE = 8
 const MAX_TERMINAL_DOWNLOADS_PER_SENDER = 20
 
-export function createAppDock() {
+export function createAppDock(options: { developmentMode?: () => boolean } = {}) {
+  const developmentMode = options.developmentMode ?? (() => !app.isPackaged)
   const browserSessions = new Map<string, Session>()
   const configuredPartitions = new Set<string>()
   const retiredStorageKeys = new Set<string>()
@@ -163,8 +168,29 @@ export function createAppDock() {
     const browserSession = browserSessions.get(partition) ?? session.fromPartition(partition)
     browserSessions.set(partition, browserSession)
     if (!configuredPartitions.has(partition)) {
-      browserSession.setPermissionRequestHandler((_webContents, _permission, callback) => callback(false))
-      browserSession.setPermissionCheckHandler(() => false)
+      const denyPermission = (webContents: Electron.WebContents, permission: string) => {
+        const source = tabByContents.get(webContents.id)
+        const record = source && tabs.get(source.senderID)?.get(source.tabID)
+        if (!source || !record || record.generation !== source.generation) return
+        record.notify(
+          Object.freeze({
+            type: "permission",
+            payload: Object.freeze({
+              identity: identity(source.tabID, source.generation),
+              permission,
+              state: "denied",
+            }),
+          }),
+        )
+      }
+      browserSession.setPermissionRequestHandler((webContents, permission, callback) => {
+        if (webContents) denyPermission(webContents, permission)
+        callback(false)
+      })
+      browserSession.setPermissionCheckHandler((webContents, permission) => {
+        if (webContents) denyPermission(webContents, permission)
+        return false
+      })
       browserSession.on("will-download", (_event, item, webContents) => {
         const source = tabByContents.get(webContents.id)
         const record = source && tabs.get(source.senderID)?.get(source.tabID)
@@ -292,6 +318,14 @@ export function createAppDock() {
       reportCrash(details.reason === "killed" ? "killed" : details.reason === "oom" ? "oom" : "crashed"),
     )
     listen("crashed", (_event, killed) => reportCrash(killed ? "killed" : "crashed"))
+    listen("before-input-event", (event, input) => {
+      if (input.type !== "keyDown") return
+      if (input.key === "F12" || ((input.control || input.meta) && input.shift && input.key.toLowerCase() === "i"))
+        event.preventDefault()
+    })
+    listen("devtools-opened", () => {
+      if (!developmentMode()) view.webContents.closeDevTools()
+    })
     listen("media-started-playing", () => update({ audible: true }))
     listen("media-paused", () => update({ audible: false }))
     view.webContents.setWindowOpenHandler(({ url }) => {
@@ -526,6 +560,12 @@ export function createAppDock() {
       if (!download || download.senderID !== senderID || download.state.state !== "completed")
         throw new Error("Unknown App Dock download")
       return shell.openPath(download.item.getSavePath())
+    },
+    openDevTools(senderID: number, tabID: string) {
+      if (!developmentMode()) throw new Error("App Dock DevTools are disabled in production")
+      const record = tabs.get(senderID)?.get(tabID)
+      if (!record) throw new Error("Unknown App Dock tab")
+      record.view.webContents.openDevTools({ mode: "detach" })
     },
     async deleteStorage(storageKey: string, _win?: BrowserWindow) {
       const partition = storagePartition(storageKey)

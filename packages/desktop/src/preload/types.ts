@@ -73,6 +73,10 @@ export type AppDockEvent =
         state: "progressing" | "paused" | "completed" | "cancelled" | "interrupted"
       }
     }
+  | {
+      type: "permission"
+      payload: { identity: { tabID: string; generation: number }; permission: string; state: "denied" }
+    }
   | { type: "fullscreen"; payload: { identity: { tabID: string; generation: number }; enabled: boolean } }
   | {
       type: "navigation-error"

@@ -36,6 +36,8 @@ const required = [
   "U26",
   "U27",
   "U28",
+  "U29",
+  "U30",
 ]
 const root = resolve(import.meta.dir, "../..")
 const artifact = join(process.env.APP_DOCK_ARTIFACT_ROOT ?? root, "artifacts/app-dock/s1.json")
@@ -394,6 +396,7 @@ async function child() {
   app.setPath("userData", temp)
   const site = await fixture()
   const { registerIpcHandlers } = ipcModule
+  const { createAppDock } = await import("./app-dock")
   registerIpcHandlers({
     killSidecar() {},
     relaunch() {},
@@ -582,6 +585,20 @@ async function child() {
       "permission request/check denial state",
     )
     pass("U07", "real permission request and permission check both deny")
+    const permissionEvent = await waitEvent(
+      u07Start,
+      (event) =>
+        event.type === "permission" &&
+        event.payload.identity.tabID === tab.tabID &&
+        /^[a-z-]{1,64}$/.test(event.payload.permission) &&
+        event.payload.state === "denied",
+      "permission denial UI state",
+    )
+    check(
+      Object.keys(permissionEvent.payload).length === 3 && !JSON.stringify(permissionEvent).includes(temp),
+      "permission event exposes sensitive data",
+    )
+    pass("U29", "permission denial emits cloneable App Dock UI state without storage data")
 
     await readEvents()
     const error = events.find((event) => event.type === "navigation-error")
@@ -1139,8 +1156,40 @@ async function child() {
       await invoke(ipcWinB.webContents.mainFrame, "app-dock-close-tab", [tab.tabID])
     pass(
       "U28",
-      "20 inactive views across two windows use global LRU: selecting A0 retains it while opening one more evicts older B0; active views remain usable; nine real same-profile slow downloads admit eight, cancel one, and expose no filesystem path",
+      "20 inactive views across two windows use global LRU: selecting A0 retains it while opening one more evicts older B0; active views remain usable; nine real same-profile slow downloads admit eight, cancel safely, and expose no filesystem path",
     )
+
+    const devDock = createAppDock({ developmentMode: () => true })
+    const devProfile = { storageKey: "12345678-1234-4123-8123-123456789abc" }
+    const devTab = await devDock.open(ipcWin.webContents.id, ipcWin, site.base, bounds, () => {}, devProfile)
+    const devContents = attachedContents(ipcWin)
+    check(devContents && !devContents.isDevToolsOpened(), "App Dock DevTools opened without trusted route")
+    devContents.sendInputEvent({ type: "keyDown", keyCode: "F12" })
+    await new Promise<void>((resolve) => setTimeout(resolve, 100))
+    check(!devContents.isDevToolsOpened(), "ordinary App Dock user input opened DevTools")
+    await rejects(
+      () => invoke(ipcWin.webContents.mainFrame, "app-dock-open-devtools", [devTab.tabID]),
+      "No handler registered",
+    )
+    devDock.openDevTools(ipcWin.webContents.id, devTab.tabID)
+    await waitFor(() => devContents.isDevToolsOpened(), "trusted development DevTools route")
+    devContents.closeDevTools()
+    devDock.close(ipcWin.webContents.id)
+    const productionDock = createAppDock({ developmentMode: () => false })
+    const productionTab = await productionDock.open(
+      ipcWin.webContents.id,
+      ipcWin,
+      site.base,
+      bounds,
+      () => {},
+      { storageKey: "abcdef12-1234-4123-8123-123456789abc" },
+    )
+    await rejects(
+      () => productionDock.openDevTools(ipcWin.webContents.id, productionTab.tabID),
+      "App Dock DevTools are disabled in production",
+    )
+    productionDock.close(ipcWin.webContents.id)
+    pass("U30", "renderer, content, and ordinary input cannot open DevTools; trusted development main route can; production refuses")
 
     check(
       cases.length === required.length &&
