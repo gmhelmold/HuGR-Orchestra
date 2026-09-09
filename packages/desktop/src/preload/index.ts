@@ -16,77 +16,27 @@ const api: ElectronAPI = {
   appDockResize: (bounds) => ipcRenderer.invoke("app-dock-resize", bounds),
   appDockHide: () => ipcRenderer.invoke("app-dock-hide"),
   appDockClose: () => ipcRenderer.invoke("app-dock-close"),
-  appDockCloseTab: (id) => ipcRenderer.invoke("app-dock-close-tab", id),
-  appDockCloseTabs: (id, scope, order) => ipcRenderer.invoke("app-dock-close-tabs", id, scope, order),
-  appDockSelect: (id, bounds) => ipcRenderer.invoke("app-dock-select", id, bounds),
-  appDockNavigate: (id, url) => ipcRenderer.invoke("app-dock-navigate", id, url),
-  appDockCommand: (id, command) => ipcRenderer.invoke("app-dock-command", id, command),
+  appDockCloseTab: (tabID) => ipcRenderer.invoke("app-dock-close-tab", tabID),
+  appDockCloseTabs: (tabID, scope, order) => ipcRenderer.invoke("app-dock-close-tabs", tabID, scope, order),
+  appDockSelect: (tabID, bounds) => ipcRenderer.invoke("app-dock-select", tabID, bounds),
+  appDockNavigate: (tabID, url) => ipcRenderer.invoke("app-dock-navigate", tabID, url),
+  appDockCommand: (tabID, command) => ipcRenderer.invoke("app-dock-command", tabID, command),
   appDockEvent: (callback) => {
     const handler = (_event: unknown, appDockEvent: Parameters<typeof callback>[0]) => callback(appDockEvent)
     ipcRenderer.on("app-dock-event", handler)
     return () => ipcRenderer.removeListener("app-dock-event", handler)
   },
-  // Legacy adapters exist for apps-panel until its S2 event-envelope migration.
-  appDockState: (callback) => {
-    return api.appDockEvent((appDockEvent) => {
-      if (appDockEvent.type === "state") callback({ ...appDockEvent.payload, id: appDockEvent.payload.tabID })
-    })
-  },
-  appDockTabOpened: (callback) => {
-    const handler = (_event: unknown, appDockEvent: unknown) => {
-      if (!appDockEvent || typeof appDockEvent !== "object" || Array.isArray(appDockEvent)) return
-      const event = appDockEvent as Record<string, unknown>
-      if (
-        Object.keys(event).length !== 2 ||
-        event.type !== "tab-opened" ||
-        !event.payload ||
-        typeof event.payload !== "object" ||
-        Array.isArray(event.payload)
-      ) {
-        return
-      }
-      const tab = event.payload as Record<string, unknown>
-      if (
-        Object.keys(tab).length !== 4 ||
-        typeof tab.id !== "string" ||
-        tab.id.length === 0 ||
-        typeof tab.tabID !== "string" ||
-        tab.tabID.length === 0 ||
-        tab.id !== tab.tabID ||
-        typeof tab.generation !== "number" ||
-        !Number.isSafeInteger(tab.generation) ||
-        tab.generation < 1 ||
-        typeof tab.url !== "string"
-      ) {
-        return
-      }
-      callback({ id: tab.id, tabID: tab.tabID, generation: tab.generation, url: tab.url })
-    }
-    ipcRenderer.on("app-dock-event", handler)
-    return () => ipcRenderer.removeListener("app-dock-event", handler)
-  },
-  appDockFind: (id, text, forward) => ipcRenderer.invoke("app-dock-find", id, text, forward),
-  appDockStopFind: (id) => ipcRenderer.invoke("app-dock-stop-find", id),
+  appDockFind: (tabID, text, forward) => ipcRenderer.invoke("app-dock-find", tabID, text, forward),
+  appDockStopFind: (tabID) => ipcRenderer.invoke("app-dock-stop-find", tabID),
   appDockFindResult: (callback) => {
     const handler = (_event: unknown, result: Parameters<typeof callback>[0]) => callback(result)
     ipcRenderer.on("app-dock-find-result", handler)
     return () => ipcRenderer.removeListener("app-dock-find-result", handler)
   },
-  appDockZoom: (id, factor) => ipcRenderer.invoke("app-dock-zoom", id, factor),
-  appDockCancelDownload: (id) => ipcRenderer.invoke("app-dock-cancel-download", id),
-  appDockOpenDownload: (id) => ipcRenderer.invoke("app-dock-open-download", id),
-  appDockDownload: (callback) => {
-    return api.appDockEvent((appDockEvent) => {
-      if (appDockEvent.type === "download") callback(appDockEvent.payload)
-    })
-  },
-  appDockFullscreen: (id, enabled) => ipcRenderer.invoke("app-dock-fullscreen", id, enabled),
-  appDockFullscreenChanged: (callback) => {
-    return api.appDockEvent((appDockEvent) => {
-      if (appDockEvent.type === "fullscreen")
-        callback({ tabID: appDockEvent.payload.identity.tabID, enabled: appDockEvent.payload.enabled })
-    })
-  },
+  appDockZoom: (tabID, factor) => ipcRenderer.invoke("app-dock-zoom", tabID, factor),
+  appDockCancelDownload: (downloadID) => ipcRenderer.invoke("app-dock-cancel-download", downloadID),
+  appDockOpenDownload: (downloadID) => ipcRenderer.invoke("app-dock-open-download", downloadID),
+  appDockFullscreen: (tabID, enabled) => ipcRenderer.invoke("app-dock-fullscreen", tabID, enabled),
   killSidecar: () => ipcRenderer.invoke("kill-sidecar"),
   installCli: () => ipcRenderer.invoke("install-cli"),
   awaitInitialization: () => ipcRenderer.invoke("await-initialization"),

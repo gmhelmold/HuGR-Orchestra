@@ -55,7 +55,7 @@ export type AppDockEvent =
         audible: boolean
       }
     }
-  | { type: "tab-opened"; payload: { id: string; tabID: string; generation: number; url: string } }
+  | { type: "tab-opened"; payload: { tabID: string; generation: number; url: string } }
   | {
       type: "download"
       payload: {
@@ -79,57 +79,33 @@ export type ElectronAPI = {
     url: string,
     bounds: { x: number; y: number; width: number; height: number },
     profile?: string,
-  ) => Promise<{ id: string; tabID: string; generation: number; url: string }>
+  ) => Promise<{ tabID: string; generation: number; url: string }>
   appDockDeleteProfile: (profileID: string) => Promise<void>
   appDockResize: (bounds: { x: number; y: number; width: number; height: number }) => Promise<void>
   appDockHide: () => Promise<void>
   appDockClose: () => Promise<void>
-  appDockCloseTab: (id: string) => Promise<void>
-  appDockCloseTabs: (id: string, scope: "others" | "right", order?: string[]) => Promise<void>
-  appDockSelect: (id: string, bounds: { x: number; y: number; width: number; height: number }) => Promise<void>
-  appDockNavigate: (id: string, url: string) => Promise<void>
-  appDockCommand: (id: string, command: "back" | "forward" | "reload") => Promise<void>
+  appDockCloseTab: (tabID: string) => Promise<void>
+  appDockCloseTabs: (tabID: string, scope: "others" | "right", order?: string[]) => Promise<void>
+  appDockSelect: (tabID: string, bounds: { x: number; y: number; width: number; height: number }) => Promise<void>
+  appDockNavigate: (tabID: string, url: string) => Promise<void>
+  appDockCommand: (tabID: string, command: "back" | "forward" | "reload") => Promise<void>
   appDockEvent: (callback: (event: AppDockEvent) => void) => () => void
-  appDockState: (
-    callback: (state: {
-      id: string
-      url: string
-      title: string
-      favicon?: string
-      loading: boolean
-      audible: boolean
-      error?: string
-    }) => void,
-  ) => () => void
-  appDockTabOpened: (
-    callback: (tab: { id: string; tabID: string; generation: number; url: string }) => void,
-  ) => () => void
-  appDockFind: (id: string, text: string, forward: boolean) => Promise<number>
-  appDockStopFind: (id: string) => Promise<void>
+  appDockFind: (tabID: string, text: string, forward: boolean) => Promise<number>
+  appDockStopFind: (tabID: string) => Promise<void>
   appDockFindResult: (
     callback: (result: {
       tabID: string
+      generation: number
       requestID: number
       activeMatchOrdinal: number
       matches: number
       finalUpdate: boolean
     }) => void,
   ) => () => void
-  appDockZoom: (id: string, factor?: number) => Promise<number>
-  appDockCancelDownload: (id: string) => Promise<void>
-  appDockOpenDownload: (id: string) => Promise<void>
-  appDockDownload: (
-    callback: (download: {
-      id: string
-      tabID: string
-      filename: string
-      receivedBytes: number
-      totalBytes: number
-      state: "progressing" | "paused" | "completed" | "cancelled" | "interrupted"
-    }) => void,
-  ) => () => void
-  appDockFullscreen: (id: string, enabled: boolean) => Promise<void>
-  appDockFullscreenChanged: (callback: (state: { tabID: string; enabled: boolean }) => void) => () => void
+  appDockZoom: (tabID: string, factor?: number) => Promise<number>
+  appDockCancelDownload: (downloadID: string) => Promise<void>
+  appDockOpenDownload: (downloadID: string) => Promise<void>
+  appDockFullscreen: (tabID: string, enabled: boolean) => Promise<void>
   killSidecar: () => Promise<void>
   installCli: () => Promise<string>
   awaitInitialization: () => Promise<ServerReadyData>

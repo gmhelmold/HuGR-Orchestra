@@ -95,15 +95,39 @@ const appDockEventOptionalString = (value: unknown) => {
   return appDockEventString(value)
 }
 
+const hasExactKeys = (value: Record<string, unknown>, keys: string[]) =>
+  Object.keys(value).length === keys.length && keys.every((key) => Object.hasOwn(value, key))
+
+const appDockEventIdentity = (value: unknown) => {
+  const identity = appDockEventRecord(value)
+  if (
+    !hasExactKeys(identity, ["tabID", "generation"]) ||
+    typeof identity.tabID !== "string" ||
+    identity.tabID.length === 0 ||
+    !Number.isSafeInteger(identity.generation) ||
+    appDockEventNumber(identity.generation) < 1
+  ) {
+    throw new Error("Invalid App Dock event")
+  }
+  return { tabID: identity.tabID, generation: identity.generation }
+}
+
 const toCloneableAppDockEvent = (event: unknown): CloneableAppDockEvent => {
   const source = appDockEventRecord(event)
   const payload = appDockEventRecord(source.payload)
+  if (!hasExactKeys(source, ["type", "payload"])) throw new Error("Invalid App Dock event")
   if (source.type === "state") {
+    if (!(
+      hasExactKeys(payload, ["tabID", "generation", "url", "title", "loading", "audible"]) ||
+      hasExactKeys(payload, ["tabID", "generation", "url", "title", "favicon", "loading", "audible"])
+    )) {
+      throw new Error("Invalid App Dock event")
+    }
+    const identity = appDockEventIdentity(payload)
     return {
       type: "state",
       payload: {
-        tabID: appDockEventString(payload.tabID),
-        generation: appDockEventNumber(payload.generation),
+        ...identity,
         url: appDockEventString(payload.url),
         title: appDockEventString(payload.title),
         favicon: appDockEventOptionalString(payload.favicon),
@@ -114,13 +138,9 @@ const toCloneableAppDockEvent = (event: unknown): CloneableAppDockEvent => {
   }
   if (source.type === "tab-opened") {
     if (
-      Object.keys(source).length !== 2 ||
-      Object.keys(payload).length !== 4 ||
-      typeof payload.id !== "string" ||
-      payload.id.length === 0 ||
+      !hasExactKeys(payload, ["tabID", "generation", "url"]) ||
       typeof payload.tabID !== "string" ||
       payload.tabID.length === 0 ||
-      payload.id !== payload.tabID ||
       !Number.isSafeInteger(payload.generation) ||
       appDockEventNumber(payload.generation) < 1 ||
       typeof payload.url !== "string"
@@ -130,7 +150,6 @@ const toCloneableAppDockEvent = (event: unknown): CloneableAppDockEvent => {
     return {
       type: "tab-opened",
       payload: {
-        id: payload.id,
         tabID: payload.tabID,
         generation: appDockEventNumber(payload.generation),
         url: payload.url,
@@ -138,6 +157,8 @@ const toCloneableAppDockEvent = (event: unknown): CloneableAppDockEvent => {
     }
   }
   if (source.type === "download") {
+    if (!hasExactKeys(payload, ["id", "tabID", "generation", "filename", "receivedBytes", "totalBytes", "state"]))
+      throw new Error("Invalid App Dock event")
     const state = appDockEventString(payload.state)
     if (
       state !== "progressing" &&
@@ -148,12 +169,12 @@ const toCloneableAppDockEvent = (event: unknown): CloneableAppDockEvent => {
     ) {
       throw new Error("Invalid App Dock event")
     }
+    const identity = appDockEventIdentity(payload)
     return {
       type: "download",
       payload: {
         id: appDockEventString(payload.id),
-        tabID: appDockEventString(payload.tabID),
-        generation: appDockEventNumber(payload.generation),
+        ...identity,
         filename: appDockEventString(payload.filename),
         receivedBytes: appDockEventNumber(payload.receivedBytes),
         totalBytes: appDockEventNumber(payload.totalBytes),
@@ -162,28 +183,28 @@ const toCloneableAppDockEvent = (event: unknown): CloneableAppDockEvent => {
     }
   }
   if (source.type === "fullscreen") {
-    const identity = appDockEventRecord(payload.identity)
+    if (!hasExactKeys(payload, ["identity", "enabled"])) throw new Error("Invalid App Dock event")
+    const identity = appDockEventIdentity(payload.identity)
     return {
       type: "fullscreen",
       payload: {
         identity: {
-          tabID: appDockEventString(identity.tabID),
-          generation: appDockEventNumber(identity.generation),
+          ...identity,
         },
         enabled: appDockEventBoolean(payload.enabled),
       },
     }
   }
   if (source.type === "navigation-error") {
-    const identity = appDockEventRecord(payload.identity)
+    if (!hasExactKeys(payload, ["identity", "code", "url"])) throw new Error("Invalid App Dock event")
+    const identity = appDockEventIdentity(payload.identity)
     const code = appDockEventString(payload.code)
     if (code !== "blocked" && code !== "failed") throw new Error("Invalid App Dock event")
     return {
       type: "navigation-error",
       payload: {
         identity: {
-          tabID: appDockEventString(identity.tabID),
-          generation: appDockEventNumber(identity.generation),
+          ...identity,
         },
         code,
         url: appDockEventString(payload.url),

@@ -6,8 +6,7 @@ import { appDockURL, appDockZoom, panelBoundsToContent, type DockBounds } from "
 export type { DockBounds } from "./app-dock-utils"
 
 export type AppDockIdentity = Readonly<{ tabID: string; generation: number }>
-// Remove `id` after bridge migrates to `tabID` in App Dock S2.
-export type AppDockTab = AppDockIdentity & { id: string; url: string }
+export type AppDockTab = AppDockIdentity & { url: string }
 export type ProfileStorage = Readonly<{ storageKey: string }>
 export type AppDockState = AppDockIdentity & {
   url: string
@@ -297,7 +296,7 @@ export function createAppDock() {
         ),
       )
     update({})
-    return Object.freeze({ ...identity(id, tabGeneration), id, url: target })
+    return Object.freeze({ ...identity(id, tabGeneration), url: target })
   }
   return {
     open,
