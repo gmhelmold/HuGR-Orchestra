@@ -16,6 +16,7 @@ import { MessageID, PartID } from "../../src/session/schema"
 import { SessionRunState } from "@/session/run-state"
 import { SessionStatus } from "@/session/status"
 import { TaskTool, type TaskPromptOps } from "../../src/tool/task"
+import { MaestroPresentApprovalTool } from "../../src/tool/maestro-approval"
 import { Truncate } from "@/tool/truncate"
 import { ToolRegistry } from "@/tool/registry"
 import { RuntimeFlags } from "@/effect/runtime-flags"
@@ -271,6 +272,44 @@ describe("Maestro governed lifecycle", () => {
       expect(maestroTools.map((tool) => tool.id)).toContain("maestro_present_approval")
       expect(maestroTools.map((tool) => tool.id)).toContain("maestro_record_approval")
       expect(maestroTools.map((tool) => tool.id)).toContain("maestro_record_admission")
+    }),
+  )
+
+  it.instance("refuses model-supplied validation until durable validation reader exists", () =>
+    Effect.gen(function* () {
+      const { chat, assistant } = yield* seed()
+      const tool = yield* MaestroPresentApprovalTool
+      const def = yield* tool.init()
+      const exit = yield* Effect.exit(
+        def.execute(
+          {
+            planRevisionID: "plan_v1",
+            validationRecordID: "val_v1",
+            revisionHash: "revision-hash",
+            validationHash: "validation-hash",
+            contextHash: "context-hash",
+            policyHash: "policy-hash",
+            intent: { subagentType: "general", prompt: "implement dark mode" },
+            methodVersion: "request-approval-v1",
+            plan: "implement dark mode",
+            provenance: "test",
+            assumptions: [],
+            validationLedger: "VALID",
+            contextState: "CURRENT",
+          },
+          {
+            sessionID: chat.id,
+            messageID: assistant.id,
+            callID: "call_present",
+            agent: "maestro",
+            abort: new AbortController().signal,
+            messages: [],
+            metadata: () => Effect.void,
+            ask: () => Effect.void,
+          },
+        ),
+      )
+      expect(Exit.isFailure(exit)).toBe(true)
     }),
   )
 

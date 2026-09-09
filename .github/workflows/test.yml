@@ -96,6 +96,9 @@ jobs:
           npm run service-gate-guard
           npm run own-snapshot-guard
 
+      - name: Test Own snapshot materializer
+        run: node --test scripts/materialize-own-snapshot.test.mjs
+
       - name: Test Own snapshot gate
         run: npm test -- harness/gates/own-snapshot-guard.test.mjs
 

@@ -96,7 +96,7 @@ function seed(presentationOutput?: (output: string) => string) {
       model,
       time: { created: 4 },
     })
-    return { session, sessions, reply }
+    return { session, sessions, assistant, reply }
   })
 }
 
@@ -132,6 +132,67 @@ describe("Maestro approval record", () => {
       })
 
       expect(yield* recordApproval(session.id)).toEqual({ status: "HOLD", reason: "presentation-message-mismatch" })
+    }),
+  )
+
+  it.instance("holds when discussion intervenes before direct approval", () =>
+    Effect.gen(function* () {
+      const { session, sessions, reply } = yield* seed()
+      const intervening: SessionV1.Assistant = {
+        id: MessageID.ascending(),
+        role: "assistant",
+        parentID: reply.id,
+        sessionID: session.id,
+        mode: "maestro",
+        agent: "maestro",
+        cost: 0,
+        path: { cwd: "/tmp", root: "/tmp" },
+        tokens: { input: 0, output: 0, reasoning: 0, cache: { read: 0, write: 0 } },
+        modelID: model.modelID,
+        providerID: model.providerID,
+        time: { created: 3 },
+      }
+      yield* sessions.updateMessage(intervening)
+      yield* sessions.updatePart({
+        id: PartID.ascending(),
+        sessionID: session.id,
+        messageID: reply.id,
+        type: "text",
+        text: "approve",
+      })
+
+      expect(yield* recordApproval(session.id)).toEqual({ status: "HOLD", reason: "reply-not-immediate" })
+    }),
+  )
+
+  it.instance("replays one presentation for same revision after a retried tool call", () =>
+    Effect.gen(function* () {
+      const { session, sessions, assistant } = yield* seed()
+      const retry: SessionV1.Assistant = { ...assistant, id: MessageID.ascending(), time: { created: 3 } }
+      yield* sessions.updateMessage(retry)
+
+      const replay = yield* presentApprovalFromSession({
+        sessionID: session.id,
+        assistantMessageID: retry.id,
+        callID: "call_retry",
+        memberID: "maestro",
+        planRevisionID: "plan_v1",
+        validationRecordID: "val_v1",
+        revisionHash: "revision-hash",
+        validationHash: "validation-hash",
+        contextHash: "context-hash",
+        policyHash: "policy-hash",
+        taskHash: "task-hash",
+        intent: { subagentType: "general", prompt: "Add dark mode." },
+        methodVersion: "request-approval-v1",
+        plan: "Add dark mode.",
+        provenance: "request msg_01",
+        assumptions: [],
+        validationLedger: "val_v1: VALID",
+        contextState: "CURRENT",
+      })
+
+      expect(replay.assistantMessageID).toBe(assistant.id)
     }),
   )
 })

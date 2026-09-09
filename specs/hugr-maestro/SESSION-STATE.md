@@ -9,11 +9,13 @@ Updated: 2026-09-09. Status: clean rebuild staged on `fork/dev`; Maestro governe
 - Canonical checkout `/Users/gustavoschneiter/Documents/HuGR/orchestra-canonical` remains on external dirty branch `perf-lazy-persist-gate`; do not modify it.
 - Clean Atlas vendor commit `e03736f521` imports Atlas `b319723` while excluding root `foundation/atlas/.atlas/**` Genesis output. `git ls-tree -r HEAD -- foundation/atlas/.atlas` returns `0`.
 - Own commits end at `4859d9effb`: snapshot provenance binds to reachable vendor commit `e03736f521`; `npm run typecheck`, materializer tests 10/10, focused Own tests 35/35, and guard tests 14/14 pass.
-- Maestro commits end at `b298eaee50`: `packages/opencode` typecheck passes; Maestro lifecycle 29/29 and task/reminders 28/28 pass.
+- Cold review found model-supplied plan/validation fields could forge governed approval. `maestro_present_approval` now refuses until durable plan-revision and validation readers exist; governed Task remains an internal exact-event fence, not a usable runtime authority. Approval reply now refuses intervening discussion; presentation retry deduplicates by contract key.
+- Cold review found materializer tests absent from CI. Atlas job now runs `node --test scripts/materialize-own-snapshot.test.mjs` before gate tests.
+- Mutation probe removed direct-reply fence: new intervening-discussion test failed `APPROVED`; restored fence passes. `packages/opencode` typecheck passes; focused Maestro suite 48/48, Atlas materializer 10/10, Own guard 14/14, and Godfile tests 9/9 pass.
 - Atlas baseline test expectations corrected at `44216b11fe`; three formerly failing files now pass 22/22.
 - Vendor whitespace corrected at `35d197bad8`; `git diff --check fork/dev..HEAD` passes.
 - CI/Godfile commit `4035d51621`; explicit lifecycle waiver update `46210c7e9`. `GODFILE_BASE_REF=fork/dev bun run check:godfile` reports 0 errors; Godfile tests 9/9 pass.
-- Remaining work: remove isolated `atlas-b319-baseline` worktree/branch, run independent cold review of `fork/dev..HEAD`, then push branch and open PR against `fork/dev`. Do not self-approve or merge.
+- `atlas-b319-baseline` worktree/branch is absent. Remaining work: commit cold-review fixes, run independent cold review of `fork/dev..HEAD`, then push branch and open PR against `fork/dev`. Do not self-approve or merge.
 
 ## Goal
 

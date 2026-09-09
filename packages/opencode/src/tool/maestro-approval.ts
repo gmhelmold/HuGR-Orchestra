@@ -1,11 +1,8 @@
 import { Effect, Schema } from "effect"
-import { presentApprovalFromSession, recordApproval } from "@/maestro/approval-record"
-import { renderPresentation } from "@/maestro/approval"
+import { recordApproval } from "@/maestro/approval-record"
 import { Database } from "@opencode-ai/core/database/database"
 import { EventV2Bridge } from "@/event-v2-bridge"
-import { Session } from "@/session/session"
 import { Agent } from "@/agent/agent"
-import { taskHash } from "@/maestro/task-hash"
 import * as Tool from "./tool"
 
 const PresentationParameters = Schema.Struct({
@@ -32,43 +29,19 @@ const PresentationParameters = Schema.Struct({
 export const MaestroPresentApprovalTool = Tool.define(
   "maestro_present_approval",
   Effect.gen(function* () {
-    const database = yield* Database.Service
-    const events = yield* EventV2Bridge.Service
-    const sessions = yield* Session.Service
     const agents = yield* Agent.Service
     return {
-      description: "Present one exact governed plan approval record. Maestro only; call only after plan validation.",
+      description:
+        "Unavailable until durable plan revision and validation readers exist. Refuses rather than treat model-supplied fields as approval authority.",
       parameters: PresentationParameters,
-      execute: (params: Schema.Schema.Type<typeof PresentationParameters>, ctx) =>
+      execute: (_params: Schema.Schema.Type<typeof PresentationParameters>, ctx) =>
         Effect.gen(function* () {
           const agent = yield* agents.get(ctx.agent)
           if (agent?.id !== "maestro") return yield* Effect.fail(new Error("Approval presentation requires Maestro"))
-          if (!ctx.callID) return yield* Effect.fail(new Error("Approval presentation requires tool call identity"))
-          const presentation = yield* presentApprovalFromSession({
-            ...params,
-            taskHash: taskHash({
-              ...params.intent,
-              planRevisionID: params.planRevisionID,
-              revisionHash: params.revisionHash,
-              validationRecordID: params.validationRecordID,
-              validationHash: params.validationHash,
-              contextHash: params.contextHash,
-              policyHash: params.policyHash,
-            }),
-            memberID: agent.id,
-            sessionID: ctx.sessionID,
-            assistantMessageID: ctx.messageID,
-            callID: ctx.callID,
-          })
-          return {
-            title: "Maestro plan approval",
-            metadata: { presentationID: presentation.id },
-            output: renderPresentation(presentation),
-          }
+          return yield* Effect.fail(
+            new Error("Approval presentation unavailable: durable plan revision and validation readers are not implemented"),
+          )
         }).pipe(
-          Effect.provideService(Database.Service, database),
-          Effect.provideService(EventV2Bridge.Service, events),
-          Effect.provideService(Session.Service, sessions),
           Effect.provideService(Agent.Service, agents),
           Effect.orDie,
         ),

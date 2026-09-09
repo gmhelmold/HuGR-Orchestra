@@ -41,9 +41,16 @@ function hash(parts: readonly string[]) {
   return createHash("sha256").update(parts.join("\u0000")).digest("hex")
 }
 
-function presentationEventID(input: Pick<PresentApprovalInput, "sessionID" | "assistantMessageID" | "callID">) {
+function presentationEventID(
+  input: Pick<PresentApprovalInput, "sessionID" | "planRevisionID" | "validationRecordID" | "methodVersion">,
+) {
   return EventV2.ID.make(
-    `evt_maestro_approval_presentation_${hash([input.sessionID, input.assistantMessageID, input.callID])}`,
+    `evt_maestro_approval_presentation_${hash([
+      input.sessionID,
+      input.planRevisionID,
+      input.validationRecordID,
+      input.methodVersion,
+    ])}`,
   )
 }
 
@@ -116,8 +123,14 @@ function visiblePresentation(input: { presentation: PresentedData; message: Sess
 }
 
 export const presentApproval = Effect.fn("MaestroApproval.present")(function* (input: PresentApprovalInput) {
+  const presentationID = `apr_${hash([
+    input.sessionID,
+    input.planRevisionID,
+    input.validationRecordID,
+    input.methodVersion,
+  ])}`
   const presentation: PresentedData = {
-    id: `apr_${hash([input.sessionID, input.assistantMessageID, input.callID])}`,
+    id: presentationID,
     sessionID: input.sessionID,
     assistantMessageID: input.assistantMessageID,
     callID: input.callID,
@@ -147,9 +160,18 @@ export const presentApproval = Effect.fn("MaestroApproval.present")(function* (i
     .pipe(Effect.orDie)
   if (existing) {
     const recorded = Schema.decodeUnknownSync(MaestroEvent.Approval.Presented.data)(existing.data)
+    const sameRevision =
+      recorded.sessionID === presentation.sessionID &&
+      recorded.planRevisionID === presentation.planRevisionID &&
+      recorded.validationRecordID === presentation.validationRecordID &&
+      recorded.methodVersion === presentation.methodVersion
     if (
       existing.type === EventV2.versionedType(MaestroEvent.Approval.Presented.type, 1) &&
-      isDeepStrictEqual(recorded, presentation)
+      sameRevision &&
+      isDeepStrictEqual(
+        { ...recorded, id: "", assistantMessageID: "", callID: "" },
+        { ...presentation, id: "", assistantMessageID: "", callID: "" },
+      )
     ) {
       return presentationFromEvent(recorded)
     }
