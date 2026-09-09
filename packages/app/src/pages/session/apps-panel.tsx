@@ -298,9 +298,11 @@ export function AppsPanel() {
     if (!id) return
     const items = tabs()
     const index = items.findIndex((tab) => tab.id === id)
+    if (index < 0) return
     const next = items[index + 1] ?? items[index - 1]
     await api()?.appDockCloseTab(id)
     setTabs((current) => current.filter((tab) => tab.id !== id))
+    if (id !== active()) return
     setActive(next?.id)
     setURL(next?.url ?? "https://opencode.ai")
     if (next && host) await api()?.appDockSelect(next.id, bounds(host))
@@ -310,7 +312,9 @@ export function AppsPanel() {
     const index = items.findIndex((item) => item.id === tab.id)
     if (index < 0 || (scope === "others" ? items.length < 2 : index === items.length - 1)) return
     await api()?.appDockCloseTabs(tab.id, scope)
-    const remaining = scope === "others" ? [tab] : items.slice(0, index + 1)
+    // Native "right" follows creation order; pinned tabs only change display order.
+    const closedIDs = new Set((scope === "others" ? items.filter((item) => item.id !== tab.id) : items.slice(index + 1)).map((item) => item.id))
+    const remaining = items.filter((item) => !closedIDs.has(item.id))
     setTabs(remaining)
     if (!remaining.some((item) => item.id === active())) {
       const next = remaining.at(-1)
@@ -488,7 +492,7 @@ export function AppsPanel() {
           </div>}
          {!api() && <div class="zen-empty-state"><strong>Browser needs OpenCode Desktop.</strong><span>Native browser tabs are unavailable in web app.</span></div>}
           <div ref={host} class="zen-browser-host" />
-          {menu() && <TabMenu tab={menu()!.tab} x={menu()!.x} y={menu()!.y} hasOthers={tabs().length > 1} hasRight={tabs().at(-1)?.id !== menu()!.tab.id} onDuplicate={() => { void duplicateTab(menu()!.tab); closeMenu() }} onTogglePin={() => { const tab = menu()!.tab; setTabs((items) => items.map((item) => item.id === tab.id ? { ...item, pinned: !item.pinned } : item)); closeMenu() }} onReload={() => { const id = menu()!.tab.id; void api()?.appDockCommand(id, "reload"); closeMenu() }} onClose={() => { void close(menu()!.tab.id); closeMenu() }} onCloseOthers={() => { void closeTabs(menu()!.tab, "others"); closeMenu() }} onCloseRight={() => { void closeTabs(menu()!.tab, "right"); closeMenu() }} />}
+          {menu() && <TabMenu tab={menu()!.tab} x={menu()!.x} y={menu()!.y} canDuplicate={capability("appDockOpen")} canReload={capability("appDockCommand")} canClose={capability("appDockCloseTab")} hasOthers={tabs().length > 1} hasRight={tabs().findIndex((item) => item.id === menu()!.tab.id) < tabs().length - 1} onDuplicate={() => { void duplicateTab(menu()!.tab); closeMenu() }} onTogglePin={() => { const tab = menu()!.tab; setTabs((items) => items.map((item) => item.id === tab.id ? { ...item, pinned: !item.pinned } : item)); closeMenu() }} onReload={() => { const id = menu()!.tab.id; void api()?.appDockCommand(id, "reload"); closeMenu() }} onClose={() => { void close(menu()!.tab.id); closeMenu() }} onCloseOthers={() => { void closeTabs(menu()!.tab, "others"); closeMenu() }} onCloseRight={() => { void closeTabs(menu()!.tab, "right"); closeMenu() }} />}
       </main>
     </div>
   )
@@ -524,13 +528,13 @@ function TabButton(props: {
   return <button class={`zen-tab ${props.active() === props.tab.id ? "is-active" : ""}`} type="button" role="tab" tabindex={props.active() === props.tab.id ? 0 : -1} aria-selected={props.active() === props.tab.id} onClick={() => props.select(props.tab)} onContextMenu={(event) => { event.preventDefault(); openMenu(event.clientX, event.clientY, event.currentTarget) }} onKeyDown={keydown}><span class={`zen-tab-icon ${props.tab.loading ? "is-loading" : ""}`}>{props.tab.favicon ? <img src={props.tab.favicon} alt="" /> : new URL(props.tab.url).hostname.slice(0, 1).toUpperCase()}</span><span class="zen-tab-title">{tabLabel(props.tab)}</span>{props.tab.pinned ? "Pinned" : ""}{props.tab.audible && <span class="zen-tab-audio">&#9835;</span>}</button>
 }
 
-function TabMenu(props: { tab: Tab; x: number; y: number; hasOthers: boolean; hasRight: boolean; onDuplicate: () => void; onTogglePin: () => void; onReload: () => void; onClose: () => void; onCloseOthers: () => void; onCloseRight: () => void }) {
+function TabMenu(props: { tab: Tab; x: number; y: number; canDuplicate: boolean; canReload: boolean; canClose: boolean; hasOthers: boolean; hasRight: boolean; onDuplicate: () => void; onTogglePin: () => void; onReload: () => void; onClose: () => void; onCloseOthers: () => void; onCloseRight: () => void }) {
   let firstItem: HTMLButtonElement | undefined
   return <div class="zen-tab-menu" role="menu" aria-label={`Actions for ${tabLabel(props.tab)}`} style={{ left: `${props.x}px`, top: `${props.y}px` }}>
-    <button ref={(element) => { firstItem = element; requestAnimationFrame(() => firstItem?.focus()) }} type="button" role="menuitem" onClick={props.onDuplicate}>Duplicate</button>
+    <button ref={(element) => { firstItem = element; requestAnimationFrame(() => firstItem?.focus()) }} type="button" role="menuitem" disabled={!props.canDuplicate} onClick={props.onDuplicate}>Duplicate</button>
     <button type="button" role="menuitem" onClick={props.onTogglePin}>{props.tab.pinned ? "Unpin" : "Pin"}</button>
-    <button type="button" role="menuitem" onClick={props.onReload}>Reload</button>
-    <button type="button" role="menuitem" onClick={props.onClose}>Close</button>
+    <button type="button" role="menuitem" disabled={!props.canReload} onClick={props.onReload}>Reload</button>
+    <button type="button" role="menuitem" disabled={!props.canClose} onClick={props.onClose}>Close</button>
     <button type="button" role="menuitem" disabled={!props.hasOthers} onClick={props.onCloseOthers}>Close others</button>
     <button type="button" role="menuitem" disabled={!props.hasRight} onClick={props.onCloseRight}>Close right</button>
   </div>
