@@ -1,11 +1,12 @@
 import { execFileSync, spawn } from "node:child_process"
 import { mkdir, mkdtemp, rename, rm, writeFile, access, readFile } from "node:fs/promises"
 import { createServer } from "node:https"
+import type { ServerResponse } from "node:http"
 import { tmpdir } from "node:os"
 import { dirname, isAbsolute, join, resolve } from "node:path"
 import { createRequire } from "node:module"
 
-const required = ["U01", "U02", "U03", "U04", "U05", "U06", "U07", "U08", "U09", "U10", "U11", "U12", "U13", "U15", "U16", "U17", "U18"]
+const required = ["U01", "U02", "U03", "U04", "U05", "U06", "U07", "U08", "U09", "U10", "U11", "U12", "U13", "U14", "U15", "U16", "U17", "U18", "U19"]
 const root = resolve(import.meta.dir, "../..")
 const artifact = join(process.env.APP_DOCK_ARTIFACT_ROOT ?? root, "artifacts/app-dock/s1.json")
 const schemes = ["http://127.0.0.1/", "file:///etc/passwd", "javascript:document.title='pwned'", "data:text/html,pwned"]
@@ -32,13 +33,36 @@ async function parent() {
   const buildDir = await mkdtemp(join(tmpdir(), "app-dock-e2e-"))
   let output = ""
   if (!startupOnly) {
-    const result = await Bun.build({ entrypoints: [import.meta.path], outdir: buildDir, naming: "[name].cjs", target: "node", format: "cjs", external: ["electron", "node:sqlite"], write: true })
+    const result = await Bun.build({
+      entrypoints: [import.meta.path],
+      outdir: buildDir,
+      naming: "[name].cjs",
+      target: "node",
+      format: "cjs",
+      external: ["electron", "node:sqlite"],
+      write: true,
+    })
     output = result.outputs[0]?.path ?? ""
-    if (!result.success || !output) throw new Error(JSON.stringify({ phase: "build-failure", output, outputs: result.outputs.map((item) => item.path), logs: result.logs.map(String) }))
+    if (!result.success || !output)
+      throw new Error(
+        JSON.stringify({
+          phase: "build-failure",
+          output,
+          outputs: result.outputs.map((item) => item.path),
+          logs: result.logs.map(String),
+        }),
+      )
     try {
       await access(output)
     } catch {
-      throw new Error(JSON.stringify({ phase: "build-output-missing", output, outputs: result.outputs.map((item) => item.path), logs: result.logs.map(String) }))
+      throw new Error(
+        JSON.stringify({
+          phase: "build-output-missing",
+          output,
+          outputs: result.outputs.map((item) => item.path),
+          logs: result.logs.map(String),
+        }),
+      )
     }
   }
   const electronModule = createRequire(join(process.cwd(), "package.json")).resolve("electron")
@@ -47,14 +71,33 @@ async function parent() {
   const { ELECTRON_RUN_AS_NODE: _electronRunAsNode, NODE_OPTIONS, APP_DOCK_LOAD_ONLY: _loadOnly, ...env } = process.env
   const safeNodeOptions = NODE_OPTIONS?.includes("ELECTRON_RUN_AS_NODE") ? undefined : NODE_OPTIONS
   const entry = join(import.meta.dir, "app-dock-security.child.cjs")
-  const child = spawn(electron, startupOnly ? [entry, "--startup-only"] : [entry, output, "--app-dock-electron-child"], { stdio: ["ignore", "pipe", "pipe"], env: { ...env, ...(safeNodeOptions ? { NODE_OPTIONS: safeNodeOptions } : {}), ...(loadOnly ? { APP_DOCK_LOAD_ONLY: "1" } : {}), APP_DOCK_ARTIFACT_ROOT: root, ELECTRON_DISABLE_SECURITY_WARNINGS: "true" } })
+  const child = spawn(electron, startupOnly ? [entry, "--startup-only"] : [entry, output, "--app-dock-electron-child"], {
+    stdio: ["ignore", "pipe", "pipe"],
+    env: {
+      ...env,
+      ...(safeNodeOptions ? { NODE_OPTIONS: safeNodeOptions } : {}),
+      ...(loadOnly ? { APP_DOCK_LOAD_ONLY: "1" } : {}),
+      APP_DOCK_ARTIFACT_ROOT: root,
+      ELECTRON_DISABLE_SECURITY_WARNINGS: "true",
+    },
+  })
   let stdout = ""
   let stderr = ""
-  child.stdout.on("data", (chunk) => { stdout += chunk })
-  child.stderr.on("data", (chunk) => { stderr += chunk })
+  child.stdout.on("data", (chunk) => {
+    stdout += chunk
+  })
+  child.stderr.on("data", (chunk) => {
+    stderr += chunk
+  })
   let timedOut = false
-  const timeout = setTimeout(() => { timedOut = true; child.kill("SIGKILL") }, 20_000)
-  const exitResult = await new Promise<{ code: number | null; signal: NodeJS.Signals | null }>((resolve, reject) => { child.once("exit", (code, signal) => resolve({ code, signal })); child.once("error", reject) })
+  const timeout = setTimeout(() => {
+    timedOut = true
+    child.kill("SIGKILL")
+  }, 20_000)
+  const exitResult = await new Promise<{ code: number | null; signal: NodeJS.Signals | null }>((resolve, reject) => {
+    child.once("exit", (code, signal) => resolve({ code, signal }))
+    child.once("error", reject)
+  })
   clearTimeout(timeout)
   if (!startupOnly && !loadOnly && exitResult.code === 0) {
     const reportPath = join(root, "artifacts/app-dock/s1.json")
@@ -70,7 +113,17 @@ async function parent() {
   await rm(buildDir, { recursive: true, force: true })
   if (startupOnly || loadOnly) console.error(JSON.stringify({ phase: "parent-startup", electron, executable: true, ...exitResult, stdout, stderr }))
   if (exitResult.code !== 0 || timedOut) {
-    console.error(JSON.stringify({ phase: "parent-child-failure", electron, executable: true, timedOut, ...exitResult, stdout, stderr }))
+    console.error(
+      JSON.stringify({
+        phase: "parent-child-failure",
+        electron,
+        executable: true,
+        timedOut,
+        ...exitResult,
+        stdout,
+        stderr,
+      }),
+    )
     process.exitCode = exitResult.code ?? 1
   }
 }
@@ -80,6 +133,11 @@ async function fixture() {
   const key = join(dir, "key.pem")
   const cert = join(dir, "cert.pem")
   execFileSync("openssl", ["req", "-x509", "-newkey", "rsa:2048", "-nodes", "-keyout", key, "-out", cert, "-subj", "/CN=127.0.0.1", "-days", "1"], { stdio: "ignore" })
+  const activeDownloads = new Set<ServerResponse>()
+  let resolveDownloadCancelled: () => void = () => {}
+  const downloadCancelled = new Promise<void>((resolve) => {
+    resolveDownloadCancelled = resolve
+  })
   const server = createServer({ key: await readFile(key), cert: await readFile(cert) }, (req, res) => {
     if (req.url === "/redirect-http") {
       res.writeHead(302, { location: "http://127.0.0.1/redirect-blocked" })
@@ -87,21 +145,50 @@ async function fixture() {
     }
     if (req.url === "/popup") return res.end("<script>window.open('http://127.0.0.1/popup-blocked')</script>")
     if (req.url === "/navigate") return res.end("<a id=n href='http://127.0.0.1/navigate-blocked'>go</a><script>n.click()</script>")
-    if (req.url === "/permission") return res.end("<script>navigator.mediaDevices.getUserMedia({audio:true}).then(()=>document.title='granted').catch(()=>document.title='denied')</script>")
+    if (req.url === "/permission") return res.end("<script>Promise.all([navigator.permissions.query({name:'microphone'}).then(result=>result.state),navigator.mediaDevices.getUserMedia({audio:true}).then(()=>'granted').catch(()=>'denied')]).then(([check,request])=>document.title=`check-${check}-request-${request}`)</script>")
+    if (req.url === "/cacheable") {
+      res.setHeader("cache-control", "public, max-age=3600")
+      return res.end("cacheable fixture")
+    }
+    if (req.url === "/download") {
+      res.writeHead(200, {
+        "content-disposition": "attachment; filename=fixture-download.txt",
+        "content-type": "text/plain",
+      })
+      activeDownloads.add(res)
+      const interval = setInterval(() => res.write("fixture download data\n"), 10)
+      return res.on("close", () => {
+        clearInterval(interval)
+        activeDownloads.delete(res)
+        resolveDownloadCancelled()
+      })
+    }
+    if (req.url === "/ticker") return res.end("<script>let tick=0;setInterval(()=>document.title=`tick-${++tick}`,25)</script>")
     if (req.url === "/iframe") return res.end("<iframe src='/'>")
     res.end("<!doctype html><title>fixture</title><body>fixture</body>")
   })
   await new Promise<void>((resolve) => server.listen(0, "127.0.0.1", resolve))
   const address = server.address()
   if (!address || typeof address === "string") throw new Error("HTTPS fixture did not bind")
-  return { base: `https://127.0.0.1:${address.port}`, close: async () => { await new Promise<void>((resolve) => server.close(() => resolve())); await rm(dir, { recursive: true, force: true }) } }
+  return {
+    base: `https://127.0.0.1:${address.port}`,
+    downloadCancelled,
+    close: async () => {
+      activeDownloads.forEach((response) => response.destroy())
+      await new Promise<void>((resolve) => server.close(() => resolve()))
+      await rm(dir, { recursive: true, force: true })
+    },
+  }
 }
 
 async function child() {
   const diagnostic = (phase: string) => process.stderr.write(`${JSON.stringify({ phase, argv: process.argv, electronVersion: process.versions.electron, pid: process.pid })}\n`)
   process.on("uncaughtException", (error) => diagnostic(`uncaught:${error.message}`))
   diagnostic("entry")
-  const startupWatchdog = setTimeout(() => { diagnostic("startup-timeout"); process.exit(1) }, 15_000)
+  const startupWatchdog = setTimeout(() => {
+    diagnostic("startup-timeout")
+    process.exit(1)
+  }, 15_000)
   diagnostic("before-import-electron")
   const { app, BrowserWindow, webContents } = await import("electron")
   diagnostic("after-import-electron")
@@ -119,21 +206,46 @@ async function child() {
     app.exit()
     return
   }
-  const watchdog = setTimeout(() => { console.error("App Dock acceptance watchdog expired"); app.exit(1) }, 30_000)
+  const watchdog = setTimeout(() => {
+    console.error("App Dock acceptance watchdog expired")
+    app.exit(1)
+  }, 30_000)
   const temp = await mkdtemp(join(tmpdir(), "app-dock-user-data-"))
   app.setPath("userData", temp)
   const site = await fixture()
   const { registerIpcHandlers } = ipcModule
   registerIpcHandlers({
-    killSidecar() {}, relaunch() {}, awaitInitialization: async () => ({ serverUrl: site.base }), consumeInitialDeepLinks: () => [],
-    getDefaultServerUrl: () => null, setDefaultServerUrl() {}, isFirstLaunchOnboardingPending: () => false,
-    finishFirstLaunchOnboarding: () => null, isOldLayoutEligible: () => false, getDisplayBackend: async () => null,
-    setDisplayBackend: async () => {}, checkAppExists: () => false, resolveAppPath: async () => null,
-    updater: { subscribe: () => () => {}, check: async () => {}, install: async () => {} }, showUpdater() {}, setBackgroundColor() {},
-    exportDebugLogs: async () => "", recordFatalRendererError() {}, setNativeTranslations() {},
+    killSidecar() {},
+    relaunch() {},
+    awaitInitialization: async () => ({ serverUrl: site.base }),
+    consumeInitialDeepLinks: () => [],
+    getDefaultServerUrl: () => null,
+    setDefaultServerUrl() {},
+    isFirstLaunchOnboardingPending: () => false,
+    finishFirstLaunchOnboarding: () => null,
+    isOldLayoutEligible: () => false,
+    getDisplayBackend: async () => null,
+    setDisplayBackend: async () => {},
+    checkAppExists: () => false,
+    resolveAppPath: async () => null,
+    updater: { subscribe: () => () => {}, check: async () => {}, install: async () => {} },
+    showUpdater() {},
+    setBackgroundColor() {},
+    exportDebugLogs: async () => "",
+    recordFatalRendererError() {},
+    setNativeTranslations() {},
   })
   if (!process.env.APP_DOCK_TEST_PRELOAD || !isAbsolute(process.env.APP_DOCK_TEST_PRELOAD)) throw new Error("Invalid App Dock test preload")
-  const ipcWin = new BrowserWindow({ show: false, webPreferences: { nodeIntegration: true, nodeIntegrationInSubFrames: true, contextIsolation: false, preload: process.env.APP_DOCK_TEST_PRELOAD } })
+  const ipcWin = new BrowserWindow({
+    show: false,
+    webPreferences: {
+      nodeIntegration: true,
+      nodeIntegrationInSubFrames: true,
+      contextIsolation: false,
+      preload: process.env.APP_DOCK_TEST_PRELOAD,
+    },
+  })
+  let ipcWinB: BrowserWindow | undefined
   const execute = async (phase: string, frame: { executeJavaScript: (code: string) => Promise<any> }, code: string) => {
     diagnostic(`renderer:${phase}:start`)
     try {
@@ -145,12 +257,24 @@ async function child() {
       throw error
     }
   }
-  const invoke = (frame: { executeJavaScript: (code: string) => Promise<any> }, channel: string, args: unknown[]) =>
-    execute(`ipc:${channel}`, frame, `window.__testIpcInvoke(${JSON.stringify(channel)}, ${JSON.stringify(args)})`)
+  const invoke = (frame: { executeJavaScript: (code: string) => Promise<any> }, channel: string, args: unknown[]) => execute(`ipc:${channel}`, frame, `window.__testIpcInvoke(${JSON.stringify(channel)}, ${JSON.stringify(args)})`)
   let events: any[] = []
   const installEventStore = () => execute("event-store", ipcWin.webContents, "window.__appDockEvents = []; window.onerror = (message, source, line, column, error) => console.error('app-dock-renderer-error', message, source, line, column, error?.stack); require('electron').ipcRenderer.on('app-dock-event', (_event, value) => window.__appDockEvents.push(value)); undefined")
-  const readEvents = async () => events = await execute("event-read", ipcWin.webContents, "window.__appDockEvents")
-  const eventCount = async () => { await readEvents(); return events.length }
+  const readEvents = async () => (events = await execute("event-read", ipcWin.webContents, "window.__appDockEvents"))
+  const eventCount = async () => {
+    await readEvents()
+    return events.length
+  }
+  const nextTurn = () => new Promise<void>((resolve) => setTimeout(resolve, 0))
+  const attached = (win: BrowserWindow, contents: Electron.WebContents) => (win.contentView as unknown as { children: { webContents?: Electron.WebContents }[] }).children.some((child) => child.webContents === contents)
+  const attachedContents = (win: BrowserWindow) => (win.contentView as unknown as { children: { webContents?: Electron.WebContents }[] }).children.map((child) => child.webContents).find(Boolean)
+  const waitFor = async (predicate: () => boolean | Promise<boolean>, label: string) => {
+    const deadline = Date.now() + 5_000
+    while (!(await predicate())) {
+      if (Date.now() >= deadline) throw new Error(`Timed out waiting for ${label}`)
+      await new Promise<void>((resolve) => setTimeout(resolve, 25))
+    }
+  }
   const waitEvent = (after: number, predicate: (event: any) => boolean, label: string) => {
     const deadline = Date.now() + 5_000
     return new Promise<any>((resolve, reject) => {
@@ -164,15 +288,19 @@ async function child() {
       void poll()
     })
   }
-    diagnostic("renderer:load:fixture:start")
-    await ipcWin.loadURL(site.base)
-    diagnostic("renderer:load:fixture:ok")
+  diagnostic("renderer:load:fixture:start")
+  await ipcWin.loadURL(site.base)
+  diagnostic("renderer:load:fixture:ok")
   await installEventStore()
   const profile = "e2e-profile"
   const bounds = { x: 0, y: 0, width: 400, height: 300 }
-  const open = async (url = site.base) => invoke(ipcWin.webContents.mainFrame, "app-dock-open", [url, bounds, profile])
+  const open = async (url = site.base, profileID = profile) => invoke(ipcWin.webContents.mainFrame, "app-dock-open", [url, bounds, profileID])
   const navigate = (tabID: string, url: string) => invoke(ipcWin.webContents.mainFrame, "app-dock-navigate", [tabID, url])
-  const viewContents = () => webContents.getAllWebContents().filter((item) => item !== ipcWin.webContents && !item.isDestroyed()).at(-1)
+  const viewContents = () =>
+    webContents
+      .getAllWebContents()
+      .filter((item) => item !== ipcWin.webContents && !item.isDestroyed())
+      .at(-1)
   let completed = false
   try {
     const u01Start = await eventCount()
@@ -209,9 +337,8 @@ async function child() {
 
     const u07Start = await eventCount()
     await navigate(tab.tabID, `${site.base}/permission`)
-    await waitEvent(u07Start, (event) => event.type === "state" && event.payload.tabID === tab.tabID && event.payload.title === "denied", "permission denial state")
-    check(await contents.session.cookies.get({ url: site.base }).then(() => true), "partition session unavailable")
-    pass("U07", "permission request denied in real partition")
+    await waitEvent(u07Start, (event) => event.type === "state" && event.payload.tabID === tab.tabID && event.payload.title === "check-denied-request-denied", "permission request/check denial state")
+    pass("U07", "real permission request and permission check both deny")
 
     await readEvents()
     const error = events.find((event) => event.type === "navigation-error")
@@ -219,23 +346,35 @@ async function child() {
     check(!JSON.stringify(events).includes("storageKey") && !JSON.stringify(events).includes(temp), "renderer event exposes storage path/key")
     pass("U08", "typed state/error envelopes omit storage internals")
 
-    const oldEventCount = events.length
+    const u09Start = await eventCount()
     await invoke(ipcWin.webContents.mainFrame, "app-dock-close-tab", [tab.tabID])
     check(contents.isDestroyed(), "closed App Dock view remains alive")
-    check(events.length === oldEventCount, "closed view emitted stale event")
-    pass("U09", "close rejects stale events and destroys real view")
+    await nextTurn()
+    await readEvents()
+    check(!events.slice(u09Start).some((event) => event.payload?.tabID === tab.tabID && event.payload?.generation === tab.generation), "closed identity emitted stale event")
+    pass("U09", "close destroys real view and emits no later closed-identity event")
 
     const first = await open()
     const firstContents = viewContents()
-    await execute("view:storage-set", firstContents, "localStorage.setItem('app-dock-e2e', 'present')")
+    check(firstContents, "App Dock did not create profile view")
+    const firstSession = firstContents.session
+    await execute("view:storage-set", firstContents, "localStorage.setItem('app-dock-e2e', 'present'); await fetch('/cacheable'); const cache = await caches.open('app-dock-e2e'); await cache.put('/cache-storage', new Response('present')); const link = document.createElement('a'); link.href = '/download'; document.body.append(link); link.click()")
+    check(await execute("view:cache-storage-set", firstContents, "(await caches.keys()).includes('app-dock-e2e')"), "CacheStorage fixture did not persist")
+    await waitFor(async () => (await firstSession.getCacheSize()) > 0, "HTTP cache fixture")
+    const u10Start = await eventCount()
+    const download = await waitEvent(u10Start, (event) => event.type === "download" && event.payload.tabID === first.tabID && event.payload.state === "progressing", "real download")
     await invoke(ipcWin.webContents.mainFrame, "app-dock-delete-profile", [{ profileID: profile }])
     check(firstContents.isDestroyed(), "profile delete did not detach/destroy view")
-    check(!(ipcWin.contentView as unknown as { children: unknown[] }).children.includes(firstContents as unknown), "deleted view remains attached")
+    check(!attached(ipcWin, firstContents), "deleted view remains attached")
+    await site.downloadCancelled
+    await rejects(() => invoke(ipcWin.webContents.mainFrame, "app-dock-cancel-download", [download.payload.id]), "Unknown App Dock download")
+    check((await firstSession.getCacheSize()) === 0, "profile HTTP cache reused after deletion")
     const fresh = await open()
     const freshContents = viewContents()
-    check(await execute("view:storage-get", freshContents, "localStorage.getItem('app-dock-e2e')") === null, "profile storage reused after deletion")
+    check((await execute("view:storage-get", freshContents, "localStorage.getItem('app-dock-e2e')")) === null, "profile storage reused after deletion")
+    check((await execute("view:cache-storage-get", freshContents, "(await caches.keys()).length")) === 0, "profile CacheStorage reused after deletion")
     await invoke(ipcWin.webContents.mainFrame, "app-dock-close-tab", [fresh.tabID])
-    pass("U10", "profile delete destroys view and clears storage before profile reuse")
+    pass("U10", "profile delete cancels/removes real download and clears localStorage, HTTP cache, CacheStorage before reuse")
 
     diagnostic("renderer:load:iframe:start")
     await ipcWin.loadURL(`${site.base}/iframe`)
@@ -256,12 +395,43 @@ async function child() {
 
     await rejects(() => invoke(ipcWin.webContents.mainFrame, "app-dock-command", [ipcTab.tabID, "history-back"]), "Invalid App Dock command")
     pass("U15", "invalid IPC command enum rejected")
+    const u14Start = await eventCount()
+    const ticker = await open(`${site.base}/ticker`)
+    const tickerContents = viewContents()
+    check(attached(ipcWin, tickerContents), "open App Dock view is not attached")
+    await invoke(ipcWin.webContents.mainFrame, "app-dock-hide", [])
+    check(!attached(ipcWin, tickerContents), "hide leaves App Dock view attached")
+    await invoke(ipcWin.webContents.mainFrame, "app-dock-select", [ticker.tabID, bounds])
+    check(attached(ipcWin, tickerContents), "select does not reattach hidden App Dock view")
+    await waitEvent(u14Start, (event) => event.type === "state" && event.payload.tabID === ticker.tabID && /^tick-\d+$/.test(event.payload.title), "unthrottled selected view")
+    await invoke(ipcWin.webContents.mainFrame, "app-dock-close-tab", [ticker.tabID])
+    pass("U14", "hide detaches view; select reattaches and resumes renderer timer")
     check(!("storageKey" in ipcTab) && !Object.keys(ipcTab).some((key) => /path/i.test(key)), "open response exposes storage internals")
     pass("U16", "IPC open response omits storage key and path")
-    check(events.every((event) => event.type !== "state" || (typeof event.payload.tabID === "string" && Number.isInteger(event.payload.generation))), "state event lacks generation identity")
+    check(
+      events.every((event) => event.type !== "state" || (typeof event.payload.tabID === "string" && Number.isInteger(event.payload.generation))),
+      "state event lacks generation identity",
+    )
     pass("U17", "state events carry tabID and generation")
     check(site.base.startsWith("https://127.0.0.1:"), "fixture is not local HTTPS")
     pass("U18", "fixture is local HTTPS")
+
+    ipcWinB = new BrowserWindow({
+      show: false,
+      webPreferences: { nodeIntegration: true, contextIsolation: false, preload: process.env.APP_DOCK_TEST_PRELOAD },
+    })
+    await ipcWinB.loadURL(site.base)
+    const sharedProfile = "shared-profile"
+    const sharedA = await open(site.base, sharedProfile)
+    const sharedAContents = attachedContents(ipcWin)
+    const sharedB = await invoke(ipcWinB.webContents.mainFrame, "app-dock-open", [site.base, bounds, sharedProfile])
+    const sharedBContents = attachedContents(ipcWinB)
+    check(!sharedAContents.isDestroyed() && !sharedBContents.isDestroyed(), "shared profile did not create both real views")
+    await invoke(ipcWin.webContents.mainFrame, "app-dock-delete-profile", [{ profileID: sharedProfile }])
+    check(sharedAContents.isDestroyed() && sharedBContents.isDestroyed(), "profile delete did not destroy shared-profile views in both windows")
+    check(!attached(ipcWin, sharedAContents) && !attached(ipcWinB, sharedBContents), "profile delete leaves shared-profile view attached")
+    check(typeof sharedA.tabID === "string" && typeof sharedB.tabID === "string", "shared-profile IPC did not return tabs")
+    pass("U19", "real IPC from two BrowserWindows shares profile; delete from A removes both views")
 
     check(cases.length === required.length && new Set(cases.map((item) => item.id)).size === required.length && required.every((id) => cases.some((item) => item.id === id && item.status === "pass")), "required acceptance cases incomplete")
     diagnostic(`artifact:${childArtifact}`)
@@ -275,6 +445,7 @@ async function child() {
     completed = true
   } finally {
     clearTimeout(watchdog)
+    if (ipcWinB && !ipcWinB.isDestroyed()) ipcWinB.destroy()
     if (!ipcWin.isDestroyed()) ipcWin.destroy()
     await site.close()
     await rm(temp, { recursive: true, force: true })
@@ -282,5 +453,13 @@ async function child() {
   }
 }
 
-if (process.argv.includes("--app-dock-electron-child")) void child().catch(async (error) => { console.error(error); (await import("electron")).app.exit(1) })
-else void parent().catch((error) => { console.error(error); process.exitCode = 1 })
+if (process.argv.includes("--app-dock-electron-child"))
+  void child().catch(async (error) => {
+    console.error(error)
+    ;(await import("electron")).app.exit(1)
+  })
+else
+  void parent().catch((error) => {
+    console.error(error)
+    process.exitCode = 1
+  })
