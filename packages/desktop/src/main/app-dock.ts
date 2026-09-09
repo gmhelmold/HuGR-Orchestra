@@ -62,6 +62,11 @@ export { panelBoundsToContent }
 const validBounds = (bounds: DockBounds) =>
   [bounds.x, bounds.y, bounds.width, bounds.height].every(Number.isSafeInteger) && bounds.width > 0 && bounds.height > 0
 
+const MAX_INACTIVE_TABS = 20
+const MAX_TABS_PER_SENDER = 24
+const MAX_PROGRESSING_DOWNLOADS_PER_PROFILE = 8
+const MAX_TERMINAL_DOWNLOADS_PER_SENDER = 20
+
 export function createAppDock() {
   const browserSessions = new Map<string, Session>()
   const configuredPartitions = new Set<string>()
@@ -72,6 +77,7 @@ export function createAppDock() {
     string,
     { senderID: number; storageKey: string; item: Electron.DownloadItem; state: AppDockDownload }
   >()
+  const terminalDownloads = new Map<string, number>()
   const active = new Map<number, string>()
   const inactive = new Map<string, { senderID: number; tabID: string }>()
   let generation = 0
@@ -99,6 +105,7 @@ export function createAppDock() {
       ) {
         download.item.cancel()
         downloads.delete(downloadID)
+        terminalDownloads.delete(downloadID)
       }
     }
     record.view.webContents.close()
@@ -110,6 +117,24 @@ export function createAppDock() {
     const ids = tabID ? [tabID] : [...(tabs.get(senderID)?.keys() ?? [])]
     ids.forEach((id) => remove(senderID, id))
     if ((tabs.get(senderID)?.size ?? 0) === 0) tabs.delete(senderID)
+  }
+  const evictOldestInactive = (senderID?: number) => {
+    for (const oldest of inactive.values()) {
+      if (senderID === undefined || oldest.senderID === senderID) {
+        remove(oldest.senderID, oldest.tabID)
+        return true
+      }
+    }
+    return false
+  }
+  const ensureViewCapacity = (senderID: number, selected: boolean) => {
+    while ((tabs.get(senderID)?.size ?? 0) >= MAX_TABS_PER_SENDER) {
+      if (!evictOldestInactive(senderID)) throw new Error("App Dock tab limit reached")
+    }
+    const inactiveNeeded = selected ? Number(active.has(senderID)) : 1
+    while (inactive.size + inactiveNeeded > MAX_INACTIVE_TABS) {
+      if (!evictOldestInactive()) throw new Error("App Dock tab limit reached")
+    }
   }
   const open = async (
     senderID: number,
@@ -149,8 +174,33 @@ export function createAppDock() {
         const record = source && tabs.get(source.senderID)?.get(source.tabID)
         if (!source || !record || record.generation !== source.generation) return item.cancel()
         const id = randomUUID()
+        let rejected = false
+        const rejectDownload = () => {
+          if (rejected) return
+          rejected = true
+          item.cancel()
+          record.notify(
+            Object.freeze({
+              type: "navigation-error",
+              payload: Object.freeze({
+                identity: identity(source.tabID, source.generation),
+                code: "failed",
+                url: record.state().url,
+              }),
+            }),
+          )
+        }
         const updateDownload = (state: AppDockDownload["state"]) => {
-          if (!isCurrent(source.senderID, source.tabID, source.generation)) return
+          if (rejected || !isCurrent(source.senderID, source.tabID, source.generation)) return
+          if (
+            state === "progressing" &&
+            [...downloads.values()].filter(
+              (download) => download.storageKey === record.storageKey && download.state.state === "progressing",
+            ).length >= MAX_PROGRESSING_DOWNLOADS_PER_PROFILE
+          ) {
+            rejectDownload()
+            return
+          }
           const download = Object.freeze({
             ...identity(source.tabID, source.generation),
             id,
@@ -160,6 +210,19 @@ export function createAppDock() {
             state,
           })
           downloads.set(id, { senderID: source.senderID, storageKey: record.storageKey, item, state: download })
+          if (state === "completed" || state === "cancelled" || state === "interrupted") {
+            terminalDownloads.delete(id)
+            terminalDownloads.set(id, source.senderID)
+            while (
+              [...terminalDownloads.values()].filter((id) => id === source.senderID).length >
+              MAX_TERMINAL_DOWNLOADS_PER_SENDER
+            ) {
+              const oldest = [...terminalDownloads].find(([, owner]) => owner === source.senderID)
+              if (!oldest) break
+              terminalDownloads.delete(oldest[0])
+              downloads.delete(oldest[0])
+            }
+          } else terminalDownloads.delete(id)
           record.notify(Object.freeze({ type: "download", payload: download }))
         }
         item.on("updated", () => updateDownload(item.isPaused() ? "paused" : "progressing"))
@@ -170,6 +233,7 @@ export function createAppDock() {
       })
       configuredPartitions.add(partition)
     }
+    ensureViewCapacity(senderID, replacement?.selected ?? true)
     const view = new WebContentsView({
       webPreferences: {
         contextIsolation: true,
@@ -304,21 +368,14 @@ export function createAppDock() {
       }
     }
     if (!(replacement?.selected ?? true)) markInactive(senderID, id, senderTabs.get(id)!)
-    while (inactive.size > 20) {
-      const oldest = inactive.values().next().value
-      if (!oldest) break
-      remove(oldest.senderID, oldest.tabID)
-    }
-    void view.webContents
-      .loadURL(target)
-      .catch(() =>
-        notify(
-          Object.freeze({
-            type: "navigation-error",
-            payload: Object.freeze({ identity: identity(id, tabGeneration), code: "failed", url: target }),
-          }),
-        ),
-      )
+    void view.webContents.loadURL(target).catch(() =>
+      notify(
+        Object.freeze({
+          type: "navigation-error",
+          payload: Object.freeze({ identity: identity(id, tabGeneration), code: "failed", url: target }),
+        }),
+      ),
+    )
     update({})
     return Object.freeze({ ...identity(id, tabGeneration), url: target })
   }
@@ -330,6 +387,9 @@ export function createAppDock() {
       if (tabID) tabs.get(senderID)?.get(tabID)?.view.setBounds(bounds)
     },
     hide(senderID: number, _win: BrowserWindow) {
+      while (active.has(senderID) && inactive.size >= MAX_INACTIVE_TABS) {
+        if (!evictOldestInactive()) throw new Error("App Dock tab limit reached")
+      }
       for (const [tabID, record] of tabs.get(senderID) ?? []) {
         if (!record.win.isDestroyed()) record.win.contentView.removeChildView(record.view)
         markInactive(senderID, tabID, record)
@@ -391,10 +451,18 @@ export function createAppDock() {
       const bounds = record.view.getBounds()
       const selected = active.get(senderID) === tabID
       remove(senderID, tabID)
-      const tab = await open(senderID, record.win, target, bounds, record.notify, { storageKey: record.storageKey }, {
-        tabID,
-        selected,
-      })
+      const tab = await open(
+        senderID,
+        record.win,
+        target,
+        bounds,
+        record.notify,
+        { storageKey: record.storageKey },
+        {
+          tabID,
+          selected,
+        },
+      )
       if (isCurrent(senderID, tabID, tab.generation))
         record.notify(Object.freeze({ type: "tab-recovered", payload: tab }))
       return tab
@@ -474,6 +542,7 @@ export function createAppDock() {
         if (download.storageKey === storageKey) {
           download.item.cancel()
           downloads.delete(downloadID)
+          terminalDownloads.delete(downloadID)
         }
       }
       const browserSession = browserSessions.get(partition) ?? session.fromPartition(partition)
@@ -487,7 +556,9 @@ export function createAppDock() {
       if (!senderTabs) throw new Error("Unknown App Dock tab")
       const targetRecord = senderTabs.get(tabID)
       if (!targetRecord) throw new Error("Unknown App Dock tab")
-      const ids = [...senderTabs].filter(([, record]) => record.storageKey === targetRecord.storageKey).map(([id]) => id)
+      const ids = [...senderTabs]
+        .filter(([, record]) => record.storageKey === targetRecord.storageKey)
+        .map(([id]) => id)
       if (scope === "others" && order !== undefined) throw new Error("Invalid App Dock tab order")
       if (
         order !== undefined &&
