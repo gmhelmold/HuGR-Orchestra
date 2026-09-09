@@ -99,38 +99,38 @@ async function parent() {
   const { ELECTRON_RUN_AS_NODE: _electronRunAsNode, NODE_OPTIONS, APP_DOCK_LOAD_ONLY: _loadOnly, ...env } = process.env
   const safeNodeOptions = NODE_OPTIONS?.includes("ELECTRON_RUN_AS_NODE") ? undefined : NODE_OPTIONS
   const entry = join(import.meta.dir, "app-dock-security.child.cjs")
+  const restartEntry = join(import.meta.dir, "app-dock-security.restart.cjs")
   const restartStages: string[] = []
   if (!startupOnly && !loadOnly) {
     const restartUserData = await mkdtemp(join(tmpdir(), "app-dock-restart-user-data-"))
     const restartSite = await fixture()
     const runRestartStage = async (stage: string) => {
-    const child = spawn(electron, [entry, output, "--app-dock-electron-child"], {
-      stdio: ["ignore", "pipe", "pipe"],
-      env: {
-        ...env,
-        ...(safeNodeOptions ? { NODE_OPTIONS: safeNodeOptions } : {}),
-        APP_DOCK_ARTIFACT_ROOT: root,
-        APP_DOCK_RESTART_STAGE: stage,
-        APP_DOCK_RESTART_SITE: restartSite.base,
-        APP_DOCK_RESTART_USER_DATA: restartUserData,
-        ELECTRON_DISABLE_SECURITY_WARNINGS: "true",
-      },
-    })
-    let stdout = ""
-    let stderr = ""
-    child.stdout.on("data", (chunk) => {
-      stdout += chunk
-    })
-    child.stderr.on("data", (chunk) => {
-      stderr += chunk
-    })
-    const result = await new Promise<{ code: number | null }>((resolve, reject) => {
-      child.once("exit", (code) => resolve({ code }))
-      child.once("error", reject)
-    })
-    if (result.code !== 0 || !stdout.includes(`app-dock-restart:${stage}:pass`))
-      throw new Error(JSON.stringify({ phase: "restart-stage-failure", stage, ...result, stdout, stderr }))
-    restartStages.push(stage)
+      const child = spawn(electron, [restartEntry, output, stage], {
+        stdio: ["ignore", "pipe", "pipe"],
+        env: {
+          ...env,
+          ...(safeNodeOptions ? { NODE_OPTIONS: safeNodeOptions } : {}),
+          APP_DOCK_ARTIFACT_ROOT: root,
+          APP_DOCK_RESTART_SITE: restartSite.base,
+          APP_DOCK_RESTART_USER_DATA: restartUserData,
+          ELECTRON_DISABLE_SECURITY_WARNINGS: "true",
+        },
+      })
+      let stdout = ""
+      let stderr = ""
+      child.stdout.on("data", (chunk) => {
+        stdout += chunk
+      })
+      child.stderr.on("data", (chunk) => {
+        stderr += chunk
+      })
+      const result = await new Promise<{ code: number | null }>((resolve, reject) => {
+        child.once("exit", (code) => resolve({ code }))
+        child.once("error", reject)
+      })
+      if (result.code !== 0 || !stdout.includes(`app-dock-restart:${stage}:pass`))
+        throw new Error(JSON.stringify({ phase: "restart-stage-failure", stage, ...result, stdout, stderr }))
+      restartStages.push(stage)
     }
     try {
       await runRestartStage("u23-write")
@@ -974,68 +974,88 @@ async function restartChild(
   const userData = process.env.APP_DOCK_RESTART_USER_DATA
   const site = process.env.APP_DOCK_RESTART_SITE
   if (!userData || !isAbsolute(userData) || !site?.startsWith("https://")) throw new Error("Invalid restart fixture")
-  app.setPath("userData", userData)
   const { registerIpcHandlers } = await import("./ipc")
   app.commandLine.appendSwitch("ignore-certificate-errors")
   await app.whenReady()
-  registerIpcHandlers({
-    killSidecar() {},
-    relaunch() {},
-    awaitInitialization: async () => ({ serverUrl: site }),
-    consumeInitialDeepLinks: () => [],
-    getDefaultServerUrl: () => null,
-    setDefaultServerUrl() {},
-    isFirstLaunchOnboardingPending: () => false,
-    finishFirstLaunchOnboarding: () => null,
-    isOldLayoutEligible: () => false,
-    getDisplayBackend: async () => null,
-    setDisplayBackend: async () => {},
-    checkAppExists: () => false,
-    resolveAppPath: async () => null,
-    updater: { subscribe: () => () => {}, check: async () => {}, install: async () => {} },
-    showUpdater() {},
-    setBackgroundColor() {},
-    exportDebugLogs: async () => "",
-    recordFatalRendererError() {},
-    setNativeTranslations() {},
-  })
+  try {
+    registerIpcHandlers({
+      killSidecar() {},
+      relaunch() {},
+      awaitInitialization: async () => ({ serverUrl: site }),
+      consumeInitialDeepLinks: () => [],
+      getDefaultServerUrl: () => null,
+      setDefaultServerUrl() {},
+      isFirstLaunchOnboardingPending: () => false,
+      finishFirstLaunchOnboarding: () => null,
+      isOldLayoutEligible: () => false,
+      getDisplayBackend: async () => null,
+      setDisplayBackend: async () => {},
+      checkAppExists: () => false,
+      resolveAppPath: async () => null,
+      updater: { subscribe: () => () => {}, check: async () => {}, install: async () => {} },
+      showUpdater() {},
+      setBackgroundColor() {},
+      exportDebugLogs: async () => "",
+      recordFatalRendererError() {},
+      setNativeTranslations() {},
+    })
+  } catch (error) {
+    if (stage !== "u25-corrupt" || !String(error).includes("Invalid App Dock profile registry")) throw error
+    console.log(`app-dock-restart:${stage}:pass`)
+    app.exit(0)
+    return
+  }
   const win = new BrowserWindow({
     show: false,
     webPreferences: { nodeIntegration: true, contextIsolation: false, preload: process.env.APP_DOCK_TEST_PRELOAD },
   })
   const invoke = (channel: string, args: unknown[]) =>
-    win.webContents.executeJavaScript(`require('electron').ipcRenderer.invoke(${JSON.stringify(channel)}, ${JSON.stringify(args)})`)
+    win.webContents.executeJavaScript(
+      `require('electron').ipcRenderer.invoke(${JSON.stringify(channel)}, ...${JSON.stringify(args)})`,
+    )
   const bounds = { x: 0, y: 0, width: 400, height: 300 }
-  const open = (profileID: string) => invoke("app-dock-open", [site, bounds, profileID])
+  const open = (profileID: string) => {
+    check(typeof site === "string", "Invalid restart App Dock address")
+    return invoke("app-dock-open", [site, bounds, profileID])
+  }
   const view = () =>
     webContents
       .getAllWebContents()
       .filter((item) => item !== win.webContents && !item.isDestroyed())
       .at(-1)
-  const waitForView = async () => {
+  const waitForView = async (excluded: number[] = []) => {
     const deadline = Date.now() + 5_000
-    while (!view()) {
+    const current = () =>
+      webContents
+        .getAllWebContents()
+        .filter((item) => item !== win.webContents && !item.isDestroyed() && !excluded.includes(item.id))
+        .at(-1)
+    while (!current()) {
       if (Date.now() > deadline) throw new Error("App Dock restart view missing")
       await new Promise<void>((resolve) => setTimeout(resolve, 25))
     }
-    return view()!
+    return current()!
   }
+  let completed = false
   try {
     await win.loadURL(site)
     if (stage === "u23-write") {
       await open("restart-profile")
       const contents = await waitForView()
-      await contents.executeJavaScript("localStorage.setItem('restart-local', 'present'); document.cookie = 'restart-cookie=present; path=/'")
+      await contents.executeJavaScript(
+        "localStorage.setItem('restart-local', 'present'); document.cookie = 'restart-cookie=present; max-age=3600; path=/'",
+      )
       await contents.session.flushStorageData()
       await contents.session.cookies.flushStore()
     } else if (stage === "u23-read") {
       await open("restart-profile")
       const contents = await waitForView()
+      const storage = await contents.executeJavaScript(
+        "({ local: localStorage.getItem('restart-local'), cookie: document.cookie })",
+      )
       check(
-        (await contents.executeJavaScript("({ local: localStorage.getItem('restart-local'), cookie: document.cookie })")).local ===
-          "present" &&
-          (await contents.executeJavaScript("document.cookie")).includes("restart-cookie=present"),
-        "profile storage did not survive main-process restart",
+        storage.local === "present" && storage.cookie.includes("restart-cookie=present"),
+        `profile storage did not survive main-process restart: ${JSON.stringify(storage)}`,
       )
     } else if (stage === "u24-delete") {
       await open("tombstone-profile")
@@ -1052,19 +1072,26 @@ async function restartChild(
       await alpha.executeJavaScript("localStorage.setItem('isolation', 'alpha')")
       await alpha.session.flushStorageData()
       await open("isolation-beta")
-      const beta = await waitForView()
+      const beta = await waitForView([alpha.id])
       await beta.executeJavaScript("localStorage.setItem('isolation', 'beta')")
       await beta.session.flushStorageData()
     } else if (stage === "u26-read") {
       await open("isolation-alpha")
-      check((await (await waitForView()).executeJavaScript("localStorage.getItem('isolation')")) === "alpha", "alpha storage changed")
+      const alpha = await waitForView()
+      check((await alpha.executeJavaScript("localStorage.getItem('isolation')")) === "alpha", "alpha storage changed")
       await open("isolation-beta")
-      check((await (await waitForView()).executeJavaScript("localStorage.getItem('isolation')")) === "beta", "beta storage changed")
+      const beta = await waitForView([alpha.id])
+      check((await beta.executeJavaScript("localStorage.getItem('isolation')")) === "beta", "beta storage changed")
     } else throw new Error(`Unknown restart stage: ${stage}`)
+    completed = true
     console.log(`app-dock-restart:${stage}:pass`)
+  } catch (error) {
+    console.error(`app-dock-restart:${stage}:failure`, error)
+    throw error
   } finally {
     if (!win.isDestroyed()) win.destroy()
-    app.exit()
+    await new Promise<void>((resolve) => setTimeout(resolve, 250))
+    app.exit(completed ? 0 : 1)
   }
 }
 
