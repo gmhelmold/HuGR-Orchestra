@@ -1,6 +1,6 @@
 # Maestro V2 Session State
 
-Updated: 2026-09-09. Status: clean rebuild staged on `fork/dev`; Maestro governed runtime, Atlas Own snapshot pipeline, and CI gates integrated. No push, PR, or merge.
+Updated: 2026-09-09. Status: clean rebuild pushed to PR #11 on `fork/dev`; Maestro governed runtime, Atlas Own snapshot pipeline, and CI gates integrated. Human review/merge only.
 
 ## Recovery Snapshot
 
@@ -16,6 +16,15 @@ Updated: 2026-09-09. Status: clean rebuild staged on `fork/dev`; Maestro governe
 - Vendor whitespace corrected at `35d197bad8`; `git diff --check fork/dev..HEAD` passes.
 - CI/Godfile commit `4035d51621`; explicit lifecycle waiver update `46210c7e9`. `GODFILE_BASE_REF=fork/dev bun run check:godfile` reports 0 errors; Godfile tests 9/9 pass.
 - `atlas-b319-baseline` worktree/branch is absent. PR `#11` is open against `fork/dev`: `https://github.com/gmhelmold/HuGR-Orchestra/pull/11`. Final independent cold review APPROVED. Remote CI created 2026-09-09 04:37 UTC but all nontrivial jobs remain `QUEUED` after 20 minutes; no job has started, no test failed. Wait for CI and human review; do not self-approve or merge.
+
+## Local Verification Debt
+
+- Green local gates: full typecheck 30/30; App unit 734/734, browser 41/41, E2E 106/106; Core 1112/1112; Atlas product 4,119 pass/12 skipped; Storybook build; generated-client check; and Godfile 0 errors when correctly based on `fork/dev`.
+- Godfile default `origin/dev` is upstream OpenCode, not PR target. Local PR-equivalent command is `GODFILE_BASE_REF=fork/dev bun run check:godfile`.
+- `packages/sdk/js/src/v2/gen/types.gen.ts` is @hey-api/OpenAPI generated V2 schema output, 12,653 LOC. Stakeholder-authorized waiver caps it at current generated size; generator redesign, not manual splitting, is required to change this boundary.
+- Full `GITHUB_ACTIONS=false bun turbo test` remains blocked by `packages/opencode` CLI-run concurrency. `test/cli/run/run-process.test.ts` passes 13/13 with `bun test test/cli/run/run-process.test.ts --timeout 60000 --max-concurrency 1`, but fails 13/13 with `--max-concurrency 4`: real `bun src/index.ts run` subprocesses time out while booting. Each fixture already has isolated home, LLM server, and random port. Do not mask with longer timeouts or serialize entire package; dedicated repair should budget/serialize this subprocess tier only, then rerun full Turbo.
+- `packages/opencode/test/cli/help/help-snapshots.test.ts` has stale `--mini` help expectation and runs its 35-command subprocess sweep at concurrency 8. With serial sweep, the host still times out at 180s and leaves a child process; repair must diagnose subprocess startup/cleanup before changing snapshots or concurrency.
+- `nix-eval` cannot run here until user installs Nix interactively: macOS multi-user Nix installer requires sudo/TTY. This host's OpenCode temporary artifacts were purged, recovering roughly 28 GiB; preserve auth and persistent databases.
 
 ## Goal
 
