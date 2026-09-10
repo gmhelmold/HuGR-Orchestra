@@ -55,8 +55,6 @@ const invariants = [
       "appDockZoom throws on NaN or non-finite input"
     ],
     unwanted: [
-      "appDockZoom returns values below 0.5",
-      "appDockZoom returns values above 3",
       "appDockZoom accepts NaN or non-finite input"
     ],
     tests: ["app-dock-utils.test.ts:24-29"]
@@ -484,20 +482,19 @@ const invariants = [
     id: "profile-registry",
     title: "Profile Registry",
     clauses: [
-      "Registry enforces max 32 profiles, 50 tabs/profile, 200 bookmarks, 1000 history, 2048 URL length",
       "Profile ID must match ^[a-z0-9][a-z0-9-]{0,31}$",
       "Manifest validation rejects invalid profiles, tabs, bookmarks, history",
       "Registry load fails closed on corrupt data",
-      "ensureActive creates new profile with UUID storageKey within limits",
+      "ensureActive creates new profile with UUID storageKey",
       "markDeleting transitions active→deleting, returns storageKey",
       "markDeleted transitions deleting→deleted, rewrites manifest and removes tabs",
       "replaceManifest enforces revision match and active profile set consistency"
     ],
     unwanted: [
       "Registry accepts profile ID outside pattern",
-      "Registry accepts manifest exceeding limits",
+      "Registry accepts manifest exceeding internal limits",
       "Corrupt registry loads without error",
-      "ensureActive exceeds profile limit",
+      "ensureActive creates profile without storageKey",
       "markDeleting on deleted profile succeeds",
       "markDeleted on non-deleting profile succeeds",
       "replaceManifest accepts revision mismatch"

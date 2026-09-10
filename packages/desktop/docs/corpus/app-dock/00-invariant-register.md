@@ -6,7 +6,7 @@
 |---|---|---|---|---|
 | `bounds-conversion` | Bounds Conversion | 5 | 3 | app-dock-utils.test.ts:4-12 |
 | `url-validation` | URL Validation and Normalization | 6 | 3 | app-dock-utils.test.ts:14-22 |
-| `zoom-clamping` | Zoom Clamping | 4 | 3 | app-dock-utils.test.ts:24-29 |
+| `zoom-clamping` | Zoom Clamping | 4 | 1 | app-dock-utils.test.ts:24-29 |
 | `rpc-bridge-dispatch` | RPC Bridge Dispatch | 12 | 6 | app-dock-rpc.test.ts:103-145 |
 | `browser-snapshot` | Browser Snapshot Script | 5 | 4 | app-dock-tools.test.ts:86-105 |
 | `browser-click` | Browser Click Script | 3 | 2 | app-dock-tools.test.ts:107-111 |
@@ -35,7 +35,7 @@
 | `capacity-lru` | Capacity LRU Eviction | 4 | 3 | app-dock-security.test.ts:1053-1095 |
 | `download-limit` | Download Limit | 3 | 3 | app-dock-security.test.ts:1097-1160 |
 | `devtools-gate` | DevTools Gate | 3 | 3 | app-dock-security.test.ts:1162-1176 |
-| `profile-registry` | Profile Registry | 8 | 7 | app-dock-profile-registry.ts, app-dock-security.test.ts:973-980 |
+| `profile-registry` | Profile Registry | 7 | 7 | app-dock-profile-registry.ts, app-dock-security.test.ts:973-980 |
 
 ## Clause Detail
 
@@ -77,8 +77,6 @@
 - appDockZoom throws on NaN or non-finite input *(measured: app-dock-utils.test.ts:24-29)*
 
 **Unwanted**
-- appDockZoom returns values below 0.5 *(measured: app-dock-utils.test.ts:24-29)*
-- appDockZoom returns values above 3 *(measured: app-dock-utils.test.ts:24-29)*
 - appDockZoom accepts NaN or non-finite input *(measured: app-dock-utils.test.ts:24-29)*
 
 ### rpc-bridge-dispatch: RPC Bridge Dispatch
@@ -419,20 +417,19 @@
 ### profile-registry: Profile Registry
 
 **Clauses**
-- Registry enforces max 32 profiles, 50 tabs/profile, 200 bookmarks, 1000 history, 2048 URL length *(measured: app-dock-profile-registry.ts, app-dock-security.test.ts:973-980)*
 - Profile ID must match ^[a-z0-9][a-z0-9-]{0,31}$ *(measured: app-dock-profile-registry.ts, app-dock-security.test.ts:973-980)*
 - Manifest validation rejects invalid profiles, tabs, bookmarks, history *(measured: app-dock-profile-registry.ts, app-dock-security.test.ts:973-980)*
 - Registry load fails closed on corrupt data *(measured: app-dock-profile-registry.ts, app-dock-security.test.ts:973-980)*
-- ensureActive creates new profile with UUID storageKey within limits *(measured: app-dock-profile-registry.ts, app-dock-security.test.ts:973-980)*
+- ensureActive creates new profile with UUID storageKey *(measured: app-dock-profile-registry.ts, app-dock-security.test.ts:973-980)*
 - markDeleting transitions active→deleting, returns storageKey *(measured: app-dock-profile-registry.ts, app-dock-security.test.ts:973-980)*
 - markDeleted transitions deleting→deleted, rewrites manifest and removes tabs *(measured: app-dock-profile-registry.ts, app-dock-security.test.ts:973-980)*
 - replaceManifest enforces revision match and active profile set consistency *(measured: app-dock-profile-registry.ts, app-dock-security.test.ts:973-980)*
 
 **Unwanted**
 - Registry accepts profile ID outside pattern *(measured: app-dock-profile-registry.ts, app-dock-security.test.ts:973-980)*
-- Registry accepts manifest exceeding limits *(measured: app-dock-profile-registry.ts, app-dock-security.test.ts:973-980)*
+- Registry accepts manifest exceeding internal limits *(measured: app-dock-profile-registry.ts, app-dock-security.test.ts:973-980)*
 - Corrupt registry loads without error *(measured: app-dock-profile-registry.ts, app-dock-security.test.ts:973-980)*
-- ensureActive exceeds profile limit *(measured: app-dock-profile-registry.ts, app-dock-security.test.ts:973-980)*
+- ensureActive creates profile without storageKey *(measured: app-dock-profile-registry.ts, app-dock-security.test.ts:973-980)*
 - markDeleting on deleted profile succeeds *(measured: app-dock-profile-registry.ts, app-dock-security.test.ts:973-980)*
 - markDeleted on non-deleting profile succeeds *(measured: app-dock-profile-registry.ts, app-dock-security.test.ts:973-980)*
 - replaceManifest accepts revision mismatch *(measured: app-dock-profile-registry.ts, app-dock-security.test.ts:973-980)*
