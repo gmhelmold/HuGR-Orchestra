@@ -11,7 +11,7 @@ import { createRequire } from "node:module"
 import { randomUUID } from "node:crypto"
 
 type Case = { id: string; status: "pass"; detail: string }
-const required = ["L01", "L02", "L03", "L04"]
+const required = ["L01", "L02", "L03", "L04", "L05", "L06"]
 const scriptDir = dirname(fileURLToPath(import.meta.url))
 const root = resolve(scriptDir, "../..")
 const desktopMain = resolve(root, "src/main")
@@ -33,7 +33,7 @@ async function fixture() {
     ["req", "-x509", "-newkey", "rsa:2048", "-nodes", "-keyout", key, "-out", cert, "-subj", "/CN=127.0.0.1", "-days", "1"],
     { stdio: "ignore" },
   )
-  const body = "<!doctype html><title>live fixture</title><button id=inc>Increment</button><output id=count>0</output><script>document.getElementById('inc').addEventListener('click',()=>{const c=document.getElementById('count');c.textContent=String(Number(c.textContent||0)+1)})</script>"
+  const body = `<!doctype html><title>live fixture</title><button id=inc>Increment</button><output id=count>0</output><label for=name>Name</label><input id=name type=text placeholder="your name"><script>document.getElementById('inc').addEventListener('click',()=>{const c=document.getElementById('count');c.textContent=String(Number(c.textContent||0)+1)})</script>`
   const server = createHttpsServer({ key: await readFile(key), cert: await readFile(cert) }, (req: IncomingMessage, res: ServerResponse) => {
     res.writeHead(200, { "content-type": "text/html; charset=utf-8" })
     res.end(body)
@@ -125,9 +125,10 @@ async function child() {
     check(typeof openedTabID === "string" && openedTabID.length > 0, "dock_open returned no tabID")
     let title = ""
     let hasIncrement = false
+    let snapshot: { title: string; items: { name: string; ref: number; tag: string }[]; text: string } | undefined
     const deadline = Date.now() + 15_000
     while (true) {
-      const snapshot = await rpc("read", {})
+      snapshot = await rpc("read", {})
       check(!!snapshot && typeof snapshot === "object" && "title" in snapshot && "items" in snapshot, "unexpected dock snapshot shape")
       const snapshotTitle = snapshot.title
       check(typeof snapshotTitle === "string" && Array.isArray(snapshot.items), "unexpected dock snapshot fields")
@@ -142,6 +143,22 @@ async function child() {
     check(title === "live fixture", `unexpected dock snapshot title: ${title}`)
     check(hasIncrement, "Increment button missing from live dock snapshot")
     pass("L04", "dock_open + dock_read round-trip through the RPC dispatch against a real dock tab")
+
+    const incRef = snapshot!.items.find((item) => !!item && typeof item === "object" && "name" in item && item.name === "Increment")
+    check(incRef && typeof incRef === "object" && "ref" in incRef && typeof incRef.ref === "number", "Increment ref missing")
+    const clickResult = await rpc("click", { ref: incRef.ref })
+    check(clickResult && typeof clickResult === "object" && "ok" in clickResult && clickResult.ok === true, "click failed")
+    const afterClick = await rpc("read", {})
+    check(afterClick && typeof afterClick === "object" && "text" in afterClick && typeof afterClick.text === "string" && afterClick.text.includes("1"), "counter not incremented")
+    pass("L05", "dock_click mutates live page through RPC")
+
+    const inputRef = snapshot.items.find((item) => !!item && typeof item === "object" && "tag" in item && item.tag === "input")
+    check(inputRef && typeof inputRef === "object" && "ref" in inputRef && typeof inputRef.ref === "number", "input ref missing")
+    const typeResult = await rpc("type", { ref: inputRef.ref, text: "Ada" })
+    check(typeResult && typeof typeResult === "object" && "ok" in typeResult && typeResult.ok === true, "type failed")
+    const afterType = await rpc("read", {})
+    check(afterType && typeof afterType === "object" && "items" in afterType && Array.isArray(afterType.items) && afterType.items.some((i) => !!i && typeof i === "object" && "value" in i && i.value === "Ada"), "typed value not reflected")
+    pass("L06", "dock_type sets input value through RPC")
 
     outcome = cases.length === required.length && required.every((id) => cases.some((item: Case) => item.id === id)) ? 0 : 1
   } finally {
