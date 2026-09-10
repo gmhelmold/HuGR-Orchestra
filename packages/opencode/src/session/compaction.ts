@@ -495,7 +495,7 @@ const layer = Layer.effect(
         }
 
         if (!replay) {
-          const info = yield* provider.getProvider(userMessage.model.providerID)
+          const info = yield* provider.getProvider(userMessage.model.providerID).pipe(Effect.orDie)
           if (
             (yield* plugin.trigger(
               "experimental.compaction.autocontinue",
