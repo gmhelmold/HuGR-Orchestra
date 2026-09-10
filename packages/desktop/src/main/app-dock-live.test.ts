@@ -57,7 +57,8 @@ async function child() {
   const electron = await import("electron")
   const { app, BrowserWindow } = electron
   const { createAppDock } = await import("./app-dock")
-  const { handleDockRPC, registerAppDockBridge, registerAppDockWindow } = await import("./app-dock-rpc")
+  const { handleDockRPC, registerAppDockBridge } = await import("./app-dock-rpc")
+  const { registerAppDockWindow } = await import("./app-dock-test-support")
   const { spawnLocalServer } = await import("./server")
   if (!process.versions.electron) throw new Error("Electron child not started")
   app.commandLine.appendSwitch("ignore-certificate-errors")

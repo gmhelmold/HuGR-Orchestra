@@ -1,17 +1,12 @@
 import type { AppDock, DockBounds } from "./app-dock"
 import { buildClickScript, buildSnapshotScript, buildTypeScript } from "./app-dock-browser"
 import { getLastFocusedWindow } from "./windows"
-import type { BrowserWindow } from "electron"
+import { dockWindowFor } from "./app-dock-test-support"
 
 let appDock: AppDock | undefined
-let dockWindow: BrowserWindow | undefined
 
 export function registerAppDockBridge(instance: AppDock) {
   appDock = instance
-}
-
-export function registerAppDockWindow(win: BrowserWindow) {
-  dockWindow = win
 }
 
 export type DockRPCReply = (message: unknown) => void
@@ -53,10 +48,8 @@ const dockNumber = (value: unknown, name: string, min: number, max: number) => {
 
 const dockBridgeStorageKey = (senderID: number) => `dock-bridge-${senderID}-default`
 
-const dockWindowFor = () => getLastFocusedWindow() ?? dockWindow
-
 const dockSender = () => {
-  const win = dockWindowFor()
+  const win = dockWindowFor(getLastFocusedWindow)
   if (!win || win.isDestroyed()) throw new Error("No window is available for App Dock")
   return { senderID: win.webContents.id, win }
 }
@@ -146,7 +139,7 @@ function resolveTabID(dock: AppDock, senderID: number, args: Record<string, unkn
 }
 
 function dockBounds(value: unknown): DockBounds {
-  const win = dockWindowFor()
+  const win = dockWindowFor(getLastFocusedWindow)
   if (!win || win.isDestroyed()) throw new Error("No window is available for App Dock")
   if (value === undefined) {
     const bounds = win.getContentBounds()
