@@ -499,7 +499,7 @@ const invariants = [
       "markDeleted on non-deleting profile succeeds",
       "replaceManifest accepts revision mismatch"
     ],
-    tests: ["app-dock-profile-registry.ts", "app-dock-security.test.ts:973-980"]
+    tests: ["app-dock-profile-registry.test.ts"]
   }
 ];
 

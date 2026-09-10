@@ -1203,84 +1203,84 @@
 ### WP-190 (covers REQ-190 + GOLDEN-190)
 **Invariant**: `profile-registry`
 **Clause**: Profile ID must match ^[a-z0-9][a-z0-9-]{0,31}$
-**Witness**: app-dock-profile-registry.ts; app-dock-security.test.ts:973-980
+**Witness**: app-dock-profile-registry.test.ts
 **Status**: ready (test exists on main)
 
 ### WP-191 (covers REQ-191 + GOLDEN-191)
 **Invariant**: `profile-registry`
 **Clause**: Manifest validation rejects invalid profiles, tabs, bookmarks, history
-**Witness**: app-dock-profile-registry.ts; app-dock-security.test.ts:973-980
+**Witness**: app-dock-profile-registry.test.ts
 **Status**: ready (test exists on main)
 
 ### WP-192 (covers REQ-192 + GOLDEN-192)
 **Invariant**: `profile-registry`
 **Clause**: Registry load fails closed on corrupt data
-**Witness**: app-dock-profile-registry.ts; app-dock-security.test.ts:973-980
+**Witness**: app-dock-profile-registry.test.ts
 **Status**: ready (test exists on main)
 
 ### WP-193 (covers REQ-193 + GOLDEN-193)
 **Invariant**: `profile-registry`
 **Clause**: ensureActive creates new profile with UUID storageKey
-**Witness**: app-dock-profile-registry.ts; app-dock-security.test.ts:973-980
+**Witness**: app-dock-profile-registry.test.ts
 **Status**: ready (test exists on main)
 
 ### WP-194 (covers REQ-194 + GOLDEN-194)
 **Invariant**: `profile-registry`
 **Clause**: markDeleting transitions active→deleting, returns storageKey
-**Witness**: app-dock-profile-registry.ts; app-dock-security.test.ts:973-980
+**Witness**: app-dock-profile-registry.test.ts
 **Status**: ready (test exists on main)
 
 ### WP-195 (covers REQ-195 + GOLDEN-195)
 **Invariant**: `profile-registry`
 **Clause**: markDeleted transitions deleting→deleted, rewrites manifest and removes tabs
-**Witness**: app-dock-profile-registry.ts; app-dock-security.test.ts:973-980
+**Witness**: app-dock-profile-registry.test.ts
 **Status**: ready (test exists on main)
 
 ### WP-196 (covers REQ-196 + GOLDEN-196)
 **Invariant**: `profile-registry`
 **Clause**: replaceManifest enforces revision match and active profile set consistency
-**Witness**: app-dock-profile-registry.ts; app-dock-security.test.ts:973-980
+**Witness**: app-dock-profile-registry.test.ts
 **Status**: ready (test exists on main)
 
 ### WP-197 (covers REQ-197 + GOLDEN-197)
 **Invariant**: `profile-registry`
 **Unwanted**: Registry accepts profile ID outside pattern
-**Witness**: app-dock-profile-registry.ts; app-dock-security.test.ts:973-980
+**Witness**: app-dock-profile-registry.test.ts
 **Status**: ready (test exists on main)
 
 ### WP-198 (covers REQ-198 + GOLDEN-198)
 **Invariant**: `profile-registry`
 **Unwanted**: Registry accepts manifest exceeding internal limits
-**Witness**: app-dock-profile-registry.ts; app-dock-security.test.ts:973-980
+**Witness**: app-dock-profile-registry.test.ts
 **Status**: ready (test exists on main)
 
 ### WP-199 (covers REQ-199 + GOLDEN-199)
 **Invariant**: `profile-registry`
 **Unwanted**: Corrupt registry loads without error
-**Witness**: app-dock-profile-registry.ts; app-dock-security.test.ts:973-980
+**Witness**: app-dock-profile-registry.test.ts
 **Status**: ready (test exists on main)
 
 ### WP-200 (covers REQ-200 + GOLDEN-200)
 **Invariant**: `profile-registry`
 **Unwanted**: ensureActive creates profile without storageKey
-**Witness**: app-dock-profile-registry.ts; app-dock-security.test.ts:973-980
+**Witness**: app-dock-profile-registry.test.ts
 **Status**: ready (test exists on main)
 
 ### WP-201 (covers REQ-201 + GOLDEN-201)
 **Invariant**: `profile-registry`
 **Unwanted**: markDeleting on deleted profile succeeds
-**Witness**: app-dock-profile-registry.ts; app-dock-security.test.ts:973-980
+**Witness**: app-dock-profile-registry.test.ts
 **Status**: ready (test exists on main)
 
 ### WP-202 (covers REQ-202 + GOLDEN-202)
 **Invariant**: `profile-registry`
 **Unwanted**: markDeleted on non-deleting profile succeeds
-**Witness**: app-dock-profile-registry.ts; app-dock-security.test.ts:973-980
+**Witness**: app-dock-profile-registry.test.ts
 **Status**: ready (test exists on main)
 
 ### WP-203 (covers REQ-203 + GOLDEN-203)
 **Invariant**: `profile-registry`
 **Unwanted**: replaceManifest accepts revision mismatch
-**Witness**: app-dock-profile-registry.ts; app-dock-security.test.ts:973-980
+**Witness**: app-dock-profile-registry.test.ts
 **Status**: ready (test exists on main)
 

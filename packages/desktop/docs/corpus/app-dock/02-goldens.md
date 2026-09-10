@@ -1014,70 +1014,70 @@
 ### GOLDEN-190 (for REQ-190)
 **Requirement**: The system shall Profile ID must match ^[a-z0-9][a-z0-9-]{0,31}$.
 
-**Witness**: app-dock-profile-registry.ts; app-dock-security.test.ts:973-980
+**Witness**: app-dock-profile-registry.test.ts
 
 ### GOLDEN-191 (for REQ-191)
 **Requirement**: The system shall Manifest validation rejects invalid profiles, tabs, bookmarks, history.
 
-**Witness**: app-dock-profile-registry.ts; app-dock-security.test.ts:973-980
+**Witness**: app-dock-profile-registry.test.ts
 
 ### GOLDEN-192 (for REQ-192)
 **Requirement**: The system shall Registry load fails closed on corrupt data.
 
-**Witness**: app-dock-profile-registry.ts; app-dock-security.test.ts:973-980
+**Witness**: app-dock-profile-registry.test.ts
 
 ### GOLDEN-193 (for REQ-193)
 **Requirement**: The system shall ensureActive creates new profile with UUID storageKey.
 
-**Witness**: app-dock-profile-registry.ts; app-dock-security.test.ts:973-980
+**Witness**: app-dock-profile-registry.test.ts
 
 ### GOLDEN-194 (for REQ-194)
 **Requirement**: The system shall markDeleting transitions active→deleting, returns storageKey.
 
-**Witness**: app-dock-profile-registry.ts; app-dock-security.test.ts:973-980
+**Witness**: app-dock-profile-registry.test.ts
 
 ### GOLDEN-195 (for REQ-195)
 **Requirement**: The system shall markDeleted transitions deleting→deleted, rewrites manifest and removes tabs.
 
-**Witness**: app-dock-profile-registry.ts; app-dock-security.test.ts:973-980
+**Witness**: app-dock-profile-registry.test.ts
 
 ### GOLDEN-196 (for REQ-196)
 **Requirement**: The system shall replaceManifest enforces revision match and active profile set consistency.
 
-**Witness**: app-dock-profile-registry.ts; app-dock-security.test.ts:973-980
+**Witness**: app-dock-profile-registry.test.ts
 
 ### GOLDEN-197 (for REQ-197)
 **Requirement**: If the system Registry accepts profile ID outside pattern, then it shall refuse and return an error.
 
-**Witness**: app-dock-profile-registry.ts; app-dock-security.test.ts:973-980
+**Witness**: app-dock-profile-registry.test.ts
 
 ### GOLDEN-198 (for REQ-198)
 **Requirement**: If the system Registry accepts manifest exceeding internal limits, then it shall refuse and return an error.
 
-**Witness**: app-dock-profile-registry.ts; app-dock-security.test.ts:973-980
+**Witness**: app-dock-profile-registry.test.ts
 
 ### GOLDEN-199 (for REQ-199)
 **Requirement**: If the system Corrupt registry loads without error, then it shall refuse and return an error.
 
-**Witness**: app-dock-profile-registry.ts; app-dock-security.test.ts:973-980
+**Witness**: app-dock-profile-registry.test.ts
 
 ### GOLDEN-200 (for REQ-200)
 **Requirement**: If the system ensureActive creates profile without storageKey, then it shall refuse and return an error.
 
-**Witness**: app-dock-profile-registry.ts; app-dock-security.test.ts:973-980
+**Witness**: app-dock-profile-registry.test.ts
 
 ### GOLDEN-201 (for REQ-201)
 **Requirement**: If the system markDeleting on deleted profile succeeds, then it shall refuse and return an error.
 
-**Witness**: app-dock-profile-registry.ts; app-dock-security.test.ts:973-980
+**Witness**: app-dock-profile-registry.test.ts
 
 ### GOLDEN-202 (for REQ-202)
 **Requirement**: If the system markDeleted on non-deleting profile succeeds, then it shall refuse and return an error.
 
-**Witness**: app-dock-profile-registry.ts; app-dock-security.test.ts:973-980
+**Witness**: app-dock-profile-registry.test.ts
 
 ### GOLDEN-203 (for REQ-203)
 **Requirement**: If the system replaceManifest accepts revision mismatch, then it shall refuse and return an error.
 
-**Witness**: app-dock-profile-registry.ts; app-dock-security.test.ts:973-980
+**Witness**: app-dock-profile-registry.test.ts
 
