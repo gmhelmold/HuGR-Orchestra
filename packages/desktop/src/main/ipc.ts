@@ -37,6 +37,7 @@ import {
   type DockBounds,
 } from "./app-dock"
 import { AppDockProfileRegistry } from "./app-dock-profile-registry"
+import { registerAppDockBridge } from "./app-dock-rpc"
 
 const pickerFilters = (ext?: string[]) => {
   if (!ext || ext.length === 0) return undefined
@@ -255,6 +256,7 @@ type Deps = {
 
 export function registerIpcHandlers(deps: Deps) {
   const appDock = createAppDock()
+  registerAppDockBridge(appDock)
   const appDockProfiles = AppDockProfileRegistry.load(app.getPath("userData"))
   appDockProfiles.ensureActive("default")
   const drafts = createDesktopDraftStore(join(app.getPath("userData"), "drafts.sqlite"))

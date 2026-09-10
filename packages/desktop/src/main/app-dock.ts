@@ -63,6 +63,8 @@ const storagePartition = (storageKey: string) => {
 
 export { panelBoundsToContent }
 
+export type AppDock = ReturnType<typeof createAppDock>
+
 const validBounds = (bounds: DockBounds) =>
   [bounds.x, bounds.y, bounds.width, bounds.height].every(Number.isSafeInteger) && bounds.width > 0 && bounds.height > 0
 
@@ -585,6 +587,21 @@ export function createAppDock(options: { developmentMode?: () => boolean } = {})
       await browserSession.clearStorageData()
       await browserSession.clearCache()
       browserSessions.delete(partition)
+    },
+    list(senderID: number) {
+      return [...(tabs.get(senderID) ?? [])].map(([tabID, record]) =>
+        Object.freeze({ ...record.state(), active: active.get(senderID) === tabID }),
+      )
+    },
+    async execute(senderID: number, tabID: string, script: string) {
+      const record = tabs.get(senderID)?.get(tabID)
+      if (!record) throw new Error("Unknown App Dock tab")
+      const generation = record.generation
+      const value = await record.view.webContents.executeJavaScript(script).catch((error: unknown) => {
+        throw new Error(`App Dock page execution failed: ${error instanceof Error ? error.message : String(error)}`)
+      })
+      if (!isCurrent(senderID, tabID, generation)) throw new Error("App Dock tab changed during execution")
+      return value
     },
     close,
     closeTabs(senderID: number, tabID: string, scope: "others" | "right", order?: string[]) {

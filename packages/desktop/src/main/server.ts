@@ -25,6 +25,7 @@ type SpawnLocalServerOptions = {
   onStdout?: (message: string) => void
   onStderr?: (message: string) => void
   onExit?: (code: number) => void
+  onMessage?: (message: unknown, reply: (message: unknown) => void) => void
 }
 
 export function getDefaultServerUrl(): string | null {
@@ -83,6 +84,11 @@ export async function spawnLocalServer(
     exit.resolve(code)
   })
   child.on("error", (error) => options.onStderr?.(`utility process error: ${serializeError(error).message}`))
+
+  child.on("message", (message) => {
+    if (!options.onMessage) return
+    if (!exited) options.onMessage(message, (reply) => child.postMessage(reply))
+  })
 
   child.stdout?.on("data", (chunk: Buffer) => options.onStdout?.(chunk.toString("utf8").trimEnd()))
   child.stderr?.on("data", (chunk: Buffer) => options.onStderr?.(chunk.toString("utf8").trimEnd()))
