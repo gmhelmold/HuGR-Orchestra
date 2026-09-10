@@ -11,7 +11,7 @@ import { expectOk, selectConfigOption } from "./acp-test-client"
 import { createAcpClient, initialize, newSession, verifierConfig } from "./helpers"
 
 describe("opencode acp lifecycle subprocess", () => {
-  cliIt.live(
+  cliIt.serial(
     "stdin EOF exits cleanly",
     ({ opencode }) =>
       Effect.gen(function* () {
@@ -24,7 +24,7 @@ describe("opencode acp lifecycle subprocess", () => {
     60_000,
   )
 
-  cliIt.live(
+  cliIt.serial(
     "close capability and close request",
     ({ home, llm, opencode }) =>
       Effect.gen(function* () {
@@ -41,7 +41,7 @@ describe("opencode acp lifecycle subprocess", () => {
     60_000,
   )
 
-  cliIt.live(
+  cliIt.serial(
     "loadSession capability and load request return session config options",
     ({ home, llm, opencode }) =>
       Effect.gen(function* () {
@@ -65,7 +65,7 @@ describe("opencode acp lifecycle subprocess", () => {
     60_000,
   )
 
-  cliIt.live(
+  cliIt.serial(
     "list request includes a live ACP-created session",
     ({ home, llm, opencode }) =>
       Effect.gen(function* () {
@@ -82,7 +82,7 @@ describe("opencode acp lifecycle subprocess", () => {
     60_000,
   )
 
-  cliIt.live(
+  cliIt.serial(
     "resume capability advertisement",
     ({ opencode }) =>
       Effect.gen(function* () {
@@ -93,7 +93,7 @@ describe("opencode acp lifecycle subprocess", () => {
     60_000,
   )
 
-  cliIt.live(
+  cliIt.serial(
     "resume request returns session config options",
     ({ home, llm, opencode }) =>
       Effect.gen(function* () {
