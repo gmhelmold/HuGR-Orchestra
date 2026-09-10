@@ -4,6 +4,7 @@ import { randomUUID } from "node:crypto"
 import type { EventEmitter } from "node:events"
 import { appDockURL, appDockZoom, panelBoundsToContent, type DockBounds } from "./app-dock-utils"
 export type { DockBounds } from "./app-dock-utils"
+import type { AppDockAPI } from "./app-dock-api"
 
 export type AppDockIdentity = Readonly<{ tabID: string; generation: number }>
 export type AppDockTab = AppDockIdentity & { url: string }
@@ -63,16 +64,9 @@ const storagePartition = (storageKey: string) => {
 
 export { panelBoundsToContent }
 
-export type AppDock = ReturnType<typeof createAppDock>
+export type AppDock = AppDockAPI
 
-const validBounds = (bounds: DockBounds) =>
-  [bounds.x, bounds.y, bounds.width, bounds.height].every(Number.isSafeInteger) && bounds.width > 0 && bounds.height > 0
-
-const MAX_INACTIVE_TABS = 20
-const MAX_PROGRESSING_DOWNLOADS_PER_PROFILE = 8
-const MAX_TERMINAL_DOWNLOADS_PER_SENDER = 20
-
-export function createAppDock(options: { developmentMode?: () => boolean } = {}) {
+export function createAppDock(options: { developmentMode?: () => boolean } = {}): AppDockAPI {
   const developmentMode = options.developmentMode ?? (() => !app.isPackaged)
   const browserSessions = new Map<string, Session>()
   const configuredPartitions = new Set<string>()
@@ -87,6 +81,12 @@ export function createAppDock(options: { developmentMode?: () => boolean } = {})
   const active = new Map<number, string>()
   const inactive = new Map<string, { senderID: number; tabID: string }>()
   let generation = 0
+  const MAX_INACTIVE_TABS = 20
+  const MAX_PROGRESSING_DOWNLOADS_PER_PROFILE = 8
+  const MAX_TERMINAL_DOWNLOADS_PER_SENDER = 20
+
+  const validBounds = (bounds: DockBounds) =>
+    [bounds.x, bounds.y, bounds.width, bounds.height].every(Number.isSafeInteger) && bounds.width > 0 && bounds.height > 0
   const identity = (tabID: string, tabGeneration: number): AppDockIdentity =>
     Object.freeze({ tabID, generation: tabGeneration })
   const isCurrent = (senderID: number, tabID: string, tabGeneration: number) =>
