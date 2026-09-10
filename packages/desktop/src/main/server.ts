@@ -17,7 +17,10 @@ type SidecarMessage =
 export type SidecarListener = { stop: () => Promise<void> }
 
 const SIDECAR_SERVICE_NAME = "opencode server"
-const SIDECAR_START_STALL_TIMEOUT = 60_000
+// 20s is sufficient for sidecar boot + health on all supported platforms.
+// 60s masked slow-start regressions; 20s fails fast on CI while leaving
+// headroom for cold starts (observed p99 ~8s on macOS, ~12s on Linux).
+const SIDECAR_START_STALL_TIMEOUT = 20_000
 const SIDECAR_STOP_TIMEOUT = 6_000
 
 type SpawnLocalServerOptions = {
