@@ -45,6 +45,8 @@ const dockNumber = (value: unknown, name: string, min: number, max: number) => {
   return Math.max(min, Math.min(max, Math.round(value)))
 }
 
+const dockBridgeStorageKey = (senderID: number) => `dock-bridge-${senderID}-default`
+
 const dockSender = () => {
   const win = getLastFocusedWindow()
   if (!win || win.isDestroyed()) throw new Error("No window is available for App Dock")
@@ -112,7 +114,7 @@ async function dispatch(op: string, args: Record<string, unknown>): Promise<unkn
         (event) => {
           if (!win.isDestroyed()) win.webContents.send("app-dock-event", event)
         },
-        { storageKey: "default" },
+        { storageKey: dockBridgeStorageKey(senderID) },
       )
       return tab
     }
