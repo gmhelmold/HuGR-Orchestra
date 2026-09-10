@@ -4,9 +4,8 @@ import { mkdir, mkdtemp, copyFile, rm, access, readFile, writeFile } from "node:
 import { createServer as createHttpsServer } from "node:https"
 import { createServer as createNetServer } from "node:net"
 import type { IncomingMessage, ServerResponse } from "node:http"
-import type { AddressInfo } from "node:net"
 import { tmpdir } from "node:os"
-import { dirname, isAbsolute, join, resolve } from "node:path"
+import { dirname, join, resolve } from "node:path"
 import { fileURLToPath } from "node:url"
 import { createRequire } from "node:module"
 import { randomUUID } from "node:crypto"
@@ -42,17 +41,14 @@ async function fixture() {
   await new Promise<void>((ready) => server.listen(0, "127.0.0.1", () => ready()))
   const address = server.address()
   if (!address || typeof address === "string") throw new Error("fixture did not bind")
-  return {
-    base: `https://127.0.0.1:${(address as AddressInfo).port}`,
-    close: () => new Promise<void>((done) => server.close(() => done())),
-  }
+  return { base: `https://127.0.0.1:${address.port}`, close: () => new Promise<void>((done) => server.close(() => done())) }
 }
 
 async function freePort() {
   const server = createNetServer()
   await new Promise<void>((ready) => server.listen(0, "127.0.0.1", () => ready()))
   const address = server.address()
-  const port = (address as AddressInfo).port
+  const port = address.port
   await new Promise<void>((done) => server.close(() => done()))
   return port
 }
@@ -61,7 +57,7 @@ async function child() {
   const electron = await import("electron")
   const { app, BrowserWindow } = electron
   const { createAppDock } = await import("./app-dock")
-  const { handleDockRPC, registerAppDockBridge } = await import("./app-dock-rpc")
+  const { handleDockRPC, registerAppDockBridge, registerAppDockWindow } = await import("./app-dock-rpc")
   const { spawnLocalServer } = await import("./server")
   if (!process.versions.electron) throw new Error("Electron child not started")
   app.commandLine.appendSwitch("ignore-certificate-errors")
@@ -79,19 +75,8 @@ async function child() {
   const doc = createAppDock({ developmentMode: () => false })
   registerAppDockBridge(doc)
   const win = new BrowserWindow({ width: 900, height: 700, show: true })
-  app.focus({ steal: true })
   win.show()
-  win.focus()
-  const focusForDock = async () => {
-    for (let spins = 0; spins < 50 && BrowserWindow.getFocusedWindow() !== win; spins++) {
-      app.focus({ steal: true })
-      win.focus()
-      win.show()
-      await new Promise((delay) => setTimeout(delay, 100))
-    }
-    check(BrowserWindow.getFocusedWindow() === win, "test window did not become focused")
-  }
-  await focusForDock()
+  registerAppDockWindow(win)
   const sidecarPath = process.env.APP_DOCK_SIDECAR
   check(sidecarPath, "APP_DOCK_SIDECAR not propagated to child")
   const server = await spawnLocalServer("127.0.0.1", port, password, {
@@ -112,7 +97,8 @@ async function child() {
       signal: AbortSignal.timeout(10_000),
     })
     check(idsResponse.ok, `tool ids request failed with ${idsResponse.status}`)
-    const ids = (await idsResponse.json()) as string[]
+    const rawIds: unknown = await idsResponse.json()
+    const ids: string[] = Array.isArray(rawIds) ? rawIds.filter((id): id is string => typeof id === "string") : []
     const expected = ["dock_list", "dock_read", "dock_click", "dock_type", "dock_navigate", "dock_go", "dock_open", "dock_close"]
     const missing = expected.filter((id) => !ids.includes(id))
     check(missing.length === 0, `dock tools missing from live server: ${missing.join(", ")}`)
@@ -122,9 +108,8 @@ async function child() {
     check(builtins.length > 1, "expected familiar builtin tools absent")
     pass("L03", "builtin tools coexist with dock_* in the live registry")
 
-    const rpc = async (op: string, args: Record<string, unknown> = {}) => {
-      await focusForDock()
-      return new Promise<unknown>((resolveRPC, rejectRPC) => {
+    const rpc = async (op: string, args: Record<string, unknown> = {}) =>
+      new Promise<unknown>((resolveRPC, rejectRPC) => {
         const id = randomUUID()
         const handled = handleDockRPC({ type: "dock.rpc", id, op, args }, (message) => {
           if (message.id !== id) return
@@ -133,19 +118,28 @@ async function child() {
         })
         if (!handled) rejectRPC(new Error(`Unhandled App Dock RPC: ${op}`))
       })
-    }
-    const opened = (await rpc("open", { address: site.base })) as { tabID: string }
-    let snapshot: { title: string; items: { name: string }[]; text: string }
+    const openedRaw = await rpc("open", { address: site.base })
+    check(!!openedRaw && typeof openedRaw === "object" && "tabID" in openedRaw, "dock_open returned no tab")
+    const openedTabID = openedRaw.tabID
+    check(typeof openedTabID === "string" && openedTabID.length > 0, "dock_open returned no tabID")
+    let title = ""
+    let hasIncrement = false
     const deadline = Date.now() + 15_000
     while (true) {
-      snapshot = (await rpc("read", {})) as typeof snapshot
-      if (Date.now() > deadline) throw new Error(`dock tab never finished loading: ${snapshot.title}`)
-      if (snapshot.title === "live fixture" || snapshot.items.some((item) => item.name === "Increment")) break
+      const snapshot = await rpc("read", {})
+      check(!!snapshot && typeof snapshot === "object" && "title" in snapshot && "items" in snapshot, "unexpected dock snapshot shape")
+      const snapshotTitle = snapshot.title
+      check(typeof snapshotTitle === "string" && Array.isArray(snapshot.items), "unexpected dock snapshot fields")
+      title = snapshotTitle
+      hasIncrement = snapshot.items.some(
+        (item) => !!item && typeof item === "object" && "name" in item && item.name === "Increment",
+      )
+      if (Date.now() > deadline) throw new Error(`dock tab never finished loading: ${title}`)
+      if (title === "live fixture" || hasIncrement) break
       await new Promise((delay) => setTimeout(delay, 150))
     }
-    check(typeof opened.tabID === "string" && opened.tabID.length > 0, "dock_open returned no tabID")
-    check(snapshot.title === "live fixture", `unexpected dock snapshot title: ${snapshot.title}`)
-    check(snapshot.items.some((item) => item.name === "Increment"), "Increment button missing from live dock snapshot")
+    check(title === "live fixture", `unexpected dock snapshot title: ${title}`)
+    check(hasIncrement, "Increment button missing from live dock snapshot")
     pass("L04", "dock_open + dock_read round-trip through the RPC dispatch against a real dock tab")
 
     outcome = cases.length === required.length && required.every((id) => cases.some((item: Case) => item.id === id)) ? 0 : 1

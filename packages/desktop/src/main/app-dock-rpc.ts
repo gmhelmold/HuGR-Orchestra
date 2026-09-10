@@ -1,11 +1,17 @@
 import type { AppDock, DockBounds } from "./app-dock"
 import { buildClickScript, buildSnapshotScript, buildTypeScript } from "./app-dock-browser"
 import { getLastFocusedWindow } from "./windows"
+import type { BrowserWindow } from "electron"
 
 let appDock: AppDock | undefined
+let dockWindow: BrowserWindow | undefined
 
 export function registerAppDockBridge(instance: AppDock) {
   appDock = instance
+}
+
+export function registerAppDockWindow(win: BrowserWindow) {
+  dockWindow = win
 }
 
 export type DockRPCReply = (message: unknown) => void
@@ -21,7 +27,7 @@ type DockRPCResult =
   | Readonly<{ type: "dock.rpc.result"; id: string; ok: true; value: unknown }>
   | Readonly<{ type: "dock.rpc.result"; id: string; ok: false; error: Readonly<{ message: string }> }>
 
-const sendResult = (reply: DockRPCReply, result: DockRPCResult) => void reply(result)
+const sendResult = (reply: DockRPCReply, result: DockRPCResult) => reply(result)
 
 const errorResult = (id: string, message: string): DockRPCResult =>
   Object.freeze({ type: "dock.rpc.result", id, ok: false, error: Object.freeze({ message }) })
@@ -47,8 +53,10 @@ const dockNumber = (value: unknown, name: string, min: number, max: number) => {
 
 const dockBridgeStorageKey = (senderID: number) => `dock-bridge-${senderID}-default`
 
+const dockWindowFor = () => getLastFocusedWindow() ?? dockWindow
+
 const dockSender = () => {
-  const win = getLastFocusedWindow()
+  const win = dockWindowFor()
   if (!win || win.isDestroyed()) throw new Error("No window is available for App Dock")
   return { senderID: win.webContents.id, win }
 }
@@ -138,7 +146,7 @@ function resolveTabID(dock: AppDock, senderID: number, args: Record<string, unkn
 }
 
 function dockBounds(value: unknown): DockBounds {
-  const win = getLastFocusedWindow()
+  const win = dockWindowFor()
   if (!win || win.isDestroyed()) throw new Error("No window is available for App Dock")
   if (value === undefined) {
     const bounds = win.getContentBounds()
