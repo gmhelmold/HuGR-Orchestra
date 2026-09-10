@@ -627,12 +627,30 @@ function writeAll() {
   fs.writeFileSync(path.join(outDir, "02-goldens.md"), genGoldens());
   fs.writeFileSync(path.join(outDir, "03-cards.md"), genCards());
 
-  const totalReqs = invariants.reduce((n, inv) => n + inv.clauses.length + inv.unwanted.length, 0);
-  console.log(`Generated corpus in ${outDir}`);
-  console.log(`Invariants: ${invariants.length}`);
-  console.log(`Total requirements: ${totalReqs}`);
-  console.log(`Total goldens: ${totalReqs}`);
-  console.log(`Total cards: ${totalReqs}`);
+  // Split into per-invariant files
+  const invariantsDir = path.join(outDir, "invariants")
+  fs.mkdirSync(invariantsDir, { recursive: true })
+  for (const inv of invariants) {
+    let md = `# Invariant: \`${inv.id}\` - ${inv.title}\n\n`
+    md += `> Clauses: ${inv.clauses.length} | Unwanted: ${inv.unwanted.length} | Witnesses: ${inv.tests.join(", ")}\n\n`
+    md += "## Clauses\n"
+    for (const c of inv.clauses) {
+      md += `- ${c} *(measured: ${inv.tests.join(", ")})*\n`
+    }
+    md += "\n## Unwanted\n"
+    for (const u of inv.unwanted) {
+      md += `- ${u} *(measured: ${inv.tests.join(", ")})*\n`
+    }
+    md += "\n"
+    fs.writeFileSync(path.join(invariantsDir, `${inv.id}.md`), md)
+  }
+
+  const totalReqs = invariants.reduce((n, inv) => n + inv.clauses.length + inv.unwanted.length, 0)
+  console.log(`Generated corpus in ${outDir}`)
+  console.log(`Invariants: ${invariants.length}`)
+  console.log(`Total requirements: ${totalReqs}`)
+  console.log(`Total goldens: ${totalReqs}`)
+  console.log(`Total cards: ${totalReqs}`)
 }
 
 writeAll();
