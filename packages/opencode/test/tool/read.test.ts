@@ -1,7 +1,7 @@
 import { PermissionV1 } from "@opencode-ai/core/v1/permission"
-import { afterEach, describe, expect } from "bun:test"
+import { afterEach, describe, expect, test } from "bun:test"
 import { LayerNode } from "@opencode-ai/core/effect/layer-node"
-import { Cause, Effect, Exit, Layer, Stream } from "effect"
+import { Cause, Effect, Exit, FileSystem, Layer, Schema } from "effect"
 import path from "path"
 import { Agent } from "../../src/agent/agent"
 import { CrossSpawnSpawner } from "@opencode-ai/core/cross-spawn-spawner"
@@ -10,11 +10,10 @@ import { Global } from "@opencode-ai/core/global"
 import { Config } from "@/config/config"
 import { RuntimeFlags } from "@/effect/runtime-flags"
 import { Ripgrep } from "@opencode-ai/core/ripgrep"
-import { LSP } from "@/lsp/lsp"
 import { Permission } from "../../src/permission"
 import { SessionID, MessageID } from "../../src/session/schema"
 import { Instruction } from "../../src/session/instruction"
-import { ReadTool } from "../../src/tool/read"
+import { Parameters, ReadTool } from "../../src/tool/read"
 import { Truncate } from "@/tool/truncate"
 import { Tool } from "@/tool/tool"
 import { Filesystem } from "@/util/filesystem"
@@ -28,6 +27,7 @@ import {
 import { testEffect } from "../lib/effect"
 
 const FIXTURES_DIR = path.join(import.meta.dir, "fixtures")
+const MAX_MEDIA_BYTES = 20 * 1024 * 1024
 
 afterEach(async () => {
   await disposeAllInstances()
@@ -46,15 +46,7 @@ const ctx = {
 
 const readLayer = (flags: Partial<RuntimeFlags.Info> = {}) =>
   LayerNode.compile(
-    LayerNode.group([
-      Agent.node,
-      FSUtil.node,
-      CrossSpawnSpawner.node,
-      Instruction.node,
-      LSP.node,
-      Ripgrep.node,
-      Truncate.node,
-    ]),
+    LayerNode.group([Agent.node, FSUtil.node, CrossSpawnSpawner.node, Instruction.node, Ripgrep.node, Truncate.node]),
   )
 
 const it = testEffect(Layer.mergeAll(readLayer(), testInstanceStoreLayer))
@@ -313,6 +305,19 @@ describe("tool.read env file permissions", () => {
 })
 
 describe("tool.read truncation", () => {
+  test("rejects zero offset and limit in schema", () => {
+    const decode = Schema.decodeUnknownResult(Parameters)
+    expect(decode({ filePath: "/a", offset: 0 })._tag).toBe("Failure")
+    expect(decode({ filePath: "/a", limit: 0 })._tag).toBe("Failure")
+  })
+
+  test("accepts numeric strings for offset and limit", () => {
+    const decode = Schema.decodeUnknownSync(Parameters)
+    expect(decode({ filePath: "/a", offset: "-20", limit: "10" })).toMatchObject({ offset: -20, limit: 10 })
+    expect(() => decode({ filePath: "/a", offset: "0" })).toThrow()
+    expect(() => decode({ filePath: "/a", limit: "1.5" })).toThrow()
+  })
+
   it.instance("truncates large file by bytes and sets truncated metadata", () =>
     Effect.gen(function* () {
       const test = yield* TestInstance
@@ -323,40 +328,9 @@ describe("tool.read truncation", () => {
 
       const result = yield* run({ filePath: path.join(test.directory, "large.json") })
       expect(result.metadata.truncated).toBe(true)
-      expect(result.output).toContain("Output capped at")
+      expect(result.output).toContain("PARTIAL view")
       expect(result.output).toContain("Use offset=")
-    }),
-  )
-
-  it.instance("stops streaming after the byte cap", () =>
-    Effect.gen(function* () {
-      const test = yield* TestInstance
-      const filepath = path.join(test.directory, "huge.txt")
-      const content = `${"x".repeat(80)}\n`.repeat(50_000)
-      yield* put(filepath, content)
-
-      const fs = yield* FSUtil.Service
-      const counter = { bytes: 0 }
-      const result = yield* run({ filePath: filepath }).pipe(
-        Effect.provideService(
-          FSUtil.Service,
-          FSUtil.Service.of({
-            ...fs,
-            stream: (file, options) =>
-              fs.stream(file, options).pipe(
-                Stream.tap((chunk) =>
-                  Effect.sync(() => {
-                    counter.bytes += chunk.length
-                  }),
-                ),
-              ),
-          }),
-        ),
-      )
-
-      expect(result.metadata.truncated).toBe(true)
-      expect(result.output).toContain("Output capped at")
-      expect(counter.bytes).toBeLessThan(Buffer.byteLength(content, "utf-8") / 2)
+      expect(Buffer.byteLength(result.output, "utf-8")).toBeLessThanOrEqual(50 * 1024)
     }),
   )
 
@@ -368,7 +342,7 @@ describe("tool.read truncation", () => {
 
       const result = yield* run({ filePath: path.join(test.directory, "many-lines.txt"), limit: 10 })
       expect(result.metadata.truncated).toBe(true)
-      expect(result.output).toContain("Showing lines 1-10 of 100")
+      expect(result.output).toContain("PARTIAL view. Showing lines 1-10")
       expect(result.output).toContain("Use offset=11")
       expect(result.output).toContain("line0")
       expect(result.output).toContain("line9")
@@ -390,7 +364,6 @@ describe("tool.read truncation", () => {
         text: "hello world",
         lineStart: 1,
         lineEnd: 1,
-        totalLines: 1,
         truncated: false,
       })
     }),
@@ -432,7 +405,7 @@ describe("tool.read truncation", () => {
 
       const result = yield* exec(dir, { filePath: path.join(dir, "empty.txt") })
       expect(result.metadata.truncated).toBe(false)
-      expect(result.output).toContain("End of file - total 0 lines")
+      expect(result.output).toContain("End of file")
     }),
   )
 
@@ -471,6 +444,15 @@ describe("tool.read truncation", () => {
     }),
   )
 
+  it.live("rejects negative directory offsets", () =>
+    Effect.gen(function* () {
+      const dir = yield* tmpdirScoped()
+      yield* put(path.join(dir, "dir", "file.txt"), "content")
+      const err = yield* fail(dir, { filePath: path.join(dir, "dir"), offset: -1 })
+      expect(err.message).toBe("Negative offset is only supported for files.")
+    }),
+  )
+
   it.live("truncates long lines", () =>
     Effect.gen(function* () {
       const dir = yield* tmpdirScoped()
@@ -482,16 +464,65 @@ describe("tool.read truncation", () => {
     }),
   )
 
-  it.live("image files set truncated to false", () =>
+  it.live("errors for explicit ranges exceeding render budget", () =>
     Effect.gen(function* () {
       const dir = yield* tmpdirScoped()
+      const file = path.join(dir, "oversized.txt")
+      yield* put(file, `${"x".repeat(2000)}\n`.repeat(100))
+      const err = yield* fail(dir, { filePath: file, limit: 100 })
+      expect(err.message).toContain("Requested range exceeds 50 KB output limit")
+    }),
+  )
+
+  it.live("uses unicode-safe long-line truncation", () =>
+    Effect.gen(function* () {
+      const dir = yield* tmpdirScoped()
+      const file = path.join(dir, "unicode.txt")
+      yield* put(file, "😀".repeat(2001))
+      const result = yield* exec(dir, { filePath: file })
+      expect(result.output).toContain("😀".repeat(2000))
+      expect(result.output).not.toContain("�")
+    }),
+  )
+
+  it.live("handles CRLF and split UTF-8 chunks", () =>
+    Effect.gen(function* () {
+      const dir = yield* tmpdirScoped()
+      const file = path.join(dir, "utf8.txt")
+      yield* put(file, "one\r\ntwo 😀\r\nthree")
+      const result = yield* exec(dir, { filePath: file, limit: 3 })
+      expect(result.output).toContain("1: one\n2: two 😀\n3: three")
+      expect(result.output).not.toContain("\r")
+    }),
+  )
+
+  it.instance("attaches images at media size cap", () =>
+    Effect.gen(function* () {
+      const test = yield* TestInstance
       const png = Buffer.from(
         "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8DwHwAFBQIAX8jx0gAAAABJRU5ErkJggg==",
         "base64",
       )
-      yield* put(path.join(dir, "image.png"), png)
+      const file = path.join(test.directory, "image.png")
+      yield* put(file, png)
+      const fs = yield* FSUtil.Service
 
-      const result = yield* exec(dir, { filePath: path.join(dir, "image.png") })
+      const result = yield* run({ filePath: file }).pipe(
+        Effect.provideService(
+          FSUtil.Service,
+          FSUtil.Service.of({
+            ...fs,
+            stat: (filepath) =>
+              fs
+                .stat(filepath)
+                .pipe(
+                  Effect.map((info) =>
+                    filepath === file ? { ...info, size: FileSystem.Size(MAX_MEDIA_BYTES) } : info,
+                  ),
+                ),
+          }),
+        ),
+      )
       expect(result.metadata.truncated).toBe(false)
       expect(result.attachments).toBeDefined()
       expect(result.attachments?.length).toBe(1)
@@ -500,6 +531,53 @@ describe("tool.read truncation", () => {
       expect(result.attachments?.[0]).not.toHaveProperty("messageID")
     }),
   )
+
+  for (const [name, bytes, mime] of [
+    [
+      "image",
+      Buffer.from(
+        "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8DwHwAFBQIAX8jx0gAAAABJRU5ErkJggg==",
+        "base64",
+      ),
+      "image/png",
+    ],
+    ["PDF", Buffer.from("%PDF-1.4"), "application/pdf"],
+  ] as const) {
+    it.instance(`rejects over-cap ${name} before reading attachment bytes`, () =>
+      Effect.gen(function* () {
+        const test = yield* TestInstance
+        const file = path.join(test.directory, `oversized-${name}`)
+        yield* put(file, bytes)
+        const fs = yield* FSUtil.Service
+        let reads = 0
+
+        const err = yield* fail(test.directory, { filePath: file }).pipe(
+          Effect.provideService(
+            FSUtil.Service,
+            FSUtil.Service.of({
+              ...fs,
+              stat: (filepath) =>
+                fs
+                  .stat(filepath)
+                  .pipe(
+                    Effect.map((info) =>
+                      filepath === file ? { ...info, size: FileSystem.Size(MAX_MEDIA_BYTES + 1) } : info,
+                    ),
+                  ),
+              readFile: (filepath) => {
+                reads++
+                return Effect.die(`readFile called for over-cap attachment: ${filepath}`)
+              },
+            }),
+          ),
+        )
+        expect(err.message).toBe(
+          `Cannot read ${mime} attachment at ${file}: ${MAX_MEDIA_BYTES + 1} bytes exceeds maximum ${MAX_MEDIA_BYTES} bytes. Use a file at or below ${MAX_MEDIA_BYTES} bytes.`,
+        )
+        expect(reads).toBe(0)
+      }),
+    )
+  }
 
   it.live("detects attachment media from file contents", () =>
     Effect.gen(function* () {
@@ -582,6 +660,43 @@ describe("tool.read loaded instructions", () => {
       expect(result.metadata.loaded).toContain(path.join(dir, "subdir", "AGENTS.md"))
     }),
   )
+
+  it.live("keeps reminders on non-default reads", () =>
+    Effect.gen(function* () {
+      const dir = yield* tmpdirScoped()
+      yield* put(path.join(dir, "subdir", "AGENTS.md"), "# Parent rule")
+      const file = path.join(dir, "subdir", "nested", "test.txt")
+      yield* put(file, "one\ntwo")
+      const result = yield* exec(dir, { filePath: file, offset: 2, limit: 1 })
+      expect(result.output).toContain("2: two")
+      expect(result.output).toContain("Parent rule")
+    }),
+  )
+
+  it.live("caps rendered body with reminders", () =>
+    Effect.gen(function* () {
+      const dir = yield* tmpdirScoped()
+      yield* put(path.join(dir, "nested", "AGENTS.md"), "r".repeat(12 * 1024))
+      const file = path.join(dir, "nested", "deep", "body.txt")
+      yield* put(file, `${"x".repeat(500)}\n`.repeat(100))
+      const result = yield* exec(dir, { filePath: file })
+      expect(result.metadata.truncated).toBe(true)
+      expect(Buffer.byteLength(result.output, "utf-8")).toBeLessThanOrEqual(50 * 1024)
+      expect(result.output).toContain("system-reminder")
+    }),
+  )
+
+  it.live("rejects empty partial view when reminder leaves no line budget", () =>
+    Effect.gen(function* () {
+      const dir = yield* tmpdirScoped()
+      yield* put(path.join(dir, "nested", "AGENTS.md"), "r".repeat(48 * 1024))
+      const file = path.join(dir, "nested", "deep", "body.txt")
+      yield* put(file, "x".repeat(2000))
+      const err = yield* fail(dir, { filePath: file })
+      expect(err.message).toContain("One complete rendered line cannot fit")
+      expect(err.message).not.toContain("Showing lines 1-0")
+    }),
+  )
 })
 
 describe("tool.read binary detection", () => {
@@ -603,6 +718,75 @@ describe("tool.read binary detection", () => {
 
       const err = yield* fail(dir, { filePath: path.join(dir, "module.wasm") })
       expect(err.message).toContain("Cannot read binary file")
+    }),
+  )
+})
+
+describe("tool.read tail", () => {
+  it.live("reads from the end with negative offset", () =>
+    Effect.gen(function* () {
+      const dir = yield* tmpdirScoped()
+      const file = path.join(dir, "log.txt")
+      yield* put(
+        file,
+        ["line1", "line2", "line3", "line4", "line5", "line6", "line7", "line8", "line9", "line10"].join("\n"),
+      )
+
+      const result = yield* exec(dir, { filePath: file, offset: -3 })
+      expect(result.output).toContain("line10")
+      expect(result.output).toContain("line9")
+      expect(result.output).toContain("line8")
+      expect(result.output).not.toContain("1: line1")
+    }),
+  )
+
+  for (const [name, content] of [
+    ["non-trailing newline", "one\ntwo\nthree"],
+    ["trailing newline", "one\ntwo\nthree\n"],
+  ] as const) {
+    it.live(`returns exact last lines with ${name}`, () =>
+      Effect.gen(function* () {
+        const dir = yield* tmpdirScoped()
+        const file = path.join(dir, "tail.txt")
+        yield* put(file, content)
+        const result = yield* exec(dir, { filePath: file, offset: -2 })
+        expect(result.output).toContain("<content>\n2: two\n3: three\n(End of file - total 3 lines)\n</content>")
+      }),
+    )
+  }
+
+  it.live("clamps negative offset beyond file to first line", () =>
+    Effect.gen(function* () {
+      const dir = yield* tmpdirScoped()
+      const file = path.join(dir, "tail.txt")
+      yield* put(file, "one\ntwo\nthree")
+      const result = yield* exec(dir, { filePath: file, offset: -10 })
+      expect(result.output).toContain("<content>\n1: one\n2: two\n3: three\n(End of file - total 3 lines)\n</content>")
+    }),
+  )
+
+  it.instance("uses seek reads without a forward stream", () =>
+    Effect.gen(function* () {
+      const test = yield* TestInstance
+      const file = path.join(test.directory, "tail.txt")
+      yield* put(file, `${"early\n".repeat(20_000)}tail-1\ntail-2\ntail-3`)
+      const fs = yield* FSUtil.Service
+      let streams = 0
+      const result = yield* run({ filePath: file, offset: -3 }).pipe(
+        Effect.provideService(
+          FSUtil.Service,
+          FSUtil.Service.of({
+            ...fs,
+            stream: (...args) => {
+              streams++
+              return fs.stream(...args)
+            },
+          }),
+        ),
+      )
+      expect(streams).toBe(0)
+      expect(result.output).toContain("tail-1")
+      expect(result.output).not.toContain("early")
     }),
   )
 })

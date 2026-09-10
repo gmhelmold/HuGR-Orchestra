@@ -989,6 +989,58 @@ describe("workspace CRUD", () => {
     { git: true },
   )
 
+  it.live("sessionWarp aborts when target rejects copied changes", () => {
+    const calls: string[] = []
+    return Effect.gen(function* () {
+      yield* HttpServer.serveEffect()(
+        Effect.gen(function* () {
+          const request = yield* HttpServerRequest.HttpServerRequest
+          yield* request.text
+          calls.push(`${request.method} ${request.url}`)
+          if (request.url === "/warp-source/vcs/diff/raw") return HttpServerResponse.text("remote patch")
+          if (request.url === "/warp-target/vcs/apply") return HttpServerResponse.text("rejected", { status: 409 })
+          return HttpServerResponse.text("unexpected", { status: 500 })
+        }),
+      )
+      const url = yield* serverUrl()
+      yield* provideTmpdirInstance(
+        () =>
+          Effect.gen(function* () {
+            const workspace = yield* Workspace.Service
+            const sessionSvc = yield* SessionNs.Service
+            const instance = yield* requireInstance
+            const previousType = unique("warp-failed-source")
+            const targetType = unique("warp-failed-target")
+            const previous = workspaceInfo(instance.project.id, previousType)
+            const target = workspaceInfo(instance.project.id, targetType, { directory: "remote-target-dir" })
+            yield* insertWorkspace(previous)
+            yield* insertWorkspace(target)
+            registerAdapter(instance.project.id, previousType, remoteAdapter(`${url}/warp-source`).adapter)
+            registerAdapter(instance.project.id, targetType, remoteAdapter(`${url}/warp-target`).adapter)
+            const session = yield* sessionSvc.create({})
+            yield* attachSessionToWorkspace(session.id, previous.id)
+
+            const exit = yield* workspace
+              .sessionWarp({ workspaceID: target.id, sessionID: session.id, copyChanges: true })
+              .pipe(Effect.exit)
+
+            expect(Exit.isFailure(exit)).toBe(true)
+            expect(calls).toEqual(["GET /warp-source/vcs/diff/raw", "POST /warp-target/vcs/apply"])
+            expect(
+              (yield* Database.Service.use(({ db }) =>
+                db
+                  .select({ workspaceID: SessionTable.workspace_id })
+                  .from(SessionTable)
+                  .where(eq(SessionTable.id, session.id))
+                  .get()
+                  .pipe(Effect.orDie)))?.workspaceID,
+            ).toBe(previous.id)
+          }),
+        { git: true },
+      )
+    })
+  })
+
   it.live("sessionWarp syncs previous remote history, replays it, steals, and claims the sequence", () => {
     const calls: FetchCall[] = []
     let historySessionID: SessionID | undefined
@@ -1051,14 +1103,14 @@ describe("workspace CRUD", () => {
             yield* workspace.sessionWarp({ workspaceID: target.id, sessionID: session.id, copyChanges: true })
 
             expect(calls.map((call) => `${call.method} ${call.url.pathname}`)).toEqual([
-              "POST /warp-source/sync/history",
               "GET /warp-source/vcs/diff/raw",
               "POST /warp-target/vcs/apply",
+              "POST /warp-source/sync/history",
               "POST /warp-target/sync/replay",
               "POST /warp-target/sync/steal",
             ])
-            expect(calls[0].json).toEqual({ [session.id]: historyNextSeq - 1 })
-            expect(calls[2].json).toEqual({ patch: "remote patch" })
+            expect(calls[2].json).toEqual({ [session.id]: historyNextSeq - 1 })
+            expect(calls[1].json).toEqual({ patch: "remote patch" })
             expect(calls[3].json).toMatchObject({
               directory: "remote-target-dir",
               events: [
