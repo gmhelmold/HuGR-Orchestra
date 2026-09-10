@@ -135,6 +135,7 @@ beforeAll(async () => {
   mock.module("@opencode-ai/ui/toast", () => ({
     Toast: { Region: () => null },
     showToast: () => 0,
+    toaster: { dismiss: () => undefined },
   }))
 
   mock.module("@opencode-ai/core/util/encode", () => ({
@@ -167,8 +168,8 @@ beforeAll(async () => {
     return { usePermission: () => ({ currentServerState: () => state(permissionServer) }) }
   })
 
-  mock.module("@/context/server", () => ({
-    useServer: () => ({ key: "server-key" }),
+  mock.module("@/context/server-sdk", () => ({
+    useServerSDK: () => () => ({ protocol: "v2", client: rootClient }),
   }))
 
   mock.module("@/context/tabs", () => ({

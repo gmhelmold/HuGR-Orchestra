@@ -42,7 +42,94 @@ export type FatalRendererError = {
   os?: string
 }
 
+export type AppDockEvent =
+  | {
+      type: "state"
+      payload: {
+        tabID: string
+        generation: number
+        url: string
+        title: string
+        favicon?: string
+        loading: boolean
+        audible: boolean
+      }
+    }
+  | { type: "tab-opened"; payload: { tabID: string; generation: number; url: string } }
+  | {
+      type: "tab-crashed"
+      payload: { identity: { tabID: string; generation: number }; reason: "crashed" | "killed" | "oom" }
+    }
+  | { type: "tab-recovered"; payload: { tabID: string; generation: number; url: string } }
+  | {
+      type: "download"
+      payload: {
+        id: string
+        tabID: string
+        generation: number
+        filename: string
+        receivedBytes: number
+        totalBytes: number
+        state: "progressing" | "paused" | "completed" | "cancelled" | "interrupted"
+      }
+    }
+  | {
+      type: "permission"
+      payload: { identity: { tabID: string; generation: number }; permission: string; state: "denied" }
+    }
+  | { type: "fullscreen"; payload: { identity: { tabID: string; generation: number }; enabled: boolean } }
+  | {
+      type: "navigation-error"
+      payload: { identity: { tabID: string; generation: number }; code: "blocked" | "failed"; url: string }
+    }
+
+export type AppDockManifest = {
+  version: 1
+  revision: number
+  profiles: { id: string; name: string }[]
+  activeProfileID: string
+  tabs: Record<string, { url: string; pinned: boolean }[]>
+  bookmarks: string[]
+  history: string[]
+}
+
+export type AppDockManifestUpdate = { status: "updated" | "conflict"; manifest: AppDockManifest }
+
 export type ElectronAPI = {
+  appDockOpen: (
+    url: string,
+    bounds: { x: number; y: number; width: number; height: number },
+    profile?: string,
+  ) => Promise<{ tabID: string; generation: number; url: string }>
+  appDockDeleteProfile: (profileID: string) => Promise<void>
+  appDockResize: (bounds: { x: number; y: number; width: number; height: number }) => Promise<void>
+  appDockHide: () => Promise<void>
+  appDockClose: () => Promise<void>
+  appDockCloseTab: (tabID: string) => Promise<void>
+  appDockRecoverTab: (tabID: string) => Promise<{ tabID: string; generation: number; url: string }>
+  appDockCloseTabs: (tabID: string, scope: "others" | "right", order?: string[]) => Promise<void>
+  appDockSelect: (tabID: string, bounds: { x: number; y: number; width: number; height: number }) => Promise<void>
+  appDockNavigate: (tabID: string, url: string) => Promise<void>
+  appDockCommand: (tabID: string, command: "back" | "forward" | "reload") => Promise<void>
+  appDockEvent: (callback: (event: AppDockEvent) => void) => () => void
+  appDockFind: (tabID: string, text: string, forward: boolean) => Promise<number>
+  appDockStopFind: (tabID: string) => Promise<void>
+  appDockFindResult: (
+    callback: (result: {
+      tabID: string
+      generation: number
+      requestID: number
+      activeMatchOrdinal: number
+      matches: number
+      finalUpdate: boolean
+    }) => void,
+  ) => () => void
+  appDockZoom: (tabID: string, factor?: number) => Promise<number>
+  appDockCancelDownload: (downloadID: string) => Promise<void>
+  appDockOpenDownload: (downloadID: string) => Promise<void>
+  appDockFullscreen: (tabID: string, enabled: boolean) => Promise<void>
+  appDockGetManifest: () => Promise<AppDockManifest>
+  appDockUpdateManifest: (expectedRevision: number, manifest: AppDockManifest) => Promise<AppDockManifestUpdate>
   killSidecar: () => Promise<void>
   installCli: () => Promise<string>
   awaitInitialization: () => Promise<ServerReadyData>

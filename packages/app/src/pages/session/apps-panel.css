@@ -1,0 +1,739 @@
+/* Ported from Zen Browser dev @ 412731f37e567223097101d9fae9f9d364708b6b.
+ * MPL-2.0 source: src/zen/common/styles/zen-theme.css,
+ * src/zen/tabs/zen-tabs/vertical-tabs.css, src/zen/spaces/zen-workspaces.css. */
+.zen-browser-shell {
+  --zen-toolbox-padding: 6px;
+  --zen-sidebar-width: 250px;
+  --zen-element-separation: 6px;
+  --zen-tab-radius: 8px;
+  --zen-panel-radius: 14px;
+  --zen-workspace-indicator-height: 44px;
+  --zen-active-tab-scale: 0.985;
+  font-family:
+    SF Pro,
+    ui-sans-serif,
+    system-ui,
+    sans-serif;
+  display: flex;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+  gap: var(--zen-toolbox-padding);
+  padding: var(--zen-toolbox-padding);
+  color: var(--text-strong);
+  background-color: var(--v2-background-bg-base, var(--surface-base));
+}
+
+.zen-browser-sidebar {
+  display: flex;
+  flex-direction: column;
+  width: var(--zen-sidebar-width);
+  min-width: 0;
+  min-height: 0;
+  gap: 8px;
+  padding: 6px;
+  border-radius: var(--zen-panel-radius);
+  background: var(--v2-background-bg-layer-01, var(--surface-raised-base));
+}
+
+.zen-browser-shell.is-sidebar-collapsed {
+  --zen-sidebar-width: 48px;
+}
+
+.zen-browser-shell.is-sidebar-collapsed .zen-workspace-indicator-name,
+.zen-browser-shell.is-sidebar-collapsed .zen-profile-add,
+.zen-browser-shell.is-sidebar-collapsed .zen-profile-form,
+.zen-browser-shell.is-sidebar-collapsed .zen-tab-title,
+.zen-browser-shell.is-sidebar-collapsed .zen-tab-section-label,
+.zen-browser-shell.is-sidebar-collapsed .zen-new-tab {
+  display: none;
+}
+
+.zen-workspaces {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.zen-workspace-indicator {
+  display: flex;
+  min-height: var(--zen-workspace-indicator-height);
+  align-items: center;
+  gap: 8px;
+  padding: 3px 12px;
+  border-radius: var(--zen-panel-radius);
+  color: var(--text-strong);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: default;
+}
+
+.zen-workspace-indicator:hover {
+  background: var(--surface-raised-stronger);
+}
+
+.zen-workspace-indicator-dot {
+  width: 10px;
+  height: 10px;
+  border: 2px solid currentColor;
+  border-radius: 50%;
+  opacity: 0.7;
+}
+
+.zen-workspace-indicator-name {
+  min-width: 0;
+  overflow: hidden;
+  flex: 1;
+  border: 0;
+  outline: 0;
+  color: inherit;
+  background: transparent;
+  font: inherit;
+  cursor: pointer;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.zen-workspace-indicator-name option {
+  color: var(--text-strong);
+  background: var(--v2-background-bg-layer-01, var(--surface-raised-base));
+}
+
+.zen-profile-add {
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: 0;
+  border-radius: 6px;
+  color: var(--text-weak);
+  background: transparent;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.zen-sidebar-toggle {
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: 0;
+  border-radius: 6px;
+  color: var(--text-weak);
+  background: transparent;
+  cursor: pointer;
+}
+
+.zen-sidebar-toggle:hover {
+  color: var(--text-strong);
+  background: var(--surface-raised-stronger);
+}
+
+.zen-profile-add:hover {
+  color: var(--text-strong);
+  background: var(--surface-raised-stronger);
+}
+
+.zen-profile-form {
+  display: flex;
+  gap: 3px;
+  padding: 0 6px 4px;
+}
+
+.zen-profile-form input {
+  min-width: 0;
+  flex: 1;
+  height: 26px;
+  padding: 0 7px;
+  border: 0;
+  border-radius: 6px;
+  color: var(--text-strong);
+  background: var(--surface-base);
+  font-size: 11px;
+  outline: 0;
+}
+
+.zen-profile-form button {
+  width: 24px;
+  height: 26px;
+  padding: 0;
+  border: 0;
+  border-radius: 6px;
+  color: var(--text-weak);
+  background: transparent;
+  cursor: pointer;
+}
+
+.zen-profile-form button:hover {
+  color: var(--text-strong);
+  background: var(--surface-raised-stronger);
+}
+
+.zen-workspace-indicator-chevron {
+  color: var(--text-weak);
+  font-size: 16px;
+  line-height: 1;
+  opacity: 0.7;
+}
+
+.zen-workspace {
+  display: flex;
+  width: 28px;
+  height: var(--zen-workspace-indicator-height);
+  flex: 0 0 28px;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  color: var(--text-weak);
+  background: transparent;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  opacity: 0.7;
+}
+
+.zen-workspace:hover,
+.zen-workspace.is-active {
+  color: var(--text-strong);
+  background: var(--surface-raised-stronger);
+  opacity: 1;
+}
+
+.zen-workspace-add {
+  margin-left: auto;
+  font-size: 16px;
+}
+
+.zen-tabs {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  flex-direction: column;
+  gap: 3px;
+  overflow-y: auto;
+}
+
+.zen-tab-section-label {
+  padding: 8px 8px 3px;
+  color: var(--text-weak);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  opacity: 0.65;
+}
+
+.zen-tab,
+.zen-new-tab {
+  display: flex;
+  min-width: 0;
+  min-height: 34px;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 8px;
+  border: 0;
+  border-radius: var(--zen-tab-radius);
+  color: var(--text-weak);
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+}
+
+.zen-tab:hover,
+.zen-tab.is-active {
+  color: var(--text-strong);
+  background: var(--surface-raised-stronger);
+}
+
+.zen-tab:focus-visible,
+.zen-new-tab:focus-visible,
+.zen-workspace:focus-visible,
+.zen-nav-button:focus-visible,
+.zen-open-button:focus-visible,
+.zen-urlbar input:focus-visible {
+  outline: 2px solid var(--text-strong);
+  outline-offset: 1px;
+}
+
+.zen-tab.is-active {
+  transform: scale(var(--zen-active-tab-scale));
+}
+
+.zen-tab-icon {
+  display: grid;
+  width: 20px;
+  height: 20px;
+  flex: 0 0 20px;
+  place-items: center;
+  border-radius: 6px;
+  color: var(--text-weak);
+  background: var(--surface-base);
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.zen-tab-icon img {
+  width: 14px;
+  height: 14px;
+  border-radius: 4px;
+}
+
+.zen-tab-icon.is-loading {
+  animation: zen-tab-pulse 0.9s ease-in-out infinite alternate;
+}
+
+.zen-tab-audio {
+  color: var(--text-weak);
+  font-size: 12px;
+}
+
+.zen-tab-pin {
+  padding: 2px 3px;
+  border: 0;
+  border-radius: 4px;
+  color: var(--text-weak);
+  background: transparent;
+  font-size: 10px;
+  cursor: pointer;
+  opacity: 0.75;
+}
+
+.zen-tab-pin-hidden {
+  display: none;
+}
+
+.zen-tab:hover .zen-tab-pin-hidden {
+  display: inline;
+  opacity: 0.35;
+}
+
+@keyframes zen-tab-pulse {
+  from {
+    opacity: 0.35;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.zen-tab-title {
+  min-width: 0;
+  overflow: hidden;
+  flex: 1;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 12px;
+}
+
+.zen-tab-close {
+  padding: 2px 3px;
+  border: 0;
+  border-radius: 4px;
+  color: inherit;
+  background: transparent;
+  cursor: pointer;
+  opacity: 0;
+}
+
+.zen-tab:hover .zen-tab-close,
+.zen-tab.is-active .zen-tab-close {
+  opacity: 0.7;
+}
+
+.zen-tab-close:hover {
+  background: var(--surface-base);
+  opacity: 1;
+}
+
+.zen-new-tab {
+  color: var(--text-weak);
+  font-size: 12px;
+}
+
+.zen-browser-content {
+  position: relative;
+  display: flex;
+  min-width: 0;
+  min-height: 0;
+  flex: 1;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.zen-urlbar {
+  display: flex;
+  min-height: 34px;
+  align-items: center;
+  gap: 3px;
+  padding: 3px 6px;
+  border-radius: var(--zen-panel-radius);
+  background: var(--v2-background-bg-layer-01, var(--surface-raised-base));
+}
+
+.zen-urlbar input {
+  min-width: 0;
+  height: 28px;
+  flex: 1;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 8px;
+  outline: 0;
+  color: var(--text-strong);
+  background: var(--surface-base);
+  font-size: 12px;
+}
+
+.zen-nav-button,
+.zen-open-button {
+  height: 28px;
+  padding: 0 8px;
+  border: 0;
+  border-radius: 8px;
+  color: var(--text-weak);
+  background: transparent;
+  cursor: pointer;
+}
+
+.zen-nav-button:hover,
+.zen-open-button:hover {
+  color: var(--text-strong);
+  background: var(--surface-base);
+}
+
+.zen-nav-button:disabled,
+.zen-open-button:disabled,
+.zen-tab-menu button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.zen-nav-button.is-active {
+  color: var(--text-strong);
+}
+
+.zen-library {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  width: min(360px, 100%);
+  max-height: 240px;
+  flex-direction: column;
+  gap: 3px;
+  overflow: auto;
+  padding: 8px;
+  border: 1px solid var(--border-weak);
+  border-radius: var(--zen-panel-radius);
+  background: var(--v2-background-bg-layer-01, var(--surface-raised-base));
+  box-shadow: 0 12px 36px rgb(0 0 0 / 0.22);
+}
+
+.zen-findbar {
+  position: relative;
+  z-index: 1;
+  align-self: flex-end;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  padding: 5px;
+  border: 1px solid var(--border-weak);
+  border-radius: 10px;
+  background: var(--v2-background-bg-layer-01, var(--surface-raised-base));
+  box-shadow: 0 8px 24px rgb(0 0 0 / 0.18);
+}
+
+.zen-findbar input {
+  width: 180px;
+  height: 26px;
+  padding: 0 7px;
+  border: 0;
+  border-radius: 6px;
+  outline: 0;
+  color: var(--text-strong);
+  background: var(--surface-base);
+  font-size: 12px;
+}
+
+.zen-findbar span {
+  min-width: 38px;
+  color: var(--text-weak);
+  font-size: 11px;
+  text-align: center;
+}
+
+.zen-findbar button {
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border: 0;
+  border-radius: 6px;
+  color: var(--text-weak);
+  background: transparent;
+  cursor: pointer;
+}
+
+.zen-findbar button:hover {
+  color: var(--text-strong);
+  background: var(--surface-base);
+}
+
+.zen-library-title {
+  padding: 5px 7px;
+  color: var(--text-weak);
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.zen-library button {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 2px;
+  padding: 7px;
+  border: 0;
+  border-radius: 8px;
+  color: var(--text-strong);
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+}
+
+.zen-library button:hover {
+  background: var(--surface-raised-stronger);
+}
+
+.zen-download {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 3px 8px;
+  align-items: center;
+  padding: 7px;
+  border-radius: 8px;
+}
+
+.zen-download:hover {
+  background: var(--surface-raised-stronger);
+}
+
+.zen-download span {
+  overflow: hidden;
+  color: var(--text-strong);
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.zen-download small {
+  color: var(--text-weak);
+  font-size: 11px;
+}
+
+.zen-download button {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+}
+
+.zen-library button span,
+.zen-library button small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.zen-library button small,
+.zen-library p {
+  margin: 0;
+  color: var(--text-weak);
+  font-size: 11px;
+}
+
+.zen-empty-state {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 24px;
+  color: var(--text-weak);
+  text-align: center;
+  font-size: 12px;
+}
+
+.zen-empty-state strong {
+  color: var(--text-strong);
+  font-size: 13px;
+}
+
+.zen-browser-host {
+  min-width: 0;
+  min-height: 0;
+  flex: 1;
+  overflow: hidden;
+  border-radius: var(--zen-panel-radius);
+  background: var(--v2-background-bg-layer-01, var(--surface-raised-base));
+}
+
+.zen-error {
+  position: relative;
+  z-index: 1;
+  padding: 4px 8px;
+  border: 1px solid var(--border-weak);
+  border-radius: 8px;
+  color: var(--text-strong);
+  background: var(--v2-background-bg-layer-01, var(--surface-raised-base));
+  font-size: 12px;
+}
+
+.zen-tab-crash {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 6px 8px;
+  border: 1px solid var(--border-weak);
+  border-radius: 8px;
+  color: var(--text-strong);
+  background: var(--v2-background-bg-layer-01, var(--surface-raised-base));
+  font-size: 12px;
+}
+
+.zen-tab-crash button {
+  height: 28px;
+  padding: 0 8px;
+  border: 0;
+  border-radius: 8px;
+  color: var(--text-strong);
+  background: var(--surface-base);
+  cursor: pointer;
+}
+
+.zen-tab-crash button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.zen-tab-menu {
+  position: fixed;
+  z-index: 2;
+  display: flex;
+  min-width: 180px;
+  flex-direction: column;
+  gap: 2px;
+  padding: 5px;
+  border: 1px solid var(--border-weak);
+  border-radius: 10px;
+  background: var(--v2-background-bg-layer-01, var(--surface-raised-base));
+  box-shadow: 0 12px 36px rgb(0 0 0 / 0.22);
+}
+
+.zen-tab-menu button {
+  min-height: 28px;
+  padding: 4px 7px;
+  border: 0;
+  border-radius: 6px;
+  color: var(--text-strong);
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+}
+
+.zen-tab-menu button:not(:disabled):hover {
+  background: var(--surface-raised-stronger);
+}
+
+.zen-sidebar-toggle:focus-visible,
+.zen-profile-add:focus-visible,
+.zen-profile-form button:focus-visible,
+.zen-tab-menu button:focus-visible,
+.zen-findbar input:focus-visible,
+.zen-findbar button:focus-visible,
+.zen-library button:focus-visible {
+  outline: 2px solid var(--text-strong);
+  outline-offset: 1px;
+}
+
+@media (max-width: 640px) {
+  .zen-browser-shell {
+    gap: 3px;
+    padding: 3px;
+  }
+
+  .zen-browser-sidebar {
+    width: 174px;
+    padding: 4px;
+  }
+
+  .zen-browser-shell.is-sidebar-collapsed .zen-browser-sidebar {
+    width: 48px;
+  }
+
+  .zen-workspace:not(.is-active):not(.zen-workspace-add) {
+    display: none;
+  }
+
+  .zen-open-button {
+    padding: 0 6px;
+    font-size: 11px;
+  }
+
+  .zen-urlbar {
+    gap: 1px;
+    padding: 3px;
+  }
+
+  .zen-nav-button {
+    padding: 0 5px;
+    font-size: 11px;
+  }
+
+  .zen-urlbar input {
+    padding: 0 7px;
+  }
+
+  .zen-findbar {
+    right: 6px;
+  }
+
+  .zen-findbar input {
+    width: min(150px, 32vw);
+  }
+}
+
+@media (max-width: 460px) {
+  .zen-browser-shell {
+    flex-direction: column;
+  }
+
+  .zen-browser-sidebar {
+    width: auto;
+    max-height: 150px;
+  }
+
+  .zen-browser-shell.is-sidebar-collapsed .zen-browser-sidebar {
+    width: 48px;
+  }
+
+  .zen-tabs {
+    flex-direction: row;
+    overflow: auto;
+  }
+
+  .zen-tab,
+  .zen-new-tab {
+    flex: 0 0 150px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .zen-tab,
+  .zen-tab-icon {
+    animation: none;
+    transition: none;
+  }
+}

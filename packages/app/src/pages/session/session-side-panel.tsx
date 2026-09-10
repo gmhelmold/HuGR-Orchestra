@@ -57,6 +57,7 @@ import { setSessionHandoff } from "@/pages/session/handoff"
 import { useSessionLayout } from "@/pages/session/session-layout"
 import { SessionFileBrowserTab, type SessionFileBrowserState } from "@/pages/session/v2/session-file-browser-tab"
 import { TasksPanel } from "./tasks-panel"
+import { AppsPanel } from "./apps-panel"
 import { createTasksData } from "./tasks-data"
 
 type ReviewDiff = FileDiffInfo | SnapshotFileDiff | VcsFileDiff
@@ -182,6 +183,7 @@ export function SessionSidePanel(props: {
     review: reviewTab,
     hasReview: props.canReview,
     fileBrowser: () => !!props.fileBrowserState,
+    apps: () => true,
   })
   const contextOpen = tabState.contextOpen
   const tasksOpen = tabState.tasksOpen
@@ -246,6 +248,7 @@ export function SessionSidePanel(props: {
   }
   const activateTab = (value: string) => {
     const next = normalizeTab(value)
+    if (next === "apps") tabs().open("apps")
     const path = file.pathFromTab(next)
     if (path) void file.load(path)
     openReviewPanel()
@@ -267,7 +270,7 @@ export function SessionSidePanel(props: {
   })
   const fileBrowserVisible = createMemo(() => {
     const active = activeTab()
-    return active !== "review" && active !== "context" && active !== "empty"
+    return active !== "review" && active !== "context" && active !== "apps" && active !== "empty"
   })
   const openFileKeybind = createMemo(() => command.keybindParts("file.open"))
   const closeTabKeybind = createMemo(() => command.keybindParts("tab.close"))
@@ -450,6 +453,7 @@ export function SessionSidePanel(props: {
                                   </div>
                                 </Tabs.Trigger>
                               </Show>
+                              <Tabs.Trigger value="apps"><div>Apps</div></Tabs.Trigger>
                               <SortableProvider ids={openedTabs()}>
                                 <For each={panelTabs()}>
                                   {(tab) => (
@@ -563,6 +567,9 @@ export function SessionSidePanel(props: {
                                 <TasksPanel />
                               </div>
                             </Tabs.Content>
+                          </Show>
+                          <Show when={activeTab() === "apps"}>
+                            <Tabs.Content value="apps" class="flex flex-col h-full overflow-hidden contain-strict"><AppsPanel /></Tabs.Content>
                           </Show>
 
                           <Show when={activeFileTab()} keyed>
@@ -708,6 +715,7 @@ export function SessionSidePanel(props: {
                                 </div>
                               </Tabs.Trigger>
                             </Show>
+                            <Tabs.Trigger value="apps"><div>Apps</div></Tabs.Trigger>
                             <For each={panelTabs()}>
                               {(tab) => (
                                 <Show
@@ -835,6 +843,9 @@ export function SessionSidePanel(props: {
                               <TasksPanel />
                             </div>
                           </Tabs.Content>
+                        </Show>
+                        <Show when={activeTab() === "apps"}>
+                          <Tabs.Content value="apps" class="flex flex-col h-full overflow-hidden contain-strict"><AppsPanel /></Tabs.Content>
                         </Show>
 
                         <Show when={fileBrowserMounted()}>

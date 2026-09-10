@@ -20,6 +20,7 @@ type TabsInput = {
   review?: Accessor<boolean>
   hasReview?: Accessor<boolean>
   fileBrowser?: Accessor<boolean>
+  apps?: Accessor<boolean>
 }
 
 export const getSessionKey = (dir: string | undefined, id: string | undefined) => `${dir ?? ""}${id ? `/${id}` : ""}`
@@ -32,6 +33,7 @@ export const createSessionTabs = (input: TabsInput) => {
   const review = input.review ?? (() => false)
   const hasReview = input.hasReview ?? (() => false)
   const fileBrowser = input.fileBrowser ?? (() => false)
+  const apps = input.apps ?? (() => false)
   const contextOpen = createMemo(() => input.tabs().active() === "context" || input.tabs().all().includes("context"))
   const tasksOpen = createMemo(() => input.tabs().active() === "tasks" || input.tabs().all().includes("tasks"))
   const openFileOpen = createMemo(
@@ -46,7 +48,7 @@ export const createSessionTabs = (input: TabsInput) => {
         .tabs()
         .all()
         .flatMap((tab) => {
-          if (tab === "context" || tab === "review" || tab === "tasks") return []
+          if (tab === "context" || tab === "review" || tab === "tasks" || tab === "apps") return []
           if (tab === SESSION_OPEN_FILE_TAB && !fileBrowser()) return []
           const value = input.pathFromTab(tab) ? input.normalizeTab(tab) : tab
           if (seen.has(value)) return []
@@ -64,6 +66,7 @@ export const createSessionTabs = (input: TabsInput) => {
     const active = input.tabs().active()
     if (active === "context") return active
     if (active === "tasks" && tasksOpen()) return active
+    if (active === "apps" && apps()) return active
     if (active === SESSION_OPEN_FILE_TAB && openFileOpen()) return active
     if (active === "review" && review()) return active
     if (active && input.pathFromTab(active)) return input.normalizeTab(active)
