@@ -1,4 +1,5 @@
-import { dirname, join } from "node:path"
+import { dirname, join, resolve, sep, isAbsolute } from "node:path"
+import { access } from "node:fs/promises"
 import { fileURLToPath } from "node:url"
 import { app, utilityProcess } from "electron"
 import type { Details } from "electron"
@@ -22,6 +23,17 @@ const SIDECAR_SERVICE_NAME = "opencode server"
 // headroom for cold starts (observed p99 ~8s on macOS, ~12s on Linux).
 const SIDECAR_START_STALL_TIMEOUT = 20_000
 const SIDECAR_STOP_TIMEOUT = 6_000
+
+function validateSidecarPath(sidecarPath: string, outDir: string): string {
+  if (!isAbsolute(sidecarPath)) {
+    throw new Error("sidecarPath must be an absolute path")
+  }
+  const resolved = resolve(sidecarPath)
+  if (resolved.includes(".." + sep) || resolved.includes(sep + "..")) {
+    throw new Error("sidecarPath must not contain directory traversal sequences")
+  }
+  return resolved
+}
 
 type SpawnLocalServerOptions = {
   userDataPath: string
@@ -65,7 +77,12 @@ export async function spawnLocalServer(
   password: string,
   options: SpawnLocalServerOptions,
 ) {
-  const sidecar = options.sidecarPath ?? join(dirname(fileURLToPath(import.meta.url)), "sidecar.js")
+  const outDir = join(dirname(fileURLToPath(import.meta.url)))
+  const defaultSidecar = join(outDir, "sidecar.js")
+  const sidecar = options.sidecarPath
+    ? validateSidecarPath(options.sidecarPath, outDir)
+    : defaultSidecar
+  await access(sidecar)
   const child = utilityProcess.fork(sidecar, [], {
     cwd: process.cwd(),
     env: createSidecarEnv(),

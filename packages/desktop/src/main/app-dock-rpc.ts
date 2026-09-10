@@ -57,14 +57,16 @@ const dockSender = () => {
 export function handleDockRPC(message: unknown, reply: DockRPCReply): boolean {
   if (!isDockRPCRequest(message)) return false
   const { id, op, args } = message
-  void (async () => {
+  ;(async () => {
     try {
       const value = await dispatch(op, args)
       sendResult(reply, Object.freeze({ type: "dock.rpc.result", id, ok: true, value }))
     } catch (error) {
       sendResult(reply, errorResult(id, error instanceof Error ? error.message : String(error)))
     }
-  })()
+  })().catch((err) => {
+    console.error("Unhandled error in handleDockRPC:", err)
+  })
   return true
 }
 
