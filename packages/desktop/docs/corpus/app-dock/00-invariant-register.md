@@ -443,7 +443,7 @@
 ### dock-scroll: Dock Scroll
 
 **Clauses**
-- dock_scroll moves page and rejects invalid direction *(measured: app-dock-live.test.ts)*
+- dock_scroll dispatches scroll and rejects invalid direction or amount *(measured: app-dock-live.test.ts)*
 - RPC dispatch validates scroll direction against up, down, top, bottom *(measured: app-dock-live.test.ts)*
 
 **Unwanted**

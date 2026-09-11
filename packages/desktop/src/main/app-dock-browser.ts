@@ -100,9 +100,10 @@ export function buildSnapshotScript(options: SnapshotOptions = {}) {
   const inert = (el) => {
     let node = el
     while (node && node !== document) {
+      if (typeof ShadowRoot !== "undefined" && node instanceof ShadowRoot) { node = node.host; continue }
       if (node.getAttribute && (node.getAttribute("aria-hidden") === "true" || node.getAttribute("hidden") !== null)) return true
       if (node.tagName === "FIELDSET" && node.disabled) return true
-      node = node.parentElement
+      node = node.parentNode
     }
     return false
   }
@@ -204,6 +205,8 @@ export function buildHoverScript(ref: number) {
   const registry = ${registryExpr}
   const el = registry.resolve(${ref})
   if (!el) return { ok: false, error: "Element ref ${ref} is gone" }
+  el.dispatchEvent(new PointerEvent("pointerover", { bubbles: true }))
+  el.dispatchEvent(new MouseEvent("mouseenter", { bubbles: false }))
   el.dispatchEvent(new MouseEvent("mouseover", { bubbles: true }))
   return { ok: true }
 })()`

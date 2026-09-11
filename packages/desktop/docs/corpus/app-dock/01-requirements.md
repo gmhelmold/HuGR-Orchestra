@@ -678,7 +678,7 @@ If the system replaceManifest accepts revision mismatch, then it **shall refuse*
 ## dock-scroll: Dock Scroll
 
 ### REQ-204
-The system **shall** dock_scroll moves page and rejects invalid direction. *(from invariant `dock-scroll`)*
+The system **shall** dock_scroll dispatches scroll and rejects invalid direction or amount. *(from invariant `dock-scroll`)*
 
 ### REQ-205
 The system **shall** RPC dispatch validates scroll direction against up, down, top, bottom. *(from invariant `dock-scroll`)*

@@ -505,7 +505,7 @@ const invariants = [
     id: "dock-scroll",
     title: "Dock Scroll",
     clauses: [
-      "dock_scroll moves page and rejects invalid direction",
+      "dock_scroll dispatches scroll and rejects invalid direction or amount",
       "RPC dispatch validates scroll direction against up, down, top, bottom"
     ],
     unwanted: [

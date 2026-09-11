@@ -1288,7 +1288,7 @@
 
 ### WP-204 (covers REQ-204 + GOLDEN-204)
 **Invariant**: `dock-scroll`
-**Clause**: dock_scroll moves page and rejects invalid direction
+**Clause**: dock_scroll dispatches scroll and rejects invalid direction or amount
 **Witness**: app-dock-live.test.ts
 **Status**: ready (test exists on main)
 

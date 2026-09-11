@@ -132,6 +132,8 @@ async function dispatch(op: string, args: Record<string, unknown>): Promise<unkn
       if (direction !== "up" && direction !== "down" && direction !== "top" && direction !== "bottom")
         throw new Error("Invalid App Dock direction")
       const amount = args.amount === undefined ? undefined : dockNumber(args.amount, "amount", 1, 10000)
+      if (amount !== undefined && (direction === "top" || direction === "bottom"))
+        throw new Error("Invalid App Dock amount for scroll to edge")
       return dock.scroll(senderID, tabID, direction, amount)
     }
     case "hover": {

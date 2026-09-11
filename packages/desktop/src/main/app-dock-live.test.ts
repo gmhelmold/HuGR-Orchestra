@@ -33,7 +33,7 @@ async function fixture() {
     ["req", "-x509", "-newkey", "rsa:2048", "-nodes", "-keyout", key, "-out", cert, "-subj", "/CN=127.0.0.1", "-days", "1"],
     { stdio: "ignore" },
   )
-  const body = `<!doctype html><title>live fixture</title><button id=inc>Increment</button><output id=count>0</output><label for=name>Name</label><input id=name type=text placeholder="your name"><div id=host></div><script>document.getElementById('inc').addEventListener('click',()=>{const c=document.getElementById('count');c.textContent=String(Number(c.textContent||0)+1)});document.getElementById('host').attachShadow({mode:'open'}).innerHTML='<input id=shadowName placeholder="shadow name">'</script>`
+  const body = `<!doctype html><title>live fixture</title><button id=inc>Increment</button><output id=count>0</output><label for=name>Name</label><input id=name type=text placeholder="your name"><div id=host></div><div id=hiddenHost aria-hidden="true"></div><script>document.getElementById('inc').addEventListener('click',()=>{const c=document.getElementById('count');c.textContent=String(Number(c.textContent||0)+1)});document.getElementById('name').addEventListener('drop',()=>{document.title='drop-ok'});document.getElementById('host').attachShadow({mode:'open'}).innerHTML='<input id=shadowName placeholder="shadow name">';document.getElementById('hiddenHost').attachShadow({mode:'open'}).innerHTML='<input placeholder="hidden shadow">'</script>`
   const server = createHttpsServer({ key: await readFile(key), cert: await readFile(cert) }, (req: IncomingMessage, res: ServerResponse) => {
     res.writeHead(200, { "content-type": "text/html; charset=utf-8" })
     res.end(body)
@@ -170,7 +170,14 @@ async function child() {
       scrollRejected = true
     }
     check(scrollRejected, "invalid scroll direction was not rejected")
-    pass("L07", "dock_scroll moves page and rejects invalid direction")
+    let amountRejected = false
+    try {
+      await rpc("scroll", { direction: "top", amount: 100 })
+    } catch {
+      amountRejected = true
+    }
+    check(amountRejected, "scroll amount with edge direction was not rejected")
+    pass("L07", "dock_scroll dispatches scroll and rejects invalid direction or amount")
 
     const hoverSnap = (await rpc("read", {})) as { items: { name?: string; ref?: number }[] }
     const hoverRef = hoverSnap.items.find((item) => item.name === "Increment")?.ref
@@ -195,6 +202,10 @@ async function child() {
     check(!!dragResult && typeof dragResult === "object" && "ok" in dragResult && dragResult.ok === true, "drag failed")
     const dragGone = (await rpc("drag", { fromRef: 999999, toRef: dragTo })) as { ok: boolean }
     check(dragGone.ok === false, "drag with missing ref was not refused")
+    const dragSelf = (await rpc("drag", { fromRef: dragFrom, toRef: dragFrom })) as { ok: boolean }
+    check(dragSelf.ok === true, "drag onto itself failed")
+    const afterDrag = (await rpc("read", {})) as { title?: string }
+    check(afterDrag.title === "drop-ok", "drop listener did not observe live drag")
     pass("L10", "dock_drag runs pointer drag sequence on live elements")
 
     await rpc("scrollTo", { x: 0, y: 0 })
@@ -206,6 +217,10 @@ async function child() {
     check(
       Array.isArray(shadowSnap.items) && shadowSnap.items.some((item) => item.name === "shadow name" && item.tag === "input"),
       "shadow DOM input missing from live snapshot",
+    )
+    check(
+      !shadowSnap.items.some((item) => item.name === "hidden shadow"),
+      "aria-hidden shadow DOM input leaked into live snapshot",
     )
     pass("L12", "dock_read pierces open shadow DOM in live snapshot")
 

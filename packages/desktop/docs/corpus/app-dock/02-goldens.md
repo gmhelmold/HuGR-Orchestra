@@ -1084,7 +1084,7 @@
 ## dock-scroll: Dock Scroll
 
 ### GOLDEN-204 (for REQ-204)
-**Requirement**: The system shall dock_scroll moves page and rejects invalid direction.
+**Requirement**: The system shall dock_scroll dispatches scroll and rejects invalid direction or amount.
 
 **Witness**: app-dock-live.test.ts
 
