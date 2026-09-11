@@ -24,7 +24,7 @@ const SIDECAR_SERVICE_NAME = "opencode server"
 const SIDECAR_START_STALL_TIMEOUT = 20_000
 const SIDECAR_STOP_TIMEOUT = 6_000
 
-function validateSidecarPath(sidecarPath: string, outDir: string): string {
+function validateSidecarPath(sidecarPath: string): string {
   if (!isAbsolute(sidecarPath)) {
     throw new Error("sidecarPath must be an absolute path")
   }
@@ -79,9 +79,7 @@ export async function spawnLocalServer(
 ) {
   const outDir = join(dirname(fileURLToPath(import.meta.url)))
   const defaultSidecar = join(outDir, "sidecar.js")
-  const sidecar = options.sidecarPath
-    ? validateSidecarPath(options.sidecarPath, outDir)
-    : defaultSidecar
+  const sidecar = options.sidecarPath ? validateSidecarPath(options.sidecarPath) : defaultSidecar
   await access(sidecar)
   const child = utilityProcess.fork(sidecar, [], {
     cwd: process.cwd(),
@@ -186,7 +184,14 @@ export async function spawnLocalServer(
       }
     }
 
-    await Promise.race([ready(), gone])
+    // Health polling is otherwise unbounded: if the sidecar stays alive but
+    // never serves HTTP, wait would hang forever. Bound it by the same
+    // start-stall budget used for the ready handshake.
+    const timedOut = delay(SIDECAR_START_STALL_TIMEOUT).then(() => {
+      throw new Error("Sidecar health check timed out")
+    })
+
+    await Promise.race([ready(), gone, timedOut])
   })()
 
   let stopping: Promise<void> | undefined

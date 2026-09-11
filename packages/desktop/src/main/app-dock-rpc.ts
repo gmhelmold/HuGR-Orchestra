@@ -1,13 +1,27 @@
+import type { BrowserWindow } from "electron"
 import type { AppDock, DockBounds } from "./app-dock"
 import { buildClickScript, buildSnapshotScript, buildTypeScript } from "./app-dock-browser"
 import { getLastFocusedWindow } from "./windows"
-import { dockWindowFor } from "./app-dock-test-support"
+
+// Module singletons below are set-once-at-startup in the single-threaded
+// Electron main process (bridge in registerIpcHandlers, window pin by the
+// test harness only) and guarded fail-fast at every use site. No message can
+// arrive before registration because the sidecar spawns in the same startup.
+// (History note: 4cc's message overclaimed singleton removal; the interface
+// extraction landed, the singletons stayed deliberately.)
 
 let appDock: AppDock | undefined
+let dockWindow: BrowserWindow | undefined
 
 export function registerAppDockBridge(instance: AppDock) {
   appDock = instance
 }
+
+export function registerAppDockWindow(win: BrowserWindow) {
+  dockWindow = win
+}
+
+const dockWindowFor = (): BrowserWindow | null => dockWindow ?? getLastFocusedWindow()
 
 export type DockRPCReply = (message: unknown) => void
 
@@ -49,7 +63,7 @@ const dockNumber = (value: unknown, name: string, min: number, max: number) => {
 const dockBridgeStorageKey = (senderID: number) => `dock-bridge-${senderID}-default`
 
 const dockSender = () => {
-  const win = dockWindowFor(getLastFocusedWindow)
+  const win = dockWindowFor()
   if (!win || win.isDestroyed()) throw new Error("No window is available for App Dock")
   return { senderID: win.webContents.id, win }
 }
@@ -167,14 +181,14 @@ async function dispatch(op: string, args: Record<string, unknown>): Promise<unkn
 function resolveTabID(dock: AppDock, senderID: number, args: Record<string, unknown>) {
   if (args.tabID !== undefined) return dockString(args.tabID, "tabID")
   const tabs = dock.list(senderID)
-  const active = tabs.find((tab) => (tab as { active?: boolean }).active)
+  const active = tabs.find((tab) => typeof tab === "object" && tab !== null && "active" in tab && tab.active === true)
   const target = active ?? tabs[0]
   if (!target) throw new Error("App Dock has no open tabs")
   return target.tabID
 }
 
 function dockBounds(value: unknown): DockBounds {
-  const win = dockWindowFor(getLastFocusedWindow)
+  const win = dockWindowFor()
   if (!win || win.isDestroyed()) throw new Error("No window is available for App Dock")
   if (value === undefined) {
     const bounds = win.getContentBounds()

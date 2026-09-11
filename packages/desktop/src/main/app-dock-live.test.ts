@@ -19,7 +19,7 @@ const outMain = join(root, "out/main")
 const artifact = join(process.env.APP_DOCK_ARTIFACT_ROOT ?? root, "artifacts/app-dock-live/s1.json")
 const cases: Case[] = []
 
-const check = (condition: unknown, message: string) => {
+const check = (condition: unknown, message: string): asserts condition => {
   if (!condition) throw new Error(message)
 }
 const pass = (id: string, detail: string) => cases.push({ id, status: "pass", detail })
@@ -57,8 +57,7 @@ async function child() {
   const electron = await import("electron")
   const { app, BrowserWindow } = electron
   const { createAppDock } = await import("./app-dock")
-  const { handleDockRPC, registerAppDockBridge } = await import("./app-dock-rpc")
-  const { registerAppDockWindow } = await import("./app-dock-test-support")
+  const { handleDockRPC, registerAppDockBridge, registerAppDockWindow } = await import("./app-dock-rpc")
   const { spawnLocalServer } = await import("./server")
   if (!process.versions.electron) throw new Error("Electron child not started")
   app.commandLine.appendSwitch("ignore-certificate-errors")
@@ -179,45 +178,49 @@ async function child() {
     check(amountRejected, "scroll amount with edge direction was not rejected")
     pass("L07", "dock_scroll dispatches scroll and rejects invalid direction or amount")
 
-    const hoverSnap = (await rpc("read", {})) as { items: { name?: string; ref?: number }[] }
-    const hoverRef = hoverSnap.items.find((item) => item.name === "Increment")?.ref
+    const hoverSnap = await rpc("read", {})
+    check(!!hoverSnap && typeof hoverSnap === "object" && "items" in hoverSnap && Array.isArray(hoverSnap.items), "snapshot shape")
+    const hoverRef = hoverSnap.items.find((item) => !!item && typeof item === "object" && "name" in item && item.name === "Increment" && "ref" in item && typeof item.ref === "number")?.ref
     check(typeof hoverRef === "number", "Increment ref missing for hover")
     const hoverResult = await rpc("hover", { ref: hoverRef })
     check(!!hoverResult && typeof hoverResult === "object" && "ok" in hoverResult && hoverResult.ok === true, "hover failed")
-    const hoverGone = (await rpc("hover", { ref: 999999 })) as { ok: boolean }
-    check(hoverGone.ok === false, "hover on missing ref was not refused")
+    const hoverGone = await rpc("hover", { ref: 999999 })
+    check(!!hoverGone && typeof hoverGone === "object" && "ok" in hoverGone && hoverGone.ok === false, "hover on missing ref was not refused")
     pass("L08", "dock_hover dispatches mouseover on live element")
 
-    const clickSnap = (await rpc("read", {})) as { items: { name?: string; x?: number; y?: number; width?: number; height?: number }[] }
-    const clickTarget = clickSnap.items.find((item) => item.name === "Increment")
+    const clickSnap = await rpc("read", {})
+    check(!!clickSnap && typeof clickSnap === "object" && "items" in clickSnap && Array.isArray(clickSnap.items), "snapshot shape")
+    const clickTarget = clickSnap.items.find((item) => !!item && typeof item === "object" && "name" in item && item.name === "Increment")
     check(
-      !!clickTarget && typeof clickTarget.x === "number" && typeof clickTarget.y === "number" &&
-        typeof clickTarget.width === "number" && typeof clickTarget.height === "number",
+      !!clickTarget && typeof clickTarget === "object" && "x" in clickTarget && "y" in clickTarget &&
+        "width" in clickTarget && "height" in clickTarget && typeof clickTarget.x === "number" &&
+        typeof clickTarget.y === "number" && typeof clickTarget.width === "number" && typeof clickTarget.height === "number",
       "Increment rect missing from snapshot",
     )
     const clickAtResult = await rpc("clickAt", {
-      x: (clickTarget.x as number) + (clickTarget.width as number) / 2,
-      y: (clickTarget.y as number) + (clickTarget.height as number) / 2,
+      x: clickTarget.x + clickTarget.width / 2,
+      y: clickTarget.y + clickTarget.height / 2,
     })
     check(!!clickAtResult && typeof clickAtResult === "object" && "ok" in clickAtResult && clickAtResult.ok === true, "clickAt failed")
     const afterClickAt = await rpc("read", {})
-    check(afterClickAt && typeof afterClickAt === "object" && "text" in afterClickAt && typeof afterClickAt.text === "string" && afterClickAt.text.includes("2"), "counter not incremented by clickAt")
-    const clickAtGone = (await rpc("clickAt", { x: 9999, y: 9999 })) as { ok: boolean }
-    check(clickAtGone.ok === false, "clickAt with no element at coordinates was not refused")
+    check(!!afterClickAt && typeof afterClickAt === "object" && "text" in afterClickAt && typeof afterClickAt.text === "string" && afterClickAt.text.includes("2"), "counter not incremented by clickAt")
+    const clickAtGone = await rpc("clickAt", { x: 9999, y: 9999 })
+    check(!!clickAtGone && typeof clickAtGone === "object" && "ok" in clickAtGone && clickAtGone.ok === false, "clickAt with no element at coordinates was not refused")
     pass("L09", "dock_clickAt clicks live coordinates")
 
-    const dragSnap = (await rpc("read", {})) as { items: { name?: string; tag?: string; ref?: number }[] }
-    const dragFrom = dragSnap.items.find((item) => item.name === "Increment")?.ref
-    const dragTo = dragSnap.items.find((item) => item.tag === "input")?.ref
+    const dragSnap = await rpc("read", {})
+    check(!!dragSnap && typeof dragSnap === "object" && "items" in dragSnap && Array.isArray(dragSnap.items), "snapshot shape")
+    const dragFrom = dragSnap.items.find((item) => !!item && typeof item === "object" && "name" in item && item.name === "Increment" && "ref" in item && typeof item.ref === "number")?.ref
+    const dragTo = dragSnap.items.find((item) => !!item && typeof item === "object" && "tag" in item && item.tag === "input" && "ref" in item && typeof item.ref === "number")?.ref
     check(typeof dragFrom === "number" && typeof dragTo === "number", "drag refs missing")
     const dragResult = await rpc("drag", { fromRef: dragFrom, toRef: dragTo })
     check(!!dragResult && typeof dragResult === "object" && "ok" in dragResult && dragResult.ok === true, "drag failed")
-    const dragGone = (await rpc("drag", { fromRef: 999999, toRef: dragTo })) as { ok: boolean }
-    check(dragGone.ok === false, "drag with missing ref was not refused")
-    const dragSelf = (await rpc("drag", { fromRef: dragFrom, toRef: dragFrom })) as { ok: boolean }
-    check(dragSelf.ok === true, "drag onto itself failed")
-    const afterDrag = (await rpc("read", {})) as { title?: string }
-    check(afterDrag.title === "drop-ok", "drop listener did not observe live drag")
+    const dragGone = await rpc("drag", { fromRef: 999999, toRef: dragTo })
+    check(!!dragGone && typeof dragGone === "object" && "ok" in dragGone && dragGone.ok === false, "drag with missing ref was not refused")
+    const dragSelf = await rpc("drag", { fromRef: dragFrom, toRef: dragFrom })
+    check(!!dragSelf && typeof dragSelf === "object" && "ok" in dragSelf && dragSelf.ok === true, "drag onto itself failed")
+    const afterDrag = await rpc("read", {})
+    check(!!afterDrag && typeof afterDrag === "object" && "title" in afterDrag && afterDrag.title === "drop-ok", "drop listener did not observe live drag")
     pass("L10", "dock_drag runs pointer drag sequence on live elements")
 
     await rpc("scrollTo", { x: 0, y: 0 })
@@ -225,13 +228,14 @@ async function child() {
     check(!!afterScrollTo && typeof afterScrollTo === "object" && "title" in afterScrollTo, "read after scrollTo failed")
     pass("L11", "dock_scrollTo jumps to live coordinates")
 
-    const shadowSnap = (await rpc("read", {})) as { items: { name?: string; tag?: string }[] }
+    const shadowSnap = await rpc("read", {})
+    check(!!shadowSnap && typeof shadowSnap === "object" && "items" in shadowSnap && Array.isArray(shadowSnap.items), "snapshot shape")
     check(
-      Array.isArray(shadowSnap.items) && shadowSnap.items.some((item) => item.name === "shadow name" && item.tag === "input"),
+      shadowSnap.items.some((item) => !!item && typeof item === "object" && "name" in item && "tag" in item && item.name === "shadow name" && item.tag === "input"),
       "shadow DOM input missing from live snapshot",
     )
     check(
-      !shadowSnap.items.some((item) => item.name === "hidden shadow"),
+      !shadowSnap.items.some((item) => !!item && typeof item === "object" && "name" in item && item.name === "hidden shadow"),
       "aria-hidden shadow DOM input leaked into live snapshot",
     )
     pass("L12", "dock_read pierces open shadow DOM in live snapshot")
