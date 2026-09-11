@@ -135,14 +135,22 @@ export function buildSnapshotScript(options: SnapshotOptions = {}) {
     if (collapsed(el, accepted)) continue
     accepted.push(el)
   }
-  state.truncated = elements.some((el) => !accepted.includes(el))
-  state.items = accepted.map((el) => ({
-    ref: registry.refFor(el),
-    role: roleOf(el),
-    name: nameOf(el),
-    tag: el.tagName.toLowerCase(),
-    ...stateOf(el),
-  }))
+  state.truncated = elements.length > budget
+  state.items = accepted.map((el) => {
+    const rect = el.getBoundingClientRect()
+    const round = (n) => Math.round(n * 10) / 10
+    return {
+      ref: registry.refFor(el),
+      role: roleOf(el),
+      name: nameOf(el),
+      tag: el.tagName.toLowerCase(),
+      x: round(rect.left),
+      y: round(rect.top),
+      width: round(rect.width),
+      height: round(rect.height),
+      ...stateOf(el),
+    }
+  })
   if (maxText > 0 && document.body && document.body.innerText) {
     state.text = document.body.innerText.replace(/\\s+/g, " ").trim().slice(0, maxText)
   }

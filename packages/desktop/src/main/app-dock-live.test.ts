@@ -188,8 +188,20 @@ async function child() {
     check(hoverGone.ok === false, "hover on missing ref was not refused")
     pass("L08", "dock_hover dispatches mouseover on live element")
 
-    const clickAtResult = await rpc("clickAt", { x: 450, y: 350 })
+    const clickSnap = (await rpc("read", {})) as { items: { name?: string; x?: number; y?: number; width?: number; height?: number }[] }
+    const clickTarget = clickSnap.items.find((item) => item.name === "Increment")
+    check(
+      !!clickTarget && typeof clickTarget.x === "number" && typeof clickTarget.y === "number" &&
+        typeof clickTarget.width === "number" && typeof clickTarget.height === "number",
+      "Increment rect missing from snapshot",
+    )
+    const clickAtResult = await rpc("clickAt", {
+      x: (clickTarget.x as number) + (clickTarget.width as number) / 2,
+      y: (clickTarget.y as number) + (clickTarget.height as number) / 2,
+    })
     check(!!clickAtResult && typeof clickAtResult === "object" && "ok" in clickAtResult && clickAtResult.ok === true, "clickAt failed")
+    const afterClickAt = await rpc("read", {})
+    check(afterClickAt && typeof afterClickAt === "object" && "text" in afterClickAt && typeof afterClickAt.text === "string" && afterClickAt.text.includes("2"), "counter not incremented by clickAt")
     const clickAtGone = (await rpc("clickAt", { x: 9999, y: 9999 })) as { ok: boolean }
     check(clickAtGone.ok === false, "clickAt with no element at coordinates was not refused")
     pass("L09", "dock_clickAt clicks live coordinates")

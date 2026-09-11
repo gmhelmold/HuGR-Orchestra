@@ -633,6 +633,8 @@ export function createAppDock(options: { developmentMode?: () => boolean } = {})
     scroll(senderID: number, tabID: string, direction: "up" | "down" | "top" | "bottom", amount?: number) {
       const record = tabs.get(senderID)?.get(tabID)
       if (!record) throw new Error("Unknown App Dock tab")
+      if (direction !== "up" && direction !== "down" && direction !== "top" && direction !== "bottom")
+        throw new Error("Invalid App Dock direction")
       return record.view.webContents.executeJavaScript(buildScrollScript(direction, amount))
     },
     hover(senderID: number, tabID: string, ref: number) {
