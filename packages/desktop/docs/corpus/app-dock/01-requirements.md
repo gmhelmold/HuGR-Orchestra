@@ -726,3 +726,14 @@ The system **shall** dock_read pierces open shadow DOM in live snapshot. *(from 
 ### REQ-216
 If the system dock_read omits visible inputs inside open shadow roots, then it **shall refuse** and return an error. *(from invariant `snapshot-shadow-dom` unwanted)*
 
+## dock-youtube-llm: Dock YouTube LLM Drive
+
+### REQ-217
+The system **shall** dock session drives dock_open, dock_read and dock_click against YouTube results via live model call. *(from invariant `dock-youtube-llm`)*
+
+### REQ-218
+The system **shall** live model turn produces final text answering with a video title. *(from invariant `dock-youtube-llm`)*
+
+### REQ-219
+If the system dock session completes without invoking any dock_* tool, then it **shall refuse** and return an error. *(from invariant `dock-youtube-llm` unwanted)*
+

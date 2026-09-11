@@ -1374,3 +1374,23 @@
 **Witness**: app-dock-live.test.ts
 **Status**: ready (test exists on main)
 
+## dock-youtube-llm: Dock YouTube LLM Drive
+
+### WP-217 (covers REQ-217 + GOLDEN-217)
+**Invariant**: `dock-youtube-llm`
+**Clause**: dock session drives dock_open, dock_read and dock_click against YouTube results via live model call
+**Witness**: app-dock-youtube.test.ts (opt-in: APP_DOCK_YOUTUBE=1, OPENCODE_AUTH_CONTENT, APP_DOCK_YOUTUBE_MODEL; skipped otherwise)
+**Status**: ready (test exists on main)
+
+### WP-218 (covers REQ-218 + GOLDEN-218)
+**Invariant**: `dock-youtube-llm`
+**Clause**: live model turn produces final text answering with a video title
+**Witness**: app-dock-youtube.test.ts (opt-in: APP_DOCK_YOUTUBE=1, OPENCODE_AUTH_CONTENT, APP_DOCK_YOUTUBE_MODEL; skipped otherwise)
+**Status**: ready (test exists on main)
+
+### WP-219 (covers REQ-219 + GOLDEN-219)
+**Invariant**: `dock-youtube-llm`
+**Unwanted**: dock session completes without invoking any dock_* tool
+**Witness**: app-dock-youtube.test.ts (opt-in: APP_DOCK_YOUTUBE=1, OPENCODE_AUTH_CONTENT, APP_DOCK_YOUTUBE_MODEL; skipped otherwise)
+**Status**: ready (test exists on main)
+

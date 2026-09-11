@@ -1158,3 +1158,20 @@
 
 **Witness**: app-dock-live.test.ts
 
+## dock-youtube-llm: Dock YouTube LLM Drive
+
+### GOLDEN-217 (for REQ-217)
+**Requirement**: The system shall dock session drives dock_open, dock_read and dock_click against YouTube results via live model call.
+
+**Witness**: app-dock-youtube.test.ts (opt-in: APP_DOCK_YOUTUBE=1, OPENCODE_AUTH_CONTENT, APP_DOCK_YOUTUBE_MODEL; skipped otherwise)
+
+### GOLDEN-218 (for REQ-218)
+**Requirement**: The system shall live model turn produces final text answering with a video title.
+
+**Witness**: app-dock-youtube.test.ts (opt-in: APP_DOCK_YOUTUBE=1, OPENCODE_AUTH_CONTENT, APP_DOCK_YOUTUBE_MODEL; skipped otherwise)
+
+### GOLDEN-219 (for REQ-219)
+**Requirement**: If the system dock session completes without invoking any dock_* tool, then it shall refuse and return an error.
+
+**Witness**: app-dock-youtube.test.ts (opt-in: APP_DOCK_YOUTUBE=1, OPENCODE_AUTH_CONTENT, APP_DOCK_YOUTUBE_MODEL; skipped otherwise)
+

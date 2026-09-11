@@ -567,6 +567,18 @@ const invariants = [
       "dock_read omits visible inputs inside open shadow roots"
     ],
     tests: ["app-dock-live.test.ts"]
+  },
+  {
+    id: "dock-youtube-llm",
+    title: "Dock YouTube LLM Drive",
+    clauses: [
+      "dock session drives dock_open, dock_read and dock_click against YouTube results via live model call",
+      "live model turn produces final text answering with a video title"
+    ],
+    unwanted: [
+      "dock session completes without invoking any dock_* tool"
+    ],
+    tests: ["app-dock-youtube.test.ts (opt-in: APP_DOCK_YOUTUBE=1, OPENCODE_AUTH_CONTENT, APP_DOCK_YOUTUBE_MODEL; skipped otherwise)"]
   }
 ];
 
