@@ -500,6 +500,73 @@ const invariants = [
       "replaceManifest accepts revision mismatch"
     ],
     tests: ["app-dock-profile-registry.test.ts"]
+  },
+  {
+    id: "dock-scroll",
+    title: "Dock Scroll",
+    clauses: [
+      "dock_scroll moves page and rejects invalid direction",
+      "RPC dispatch validates scroll direction against up, down, top, bottom"
+    ],
+    unwanted: [
+      "dock_scroll accepts invalid direction"
+    ],
+    tests: ["app-dock-live.test.ts"]
+  },
+  {
+    id: "dock-hover",
+    title: "Dock Hover",
+    clauses: [
+      "dock_hover dispatches mouseover on live element"
+    ],
+    unwanted: [
+      "dock_hover reports success on missing element ref"
+    ],
+    tests: ["app-dock-live.test.ts"]
+  },
+  {
+    id: "dock-click-at",
+    title: "Dock Click At Coordinates",
+    clauses: [
+      "dock_clickAt clicks live coordinates"
+    ],
+    unwanted: [
+      "dock_clickAt reports success with no element at coordinates"
+    ],
+    tests: ["app-dock-live.test.ts"]
+  },
+  {
+    id: "dock-drag",
+    title: "Dock Drag",
+    clauses: [
+      "dock_drag runs pointer drag sequence on live elements"
+    ],
+    unwanted: [
+      "dock_drag reports success with missing element ref"
+    ],
+    tests: ["app-dock-live.test.ts"]
+  },
+  {
+    id: "dock-scroll-to",
+    title: "Dock Scroll To",
+    clauses: [
+      "dock_scrollTo jumps to live coordinates"
+    ],
+    unwanted: [
+      "dock_scrollTo rejects valid coordinates"
+    ],
+    tests: ["app-dock-live.test.ts"]
+  },
+  {
+    id: "snapshot-shadow-dom",
+    title: "Snapshot Shadow DOM Piercing",
+    clauses: [
+      "dock_read pierces open shadow DOM in live snapshot"
+    ],
+    unwanted: [
+      "dock_read omits visible inputs inside open shadow roots"
+    ],
+    tests: ["app-dock-live.test.ts"]
   }
 ];
 

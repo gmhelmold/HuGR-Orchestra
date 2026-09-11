@@ -126,6 +126,37 @@ async function dispatch(op: string, args: Record<string, unknown>): Promise<unkn
       dock.close(senderID, win, tabID)
       return tabID === undefined ? dock.list(senderID) : undefined
     }
+    case "scroll": {
+      const tabID = resolveTabID(dock, senderID, args)
+      const direction = dockString(args.direction, "direction")
+      if (direction !== "up" && direction !== "down" && direction !== "top" && direction !== "bottom")
+        throw new Error("Invalid App Dock direction")
+      const amount = args.amount === undefined ? undefined : dockNumber(args.amount, "amount", 1, 10000)
+      return dock.scroll(senderID, tabID, direction, amount)
+    }
+    case "hover": {
+      const tabID = resolveTabID(dock, senderID, args)
+      const ref = dockNumber(args.ref, "element ref", 1, 1_000_000)
+      return dock.hover(senderID, tabID, ref)
+    }
+    case "drag": {
+      const tabID = resolveTabID(dock, senderID, args)
+      const fromRef = dockNumber(args.fromRef, "from ref", 1, 1_000_000)
+      const toRef = dockNumber(args.toRef, "to ref", 1, 1_000_000)
+      return dock.drag(senderID, tabID, fromRef, toRef)
+    }
+    case "clickAt": {
+      const tabID = resolveTabID(dock, senderID, args)
+      const x = dockNumber(args.x, "x", 0, 10000)
+      const y = dockNumber(args.y, "y", 0, 10000)
+      return dock.clickAt(senderID, tabID, x, y)
+    }
+    case "scrollTo": {
+      const tabID = resolveTabID(dock, senderID, args)
+      const x = dockNumber(args.x, "x", 0, 10000)
+      const y = dockNumber(args.y, "y", 0, 10000)
+      return dock.scrollTo(senderID, tabID, x, y)
+    }
     default:
       throw new Error(`Unknown App Dock operation: ${op}`)
   }

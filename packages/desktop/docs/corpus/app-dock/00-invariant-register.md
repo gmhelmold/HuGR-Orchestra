@@ -36,6 +36,12 @@
 | `download-limit` | Download Limit | 3 | 3 | app-dock-security.test.ts:1097-1160 |
 | `devtools-gate` | DevTools Gate | 3 | 3 | app-dock-security.test.ts:1162-1176 |
 | `profile-registry` | Profile Registry | 7 | 7 | app-dock-profile-registry.test.ts |
+| `dock-scroll` | Dock Scroll | 2 | 1 | app-dock-live.test.ts |
+| `dock-hover` | Dock Hover | 1 | 1 | app-dock-live.test.ts |
+| `dock-click-at` | Dock Click At Coordinates | 1 | 1 | app-dock-live.test.ts |
+| `dock-drag` | Dock Drag | 1 | 1 | app-dock-live.test.ts |
+| `dock-scroll-to` | Dock Scroll To | 1 | 1 | app-dock-live.test.ts |
+| `snapshot-shadow-dom` | Snapshot Shadow DOM Piercing | 1 | 1 | app-dock-live.test.ts |
 
 ## Clause Detail
 
@@ -433,4 +439,53 @@
 - markDeleting on deleted profile succeeds *(measured: app-dock-profile-registry.test.ts)*
 - markDeleted on non-deleting profile succeeds *(measured: app-dock-profile-registry.test.ts)*
 - replaceManifest accepts revision mismatch *(measured: app-dock-profile-registry.test.ts)*
+
+### dock-scroll: Dock Scroll
+
+**Clauses**
+- dock_scroll moves page and rejects invalid direction *(measured: app-dock-live.test.ts)*
+- RPC dispatch validates scroll direction against up, down, top, bottom *(measured: app-dock-live.test.ts)*
+
+**Unwanted**
+- dock_scroll accepts invalid direction *(measured: app-dock-live.test.ts)*
+
+### dock-hover: Dock Hover
+
+**Clauses**
+- dock_hover dispatches mouseover on live element *(measured: app-dock-live.test.ts)*
+
+**Unwanted**
+- dock_hover reports success on missing element ref *(measured: app-dock-live.test.ts)*
+
+### dock-click-at: Dock Click At Coordinates
+
+**Clauses**
+- dock_clickAt clicks live coordinates *(measured: app-dock-live.test.ts)*
+
+**Unwanted**
+- dock_clickAt reports success with no element at coordinates *(measured: app-dock-live.test.ts)*
+
+### dock-drag: Dock Drag
+
+**Clauses**
+- dock_drag runs pointer drag sequence on live elements *(measured: app-dock-live.test.ts)*
+
+**Unwanted**
+- dock_drag reports success with missing element ref *(measured: app-dock-live.test.ts)*
+
+### dock-scroll-to: Dock Scroll To
+
+**Clauses**
+- dock_scrollTo jumps to live coordinates *(measured: app-dock-live.test.ts)*
+
+**Unwanted**
+- dock_scrollTo rejects valid coordinates *(measured: app-dock-live.test.ts)*
+
+### snapshot-shadow-dom: Snapshot Shadow DOM Piercing
+
+**Clauses**
+- dock_read pierces open shadow DOM in live snapshot *(measured: app-dock-live.test.ts)*
+
+**Unwanted**
+- dock_read omits visible inputs inside open shadow roots *(measured: app-dock-live.test.ts)*
 

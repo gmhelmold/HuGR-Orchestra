@@ -1081,3 +1081,80 @@
 
 **Witness**: app-dock-profile-registry.test.ts
 
+## dock-scroll: Dock Scroll
+
+### GOLDEN-204 (for REQ-204)
+**Requirement**: The system shall dock_scroll moves page and rejects invalid direction.
+
+**Witness**: app-dock-live.test.ts
+
+### GOLDEN-205 (for REQ-205)
+**Requirement**: The system shall RPC dispatch validates scroll direction against up, down, top, bottom.
+
+**Witness**: app-dock-live.test.ts
+
+### GOLDEN-206 (for REQ-206)
+**Requirement**: If the system dock_scroll accepts invalid direction, then it shall refuse and return an error.
+
+**Witness**: app-dock-live.test.ts
+
+## dock-hover: Dock Hover
+
+### GOLDEN-207 (for REQ-207)
+**Requirement**: The system shall dock_hover dispatches mouseover on live element.
+
+**Witness**: app-dock-live.test.ts
+
+### GOLDEN-208 (for REQ-208)
+**Requirement**: If the system dock_hover reports success on missing element ref, then it shall refuse and return an error.
+
+**Witness**: app-dock-live.test.ts
+
+## dock-click-at: Dock Click At Coordinates
+
+### GOLDEN-209 (for REQ-209)
+**Requirement**: The system shall dock_clickAt clicks live coordinates.
+
+**Witness**: app-dock-live.test.ts
+
+### GOLDEN-210 (for REQ-210)
+**Requirement**: If the system dock_clickAt reports success with no element at coordinates, then it shall refuse and return an error.
+
+**Witness**: app-dock-live.test.ts
+
+## dock-drag: Dock Drag
+
+### GOLDEN-211 (for REQ-211)
+**Requirement**: The system shall dock_drag runs pointer drag sequence on live elements.
+
+**Witness**: app-dock-live.test.ts
+
+### GOLDEN-212 (for REQ-212)
+**Requirement**: If the system dock_drag reports success with missing element ref, then it shall refuse and return an error.
+
+**Witness**: app-dock-live.test.ts
+
+## dock-scroll-to: Dock Scroll To
+
+### GOLDEN-213 (for REQ-213)
+**Requirement**: The system shall dock_scrollTo jumps to live coordinates.
+
+**Witness**: app-dock-live.test.ts
+
+### GOLDEN-214 (for REQ-214)
+**Requirement**: If the system dock_scrollTo rejects valid coordinates, then it shall refuse and return an error.
+
+**Witness**: app-dock-live.test.ts
+
+## snapshot-shadow-dom: Snapshot Shadow DOM Piercing
+
+### GOLDEN-215 (for REQ-215)
+**Requirement**: The system shall dock_read pierces open shadow DOM in live snapshot.
+
+**Witness**: app-dock-live.test.ts
+
+### GOLDEN-216 (for REQ-216)
+**Requirement**: If the system dock_read omits visible inputs inside open shadow roots, then it shall refuse and return an error.
+
+**Witness**: app-dock-live.test.ts
+

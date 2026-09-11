@@ -118,7 +118,14 @@ export function buildSnapshotScript(options: SnapshotOptions = {}) {
     return out
   }
   const selector = "a[href], button, input, textarea, select, option, summary, [contenteditable], [role], [onclick], [tabindex], [aria-label], [aria-labelledby]"
-  const elements = Array.from(document.querySelectorAll(selector))
+  function getAllElements(root, sel) {
+    const found = Array.from(root.querySelectorAll(sel))
+    for (const el of Array.from(root.querySelectorAll("*"))) {
+      if (el.shadowRoot) found.push(...getAllElements(el.shadowRoot, sel))
+    }
+    return found
+  }
+  const elements = getAllElements(document, selector)
   const collapsed = (el, accepted) => accepted.some((prior) => prior.contains(el))
   const accepted = []
   for (const el of elements) {
@@ -184,4 +191,49 @@ export function buildTypeScript(ref: number, text: string) {
   }
   return { ok: false, error: "Element ref ${ref} is not editable" }
 })()`
+}
+
+export function buildScrollScript(direction: "up" | "down" | "top" | "bottom", amount?: number) {
+  const pixels = amount ?? (direction === "top" || direction === "bottom" ? 10000 : 300)
+  const dir = direction === "up" ? -pixels : direction === "down" ? pixels : direction === "top" ? -10000 : 10000
+  return `(window.scrollBy(0, ${dir}), undefined)`
+}
+
+export function buildHoverScript(ref: number) {
+  return `(async () => {
+  const registry = ${registryExpr}
+  const el = registry.resolve(${ref})
+  if (!el) return { ok: false, error: "Element ref ${ref} is gone" }
+  el.dispatchEvent(new MouseEvent("mouseover", { bubbles: true }))
+  return { ok: true }
+})()`
+}
+
+export function buildDragScript(fromRef: number, toRef: number) {
+  return `(async () => {
+  const registry = ${registryExpr}
+  const from = registry.resolve(${fromRef})
+  const to = registry.resolve(${toRef})
+  if (!from || !to) return { ok: false, error: "Element ref gone" }
+  const rect1 = from.getBoundingClientRect()
+  const rect2 = to.getBoundingClientRect()
+  from.dispatchEvent(new DragEvent("dragstart", { bubbles: true, clientX: rect1.x, clientY: rect1.y }))
+  to.dispatchEvent(new DragEvent("dragover", { bubbles: true, clientX: rect2.x, clientY: rect2.y }))
+  to.dispatchEvent(new DragEvent("drop", { bubbles: true, clientX: rect2.x, clientY: rect2.y }))
+  from.dispatchEvent(new DragEvent("dragend", { bubbles: true }))
+  return { ok: true }
+})()`
+}
+
+export function buildClickAtScript(x: number, y: number) {
+  return `(async () => {
+  const el = document.elementFromPoint(${x}, ${y})
+  if (!el) return { ok: false, error: "No element at coordinates" }
+  el.click()
+  return { ok: true }
+})()`
+}
+
+export function buildScrollToScript(x: number, y: number) {
+  return `(window.scrollTo(${x}, ${y}), undefined)`
 }

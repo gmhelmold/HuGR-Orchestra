@@ -21,4 +21,9 @@ export interface AppDockAPI {
   openDownload(senderID: number, id: string): Promise<string>
   openDevTools(senderID: number, tabID: string): void
   recover(senderID: number, tabID: string): Promise<AppDockTab>
+  scroll(senderID: number, tabID: string, direction: "up" | "down" | "top" | "bottom", amount?: number): Promise<unknown>
+  hover(senderID: number, tabID: string, ref: number): Promise<unknown>
+  drag(senderID: number, tabID: string, fromRef: number, toRef: number): Promise<unknown>
+  clickAt(senderID: number, tabID: string, x: number, y: number): Promise<unknown>
+  scrollTo(senderID: number, tabID: string, x: number, y: number): Promise<unknown>
 }

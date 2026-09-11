@@ -4,6 +4,7 @@ import { randomUUID } from "node:crypto"
 import type { EventEmitter } from "node:events"
 import { appDockURL, appDockZoom, panelBoundsToContent, type DockBounds } from "./app-dock-utils"
 export type { DockBounds } from "./app-dock-utils"
+import { buildScrollScript, buildHoverScript, buildDragScript, buildClickAtScript, buildScrollToScript } from "./app-dock-browser"
 import type { AppDockAPI } from "./app-dock-api"
 
 export type AppDockIdentity = Readonly<{ tabID: string; generation: number }>
@@ -628,6 +629,31 @@ export function createAppDock(options: { developmentMode?: () => boolean } = {})
       const closing = scope === "others" ? ids.filter((id) => id !== tabID) : ordered.slice(target + 1)
       closing.forEach((id) => remove(senderID, id))
       if (senderTabs.size === 0) tabs.delete(senderID)
+    },
+    scroll(senderID: number, tabID: string, direction: "up" | "down" | "top" | "bottom", amount?: number) {
+      const record = tabs.get(senderID)?.get(tabID)
+      if (!record) throw new Error("Unknown App Dock tab")
+      return record.view.webContents.executeJavaScript(buildScrollScript(direction, amount))
+    },
+    hover(senderID: number, tabID: string, ref: number) {
+      const record = tabs.get(senderID)?.get(tabID)
+      if (!record) throw new Error("Unknown App Dock tab")
+      return record.view.webContents.executeJavaScript(buildHoverScript(ref))
+    },
+    drag(senderID: number, tabID: string, fromRef: number, toRef: number) {
+      const record = tabs.get(senderID)?.get(tabID)
+      if (!record) throw new Error("Unknown App Dock tab")
+      return record.view.webContents.executeJavaScript(buildDragScript(fromRef, toRef))
+    },
+    clickAt(senderID: number, tabID: string, x: number, y: number) {
+      const record = tabs.get(senderID)?.get(tabID)
+      if (!record) throw new Error("Unknown App Dock tab")
+      return record.view.webContents.executeJavaScript(buildClickAtScript(x, y))
+    },
+    scrollTo(senderID: number, tabID: string, x: number, y: number) {
+      const record = tabs.get(senderID)?.get(tabID)
+      if (!record) throw new Error("Unknown App Dock tab")
+      return record.view.webContents.executeJavaScript(buildScrollToScript(x, y))
     },
   }
 }

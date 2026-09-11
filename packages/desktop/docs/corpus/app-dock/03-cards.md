@@ -1284,3 +1284,93 @@
 **Witness**: app-dock-profile-registry.test.ts
 **Status**: ready (test exists on main)
 
+## dock-scroll: Dock Scroll
+
+### WP-204 (covers REQ-204 + GOLDEN-204)
+**Invariant**: `dock-scroll`
+**Clause**: dock_scroll moves page and rejects invalid direction
+**Witness**: app-dock-live.test.ts
+**Status**: ready (test exists on main)
+
+### WP-205 (covers REQ-205 + GOLDEN-205)
+**Invariant**: `dock-scroll`
+**Clause**: RPC dispatch validates scroll direction against up, down, top, bottom
+**Witness**: app-dock-live.test.ts
+**Status**: ready (test exists on main)
+
+### WP-206 (covers REQ-206 + GOLDEN-206)
+**Invariant**: `dock-scroll`
+**Unwanted**: dock_scroll accepts invalid direction
+**Witness**: app-dock-live.test.ts
+**Status**: ready (test exists on main)
+
+## dock-hover: Dock Hover
+
+### WP-207 (covers REQ-207 + GOLDEN-207)
+**Invariant**: `dock-hover`
+**Clause**: dock_hover dispatches mouseover on live element
+**Witness**: app-dock-live.test.ts
+**Status**: ready (test exists on main)
+
+### WP-208 (covers REQ-208 + GOLDEN-208)
+**Invariant**: `dock-hover`
+**Unwanted**: dock_hover reports success on missing element ref
+**Witness**: app-dock-live.test.ts
+**Status**: ready (test exists on main)
+
+## dock-click-at: Dock Click At Coordinates
+
+### WP-209 (covers REQ-209 + GOLDEN-209)
+**Invariant**: `dock-click-at`
+**Clause**: dock_clickAt clicks live coordinates
+**Witness**: app-dock-live.test.ts
+**Status**: ready (test exists on main)
+
+### WP-210 (covers REQ-210 + GOLDEN-210)
+**Invariant**: `dock-click-at`
+**Unwanted**: dock_clickAt reports success with no element at coordinates
+**Witness**: app-dock-live.test.ts
+**Status**: ready (test exists on main)
+
+## dock-drag: Dock Drag
+
+### WP-211 (covers REQ-211 + GOLDEN-211)
+**Invariant**: `dock-drag`
+**Clause**: dock_drag runs pointer drag sequence on live elements
+**Witness**: app-dock-live.test.ts
+**Status**: ready (test exists on main)
+
+### WP-212 (covers REQ-212 + GOLDEN-212)
+**Invariant**: `dock-drag`
+**Unwanted**: dock_drag reports success with missing element ref
+**Witness**: app-dock-live.test.ts
+**Status**: ready (test exists on main)
+
+## dock-scroll-to: Dock Scroll To
+
+### WP-213 (covers REQ-213 + GOLDEN-213)
+**Invariant**: `dock-scroll-to`
+**Clause**: dock_scrollTo jumps to live coordinates
+**Witness**: app-dock-live.test.ts
+**Status**: ready (test exists on main)
+
+### WP-214 (covers REQ-214 + GOLDEN-214)
+**Invariant**: `dock-scroll-to`
+**Unwanted**: dock_scrollTo rejects valid coordinates
+**Witness**: app-dock-live.test.ts
+**Status**: ready (test exists on main)
+
+## snapshot-shadow-dom: Snapshot Shadow DOM Piercing
+
+### WP-215 (covers REQ-215 + GOLDEN-215)
+**Invariant**: `snapshot-shadow-dom`
+**Clause**: dock_read pierces open shadow DOM in live snapshot
+**Witness**: app-dock-live.test.ts
+**Status**: ready (test exists on main)
+
+### WP-216 (covers REQ-216 + GOLDEN-216)
+**Invariant**: `snapshot-shadow-dom`
+**Unwanted**: dock_read omits visible inputs inside open shadow roots
+**Witness**: app-dock-live.test.ts
+**Status**: ready (test exists on main)
+

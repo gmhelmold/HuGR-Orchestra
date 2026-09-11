@@ -11,7 +11,7 @@ import { createRequire } from "node:module"
 import { randomUUID } from "node:crypto"
 
 type Case = { id: string; status: "pass"; detail: string }
-const required = ["L01", "L02", "L03", "L04", "L05", "L06"]
+const required = ["L01", "L02", "L03", "L04", "L05", "L06", "L07", "L08", "L09", "L10", "L11", "L12"]
 const scriptDir = dirname(fileURLToPath(import.meta.url))
 const root = resolve(scriptDir, "../..")
 const desktopMain = resolve(root, "src/main")
@@ -33,7 +33,7 @@ async function fixture() {
     ["req", "-x509", "-newkey", "rsa:2048", "-nodes", "-keyout", key, "-out", cert, "-subj", "/CN=127.0.0.1", "-days", "1"],
     { stdio: "ignore" },
   )
-  const body = `<!doctype html><title>live fixture</title><button id=inc>Increment</button><output id=count>0</output><label for=name>Name</label><input id=name type=text placeholder="your name"><script>document.getElementById('inc').addEventListener('click',()=>{const c=document.getElementById('count');c.textContent=String(Number(c.textContent||0)+1)})</script>`
+  const body = `<!doctype html><title>live fixture</title><button id=inc>Increment</button><output id=count>0</output><label for=name>Name</label><input id=name type=text placeholder="your name"><div id=host></div><script>document.getElementById('inc').addEventListener('click',()=>{const c=document.getElementById('count');c.textContent=String(Number(c.textContent||0)+1)});document.getElementById('host').attachShadow({mode:'open'}).innerHTML='<input id=shadowName placeholder="shadow name">'</script>`
   const server = createHttpsServer({ key: await readFile(key), cert: await readFile(cert) }, (req: IncomingMessage, res: ServerResponse) => {
     res.writeHead(200, { "content-type": "text/html; charset=utf-8" })
     res.end(body)
@@ -159,6 +159,55 @@ async function child() {
     const afterType = await rpc("read", {})
     check(afterType && typeof afterType === "object" && "items" in afterType && Array.isArray(afterType.items) && afterType.items.some((i) => !!i && typeof i === "object" && "value" in i && i.value === "Ada"), "typed value not reflected")
     pass("L06", "dock_type sets input value through RPC")
+
+    await rpc("scroll", { direction: "down", amount: 300 })
+    const afterScroll = await rpc("read", {})
+    check(!!afterScroll && typeof afterScroll === "object" && "title" in afterScroll, "read after scroll failed")
+    let scrollRejected = false
+    try {
+      await rpc("scroll", { direction: "sideways" })
+    } catch {
+      scrollRejected = true
+    }
+    check(scrollRejected, "invalid scroll direction was not rejected")
+    pass("L07", "dock_scroll moves page and rejects invalid direction")
+
+    const hoverSnap = (await rpc("read", {})) as { items: { name?: string; ref?: number }[] }
+    const hoverRef = hoverSnap.items.find((item) => item.name === "Increment")?.ref
+    check(typeof hoverRef === "number", "Increment ref missing for hover")
+    const hoverResult = await rpc("hover", { ref: hoverRef })
+    check(!!hoverResult && typeof hoverResult === "object" && "ok" in hoverResult && hoverResult.ok === true, "hover failed")
+    const hoverGone = (await rpc("hover", { ref: 999999 })) as { ok: boolean }
+    check(hoverGone.ok === false, "hover on missing ref was not refused")
+    pass("L08", "dock_hover dispatches mouseover on live element")
+
+    const clickAtResult = await rpc("clickAt", { x: 450, y: 350 })
+    check(!!clickAtResult && typeof clickAtResult === "object" && "ok" in clickAtResult && clickAtResult.ok === true, "clickAt failed")
+    const clickAtGone = (await rpc("clickAt", { x: 9999, y: 9999 })) as { ok: boolean }
+    check(clickAtGone.ok === false, "clickAt with no element at coordinates was not refused")
+    pass("L09", "dock_clickAt clicks live coordinates")
+
+    const dragSnap = (await rpc("read", {})) as { items: { name?: string; tag?: string; ref?: number }[] }
+    const dragFrom = dragSnap.items.find((item) => item.name === "Increment")?.ref
+    const dragTo = dragSnap.items.find((item) => item.tag === "input")?.ref
+    check(typeof dragFrom === "number" && typeof dragTo === "number", "drag refs missing")
+    const dragResult = await rpc("drag", { fromRef: dragFrom, toRef: dragTo })
+    check(!!dragResult && typeof dragResult === "object" && "ok" in dragResult && dragResult.ok === true, "drag failed")
+    const dragGone = (await rpc("drag", { fromRef: 999999, toRef: dragTo })) as { ok: boolean }
+    check(dragGone.ok === false, "drag with missing ref was not refused")
+    pass("L10", "dock_drag runs pointer drag sequence on live elements")
+
+    await rpc("scrollTo", { x: 0, y: 0 })
+    const afterScrollTo = await rpc("read", {})
+    check(!!afterScrollTo && typeof afterScrollTo === "object" && "title" in afterScrollTo, "read after scrollTo failed")
+    pass("L11", "dock_scrollTo jumps to live coordinates")
+
+    const shadowSnap = (await rpc("read", {})) as { items: { name?: string; tag?: string }[] }
+    check(
+      Array.isArray(shadowSnap.items) && shadowSnap.items.some((item) => item.name === "shadow name" && item.tag === "input"),
+      "shadow DOM input missing from live snapshot",
+    )
+    pass("L12", "dock_read pierces open shadow DOM in live snapshot")
 
     outcome = cases.length === required.length && required.every((id) => cases.some((item: Case) => item.id === id)) ? 0 : 1
   } finally {

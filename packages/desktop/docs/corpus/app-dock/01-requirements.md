@@ -675,3 +675,54 @@ If the system markDeleted on non-deleting profile succeeds, then it **shall refu
 ### REQ-203
 If the system replaceManifest accepts revision mismatch, then it **shall refuse** and return an error. *(from invariant `profile-registry` unwanted)*
 
+## dock-scroll: Dock Scroll
+
+### REQ-204
+The system **shall** dock_scroll moves page and rejects invalid direction. *(from invariant `dock-scroll`)*
+
+### REQ-205
+The system **shall** RPC dispatch validates scroll direction against up, down, top, bottom. *(from invariant `dock-scroll`)*
+
+### REQ-206
+If the system dock_scroll accepts invalid direction, then it **shall refuse** and return an error. *(from invariant `dock-scroll` unwanted)*
+
+## dock-hover: Dock Hover
+
+### REQ-207
+The system **shall** dock_hover dispatches mouseover on live element. *(from invariant `dock-hover`)*
+
+### REQ-208
+If the system dock_hover reports success on missing element ref, then it **shall refuse** and return an error. *(from invariant `dock-hover` unwanted)*
+
+## dock-click-at: Dock Click At Coordinates
+
+### REQ-209
+The system **shall** dock_clickAt clicks live coordinates. *(from invariant `dock-click-at`)*
+
+### REQ-210
+If the system dock_clickAt reports success with no element at coordinates, then it **shall refuse** and return an error. *(from invariant `dock-click-at` unwanted)*
+
+## dock-drag: Dock Drag
+
+### REQ-211
+The system **shall** dock_drag runs pointer drag sequence on live elements. *(from invariant `dock-drag`)*
+
+### REQ-212
+If the system dock_drag reports success with missing element ref, then it **shall refuse** and return an error. *(from invariant `dock-drag` unwanted)*
+
+## dock-scroll-to: Dock Scroll To
+
+### REQ-213
+The system **shall** dock_scrollTo jumps to live coordinates. *(from invariant `dock-scroll-to`)*
+
+### REQ-214
+If the system dock_scrollTo rejects valid coordinates, then it **shall refuse** and return an error. *(from invariant `dock-scroll-to` unwanted)*
+
+## snapshot-shadow-dom: Snapshot Shadow DOM Piercing
+
+### REQ-215
+The system **shall** dock_read pierces open shadow DOM in live snapshot. *(from invariant `snapshot-shadow-dom`)*
+
+### REQ-216
+If the system dock_read omits visible inputs inside open shadow roots, then it **shall refuse** and return an error. *(from invariant `snapshot-shadow-dom` unwanted)*
+
