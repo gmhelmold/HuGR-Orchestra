@@ -1,5 +1,5 @@
 import type { BrowserWindow } from "electron"
-import type { AppDockEvent, AppDockState, AppDockTab, AppDockFindResult, DockBounds, ProfileStorage, AppDockDownload } from "./app-dock"
+import type { AppDockEvent, AppDockState, AppDockTab, AppDockFindResult, DockBounds, ProfileStorage } from "./app-dock"
 
 export interface AppDockAPI {
   open(senderID: number, win: BrowserWindow, address: string, bounds: DockBounds, notify: (event: AppDockEvent) => void, profileStorage: ProfileStorage, replacement?: Readonly<{ tabID: string; selected: boolean }>): Promise<AppDockTab>
