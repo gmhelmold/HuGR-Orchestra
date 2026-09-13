@@ -58,11 +58,22 @@ jobs:
             ids.add(task.taskId)
           }
 
-          const include = testTasks.flatMap((task) => [
-            { name: `${task.package} linux`, package: task.package, shard: task.taskId, host: "ubuntu-latest", bootstrap: false, gates: task.package === "@opencode-ai/core" },
-            { name: `${task.package} windows`, package: task.package, shard: task.taskId, host: "windows-latest", bootstrap: task.package === "@opencode-ai/core", gates: false },
-          ])
-          if (include.length !== testTasks.length * 2) throw new Error("Unit platform coverage matrix is incomplete")
+          const include = testTasks.flatMap((task) => {
+            const shardCount = task.package === "opencode" ? 8 : 1
+            return [
+              { host: "ubuntu-latest", platform: "linux", bootstrap: false, gates: task.package === "@opencode-ai/core" },
+              { host: "windows-latest", platform: "windows", bootstrap: task.package === "@opencode-ai/core", gates: false },
+            ].flatMap((platform) => Array.from({ length: shardCount }, (_, index) => ({
+              ...platform,
+              name: `${task.package} ${platform.platform}${shardCount > 1 ? ` ${index + 1}/${shardCount}` : ""}`,
+              package: task.package,
+              shard: `${task.taskId}-${index + 1}-of-${shardCount}`,
+              testShard: index + 1,
+              testShardCount: shardCount,
+            })))
+          })
+          const expected = testTasks.reduce((count, task) => count + (task.package === "opencode" ? 8 : 1), 0) * 2
+          if (include.length !== expected) throw new Error("Unit platform coverage matrix is incomplete")
           console.log(`matrix=${JSON.stringify({ include })}`)
           NODE
 
@@ -112,9 +123,25 @@ jobs:
 
       - name: Run unit tests
         timeout-minutes: 20
-        run: GITHUB_ACTIONS=false bun turbo run test --filter="${{ matrix.package }}"
+        run: |
+          set -o pipefail
+          shard_count="${{ matrix.testShardCount }}"
+          if [ "$shard_count" -gt 1 ]; then
+            GITHUB_ACTIONS=false bun turbo run test --filter="${{ matrix.package }}" -- --shard="${{ matrix.testShard }}/${{ matrix.testShardCount }}" 2>&1 | tee "$RUNNER_TEMP/unit-${{ matrix.shard }}.log"
+          else
+            GITHUB_ACTIONS=false bun turbo run test --filter="${{ matrix.package }}"
+          fi
         env:
           OPENCODE_EXPERIMENTAL_DISABLE_FILEWATCHER: ${{ runner.os == 'Windows' && 'true' || 'false' }}
+
+      - name: Upload opencode test log
+        if: always() && matrix.package == 'opencode'
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: unit-${{ matrix.shard }}-${{ github.run_attempt }}
+          if-no-files-found: warn
+          retention-days: 7
+          path: ${{ runner.temp }}/unit-${{ matrix.shard }}.log
 
       - name: Check generated client
         if: matrix.gates
