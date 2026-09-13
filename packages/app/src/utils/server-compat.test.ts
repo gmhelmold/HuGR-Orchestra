@@ -219,6 +219,21 @@ describe("createCompatibleApi", () => {
     expect(requests[3]!.headers.get("x-opencode-directory")).toBeNull()
   })
 
+  test("sends V2 API key connections to the integration endpoint", async () => {
+    const { api, requests } = setup("v2")
+
+    await api.integration.connect.key({
+      integrationID: "opencode-go",
+      key: "mock-go-api-key",
+      location: { directory: "C:/OpenCode/NewProject" },
+    })
+
+    expect(requests).toHaveLength(1)
+    expect(new URL(requests[0]!.url).pathname).toBe("/api/integration/opencode-go/connect/key")
+    expect(requests[0]!.method).toBe("POST")
+    await expect(requests[0]!.json()).resolves.toEqual({ key: "mock-go-api-key" })
+  })
+
   test("disposes the V1 instance after completing provider OAuth", async () => {
     const { api, requests } = setup("v1")
 
