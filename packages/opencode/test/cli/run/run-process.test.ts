@@ -71,12 +71,16 @@ describe("opencode run (non-interactive subprocess)", () => {
     "exits nonzero promptly when the model is unknown (regression for #27371)",
     ({ opencode }) =>
       Effect.gen(function* () {
+        const processTimeoutMs = 15_000
+        // `durationMs` also includes AppProcess timeout cleanup after this
+        // deadline, so bound that scheduler/process-exit overhead separately.
+        const cleanupOverheadMs = 1_000
         const result = yield* opencode.run("say hi", {
           model: "test/nonexistent-model",
-          timeoutMs: 15_000,
+          timeoutMs: processTimeoutMs,
         })
         expect(result.exitCode).not.toBe(0)
-        expect(result.durationMs).toBeLessThan(15_000)
+        expect(result.durationMs).toBeLessThan(processTimeoutMs + cleanupOverheadMs)
       }),
     30_000,
   )
