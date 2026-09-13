@@ -1,4 +1,4 @@
-import type { CommandModule } from "yargs"
+import type { ArgumentsCamelCase, CommandModule } from "yargs"
 import type { Argv } from "yargs"
 import type { ArgumentsCamelCase } from "yargs"
 
