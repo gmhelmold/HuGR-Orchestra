@@ -5,10 +5,6 @@ inputs:
     description: "Additional flags to pass to 'bun install'"
     required: false
     default: ""
-  cache-scope:
-    description: "Unique scope for Windows Bun cache mutations"
-    required: false
-    default: "default"
 runs:
   using: "composite"
   steps:
@@ -63,8 +59,7 @@ runs:
         # e.g. ./patches/ for standard-openapi
         # https://github.com/oven-sh/bun/issues/28147
         if [ "$RUNNER_OS" = "Windows" ]; then
-          # Windows hosted jobs share RUNNER_TEMP. Isolate patched-package cache mutations per job.
-          bun install --linker hoisted --cache-dir "$RUNNER_TEMP/bun-cache-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT-${{ inputs.cache-scope }}" --network-concurrency 1 ${{ inputs.install-flags }}
+          bun install --linker hoisted --network-concurrency 1 ${{ inputs.install-flags }}
         else
           bun install ${{ inputs.install-flags }}
         fi
