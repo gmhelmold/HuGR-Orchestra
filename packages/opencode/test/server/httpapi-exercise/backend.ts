@@ -26,7 +26,8 @@ export function callAuthProbe(scenario: ActiveScenario, credentials: "missing" |
           toAuthProbeRequest(scenario, credentials, controller.signal),
         ),
       ).then((response) => capture(response, scenario.capture)),
-      Bun.sleep(1_000).then(() => {
+      // First auth probe creates global HttpApi state; one second races cold startup on CI.
+      Bun.sleep(10_000).then(() => {
         controller.abort("auth probe timed out")
         return {
           status: 0,
