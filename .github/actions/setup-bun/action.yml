@@ -60,7 +60,7 @@ runs:
         # https://github.com/oven-sh/bun/issues/28147
         if [ "$RUNNER_OS" = "Windows" ]; then
           # Windows hosted jobs share RUNNER_TEMP. Isolate patched-package cache mutations per job.
-          bun install --linker hoisted --cache-dir "$RUNNER_TEMP/bun-cache-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT-$GITHUB_JOB" --network-concurrency 8 ${{ inputs.install-flags }}
+          bun install --linker hoisted --cache-dir "$RUNNER_TEMP/bun-cache-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT-$GITHUB_JOB" --network-concurrency 1 ${{ inputs.install-flags }}
         else
           bun install ${{ inputs.install-flags }}
         fi
