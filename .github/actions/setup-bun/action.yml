@@ -59,8 +59,8 @@ runs:
         # e.g. ./patches/ for standard-openapi
         # https://github.com/oven-sh/bun/issues/28147
         if [ "$RUNNER_OS" = "Windows" ]; then
-          # Restored cache entries race Bun's patched-package rename on NTFS. Use job-local cache.
-          bun install --linker hoisted --cache-dir "$RUNNER_TEMP/bun-cache" --network-concurrency 8 ${{ inputs.install-flags }}
+          # Windows hosted jobs share RUNNER_TEMP. Isolate patched-package cache mutations per job.
+          bun install --linker hoisted --cache-dir "$RUNNER_TEMP/bun-cache-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT-$GITHUB_JOB" --network-concurrency 8 ${{ inputs.install-flags }}
         else
           bun install ${{ inputs.install-flags }}
         fi
