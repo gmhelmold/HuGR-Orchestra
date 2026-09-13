@@ -1,6 +1,5 @@
 import type { ArgumentsCamelCase, CommandModule } from "yargs"
 import type { Argv } from "yargs"
-import type { ArgumentsCamelCase } from "yargs"
 
 /**
  * Lazy command registration for the CLI entrypoint.
