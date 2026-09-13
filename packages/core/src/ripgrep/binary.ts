@@ -1,3 +1,4 @@
+import { randomUUID } from "crypto"
 import path from "path"
 import { Context, Effect, Layer, Stream } from "effect"
 import { FetchHttpClient, HttpClient, HttpClientRequest } from "effect/unstable/http"
@@ -103,7 +104,9 @@ export namespace RipgrepBinary {
 
             const filename = `ripgrep-${VERSION}-${config.platform}.${config.extension}`
             const url = `https://github.com/BurntSushi/ripgrep/releases/download/${VERSION}/${filename}`
-            const archive = path.join(Global.Path.bin, filename)
+            // Concurrent service layers share Global.Path.bin. Unique archives prevent one download
+            // from replacing another while Windows expands it.
+            const archive = path.join(Global.Path.bin, `${randomUUID()}-${filename}`)
 
             yield* Effect.logInfo("downloading ripgrep", { url })
             yield* fs.ensureDir(Global.Path.bin).pipe(Effect.orDie)
