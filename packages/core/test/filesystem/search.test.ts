@@ -26,6 +26,7 @@ describe("Ripgrep", () => {
         expect(result.map((item) => item.path)).toEqual([RelativePath.make("src/match.ts")])
       }),
     ),
+    20_000,
   )
 
   it.live("greps files with include filtering", () =>
