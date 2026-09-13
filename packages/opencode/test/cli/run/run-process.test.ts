@@ -229,9 +229,7 @@ describe("opencode run (non-interactive subprocess)", () => {
         )
         yield* llm.fail("provider failed")
         yield* llm.text("recovered")
-        // Three streamed model turns plus tool completion need an isolated
-        // process deadline; leave harness default unchanged for normal runs.
-        const result = yield* opencode.run("fail after output", { format: "json", timeoutMs: 45_000 })
+        const result = yield* opencode.run("fail after output", { format: "json" })
 
         const events = opencode.parseJsonEvents(result.stdout)
         expect(result.exitCode).toBe(0)
