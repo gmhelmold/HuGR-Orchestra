@@ -226,7 +226,13 @@ test.describe("regression: session timeline local row state", () => {
     const trigger = wrapper.locator('[data-slot="collapsible-trigger"]').first()
     const diff = wrapper.locator('[data-component="edit-content"]').first()
     await expectAppVisible(diff)
-    await expect.poll(() => wrapper.evaluate((element) => element.getBoundingClientRect().height)).toBeGreaterThan(500)
+    await expect(trigger).toHaveAttribute("aria-expanded", "true")
+    await expect.poll(() =>
+      wrapper.evaluate((element) => {
+        const root = element.closest<HTMLElement>(".scroll-view__viewport")
+        return !!root && root.scrollHeight > root.clientHeight
+      }),
+    ).toBe(true)
     const samples = await wrapper.evaluate(async (element) => {
       const root = element.closest<HTMLElement>(".scroll-view__viewport")!
       element.scrollIntoView({ block: "start" })
@@ -238,6 +244,7 @@ test.describe("regression: session timeline local row state", () => {
         const diff = element.querySelector<HTMLElement>('[data-component="edit-content"]')!
         result.push({
           offset,
+          scrollTop: root.scrollTop,
           trigger: trigger.getBoundingClientRect().y,
           diff: diff.getBoundingClientRect().y,
           bottom: element.getBoundingClientRect().bottom,
@@ -247,6 +254,7 @@ test.describe("regression: session timeline local row state", () => {
     })
 
     expect(samples[0]!.trigger).toBeLessThan(samples[0]!.diff)
+    expect(samples.slice(1).some((sample) => sample.scrollTop > samples[0]!.scrollTop)).toBe(true)
     expect(samples.every((sample) => Math.abs(sample.trigger - samples[0]!.trigger) <= 1)).toBe(true)
     expect(samples.every((sample) => sample.trigger < sample.bottom)).toBe(true)
   })
