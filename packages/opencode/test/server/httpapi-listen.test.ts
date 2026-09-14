@@ -117,6 +117,12 @@ async function openSocket(url: URL) {
   return ws
 }
 
+function closeSocket(ws: WebSocket) {
+  const closed = new Promise<void>((resolve) => ws.addEventListener("close", () => resolve(), { once: true }))
+  ws.close(1000)
+  return withTimeout(closed, 5_000, "timed out waiting for websocket close")
+}
+
 async function expectSocketRejected(url: URL, init?: { headers?: Record<string, string> }) {
   // Bun's WebSocket accepts an init object with headers; standard DOM types don't reflect that.
   const Ctor = WebSocket as unknown as new (url: URL, init?: { headers?: Record<string, string> }) => WebSocket
@@ -215,7 +221,7 @@ describe("HttpApi Server.listen", () => {
         const nextMessage = waitForMessage(nextWs, (message) => message.includes("ping-restarted"))
         nextWs.send("ping-restarted\n")
         expect(await nextMessage).toContain("ping-restarted")
-        nextWs.close(1000)
+        await closeSocket(nextWs)
       } finally {
         await stop(restarted, "timed out waiting for restarted listener.stop(true)")
       }
@@ -411,14 +417,14 @@ describe("HttpApi Server.listen", () => {
       expect(directoryScoped.status).toBe(200)
       const mint = (await directoryScoped.json()) as { ticket: string }
       const scopedWs = await openSocket(socketURL(listener, info.id, tmp.path, mint.ticket))
-      scopedWs.close(1000)
+      await closeSocket(scopedWs)
 
       await expectSocketRejected(socketURL(listener, info.id, tmp.path, "not-a-ticket"))
 
       const reusable = await connectTicket(listener, info.id, tmp.path)
       const ws = await openSocket(socketURL(listener, info.id, tmp.path, reusable.ticket))
       await expectSocketRejected(socketURL(listener, info.id, tmp.path, reusable.ticket))
-      ws.close(1000)
+      await closeSocket(ws)
 
       const other = await createCat(listener, tmp.path)
       const scoped = await connectTicket(listener, info.id, tmp.path)
@@ -442,7 +448,7 @@ describe("HttpApi Server.listen", () => {
       const message = waitForMessage(ws, (message) => message.includes("ping-no-auth"))
       ws.send("ping-no-auth\n")
       expect(await message).toContain("ping-no-auth")
-      ws.close(1000)
+      await closeSocket(ws)
     } finally {
       await stop(listener, "timed out cleaning up no-auth listener").catch(() => undefined)
     }

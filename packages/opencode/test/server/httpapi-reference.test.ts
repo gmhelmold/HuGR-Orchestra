@@ -18,6 +18,7 @@ afterEach(async () => {
 describe("reference HttpApi", () => {
   test("lists local and hermetic remote references resolved in the server workspace", async () => {
     let server: ReturnType<typeof Bun.serve> | undefined
+    let repository = ""
     await using tmp = await tmpdir({
       init: async (directory) => {
         await fs.mkdir(path.join(directory, "docs"))
@@ -42,9 +43,8 @@ describe("reference HttpApi", () => {
             return (await file.exists()) ? new Response(file) : new Response("not found", { status: 404 })
           },
         })
-        const repository = `http://127.0.0.1:${server.port}/repo.git`
+        repository = `http://127.0.0.1:${server.port}/repo.git`
         await $`git clone ${repository} ${path.join(directory, "probe")}`.quiet()
-        return { repository }
       },
       dispose: async () => server?.stop(true),
       config: {
@@ -61,10 +61,10 @@ describe("reference HttpApi", () => {
       JSON.stringify({
         formatter: false,
         lsp: false,
-        references: { docs: "./docs", fixture: { repository: tmp.extra.repository, branch: "main" } },
+        references: { docs: "./docs", fixture: { repository, branch: "main" } },
       }),
     )
-    const remote = Repository.parseRemote(tmp.extra.repository)
+    const remote = Repository.parseRemote(repository)
     const remotePath = Repository.cachePath(Global.Path.repos, remote, "main")
     const body = await Effect.runPromise(
       pollWithTimeout(
@@ -94,7 +94,7 @@ describe("reference HttpApi", () => {
         path: remotePath,
         source: {
           type: "git",
-          repository: tmp.extra.repository,
+          repository,
           branch: "main",
         },
       },
