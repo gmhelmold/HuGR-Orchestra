@@ -22,6 +22,7 @@ import {
   ProcessId,
 } from "effect/unstable/process/ChildProcessSpawner"
 import * as NodeChildProcess from "node:child_process"
+import { existsSync } from "node:fs"
 import os from "node:os"
 import { PassThrough } from "node:stream"
 import launch from "cross-spawn"
@@ -101,7 +102,8 @@ type ExitSignal = Deferred.Deferred<readonly [code: number | null, signal: NodeJ
 // That directory can disappear after process startup.
 export function defaultCwd(getCwd: () => string = globalThis.process.cwd) {
   try {
-    return getCwd()
+    const cwd = getCwd()
+    return existsSync(cwd) ? cwd : os.tmpdir()
   } catch {
     return os.tmpdir()
   }
