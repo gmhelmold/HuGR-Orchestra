@@ -27,7 +27,7 @@ const args = hideBin(process.argv)
 // ACP's lazy command loading can take longer than a client needs to close its
 // pipe. Register EOF now, before loading its handler, and retain input that
 // arrives during startup for the command's stream.
-if (args[0] === "acp") {
+if (args[0] === "acp" && !args.includes("--help") && !args.includes("-h")) {
   const stdin = watchAcpStdin()
   void stdin.ended.then(
     () => process.exit(0),
