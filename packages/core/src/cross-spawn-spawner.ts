@@ -22,6 +22,7 @@ import {
   ProcessId,
 } from "effect/unstable/process/ChildProcessSpawner"
 import * as NodeChildProcess from "node:child_process"
+import os from "node:os"
 import { PassThrough } from "node:stream"
 import launch from "cross-spawn"
 import { makeGlobalNode } from "./effect/app-node"
@@ -108,6 +109,16 @@ export const make = Effect.gen(function* () {
 
   const env = (opts: ChildProcess.CommandOptions) =>
     opts.extendEnv ? { ...globalThis.process.env, ...opts.env } : opts.env
+
+  // cross-spawn resolves commands from process.cwd() when cwd is omitted.
+  // A prior test can delete that directory before this spawn runs.
+  const defaultCwd = () => {
+    try {
+      return globalThis.process.cwd()
+    } catch {
+      return os.tmpdir()
+    }
+  }
 
   const input = (x: ChildProcess.CommandInput | undefined): NodeChildProcess.IOType | undefined =>
     Stream.isStream(x) ? "pipe" : x
@@ -372,7 +383,7 @@ export const make = Effect.gen(function* () {
 
           const [proc, signal] = yield* Effect.acquireRelease(
             spawn(command, {
-              cwd: dir,
+              cwd: dir ?? defaultCwd(),
               env: env(command.options),
               stdio: stdios(sin, sout, serr, extra),
               detached: command.options.detached ?? process.platform !== "win32",
