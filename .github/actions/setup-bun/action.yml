@@ -59,7 +59,15 @@ runs:
         # e.g. ./patches/ for standard-openapi
         # https://github.com/oven-sh/bun/issues/28147
         if [ "$RUNNER_OS" = "Windows" ]; then
-          bun install --linker hoisted --network-concurrency 1 ${{ inputs.install-flags }}
+          for attempt in 1 2 3; do
+            if bun install --linker hoisted --network-concurrency 1 ${{ inputs.install-flags }}; then
+              break
+            fi
+            if [ "$attempt" = 3 ]; then
+              exit 1
+            fi
+            echo "Bun patched install failed; retrying ($attempt/3)"
+          done
         else
           bun install ${{ inputs.install-flags }}
         fi
