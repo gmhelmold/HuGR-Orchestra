@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, test } from "bun:test"
+import fs from "node:fs/promises"
 import path from "path"
 import { Server } from "../../src/server/server"
-import { Global } from "@opencode-ai/core/global"
 import { resetDatabase } from "../fixture/db"
 import { disposeAllInstances, tmpdir } from "../fixture/fixture"
 import { Effect } from "effect"
@@ -13,15 +13,16 @@ afterEach(async () => {
 })
 
 describe("reference HttpApi", () => {
-  test("lists usable references resolved in the server workspace", async () => {
+  test("lists local references resolved in the server workspace", async () => {
     await using tmp = await tmpdir({
+      init: async (directory) => {
+        await fs.mkdir(path.join(directory, "docs"))
+      },
       config: {
         formatter: false,
         lsp: false,
         references: {
           docs: "./docs",
-          effect: { repository: "Effect-TS/effect", branch: "main" },
-          bad: "not-a-repo",
         },
       },
     })
@@ -47,15 +48,6 @@ describe("reference HttpApi", () => {
         source: {
           type: "local",
           path: path.join(tmp.path, "docs"),
-        },
-      },
-      {
-        name: "effect",
-        path: path.join(Global.Path.repos, "github.com", "Effect-TS", "effect@main"),
-        source: {
-          type: "git",
-          repository: "Effect-TS/effect",
-          branch: "main",
         },
       },
     ])
