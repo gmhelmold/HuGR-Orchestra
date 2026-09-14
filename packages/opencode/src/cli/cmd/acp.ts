@@ -46,8 +46,7 @@ export const AcpCommand = effectCmd({
     })
     const output = new ReadableStream<Uint8Array>({
       start(controller) {
-        for (const chunk of stdin.buffered) controller.enqueue(chunk)
-        stdin.onData((chunk) => controller.enqueue(chunk))
+        for (const chunk of stdin.attach((chunk) => controller.enqueue(chunk))) controller.enqueue(chunk)
         void stdin.ended.then(
           () => controller.close(),
           (err) => controller.error(err),
