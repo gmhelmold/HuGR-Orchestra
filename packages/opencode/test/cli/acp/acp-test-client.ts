@@ -24,7 +24,11 @@ type JsonRpcNotification<T = unknown> = {
 }
 
 export type AcpClient = {
-  readonly request: <T>(method: string, params?: unknown) => Effect.Effect<JsonRpcResponse<T>, unknown>
+  readonly request: <T>(
+    method: string,
+    params?: unknown,
+    timeoutMs?: number,
+  ) => Effect.Effect<JsonRpcResponse<T>, unknown>
   readonly receive: Effect.Effect<unknown>
   readonly waitForNotification: <T>(
     method: string,
@@ -36,7 +40,7 @@ export type AcpClient = {
 export function createAcpClient(acp: AcpHandle): AcpClient {
   const state = { nextId: 1 }
 
-  const request = <T>(method: string, params?: unknown) =>
+  const request = <T>(method: string, params?: unknown, timeoutMs = 15_000) =>
     Effect.gen(function* () {
       const id = state.nextId++
       const message: JsonRpcRequest =
@@ -44,7 +48,7 @@ export function createAcpClient(acp: AcpHandle): AcpClient {
       yield* acp.send(message)
 
       while (true) {
-        const received = yield* acp.receive.pipe(Effect.timeout(Duration.seconds(15)))
+        const received = yield* acp.receive.pipe(Effect.timeout(Duration.millis(timeoutMs)))
         if (isJsonRpcResponse<T>(received) && received.id === id) return received
       }
     })

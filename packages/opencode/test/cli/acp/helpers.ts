@@ -24,7 +24,7 @@ export function initialize(acp: AcpClient) {
         protocolVersion: 1,
         clientCapabilities: { _meta: { "terminal-auth": true } },
         clientInfo: { name: "opencode-local-acp", version: "0.1.0" },
-      }),
+      }, 25_000),
     )
   })
 }
