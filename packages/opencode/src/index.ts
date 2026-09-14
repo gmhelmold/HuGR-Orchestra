@@ -6,6 +6,7 @@ import { UI } from "./cli/ui"
 import { InstallationVersion } from "@opencode-ai/core/installation/version"
 import { EOL } from "os"
 import { Heap } from "./cli/heap"
+import { watchAcpStdin } from "./cli/acp-stdin"
 
 const lazy = (spec: {
   readonly command: string
@@ -22,6 +23,17 @@ function command(mod: Record<string, unknown>, name: string) {
 }
 
 const args = hideBin(process.argv)
+
+// ACP's lazy command loading can take longer than a client needs to close its
+// pipe. Register EOF now, before loading its handler, and retain input that
+// arrives during startup for the command's stream.
+if (args[0] === "acp") {
+  const stdin = watchAcpStdin()
+  void stdin.ended.then(
+    () => process.exit(0),
+    () => process.exit(1),
+  )
+}
 
 function show(out: string) {
   const text = out.trimStart()
