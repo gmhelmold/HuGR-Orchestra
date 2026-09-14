@@ -115,7 +115,7 @@ function waitForFileContent(page: Page, path: string) {
   return page.waitForResponse(
     (response) =>
       response.ok() &&
-      new URL(response.url()).pathname === "/api/file/content" &&
+      new URL(response.url()).pathname === "/file/content" &&
       new URL(response.url()).searchParams.get("path") === path,
   )
 }
