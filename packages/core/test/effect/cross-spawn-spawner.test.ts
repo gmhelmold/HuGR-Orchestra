@@ -183,7 +183,7 @@ describe("cross-spawn spawner", () => {
       }),
     )
 
-    fx.effect(
+    ;(process.platform === "win32" ? fx.effect.skip : fx.effect)(
       "spawns concurrent commands after its current directory is deleted",
       Effect.promise(async () => {
         const result = await spawnFromDeletedCwd()
