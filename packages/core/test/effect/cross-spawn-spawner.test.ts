@@ -5,7 +5,7 @@ import path from "node:path"
 import { Effect, Exit, Stream } from "effect"
 import type * as PlatformError from "effect/PlatformError"
 import { ChildProcess, ChildProcessSpawner } from "effect/unstable/process"
-import { CrossSpawnSpawner } from "@opencode-ai/core/cross-spawn-spawner"
+import { CrossSpawnSpawner, defaultCwd } from "@opencode-ai/core/cross-spawn-spawner"
 import { LayerNode } from "@opencode-ai/core/effect/layer-node"
 import { testEffect } from "../lib/effect"
 
@@ -129,24 +129,11 @@ describe("cross-spawn spawner", () => {
     )
 
     fx.effect(
-      "spawns when current directory is unavailable",
-      Effect.gen(function* () {
-        const original = Object.getOwnPropertyDescriptor(process, "cwd")
-        try {
-          Object.defineProperty(process, "cwd", {
-            configurable: true,
-            value: () => {
-              throw Object.assign(new Error("current directory was deleted"), { code: "ENOENT" })
-            },
-          })
-          const out = yield* ChildProcessSpawner.ChildProcessSpawner.use((svc) =>
-            svc.string(ChildProcess.make(process.execPath, ["-e", "process.stdout.write(process.cwd())"])),
-          )
-          expect(yield* Effect.promise(() => fs.realpath(out))).toBe(yield* Effect.promise(() => fs.realpath(os.tmpdir())))
-        } finally {
-          if (original) Object.defineProperty(process, "cwd", original)
-          else delete (process as { cwd?: () => string }).cwd
-        }
+      "uses temp directory when current directory is unavailable",
+      Effect.sync(() => {
+        expect(defaultCwd(() => {
+          throw Object.assign(new Error("current directory was deleted"), { code: "ENOENT" })
+        })).toBe(os.tmpdir())
       }),
     )
   })

@@ -97,6 +97,16 @@ const toPlatformError = (
 
 type ExitSignal = Deferred.Deferred<readonly [code: number | null, signal: NodeJS.Signals | null]>
 
+// cross-spawn resolves commands from process.cwd() when cwd is omitted.
+// That directory can disappear after process startup.
+export function defaultCwd(getCwd: () => string = globalThis.process.cwd) {
+  try {
+    return getCwd()
+  } catch {
+    return os.tmpdir()
+  }
+}
+
 export const make = Effect.gen(function* () {
   const fs = yield* FileSystem.FileSystem
   const path = yield* Path.Path
@@ -109,16 +119,6 @@ export const make = Effect.gen(function* () {
 
   const env = (opts: ChildProcess.CommandOptions) =>
     opts.extendEnv ? { ...globalThis.process.env, ...opts.env } : opts.env
-
-  // cross-spawn resolves commands from process.cwd() when cwd is omitted.
-  // A prior test can delete that directory before this spawn runs.
-  const defaultCwd = () => {
-    try {
-      return globalThis.process.cwd()
-    } catch {
-      return os.tmpdir()
-    }
-  }
 
   const input = (x: ChildProcess.CommandInput | undefined): NodeChildProcess.IOType | undefined =>
     Stream.isStream(x) ? "pipe" : x
