@@ -91,14 +91,7 @@ export const ptyHandlers = HttpApiBuilder.group(InstanceHttpApi, "pty", (handler
               message: `PTY session not found: ${error.ptyID}`,
             }),
         ),
-        Effect.flatMap((info) =>
-          info.status === "running"
-            ? Effect.succeed(info)
-            : new ApiError.PtyNotFoundError({
-                ptyID: ctx.params.ptyID,
-                message: `PTY session not found: ${ctx.params.ptyID}`,
-              }),
-        ),
+        Effect.flatMap((info) => Effect.succeed(info)),
       )
     })
 
