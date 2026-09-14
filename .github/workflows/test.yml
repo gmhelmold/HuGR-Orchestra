@@ -59,7 +59,7 @@ jobs:
           }
 
           const include = testTasks.flatMap((task) => {
-            const shardCount = task.package === "opencode" ? 8 : 1
+            const shardCount = task.package === "opencode" ? 3 : 1
             return [
               { host: "ubuntu-latest", platform: "linux", bootstrap: false, gates: task.package === "@opencode-ai/core" },
               { host: "windows-latest", platform: "windows", bootstrap: task.package === "@opencode-ai/core", gates: false },
@@ -72,7 +72,7 @@ jobs:
               testShardCount: shardCount,
             })))
           })
-          const expected = testTasks.reduce((count, task) => count + (task.package === "opencode" ? 8 : 1), 0) * 2
+          const expected = testTasks.reduce((count, task) => count + (task.package === "opencode" ? 3 : 1), 0) * 2
           if (include.length !== expected) throw new Error("Unit platform coverage matrix is incomplete")
           console.log(`matrix=${JSON.stringify({ include })}`)
           NODE
