@@ -144,7 +144,8 @@ describe("cross-spawn spawner", () => {
           )
           expect(yield* Effect.promise(() => fs.realpath(out))).toBe(yield* Effect.promise(() => fs.realpath(os.tmpdir())))
         } finally {
-          Object.defineProperty(process, "cwd", original!)
+          if (original) Object.defineProperty(process, "cwd", original)
+          else delete (process as { cwd?: () => string }).cwd
         }
       }),
     )
