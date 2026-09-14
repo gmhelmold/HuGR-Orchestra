@@ -127,6 +127,27 @@ describe("cross-spawn spawner", () => {
         expect(Exit.isFailure(exit)).toBe(true)
       }),
     )
+
+    fx.effect(
+      "spawns when current directory is unavailable",
+      Effect.gen(function* () {
+        const original = Object.getOwnPropertyDescriptor(process, "cwd")
+        try {
+          Object.defineProperty(process, "cwd", {
+            configurable: true,
+            value: () => {
+              throw Object.assign(new Error("current directory was deleted"), { code: "ENOENT" })
+            },
+          })
+          const out = yield* ChildProcessSpawner.ChildProcessSpawner.use((svc) =>
+            svc.string(ChildProcess.make(process.execPath, ["-e", "process.stdout.write(process.cwd())"])),
+          )
+          expect(yield* Effect.promise(() => fs.realpath(out))).toBe(yield* Effect.promise(() => fs.realpath(os.tmpdir())))
+        } finally {
+          Object.defineProperty(process, "cwd", original!)
+        }
+      }),
+    )
   })
 
   describe("env option", () => {
