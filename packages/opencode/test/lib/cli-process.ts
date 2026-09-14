@@ -61,6 +61,7 @@ function forkStderrDrain(stream: ReadableStream<Uint8Array>, into: string[]) {
 
 function isolatedEnv(home: string, configJson: string): Record<string, string> {
   return {
+    PATH: process.env.PATH ?? "",
     OPENCODE_TEST_HOME: home,
     HOME: home,
     XDG_CONFIG_HOME: path.join(home, ".config"),
@@ -74,6 +75,7 @@ function isolatedEnv(home: string, configJson: string): Record<string, string> {
     OPENCODE_DISABLE_AUTOCOMPACT: "1",
     OPENCODE_DISABLE_MODELS_FETCH: "1",
     OPENCODE_AUTH_CONTENT: "{}",
+    OPENCODE_CLIENT: "cli",
   }
 }
 
@@ -214,7 +216,7 @@ export function withCliFixture<A, E>(
       const command = ChildProcess.make("bun", ["run", cliEntry, ...args], {
         cwd: home,
         env: { ...env, ...opts?.env },
-        extendEnv: true,
+        extendEnv: false,
         stdin: "ignore",
       })
       // Pass timeout to appProc.run rather than wrapping with
@@ -285,7 +287,7 @@ export function withCliFixture<A, E>(
         Effect.sync(() =>
           Bun.spawn(["bun", "run", cliEntry, ...runArgs(message, opts)], {
             cwd: home,
-            env: { ...process.env, ...env, ...options?.env },
+            env: { ...env, ...options?.env },
             stdin: "ignore",
             stdout: "pipe",
             stderr: "pipe",
@@ -522,6 +524,11 @@ export const cliIt = {
     body: (input: CliFixture) => Effect.Effect<A, E, Scope.Scope | HttpClient.HttpClient>,
     opts?: number | TestOptions,
   ) => it.live(name, () => withCliFixture(body), opts),
+  serial: <A, E>(
+    name: string,
+    body: (input: CliFixture) => Effect.Effect<A, E, Scope.Scope | HttpClient.HttpClient>,
+    opts?: number | TestOptions,
+  ) => test.serial(name, () => Effect.runPromise(Effect.scoped(withCliFixture(body))), opts),
   concurrent: <A, E>(
     name: string,
     body: (input: CliFixture) => Effect.Effect<A, E, Scope.Scope | HttpClient.HttpClient>,

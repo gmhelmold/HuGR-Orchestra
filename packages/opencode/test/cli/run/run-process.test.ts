@@ -11,7 +11,7 @@ import { cliIt } from "../../lib/cli-process"
 describe("opencode run (non-interactive subprocess)", () => {
   // Happy path: prompt completes, output reaches stdout, process exits 0.
   // If this fails, all the others likely will too — debug here first.
-  cliIt.concurrent(
+  cliIt.serial(
     "exits 0 and writes the response to stdout on a successful prompt",
     ({ llm, opencode }) =>
       Effect.gen(function* () {
@@ -23,7 +23,7 @@ describe("opencode run (non-interactive subprocess)", () => {
     60_000,
   )
 
-  cliIt.concurrent(
+  cliIt.serial(
     "prints each completed text part in order around a tool continuation",
     ({ llm, opencode }) =>
       Effect.gen(function* () {
@@ -45,7 +45,7 @@ describe("opencode run (non-interactive subprocess)", () => {
     60_000,
   )
 
-  cliIt.concurrent(
+  cliIt.serial(
     "prints reasoning before text only with --thinking",
     ({ llm, opencode }) =>
       Effect.gen(function* () {
@@ -67,7 +67,7 @@ describe("opencode run (non-interactive subprocess)", () => {
   // makes the SDK call surface an error promptly so the process exits nonzero.
   // We assert nonzero exit AND wall-clock under the harness timeout — a hang
   // would expire the timeout and produce a different (signal-killed) failure.
-  cliIt.concurrent(
+  cliIt.serial(
     "exits nonzero promptly when the model is unknown (regression for #27371)",
     ({ opencode }) =>
       Effect.gen(function* () {
@@ -88,7 +88,7 @@ describe("opencode run (non-interactive subprocess)", () => {
   // The test provider's SSE error item is interpreted by the SDK as an unknown
   // finish, not a fatal provider/session error. Unknown finishes should continue
   // the prompt loop so a subsequent response can complete the run.
-  cliIt.concurrent(
+  cliIt.serial(
     "unknown stream finish preserves partial output and continues",
     ({ llm, opencode }) =>
       Effect.gen(function* () {
@@ -111,7 +111,7 @@ describe("opencode run (non-interactive subprocess)", () => {
   // --format json puts one JSON object per line on stdout for each emitted
   // event. Consumers (CI scripts, tooling) parse this stream. Asserts the
   // shape so a future event-emit change has to update this expectation.
-  cliIt.concurrent(
+  cliIt.serial(
     "--format json emits parseable line-delimited JSON to stdout",
     ({ llm, opencode }) =>
       Effect.gen(function* () {
@@ -145,7 +145,7 @@ describe("opencode run (non-interactive subprocess)", () => {
     60_000,
   )
 
-  cliIt.concurrent(
+  cliIt.serial(
     "--format json emits a pure error record for a rejected prompt request",
     ({ opencode }) =>
       Effect.gen(function* () {
@@ -168,7 +168,7 @@ describe("opencode run (non-interactive subprocess)", () => {
     30_000,
   )
 
-  cliIt.concurrent(
+  cliIt.serial(
     "--format json preserves reasoning, tool, and continuation ordering",
     ({ llm, opencode }) =>
       Effect.gen(function* () {
@@ -217,7 +217,7 @@ describe("opencode run (non-interactive subprocess)", () => {
     60_000,
   )
 
-  cliIt.live(
+  cliIt.serial(
     "--format json records an unknown stream finish and continuation",
     ({ llm, opencode }) =>
       Effect.gen(function* () {
@@ -252,7 +252,7 @@ describe("opencode run (non-interactive subprocess)", () => {
     60_000,
   )
 
-  cliIt.concurrent(
+  cliIt.serial(
     "rejects requested permissions by default and allows them with the dangerous flag",
     ({ home, llm, opencode }) =>
       Effect.gen(function* () {
@@ -288,7 +288,7 @@ describe("opencode run (non-interactive subprocess)", () => {
     60_000,
   )
 
-  cliIt.live(
+  cliIt.serial(
     "attach mode sends client-local file contents without a shared path",
     ({ home, llm, opencode }) =>
       Effect.gen(function* () {
@@ -310,7 +310,7 @@ describe("opencode run (non-interactive subprocess)", () => {
     60_000,
   )
 
-  cliIt.concurrent(
+  cliIt.serial(
     "attach mode rejects local directories before prompt admission",
     ({ home, opencode }) =>
       Effect.gen(function* () {
@@ -324,7 +324,7 @@ describe("opencode run (non-interactive subprocess)", () => {
     30_000,
   )
 
-  cliIt.live(
+  cliIt.serial(
     "SIGINT interrupts an active non-interactive run without leaking the process",
     ({ llm, opencode }) =>
       Effect.gen(function* () {
