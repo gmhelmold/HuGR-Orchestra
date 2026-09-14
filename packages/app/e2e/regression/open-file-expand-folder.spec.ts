@@ -126,7 +126,14 @@ test("expands a folder whose path has a trailing Windows separator", async ({ pa
 
   const appRow = panel.locator('[data-slot="file-tree-v2-row"][data-path="frontend/app.ts"]')
   await expect(appRow).toBeVisible()
+  const contentResponse = page.waitForResponse(
+    (response) =>
+      response.ok() &&
+      new URL(response.url()).pathname === "/api/file/content" &&
+      new URL(response.url()).searchParams.get("path") === "frontend/app.ts",
+  )
   await appRow.click()
+  await contentResponse
   await expect(panel.getByRole("tab", { name: "app.ts" })).toHaveAttribute("data-selected", "")
   await expect(panel.getByText("contents:frontend/app.ts", { exact: true })).toBeVisible()
 })

@@ -48,5 +48,8 @@ test("renders a completed single-file patch", async ({ page }) => {
     settings: { editToolPartsExpanded: true },
   })
 
-  await expect(page.locator(`[data-timeline-part-id="${id}"] [data-component="apply-patch-file-diff"]`)).toBeVisible()
+  const wrapper = page.locator(`[data-timeline-part-id="${id}"]`)
+  const trigger = wrapper.locator('[data-slot="collapsible-trigger"]').first()
+  await expect(trigger).toHaveAttribute("aria-expanded", "true")
+  await expect(wrapper.locator('[data-component="apply-patch-file-diff"]')).toBeVisible()
 })
