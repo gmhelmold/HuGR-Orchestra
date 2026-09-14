@@ -1,6 +1,7 @@
 import { $ } from "bun"
 import { describe, expect, test } from "bun:test"
 import fs from "fs/promises"
+import os from "os"
 import { tmpdir } from "./fixture"
 
 describe("tmpdir", () => {
@@ -22,5 +23,17 @@ describe("tmpdir", () => {
       .then(() => true)
       .catch(() => false)
     expect(exists).toBe(false)
+  })
+
+  test("moves global cwd before deleting current fixture", async () => {
+    const original = process.cwd()
+    const tmp = await tmpdir()
+    try {
+      process.chdir(tmp.path)
+      await tmp[Symbol.asyncDispose]()
+      expect(await fs.realpath(process.cwd())).toBe(await fs.realpath(os.tmpdir()))
+    } finally {
+      process.chdir(original)
+    }
   })
 })

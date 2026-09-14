@@ -61,7 +61,9 @@ function exists(dir: string) {
     .catch(() => false)
 }
 
-function clean(dir: string) {
+async function clean(dir: string) {
+  const cwd = process.cwd()
+  if (cwd === dir || cwd.startsWith(dir + path.sep)) process.chdir(os.tmpdir())
   return fs.rm(dir, {
     recursive: true,
     force: true,
