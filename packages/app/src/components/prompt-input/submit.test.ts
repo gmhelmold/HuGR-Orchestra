@@ -132,8 +132,7 @@ beforeAll(async () => {
     },
   }))
 
-  mock.module("@opencode-ai/ui/toast", () => ({
-    Toast: { Region: () => null },
+  mock.module("@/utils/toast", () => ({
     showToast: () => 0,
     toaster: { dismiss: () => undefined },
   }))
@@ -207,6 +206,10 @@ beforeAll(async () => {
       }
       return () => sdk
     },
+  }))
+
+  mock.module("@/context/server-sdk", () => ({
+    useServerSDK: () => () => ({ protocol: Promise.resolve("v2"), client: rootClient }),
   }))
 
   mock.module("@/context/sync", () => ({

@@ -6,8 +6,8 @@ const directory = "C:/OpenCode/NewProject"
 
 test("creates a session in a new project, connects OpenCode Go, and selects its model", async ({ page }) => {
   let connectedGo = false
-  let pendingGo = false
-  const connections: Array<{ integrationID: string; body: unknown }> = []
+  let connectedProviderRefresh = false
+  const connections: Array<{ integrationID: string; body: unknown; location?: { directory: string } }> = []
 
   await mockOpenCodeServer(page, {
     directory,
@@ -19,43 +19,43 @@ test("creates a session in a new project, connects OpenCode Go, and selects its 
       time: { created: 1_700_000_000_000, updated: 1_700_000_000_000 },
       sandboxes: [],
     },
-    provider: () => ({
-      all: [
-        {
-          id: "opencode",
-          name: "OpenCode",
-          models: {
-            "free-model": {
-              id: "free-model",
-              name: "Free Model",
-              cost: { input: 0, output: 0 },
-              limit: { context: 200_000 },
+    provider: () => {
+      if (connectedGo) connectedProviderRefresh = true
+      return {
+        all: [
+          {
+            id: "opencode",
+            name: "OpenCode",
+            models: {
+              "free-model": {
+                id: "free-model",
+                name: "Free Model",
+                cost: { input: 0, output: 0 },
+                limit: { context: 200_000 },
+              },
             },
           },
-        },
-        {
-          id: "opencode-go",
-          name: "OpenCode Go",
-          models: {
-            "go-model-1": {
-              id: "go-model-1",
-              name: "Go Model 1",
-              cost: { input: 1, output: 1 },
-              limit: { context: 200_000 },
+          {
+            id: "opencode-go",
+            name: "OpenCode Go",
+            models: {
+              "go-model-1": {
+                id: "go-model-1",
+                name: "Go Model 1",
+                cost: { input: 1, output: 1 },
+                limit: { context: 200_000 },
+              },
             },
           },
-        },
-      ],
-      connected: connectedGo ? ["opencode", "opencode-go"] : ["opencode"],
-      default: { providerID: "opencode", modelID: "free-model" },
-    }),
+        ],
+        connected: connectedGo ? ["opencode", "opencode-go"] : ["opencode"],
+        default: { providerID: "opencode", modelID: "free-model" },
+      }
+    },
     integrationMethods: { "opencode-go": [{ type: "api", label: "API key" }] },
     onConnectKey: (input) => {
       connections.push(input)
-      if (input.integrationID === "opencode-go") pendingGo = true
-    },
-    onInstanceDispose: () => {
-      if (pendingGo) connectedGo = true
+      if (input.integrationID === "opencode-go") connectedGo = true
     },
     sessions: [],
     pageMessages: () => ({ items: [] }),
@@ -68,7 +68,7 @@ test("creates a session in a new project, connects OpenCode Go, and selects its 
     localStorage.setItem("opencode.global.dat:server", JSON.stringify({ projects: { local: [] } }))
   })
 
-  await page.goto("/")
+  await page.goto("/", { waitUntil: "commit" })
   const addProject = page.locator('[data-action="home-add-project-row"]')
   await expectAppVisible(addProject)
   await addProject.click()
@@ -84,8 +84,16 @@ test("creates a session in a new project, connects OpenCode Go, and selects its 
   await page.locator('[data-provider-id="opencode-go"]').click()
   await page.locator('[data-input="provider-api-key"]').fill("mock-go-api-key")
   await page.locator('[data-action="provider-connect-submit"]').click()
+  await expect
+    .poll(() => connections)
+    .toEqual([
+      {
+        integrationID: "opencode-go",
+        body: { key: "mock-go-api-key" },
+      },
+    ])
+  await expect.poll(() => connectedProviderRefresh).toBe(true)
   await expect(page.locator('[data-component="dialog-v2"]')).toHaveCount(0)
-  expect(connections).toEqual([{ integrationID: "opencode-go", body: { type: "api", key: "mock-go-api-key" } }])
 
   await expect(modelControl).toHaveAttribute("data-control-type", "popover")
   await modelControl.click()

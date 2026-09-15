@@ -30,7 +30,9 @@ test("keeps the file-browser sidebar mounted when switching file tabs", async ({
   await expect(sidebar).toBeVisible()
   await expect(panel.getByRole("button", { name: "file-00.ts" })).toBeVisible()
 
+  const firstContent = waitForFileContent(page, "file-00.ts")
   await panel.getByRole("button", { name: "file-00.ts" }).click()
+  await firstContent
   await expect(panel.getByRole("tab", { name: "file-00.ts" })).toHaveAttribute("data-selected", "")
   await expect(panel.getByText("contents:file-00.ts", { exact: true })).toBeVisible()
 
@@ -44,7 +46,9 @@ test("keeps the file-browser sidebar mounted when switching file tabs", async ({
   expect(scrolled).toBeGreaterThan(0)
   await writeProbe(page)
 
+  const lastContent = waitForFileContent(page, "file-79.ts")
   await panel.getByRole("button", { name: "file-79.ts" }).click()
+  await lastContent
   await expect(panel.getByRole("tab", { name: "file-79.ts" })).toHaveAttribute("data-selected", "")
   await expect(panel.getByText("contents:file-79.ts", { exact: true })).toBeVisible()
   expect(await readProbe(page)).toBe(PROBE)
@@ -105,6 +109,15 @@ async function readProbe(page: Page) {
   return page
     .locator('#review-panel [data-component="session-review-v2-sidebar-root"]')
     .evaluate((el) => (el as Probed).__e2eProbe)
+}
+
+function waitForFileContent(page: Page, path: string) {
+  return page.waitForResponse(
+    (response) =>
+      response.ok() &&
+      new URL(response.url()).pathname === "/file/content" &&
+      new URL(response.url()).searchParams.get("path") === path,
+  )
 }
 
 async function setup(

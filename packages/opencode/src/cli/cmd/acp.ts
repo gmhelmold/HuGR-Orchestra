@@ -5,6 +5,7 @@ import { ServerAuth } from "@/server/auth"
 import { createOpencodeClient } from "@opencode-ai/sdk/v2"
 import { withNetworkOptions, resolveNetworkOptions } from "../network"
 import { ACPProfile } from "@/acp/profile"
+import { watchAcpStdin } from "../acp-stdin"
 
 export const AcpCommand = effectCmd({
   command: "acp",
@@ -17,6 +18,7 @@ export const AcpCommand = effectCmd({
     })
   },
   handler: Effect.fn("Cli.acp")(function* (args) {
+    const stdin = watchAcpStdin()
     const { Server } = yield* Effect.promise(() => import("@/server/server"))
     const { ACP } = yield* Effect.promise(() => import("@/acp/agent"))
     ACPProfile.mark("cli.acp.handler")
@@ -44,11 +46,11 @@ export const AcpCommand = effectCmd({
     })
     const output = new ReadableStream<Uint8Array>({
       start(controller) {
-        process.stdin.on("data", (chunk: Buffer) => {
-          controller.enqueue(new Uint8Array(chunk))
-        })
-        process.stdin.on("end", () => controller.close())
-        process.stdin.on("error", (err) => controller.error(err))
+        for (const chunk of stdin.attach((chunk) => controller.enqueue(chunk))) controller.enqueue(chunk)
+        void stdin.ended.then(
+          () => controller.close(),
+          (err) => controller.error(err),
+        )
       },
     })
 
@@ -62,12 +64,6 @@ export const AcpCommand = effectCmd({
 
     yield* Effect.logInfo("setup connection")
     process.stdin.resume()
-    yield* Effect.promise(
-      () =>
-        new Promise<void>((resolve, reject) => {
-          process.stdin.on("end", () => resolve())
-          process.stdin.on("error", reject)
-        }),
-    )
+    yield* Effect.promise(() => stdin.ended)
   }),
 })

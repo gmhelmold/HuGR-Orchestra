@@ -4,6 +4,8 @@ import path from "path"
 import { Effect } from "effect"
 import { LayerNode } from "@opencode-ai/core/effect/layer-node"
 import { Ripgrep } from "@opencode-ai/core/ripgrep"
+import { RipgrepBinary } from "@opencode-ai/core/ripgrep/binary"
+import type { FSUtil } from "@opencode-ai/core/fs-util"
 import { RelativePath } from "@opencode-ai/core/schema"
 import { tmpdir } from "./fixture/tmpdir"
 import { testEffect } from "./lib/effect"
@@ -11,6 +13,28 @@ import { testEffect } from "./lib/effect"
 const it = testEffect(LayerNode.compile(Ripgrep.node))
 
 describe("Ripgrep", () => {
+  it.live("canonicalizes cache aliases before locking", () =>
+    Effect.acquireUseRelease(
+      Effect.promise(() => tmpdir()),
+      (tmp) =>
+        Effect.gen(function* () {
+          const bin = path.join(tmp.path, "bin")
+          yield* Effect.promise(() => fs.mkdir(bin))
+          const alias = path.join(tmp.path, "bin-alias")
+          yield* Effect.promise(() => fs.symlink(bin, alias, process.platform === "win32" ? "junction" : "dir"))
+          const filesystem = {
+            ensureDir: (directory: string) => Effect.promise(() => fs.mkdir(directory, { recursive: true })),
+            realPath: (directory: string) => Effect.promise(() => fs.realpath(directory)),
+          } satisfies Pick<FSUtil.Interface, "ensureDir" | "realPath">
+
+          expect(yield* RipgrepBinary.cacheDirectory(filesystem, alias)).toBe(
+            yield* Effect.promise(() => fs.realpath(bin)),
+          )
+        }),
+      (tmp) => Effect.promise(() => tmp[Symbol.asyncDispose]()),
+    ),
+  )
+
   it.live("keeps ignored files out of catch-all find results", () =>
     Effect.acquireUseRelease(
       Effect.promise(() => tmpdir()),

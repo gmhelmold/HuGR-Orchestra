@@ -1,4 +1,4 @@
-import { afterEach, expect } from "bun:test"
+import { afterEach, expect, test } from "bun:test"
 import { LayerNode } from "@opencode-ai/core/effect/layer-node"
 import { Cause, Effect, Exit, Layer } from "effect"
 import path from "path"
@@ -9,6 +9,9 @@ import { Auth } from "../../src/auth"
 import { Config } from "../../src/config/config"
 import { RuntimeFlags } from "../../src/effect/runtime-flags"
 import { Global } from "@opencode-ai/core/global"
+import { referenceLocationServices } from "@opencode-ai/core/location-services"
+import { FileSystemSearch } from "@opencode-ai/core/filesystem/search"
+import { Ripgrep } from "@opencode-ai/core/ripgrep"
 import { Permission } from "../../src/permission"
 import { PermissionV1 } from "@opencode-ai/core/v1/permission"
 import { Plugin } from "../../src/plugin"
@@ -32,6 +35,10 @@ function evalPerm(agent: Agent.Info | undefined, permission: string): Permission
 
 function load<A>(fn: (svc: Agent.Interface) => Effect.Effect<A>) {
   return Agent.Service.use(fn)
+}
+
+function includesNode(node: LayerNode.Node<any, any, any>, target: LayerNode.Node<any, any, any>): boolean {
+  return node === target || node.dependencies.some((dependency) => includesNode(dependency, target))
 }
 
 const expectDefaultAgentError = Effect.fn("AgentTest.expectDefaultAgentError")(function* (message: string) {
@@ -108,6 +115,11 @@ it.instance(
     },
   },
 )
+
+test("reference location graph excludes FileSystemSearch and Ripgrep", () => {
+  expect(includesNode(referenceLocationServices, FileSystemSearch.node)).toBe(false)
+  expect(includesNode(referenceLocationServices, Ripgrep.node)).toBe(false)
+})
 
 it.instance("explore agent denies edit and write", () =>
   Effect.gen(function* () {

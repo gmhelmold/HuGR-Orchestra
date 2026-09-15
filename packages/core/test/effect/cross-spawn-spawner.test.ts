@@ -2,10 +2,11 @@ import { describe, expect } from "bun:test"
 import fs from "node:fs/promises"
 import os from "node:os"
 import path from "node:path"
+import { pathToFileURL } from "node:url"
 import { Effect, Exit, Stream } from "effect"
 import type * as PlatformError from "effect/PlatformError"
 import { ChildProcess, ChildProcessSpawner } from "effect/unstable/process"
-import { CrossSpawnSpawner } from "@opencode-ai/core/cross-spawn-spawner"
+import { CrossSpawnSpawner, defaultCwd } from "@opencode-ai/core/cross-spawn-spawner"
 import { LayerNode } from "@opencode-ai/core/effect/layer-node"
 import { testEffect } from "../lib/effect"
 
@@ -48,6 +49,42 @@ async function tmpdir() {
       await fs.rm(dir, { recursive: true, force: true })
     },
   }
+}
+
+async function spawnFromDeletedCwd() {
+  const spawner = pathToFileURL(path.resolve(import.meta.dir, "../../src/cross-spawn-spawner.ts")).href
+  const script = `
+    import fs from "node:fs/promises"
+    import os from "node:os"
+    import path from "node:path"
+    import { Effect } from "effect"
+    import { ChildProcess, ChildProcessSpawner } from "effect/unstable/process"
+    import { CrossSpawnSpawner } from ${JSON.stringify(spawner)}
+    import { LayerNode } from ${JSON.stringify(pathToFileURL(path.resolve(import.meta.dir, "../../src/effect/layer-node.ts")).href)}
+
+    const cwd = await fs.mkdtemp(path.join(os.tmpdir(), "opencode-deleted-cwd-"))
+    process.chdir(cwd)
+    await fs.rm(cwd, { recursive: true, force: true })
+    const layer = LayerNode.compile(CrossSpawnSpawner.node)
+    const out = await Effect.runPromise(
+      ChildProcessSpawner.ChildProcessSpawner.use((svc) =>
+        Effect.all(
+          Array.from({ length: 2 }, () =>
+            svc.string(ChildProcess.make(process.execPath, ["-e", 'process.stdout.write("ok")'])),
+          ),
+          { concurrency: "unbounded" },
+        ),
+      ).pipe(Effect.scoped, Effect.provide(layer)),
+    )
+    if (out.some((value) => value !== "ok")) process.exitCode = 1
+  `
+  const proc = Bun.spawn([process.execPath, "-e", script], { stdout: "pipe", stderr: "pipe" })
+  const [stdout, stderr, exitCode] = await Promise.all([
+    new Response(proc.stdout).text(),
+    new Response(proc.stderr).text(),
+    proc.exited,
+  ])
+  return { exitCode, stdout, stderr }
 }
 
 async function gone(pid: number, timeout = 5_000) {
@@ -126,6 +163,35 @@ describe("cross-spawn spawner", () => {
         )
         expect(Exit.isFailure(exit)).toBe(true)
       }),
+    )
+
+    fx.effect(
+      "uses temp directory when current directory is unavailable",
+      Effect.sync(() => {
+        expect(
+          defaultCwd(() => {
+            throw Object.assign(new Error("current directory was deleted"), { code: "ENOENT" })
+          }),
+        ).toBe(os.tmpdir())
+      }),
+    )
+
+    fx.effect(
+      "uses temp directory when current directory was deleted",
+      Effect.sync(() => {
+        expect(defaultCwd(() => "/nonexistent/directory/path")).toBe(os.tmpdir())
+      }),
+    )
+
+    ;(process.platform === "win32" ? fx.effect.skip : fx.effect)(
+      "spawns concurrent commands after its current directory is deleted",
+      Effect.promise(async () => {
+        const result = await spawnFromDeletedCwd()
+        expect(result.exitCode, `${result.stdout}\n${result.stderr}`).toBe(0)
+        expect(result.stdout).toBe("")
+        expect(result.stderr).toBe("")
+      }),
+      15_000,
     )
   })
 

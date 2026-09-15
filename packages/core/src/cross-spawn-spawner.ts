@@ -22,6 +22,8 @@ import {
   ProcessId,
 } from "effect/unstable/process/ChildProcessSpawner"
 import * as NodeChildProcess from "node:child_process"
+import { existsSync } from "node:fs"
+import os from "node:os"
 import { PassThrough } from "node:stream"
 import launch from "cross-spawn"
 import { makeGlobalNode } from "./effect/app-node"
@@ -95,6 +97,17 @@ const toPlatformError = (
 }
 
 type ExitSignal = Deferred.Deferred<readonly [code: number | null, signal: NodeJS.Signals | null]>
+
+// cross-spawn resolves commands from process.cwd() when cwd is omitted.
+// That directory can disappear after process startup.
+export function defaultCwd(getCwd: () => string = globalThis.process.cwd) {
+  try {
+    const cwd = getCwd()
+    return existsSync(cwd) ? cwd : os.tmpdir()
+  } catch {
+    return os.tmpdir()
+  }
+}
 
 export const make = Effect.gen(function* () {
   const fs = yield* FileSystem.FileSystem
@@ -372,7 +385,7 @@ export const make = Effect.gen(function* () {
 
           const [proc, signal] = yield* Effect.acquireRelease(
             spawn(command, {
-              cwd: dir,
+              cwd: dir ?? defaultCwd(),
               env: env(command.options),
               stdio: stdios(sin, sout, serr, extra),
               detached: command.options.detached ?? process.platform !== "win32",

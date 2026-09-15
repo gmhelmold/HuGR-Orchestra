@@ -7,7 +7,7 @@ export interface MockServerConfig {
   protocol?: "v1" | "v2"
   provider: unknown | (() => unknown)
   integrationMethods?: Record<string, unknown[]>
-  onConnectKey?: (input: { integrationID: string; body: unknown }) => void
+  onConnectKey?: (input: { integrationID: string; body: unknown; location?: { directory: string } }) => void
   onInstanceDispose?: () => void
   directory: string
   project: unknown
@@ -82,7 +82,11 @@ export async function mockOpenCodeServer(page: Page, config: MockServerConfig) {
     if (path === "/provider/auth") return json(route, config.integrationMethods ?? {})
     const legacyAuth = path.match(/^\/auth\/([^/]+)$/)?.[1]
     if (legacyAuth && route.request().method() === "PUT") {
-      config.onConnectKey?.({ integrationID: legacyAuth, body: route.request().postDataJSON() })
+      config.onConnectKey?.({
+        integrationID: legacyAuth,
+        body: route.request().postDataJSON(),
+        location: requestLocation(route),
+      })
       return json(route, true)
     }
     if (path === "/instance/dispose" && route.request().method() === "POST") {
@@ -146,7 +150,11 @@ export async function mockOpenCodeServer(page: Page, config: MockServerConfig) {
       })
     const integrationConnect = path.match(/^\/api\/integration\/([^/]+)\/connect\/key$/)?.[1]
     if (integrationConnect && route.request().method() === "POST") {
-      config.onConnectKey?.({ integrationID: integrationConnect, body: route.request().postDataJSON() })
+      config.onConnectKey?.({
+        integrationID: integrationConnect,
+        body: route.request().postDataJSON(),
+        location: requestLocation(route),
+      })
       return route.fulfill({ status: 204, headers: { "access-control-allow-origin": "*" } })
     }
     if (path === "/api/project") return json(route, [config.project])
@@ -312,6 +320,11 @@ export async function mockOpenCodeServer(page: Page, config: MockServerConfig) {
     if (url.port === targetPort && targetPort !== appPort) return json(route, {})
     return route.fallback()
   })
+}
+
+function requestLocation(route: Route) {
+  const directory = route.request().headers()["x-opencode-directory"]
+  return directory ? { directory: decodeURIComponent(directory) } : undefined
 }
 
 function location(config: MockServerConfig) {

@@ -17,6 +17,12 @@ const original = {
 }
 const auth = { username: "opencode", password: "listen-secret" }
 const testPty = process.platform === "win32" ? test.skip : test
+const pluginCompletionKey = Symbol.for("opencode.test.httpapi-listen.plugin-completion")
+
+type PluginCompletion = {
+  resolve: () => void
+  reject: (error: unknown) => void
+}
 
 afterEach(async () => {
   Flag.OPENCODE_SERVER_PASSWORD = original.OPENCODE_SERVER_PASSWORD
@@ -109,6 +115,12 @@ async function openSocket(url: URL) {
     "timed out waiting for websocket open",
   )
   return ws
+}
+
+function closeSocket(ws: WebSocket) {
+  const closed = new Promise<void>((resolve) => ws.addEventListener("close", () => resolve(), { once: true }))
+  ws.close(1000)
+  return withTimeout(closed, 5_000, "timed out waiting for websocket close")
 }
 
 async function expectSocketRejected(url: URL, init?: { headers?: Record<string, string> }) {
@@ -209,7 +221,7 @@ describe("HttpApi Server.listen", () => {
         const nextMessage = waitForMessage(nextWs, (message) => message.includes("ping-restarted"))
         nextWs.send("ping-restarted\n")
         expect(await nextMessage).toContain("ping-restarted")
-        nextWs.close(1000)
+        await closeSocket(nextWs)
       } finally {
         await stop(restarted, "timed out waiting for restarted listener.stop(true)")
       }
@@ -303,20 +315,23 @@ describe("HttpApi Server.listen", () => {
   })
 
   test("plugin client requests reuse the listening server instance", async () => {
+    const completion = Promise.withResolvers<void>()
+    ;(globalThis as Record<symbol, PluginCompletion | undefined>)[pluginCompletionKey] = completion
     await using tmp = await tmpdir({
       init: async (directory) => {
         const plugin = path.join(directory, "plugin.ts")
-        const initialized = path.join(directory, "initialized.txt")
-        const completed = path.join(directory, "completed.txt")
         await Bun.write(
           plugin,
           [
             "export default async function plugin(input) {",
-            `  await Bun.write(${JSON.stringify(initialized)}, (await Bun.file(${JSON.stringify(initialized)}).text().catch(() => "")) + "initialized\\n")`,
-            "  setTimeout(async () => {",
-            "    await input.client.config.get()",
-            `    await Bun.write(${JSON.stringify(completed)}, "completed")`,
-            "  }, 50)",
+            "  setTimeout(() => void (async () => {",
+            "    try {",
+            "      await input.client.config.get()",
+            `      globalThis[Symbol.for(${JSON.stringify(Symbol.keyFor(pluginCompletionKey))})]?.resolve()`,
+            "    } catch (error) {",
+            `      globalThis[Symbol.for(${JSON.stringify(Symbol.keyFor(pluginCompletionKey))})]?.reject(error)`,
+            "    }",
+            "  })(), 0)",
             "  return {}",
             "}",
             "",
@@ -326,7 +341,6 @@ describe("HttpApi Server.listen", () => {
           path.join(directory, "opencode.json"),
           JSON.stringify({ formatter: false, lsp: false, plugin: [pathToFileURL(plugin).href] }),
         )
-        return { initialized, completed }
       },
     })
     const previous = process.env.OPENCODE_DISABLE_DEFAULT_PLUGINS
@@ -338,18 +352,12 @@ describe("HttpApi Server.listen", () => {
         headers: { authorization: authorization(), "x-opencode-directory": tmp.path },
       })
       expect(response.status).toBe(200)
-      await withTimeout(
-        (async () => {
-          while (!(await Bun.file(tmp.extra.completed).exists())) await Bun.sleep(10)
-        })(),
-        5_000,
-        "timed out waiting for plugin client request",
-      )
-      expect(await Bun.file(tmp.extra.initialized).text()).toBe("initialized\n")
+      await withTimeout(completion.promise, 5_000, "timed out waiting for plugin client request")
     } finally {
       if (listener) await stop(listener, "timed out cleaning up plugin client listener").catch(() => undefined)
       if (previous === undefined) delete process.env.OPENCODE_DISABLE_DEFAULT_PLUGINS
       else process.env.OPENCODE_DISABLE_DEFAULT_PLUGINS = previous
+      delete (globalThis as Record<symbol, PluginCompletion | undefined>)[pluginCompletionKey]
     }
   })
 
@@ -409,14 +417,14 @@ describe("HttpApi Server.listen", () => {
       expect(directoryScoped.status).toBe(200)
       const mint = (await directoryScoped.json()) as { ticket: string }
       const scopedWs = await openSocket(socketURL(listener, info.id, tmp.path, mint.ticket))
-      scopedWs.close(1000)
+      await closeSocket(scopedWs)
 
       await expectSocketRejected(socketURL(listener, info.id, tmp.path, "not-a-ticket"))
 
       const reusable = await connectTicket(listener, info.id, tmp.path)
       const ws = await openSocket(socketURL(listener, info.id, tmp.path, reusable.ticket))
       await expectSocketRejected(socketURL(listener, info.id, tmp.path, reusable.ticket))
-      ws.close(1000)
+      await closeSocket(ws)
 
       const other = await createCat(listener, tmp.path)
       const scoped = await connectTicket(listener, info.id, tmp.path)
@@ -440,7 +448,7 @@ describe("HttpApi Server.listen", () => {
       const message = waitForMessage(ws, (message) => message.includes("ping-no-auth"))
       ws.send("ping-no-auth\n")
       expect(await message).toContain("ping-no-auth")
-      ws.close(1000)
+      await closeSocket(ws)
     } finally {
       await stop(listener, "timed out cleaning up no-auth listener").catch(() => undefined)
     }

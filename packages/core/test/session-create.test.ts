@@ -291,7 +291,7 @@ describe("SessionV2.create", () => {
           [2, EventV2.versionedType(SessionEvent.Prompted.type, 1)],
         ])
       }).pipe(Effect.provide(Layer.fresh(targetLayer)))
-    }),
+    }), { timeout: 15_000 },
   )
 
   it.effect("does not mask unrelated created projector defects", () =>

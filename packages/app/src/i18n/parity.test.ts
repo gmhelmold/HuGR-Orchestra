@@ -97,10 +97,10 @@ const domains = [
 ] as const
 
 describe("i18n parity", () => {
-  test("non-English locales have every English key and required plural variants", async () => {
-    for (const domain of domains) {
-      const source = await dictionary(domain.source)
-      for (const locale of domain.locales) {
+  for (const domain of domains) {
+    for (const locale of domain.locales) {
+      test(`${domain.name} ${locale} has every English key and required plural variants`, async () => {
+        const source = await dictionary(domain.source)
         const target = await dictionary(domain.target(locale))
         const missing = Object.keys(source).filter((key) => !Object.hasOwn(target, key))
         const extra = Object.keys(target)
@@ -115,9 +115,9 @@ describe("i18n parity", () => {
           missing: [],
           extra: expected,
         })
-      }
+      })
     }
-  })
+  }
 
   test("non-English locales preserve English placeholders", async () => {
     for (const domain of domains) {
