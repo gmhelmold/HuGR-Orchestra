@@ -1050,26 +1050,37 @@ it.instance(
   () =>
     Effect.gen(function* () {
       const { llm } = yield* useServerConfig(providerCfg)
+      const events = yield* EventV2Bridge.Service
       const prompt = yield* SessionPrompt.Service
       const sessions = yield* Session.Service
+      const metadataSet = yield* Deferred.make<void>()
       const chat = yield* sessions.create({ title: "Pinned" })
+      yield* events.listen((event) => {
+        if (event.type !== MessageV2.Event.PartUpdated.type) return Effect.void
+        const part = (event.data as typeof MessageV2.Event.PartUpdated.data.Type).part
+        if (
+          part.type === "tool" &&
+          part.sessionID === chat.id &&
+          part.state.status === "running" &&
+          part.state.metadata?.sessionId
+        ) {
+          return Deferred.succeed(metadataSet, undefined)
+        }
+        return Effect.void
+      })
       yield* llm.hang
       const msg = yield* user(chat.id, "hello")
       yield* addSubtask(chat.id, msg.id)
 
       const fiber = yield* prompt.loop({ sessionID: chat.id }).pipe(Effect.forkChild)
 
-      const tool = yield* pollWithTimeout(
-        Effect.gen(function* () {
-          const msgs = yield* MessageV2.filterCompactedEffect(chat.id)
-          const taskMsg = msgs.find((item) => item.info.role === "assistant" && item.info.agent === "general")
-          const tool = taskMsg?.parts.find((part): part is SessionV1.ToolPart => part.type === "tool")
-          if (tool?.state.status === "running" && tool.state.metadata?.sessionId) return tool
-        }),
-        "timed out waiting for running subtask metadata",
-      )
+      yield* Deferred.await(metadataSet)
+      const msgs = yield* MessageV2.filterCompactedEffect(chat.id)
+      const taskMsg = msgs.find((item) => item.info.role === "assistant" && item.info.agent === "general")
+      const tool = taskMsg?.parts.find((part): part is SessionV1.ToolPart => part.type === "tool")
 
-      if (tool.state.status !== "running") return
+      expect(tool?.state.status).toBe("running")
+      if (!tool || tool.state.status !== "running") return
       expect(typeof tool.state.metadata?.sessionId).toBe("string")
       expect(tool.state.title).toBeDefined()
       expect(tool.state.metadata?.model).toBeDefined()

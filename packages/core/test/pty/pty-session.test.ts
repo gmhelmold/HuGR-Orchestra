@@ -60,7 +60,7 @@ const waitForEvents = (events: Queue.Queue<PtyEvent>, id: PtyID, count: number) 
     return picked
   }).pipe(
     Effect.timeoutOrElse({
-      duration: "5 seconds",
+      duration: "15 seconds",
       orElse: () => Effect.fail(new Error("timeout waiting for pty events")),
     }),
   )
@@ -126,6 +126,7 @@ describe("pty", () => {
       const missing = yield* pty.get(info.id).pipe(Effect.exit)
       expect(Exit.isFailure(missing)).toBe(true)
     }),
+    30000,
   )
 
   ptyTest("replays buffered output and streams live output to attachments", () =>

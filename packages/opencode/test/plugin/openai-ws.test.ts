@@ -329,6 +329,7 @@ describe("plugin.openai.ws-pool", () => {
     expect(await second.text()).toContain("data: [DONE]")
     expect(connections).toBe(2)
     fetch.close()
+    await waitFor(() => closed === 2, "active websocket was not closed")
   })
 
   test("invalidates but does not reuse a socket after terminal failure frames", async () => {
