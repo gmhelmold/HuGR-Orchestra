@@ -1,0 +1,27 @@
+[
+  {
+    "case": "normal",
+    "success": true,
+    "markers": 1,
+    "children": 1,
+    "countedExecutions": 1
+  },
+  {
+    "case": "already-consumed",
+    "cause": "Error: Governed Task denied: approval-consumed\n    at <anonymous> (/private/tmp/hugr-deep-followup.ou9sem/repo/packages/opencode/src/tool/task.ts:279:41)\n    at Tool.execute (/private/tmp/hugr-deep-followup.ou9sem/repo/packages/opencode/src/tool/tool.ts:145:38)",
+    "markers": 1,
+    "children": 0,
+    "countedExecutions": 0
+  },
+  {
+    "case": "write-fault-before-consumption",
+    "injectedCalls": 1,
+    "cause": "Error: Governed Task denied: approval-consumed\n    at <anonymous> (/private/tmp/hugr-deep-followup.ou9sem/repo/packages/opencode/src/tool/task.ts:307:56)\n    at runLoop (/private/tmp/hugr-atlas-maestro-audit.BDqrxm/repo/node_modules/.bun/effect@4.0.0-beta.83/node_modules/effect/dist/internal/effect.js:444:98)\n    at evaluate (/private/tmp/hugr-atlas-maestro-audit.BDqrxm/repo/node_modules/.bun/effect@4.0.0-beta.83/node_modules/effect/dist/internal/effect.js:412:23)\n    at <anonymous> (/private/tmp/hugr-atlas-maestro-audit.BDqrxm/repo/node_modules/.bun/effect@4.0.0-beta.83/node_modules/effect/dist/internal/effect.js:723:15)\n    at processTicksAndRejections (native:7:39)\n    at Tool.execute (/private/tmp/hugr-deep-followup.ou9sem/repo/packages/opencode/src/tool/tool.ts:145:38)",
+    "markersBeforeRetry": 0,
+    "childrenBeforeRetry": 0,
+    "retrySuccess": true,
+    "markersAfterRetry": 1,
+    "childrenAfterRetry": 1,
+    "countedExecutions": 1
+  }
+]

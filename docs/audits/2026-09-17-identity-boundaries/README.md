@@ -39,6 +39,27 @@ Run from the repository root. The script imports the original built Atlas module
 
 ## Verification boundaries
 
-The original targeted Atlas suite result and its exact command are included. Runtime observations cover CLI transitions/test-vacuity, reopened composed reads, and the direct original RevIndex adapter. The moving-reference experiment does not yet prove a stale answer from a public MCP tool. Maestro investigation is still in progress in this journal; the public approval-presentation tool remains intentionally unavailable and must not be enabled from model-supplied validation.
+The original targeted Atlas suite result and its exact command are included. Runtime observations cover CLI transitions/test-vacuity, reopened composed reads, and the direct original RevIndex adapter. The moving-reference experiment does not yet prove a stale answer from a public MCP tool. Maestro dispatch fault handling was exercised with seeded approval records, real services and a counted no-network executor; the public approval-presentation tool remains intentionally unavailable and must not be enabled from model-supplied validation.
 
 No production source, policy of an existing project, workflow, merge gate, or existing issue state was modified. No automatic merge or issue closure is requested by this audit.
+
+## Additional confirmed boundaries
+
+The `failure-boundaries.mjs` probe executes the real CLI parser-failure cases and retained composed transition producer. An unparseable-only scan is rendered byte-identically to a valid no-findings scan. A mixed scan exits 0 and omits the parse failure. A retained transition producer uses obsolete HEAD resolution; a fresh producer or immutable SHA is the positive control. Both observations repeat three times.
+
+`maestro-consume-boundary.test.ts` exercises original TaskTool with seeded approved events and real Session/Database/Event services. Only the model port is counted without network, and only the Consumed publish is fault-injected in the error case. The error reports approval-consumed despite zero durable markers; restoring the publisher permits the exact approval to dispatch once. Normal and actually-consumed controls are included. All three cases repeat in three independent Bun runs.
+
+## Evidence index
+
+- `UNDERSTANDING.md`: detailed learned model, source paths, counterevidence and hypotheses not promoted to issues.
+- `JOURNAL.md`: five progressive focused passes. These are NOT five exhaustive semantic reads of the monorepo.
+- `evidence/verification-summary.json`: 136 original Atlas tests in 15 files and 58 original Maestro/Task tests in 8 files, all passing; characterization runs reported separately.
+- `evidence/reviewed-source-manifest.json`: 42 full files read, totaling 7,071 physical lines including comments and tests; this is not a business-logic LOC count.
+- `evidence/independent-source-check.json`: four source blobs rechecked through independent GitHub reads.
+- `evidence/*round*.json`: raw observations with positive controls and real fixture identities. Historical absolute temp paths identify where measurements ran, not a portable installation requirement.
+
+## Maestro probe reproduction
+
+Use a disposable checkout at the product baseline with working host dependencies. Copy `probes/maestro-consume-boundary.test.ts` into `packages/opencode/test/maestro/audit-consume-boundary.test.ts`; its relative imports intentionally follow the original test layout. From `packages/opencode`, run `bun test test/maestro/audit-consume-boundary.test.ts` with a temporary HOME/TMPDIR and optional `AUDIT_OUTPUT` pointing to an output JSON file. Remove only that new diagnostic copy afterwards. No existing test or production file needs modification.
+
+The fault is injected before publication, not after a durable marker is written. Do not interpret the seeded approval fixtures as a working public approval journey.
