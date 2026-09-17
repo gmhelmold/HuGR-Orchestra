@@ -1,0 +1,32 @@
+
+> atlas@0.0.0 test
+> vitest run packages/memory/test packages/adapter-io/test/memory-emit.test.ts packages/adapter-io/test/memory-store.test.ts packages/adapter-io/test/memory-read.test.ts packages/adapter-io/test/orientation-store.test.ts
+
+
+ RUN  v2.1.9 /private/tmp/hugr-atlas-maestro-audit.BDqrxm/repo/foundation/atlas
+
+ ✓ |unit| packages/memory/test/mem-5-field-types.test.ts (28 tests) 45ms
+ ✓ |unit| packages/memory/test/mem-9-portable-scangate.wp35a.test.ts (8 tests) 32ms
+ ✓ |unit| packages/memory/test/wp-6.23-mem.test.ts (6 tests) 43ms
+ ✓ |unit| packages/memory/test/wp-3.5-b-mem.test.ts (5 tests) 42ms
+ ✓ |unit| packages/memory/test/wp-6.24-b-mem.test.ts (6 tests) 42ms
+ ✓ |unit| packages/memory/test/wp-6.25-b-mem.test.ts (7 tests) 42ms
+ ✓ |unit| packages/memory/test/wp-6.25-a-mem.test.ts (8 tests) 46ms
+ ✓ |unit| packages/memory/test/wp-6.24-a-mem.test.ts (11 tests) 181ms
+ ✓ |unit| packages/adapter-io/test/memory-emit.test.ts (19 tests) 534ms
+ ✓ |unit| packages/adapter-io/test/memory-read.test.ts (12 tests) 854ms
+ ✓ |unit| packages/adapter-io/test/memory-store.test.ts (10 tests) 1913ms
+   ✓ A4 — concurrent writers do not lose each other (REAL subprocesses) > 8 processes × 5 appends = 40 durable records, 0 lost 1650ms
+ ✓ |unit| packages/memory/test/wp-6.24-b-mem.heldout.test.ts (6 tests) 125ms
+ ✓ |unit| packages/memory/test/wp-3.5-b-mem.heldout.test.ts (5 tests) 232ms
+ ✓ |unit| packages/memory/test/mem-kind-derivation.test.ts (14 tests) 131ms
+ ✓ |unit| packages/memory/test/mem-9.wp35a.heldout.test.ts (2 tests) 42ms
+ ✓ |unit| packages/memory/test/wp-6.24-a-mem.heldout.test.ts (2 tests) 156ms
+ ✓ |unit| packages/adapter-io/test/orientation-store.test.ts (9 tests) 1304ms
+   ✓ concurrent appends do not lose events (REAL, CONCURRENT subprocesses) > 8 processes × 5 appends = 40 durable events, 0 lost 1083ms
+
+ Test Files  17 passed (17)
+      Tests  158 passed (158)
+   Start at  18:03:04
+   Duration  8.24s (transform 3.19s, setup 0ms, collect 10.45s, tests 5.76s, environment 23ms, prepare 16.54s)
+
