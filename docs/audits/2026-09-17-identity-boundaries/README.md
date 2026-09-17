@@ -63,3 +63,7 @@ The `failure-boundaries.mjs` probe executes the real CLI parser-failure cases an
 Use a disposable checkout at the product baseline with working host dependencies. Copy `probes/maestro-consume-boundary.test.ts` into `packages/opencode/test/maestro/audit-consume-boundary.test.ts`; its relative imports intentionally follow the original test layout. From `packages/opencode`, run `bun test test/maestro/audit-consume-boundary.test.ts` with a temporary HOME/TMPDIR and optional `AUDIT_OUTPUT` pointing to an output JSON file. Remove only that new diagnostic copy afterwards. No existing test or production file needs modification.
 
 The fault is injected before publication, not after a durable marker is written. Do not interpret the seeded approval fixtures as a working public approval journey.
+
+## Published issues
+
+See [FINDINGS.md](./FINDINGS.md) for issues **#68–#72**, their exact evidence paths, runtime reachability and deduplication rationale. These records do not close or fix any issue.

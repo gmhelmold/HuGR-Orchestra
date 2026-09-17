@@ -1,0 +1,44 @@
+{
+  "transitions": {
+    "linear": {
+      "admitted": 2,
+      "rows": 2,
+      "current": 1
+    },
+    "revert": {
+      "admitted": 2,
+      "rows": 2,
+      "current": 0
+    },
+    "reapply": {
+      "admitted": 3,
+      "rows": 2,
+      "current": 0
+    }
+  },
+  "testVacuity": {
+    "unique": {
+      "scanned": 2,
+      "delivered": 2,
+      "shapes": [
+        "assertion-only-in-catch",
+        "no-assertion-in-test"
+      ]
+    },
+    "same": {
+      "scanned": 2,
+      "delivered": 1,
+      "shapes": [
+        "no-assertion-in-test"
+      ]
+    },
+    "same-reversed": {
+      "scanned": 2,
+      "delivered": 1,
+      "shapes": [
+        "assertion-only-in-catch"
+      ]
+    }
+  },
+  "movingRefReturnsPriorState": true
+}
