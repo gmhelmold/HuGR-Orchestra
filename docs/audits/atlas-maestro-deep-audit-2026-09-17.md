@@ -150,3 +150,73 @@ This distinction is now an audit invariant: **a green reference-model test is ne
 ### Open questions intentionally NOT promoted
 - Four-family shape scrub does not cover JWT/PEM/AWS secret keys. This is already explicitly documented as a narrower shipped primary control with a scanner backstop requirement; no new issue until the scanner/backstop reachability is independently audited.
 - Forge PR projection is process-local. This matches the low-level Forge's current modelling comments; whether it violates the intended shipped host adapter depends on the still-unwired composition. Track during host/transport pass rather than issue prematurely.
+
+
+## Pass 10 — Grounding audit (PROVEN + intentional limits separated)
+
+### Baseline
+A clean built checkout at the pinned SHA ran the full grounding suite:
+- **13 test files passed**
+- **80 tests passed**
+
+All nine grounding source files were read end-to-end:
+`drift.ts`, `emit-guard.ts`, `freshness.ts`, `gate.ts`, `ground.ts`, `index.ts`, `span.ts`, `subtree.ts`, `types.ts`.
+
+### Finding G-1 — GROUND-11 transitive freshness exists only as an isolated model
+Status: **PROVEN / P1** — filed as #79.
+
+The ratified GROUND-11 law requires freshness to fold the caller's own structural hash plus the forward closure's INTERFACE-level `rState`. `grounding/freshness.ts` correctly implements this and has visible/held-out/multiset tests, but the repository's own reference-model ledger marks it `shipped: null`.
+
+Every wired path uses `driftDetect`, which implements only the local grounding-set leg. The historical WP already says so explicitly and recommends wiring it later.
+
+Direct compiled differential:
+- own anchor unchanged;
+- callee interface changed;
+- `driftDetect` => `FRESH`;
+- GROUND-11 `freshness` => `DRIFTED`.
+
+This is a contract/runtime mismatch, not a speculative feature request.
+
+### Finding G-2 — GROUND-12 policy-artifact anchors are documented non-behavior
+Status: **PROVEN capability gap / P2 improvement** — filed as #80.
+
+`AnchorApi.resolveAnchor` is a public/frozen surface with no runtime implementation in the grounding package. The black-box product suite explicitly labels `block|repo|project` as **DOCUMENTED non-behavior** and proves only the correct fail-closed behavior: real `atlas emit` rejects each as `ungrounded`.
+
+The missing positive capability is the ratified GROUND-12 path:
+- parseable policy artifact -> heading/section block hash;
+- unrelated section change -> remains FRESH;
+- target section change -> DRIFTED;
+- non-parseable artifact -> whole-file content hash.
+
+### Suspects rejected after double check
+
+#### Malformed non-`Grounding` values throwing in `isGrounded`/`driftDetect`
+Direct calls with `null`, `{}`, `{entries:null}`, or `entries:[{}]` can throw. This is real behavior but not currently promoted to an issue:
+- the valid API domain is `Grounding`;
+- governed emit has a `groundingWellFormed` shape gate before truth evaluation;
+- read paths over attacker/committed malformed CAS facts go through `resolveFreshness(...try/catch...)`, which fails closed to `DRIFTED`.
+
+The product boundary already contains the malformed shape; no demonstrated uncaught product path remains.
+
+#### GROUND-13 advisory -> STALE
+Confirmed WIRED, not a gap. `knowledge.resolveFactFreshness` is imported by `adapter-io/wire.ts` and the family-aware read oracle maps structural advisory drift to `STALE`, predicates to `DRIFTED`.
+
+#### GROUND-8 untrusted provenance
+Confirmed WIRED through the governed emit shape/ratification chain. A `trusted:false` predicate-shaped payload is converted to advisory authority, cannot use the fast path, and requires ratification before persistence. Existing governed-emit tests pin this behavior.
+
+### Intentional limits, not issues
+
+#### Stored GroundingSpan is not integrity-protected
+REQ-GROUND-1f explicitly records the limit and an end-to-end tamper measurement: `grounding` is excluded from the KERNEL-8 canonical preimage, so changing stored span offsets/hash does not move fact identity and shipped reads do not notice. This is owner-approved and documented, not an undisclosed defect.
+
+The sole production span minter today is `adapter-io/prompt.ts`, and it mints the full shown source range `0..bytes.length`; the code explicitly says current granularity is file-level even when the anchor is a symbol. No interior-offset producer exists today.
+
+#### Grounding ordering
+The data-model comment says entries are sorted by anchor while `ground()` preserves input order. Current production callers of `ground()` do not make this a demonstrated identity defect:
+- mine admission passes one citation;
+- relation derivation has its own two-ended identity.
+Keep as a latent contract-quality note until a multi-entry intrinsic fact is built through this path.
+
+### Issues added in this pass
+- #79 — GROUND-11 interface-fold freshness is not wired.
+- #80 — implement GROUND-12 policy-artifact block/repo/project anchoring.
