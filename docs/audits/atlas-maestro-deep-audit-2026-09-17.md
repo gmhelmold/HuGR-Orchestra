@@ -93,3 +93,60 @@ Several diagnostic/setup mistakes were observed and **not** attributed to the pr
 - a temporary adversarial test blocked `tsc -b` because of its own branded-type cast and was removed before the clean product build.
 
 These remain excluded from product findings.
+
+
+## Pass 9 — Persist boundary audit (PROVEN + reachability-qualified)
+
+### Baseline
+A clean, built Atlas checkout at the pinned product SHA ran the complete persist test directory:
+- **24 test files passed**
+- **268 tests passed**
+- no failures
+
+The suite is especially strong on scrub semantics, chunk independence, transcript door redaction, reconstruct/fold laws, abstract merge algebra, host-adapter models, and re-invoke models. The new findings below are therefore primarily **external-boundary / durability / reachability** gaps.
+
+### Finding P-1 — TranscriptRef does not survive store recreation
+Status: **PROVEN** — filed as #77.
+
+PERSIST-10 requires the complete transcript body to be a durable, versioned, content-addressed large object that remains fetchable on demand across machine/clone boundaries. The current `createTranscriptStore()` is a fresh process-local `Map<Hash, Uint8Array>` with strong intra-instance semantics but no reopen backend.
+
+Original compiled-module reproduction:
+- `first.put(body)` -> pointer resolves on `first`;
+- same pointer on a new `createTranscriptStore()` -> `transcript large-object not found`.
+
+Repository-wide source search found no durable transcript backend and no production construction of `createTranscriptStore()`; current usages are tests/E2E/reference surface. This is therefore a **durability/integration gap**, not evidence of a currently emitted dangling product pointer.
+
+### Finding P-2 — Notes push configuration is only an in-memory claim
+Status: **PROVEN, LATENT** — filed as #78 and re-qualified after filing.
+
+PERSIST-8 requires the adapter to configure note transport because Git does not push notes by default. The real `createForge.configurePush` appends a refspec to an in-memory array. Real-Git reproduction:
+- adapter ledger after configuration: `refs/notes/*:refs/notes/*`;
+- `remote.origin.push` before: absent;
+- `remote.origin.push` after: still absent;
+- `git push origin main`: remote still has no `refs/notes/orchestra`.
+
+Post-filing reachability double check: the repository's own `reference-model-guard` states that the persist package is overwhelmingly reference-model-only. `wire.ts` retains `createForge` in a `void [createForge, ...]` DAG pin, not a handler leg. #78 was updated to state explicitly that this is **latent integration correctness**, not proof that a shipped CLI/MCP push has already lost a note.
+
+### Reference-model boundary
+The repository mechanically acknowledges this state:
+- only `NOTES_REF` crosses as a value into `adapter-io/src/git-forge.ts`;
+- persist `attach`, `diff`, `merge`, `metering`, `placement`, `provenance`, `reconstruct`, `reinvoke`, and `transcript-store` are ledgered with no production caller;
+- `source.ts` is partly shipped through OKF export/import;
+- scrub is additionally consumed by CLI mining paths.
+
+This distinction is now an audit invariant: **a green reference-model test is never treated as evidence that the product entrypoint exercises that invariant.**
+
+### Positive findings
+- TranscriptStore makes defensive byte copies on both store and fetch; it does not share the kernel aliasing defect from #74.
+- The whole-body transcript store applies `scrub(body)` at its own admission boundary; callers do not have to remember the scrub manually.
+- The streaming `admitToBuffer` seam explicitly declares that it has no production caller; this is documented rather than hidden.
+- Provenance JSON parsing and PR-body parsing are total on malformed JSON.
+- Placement model defensively snapshots its simple trailer/note records.
+
+### Issues added in this pass
+- #77 — process-local transcript large-object authority.
+- #78 — note refspec configuration does not configure Git; latent until the Forge path is composed.
+
+### Open questions intentionally NOT promoted
+- Four-family shape scrub does not cover JWT/PEM/AWS secret keys. This is already explicitly documented as a narrower shipped primary control with a scanner backstop requirement; no new issue until the scanner/backstop reachability is independently audited.
+- Forge PR projection is process-local. This matches the low-level Forge's current modelling comments; whether it violates the intended shipped host adapter depends on the still-unwired composition. Track during host/transport pass rather than issue prematurely.
