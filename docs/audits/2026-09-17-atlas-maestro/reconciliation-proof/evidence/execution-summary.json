@@ -1,0 +1,96 @@
+{
+  "productSHA": "b0c33d2f6567a2c741240f3c44bc00ca2f01e7e7",
+  "environment": {
+    "platform": "darwin",
+    "node": "v22.17.1",
+    "bun": "1.3.14"
+  },
+  "runs": [
+    {
+      "command": "bun run typecheck",
+      "cwd": "foundation/atlas",
+      "exitCode": 0,
+      "log": "atlas-typecheck.log"
+    },
+    {
+      "command": "bun run test (7 focused files) --maxWorkers=2 --minWorkers=1",
+      "exitCode": 0,
+      "testsPassed": 50,
+      "filesPassed": 7,
+      "log": "atlas-focused-baseline.log"
+    },
+    {
+      "command": "bun run test --maxWorkers=2 --minWorkers=1",
+      "cwd": "foundation/atlas",
+      "exitCode": 0,
+      "testsPassed": 4119,
+      "testsSkipped": 12,
+      "testsTodo": 3,
+      "filesPassed": 527,
+      "filesSkipped": 2,
+      "durationSeconds": 598.07,
+      "log": "atlas-full-suite.log"
+    },
+    {
+      "command": "bun test test/maestro",
+      "cwd": "packages/opencode",
+      "exitCode": 0,
+      "testsPassed": 32,
+      "filesPassed": 7,
+      "log": "maestro-baseline.log"
+    },
+    {
+      "command": "bun test test/maestro/audit-conflicts.test.ts",
+      "exitCode": 0,
+      "testCases": 1,
+      "observedConcurrentPairs": 6,
+      "allObservedConflictsPreserved": true,
+      "log": "maestro-conflicts-run1.log",
+      "limitation": "ordinary Effect scheduling; not exhaustive interleavings or cross-process"
+    },
+    {
+      "command": "node reconcile-probes.mjs <atlas-root> <output> (initial version)",
+      "exitCode": 1,
+      "observationsConfirmed": 5,
+      "diagnosticErrors": 1,
+      "log": "reconcile-probes-run1.log",
+      "limitation": "initial diagnostic incorrectly asserted MCP isError instead of data.exitCode for semantic reconcile"
+    },
+    {
+      "command": "node reconcile-probes.mjs <atlas-root> <output> (run 2)",
+      "exitCode": 0,
+      "observationsConfirmed": 6,
+      "log": "reconcile-probes-run2.log"
+    },
+    {
+      "command": "node reconcile-probes.mjs <atlas-root> <output> (run 3)",
+      "exitCode": 0,
+      "observationsConfirmed": 6,
+      "log": "reconcile-probes-run3.log"
+    },
+    {
+      "command": "node additional-controls.mjs <atlas-root> <output>",
+      "exitCode": 0,
+      "aggregatedCases": 3,
+      "log": "additional-controls.log"
+    }
+  ],
+  "guards": [
+    {
+      "command": "bun run reference-model-guard",
+      "exitCode": 1
+    },
+    {
+      "command": "bun run own-snapshot-guard",
+      "exitCode": 0
+    }
+  ],
+  "newIssues": [
+    55,
+    57,
+    59,
+    60,
+    61
+  ],
+  "coverageStatement": "Full tracked-file inventory and textual reference scan; semantic review focused on Atlas lifecycle and Maestro. Not five complete manual reads of every monorepo file."
+}
