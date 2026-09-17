@@ -1,0 +1,250 @@
+[
+  {
+    "path": "foundation/atlas/packages/knowledge/src/write/upsert.ts",
+    "git_blob": "141ce6bec3c6333fc42a3ea0eb7d1044566d86ff",
+    "sha256": "a50bb48ff03617cc7bb945f7b9db21570dd056007ab0c2acf6e74f209fff7a64",
+    "lines": 410,
+    "matches_audited_commit": true,
+    "url": "https://github.com/gmhelmold/HuGR-Orchestra/blob/b0c33d2f6567a2c741240f3c44bc00ca2f01e7e7/foundation/atlas/packages/knowledge/src/write/upsert.ts"
+  },
+  {
+    "path": "foundation/atlas/packages/knowledge/src/ratify/fastpath.ts",
+    "git_blob": "af929eb318d544c0d2489f83401538af616e353b",
+    "sha256": "3dad80da1cc5f14463c07dd420af453186fa77417c5e783f8bb88c47fe07c9a6",
+    "lines": 158,
+    "matches_audited_commit": true,
+    "url": "https://github.com/gmhelmold/HuGR-Orchestra/blob/b0c33d2f6567a2c741240f3c44bc00ca2f01e7e7/foundation/atlas/packages/knowledge/src/ratify/fastpath.ts"
+  },
+  {
+    "path": "foundation/atlas/packages/knowledge/src/lifecycle/hits.ts",
+    "git_blob": "83cb4ff24017ed9a65b88357ccb3cea484dc28b3",
+    "sha256": "0aec48ac9b928e9641a5808d32bf68c742d72b5e4a0bd3ab72d85a5a9e1c0a16",
+    "lines": 210,
+    "matches_audited_commit": true,
+    "url": "https://github.com/gmhelmold/HuGR-Orchestra/blob/b0c33d2f6567a2c741240f3c44bc00ca2f01e7e7/foundation/atlas/packages/knowledge/src/lifecycle/hits.ts"
+  },
+  {
+    "path": "foundation/atlas/packages/adapter-io/src/compose.ts",
+    "git_blob": "6db0403297bf573be189136aa99a043039a36c70",
+    "sha256": "13a5f136784d0e6bedd3702923195e08541504bebf7ec4c2d73ad1759d829c66",
+    "lines": 594,
+    "matches_audited_commit": true,
+    "url": "https://github.com/gmhelmold/HuGR-Orchestra/blob/b0c33d2f6567a2c741240f3c44bc00ca2f01e7e7/foundation/atlas/packages/adapter-io/src/compose.ts"
+  },
+  {
+    "path": "foundation/atlas/packages/adapter-io/src/compose-runtime.ts",
+    "git_blob": "89946e28ead3eaaddca1deac8d02684d0464f68f",
+    "sha256": "38ccd3abcba6bab5456e787d0f7b8acbdfd2de985c8f2eb3463456aeec15162f",
+    "lines": 215,
+    "matches_audited_commit": true,
+    "url": "https://github.com/gmhelmold/HuGR-Orchestra/blob/b0c33d2f6567a2c741240f3c44bc00ca2f01e7e7/foundation/atlas/packages/adapter-io/src/compose-runtime.ts"
+  },
+  {
+    "path": "foundation/atlas/packages/adapter-io/src/wire.ts",
+    "git_blob": "5e60ecbcd67d8cc63f3b4ef4934ea29732058da2",
+    "sha256": "5dd546cde30aae72f54e74a417161ea13ecbb14df65d5aee42349fe1467b89c0",
+    "lines": 539,
+    "matches_audited_commit": true,
+    "url": "https://github.com/gmhelmold/HuGR-Orchestra/blob/b0c33d2f6567a2c741240f3c44bc00ca2f01e7e7/foundation/atlas/packages/adapter-io/src/wire.ts"
+  },
+  {
+    "path": "foundation/atlas/packages/adapter-io/src/grounding-computer.ts",
+    "git_blob": "218c7a7122ed10148daba1def6f6554c5c4b7fdb",
+    "sha256": "147990a90169fa266225215c1c80bdeb2a832bf126dfb2ff81e7080ea3853fad",
+    "lines": 285,
+    "matches_audited_commit": true,
+    "url": "https://github.com/gmhelmold/HuGR-Orchestra/blob/b0c33d2f6567a2c741240f3c44bc00ca2f01e7e7/foundation/atlas/packages/adapter-io/src/grounding-computer.ts"
+  },
+  {
+    "path": "foundation/atlas/packages/adapter-io/src/freshness-watermark.ts",
+    "git_blob": "63003452fa64df9373ce2a88f94301917991ca61",
+    "sha256": "c4c9ffadf4b2ee1f9e9ddfe4265a8fd76d97fe129d80e0ea2a6de4709f918dc8",
+    "lines": 109,
+    "matches_audited_commit": true,
+    "url": "https://github.com/gmhelmold/HuGR-Orchestra/blob/b0c33d2f6567a2c741240f3c44bc00ca2f01e7e7/foundation/atlas/packages/adapter-io/src/freshness-watermark.ts"
+  },
+  {
+    "path": "foundation/atlas/packages/adapter-io/src/projection-query-index.ts",
+    "git_blob": "baa9499259ba73499a4b6e8a43e9e700f00b3444",
+    "sha256": "ee8857c8746ea3541d685d86405fa3c89648ca0440939ddea1002440d3b5f4fe",
+    "lines": 140,
+    "matches_audited_commit": true,
+    "url": "https://github.com/gmhelmold/HuGR-Orchestra/blob/b0c33d2f6567a2c741240f3c44bc00ca2f01e7e7/foundation/atlas/packages/adapter-io/src/projection-query-index.ts"
+  },
+  {
+    "path": "foundation/atlas/packages/adapter-io/src/own-bands.ts",
+    "git_blob": "edd133fcadad038ce82b2341fd8bdb33843dddc4",
+    "sha256": "e301281c0d116671262b5d063be0409c23175ac45734db843c34ee61a6dd6ad6",
+    "lines": 113,
+    "matches_audited_commit": true,
+    "url": "https://github.com/gmhelmold/HuGR-Orchestra/blob/b0c33d2f6567a2c741240f3c44bc00ca2f01e7e7/foundation/atlas/packages/adapter-io/src/own-bands.ts"
+  },
+  {
+    "path": "foundation/atlas/packages/adapter-io/src/own-source.ts",
+    "git_blob": "4874c2d11adb1a40930e70c4135a239fe9859860",
+    "sha256": "6111dd89cb775663f001339ed45b7dafad6b35cd77fe9d6f17a8e53b4d147d5e",
+    "lines": 366,
+    "matches_audited_commit": true,
+    "url": "https://github.com/gmhelmold/HuGR-Orchestra/blob/b0c33d2f6567a2c741240f3c44bc00ca2f01e7e7/foundation/atlas/packages/adapter-io/src/own-source.ts"
+  },
+  {
+    "path": "foundation/atlas/packages/adapter-io/src/governed-emit.ts",
+    "git_blob": "c390d4e979b90d83a141e9c134473a08cd89232c",
+    "sha256": "33546bdf5103174c633adf968feb4b9cbfb9dc3f649d973eeae9466f531c679d",
+    "lines": 365,
+    "matches_audited_commit": true,
+    "url": "https://github.com/gmhelmold/HuGR-Orchestra/blob/b0c33d2f6567a2c741240f3c44bc00ca2f01e7e7/foundation/atlas/packages/adapter-io/src/governed-emit.ts"
+  },
+  {
+    "path": "foundation/atlas/packages/adapter-io/src/governed-emit-gates.ts",
+    "git_blob": "e02a224c9a683e0b1fd3aa258cd63310de4475d0",
+    "sha256": "82a33491b088615d30d7ff5e6c7b9e19184e2517cce9a7048cbc282156f08f81",
+    "lines": 324,
+    "matches_audited_commit": true,
+    "url": "https://github.com/gmhelmold/HuGR-Orchestra/blob/b0c33d2f6567a2c741240f3c44bc00ca2f01e7e7/foundation/atlas/packages/adapter-io/src/governed-emit-gates.ts"
+  },
+  {
+    "path": "foundation/atlas/packages/tools/src/draft.ts",
+    "git_blob": "92be02e68c0586bacb11d9ae8ee8ffd7921daac9",
+    "sha256": "1bb25e6a0978c476e3e8f40ff01b767d27f70a7790eee1b190b276501610cc4e",
+    "lines": 220,
+    "matches_audited_commit": true,
+    "url": "https://github.com/gmhelmold/HuGR-Orchestra/blob/b0c33d2f6567a2c741240f3c44bc00ca2f01e7e7/foundation/atlas/packages/tools/src/draft.ts"
+  },
+  {
+    "path": "foundation/atlas/packages/tools/src/query.ts",
+    "git_blob": "914a2b695104b4ed7fd916595d2b20e4c811d4c3",
+    "sha256": "db1c0bf166c009681b6de2a7042938d2a8f25bc83582580b49cceede0ed0e8f7",
+    "lines": 79,
+    "matches_audited_commit": true,
+    "url": "https://github.com/gmhelmold/HuGR-Orchestra/blob/b0c33d2f6567a2c741240f3c44bc00ca2f01e7e7/foundation/atlas/packages/tools/src/query.ts"
+  },
+  {
+    "path": "foundation/atlas/packages/retrieval/src/own.ts",
+    "git_blob": "5fc1775c777ed8110f1ed9fed27f1c2c583ecda4",
+    "sha256": "dd954ca3417c6d3cdf6e62fd9e48aaf7e677d01bbf5a908a30dbce72836eea2a",
+    "lines": 359,
+    "matches_audited_commit": true,
+    "url": "https://github.com/gmhelmold/HuGR-Orchestra/blob/b0c33d2f6567a2c741240f3c44bc00ca2f01e7e7/foundation/atlas/packages/retrieval/src/own.ts"
+  },
+  {
+    "path": "foundation/atlas/packages/retrieval/src/own-snapshot.ts",
+    "git_blob": "758a4b4df5165d0cdc2d2c773cfcd652a6b4ce6e",
+    "sha256": "abba062aa8e6dbeab76c7005da49313da7c0f41abf75b6efa036906b7e336a42",
+    "lines": 173,
+    "matches_audited_commit": true,
+    "url": "https://github.com/gmhelmold/HuGR-Orchestra/blob/b0c33d2f6567a2c741240f3c44bc00ca2f01e7e7/foundation/atlas/packages/retrieval/src/own-snapshot.ts"
+  },
+  {
+    "path": "foundation/atlas/packages/retrieval/src/own-artifact.ts",
+    "git_blob": "3f8ff4c6d7f01b6e2071652b764b06680798420b",
+    "sha256": "11b49d190c923a3de2633084a88b611e349cb1a9d33253f4f1915fe84486e1f6",
+    "lines": 366,
+    "matches_audited_commit": true,
+    "url": "https://github.com/gmhelmold/HuGR-Orchestra/blob/b0c33d2f6567a2c741240f3c44bc00ca2f01e7e7/foundation/atlas/packages/retrieval/src/own-artifact.ts"
+  },
+  {
+    "path": "foundation/atlas/scripts/materialize-own-snapshot.mjs",
+    "git_blob": "ce9f1eb4a23a6358f3c2bae781f4022cce1dd8c0",
+    "sha256": "cf13bb70af03edcda3b22c323c0e0ac9756686660afe7dcd487a75f1e2ae2371",
+    "lines": 255,
+    "matches_audited_commit": true,
+    "url": "https://github.com/gmhelmold/HuGR-Orchestra/blob/b0c33d2f6567a2c741240f3c44bc00ca2f01e7e7/foundation/atlas/scripts/materialize-own-snapshot.mjs"
+  },
+  {
+    "path": "foundation/atlas/harness/gates/own-snapshot-guard.mjs",
+    "git_blob": "3f0a7efdde4f94e21d9977b86bb9ba9d96455c7a",
+    "sha256": "492a1bd04e439199e9f8de0525bdbe4c94c6a48a39c9b0ae9d1f9e43f5335b5f",
+    "lines": 97,
+    "matches_audited_commit": true,
+    "url": "https://github.com/gmhelmold/HuGR-Orchestra/blob/b0c33d2f6567a2c741240f3c44bc00ca2f01e7e7/foundation/atlas/harness/gates/own-snapshot-guard.mjs"
+  },
+  {
+    "path": "foundation/atlas/packages/mcp-server/src/bin.ts",
+    "git_blob": "24f2c0be3e44c0eea9b560b5420a227783161876",
+    "sha256": "ffed052d8d0d4b6486f5e16e51bd00cdd789b01bf80d5de17794cb6cf742b26b",
+    "lines": 35,
+    "matches_audited_commit": true,
+    "url": "https://github.com/gmhelmold/HuGR-Orchestra/blob/b0c33d2f6567a2c741240f3c44bc00ca2f01e7e7/foundation/atlas/packages/mcp-server/src/bin.ts"
+  },
+  {
+    "path": "foundation/atlas/packages/e2e-blackbox/src/harness.ts",
+    "git_blob": "7eb59ae581404cb8627a21526f9026285fea06e5",
+    "sha256": "f3593d53e2a466fab4dbdd8a81cd77e360f99a7fa2f811190d37b316bfa7b8ad",
+    "lines": 238,
+    "matches_audited_commit": true,
+    "url": "https://github.com/gmhelmold/HuGR-Orchestra/blob/b0c33d2f6567a2c741240f3c44bc00ca2f01e7e7/foundation/atlas/packages/e2e-blackbox/src/harness.ts"
+  },
+  {
+    "path": "packages/opencode/src/maestro/approval-record.ts",
+    "git_blob": "10f43f5d5b6d3b06304425ac89d2b079f6a48799",
+    "sha256": "d341f987334958604417125bd7d5bba83c8d991034faf5baf7424c49f888725d",
+    "lines": 298,
+    "matches_audited_commit": true,
+    "url": "https://github.com/gmhelmold/HuGR-Orchestra/blob/b0c33d2f6567a2c741240f3c44bc00ca2f01e7e7/packages/opencode/src/maestro/approval-record.ts"
+  },
+  {
+    "path": "packages/opencode/src/maestro/approval.ts",
+    "git_blob": "d0052a0a0c7aa1546328906ef8b333a757cf6547",
+    "sha256": "467d6b57110a8cf9552694372e4d81eaf1a2cf036f2af6b04830982b76f1a85a",
+    "lines": 260,
+    "matches_audited_commit": true,
+    "url": "https://github.com/gmhelmold/HuGR-Orchestra/blob/b0c33d2f6567a2c741240f3c44bc00ca2f01e7e7/packages/opencode/src/maestro/approval.ts"
+  },
+  {
+    "path": "packages/opencode/src/maestro/governed-task.ts",
+    "git_blob": "14944d11eb7f68e76ffac324f5122dd3874e40c1",
+    "sha256": "28da2f35a7fe0579d87c63a718628e2051b60c1ef0c64c1e66152f9fbeb23594",
+    "lines": 52,
+    "matches_audited_commit": true,
+    "url": "https://github.com/gmhelmold/HuGR-Orchestra/blob/b0c33d2f6567a2c741240f3c44bc00ca2f01e7e7/packages/opencode/src/maestro/governed-task.ts"
+  },
+  {
+    "path": "packages/opencode/src/maestro/task-hash.ts",
+    "git_blob": "ff09eb78b74e77da782c419e08ac9ec74d701b8a",
+    "sha256": "3abd7ba5eb2c61d93949d600fb6b01a84dc208a4ded6abcb1ed70d042d63f4d5",
+    "lines": 36,
+    "matches_audited_commit": true,
+    "url": "https://github.com/gmhelmold/HuGR-Orchestra/blob/b0c33d2f6567a2c741240f3c44bc00ca2f01e7e7/packages/opencode/src/maestro/task-hash.ts"
+  },
+  {
+    "path": "packages/opencode/src/tool/task.ts",
+    "git_blob": "f80e0beaf8e7cbd227d506f5769a05733d61dcda",
+    "sha256": "23828594dd3d54efef1d0e32c592ed51a2eaf7aca54320e49279203fee1d0b39",
+    "lines": 596,
+    "matches_audited_commit": true,
+    "url": "https://github.com/gmhelmold/HuGR-Orchestra/blob/b0c33d2f6567a2c741240f3c44bc00ca2f01e7e7/packages/opencode/src/tool/task.ts"
+  },
+  {
+    "path": "packages/opencode/src/tool/maestro-approval.ts",
+    "git_blob": "f153199fd08ed3dd51824148f05210387b3ec40f",
+    "sha256": "4ad008ff2b23032a45a6890202b4280535d352d9a6cf2771fec5ea6814fd247d",
+    "lines": 95,
+    "matches_audited_commit": true,
+    "url": "https://github.com/gmhelmold/HuGR-Orchestra/blob/b0c33d2f6567a2c741240f3c44bc00ca2f01e7e7/packages/opencode/src/tool/maestro-approval.ts"
+  },
+  {
+    "path": "packages/opencode/src/tool/skill.ts",
+    "git_blob": "9149bcc5ff0de554828b5c2b08ee85ce1cc6502a",
+    "sha256": "629ada0c0a0135cb003429aec233aeb165f0b98a2bd5171986bc319c11af3c07",
+    "lines": 70,
+    "matches_audited_commit": true,
+    "url": "https://github.com/gmhelmold/HuGR-Orchestra/blob/b0c33d2f6567a2c741240f3c44bc00ca2f01e7e7/packages/opencode/src/tool/skill.ts"
+  },
+  {
+    "path": "packages/opencode/src/skill/index.ts",
+    "git_blob": "5a04ec213994a65dd25098b843efca1fbd1c4e0e",
+    "sha256": "91dce57f590e1ad3103e0555b893500e098a95cde2739422b699233889b205e6",
+    "lines": 354,
+    "matches_audited_commit": true,
+    "url": "https://github.com/gmhelmold/HuGR-Orchestra/blob/b0c33d2f6567a2c741240f3c44bc00ca2f01e7e7/packages/opencode/src/skill/index.ts"
+  },
+  {
+    "path": "specs/hugr-maestro/own-protocol.md",
+    "git_blob": "dece051d0f5fcbab09b641ac42495201ebb44348",
+    "sha256": "f25e6b88ba581bc2b1c348f817a10828b36675b4064f78a48ce73713c9f14883",
+    "lines": 100,
+    "matches_audited_commit": true,
+    "url": "https://github.com/gmhelmold/HuGR-Orchestra/blob/b0c33d2f6567a2c741240f3c44bc00ca2f01e7e7/specs/hugr-maestro/own-protocol.md"
+  }
+]

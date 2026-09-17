@@ -1,0 +1,650 @@
+{
+  "commit": "b0c33d2f6567a2c741240f3c44bc00ca2f01e7e7",
+  "node": "v22.17.1",
+  "platform": "darwin",
+  "arch": "x64",
+  "realKernel": true,
+  "originalCompiledProduct": true,
+  "results": [
+    {
+      "id": "ATL-001-upsert-all-routes",
+      "outcome": "observed",
+      "outcomes": [
+        {
+          "route": "CREATE",
+          "retained": 0,
+          "builtAt": null
+        },
+        {
+          "route": "UPDATE",
+          "retained": 0,
+          "builtAt": null
+        },
+        {
+          "route": "SUPERSEDE",
+          "retained": 0,
+          "builtAt": null
+        },
+        {
+          "route": "DEDUP",
+          "retained": 0,
+          "builtAt": null
+        }
+      ],
+      "inputUnmodified": true,
+      "defectReproduced": true
+    },
+    {
+      "id": "ATL-001-real-handler-durable-loss",
+      "outcome": "observed",
+      "abstainReason": "abstained (target-not-global): the target is a `local ` SCIP symbol, document-scoped by the grammar — its callers are intra-document (a different closed procedure), out of #99b v1 scope. Name the GLOBAL symbol",
+      "before": 1,
+      "emit": {
+        "emitted": true,
+        "id": "3da4aa64d4676ea9726ae27fa0100cbf77f11a455f32eb60655fe24283644f93",
+        "nodeKey": "bcbcbcd6d6bcf36ef38f5c92f96fc6eff4839e5dc326f96870c0f6eba39d9454"
+      },
+      "afterReopen": 0,
+      "defectReproduced": true
+    },
+    {
+      "id": "ATL-002-real-handler-invisible-hit-promotion",
+      "outcome": "observed",
+      "sequence": [
+        {
+          "query": 1,
+          "governing": [],
+          "advisory": [
+            "251c18c0257328773d05c4a6a09354dc2f9e329e3d83a08f5aa43672e5ef41c7",
+            "60fd1f933dd7b05682d2869afe06af7882e9cb32433134622a5567d9381565be",
+            "a1d4c0cf243d6acf0e35363c33fa3304633211d42372bfe0b99b6a2d00b3713e",
+            "b58910d248d082e5334353c6267318363a3e0ab71a8cf752e9e333fa40cdc20e"
+          ],
+          "advisoryDropped": 2
+        },
+        {
+          "query": 2,
+          "governing": [],
+          "advisory": [
+            "251c18c0257328773d05c4a6a09354dc2f9e329e3d83a08f5aa43672e5ef41c7",
+            "60fd1f933dd7b05682d2869afe06af7882e9cb32433134622a5567d9381565be",
+            "a1d4c0cf243d6acf0e35363c33fa3304633211d42372bfe0b99b6a2d00b3713e",
+            "b58910d248d082e5334353c6267318363a3e0ab71a8cf752e9e333fa40cdc20e"
+          ],
+          "advisoryDropped": 2
+        },
+        {
+          "query": 3,
+          "governing": [],
+          "advisory": [
+            "251c18c0257328773d05c4a6a09354dc2f9e329e3d83a08f5aa43672e5ef41c7",
+            "60fd1f933dd7b05682d2869afe06af7882e9cb32433134622a5567d9381565be",
+            "a1d4c0cf243d6acf0e35363c33fa3304633211d42372bfe0b99b6a2d00b3713e",
+            "b58910d248d082e5334353c6267318363a3e0ab71a8cf752e9e333fa40cdc20e"
+          ],
+          "advisoryDropped": 2
+        },
+        {
+          "query": 4,
+          "governing": [],
+          "advisory": [
+            "251c18c0257328773d05c4a6a09354dc2f9e329e3d83a08f5aa43672e5ef41c7",
+            "60fd1f933dd7b05682d2869afe06af7882e9cb32433134622a5567d9381565be",
+            "a1d4c0cf243d6acf0e35363c33fa3304633211d42372bfe0b99b6a2d00b3713e",
+            "b58910d248d082e5334353c6267318363a3e0ab71a8cf752e9e333fa40cdc20e"
+          ],
+          "advisoryDropped": 2
+        },
+        {
+          "query": 5,
+          "governing": [],
+          "advisory": [
+            "251c18c0257328773d05c4a6a09354dc2f9e329e3d83a08f5aa43672e5ef41c7",
+            "60fd1f933dd7b05682d2869afe06af7882e9cb32433134622a5567d9381565be",
+            "a1d4c0cf243d6acf0e35363c33fa3304633211d42372bfe0b99b6a2d00b3713e",
+            "b58910d248d082e5334353c6267318363a3e0ab71a8cf752e9e333fa40cdc20e"
+          ],
+          "advisoryDropped": 2
+        },
+        {
+          "query": 6,
+          "governing": [],
+          "advisory": [
+            "251c18c0257328773d05c4a6a09354dc2f9e329e3d83a08f5aa43672e5ef41c7",
+            "60fd1f933dd7b05682d2869afe06af7882e9cb32433134622a5567d9381565be",
+            "a1d4c0cf243d6acf0e35363c33fa3304633211d42372bfe0b99b6a2d00b3713e",
+            "b58910d248d082e5334353c6267318363a3e0ab71a8cf752e9e333fa40cdc20e"
+          ],
+          "advisoryDropped": 2
+        },
+        {
+          "query": 7,
+          "governing": [],
+          "advisory": [
+            "251c18c0257328773d05c4a6a09354dc2f9e329e3d83a08f5aa43672e5ef41c7",
+            "60fd1f933dd7b05682d2869afe06af7882e9cb32433134622a5567d9381565be",
+            "a1d4c0cf243d6acf0e35363c33fa3304633211d42372bfe0b99b6a2d00b3713e",
+            "b58910d248d082e5334353c6267318363a3e0ab71a8cf752e9e333fa40cdc20e"
+          ],
+          "advisoryDropped": 2
+        },
+        {
+          "query": 8,
+          "governing": [],
+          "advisory": [
+            "251c18c0257328773d05c4a6a09354dc2f9e329e3d83a08f5aa43672e5ef41c7",
+            "60fd1f933dd7b05682d2869afe06af7882e9cb32433134622a5567d9381565be",
+            "a1d4c0cf243d6acf0e35363c33fa3304633211d42372bfe0b99b6a2d00b3713e",
+            "b58910d248d082e5334353c6267318363a3e0ab71a8cf752e9e333fa40cdc20e"
+          ],
+          "advisoryDropped": 2
+        },
+        {
+          "query": 9,
+          "governing": [
+            "251c18c0257328773d05c4a6a09354dc2f9e329e3d83a08f5aa43672e5ef41c7",
+            "60fd1f933dd7b05682d2869afe06af7882e9cb32433134622a5567d9381565be",
+            "a1d4c0cf243d6acf0e35363c33fa3304633211d42372bfe0b99b6a2d00b3713e",
+            "b58910d248d082e5334353c6267318363a3e0ab71a8cf752e9e333fa40cdc20e",
+            "bcbcbcd6d6bcf36ef38f5c92f96fc6eff4839e5dc326f96870c0f6eba39d9454",
+            "bec91d798026088863ac0b8136b26c9595e38da45d3fe92d346793139c304a49"
+          ],
+          "advisory": [],
+          "advisoryDropped": 0
+        }
+      ],
+      "neverDeliveredBeforeNine": [
+        "bcbcbcd6d6bcf36ef38f5c92f96fc6eff4839e5dc326f96870c0f6eba39d9454",
+        "bec91d798026088863ac0b8136b26c9595e38da45d3fe92d346793139c304a49"
+      ],
+      "promotedWithoutDelivery": [
+        "bcbcbcd6d6bcf36ef38f5c92f96fc6eff4839e5dc326f96870c0f6eba39d9454",
+        "bec91d798026088863ac0b8136b26c9595e38da45d3fe92d346793139c304a49"
+      ],
+      "storedTiers": [
+        "T2",
+        "T2",
+        "T2",
+        "T2",
+        "T2",
+        "T2"
+      ],
+      "defectReproduced": true
+    },
+    {
+      "id": "OWN-003-real-gotcha-freshness",
+      "outcome": "observed",
+      "before": {
+        "invariants": [
+          "FRESH"
+        ],
+        "gotchas": [
+          "FRESH"
+        ]
+      },
+      "after": {
+        "invariants": [
+          "DRIFTED"
+        ],
+        "gotchas": [
+          "FRESH"
+        ]
+      },
+      "query": [
+        {
+          "claim": "Original value for invariant.",
+          "freshness": "STALE"
+        },
+        {
+          "claim": "Original value for gotcha.",
+          "freshness": "STALE"
+        }
+      ],
+      "defectReproduced": true
+    },
+    {
+      "id": "NEW-runtime-stale-axes-current-watermark",
+      "outcome": "observed",
+      "oldRev": "13f4acf580488ab9209bb62153862eafa8d7b60c",
+      "newRev": "3439c2feb1c72fc62091d585133120e004a792ae",
+      "oldDraftRev": "13f4acf580488ab9209bb62153862eafa8d7b60c",
+      "emit": {
+        "ok": true,
+        "data": {
+          "emitted": true,
+          "id": "e9148eee2d1692aeaedfa8d87a951df7a1a059be52f9c73c635d32673a511b6c",
+          "nodeKey": "bcbcbcd6d6bcf36ef38f5c92f96fc6eff4839e5dc326f96870c0f6eba39d9454"
+        },
+        "guidance": {
+          "next": "a rejected write did not re-derive at source@sha — fix the citation and re-emit",
+          "invariant": "TOOLS-1/7: atlas-emit is a governed fail-closed write door (WRITE_PATHS: atlas-emit, atlas-link — ADR-0003)"
+        }
+      },
+      "sameProcess": {
+        "territory": "src",
+        "axisHash": "cf4a97639b6884a5845ec91e076e9c3b3618d5a56e8da263917c66ad92ae19b6",
+        "invariants": [],
+        "advisory": [
+          {
+            "nodeId": "bcbcbcd6d6bcf36ef38f5c92f96fc6eff4839e5dc326f96870c0f6eba39d9454",
+            "tier": "T2",
+            "claim": "The original value0 is zero.",
+            "freshness": "FRESH"
+          }
+        ],
+        "advisoryDropped": 0,
+        "tokenEstimate": 28,
+        "stale": false
+      },
+      "freshProcess": {
+        "territory": "src",
+        "axisHash": "a46aba489652559ce47c8da533e950dac058f813fabea82a7f36d47e660f4a5a",
+        "invariants": [],
+        "advisory": [
+          {
+            "nodeId": "bcbcbcd6d6bcf36ef38f5c92f96fc6eff4839e5dc326f96870c0f6eba39d9454",
+            "tier": "T2",
+            "claim": "The original value0 is zero.",
+            "freshness": "STALE"
+          }
+        ],
+        "advisoryDropped": 0,
+        "tokenEstimate": 28,
+        "stale": false
+      },
+      "freshCheck": {
+        "wouldEmit": false,
+        "gates": [
+          {
+            "gate": "shape",
+            "pass": true
+          },
+          {
+            "gate": "truth",
+            "pass": false,
+            "reason": "ungrounded: citation does not re-derive FRESH at source (TOOLS-7b / GROUND-6)",
+            "remedy": "re-derive the citation against the CURRENT source tree, or re-anchor the claim to a unit that still exists"
+          }
+        ]
+      },
+      "defectReproduced": true
+    },
+    {
+      "id": "NEW-draft-provenance-route-parity",
+      "outcome": "observed",
+      "draftRoute": "full-ratify",
+      "requires": "ATLAS_RATIFY_TOKEN",
+      "returnedFactProvenance": null,
+      "check": {
+        "wouldEmit": true,
+        "gates": [
+          {
+            "gate": "shape",
+            "pass": true
+          },
+          {
+            "gate": "truth",
+            "pass": true
+          },
+          {
+            "gate": "authz",
+            "pass": true
+          },
+          {
+            "gate": "ratify",
+            "pass": true
+          }
+        ]
+      },
+      "emit": {
+        "ok": true,
+        "data": {
+          "emitted": true,
+          "id": "3da4aa64d4676ea9726ae27fa0100cbf77f11a455f32eb60655fe24283644f93",
+          "nodeKey": "bcbcbcd6d6bcf36ef38f5c92f96fc6eff4839e5dc326f96870c0f6eba39d9454"
+        },
+        "guidance": {
+          "next": "a rejected write did not re-derive at source@sha — fix the citation and re-emit",
+          "invariant": "TOOLS-1/7: atlas-emit is a governed fail-closed write door (WRITE_PATHS: atlas-emit, atlas-link — ADR-0003)"
+        }
+      },
+      "ratifyTokenPresent": false,
+      "defectReproduced": true
+    },
+    {
+      "id": "OWN-scripts-control",
+      "outcome": "observed",
+      "pure": {
+        "status": "READY"
+      },
+      "materialize": {
+        "status": 0,
+        "stdout": "materialize-own-snapshot: wrote OWN-SNAPSHOT.json and 2 file(s) under .opencode/skills/own; replacement uses transactional rollback, not crash-atomic commit\n",
+        "stderr": ""
+      },
+      "guard": {
+        "status": 0,
+        "stdout": "own-snapshot-guard: OK — 1 Genesis unit(s), 2 static Own file(s), source blobs fresh. Snapshot facts/units/blobs exactly recompose committed skills.\n",
+        "stderr": ""
+      },
+      "rendersUndefined": false,
+      "drill": [],
+      "realKernel": true,
+      "defectReproduced": false
+    },
+    {
+      "id": "OWN-scripts-dangling",
+      "outcome": "observed",
+      "pure": {
+        "status": "READY"
+      },
+      "materialize": {
+        "status": 0,
+        "stdout": "materialize-own-snapshot: wrote OWN-SNAPSHOT.json and 2 file(s) under .opencode/skills/own; replacement uses transactional rollback, not crash-atomic commit\n",
+        "stderr": ""
+      },
+      "guard": {
+        "status": 0,
+        "stdout": "own-snapshot-guard: OK — 1 Genesis unit(s), 2 static Own file(s), source blobs fresh. Snapshot facts/units/blobs exactly recompose committed skills.\n",
+        "stderr": ""
+      },
+      "rendersUndefined": false,
+      "drill": [
+        "missing/unit"
+      ],
+      "realKernel": true,
+      "defectReproduced": true
+    },
+    {
+      "id": "OWN-scripts-malformed-predicate",
+      "outcome": "observed",
+      "pure": {
+        "status": "READY"
+      },
+      "materialize": {
+        "status": 0,
+        "stdout": "materialize-own-snapshot: wrote OWN-SNAPSHOT.json and 2 file(s) under .opencode/skills/own; replacement uses transactional rollback, not crash-atomic commit\n",
+        "stderr": ""
+      },
+      "guard": {
+        "status": 0,
+        "stdout": "own-snapshot-guard: OK — 1 Genesis unit(s), 2 static Own file(s), source blobs fresh. Snapshot facts/units/blobs exactly recompose committed skills.\n",
+        "stderr": ""
+      },
+      "rendersUndefined": true,
+      "drill": [],
+      "realKernel": true,
+      "defectReproduced": true
+    },
+    {
+      "id": "OWN-scripts-stale-source",
+      "outcome": "observed",
+      "pure": {
+        "status": "READY"
+      },
+      "materialize": {
+        "status": 0,
+        "stdout": "materialize-own-snapshot: wrote OWN-SNAPSHOT.json and 2 file(s) under .opencode/skills/own; replacement uses transactional rollback, not crash-atomic commit\n",
+        "stderr": ""
+      },
+      "guard": {
+        "status": 1,
+        "stdout": "",
+        "stderr": "own-snapshot-guard: FAIL\n\n  ✗ source blob drift: src -> src/f0.ts\n"
+      },
+      "rendersUndefined": false,
+      "drill": [],
+      "realKernel": true,
+      "defectReproduced": false
+    },
+    {
+      "id": "OWN-005-final-payload-budget",
+      "outcome": "observed",
+      "files": 350,
+      "estimate": 127,
+      "packUtf8Bytes": 8885,
+      "terrainEntries": 350,
+      "explicitFiner": 16,
+      "manifest": {
+        "pointers": [
+          {
+            "kind": "pack",
+            "name": "own_f0.ts",
+            "digest": "632fd14853d6d5deca72aa2a47bcc293f7183b43260962b1b766a30a6e91012d",
+            "pull": "atlas own src/f0.ts",
+            "hits": 0
+          },
+          {
+            "kind": "pack",
+            "name": "own_f1.ts",
+            "digest": "76bc676ab675707e34fbcb7e38685ef859669577de5e77eacac017c457e31836",
+            "pull": "atlas own src/f1.ts",
+            "hits": 0
+          },
+          {
+            "kind": "pack",
+            "name": "own_f10.ts",
+            "digest": "52ccf7f1212462c9a151348869f769cb91379b34c4e8bdc457731bb68412cade",
+            "pull": "atlas own src/f10.ts",
+            "hits": 0
+          },
+          {
+            "kind": "pack",
+            "name": "own_f100.ts",
+            "digest": "91b9dec479a2dc67958ba0fc456ea80a365123b4ff7823bf5965fb7d90464049",
+            "pull": "atlas own src/f100.ts",
+            "hits": 0
+          },
+          {
+            "kind": "pack",
+            "name": "own_f101.ts",
+            "digest": "1545103fc14a0f9c8cbf8099666d9ab64f2bb9e1006466532b0ce3a6b784fb99",
+            "pull": "atlas own src/f101.ts",
+            "hits": 0
+          },
+          {
+            "kind": "pack",
+            "name": "own_f102.ts",
+            "digest": "0dcd28c71b21ea9d5adcaf9cb390c920fbb1b2582c31d02e942a6e767c30923a",
+            "pull": "atlas own src/f102.ts",
+            "hits": 0
+          },
+          {
+            "kind": "pack",
+            "name": "own_f103.ts",
+            "digest": "6cfe03e206767607d59a95ade72d615e8a750edc998b940887b740350e061cb8",
+            "pull": "atlas own src/f103.ts",
+            "hits": 0
+          },
+          {
+            "kind": "pack",
+            "name": "own_f104.ts",
+            "digest": "71c46d1d65fd008ceaa00d7546ac8ec681bc19c5221574c45fc285e0872e10fe",
+            "pull": "atlas own src/f104.ts",
+            "hits": 0
+          },
+          {
+            "kind": "pack",
+            "name": "own_f105.ts",
+            "digest": "85bc8ef4c4b4e994eedbd8cd5845aaaa2e3b6abcfa456d793b82c1968564ef4f",
+            "pull": "atlas own src/f105.ts",
+            "hits": 0
+          },
+          {
+            "kind": "pack",
+            "name": "own_f106.ts",
+            "digest": "f1746425d0b72c730ca0a5ce2a4c56d481cd7cfc9da1f9e38781a9aeb1880bcd",
+            "pull": "atlas own src/f106.ts",
+            "hits": 0
+          },
+          {
+            "kind": "pack",
+            "name": "own_f107.ts",
+            "digest": "28cd538057fab70abf0e2c71735a82413ec2a9240621642b500134cde1fce2c0",
+            "pull": "atlas own src/f107.ts",
+            "hits": 0
+          },
+          {
+            "kind": "pack",
+            "name": "own_f108.ts",
+            "digest": "780eb3206fcdc950edc6c330c8ba6578c016fa34169977baffd1a7daa6435f6c",
+            "pull": "atlas own src/f108.ts",
+            "hits": 0
+          }
+        ],
+        "truncated": true
+      },
+      "claim": "Serialized size is measured in bytes; no exact model token count is claimed."
+    },
+    {
+      "id": "NEW-draft-provenance-negative-control",
+      "outcome": "observed",
+      "declaredProvenanceRefused": {
+        "ok": false,
+        "data": {
+          "emitted": false,
+          "rejected": "unratified: this write owed FULL ratification and no valid ratifier was named (KNOW-8) — set ATLAS_RATIFY_TOKEN. A write owes full ratification when it is T0, a predicate, contested, or a PROMOTION of a staged candidate (the fast path does not apply to a machine-proposed fact no human has read). A T0 fact additionally requires the billy token"
+        },
+        "rejected": "unratified: this write owed FULL ratification and no valid ratifier was named (KNOW-8) — set ATLAS_RATIFY_TOKEN. A write owes full ratification when it is T0, a predicate, contested, or a PROMOTION of a staged candidate (the fast path does not apply to a machine-proposed fact no human has read). A T0 fact additionally requires the billy token",
+        "guidance": {
+          "next": "a rejected write did not re-derive at source@sha — fix the citation and re-emit",
+          "invariant": "TOOLS-1/7: atlas-emit is a governed fail-closed write door (WRITE_PATHS: atlas-emit, atlas-link — ADR-0003)"
+        }
+      },
+      "omittedProvenanceAccepted": {
+        "ok": true,
+        "data": {
+          "emitted": true,
+          "id": "3da4aa64d4676ea9726ae27fa0100cbf77f11a455f32eb60655fe24283644f93",
+          "nodeKey": "bcbcbcd6d6bcf36ef38f5c92f96fc6eff4839e5dc326f96870c0f6eba39d9454"
+        },
+        "guidance": {
+          "next": "a rejected write did not re-derive at source@sha — fix the citation and re-emit",
+          "invariant": "TOOLS-1/7: atlas-emit is a governed fail-closed write door (WRITE_PATHS: atlas-emit, atlas-link — ADR-0003)"
+        }
+      },
+      "defectReproduced": true
+    },
+    {
+      "id": "NEW-check-closed-slot-parity",
+      "outcome": "observed",
+      "validControl": {
+        "wouldEmit": true,
+        "gates": [
+          {
+            "gate": "shape",
+            "pass": true
+          },
+          {
+            "gate": "truth",
+            "pass": true
+          },
+          {
+            "gate": "authz",
+            "pass": true
+          },
+          {
+            "gate": "ratify",
+            "pass": true
+          }
+        ]
+      },
+      "check": {
+        "wouldEmit": true,
+        "gates": [
+          {
+            "gate": "shape",
+            "pass": true
+          },
+          {
+            "gate": "truth",
+            "pass": true
+          },
+          {
+            "gate": "authz",
+            "pass": true
+          },
+          {
+            "gate": "ratify",
+            "pass": true
+          }
+        ]
+      },
+      "emit": {
+        "ok": false,
+        "data": {
+          "emitted": false,
+          "rejected": "closed-slot-violation: this write declares predicateSlot 'unknown-audit-slot', which is not one of the closed 13. The vocabulary is CLOSED (KNOW-10 / KNOW-15i): 'invariant', 'contract', 'precondition', 'postcondition', 'sideeffect', 'ownership', 'perf-bound', 'security-property', 'gotcha', 'rationale', 'dependency', 'count', 'definition'. It is closed because node identity is hash(primaryAnchorId + predicateSlot), so an unrecognised slot does not collide with anything — it silently mints a NEW address at the same anchor and the store proliferates parallel nodes that never merge. Re-state the claim under one of the 13; adding a fourteenth is a contract-version (`cv`) bump, not a write. Refused by the governed write door (atlas-emit / atlas-link) before anything was persisted"
+        },
+        "rejected": "closed-slot-violation: this write declares predicateSlot 'unknown-audit-slot', which is not one of the closed 13. The vocabulary is CLOSED (KNOW-10 / KNOW-15i): 'invariant', 'contract', 'precondition', 'postcondition', 'sideeffect', 'ownership', 'perf-bound', 'security-property', 'gotcha', 'rationale', 'dependency', 'count', 'definition'. It is closed because node identity is hash(primaryAnchorId + predicateSlot), so an unrecognised slot does not collide with anything — it silently mints a NEW address at the same anchor and the store proliferates parallel nodes that never merge. Re-state the claim under one of the 13; adding a fourteenth is a contract-version (`cv`) bump, not a write. Refused by the governed write door (atlas-emit / atlas-link) before anything was persisted",
+        "guidance": {
+          "next": "a rejected write did not re-derive at source@sha — fix the citation and re-emit",
+          "invariant": "TOOLS-1/7: atlas-emit is a governed fail-closed write door (WRITE_PATHS: atlas-emit, atlas-link — ADR-0003)"
+        }
+      },
+      "rowsAfter": 0,
+      "defectReproduced": true
+    },
+    {
+      "id": "ATL-003-contested-wiring",
+      "outcome": "observed",
+      "explicitContested": "full-ratify",
+      "check": {
+        "wouldEmit": true,
+        "gates": [
+          {
+            "gate": "shape",
+            "pass": true
+          },
+          {
+            "gate": "truth",
+            "pass": true
+          },
+          {
+            "gate": "authz",
+            "pass": true
+          },
+          {
+            "gate": "ratify",
+            "pass": true
+          }
+        ]
+      },
+      "emit": {
+        "ok": true,
+        "data": {
+          "emitted": true,
+          "id": "5146304b763da0e866a83a3fc4de0ba0521d62a415c8fdfe5e61deeb7f64a2a3",
+          "nodeKey": "bcbcbcd6d6bcf36ef38f5c92f96fc6eff4839e5dc326f96870c0f6eba39d9454"
+        },
+        "guidance": {
+          "next": "a rejected write did not re-derive at source@sha — fix the citation and re-emit",
+          "invariant": "TOOLS-1/7: atlas-emit is a governed fail-closed write door (WRITE_PATHS: atlas-emit, atlas-link — ADR-0003)"
+        }
+      },
+      "contentChanged": true,
+      "claimUnion": [
+        "Claim A at this anchor.",
+        "Different claim B at this anchor."
+      ],
+      "classification": "Wiring/contract conflict, not proof all different claims are semantically contradictory."
+    },
+    {
+      "id": "NEW-materializer-symlink-entrypoint",
+      "outcome": "observed",
+      "aliased": {
+        "status": 0,
+        "stdout": "",
+        "stderr": "",
+        "installed": false
+      },
+      "canonical": {
+        "status": 0,
+        "stdout": "materialize-own-snapshot: wrote OWN-SNAPSHOT.json and 2 file(s) under .opencode/skills/own; replacement uses transactional rollback, not crash-atomic commit\n",
+        "stderr": "",
+        "installed": true
+      },
+      "defectReproduced": true
+    }
+  ]
+}

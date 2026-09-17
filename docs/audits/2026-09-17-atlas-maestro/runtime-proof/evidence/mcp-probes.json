@@ -1,0 +1,323 @@
+{
+  "commit": "b0c33d2f6567a2c741240f3c44bc00ca2f01e7e7",
+  "node": "v22.17.1",
+  "transport": "original MCP stdio subprocess + original SDK client",
+  "results": [
+    {
+      "id": "MCP-frozen-axes-current-watermark",
+      "outcome": "observed",
+      "oldRev": "f645b0c0afe16f31d99a2b356f12018fd014c97f",
+      "newRev": "389af5caad73d91aa1a590752047a272e95d9487",
+      "control": {
+        "isError": false,
+        "body": {
+          "data": {
+            "wouldEmit": true,
+            "gates": [
+              {
+                "gate": "shape",
+                "pass": true
+              },
+              {
+                "gate": "truth",
+                "pass": true
+              },
+              {
+                "gate": "authz",
+                "pass": true
+              },
+              {
+                "gate": "ratify",
+                "pass": true
+              }
+            ]
+          },
+          "guidance": {
+            "next": "the candidate would be ADMITTED — all 4 gate(s) pass; emit it through the governed door with `atlas emit <file> --at <rev>`",
+            "invariant": "AUTHOR-11/12: `atlas check` DRY-RUNS the governed emit door's WHOLE gate chain over a candidate `GroundedFact` at a rev, WITHOUT any write — the `wouldEmit` verdict and the first-refusing gate agree with the real door's BY CONSTRUCTION (PROP-AUTH-11, the SAME `runGateChain` fold), persisting NOTHING, opening no write path, never a throw"
+          }
+        }
+      },
+      "emit": {
+        "isError": false,
+        "body": {
+          "data": {
+            "emitted": true,
+            "id": "7d623ca24185cd26b8be79f3d98ed25cf86e8f715a96efdf44907734107fc7f4",
+            "nodeKey": "bcbcbcd6d6bcf36ef38f5c92f96fc6eff4839e5dc326f96870c0f6eba39d9454"
+          },
+          "guidance": {
+            "next": "a rejected write did not re-derive at source@sha — fix the citation and re-emit",
+            "invariant": "TOOLS-1/7: atlas-emit is a governed fail-closed write door (WRITE_PATHS: atlas-emit, atlas-link — ADR-0003)"
+          }
+        }
+      },
+      "oldQuery": {
+        "isError": false,
+        "body": {
+          "data": {
+            "pack": {
+              "territory": "src",
+              "axisHash": "9caa2b67a950fecb0fc6a4961a416535f6f6533614ba444f82e5f389aeabaaab",
+              "invariants": [],
+              "advisory": [
+                {
+                  "nodeId": "bcbcbcd6d6bcf36ef38f5c92f96fc6eff4839e5dc326f96870c0f6eba39d9454",
+                  "tier": "T2",
+                  "claim": "The value0 is zero.",
+                  "freshness": "FRESH"
+                }
+              ],
+              "advisoryDropped": 0,
+              "tokenEstimate": 19,
+              "stale": false
+            },
+            "subsumes": [],
+            "sameAs": []
+          },
+          "guidance": {
+            "next": "re-ground stale packs before trusting; an advisory row is a machine proposal no ratifier saw — check its per-row freshness; scope must be a path string",
+            "invariant": "TOOLS-6: bounded read projection, two bands (governing tier>=T1 + separately capped advisory T2), every row carrying its own freshness"
+          }
+        }
+      },
+      "freshQuery": {
+        "isError": false,
+        "body": {
+          "data": {
+            "pack": {
+              "territory": "src",
+              "axisHash": "88522d9dbc1694f3d8e3bbbebb7737381cd275000f25c2ab9c1dadd7e3d57495",
+              "invariants": [],
+              "advisory": [
+                {
+                  "nodeId": "bcbcbcd6d6bcf36ef38f5c92f96fc6eff4839e5dc326f96870c0f6eba39d9454",
+                  "tier": "T2",
+                  "claim": "The value0 is zero.",
+                  "freshness": "STALE"
+                }
+              ],
+              "advisoryDropped": 0,
+              "tokenEstimate": 19,
+              "stale": false
+            },
+            "subsumes": [],
+            "sameAs": []
+          },
+          "guidance": {
+            "next": "re-ground stale packs before trusting; an advisory row is a machine proposal no ratifier saw — check its per-row freshness; scope must be a path string",
+            "invariant": "TOOLS-6: bounded read projection, two bands (governing tier>=T1 + separately capped advisory T2), every row carrying its own freshness"
+          }
+        }
+      },
+      "freshCheck": {
+        "isError": false,
+        "body": {
+          "data": {
+            "wouldEmit": false,
+            "gates": [
+              {
+                "gate": "shape",
+                "pass": true
+              },
+              {
+                "gate": "truth",
+                "pass": false,
+                "reason": "ungrounded: citation does not re-derive FRESH at source (TOOLS-7b / GROUND-6)",
+                "remedy": "re-derive the citation against the CURRENT source tree, or re-anchor the claim to a unit that still exists"
+              }
+            ]
+          },
+          "guidance": {
+            "next": "the candidate would be REFUSED at gate 'truth' — re-derive the citation against the CURRENT source tree, or re-anchor the claim to a unit that still exists",
+            "invariant": "AUTHOR-11/12: `atlas check` DRY-RUNS the governed emit door's WHOLE gate chain over a candidate `GroundedFact` at a rev, WITHOUT any write — the `wouldEmit` verdict and the first-refusing gate agree with the real door's BY CONSTRUCTION (PROP-AUTH-11, the SAME `runGateChain` fold), persisting NOTHING, opening no write path, never a throw"
+          }
+        }
+      },
+      "defectReproduced": true
+    },
+    {
+      "id": "MCP-invisible-hit-promotion",
+      "outcome": "observed",
+      "sequence": [
+        {
+          "query": 1,
+          "governing": [],
+          "advisory": [
+            "251c18c0257328773d05c4a6a09354dc2f9e329e3d83a08f5aa43672e5ef41c7",
+            "60fd1f933dd7b05682d2869afe06af7882e9cb32433134622a5567d9381565be",
+            "a1d4c0cf243d6acf0e35363c33fa3304633211d42372bfe0b99b6a2d00b3713e",
+            "b58910d248d082e5334353c6267318363a3e0ab71a8cf752e9e333fa40cdc20e"
+          ],
+          "dropped": 2
+        },
+        {
+          "query": 2,
+          "governing": [],
+          "advisory": [
+            "251c18c0257328773d05c4a6a09354dc2f9e329e3d83a08f5aa43672e5ef41c7",
+            "60fd1f933dd7b05682d2869afe06af7882e9cb32433134622a5567d9381565be",
+            "a1d4c0cf243d6acf0e35363c33fa3304633211d42372bfe0b99b6a2d00b3713e",
+            "b58910d248d082e5334353c6267318363a3e0ab71a8cf752e9e333fa40cdc20e"
+          ],
+          "dropped": 2
+        },
+        {
+          "query": 3,
+          "governing": [],
+          "advisory": [
+            "251c18c0257328773d05c4a6a09354dc2f9e329e3d83a08f5aa43672e5ef41c7",
+            "60fd1f933dd7b05682d2869afe06af7882e9cb32433134622a5567d9381565be",
+            "a1d4c0cf243d6acf0e35363c33fa3304633211d42372bfe0b99b6a2d00b3713e",
+            "b58910d248d082e5334353c6267318363a3e0ab71a8cf752e9e333fa40cdc20e"
+          ],
+          "dropped": 2
+        },
+        {
+          "query": 4,
+          "governing": [],
+          "advisory": [
+            "251c18c0257328773d05c4a6a09354dc2f9e329e3d83a08f5aa43672e5ef41c7",
+            "60fd1f933dd7b05682d2869afe06af7882e9cb32433134622a5567d9381565be",
+            "a1d4c0cf243d6acf0e35363c33fa3304633211d42372bfe0b99b6a2d00b3713e",
+            "b58910d248d082e5334353c6267318363a3e0ab71a8cf752e9e333fa40cdc20e"
+          ],
+          "dropped": 2
+        },
+        {
+          "query": 5,
+          "governing": [],
+          "advisory": [
+            "251c18c0257328773d05c4a6a09354dc2f9e329e3d83a08f5aa43672e5ef41c7",
+            "60fd1f933dd7b05682d2869afe06af7882e9cb32433134622a5567d9381565be",
+            "a1d4c0cf243d6acf0e35363c33fa3304633211d42372bfe0b99b6a2d00b3713e",
+            "b58910d248d082e5334353c6267318363a3e0ab71a8cf752e9e333fa40cdc20e"
+          ],
+          "dropped": 2
+        },
+        {
+          "query": 6,
+          "governing": [],
+          "advisory": [
+            "251c18c0257328773d05c4a6a09354dc2f9e329e3d83a08f5aa43672e5ef41c7",
+            "60fd1f933dd7b05682d2869afe06af7882e9cb32433134622a5567d9381565be",
+            "a1d4c0cf243d6acf0e35363c33fa3304633211d42372bfe0b99b6a2d00b3713e",
+            "b58910d248d082e5334353c6267318363a3e0ab71a8cf752e9e333fa40cdc20e"
+          ],
+          "dropped": 2
+        },
+        {
+          "query": 7,
+          "governing": [],
+          "advisory": [
+            "251c18c0257328773d05c4a6a09354dc2f9e329e3d83a08f5aa43672e5ef41c7",
+            "60fd1f933dd7b05682d2869afe06af7882e9cb32433134622a5567d9381565be",
+            "a1d4c0cf243d6acf0e35363c33fa3304633211d42372bfe0b99b6a2d00b3713e",
+            "b58910d248d082e5334353c6267318363a3e0ab71a8cf752e9e333fa40cdc20e"
+          ],
+          "dropped": 2
+        },
+        {
+          "query": 8,
+          "governing": [],
+          "advisory": [
+            "251c18c0257328773d05c4a6a09354dc2f9e329e3d83a08f5aa43672e5ef41c7",
+            "60fd1f933dd7b05682d2869afe06af7882e9cb32433134622a5567d9381565be",
+            "a1d4c0cf243d6acf0e35363c33fa3304633211d42372bfe0b99b6a2d00b3713e",
+            "b58910d248d082e5334353c6267318363a3e0ab71a8cf752e9e333fa40cdc20e"
+          ],
+          "dropped": 2
+        },
+        {
+          "query": 9,
+          "governing": [
+            "251c18c0257328773d05c4a6a09354dc2f9e329e3d83a08f5aa43672e5ef41c7",
+            "60fd1f933dd7b05682d2869afe06af7882e9cb32433134622a5567d9381565be",
+            "a1d4c0cf243d6acf0e35363c33fa3304633211d42372bfe0b99b6a2d00b3713e",
+            "b58910d248d082e5334353c6267318363a3e0ab71a8cf752e9e333fa40cdc20e",
+            "bcbcbcd6d6bcf36ef38f5c92f96fc6eff4839e5dc326f96870c0f6eba39d9454",
+            "bec91d798026088863ac0b8136b26c9595e38da45d3fe92d346793139c304a49"
+          ],
+          "advisory": [],
+          "dropped": 0
+        }
+      ],
+      "undelivered": [
+        "bcbcbcd6d6bcf36ef38f5c92f96fc6eff4839e5dc326f96870c0f6eba39d9454",
+        "bec91d798026088863ac0b8136b26c9595e38da45d3fe92d346793139c304a49"
+      ],
+      "defectReproduced": true
+    },
+    {
+      "id": "MCP-abstention-unrelated-emit-loss",
+      "outcome": "observed",
+      "abstain": {
+        "isError": true,
+        "body": {
+          "fault": "refused",
+          "rejected": "abstained (target-not-global): the target is a `local ` SCIP symbol, document-scoped by the grammar — its callers are intra-document (a different closed procedure), out of #99b v1 scope. Name the GLOBAL symbol",
+          "guidance": {
+            "next": "a rejected write did not re-derive at source@sha — fix the citation and re-emit",
+            "invariant": "TOOLS-1/7: atlas-emit is a governed fail-closed write door (WRITE_PATHS: atlas-emit, atlas-link — ADR-0003)"
+          }
+        }
+      },
+      "before": {
+        "isError": false,
+        "body": {
+          "data": {
+            "negations": [],
+            "abstentions": [
+              {
+                "kind": "abstained",
+                "id": "1801c02a761c3a26c149d4515389e0fa879104a11c8ce59644c66c37a8f26657",
+                "relationKind": "calls",
+                "target": "local 4",
+                "scope": "src",
+                "reason": "target-not-global",
+                "witness": {
+                  "underApproxSources": []
+                }
+              }
+            ],
+            "scope": "src",
+            "abstained": false
+          },
+          "guidance": {
+            "next": "0 grounded negative(s) and 1 ABSTENTION(s) under 'src' — an abstention is the door declining to decide a negative over an OPEN scope (see its reason + witness), NOT a negative; it fired and is on the record (#202)",
+            "invariant": "NEG-1: `atlas negations` reads GROUNDED negatives (family:negation) AND honest ABSTENTIONS off the live projection the query readback rides — scope-contained (segment-wise path-prefix, #153-safe), sorted for byte-identical output, never a throw, no write path; an abstention that FIRED is observable (closes #202)"
+          }
+        }
+      },
+      "emit": {
+        "isError": false,
+        "body": {
+          "data": {
+            "emitted": true,
+            "id": "e3db41f7ad9ce0f8a8b90ae13ebba1feeb0cddf9365ab05369d568868694acc4",
+            "nodeKey": "bcbcbcd6d6bcf36ef38f5c92f96fc6eff4839e5dc326f96870c0f6eba39d9454"
+          },
+          "guidance": {
+            "next": "a rejected write did not re-derive at source@sha — fix the citation and re-emit",
+            "invariant": "TOOLS-1/7: atlas-emit is a governed fail-closed write door (WRITE_PATHS: atlas-emit, atlas-link — ADR-0003)"
+          }
+        }
+      },
+      "after": {
+        "isError": false,
+        "body": {
+          "data": {
+            "negations": [],
+            "abstentions": [],
+            "scope": "src",
+            "abstained": false
+          },
+          "guidance": {
+            "next": "no grounded negative and no abstention under scope 'src' — a negation is filed by the truth door (`atlas emit` a family:negation fact over a CLOSED scope); check the scope spelling, or widen it",
+            "invariant": "NEG-1: `atlas negations` reads GROUNDED negatives (family:negation) AND honest ABSTENTIONS off the live projection the query readback rides — scope-contained (segment-wise path-prefix, #153-safe), sorted for byte-identical output, never a throw, no write path; an abstention that FIRED is observable (closes #202)"
+          }
+        }
+      }
+    }
+  ]
+}
