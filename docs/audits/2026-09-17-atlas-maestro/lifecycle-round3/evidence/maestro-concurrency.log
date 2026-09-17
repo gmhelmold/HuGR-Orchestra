@@ -1,0 +1,11 @@
+bun test v1.3.14 (0d9b296a)
+Internal error: directory mismatch for directory "<PRODUCT_ROOT>/packages/opencode/tsconfig.json", fd 4. You don't need to do anything, but this indicates a bug.
+
+../../../../hugr-deep-round3.16oo8Q/probes/maestro-concurrent.test.ts:
+(pass) Diagnostic: Maestro exact retry under concurrency > eight identical concurrent requests and sequential control [1021.96ms]
+(pass) Diagnostic: Maestro exact retry under concurrency > different admission keys and changed-payload conflict controls [137.76ms]
+
+ 2 pass
+ 0 fail
+ 8 expect() calls
+Ran 2 tests across 1 file. [10.28s]

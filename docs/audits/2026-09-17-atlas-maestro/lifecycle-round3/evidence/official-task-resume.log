@@ -1,0 +1,11 @@
+bun test v1.3.14 (0d9b296a)
+
+test/tool/task.test.ts:
+(pass) tool.task > execute resumes an existing task session from task_id [4693.04ms]
+(pass) tool.task > execute creates a child when task_id does not exist [669.43ms]
+
+ 2 pass
+ 24 filtered out
+ 0 fail
+ 11 expect() calls
+Ran 2 tests across 1 file. [13.76s]
