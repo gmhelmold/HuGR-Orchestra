@@ -1,0 +1,343 @@
+[
+  {
+    "path": "packages/app/package.json",
+    "name": "@opencode-ai/app",
+    "dependencies": [
+      "@opencode-ai/client",
+      "@opencode-ai/core",
+      "@opencode-ai/schema",
+      "@opencode-ai/sdk",
+      "@opencode-ai/session-ui",
+      "@opencode-ai/ui"
+    ]
+  },
+  {
+    "path": "packages/cli/package.json",
+    "name": "@opencode-ai/cli",
+    "dependencies": [
+      "@opencode-ai/core",
+      "@opencode-ai/sdk",
+      "@opencode-ai/server",
+      "@opencode-ai/tui"
+    ]
+  },
+  {
+    "path": "packages/client/package.json",
+    "name": "@opencode-ai/client",
+    "dependencies": [
+      "@opencode-ai/protocol",
+      "@opencode-ai/schema"
+    ]
+  },
+  {
+    "path": "packages/codemode/package.json",
+    "name": "@opencode-ai/codemode",
+    "dependencies": []
+  },
+  {
+    "path": "packages/core/package.json",
+    "name": "@opencode-ai/core",
+    "dependencies": [
+      "@opencode-ai/effect-drizzle-sqlite",
+      "@opencode-ai/effect-sqlite-node",
+      "@opencode-ai/llm",
+      "@opencode-ai/plugin",
+      "@opencode-ai/schema"
+    ]
+  },
+  {
+    "path": "packages/desktop/package.json",
+    "name": "@opencode-ai/desktop",
+    "dependencies": []
+  },
+  {
+    "path": "packages/effect-drizzle-sqlite/package.json",
+    "name": "@opencode-ai/effect-drizzle-sqlite",
+    "dependencies": []
+  },
+  {
+    "path": "packages/effect-sqlite-node/package.json",
+    "name": "@opencode-ai/effect-sqlite-node",
+    "dependencies": []
+  },
+  {
+    "path": "packages/enterprise/package.json",
+    "name": "@opencode-ai/enterprise",
+    "dependencies": [
+      "@opencode-ai/core",
+      "@opencode-ai/session-ui",
+      "@opencode-ai/ui"
+    ]
+  },
+  {
+    "path": "packages/function/package.json",
+    "name": "@opencode-ai/function",
+    "dependencies": []
+  },
+  {
+    "path": "packages/http-recorder/package.json",
+    "name": "@opencode-ai/http-recorder",
+    "dependencies": []
+  },
+  {
+    "path": "packages/httpapi-codegen/package.json",
+    "name": "@opencode-ai/httpapi-codegen",
+    "dependencies": []
+  },
+  {
+    "path": "packages/llm/package.json",
+    "name": "@opencode-ai/llm",
+    "dependencies": [
+      "@opencode-ai/schema"
+    ]
+  },
+  {
+    "path": "packages/opencode/package.json",
+    "name": "opencode",
+    "dependencies": [
+      "@opencode-ai/codemode",
+      "@opencode-ai/llm",
+      "@opencode-ai/plugin",
+      "@opencode-ai/protocol",
+      "@opencode-ai/schema",
+      "@opencode-ai/script",
+      "@opencode-ai/sdk",
+      "@opencode-ai/server",
+      "@opencode-ai/tui"
+    ]
+  },
+  {
+    "path": "packages/plugin/package.json",
+    "name": "@opencode-ai/plugin",
+    "dependencies": [
+      "@opencode-ai/sdk"
+    ]
+  },
+  {
+    "path": "packages/protocol/package.json",
+    "name": "@opencode-ai/protocol",
+    "dependencies": [
+      "@opencode-ai/schema"
+    ]
+  },
+  {
+    "path": "packages/schema/package.json",
+    "name": "@opencode-ai/schema",
+    "dependencies": []
+  },
+  {
+    "path": "packages/script/package.json",
+    "name": "@opencode-ai/script",
+    "dependencies": []
+  },
+  {
+    "path": "packages/sdk-next/package.json",
+    "name": "@opencode-ai/sdk-next",
+    "dependencies": [
+      "@opencode-ai/client",
+      "@opencode-ai/core",
+      "@opencode-ai/server"
+    ]
+  },
+  {
+    "path": "packages/server/package.json",
+    "name": "@opencode-ai/server",
+    "dependencies": [
+      "@opencode-ai/core",
+      "@opencode-ai/protocol"
+    ]
+  },
+  {
+    "path": "packages/session-ui/package.json",
+    "name": "@opencode-ai/session-ui",
+    "dependencies": [
+      "@opencode-ai/client",
+      "@opencode-ai/core",
+      "@opencode-ai/sdk",
+      "@opencode-ai/ui"
+    ]
+  },
+  {
+    "path": "packages/slack/package.json",
+    "name": "@opencode-ai/slack",
+    "dependencies": [
+      "@opencode-ai/sdk"
+    ]
+  },
+  {
+    "path": "packages/storybook/package.json",
+    "name": "@opencode-ai/storybook",
+    "dependencies": []
+  },
+  {
+    "path": "packages/tui/package.json",
+    "name": "@opencode-ai/tui",
+    "dependencies": [
+      "@opencode-ai/core",
+      "@opencode-ai/plugin",
+      "@opencode-ai/sdk",
+      "@opencode-ai/ui"
+    ]
+  },
+  {
+    "path": "packages/ui/package.json",
+    "name": "@opencode-ai/ui",
+    "dependencies": []
+  },
+  {
+    "path": "packages/web/package.json",
+    "name": "@opencode-ai/web",
+    "dependencies": []
+  },
+  {
+    "path": "foundation/atlas/packages/adapter-io/package.json",
+    "name": "@atlas/adapter-io",
+    "dependencies": [
+      "@atlas/contracts",
+      "@atlas/genesis",
+      "@atlas/grounding",
+      "@atlas/index",
+      "@atlas/kernel",
+      "@atlas/knowledge",
+      "@atlas/memory",
+      "@atlas/persist",
+      "@atlas/retrieval",
+      "@atlas/tools"
+    ]
+  },
+  {
+    "path": "foundation/atlas/packages/cli/package.json",
+    "name": "@atlas/cli",
+    "dependencies": [
+      "@atlas/adapter-io",
+      "@atlas/contracts",
+      "@atlas/genesis",
+      "@atlas/kernel",
+      "@atlas/knowledge",
+      "@atlas/memory",
+      "@atlas/persist",
+      "@atlas/tools"
+    ]
+  },
+  {
+    "path": "foundation/atlas/packages/contracts/package.json",
+    "name": "@atlas/contracts",
+    "dependencies": []
+  },
+  {
+    "path": "foundation/atlas/packages/e2e/package.json",
+    "name": "@atlas/e2e",
+    "dependencies": [
+      "@atlas/contracts",
+      "@atlas/genesis",
+      "@atlas/grounding",
+      "@atlas/index",
+      "@atlas/kernel",
+      "@atlas/knowledge",
+      "@atlas/memory",
+      "@atlas/persist",
+      "@atlas/retrieval",
+      "@atlas/tools"
+    ]
+  },
+  {
+    "path": "foundation/atlas/packages/e2e-blackbox/package.json",
+    "name": "@atlas/e2e-blackbox",
+    "dependencies": []
+  },
+  {
+    "path": "foundation/atlas/packages/genesis/package.json",
+    "name": "@atlas/genesis",
+    "dependencies": [
+      "@atlas/contracts",
+      "@atlas/index",
+      "@atlas/kernel",
+      "@atlas/knowledge",
+      "@atlas/memory"
+    ]
+  },
+  {
+    "path": "foundation/atlas/packages/grounding/package.json",
+    "name": "@atlas/grounding",
+    "dependencies": [
+      "@atlas/contracts",
+      "@atlas/index",
+      "@atlas/kernel"
+    ]
+  },
+  {
+    "path": "foundation/atlas/packages/index/package.json",
+    "name": "@atlas/index",
+    "dependencies": [
+      "@atlas/contracts",
+      "@atlas/kernel"
+    ]
+  },
+  {
+    "path": "foundation/atlas/packages/kernel/package.json",
+    "name": "@atlas/kernel",
+    "dependencies": [
+      "@atlas/contracts"
+    ]
+  },
+  {
+    "path": "foundation/atlas/packages/knowledge/package.json",
+    "name": "@atlas/knowledge",
+    "dependencies": [
+      "@atlas/contracts",
+      "@atlas/grounding",
+      "@atlas/index",
+      "@atlas/kernel"
+    ]
+  },
+  {
+    "path": "foundation/atlas/packages/mcp-server/package.json",
+    "name": "@atlas/mcp-server",
+    "dependencies": [
+      "@atlas/adapter-io",
+      "@atlas/memory",
+      "@atlas/tools"
+    ]
+  },
+  {
+    "path": "foundation/atlas/packages/memory/package.json",
+    "name": "@atlas/memory",
+    "dependencies": [
+      "@atlas/contracts",
+      "@atlas/kernel",
+      "@atlas/knowledge",
+      "@atlas/retrieval"
+    ]
+  },
+  {
+    "path": "foundation/atlas/packages/persist/package.json",
+    "name": "@atlas/persist",
+    "dependencies": [
+      "@atlas/contracts",
+      "@atlas/kernel"
+    ]
+  },
+  {
+    "path": "foundation/atlas/packages/retrieval/package.json",
+    "name": "@atlas/retrieval",
+    "dependencies": [
+      "@atlas/contracts",
+      "@atlas/index",
+      "@atlas/kernel",
+      "@atlas/knowledge"
+    ]
+  },
+  {
+    "path": "foundation/atlas/packages/tools/package.json",
+    "name": "@atlas/tools",
+    "dependencies": [
+      "@atlas/contracts",
+      "@atlas/grounding",
+      "@atlas/kernel",
+      "@atlas/knowledge",
+      "@atlas/memory",
+      "@atlas/persist",
+      "@atlas/retrieval"
+    ]
+  }
+]

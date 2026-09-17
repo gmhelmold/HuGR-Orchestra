@@ -1,0 +1,2661 @@
+{
+  "numTotalTestSuites": 1705,
+  "numPassedTestSuites": 1705,
+  "numFailedTestSuites": 0,
+  "numPendingTestSuites": 0,
+  "numTotalTests": 4134,
+  "numPassedTests": 4119,
+  "numFailedTests": 0,
+  "numPendingTests": 12,
+  "numTodoTests": 3,
+  "success": true,
+  "testResultEntries": 529,
+  "actualCommand": "cd foundation/atlas && bun run test -- --reporter=json --outputFile=<evidence>/atlas-baseline.json",
+  "fileResults": [
+    {
+      "name": "foundation/atlas/packages/e2e-blackbox/test/door-regression-scope-brick.test.ts",
+      "status": "passed",
+      "assertions": 1
+    },
+    {
+      "name": "foundation/atlas/packages/e2e-blackbox/test/harness.smoke.test.ts",
+      "status": "passed",
+      "assertions": 5
+    },
+    {
+      "name": "foundation/atlas/packages/e2e-blackbox/test/s-author8-round-trip.blackbox.test.ts",
+      "status": "passed",
+      "assertions": 10
+    },
+    {
+      "name": "foundation/atlas/packages/e2e-blackbox/test/s-mcp-4-draft-parity.blackbox.test.ts",
+      "status": "passed",
+      "assertions": 4
+    },
+    {
+      "name": "foundation/atlas/packages/e2e-blackbox/test/s-mcp-authoring.blackbox.test.ts",
+      "status": "passed",
+      "assertions": 2
+    },
+    {
+      "name": "foundation/atlas/packages/e2e-blackbox/test/s-sound-default.blackbox.test.ts",
+      "status": "passed",
+      "assertions": 1
+    },
+    {
+      "name": "foundation/atlas/packages/e2e-blackbox/test/s1-genesis.blackbox.test.ts",
+      "status": "passed",
+      "assertions": 5
+    },
+    {
+      "name": "foundation/atlas/packages/e2e-blackbox/test/s10-node-door.blackbox.test.ts",
+      "status": "passed",
+      "assertions": 4
+    },
+    {
+      "name": "foundation/atlas/packages/e2e-blackbox/test/s11-predicate-lineage.blackbox.test.ts",
+      "status": "passed",
+      "assertions": 7
+    },
+    {
+      "name": "foundation/atlas/packages/e2e-blackbox/test/s12-grounding-kinds.blackbox.test.ts",
+      "status": "passed",
+      "assertions": 12
+    },
+    {
+      "name": "foundation/atlas/packages/e2e-blackbox/test/s13-pack-fields.blackbox.test.ts",
+      "status": "passed",
+      "assertions": 7
+    },
+    {
+      "name": "foundation/atlas/packages/e2e-blackbox/test/s14-mine.blackbox.test.ts",
+      "status": "passed",
+      "assertions": 2
+    },
+    {
+      "name": "foundation/atlas/packages/e2e-blackbox/test/s15-freshness-watermark.blackbox.test.ts",
+      "status": "passed",
+      "assertions": 3
+    },
+    {
+      "name": "foundation/atlas/packages/e2e-blackbox/test/s16-sameas.blackbox.test.ts",
+      "status": "passed",
+      "assertions": 6
+    },
+    {
+      "name": "foundation/atlas/packages/e2e-blackbox/test/s17-degenerate-anchor.blackbox.test.ts",
+      "status": "passed",
+      "assertions": 5
+    },
+    {
+      "name": "foundation/atlas/packages/e2e-blackbox/test/s17-nested-scope.blackbox.test.ts",
+      "status": "passed",
+      "assertions": 7
+    },
+    {
+      "name": "foundation/atlas/packages/e2e-blackbox/test/s18-durability.blackbox.test.ts",
+      "status": "passed",
+      "assertions": 2
+    },
+    {
+      "name": "foundation/atlas/packages/e2e-blackbox/test/s19-init-gitignore.blackbox.test.ts",
+      "status": "passed",
+      "assertions": 4
+    },
+    {
+      "name": "foundation/atlas/packages/e2e-blackbox/test/s2-guardrails.blackbox.test.ts",
+      "status": "passed",
+      "assertions": 4
+    },
+    {
+      "name": "foundation/atlas/packages/e2e-blackbox/test/s20-committed-store-refusal.blackbox.test.ts",
+      "status": "passed",
+      "assertions": 7
+    },
+    {
+      "name": "foundation/atlas/packages/e2e-blackbox/test/s21-scip-forgery.blackbox.test.ts",
+      "status": "passed",
+      "assertions": 5
+    },
+    {
+      "name": "foundation/atlas/packages/e2e-blackbox/test/s22-scip-device-read.blackbox.test.ts",
+      "status": "passed",
+      "assertions": 3
+    },
+    {
+      "name": "foundation/atlas/packages/e2e-blackbox/test/s23-error-attribution.blackbox.test.ts",
+      "status": "passed",
+      "assertions": 5
+    },
+    {
+      "name": "foundation/atlas/packages/e2e-blackbox/test/s234-transition.blackbox.test.ts",
+      "status": "passed",
+      "assertions": 6
+    },
+    {
+      "name": "foundation/atlas/packages/e2e-blackbox/test/s237-mine-summary-agrees-with-store.blackbox.test.ts",
+      "status": "passed",
+      "assertions": 1
+    },
+    {
+      "name": "foundation/atlas/packages/e2e-blackbox/test/s239-node-witness.blackbox.test.ts",
+      "status": "passed",
+      "assertions": 1
+    },
+    {
+      "name": "foundation/atlas/packages/e2e-blackbox/test/s24-model-config.blackbox.test.ts",
+      "status": "passed",
+      "assertions": 5
+    },
+    {
+      "name": "foundation/atlas/packages/e2e-blackbox/test/s24-uncanonicalizable-row.blackbox.test.ts",
+      "status": "passed",
+      "assertions": 6
+    },
+    {
+      "name": "foundation/atlas/packages/e2e-blackbox/test/s25-model-reachability.blackbox.test.ts",
+      "status": "passed",
+      "assertions": 4
+    },
+    {
+      "name": "foundation/atlas/packages/e2e-blackbox/test/s25-sameas-retraction.blackbox.test.ts",
+      "status": "passed",
+      "assertions": 5
+    },
+    {
+      "name": "foundation/atlas/packages/e2e-blackbox/test/s26-doctor-index.blackbox.test.ts",
+      "status": "passed",
+      "assertions": 5
+    },
+    {
+      "name": "foundation/atlas/packages/e2e-blackbox/test/s26-promote.blackbox.test.ts",
+      "status": "passed",
+      "assertions": 7
+    },
+    {
+      "name": "foundation/atlas/packages/e2e-blackbox/test/s26-query-description.blackbox.test.ts",
+      "status": "passed",
+      "assertions": 5
+    },
+    {
+      "name": "foundation/atlas/packages/e2e-blackbox/test/s26-surface-lies.blackbox.test.ts",
+      "status": "passed",
+      "assertions": 14
+    },
+    {
+      "name": "foundation/atlas/packages/e2e-blackbox/test/s26-symbol-arm.blackbox.test.ts",
+      "status": "passed",
+      "assertions": 3
+    },
+    {
+      "name": "foundation/atlas/packages/e2e-blackbox/test/s26-watermark-laundering.blackbox.test.ts",
+      "status": "passed",
+      "assertions": 5
+    },
+    {
+      "name": "foundation/atlas/packages/e2e-blackbox/test/s27-reconcile-merge-base.blackbox.test.ts",
+      "status": "passed",
+      "assertions": 6
+    },
+    {
+      "name": "foundation/atlas/packages/e2e-blackbox/test/s28-own-briefing.blackbox.test.ts",
+      "status": "passed",
+      "assertions": 10
+    },
+    {
+      "name": "foundation/atlas/packages/e2e-blackbox/test/s29-closed-slot.blackbox.test.ts",
+      "status": "passed",
+      "assertions": 5
+    },
+    {
+      "name": "foundation/atlas/packages/e2e-blackbox/test/s3-dedup.blackbox.test.ts",
+      "status": "passed",
+      "assertions": 5
+    },
+    {
+      "name": "foundation/atlas/packages/e2e-blackbox/test/s30-relation.blackbox.test.ts",
+      "status": "passed",
+      "assertions": 8
+    },
+    {
+      "name": "foundation/atlas/packages/e2e-blackbox/test/s31-negation.blackbox.test.ts",
+      "status": "passed",
+      "assertions": 8
+    },
+    {
+      "name": "foundation/atlas/packages/e2e-blackbox/test/s32-verify-fact.blackbox.test.ts",
+      "status": "passed",
+      "assertions": 6
+    },
+    {
+      "name": "foundation/atlas/packages/e2e-blackbox/test/s33-seal-witness.blackbox.test.ts",
+      "status": "passed",
+      "assertions": 4
+    },
+    {
+      "name": "foundation/atlas/packages/e2e-blackbox/test/s34-mine-history-frontier.blackbox.test.ts",
+      "status": "passed",
+      "assertions": 1
+    },
+    {
+      "name": "foundation/atlas/packages/e2e-blackbox/test/s34-reverify-store.blackbox.test.ts",
+      "status": "passed",
+      "assertions": 5
+    },
+    {
+      "name": "foundation/atlas/packages/e2e-blackbox/test/s35-semantic-justified.blackbox.test.ts",
+      "status": "passed",
+      "assertions": 4
+    },
+    {
+      "name": "foundation/atlas/packages/e2e-blackbox/test/s36-definition-proven.blackbox.test.ts",
+      "status": "passed",
+      "assertions": 5
+    },
+    {
+      "name": "foundation/atlas/packages/e2e-blackbox/test/s37-sound-relation.blackbox.test.ts",
+      "status": "passed",
+      "assertions": 8
+    },
+    {
+      "name": "foundation/atlas/packages/e2e-blackbox/test/s4-drift.blackbox.test.ts",
+      "status": "passed",
+      "assertions": 5
+    },
+    {
+      "name": "foundation/atlas/packages/e2e-blackbox/test/s5-mcp-parity.blackbox.test.ts",
+      "status": "passed",
+      "assertions": 4
+    },
+    {
+      "name": "foundation/atlas/packages/e2e-blackbox/test/s6-edge.blackbox.test.ts",
+      "status": "passed",
+      "assertions": 9
+    },
+    {
+      "name": "foundation/atlas/packages/e2e-blackbox/test/s7-governance.blackbox.test.ts",
+      "status": "passed",
+      "assertions": 10
+    },
+    {
+      "name": "foundation/atlas/packages/e2e-blackbox/test/s8-doctor.blackbox.test.ts",
+      "status": "passed",
+      "assertions": 6
+    },
+    {
+      "name": "foundation/atlas/packages/e2e-blackbox/test/s9-retrieval-modes.blackbox.test.ts",
+      "status": "passed",
+      "assertions": 4
+    },
+    {
+      "name": "foundation/atlas/packages/e2e-blackbox/test/s95-test-vacuity.blackbox.test.ts",
+      "status": "passed",
+      "assertions": 4
+    },
+    {
+      "name": "foundation/atlas/packages/adapter-io/test/actor-is-unauthenticated.test.ts",
+      "status": "passed",
+      "assertions": 4
+    },
+    {
+      "name": "foundation/atlas/packages/adapter-io/test/anchor-identity.test.ts",
+      "status": "passed",
+      "assertions": 10
+    },
+    {
+      "name": "foundation/atlas/packages/adapter-io/test/arch-d3b-claim-launder.test.ts",
+      "status": "passed",
+      "assertions": 2
+    },
+    {
+      "name": "foundation/atlas/packages/adapter-io/test/arch9-door-derivation.test.ts",
+      "status": "passed",
+      "assertions": 9
+    },
+    {
+      "name": "foundation/atlas/packages/adapter-io/test/ast-gap2-doc-comment.test.ts",
+      "status": "passed",
+      "assertions": 8
+    },
+    {
+      "name": "foundation/atlas/packages/adapter-io/test/ast-normalize.test.ts",
+      "status": "passed",
+      "assertions": 7
+    },
+    {
+      "name": "foundation/atlas/packages/adapter-io/test/ast-parser-lifecycle.test.ts",
+      "status": "passed",
+      "assertions": 1
+    },
+    {
+      "name": "foundation/atlas/packages/adapter-io/test/ast.test.ts",
+      "status": "passed",
+      "assertions": 8
+    },
+    {
+      "name": "foundation/atlas/packages/adapter-io/test/awareness-store.test.ts",
+      "status": "passed",
+      "assertions": 8
+    },
+    {
+      "name": "foundation/atlas/packages/adapter-io/test/calibration-ledger.test.ts",
+      "status": "passed",
+      "assertions": 2
+    },
+    {
+      "name": "foundation/atlas/packages/adapter-io/test/commit-superseded.test.ts",
+      "status": "passed",
+      "assertions": 6
+    },
+    {
+      "name": "foundation/atlas/packages/adapter-io/test/compose-mine-admission.count-leg.test.ts",
+      "status": "passed",
+      "assertions": 4
+    },
+    {
+      "name": "foundation/atlas/packages/adapter-io/test/compose-negation-promote-deps.test.ts",
+      "status": "passed",
+      "assertions": 2
+    },
+    {
+      "name": "foundation/atlas/packages/adapter-io/test/compose-recon-n10.test.ts",
+      "status": "passed",
+      "assertions": 3
+    },
+    {
+      "name": "foundation/atlas/packages/adapter-io/test/compose-recon.test.ts",
+      "status": "passed",
+      "assertions": 4
+    },
+    {
+      "name": "foundation/atlas/packages/adapter-io/test/compose.test.ts",
+      "status": "passed",
+      "assertions": 8
+    },
+    {
+      "name": "foundation/atlas/packages/adapter-io/test/containment.test.ts",
+      "status": "passed",
+      "assertions": 11
+    },
+    {
+      "name": "foundation/atlas/packages/adapter-io/test/doctor-cas-integrity.test.ts",
+      "status": "passed",
+      "assertions": 11
+    },
+    {
+      "name": "foundation/atlas/packages/adapter-io/test/doctor-entry-symmetry.test.ts",
+      "status": "passed",
+      "assertions": 8
+    },
+    {
+      "name": "foundation/atlas/packages/adapter-io/test/doctor-source.test.ts",
+      "status": "passed",
+      "assertions": 7
+    },
+    {
+      "name": "foundation/atlas/packages/adapter-io/test/door-regression-commit-retry.test.ts",
+      "status": "passed",
+      "assertions": 8
+    },
+    {
+      "name": "foundation/atlas/packages/adapter-io/test/door-regression-kind-check.test.ts",
+      "status": "passed",
+      "assertions": 2
+    },
+    {
+      "name": "foundation/atlas/packages/adapter-io/test/door-regression-malformed-check-shape.test.ts",
+      "status": "passed",
+      "assertions": 6
+    },
+    {
+      "name": "foundation/atlas/packages/adapter-io/test/door-regression-reject-disclosure.test.ts",
+      "status": "passed",
+      "assertions": 1
+    },
+    {
+      "name": "foundation/atlas/packages/adapter-io/test/door-regression-scope-wellformed.test.ts",
+      "status": "passed",
+      "assertions": 2
+    },
+    {
+      "name": "foundation/atlas/packages/adapter-io/test/door-regression-supersede-sameas.test.ts",
+      "status": "passed",
+      "assertions": 2
+    },
+    {
+      "name": "foundation/atlas/packages/adapter-io/test/dynamic-reach.test.ts",
+      "status": "passed",
+      "assertions": 7
+    },
+    {
+      "name": "foundation/atlas/packages/adapter-io/test/enrich-sibling.test.ts",
+      "status": "passed",
+      "assertions": 6
+    },
+    {
+      "name": "foundation/atlas/packages/adapter-io/test/escape-assemble.test.ts",
+      "status": "passed",
+      "assertions": 4
+    },
+    {
+      "name": "foundation/atlas/packages/adapter-io/test/escape-classifier.test.ts",
+      "status": "passed",
+      "assertions": 9
+    },
+    {
+      "name": "foundation/atlas/packages/adapter-io/test/fs-tracked-symlink.test.ts",
+      "status": "passed",
+      "assertions": 7
+    },
+    {
+      "name": "foundation/atlas/packages/adapter-io/test/fs.test.ts",
+      "status": "passed",
+      "assertions": 7
+    },
+    {
+      "name": "foundation/atlas/packages/adapter-io/test/git-drift-entries.test.ts",
+      "status": "passed",
+      "assertions": 4
+    },
+    {
+      "name": "foundation/atlas/packages/adapter-io/test/git-drift.test.ts",
+      "status": "passed",
+      "assertions": 5
+    },
+    {
+      "name": "foundation/atlas/packages/adapter-io/test/git-forge.test.ts",
+      "status": "passed",
+      "assertions": 3
+    },
+    {
+      "name": "foundation/atlas/packages/adapter-io/test/git-history-bridge.test.ts",
+      "status": "passed",
+      "assertions": 6
+    },
+    {
+      "name": "foundation/atlas/packages/adapter-io/test/git-history-frontier-szz.test.ts",
+      "status": "passed",
+      "assertions": 3
+    },
+    {
+      "name": "foundation/atlas/packages/adapter-io/test/git-history-memo.test.ts",
+      "status": "passed",
+      "assertions": 4
+    },
+    {
+      "name": "foundation/atlas/packages/adapter-io/test/git-history.test.ts",
+      "status": "passed",
+      "assertions": 3
+    },
+    {
+      "name": "foundation/atlas/packages/adapter-io/test/governance-carrier-controls.test.ts",
+      "status": "passed",
+      "assertions": 8
+    },
+    {
+      "name": "foundation/atlas/packages/adapter-io/test/governed-emit-addressable.test.ts",
+      "status": "passed",
+      "assertions": 11
+    },
+    {
+      "name": "foundation/atlas/packages/adapter-io/test/governed-emit-incumbent.test.ts",
+      "status": "passed",
+      "assertions": 11
+    },
+    {
+      "name": "foundation/atlas/packages/adapter-io/test/governed-emit-shape-gate.test.ts",
+      "status": "passed",
+      "assertions": 10
+    },
+    {
+      "name": "foundation/atlas/packages/adapter-io/test/governed-emit-test-vacuity-door.test.ts",
+      "status": "passed",
+      "assertions": 5
+    },
+    {
+      "name": "foundation/atlas/packages/adapter-io/test/governed-emit-transition-door.test.ts",
+      "status": "passed",
+      "assertions": 5
+    },
+    {
+      "name": "foundation/atlas/packages/adapter-io/test/governed-emit.test.ts",
+      "status": "passed",
+      "assertions": 23
+    },
+    {
+      "name": "foundation/atlas/packages/adapter-io/test/governed-link-endpoint-authz.test.ts",
+      "status": "passed",
+      "assertions": 3
+    },
+    {
+      "name": "foundation/atlas/packages/adapter-io/test/governed-link-endpoint-existence.test.ts",
+      "status": "passed",
+      "assertions": 7
+    },
+    {
+      "name": "foundation/atlas/packages/adapter-io/test/governed-link-retract-disclosure.test.ts",
+      "status": "passed",
+      "assertions": 9
+    },
+    {
+      "name": "foundation/atlas/packages/adapter-io/test/governed-link-retract.test.ts",
+      "status": "passed",
+      "assertions": 16
+    },
+    {
+      "name": "foundation/atlas/packages/adapter-io/test/governed-link.test.ts",
+      "status": "passed",
+      "assertions": 15
+    },
+    {
+      "name": "foundation/atlas/packages/adapter-io/test/governed-promote.test.ts",
+      "status": "passed",
+      "assertions": 21
+    },
+    {
+      "name": "foundation/atlas/packages/adapter-io/test/grounding-computer.test.ts",
+      "status": "passed",
+      "assertions": 17
+    },
+    {
+      "name": "foundation/atlas/packages/adapter-io/test/identity-goldens.test.ts",
+      "status": "passed",
+      "assertions": 4
+    },
+    {
+      "name": "foundation/atlas/packages/adapter-io/test/identity-schema.test.ts",
+      "status": "passed",
+      "assertions": 13
+    },
+    {
+      "name": "foundation/atlas/packages/adapter-io/test/index-adapter.test.ts",
+      "status": "passed",
+      "assertions": 4
+    },
+    {
+      "name": "foundation/atlas/packages/adapter-io/test/indexer-report.test.ts",
+      "status": "passed",
+      "assertions": 5
+    },
+    {
+      "name": "foundation/atlas/packages/adapter-io/test/llm-answer-provenance.test.ts",
+      "status": "passed",
+      "assertions": 4
+    },
+    {
+      "name": "foundation/atlas/packages/adapter-io/test/llm-command-client.test.ts",
+      "status": "passed",
+      "assertions": 26
+    },
+    {
+      "name": "foundation/atlas/packages/adapter-io/test/llm-count-parser.test.ts",
+      "status": "passed",
+      "assertions": 10
+    },
+    {
+      "name": "foundation/atlas/packages/adapter-io/test/llm-dependency-parser.test.ts",
+      "status": "passed",
+      "assertions": 10
+    },
+    {
+      "name": "foundation/atlas/packages/adapter-io/test/llm-semantic-parser.test.ts",
+      "status": "passed",
+      "assertions": 14
+    },
+    {
+      "name": "foundation/atlas/packages/adapter-io/test/llm.test.ts",
+      "status": "passed",
+      "assertions": 3
+    },
+    {
+      "name": "foundation/atlas/packages/adapter-io/test/memory-emit-template-reach.test.ts",
+      "status": "passed",
+      "assertions": 5
+    },
+    {
+      "name": "foundation/atlas/packages/adapter-io/test/memory-emit.test.ts",
+      "status": "passed",
+      "assertions": 19
+    },
+    {
+      "name": "foundation/atlas/packages/adapter-io/test/memory-read-kind-filter.test.ts",
+      "status": "passed",
+      "assertions": 4
+    },
+    {
+      "name": "foundation/atlas/packages/adapter-io/test/memory-read.test.ts",
+      "status": "passed",
+      "assertions": 12
+    },
+    {
+      "name": "foundation/atlas/packages/adapter-io/test/memory-store.test.ts",
+      "status": "passed",
+      "assertions": 10
+    },
+    {
+      "name": "foundation/atlas/packages/adapter-io/test/model-config.test.ts",
+      "status": "passed",
+      "assertions": 22
+    },
+    {
+      "name": "foundation/atlas/packages/adapter-io/test/negation-authz-scope-split.test.ts",
+      "status": "passed",
+      "assertions": 5
+    },
+    {
+      "name": "foundation/atlas/packages/adapter-io/test/negation-bench.test.ts",
+      "status": "passed",
+      "assertions": 3
+    },
+    {
+      "name": "foundation/atlas/packages/adapter-io/test/negation-collapsed-local.test.ts",
+      "status": "passed",
+      "assertions": 5
+    },
+    {
+      "name": "foundation/atlas/packages/adapter-io/test/negation-door-v2-escape.test.ts",
+      "status": "passed",
+      "assertions": 8
+    },
+    {
+      "name": "foundation/atlas/packages/adapter-io/test/negation-door.test.ts",
+      "status": "passed",
+      "assertions": 15
+    },
+    {
+      "name": "foundation/atlas/packages/adapter-io/test/negation-edgemodel-freshness.test.ts",
+      "status": "passed",
+      "assertions": 4
+    },
+    {
+      "name": "foundation/atlas/packages/adapter-io/test/negation-proposer-bench.test.ts",
+      "status": "passed",
+      "assertions": 1
+    },
+    {
+      "name": "foundation/atlas/packages/adapter-io/test/negation-recall-win-blackbox.test.ts",
+      "status": "passed",
+      "assertions": 2
+    },
+    {
+      "name": "foundation/atlas/packages/adapter-io/test/negation-seal-promote-carry.test.ts",
+      "status": "passed",
+      "assertions": 3
+    },
+    {
+      "name": "foundation/atlas/packages/adapter-io/test/okf-store.test.ts",
+      "status": "passed",
+      "assertions": 6
+    },
+    {
+      "name": "foundation/atlas/packages/adapter-io/test/orientation-store.test.ts",
+      "status": "passed",
+      "assertions": 9
+    },
+    {
+      "name": "foundation/atlas/packages/adapter-io/test/own-availability.test.ts",
+      "status": "passed",
+      "assertions": 1
+    },
+    {
+      "name": "foundation/atlas/packages/adapter-io/test/own-two-bands.test.ts",
+      "status": "passed",
+      "assertions": 6
+    },
+    {
+      "name": "foundation/atlas/packages/adapter-io/test/poke-file.test.ts",
+      "status": "passed",
+      "assertions": 5
+    },
+    {
+      "name": "foundation/atlas/packages/adapter-io/test/policy.test.ts",
+      "status": "passed",
+      "assertions": 13
+    },
+    {
+      "name": "foundation/atlas/packages/adapter-io/test/projection-query-index.test.ts",
+      "status": "passed",
+      "assertions": 5
+    },
+    {
+      "name": "foundation/atlas/packages/adapter-io/test/projection-query-index.use-or-seal.test.ts",
+      "status": "passed",
+      "assertions": 5
+    },
+    {
+      "name": "foundation/atlas/packages/adapter-io/test/promotion-ratify-context.test.ts",
+      "status": "passed",
+      "assertions": 3
+    },
+    {
+      "name": "foundation/atlas/packages/adapter-io/test/prompt.test.ts",
+      "status": "passed",
+      "assertions": 27
+    },
+    {
+      "name": "foundation/atlas/packages/adapter-io/test/read-access.test.ts",
+      "status": "passed",
+      "assertions": 8
+    },
+    {
+      "name": "foundation/atlas/packages/adapter-io/test/read-provenance-refusal.test.ts",
+      "status": "passed",
+      "assertions": 9
+    },
+    {
+      "name": "foundation/atlas/packages/adapter-io/test/reconcile-entry-symmetry.test.ts",
+      "status": "passed",
+      "assertions": 3
+    },
+    {
+      "name": "foundation/atlas/packages/adapter-io/test/relation-derive-reachability.test.ts",
+      "status": "passed",
+      "assertions": 3
+    },
+    {
+      "name": "foundation/atlas/packages/adapter-io/test/relation-derive.test.ts",
+      "status": "passed",
+      "assertions": 11
+    },
+    {
+      "name": "foundation/atlas/packages/adapter-io/test/relation-door.test.ts",
+      "status": "passed",
+      "assertions": 6
+    },
+    {
+      "name": "foundation/atlas/packages/adapter-io/test/relation-seal-door.test.ts",
+      "status": "passed",
+      "assertions": 8
+    },
+    {
+      "name": "foundation/atlas/packages/adapter-io/test/retrieval-tier-bound.test.ts",
+      "status": "passed",
+      "assertions": 5
+    },
+    {
+      "name": "foundation/atlas/packages/adapter-io/test/rev-index-content-resolve.test.ts",
+      "status": "passed",
+      "assertions": 5
+    },
+    {
+      "name": "foundation/atlas/packages/adapter-io/test/rev-index-scip-parity.test.ts",
+      "status": "passed",
+      "assertions": 3
+    },
+    {
+      "name": "foundation/atlas/packages/adapter-io/test/rev-index-stable-across-builds.test.ts",
+      "status": "passed",
+      "assertions": 2
+    },
+    {
+      "name": "foundation/atlas/packages/adapter-io/test/rev-index.test.ts",
+      "status": "passed",
+      "assertions": 8
+    },
+    {
+      "name": "foundation/atlas/packages/adapter-io/test/reverify-dangling.test.ts",
+      "status": "passed",
+      "assertions": 5
+    },
+    {
+      "name": "foundation/atlas/packages/adapter-io/test/reverify-gate-compose.test.ts",
+      "status": "passed",
+      "assertions": 2
+    },
+    {
+      "name": "foundation/atlas/packages/adapter-io/test/reverify-negation.test.ts",
+      "status": "passed",
+      "assertions": 8
+    },
+    {
+      "name": "foundation/atlas/packages/adapter-io/test/reverify-relation.test.ts",
+      "status": "passed",
+      "assertions": 14
+    },
+    {
+      "name": "foundation/atlas/packages/adapter-io/test/reverify-store.test.ts",
+      "status": "passed",
+      "assertions": 25
+    },
+    {
+      "name": "foundation/atlas/packages/adapter-io/test/reverify-test-vacuity.test.ts",
+      "status": "passed",
+      "assertions": 7
+    },
+    {
+      "name": "foundation/atlas/packages/adapter-io/test/scanner-conformance.test.ts",
+      "status": "passed",
+      "assertions": 4
+    },
+    {
+      "name": "foundation/atlas/packages/adapter-io/test/scanner.wp-11.w5.test.ts",
+      "status": "passed",
+      "assertions": 17
+    },
+    {
+      "name": "foundation/atlas/packages/adapter-io/test/scip-corrupt-guard.test.ts",
+      "status": "passed",
+      "assertions": 3
+    },
+    {
+      "name": "foundation/atlas/packages/adapter-io/test/scip-forgery-freshness.test.ts",
+      "status": "passed",
+      "assertions": 8
+    },
+    {
+      "name": "foundation/atlas/packages/adapter-io/test/scip-raw-cache.test.ts",
+      "status": "passed",
+      "assertions": 2
+    },
+    {
+      "name": "foundation/atlas/packages/adapter-io/test/scip.test.ts",
+      "status": "passed",
+      "assertions": 6
+    },
+    {
+      "name": "foundation/atlas/packages/adapter-io/test/semantic-bench.test.ts",
+      "status": "passed",
+      "assertions": 17
+    },
+    {
+      "name": "foundation/atlas/packages/adapter-io/test/sidecar-generation-filename.test.ts",
+      "status": "passed",
+      "assertions": 6
+    },
+    {
+      "name": "foundation/atlas/packages/adapter-io/test/sidecar.test.ts",
+      "status": "passed",
+      "assertions": 17
+    },
+    {
+      "name": "foundation/atlas/packages/adapter-io/test/skeleton-memo-key.test.ts",
+      "status": "passed",
+      "assertions": 5
+    },
+    {
+      "name": "foundation/atlas/packages/adapter-io/test/skeleton-priors-leak.test.ts",
+      "status": "passed",
+      "assertions": 1
+    },
+    {
+      "name": "foundation/atlas/packages/adapter-io/test/skeleton-source.test.ts",
+      "status": "passed",
+      "assertions": 9
+    },
+    {
+      "name": "foundation/atlas/packages/adapter-io/test/store-fail-closed-cas.test.ts",
+      "status": "passed",
+      "assertions": 34
+    },
+    {
+      "name": "foundation/atlas/packages/adapter-io/test/store-fail-closed-door.test.ts",
+      "status": "passed",
+      "assertions": 25
+    },
+    {
+      "name": "foundation/atlas/packages/adapter-io/test/store-provenance.test.ts",
+      "status": "passed",
+      "assertions": 6
+    },
+    {
+      "name": "foundation/atlas/packages/adapter-io/test/store-staging.test.ts",
+      "status": "passed",
+      "assertions": 4
+    },
+    {
+      "name": "foundation/atlas/packages/adapter-io/test/store.test.ts",
+      "status": "passed",
+      "assertions": 19
+    },
+    {
+      "name": "foundation/atlas/packages/adapter-io/test/symbol-frontier.test.ts",
+      "status": "passed",
+      "assertions": 5
+    },
+    {
+      "name": "foundation/atlas/packages/adapter-io/test/test-vacuity-bench.test.ts",
+      "status": "passed",
+      "assertions": 5
+    },
+    {
+      "name": "foundation/atlas/packages/adapter-io/test/test-vacuity-producer.test.ts",
+      "status": "passed",
+      "assertions": 4
+    },
+    {
+      "name": "foundation/atlas/packages/adapter-io/test/test-vacuity.test.ts",
+      "status": "passed",
+      "assertions": 49
+    },
+    {
+      "name": "foundation/atlas/packages/adapter-io/test/transition-producer.test.ts",
+      "status": "passed",
+      "assertions": 7
+    },
+    {
+      "name": "foundation/atlas/packages/adapter-io/test/travel-by-reproof-compose.test.ts",
+      "status": "passed",
+      "assertions": 14
+    },
+    {
+      "name": "foundation/atlas/packages/adapter-io/test/unit-source.test.ts",
+      "status": "passed",
+      "assertions": 12
+    },
+    {
+      "name": "foundation/atlas/packages/adapter-io/test/verify-fact-source.test.ts",
+      "status": "passed",
+      "assertions": 15
+    },
+    {
+      "name": "foundation/atlas/packages/adapter-io/test/wire-precomputed-parity.test.ts",
+      "status": "passed",
+      "assertions": 1
+    },
+    {
+      "name": "foundation/atlas/packages/adapter-io/test/wire-query-envelope.test.ts",
+      "status": "passed",
+      "assertions": 2
+    },
+    {
+      "name": "foundation/atlas/packages/adapter-io/test/wire-retrieval-freshness.test.ts",
+      "status": "passed",
+      "assertions": 1
+    },
+    {
+      "name": "foundation/atlas/packages/adapter-io/test/wire-scip-guard.test.ts",
+      "status": "passed",
+      "assertions": 3
+    },
+    {
+      "name": "foundation/atlas/packages/adapter-io/test/wire.test.ts",
+      "status": "passed",
+      "assertions": 4
+    },
+    {
+      "name": "foundation/atlas/packages/adapter-io/test/wp-10.a2a-authoring.test.ts",
+      "status": "passed",
+      "assertions": 11
+    },
+    {
+      "name": "foundation/atlas/packages/adapter-io/test/wp-10.a2b-adapter-retire-door.test.ts",
+      "status": "passed",
+      "assertions": 3
+    },
+    {
+      "name": "foundation/atlas/packages/adapter-io/test/wp-10.a2b-draft.test.ts",
+      "status": "passed",
+      "assertions": 7
+    },
+    {
+      "name": "foundation/atlas/packages/adapter-io/test/wp-10.a3-check.test.ts",
+      "status": "passed",
+      "assertions": 4
+    },
+    {
+      "name": "foundation/atlas/packages/adapter-io/test/wp-d3b-a-wire-verdicts.test.ts",
+      "status": "passed",
+      "assertions": 7
+    },
+    {
+      "name": "foundation/atlas/packages/adapter-io/test/wp-per-fact-freshness.test.ts",
+      "status": "passed",
+      "assertions": 12
+    },
+    {
+      "name": "foundation/atlas/packages/cli/test/anchors-cli.test.ts",
+      "status": "passed",
+      "assertions": 10
+    },
+    {
+      "name": "foundation/atlas/packages/cli/test/calibration-cli.test.ts",
+      "status": "passed",
+      "assertions": 6
+    },
+    {
+      "name": "foundation/atlas/packages/cli/test/check-cli.test.ts",
+      "status": "passed",
+      "assertions": 7
+    },
+    {
+      "name": "foundation/atlas/packages/cli/test/derive-relations-cli.test.ts",
+      "status": "passed",
+      "assertions": 8
+    },
+    {
+      "name": "foundation/atlas/packages/cli/test/doctor-provenance-total.test.ts",
+      "status": "passed",
+      "assertions": 3
+    },
+    {
+      "name": "foundation/atlas/packages/cli/test/draft-json-cli.test.ts",
+      "status": "passed",
+      "assertions": 5
+    },
+    {
+      "name": "foundation/atlas/packages/cli/test/enrich-env-gating.test.ts",
+      "status": "passed",
+      "assertions": 14
+    },
+    {
+      "name": "foundation/atlas/packages/cli/test/error-attribution-cli.test.ts",
+      "status": "passed",
+      "assertions": 7
+    },
+    {
+      "name": "foundation/atlas/packages/cli/test/help-cli.test.ts",
+      "status": "passed",
+      "assertions": 6
+    },
+    {
+      "name": "foundation/atlas/packages/cli/test/init-gitignore.test.ts",
+      "status": "passed",
+      "assertions": 7
+    },
+    {
+      "name": "foundation/atlas/packages/cli/test/marshal-link-retract.test.ts",
+      "status": "passed",
+      "assertions": 14
+    },
+    {
+      "name": "foundation/atlas/packages/cli/test/memory-emit-cli.test.ts",
+      "status": "passed",
+      "assertions": 7
+    },
+    {
+      "name": "foundation/atlas/packages/cli/test/memory-read-cli.test.ts",
+      "status": "passed",
+      "assertions": 11
+    },
+    {
+      "name": "foundation/atlas/packages/cli/test/mine-answer-provenance.test.ts",
+      "status": "passed",
+      "assertions": 4
+    },
+    {
+      "name": "foundation/atlas/packages/cli/test/mine-answer-scrub-fitness.test.ts",
+      "status": "passed",
+      "assertions": 3
+    },
+    {
+      "name": "foundation/atlas/packages/cli/test/mine-arms-backcompat.test.ts",
+      "status": "passed",
+      "assertions": 1
+    },
+    {
+      "name": "foundation/atlas/packages/cli/test/mine-arms-isolation.test.ts",
+      "status": "passed",
+      "assertions": 3
+    },
+    {
+      "name": "foundation/atlas/packages/cli/test/mine-arms-render.test.ts",
+      "status": "passed",
+      "assertions": 4
+    },
+    {
+      "name": "foundation/atlas/packages/cli/test/mine-arms-union.test.ts",
+      "status": "passed",
+      "assertions": 1
+    },
+    {
+      "name": "foundation/atlas/packages/cli/test/mine-budget-cap.test.ts",
+      "status": "passed",
+      "assertions": 6
+    },
+    {
+      "name": "foundation/atlas/packages/cli/test/mine-cas-unaddressable-refusal.test.ts",
+      "status": "passed",
+      "assertions": 3
+    },
+    {
+      "name": "foundation/atlas/packages/cli/test/mine-claim-scrub-fitness-rel-neg.test.ts",
+      "status": "passed",
+      "assertions": 7
+    },
+    {
+      "name": "foundation/atlas/packages/cli/test/mine-claim-scrub-fitness.test.ts",
+      "status": "passed",
+      "assertions": 9
+    },
+    {
+      "name": "foundation/atlas/packages/cli/test/mine-claim-scrub.test.ts",
+      "status": "passed",
+      "assertions": 6
+    },
+    {
+      "name": "foundation/atlas/packages/cli/test/mine-cold-grammar.test.ts",
+      "status": "passed",
+      "assertions": 2
+    },
+    {
+      "name": "foundation/atlas/packages/cli/test/mine-contention.test.ts",
+      "status": "passed",
+      "assertions": 9
+    },
+    {
+      "name": "foundation/atlas/packages/cli/test/mine-coverage-render.test.ts",
+      "status": "passed",
+      "assertions": 3
+    },
+    {
+      "name": "foundation/atlas/packages/cli/test/mine-decide-family-identity.test.ts",
+      "status": "passed",
+      "assertions": 4
+    },
+    {
+      "name": "foundation/atlas/packages/cli/test/mine-decide-seal-carry.test.ts",
+      "status": "passed",
+      "assertions": 2
+    },
+    {
+      "name": "foundation/atlas/packages/cli/test/mine-gate-shape-dispatch.test.ts",
+      "status": "passed",
+      "assertions": 6
+    },
+    {
+      "name": "foundation/atlas/packages/cli/test/mine-governance-seam.test.ts",
+      "status": "passed",
+      "assertions": 5
+    },
+    {
+      "name": "foundation/atlas/packages/cli/test/mine-grounding-scrub.test.ts",
+      "status": "passed",
+      "assertions": 3
+    },
+    {
+      "name": "foundation/atlas/packages/cli/test/mine-history-wired.test.ts",
+      "status": "passed",
+      "assertions": 1
+    },
+    {
+      "name": "foundation/atlas/packages/cli/test/mine-model-wired.test.ts",
+      "status": "passed",
+      "assertions": 5
+    },
+    {
+      "name": "foundation/atlas/packages/cli/test/mine-predicate-check-scrub.test.ts",
+      "status": "passed",
+      "assertions": 7
+    },
+    {
+      "name": "foundation/atlas/packages/cli/test/mine-projection-surface.test.ts",
+      "status": "passed",
+      "assertions": 7
+    },
+    {
+      "name": "foundation/atlas/packages/cli/test/mine-proposer-identity.test.ts",
+      "status": "passed",
+      "assertions": 3
+    },
+    {
+      "name": "foundation/atlas/packages/cli/test/mine-provable-frontier-driver.test.ts",
+      "status": "passed",
+      "assertions": 5
+    },
+    {
+      "name": "foundation/atlas/packages/cli/test/mine-provable-frontier-proposer.test.ts",
+      "status": "passed",
+      "assertions": 3
+    },
+    {
+      "name": "foundation/atlas/packages/cli/test/mine-provenance-report.test.ts",
+      "status": "passed",
+      "assertions": 5
+    },
+    {
+      "name": "foundation/atlas/packages/cli/test/mine-provenance-seam.test.ts",
+      "status": "passed",
+      "assertions": 2
+    },
+    {
+      "name": "foundation/atlas/packages/cli/test/mine-render-seeded-count.test.ts",
+      "status": "passed",
+      "assertions": 6
+    },
+    {
+      "name": "foundation/atlas/packages/cli/test/mine-seed-awareness.test.ts",
+      "status": "passed",
+      "assertions": 5
+    },
+    {
+      "name": "foundation/atlas/packages/cli/test/mine-semantic-arm.test.ts",
+      "status": "passed",
+      "assertions": 8
+    },
+    {
+      "name": "foundation/atlas/packages/cli/test/mine-slot-gating.test.ts",
+      "status": "passed",
+      "assertions": 15
+    },
+    {
+      "name": "foundation/atlas/packages/cli/test/mine-superseded-publish.test.ts",
+      "status": "passed",
+      "assertions": 2
+    },
+    {
+      "name": "foundation/atlas/packages/cli/test/mined-tier-mirror-pin.test.ts",
+      "status": "passed",
+      "assertions": 2
+    },
+    {
+      "name": "foundation/atlas/packages/cli/test/negations-cli.test.ts",
+      "status": "passed",
+      "assertions": 6
+    },
+    {
+      "name": "foundation/atlas/packages/cli/test/okf-cli.test.ts",
+      "status": "passed",
+      "assertions": 10
+    },
+    {
+      "name": "foundation/atlas/packages/cli/test/own-cli.test.ts",
+      "status": "passed",
+      "assertions": 10
+    },
+    {
+      "name": "foundation/atlas/packages/cli/test/promote-cli.test.ts",
+      "status": "passed",
+      "assertions": 8
+    },
+    {
+      "name": "foundation/atlas/packages/cli/test/relations-cli.test.ts",
+      "status": "passed",
+      "assertions": 7
+    },
+    {
+      "name": "foundation/atlas/packages/cli/test/relations-seal-render.test.ts",
+      "status": "passed",
+      "assertions": 3
+    },
+    {
+      "name": "foundation/atlas/packages/cli/test/render-data.test.ts",
+      "status": "passed",
+      "assertions": 10
+    },
+    {
+      "name": "foundation/atlas/packages/cli/test/resolve-mine-slots.test.ts",
+      "status": "passed",
+      "assertions": 12
+    },
+    {
+      "name": "foundation/atlas/packages/cli/test/reverify-cli.test.ts",
+      "status": "passed",
+      "assertions": 11
+    },
+    {
+      "name": "foundation/atlas/packages/cli/test/skel-mine-default-skeleton.test.ts",
+      "status": "passed",
+      "assertions": 5
+    },
+    {
+      "name": "foundation/atlas/packages/cli/test/slots-draft-cli.test.ts",
+      "status": "passed",
+      "assertions": 16
+    },
+    {
+      "name": "foundation/atlas/packages/cli/test/task-proposer-dispatch.test.ts",
+      "status": "passed",
+      "assertions": 1
+    },
+    {
+      "name": "foundation/atlas/packages/cli/test/task-proposer.test.ts",
+      "status": "passed",
+      "assertions": 1
+    },
+    {
+      "name": "foundation/atlas/packages/cli/test/wp-196a-proposer-dependency.test.ts",
+      "status": "passed",
+      "assertions": 3
+    },
+    {
+      "name": "foundation/atlas/packages/cli/test/wp-9.1.1-a-cli.test.ts",
+      "status": "passed",
+      "assertions": 11
+    },
+    {
+      "name": "foundation/atlas/packages/cli/test/wp-9.3.6-b-mine.test.ts",
+      "status": "passed",
+      "assertions": 14
+    },
+    {
+      "name": "foundation/atlas/packages/cli/test/wp-9.x-argmarshal.test.ts",
+      "status": "passed",
+      "assertions": 12
+    },
+    {
+      "name": "foundation/atlas/packages/cli/test/wp-9.x-compose-b.integration.test.ts",
+      "status": "passed",
+      "assertions": 9
+    },
+    {
+      "name": "foundation/atlas/packages/cli/test/wp-96-identity-scrub.test.ts",
+      "status": "passed",
+      "assertions": 6
+    },
+    {
+      "name": "foundation/atlas/packages/cli/test/wp-96-predicate-e2e.test.ts",
+      "status": "passed",
+      "assertions": 2
+    },
+    {
+      "name": "foundation/atlas/packages/cli/test/wp-96-r-relation-e2e.test.ts",
+      "status": "passed",
+      "assertions": 3
+    },
+    {
+      "name": "foundation/atlas/packages/cli/test/wp-doctor-cli.test.ts",
+      "status": "passed",
+      "assertions": 18
+    },
+    {
+      "name": "foundation/atlas/packages/cli/test/wp-f4-parse-at.test.ts",
+      "status": "passed",
+      "assertions": 8
+    },
+    {
+      "name": "foundation/atlas/packages/cli/test/wp-f6-mine-empty-explained.test.ts",
+      "status": "passed",
+      "assertions": 7
+    },
+    {
+      "name": "foundation/atlas/packages/cli/test/wp-seedgate-compose.test.ts",
+      "status": "passed",
+      "assertions": 3
+    },
+    {
+      "name": "foundation/atlas/packages/e2e/test/s01-move-in.e2e.test.ts",
+      "status": "passed",
+      "assertions": 6
+    },
+    {
+      "name": "foundation/atlas/packages/e2e/test/s02-genesis-mining.e2e.test.ts",
+      "status": "passed",
+      "assertions": 4
+    },
+    {
+      "name": "foundation/atlas/packages/e2e/test/s03-truth-gate.e2e.test.ts",
+      "status": "passed",
+      "assertions": 6
+    },
+    {
+      "name": "foundation/atlas/packages/e2e/test/s04-drift-lifecycle.e2e.test.ts",
+      "status": "passed",
+      "assertions": 5
+    },
+    {
+      "name": "foundation/atlas/packages/e2e/test/s05-write-governance.e2e.test.ts",
+      "status": "passed",
+      "assertions": 9
+    },
+    {
+      "name": "foundation/atlas/packages/e2e/test/s06-retrieval-budget.e2e.test.ts",
+      "status": "passed",
+      "assertions": 4
+    },
+    {
+      "name": "foundation/atlas/packages/e2e/test/s07-memory-scoping.e2e.test.ts",
+      "status": "passed",
+      "assertions": 5
+    },
+    {
+      "name": "foundation/atlas/packages/e2e/test/s08-transport-writedoor.e2e.test.ts",
+      "status": "passed",
+      "assertions": 7
+    },
+    {
+      "name": "foundation/atlas/packages/e2e/test/s09-persist-provenance.e2e.test.ts",
+      "status": "passed",
+      "assertions": 5
+    },
+    {
+      "name": "foundation/atlas/packages/e2e/test/s10-full-pipeline.e2e.test.ts",
+      "status": "passed",
+      "assertions": 5
+    },
+    {
+      "name": "foundation/atlas/packages/genesis/src/verify-count.test.ts",
+      "status": "passed",
+      "assertions": 11
+    },
+    {
+      "name": "foundation/atlas/packages/genesis/src/verify-definition.test.ts",
+      "status": "passed",
+      "assertions": 6
+    },
+    {
+      "name": "foundation/atlas/packages/genesis/src/verify-fact-relation.test.ts",
+      "status": "passed",
+      "assertions": 8
+    },
+    {
+      "name": "foundation/atlas/packages/genesis/src/verify-fact.test.ts",
+      "status": "passed",
+      "assertions": 7
+    },
+    {
+      "name": "foundation/atlas/packages/genesis/src/verify-negation.test.ts",
+      "status": "passed",
+      "assertions": 10
+    },
+    {
+      "name": "foundation/atlas/packages/genesis/test/admit-harness.count-leg.test.ts",
+      "status": "passed",
+      "assertions": 8
+    },
+    {
+      "name": "foundation/atlas/packages/genesis/test/admit-harness.definition-leg.test.ts",
+      "status": "passed",
+      "assertions": 6
+    },
+    {
+      "name": "foundation/atlas/packages/genesis/test/admit-harness.dependency-leg.test.ts",
+      "status": "passed",
+      "assertions": 6
+    },
+    {
+      "name": "foundation/atlas/packages/genesis/test/admit-harness.justified-leg.test.ts",
+      "status": "passed",
+      "assertions": 5
+    },
+    {
+      "name": "foundation/atlas/packages/genesis/test/admit-harness.no-fabricated-check.test.ts",
+      "status": "passed",
+      "assertions": 4
+    },
+    {
+      "name": "foundation/atlas/packages/genesis/test/admit-harness.relation-leg.test.ts",
+      "status": "passed",
+      "assertions": 7
+    },
+    {
+      "name": "foundation/atlas/packages/genesis/test/admit-harness.witness.test.ts",
+      "status": "passed",
+      "assertions": 7
+    },
+    {
+      "name": "foundation/atlas/packages/genesis/test/admit-test-vacuity.test.ts",
+      "status": "passed",
+      "assertions": 8
+    },
+    {
+      "name": "foundation/atlas/packages/genesis/test/canon-skeleton-memo.test.ts",
+      "status": "passed",
+      "assertions": 2
+    },
+    {
+      "name": "foundation/atlas/packages/genesis/test/capped-budget.test.ts",
+      "status": "passed",
+      "assertions": 3
+    },
+    {
+      "name": "foundation/atlas/packages/genesis/test/coverage-ledger.test.ts",
+      "status": "passed",
+      "assertions": 10
+    },
+    {
+      "name": "foundation/atlas/packages/genesis/test/extract-answer-malformed.test.ts",
+      "status": "passed",
+      "assertions": 2
+    },
+    {
+      "name": "foundation/atlas/packages/genesis/test/ppr-damping-teeth.test.ts",
+      "status": "passed",
+      "assertions": 3
+    },
+    {
+      "name": "foundation/atlas/packages/genesis/test/provable-frontier.test.ts",
+      "status": "passed",
+      "assertions": 5
+    },
+    {
+      "name": "foundation/atlas/packages/genesis/test/seeds-qualified-path.test.ts",
+      "status": "passed",
+      "assertions": 4
+    },
+    {
+      "name": "foundation/atlas/packages/genesis/test/transition-family.test.ts",
+      "status": "passed",
+      "assertions": 11
+    },
+    {
+      "name": "foundation/atlas/packages/genesis/test/unit-frontier.test.ts",
+      "status": "passed",
+      "assertions": 15
+    },
+    {
+      "name": "foundation/atlas/packages/genesis/test/wp-6.18-gen.test.ts",
+      "status": "passed",
+      "assertions": 6
+    },
+    {
+      "name": "foundation/atlas/packages/genesis/test/wp-8.27-gen.test.ts",
+      "status": "passed",
+      "assertions": 17
+    },
+    {
+      "name": "foundation/atlas/packages/genesis/test/wp-8.28-a-gen.heldout.test.ts",
+      "status": "passed",
+      "assertions": 13
+    },
+    {
+      "name": "foundation/atlas/packages/genesis/test/wp-8.28-a-gen.test.ts",
+      "status": "passed",
+      "assertions": 14
+    },
+    {
+      "name": "foundation/atlas/packages/genesis/test/wp-8.28-b-gen.heldout.test.ts",
+      "status": "passed",
+      "assertions": 11
+    },
+    {
+      "name": "foundation/atlas/packages/genesis/test/wp-8.28-b-gen.test.ts",
+      "status": "passed",
+      "assertions": 13
+    },
+    {
+      "name": "foundation/atlas/packages/genesis/test/wp-8.28-c-gen.heldout.test.ts",
+      "status": "passed",
+      "assertions": 13
+    },
+    {
+      "name": "foundation/atlas/packages/genesis/test/wp-8.28-c-gen.test.ts",
+      "status": "passed",
+      "assertions": 13
+    },
+    {
+      "name": "foundation/atlas/packages/genesis/test/wp-8.29-gen.heldout.test.ts",
+      "status": "passed",
+      "assertions": 8
+    },
+    {
+      "name": "foundation/atlas/packages/genesis/test/wp-8.29-gen.test.ts",
+      "status": "passed",
+      "assertions": 9
+    },
+    {
+      "name": "foundation/atlas/packages/genesis/test/wp-8.30-gen-witness.test.ts",
+      "status": "passed",
+      "assertions": 7
+    },
+    {
+      "name": "foundation/atlas/packages/genesis/test/wp-8.30-gen.heldout.test.ts",
+      "status": "passed",
+      "assertions": 6
+    },
+    {
+      "name": "foundation/atlas/packages/genesis/test/wp-8.30-gen.test.ts",
+      "status": "passed",
+      "assertions": 11
+    },
+    {
+      "name": "foundation/atlas/packages/genesis/test/wp-8.31-gen.test.ts",
+      "status": "passed",
+      "assertions": 9
+    },
+    {
+      "name": "foundation/atlas/packages/genesis/test/wp-fix-concurrency.test.ts",
+      "status": "passed",
+      "assertions": 8
+    },
+    {
+      "name": "foundation/atlas/packages/grounding/test/ground-fail-closed.test.ts",
+      "status": "passed",
+      "assertions": 3
+    },
+    {
+      "name": "foundation/atlas/packages/grounding/test/wp-4.10-a-grd.heldout.test.ts",
+      "status": "passed",
+      "assertions": 9
+    },
+    {
+      "name": "foundation/atlas/packages/grounding/test/wp-4.10-a-grd.test.ts",
+      "status": "passed",
+      "assertions": 10
+    },
+    {
+      "name": "foundation/atlas/packages/grounding/test/wp-4.10-b-grd.heldout.test.ts",
+      "status": "passed",
+      "assertions": 6
+    },
+    {
+      "name": "foundation/atlas/packages/grounding/test/wp-4.10-b-grd.multiset.test.ts",
+      "status": "passed",
+      "assertions": 4
+    },
+    {
+      "name": "foundation/atlas/packages/grounding/test/wp-4.10-b-grd.test.ts",
+      "status": "passed",
+      "assertions": 7
+    },
+    {
+      "name": "foundation/atlas/packages/grounding/test/wp-4.10-c-grd.heldout.test.ts",
+      "status": "passed",
+      "assertions": 3
+    },
+    {
+      "name": "foundation/atlas/packages/grounding/test/wp-4.10-c-grd.test.ts",
+      "status": "passed",
+      "assertions": 3
+    },
+    {
+      "name": "foundation/atlas/packages/grounding/test/wp-4.10-d-grd.heldout.test.ts",
+      "status": "passed",
+      "assertions": 6
+    },
+    {
+      "name": "foundation/atlas/packages/grounding/test/wp-4.10-d-grd.test.ts",
+      "status": "passed",
+      "assertions": 13
+    },
+    {
+      "name": "foundation/atlas/packages/grounding/test/wp-4.10-d-grd.units.test.ts",
+      "status": "passed",
+      "assertions": 10
+    },
+    {
+      "name": "foundation/atlas/packages/grounding/test/wp-4.11-a-grd.heldout.test.ts",
+      "status": "passed",
+      "assertions": 2
+    },
+    {
+      "name": "foundation/atlas/packages/grounding/test/wp-4.11-a-grd.test.ts",
+      "status": "passed",
+      "assertions": 4
+    },
+    {
+      "name": "foundation/atlas/packages/index/test/build-key-mint.test.ts",
+      "status": "passed",
+      "assertions": 9
+    },
+    {
+      "name": "foundation/atlas/packages/index/test/build.test.ts",
+      "status": "passed",
+      "assertions": 10
+    },
+    {
+      "name": "foundation/atlas/packages/index/test/cas.heldout.test.ts",
+      "status": "passed",
+      "assertions": 4
+    },
+    {
+      "name": "foundation/atlas/packages/index/test/cas.test.ts",
+      "status": "passed",
+      "assertions": 4
+    },
+    {
+      "name": "foundation/atlas/packages/index/test/compose.compose-index.test.ts",
+      "status": "passed",
+      "assertions": 2
+    },
+    {
+      "name": "foundation/atlas/packages/index/test/coverage.heldout.test.ts",
+      "status": "passed",
+      "assertions": 3
+    },
+    {
+      "name": "foundation/atlas/packages/index/test/coverage.test.ts",
+      "status": "passed",
+      "assertions": 3
+    },
+    {
+      "name": "foundation/atlas/packages/index/test/depgraph-honest.test.ts",
+      "status": "passed",
+      "assertions": 6
+    },
+    {
+      "name": "foundation/atlas/packages/index/test/depgraph.heldout.test.ts",
+      "status": "passed",
+      "assertions": 11
+    },
+    {
+      "name": "foundation/atlas/packages/index/test/depgraph.test.ts",
+      "status": "passed",
+      "assertions": 4
+    },
+    {
+      "name": "foundation/atlas/packages/index/test/fold-drift.test.ts",
+      "status": "passed",
+      "assertions": 8
+    },
+    {
+      "name": "foundation/atlas/packages/index/test/fold.heldout.test.ts",
+      "status": "passed",
+      "assertions": 3
+    },
+    {
+      "name": "foundation/atlas/packages/index/test/fold.test.ts",
+      "status": "passed",
+      "assertions": 7
+    },
+    {
+      "name": "foundation/atlas/packages/index/test/identity-goldens.test.ts",
+      "status": "passed",
+      "assertions": 11
+    },
+    {
+      "name": "foundation/atlas/packages/index/test/merkle-core.regression.test.ts",
+      "status": "passed",
+      "assertions": 20
+    },
+    {
+      "name": "foundation/atlas/packages/index/test/own-impact.test.ts",
+      "status": "passed",
+      "assertions": 4
+    },
+    {
+      "name": "foundation/atlas/packages/index/test/ownership.test.ts",
+      "status": "passed",
+      "assertions": 6
+    },
+    {
+      "name": "foundation/atlas/packages/index/test/resolve.depth.test.ts",
+      "status": "passed",
+      "assertions": 13
+    },
+    {
+      "name": "foundation/atlas/packages/index/test/resolve.heldout.test.ts",
+      "status": "passed",
+      "assertions": 10
+    },
+    {
+      "name": "foundation/atlas/packages/index/test/resolve.test.ts",
+      "status": "passed",
+      "assertions": 4
+    },
+    {
+      "name": "foundation/atlas/packages/index/test/retrieval.test.ts",
+      "status": "passed",
+      "assertions": 14
+    },
+    {
+      "name": "foundation/atlas/packages/index/test/rollup.test.ts",
+      "status": "passed",
+      "assertions": 7
+    },
+    {
+      "name": "foundation/atlas/packages/index/test/symbol-reverse.test.ts",
+      "status": "passed",
+      "assertions": 9
+    },
+    {
+      "name": "foundation/atlas/packages/index/test/territory.heldout.test.ts",
+      "status": "passed",
+      "assertions": 4
+    },
+    {
+      "name": "foundation/atlas/packages/index/test/territory.test.ts",
+      "status": "passed",
+      "assertions": 7
+    },
+    {
+      "name": "foundation/atlas/packages/index/test/unit-defs-memo.test.ts",
+      "status": "passed",
+      "assertions": 2
+    },
+    {
+      "name": "foundation/atlas/packages/index/test/unit-deps.test.ts",
+      "status": "passed",
+      "assertions": 7
+    },
+    {
+      "name": "foundation/atlas/packages/index/test/unit-exports.test.ts",
+      "status": "passed",
+      "assertions": 4
+    },
+    {
+      "name": "foundation/atlas/packages/kernel/test/canonical.test.ts",
+      "status": "passed",
+      "assertions": 13
+    },
+    {
+      "name": "foundation/atlas/packages/kernel/test/encoder.test.ts",
+      "status": "passed",
+      "assertions": 4
+    },
+    {
+      "name": "foundation/atlas/packages/kernel/test/event-identity.test.ts",
+      "status": "passed",
+      "assertions": 11
+    },
+    {
+      "name": "foundation/atlas/packages/kernel/test/fold-convergence.test.ts",
+      "status": "passed",
+      "assertions": 4
+    },
+    {
+      "name": "foundation/atlas/packages/kernel/test/fold.test.ts",
+      "status": "passed",
+      "assertions": 3
+    },
+    {
+      "name": "foundation/atlas/packages/kernel/test/heldout-krn-event.test.ts",
+      "status": "passed",
+      "assertions": 6
+    },
+    {
+      "name": "foundation/atlas/packages/kernel/test/heldout-krn-fold.test.ts",
+      "status": "passed",
+      "assertions": 2
+    },
+    {
+      "name": "foundation/atlas/packages/kernel/test/heldout-krn-merge.test.ts",
+      "status": "passed",
+      "assertions": 4
+    },
+    {
+      "name": "foundation/atlas/packages/kernel/test/heldout-krn-portable.test.ts",
+      "status": "passed",
+      "assertions": 5
+    },
+    {
+      "name": "foundation/atlas/packages/kernel/test/heldout-krn-store.test.ts",
+      "status": "passed",
+      "assertions": 7
+    },
+    {
+      "name": "foundation/atlas/packages/kernel/test/heldout-krn.test.ts",
+      "status": "passed",
+      "assertions": 9
+    },
+    {
+      "name": "foundation/atlas/packages/kernel/test/identity-goldens.test.ts",
+      "status": "passed",
+      "assertions": 4
+    },
+    {
+      "name": "foundation/atlas/packages/kernel/test/log.test.ts",
+      "status": "passed",
+      "assertions": 3
+    },
+    {
+      "name": "foundation/atlas/packages/kernel/test/merge-fold.test.ts",
+      "status": "passed",
+      "assertions": 12
+    },
+    {
+      "name": "foundation/atlas/packages/kernel/test/portable.test.ts",
+      "status": "passed",
+      "assertions": 8
+    },
+    {
+      "name": "foundation/atlas/packages/kernel/test/store.test.ts",
+      "status": "passed",
+      "assertions": 3
+    },
+    {
+      "name": "foundation/atlas/packages/kernel/test/totality.test.ts",
+      "status": "passed",
+      "assertions": 3
+    },
+    {
+      "name": "foundation/atlas/packages/knowledge/test/arch-9-10-authority.test.ts",
+      "status": "passed",
+      "assertions": 10
+    },
+    {
+      "name": "foundation/atlas/packages/knowledge/test/archive-unaddressable.test.ts",
+      "status": "passed",
+      "assertions": 5
+    },
+    {
+      "name": "foundation/atlas/packages/knowledge/test/degenerate-anchor.test.ts",
+      "status": "passed",
+      "assertions": 14
+    },
+    {
+      "name": "foundation/atlas/packages/knowledge/test/evaluator.admit-grammar.test.ts",
+      "status": "passed",
+      "assertions": 7
+    },
+    {
+      "name": "foundation/atlas/packages/knowledge/test/evaluator.know16.heldout.test.ts",
+      "status": "passed",
+      "assertions": 7
+    },
+    {
+      "name": "foundation/atlas/packages/knowledge/test/evaluator.know16.test.ts",
+      "status": "passed",
+      "assertions": 7
+    },
+    {
+      "name": "foundation/atlas/packages/knowledge/test/fastpath-isgrounded-parity.test.ts",
+      "status": "passed",
+      "assertions": 26
+    },
+    {
+      "name": "foundation/atlas/packages/knowledge/test/fastpath-promotion-origin.test.ts",
+      "status": "passed",
+      "assertions": 6
+    },
+    {
+      "name": "foundation/atlas/packages/knowledge/test/freshness.know3.heldout.test.ts",
+      "status": "passed",
+      "assertions": 3
+    },
+    {
+      "name": "foundation/atlas/packages/knowledge/test/freshness.know3.realmint.test.ts",
+      "status": "passed",
+      "assertions": 8
+    },
+    {
+      "name": "foundation/atlas/packages/knowledge/test/freshness.know3.test.ts",
+      "status": "passed",
+      "assertions": 5
+    },
+    {
+      "name": "foundation/atlas/packages/knowledge/test/hits.auth16.heldout.test.ts",
+      "status": "passed",
+      "assertions": 5
+    },
+    {
+      "name": "foundation/atlas/packages/knowledge/test/hits.auth16.test.ts",
+      "status": "passed",
+      "assertions": 6
+    },
+    {
+      "name": "foundation/atlas/packages/knowledge/test/hits.know17.heldout.test.ts",
+      "status": "passed",
+      "assertions": 4
+    },
+    {
+      "name": "foundation/atlas/packages/knowledge/test/hits.know17.test.ts",
+      "status": "passed",
+      "assertions": 6
+    },
+    {
+      "name": "foundation/atlas/packages/knowledge/test/negation-key.test.ts",
+      "status": "passed",
+      "assertions": 13
+    },
+    {
+      "name": "foundation/atlas/packages/knowledge/test/negation-witness-drift.test.ts",
+      "status": "passed",
+      "assertions": 4
+    },
+    {
+      "name": "foundation/atlas/packages/knowledge/test/negations-fold.test.ts",
+      "status": "passed",
+      "assertions": 8
+    },
+    {
+      "name": "foundation/atlas/packages/knowledge/test/produce.know13.heldout.test.ts",
+      "status": "passed",
+      "assertions": 2
+    },
+    {
+      "name": "foundation/atlas/packages/knowledge/test/produce.know13.test.ts",
+      "status": "passed",
+      "assertions": 8
+    },
+    {
+      "name": "foundation/atlas/packages/knowledge/test/reconcile.know5.heldout.test.ts",
+      "status": "passed",
+      "assertions": 4
+    },
+    {
+      "name": "foundation/atlas/packages/knowledge/test/reconcile.know5.test.ts",
+      "status": "passed",
+      "assertions": 6
+    },
+    {
+      "name": "foundation/atlas/packages/knowledge/test/relation-key.test.ts",
+      "status": "passed",
+      "assertions": 15
+    },
+    {
+      "name": "foundation/atlas/packages/knowledge/test/relations-fold.test.ts",
+      "status": "passed",
+      "assertions": 6
+    },
+    {
+      "name": "foundation/atlas/packages/knowledge/test/relations-seal-fold.test.ts",
+      "status": "passed",
+      "assertions": 3
+    },
+    {
+      "name": "foundation/atlas/packages/knowledge/test/sameas-pairkey-forgery.test.ts",
+      "status": "passed",
+      "assertions": 8
+    },
+    {
+      "name": "foundation/atlas/packages/knowledge/test/sameas-retraction.test.ts",
+      "status": "passed",
+      "assertions": 17
+    },
+    {
+      "name": "foundation/atlas/packages/knowledge/test/test-vacuity-fold.test.ts",
+      "status": "passed",
+      "assertions": 7
+    },
+    {
+      "name": "foundation/atlas/packages/knowledge/test/test-vacuity-key.test.ts",
+      "status": "passed",
+      "assertions": 11
+    },
+    {
+      "name": "foundation/atlas/packages/knowledge/test/tier.test.ts",
+      "status": "passed",
+      "assertions": 7
+    },
+    {
+      "name": "foundation/atlas/packages/knowledge/test/upsert-answerref-update.test.ts",
+      "status": "passed",
+      "assertions": 3
+    },
+    {
+      "name": "foundation/atlas/packages/knowledge/test/upsert-raise-carry-forward.test.ts",
+      "status": "passed",
+      "assertions": 1
+    },
+    {
+      "name": "foundation/atlas/packages/knowledge/test/upsert-seal-carry.test.ts",
+      "status": "passed",
+      "assertions": 6
+    },
+    {
+      "name": "foundation/atlas/packages/knowledge/test/wp-196a-seal.test.ts",
+      "status": "passed",
+      "assertions": 5
+    },
+    {
+      "name": "foundation/atlas/packages/knowledge/test/wp-242-neardup-deleted.test.ts",
+      "status": "passed",
+      "assertions": 3
+    },
+    {
+      "name": "foundation/atlas/packages/knowledge/test/wp-4.11-a-know.heldout.test.ts",
+      "status": "passed",
+      "assertions": 3
+    },
+    {
+      "name": "foundation/atlas/packages/knowledge/test/wp-4.11-a-know.truthgate.test.ts",
+      "status": "passed",
+      "assertions": 7
+    },
+    {
+      "name": "foundation/atlas/packages/knowledge/test/wp-4.12-a-know.stale.test.ts",
+      "status": "passed",
+      "assertions": 5
+    },
+    {
+      "name": "foundation/atlas/packages/knowledge/test/wp-5.13-a-know.router.heldout.test.ts",
+      "status": "passed",
+      "assertions": 7
+    },
+    {
+      "name": "foundation/atlas/packages/knowledge/test/wp-5.13-a-know.router.test.ts",
+      "status": "passed",
+      "assertions": 9
+    },
+    {
+      "name": "foundation/atlas/packages/knowledge/test/wp-5.13-b-know.anchor-identity.test.ts",
+      "status": "passed",
+      "assertions": 8
+    },
+    {
+      "name": "foundation/atlas/packages/knowledge/test/wp-5.14-know.lifecycle.test.ts",
+      "status": "passed",
+      "assertions": 14
+    },
+    {
+      "name": "foundation/atlas/packages/knowledge/test/wp-5.15-know.tier-ratify.heldout.test.ts",
+      "status": "passed",
+      "assertions": 9
+    },
+    {
+      "name": "foundation/atlas/packages/knowledge/test/wp-5.15-know.tier-ratify.test.ts",
+      "status": "passed",
+      "assertions": 9
+    },
+    {
+      "name": "foundation/atlas/packages/knowledge/test/wp-9.2.4-know.writedecision.test.ts",
+      "status": "passed",
+      "assertions": 9
+    },
+    {
+      "name": "foundation/atlas/packages/knowledge/test/wp-9.x-adjacency-a.carrier.test.ts",
+      "status": "passed",
+      "assertions": 7
+    },
+    {
+      "name": "foundation/atlas/packages/knowledge/test/wp-9.x-adjacency-b.near-dup.test.ts",
+      "status": "passed",
+      "assertions": 5
+    },
+    {
+      "name": "foundation/atlas/packages/knowledge/test/wp-closed-slot-gate.test.ts",
+      "status": "passed",
+      "assertions": 9
+    },
+    {
+      "name": "foundation/atlas/packages/knowledge/test/wp-dedup-2.subsumes.test.ts",
+      "status": "passed",
+      "assertions": 12
+    },
+    {
+      "name": "foundation/atlas/packages/knowledge/test/wp-owner-not-required.test.ts",
+      "status": "passed",
+      "assertions": 13
+    },
+    {
+      "name": "foundation/atlas/packages/knowledge/test/wp-sameas.test.ts",
+      "status": "passed",
+      "assertions": 15
+    },
+    {
+      "name": "foundation/atlas/packages/mcp-server/test/error-attribution-mcp.test.ts",
+      "status": "passed",
+      "assertions": 6
+    },
+    {
+      "name": "foundation/atlas/packages/mcp-server/test/memory-emit-mcp.test.ts",
+      "status": "passed",
+      "assertions": 3
+    },
+    {
+      "name": "foundation/atlas/packages/mcp-server/test/memory-read-mcp.test.ts",
+      "status": "passed",
+      "assertions": 5
+    },
+    {
+      "name": "foundation/atlas/packages/mcp-server/test/negations-mcp.test.ts",
+      "status": "passed",
+      "assertions": 5
+    },
+    {
+      "name": "foundation/atlas/packages/mcp-server/test/relations-mcp.test.ts",
+      "status": "passed",
+      "assertions": 6
+    },
+    {
+      "name": "foundation/atlas/packages/mcp-server/test/surface-conformance-req-mcp-1e.test.ts",
+      "status": "passed",
+      "assertions": 8
+    },
+    {
+      "name": "foundation/atlas/packages/mcp-server/test/wp-9.4.7-mcp.test.ts",
+      "status": "passed",
+      "assertions": 6
+    },
+    {
+      "name": "foundation/atlas/packages/memory/test/mem-5-field-types.test.ts",
+      "status": "passed",
+      "assertions": 28
+    },
+    {
+      "name": "foundation/atlas/packages/memory/test/mem-9-portable-scangate.wp35a.test.ts",
+      "status": "passed",
+      "assertions": 8
+    },
+    {
+      "name": "foundation/atlas/packages/memory/test/mem-9.wp35a.heldout.test.ts",
+      "status": "passed",
+      "assertions": 2
+    },
+    {
+      "name": "foundation/atlas/packages/memory/test/mem-kind-derivation.test.ts",
+      "status": "passed",
+      "assertions": 14
+    },
+    {
+      "name": "foundation/atlas/packages/memory/test/wp-3.5-b-mem.heldout.test.ts",
+      "status": "passed",
+      "assertions": 5
+    },
+    {
+      "name": "foundation/atlas/packages/memory/test/wp-3.5-b-mem.test.ts",
+      "status": "passed",
+      "assertions": 5
+    },
+    {
+      "name": "foundation/atlas/packages/memory/test/wp-6.23-mem.test.ts",
+      "status": "passed",
+      "assertions": 6
+    },
+    {
+      "name": "foundation/atlas/packages/memory/test/wp-6.24-a-mem.heldout.test.ts",
+      "status": "passed",
+      "assertions": 2
+    },
+    {
+      "name": "foundation/atlas/packages/memory/test/wp-6.24-a-mem.test.ts",
+      "status": "passed",
+      "assertions": 11
+    },
+    {
+      "name": "foundation/atlas/packages/memory/test/wp-6.24-b-mem.heldout.test.ts",
+      "status": "passed",
+      "assertions": 6
+    },
+    {
+      "name": "foundation/atlas/packages/memory/test/wp-6.24-b-mem.test.ts",
+      "status": "passed",
+      "assertions": 6
+    },
+    {
+      "name": "foundation/atlas/packages/memory/test/wp-6.25-a-mem.test.ts",
+      "status": "passed",
+      "assertions": 8
+    },
+    {
+      "name": "foundation/atlas/packages/memory/test/wp-6.25-b-mem.test.ts",
+      "status": "passed",
+      "assertions": 7
+    },
+    {
+      "name": "foundation/atlas/packages/persist/test/attach-unaddressable.test.ts",
+      "status": "passed",
+      "assertions": 6
+    },
+    {
+      "name": "foundation/atlas/packages/persist/test/heldout-pst-reconstruct.test.ts",
+      "status": "passed",
+      "assertions": 9
+    },
+    {
+      "name": "foundation/atlas/packages/persist/test/heldout-pst-source.test.ts",
+      "status": "passed",
+      "assertions": 4
+    },
+    {
+      "name": "foundation/atlas/packages/persist/test/merge.heldout.test.ts",
+      "status": "passed",
+      "assertions": 2
+    },
+    {
+      "name": "foundation/atlas/packages/persist/test/merge.test.ts",
+      "status": "passed",
+      "assertions": 10
+    },
+    {
+      "name": "foundation/atlas/packages/persist/test/reconstruct.test.ts",
+      "status": "passed",
+      "assertions": 12
+    },
+    {
+      "name": "foundation/atlas/packages/persist/test/reinvoke.heldout.test.ts",
+      "status": "passed",
+      "assertions": 6
+    },
+    {
+      "name": "foundation/atlas/packages/persist/test/reinvoke.test.ts",
+      "status": "passed",
+      "assertions": 7
+    },
+    {
+      "name": "foundation/atlas/packages/persist/test/scrub-adjacent-fuzz.test.ts",
+      "status": "passed",
+      "assertions": 16
+    },
+    {
+      "name": "foundation/atlas/packages/persist/test/scrub-adjacent-store.test.ts",
+      "status": "passed",
+      "assertions": 21
+    },
+    {
+      "name": "foundation/atlas/packages/persist/test/scrub-cross-family.test.ts",
+      "status": "passed",
+      "assertions": 32
+    },
+    {
+      "name": "foundation/atlas/packages/persist/test/scrub-declared-families.test.ts",
+      "status": "passed",
+      "assertions": 27
+    },
+    {
+      "name": "foundation/atlas/packages/persist/test/scrub-seam.test.ts",
+      "status": "passed",
+      "assertions": 27
+    },
+    {
+      "name": "foundation/atlas/packages/persist/test/source.test.ts",
+      "status": "passed",
+      "assertions": 6
+    },
+    {
+      "name": "foundation/atlas/packages/persist/test/transcript-3.5-a.heldout.test.ts",
+      "status": "passed",
+      "assertions": 8
+    },
+    {
+      "name": "foundation/atlas/packages/persist/test/transcript-persist.test.ts",
+      "status": "passed",
+      "assertions": 8
+    },
+    {
+      "name": "foundation/atlas/packages/persist/test/transcript-store-door-fitness.test.ts",
+      "status": "passed",
+      "assertions": 10
+    },
+    {
+      "name": "foundation/atlas/packages/persist/test/transcript-store-known-limits.test.ts",
+      "status": "passed",
+      "assertions": 6
+    },
+    {
+      "name": "foundation/atlas/packages/persist/test/transcript-store-redaction.test.ts",
+      "status": "passed",
+      "assertions": 18
+    },
+    {
+      "name": "foundation/atlas/packages/persist/test/wp-3.4-a-persist.test.ts",
+      "status": "passed",
+      "assertions": 7
+    },
+    {
+      "name": "foundation/atlas/packages/persist/test/wp-3.4-a.heldout.test.ts",
+      "status": "passed",
+      "assertions": 6
+    },
+    {
+      "name": "foundation/atlas/packages/persist/test/wp-3.4-b.heldout.test.ts",
+      "status": "passed",
+      "assertions": 7
+    },
+    {
+      "name": "foundation/atlas/packages/persist/test/wp-3.4-b.hostadapter-placement.test.ts",
+      "status": "passed",
+      "assertions": 7
+    },
+    {
+      "name": "foundation/atlas/packages/persist/test/wp-7.32-persist.test.ts",
+      "status": "passed",
+      "assertions": 6
+    },
+    {
+      "name": "foundation/atlas/packages/retrieval/test/own-artifact.test.ts",
+      "status": "passed",
+      "assertions": 8
+    },
+    {
+      "name": "foundation/atlas/packages/retrieval/test/own-snapshot.test.ts",
+      "status": "passed",
+      "assertions": 20
+    },
+    {
+      "name": "foundation/atlas/packages/retrieval/test/wp-2.8-b-retr.heldout.test.ts",
+      "status": "passed",
+      "assertions": 5
+    },
+    {
+      "name": "foundation/atlas/packages/retrieval/test/wp-2.8-b-retr.relate.test.ts",
+      "status": "passed",
+      "assertions": 11
+    },
+    {
+      "name": "foundation/atlas/packages/retrieval/test/wp-6.18-retr.test.ts",
+      "status": "passed",
+      "assertions": 7
+    },
+    {
+      "name": "foundation/atlas/packages/retrieval/test/wp-6.19-retr.pack.test.ts",
+      "status": "passed",
+      "assertions": 13
+    },
+    {
+      "name": "foundation/atlas/packages/retrieval/test/wp-6.20-retr.own.test.ts",
+      "status": "passed",
+      "assertions": 14
+    },
+    {
+      "name": "foundation/atlas/packages/retrieval/test/wp-6.21-retr.poke.test.ts",
+      "status": "passed",
+      "assertions": 13
+    },
+    {
+      "name": "foundation/atlas/packages/retrieval/test/wp-6.22-retr.drop.test.ts",
+      "status": "passed",
+      "assertions": 10
+    },
+    {
+      "name": "foundation/atlas/packages/tools/test/error-attribution.test.ts",
+      "status": "passed",
+      "assertions": 14
+    },
+    {
+      "name": "foundation/atlas/packages/tools/test/fault-vocabulary.test.ts",
+      "status": "passed",
+      "assertions": 21
+    },
+    {
+      "name": "foundation/atlas/packages/tools/test/guard-fail-closed.test.ts",
+      "status": "passed",
+      "assertions": 20
+    },
+    {
+      "name": "foundation/atlas/packages/tools/test/link-retract-schema.test.ts",
+      "status": "passed",
+      "assertions": 7
+    },
+    {
+      "name": "foundation/atlas/packages/tools/test/push-pull-optimize.test.ts",
+      "status": "passed",
+      "assertions": 5
+    },
+    {
+      "name": "foundation/atlas/packages/tools/test/refusal-visibility.test.ts",
+      "status": "passed",
+      "assertions": 11
+    },
+    {
+      "name": "foundation/atlas/packages/tools/test/wp-10.a1-tools.test.ts",
+      "status": "passed",
+      "assertions": 5
+    },
+    {
+      "name": "foundation/atlas/packages/tools/test/wp-10.a4-tools.test.ts",
+      "status": "passed",
+      "assertions": 4
+    },
+    {
+      "name": "foundation/atlas/packages/tools/test/wp-10.a5-tools.test.ts",
+      "status": "passed",
+      "assertions": 6
+    },
+    {
+      "name": "foundation/atlas/packages/tools/test/wp-4.11-a-tools.heldout.test.ts",
+      "status": "passed",
+      "assertions": 2
+    },
+    {
+      "name": "foundation/atlas/packages/tools/test/wp-4.11-a-tools.test.ts",
+      "status": "passed",
+      "assertions": 2
+    },
+    {
+      "name": "foundation/atlas/packages/tools/test/wp-4.12-a-tools.heldout.test.ts",
+      "status": "passed",
+      "assertions": 4
+    },
+    {
+      "name": "foundation/atlas/packages/tools/test/wp-4.12-a-tools.test.ts",
+      "status": "passed",
+      "assertions": 7
+    },
+    {
+      "name": "foundation/atlas/packages/tools/test/wp-6.19-tools.test.ts",
+      "status": "passed",
+      "assertions": 4
+    },
+    {
+      "name": "foundation/atlas/packages/tools/test/wp-6.22-tools.test.ts",
+      "status": "passed",
+      "assertions": 3
+    },
+    {
+      "name": "foundation/atlas/packages/tools/test/wp-7.26-a-tools.test.ts",
+      "status": "passed",
+      "assertions": 10
+    },
+    {
+      "name": "foundation/atlas/packages/tools/test/wp-7.26-b-tools.test.ts",
+      "status": "passed",
+      "assertions": 6
+    },
+    {
+      "name": "foundation/atlas/packages/tools/test/wp-7.26-c-tools.test.ts",
+      "status": "passed",
+      "assertions": 12
+    },
+    {
+      "name": "foundation/atlas/packages/tools/test/wp-7.32-tools.test.ts",
+      "status": "passed",
+      "assertions": 5
+    },
+    {
+      "name": "foundation/atlas/packages/tools/test/wp-8.27-tools.heldout.test.ts",
+      "status": "passed",
+      "assertions": 5
+    },
+    {
+      "name": "foundation/atlas/packages/tools/test/wp-8.27-tools.test.ts",
+      "status": "passed",
+      "assertions": 5
+    },
+    {
+      "name": "foundation/atlas/packages/adapter-io/test/harness/fix-repo.smoke.test.ts",
+      "status": "passed",
+      "assertions": 2
+    },
+    {
+      "name": "foundation/atlas/packages/adapter-io/test/harness/fix-scip.smoke.test.ts",
+      "status": "passed",
+      "assertions": 2
+    },
+    {
+      "name": "foundation/atlas/packages/adapter-io/test/harness/git-sbx.smoke.test.ts",
+      "status": "passed",
+      "assertions": 7
+    },
+    {
+      "name": "foundation/atlas/harness/gates/adr-citation-guard.packages.test.mjs",
+      "status": "passed",
+      "assertions": 13
+    },
+    {
+      "name": "foundation/atlas/harness/gates/adr-citation-guard.test.mjs",
+      "status": "passed",
+      "assertions": 11
+    },
+    {
+      "name": "foundation/atlas/harness/gates/command-doc-guard.test.mjs",
+      "status": "passed",
+      "assertions": 37
+    },
+    {
+      "name": "foundation/atlas/harness/gates/doc-transcript-guard.test.mjs",
+      "status": "passed",
+      "assertions": 13
+    },
+    {
+      "name": "foundation/atlas/harness/gates/ears-coamend-guard.test.mjs",
+      "status": "passed",
+      "assertions": 18
+    },
+    {
+      "name": "foundation/atlas/harness/gates/gate-directory.test.mjs",
+      "status": "passed",
+      "assertions": 25
+    },
+    {
+      "name": "foundation/atlas/harness/gates/godfile-guard.test.mjs",
+      "status": "passed",
+      "assertions": 8
+    },
+    {
+      "name": "foundation/atlas/harness/gates/id-integrity.test.mjs",
+      "status": "passed",
+      "assertions": 24
+    },
+    {
+      "name": "foundation/atlas/harness/gates/layer-guard.test.mjs",
+      "status": "passed",
+      "assertions": 31
+    },
+    {
+      "name": "foundation/atlas/harness/gates/own-snapshot-guard.test.mjs",
+      "status": "passed",
+      "assertions": 14
+    },
+    {
+      "name": "foundation/atlas/harness/gates/reference-model-guard.test.mjs",
+      "status": "passed",
+      "assertions": 13
+    },
+    {
+      "name": "foundation/atlas/harness/gates/req-clause-guard.test.mjs",
+      "status": "passed",
+      "assertions": 17
+    },
+    {
+      "name": "foundation/atlas/harness/gates/service-gate-guard.test.mjs",
+      "status": "passed",
+      "assertions": 11
+    },
+    {
+      "name": "foundation/atlas/harness/gates/spec-conformance-guard.test.mjs",
+      "status": "passed",
+      "assertions": 10
+    },
+    {
+      "name": "foundation/atlas/harness/gates/wiring-guard.test.mjs",
+      "status": "passed",
+      "assertions": 15
+    },
+    {
+      "name": "foundation/atlas/harness/lib/drift-patterns.test.mjs",
+      "status": "passed",
+      "assertions": 25
+    },
+    {
+      "name": "foundation/atlas/harness/lib/lexing.test.mjs",
+      "status": "passed",
+      "assertions": 7
+    },
+    {
+      "name": "foundation/atlas/harness/lib/reachability-lexing.test.mjs",
+      "status": "passed",
+      "assertions": 26
+    },
+    {
+      "name": "foundation/atlas/harness/lib/reachability.test.mjs",
+      "status": "passed",
+      "assertions": 25
+    },
+    {
+      "name": "foundation/atlas/harness/probes/a2-staleness-teeth.test.mjs",
+      "status": "passed",
+      "assertions": 7
+    },
+    {
+      "name": "foundation/atlas/harness/probes/a2-staleness.test.mjs",
+      "status": "passed",
+      "assertions": 4
+    },
+    {
+      "name": "foundation/atlas/harness/probes/a2r-corpus.test.mjs",
+      "status": "passed",
+      "assertions": 7
+    },
+    {
+      "name": "foundation/atlas/harness/probes/bench-driver.test.mjs",
+      "status": "passed",
+      "assertions": 12
+    },
+    {
+      "name": "foundation/atlas/harness/probes/concurrency-report.test.mjs",
+      "status": "passed",
+      "assertions": 8
+    },
+    {
+      "name": "foundation/atlas/harness/probes/metered-claude.test.mjs",
+      "status": "passed",
+      "assertions": 10
+    },
+    {
+      "name": "foundation/atlas/harness/probes/adjudicate/adjudicate.test.mjs",
+      "status": "passed",
+      "assertions": 24
+    }
+  ]
+}

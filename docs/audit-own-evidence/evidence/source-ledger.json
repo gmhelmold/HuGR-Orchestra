@@ -1,0 +1,212 @@
+[
+  {
+    "path": "AGENTS.md",
+    "gitBlob": "cd2327e888119bb084895b615f5abc8f81afcc3f",
+    "lines": 161,
+    "readScope": "complete file returned by Remote Desktop read_multiple_files this round",
+    "verifiedAgainstBaseline": true
+  },
+  {
+    "path": "foundation/atlas/package.json",
+    "gitBlob": "700eb8c7d4bf7a5ce2c765f0d3a0bbd2b3c6e2ec",
+    "lines": 44,
+    "readScope": "complete file returned by Remote Desktop read_multiple_files this round",
+    "verifiedAgainstBaseline": true
+  },
+  {
+    "path": "packages/opencode/src/maestro/admission-record.ts",
+    "gitBlob": "e4be41c69e2cc9fccb018064337af5a80e17bcf4",
+    "lines": 66,
+    "readScope": "complete file returned by Remote Desktop read_multiple_files this round",
+    "verifiedAgainstBaseline": true
+  },
+  {
+    "path": "packages/opencode/src/maestro/approval-record.ts",
+    "gitBlob": "10f43f5d5b6d3b06304425ac89d2b079f6a48799",
+    "lines": 298,
+    "readScope": "complete file returned by Remote Desktop read_multiple_files this round",
+    "verifiedAgainstBaseline": true
+  },
+  {
+    "path": "packages/opencode/src/tool/maestro-admission.ts",
+    "gitBlob": "b7bbccfd08176affcdbeee20df722e30018bcb30",
+    "lines": 53,
+    "readScope": "complete file returned by Remote Desktop read_multiple_files this round",
+    "verifiedAgainstBaseline": true
+  },
+  {
+    "path": "packages/opencode/src/event-v2-bridge.ts",
+    "gitBlob": "8e65f2752df7cdc1d0a4946cb100fda8e89a8715",
+    "lines": 71,
+    "readScope": "complete file returned by Remote Desktop read_multiple_files this round",
+    "verifiedAgainstBaseline": true
+  },
+  {
+    "path": "packages/opencode/test/maestro/admission-record.test.ts",
+    "gitBlob": "ef72ca36b702630ab996f3012aa8c15919503c2f",
+    "lines": 56,
+    "readScope": "complete file returned by Remote Desktop read_multiple_files this round",
+    "verifiedAgainstBaseline": true
+  },
+  {
+    "path": "packages/opencode/test/lib/effect.ts",
+    "gitBlob": "255d4b3947502b971ffb4ab3ab15cfb184c2db4f",
+    "lines": 177,
+    "readScope": "complete file returned by Remote Desktop read_multiple_files this round",
+    "verifiedAgainstBaseline": true
+  },
+  {
+    "path": "packages/opencode/test/fixture/fixture.ts",
+    "gitBlob": "53e3142cdfb34aea269cae40cb90a6c768fff27e",
+    "lines": 228,
+    "readScope": "complete file returned by Remote Desktop read_multiple_files this round",
+    "verifiedAgainstBaseline": true
+  },
+  {
+    "path": "foundation/atlas/packages/index/src/depgraph.ts",
+    "gitBlob": "c55a264976c1b3aacef4802509b9c8f4bc9f5e32",
+    "lines": 95,
+    "readScope": "complete file returned by Remote Desktop read_multiple_files this round",
+    "verifiedAgainstBaseline": true
+  },
+  {
+    "path": "foundation/atlas/packages/index/src/own-impact.ts",
+    "gitBlob": "37dd53bfd20900ef7343475839758ebca4319602",
+    "lines": 135,
+    "readScope": "complete file returned by Remote Desktop read_multiple_files this round",
+    "verifiedAgainstBaseline": true
+  },
+  {
+    "path": "foundation/atlas/packages/index/src/build.ts",
+    "gitBlob": "b47846d7b60978e0fb57f5b991509f4297e1a3bf",
+    "lines": 287,
+    "readScope": "complete file returned by Remote Desktop read_multiple_files this round",
+    "verifiedAgainstBaseline": true
+  },
+  {
+    "path": "foundation/atlas/packages/index/src/fold.ts",
+    "gitBlob": "38f9d8cc01cf0681b4ed6a834b1c2eb6d151197a",
+    "lines": 312,
+    "readScope": "complete file returned by Remote Desktop read_multiple_files this round",
+    "verifiedAgainstBaseline": true
+  },
+  {
+    "path": "foundation/atlas/packages/index/src/retrieval.ts",
+    "gitBlob": "9becfb475503250a8884ad5e7381cb7c77bb9a3b",
+    "lines": 91,
+    "readScope": "complete file returned by Remote Desktop read_multiple_files this round",
+    "verifiedAgainstBaseline": true
+  },
+  {
+    "path": "foundation/atlas/packages/index/test/own-impact.test.ts",
+    "gitBlob": "36fedc645913d8caacdf137950e913ebe025badd",
+    "lines": 68,
+    "readScope": "complete file returned by Remote Desktop read_multiple_files this round",
+    "verifiedAgainstBaseline": true
+  },
+  {
+    "path": "foundation/atlas/packages/index/test/fold-drift.test.ts",
+    "gitBlob": "2aa04ab69194354af36045c4fc49380b8cc9d6ce",
+    "lines": 155,
+    "readScope": "complete file returned by Remote Desktop read_multiple_files this round",
+    "verifiedAgainstBaseline": true
+  },
+  {
+    "path": "foundation/atlas/packages/index/test/fold.heldout.test.ts",
+    "gitBlob": "2f28363dfe9aff00fdd13638093bbb25c6ba9443",
+    "lines": 43,
+    "readScope": "complete file returned by Remote Desktop read_multiple_files this round",
+    "verifiedAgainstBaseline": true
+  },
+  {
+    "path": "foundation/atlas/packages/adapter-io/src/own-source.ts",
+    "gitBlob": "4874c2d11adb1a40930e70c4135a239fe9859860",
+    "lines": 366,
+    "readScope": "complete file returned by Remote Desktop read_multiple_files this round",
+    "verifiedAgainstBaseline": true
+  },
+  {
+    "path": "foundation/atlas/packages/adapter-io/src/retrieval-model.ts",
+    "gitBlob": "8b05d4958b7a0b7ee02dbe9d4adb424c350ca364",
+    "lines": 147,
+    "readScope": "complete file returned by Remote Desktop read_multiple_files this round",
+    "verifiedAgainstBaseline": true
+  },
+  {
+    "path": "foundation/atlas/packages/adapter-io/src/policy.ts",
+    "gitBlob": "8e6cb85b0c6ed1ac60c7ceffb97f9c8f85a41dd9",
+    "lines": 272,
+    "readScope": "complete file returned by Remote Desktop read_multiple_files this round",
+    "verifiedAgainstBaseline": true
+  },
+  {
+    "path": "foundation/atlas/packages/adapter-io/src/compose-runtime.ts",
+    "gitBlob": "89946e28ead3eaaddca1deac8d02684d0464f68f",
+    "lines": 215,
+    "readScope": "complete file returned by Remote Desktop read_multiple_files this round",
+    "verifiedAgainstBaseline": true
+  },
+  {
+    "path": "foundation/atlas/packages/adapter-io/src/orientation-store.ts",
+    "gitBlob": "a551836241b13d58d38cfbc89cad70f649d1a3ef",
+    "lines": 77,
+    "readScope": "complete file returned by Remote Desktop read_multiple_files this round",
+    "verifiedAgainstBaseline": true
+  },
+  {
+    "path": "foundation/atlas/packages/adapter-io/test/wire-retrieval-freshness.test.ts",
+    "gitBlob": "05e90e90e1359e0c1d89a7bc30125d724fbfe291",
+    "lines": 93,
+    "readScope": "complete file returned by Remote Desktop read_multiple_files this round",
+    "verifiedAgainstBaseline": true
+  },
+  {
+    "path": "foundation/atlas/packages/adapter-io/test/own-two-bands.test.ts",
+    "gitBlob": "699b62107c31c62f3d5b02be866303e50caa1797",
+    "lines": 174,
+    "readScope": "complete file returned by Remote Desktop read_multiple_files this round",
+    "verifiedAgainstBaseline": true
+  },
+  {
+    "path": "foundation/atlas/packages/adapter-io/test/harness/fix-scip.ts",
+    "gitBlob": "656c2d98c66beb3d58294ba43f4a9a9bd7025688",
+    "lines": 96,
+    "readScope": "complete file returned by Remote Desktop read_multiple_files this round",
+    "verifiedAgainstBaseline": true
+  },
+  {
+    "path": "foundation/atlas/packages/tools/src/draft.ts",
+    "gitBlob": "92be02e68c0586bacb11d9ae8ee8ffd7921daac9",
+    "lines": 220,
+    "readScope": "complete file returned by Remote Desktop read_multiple_files this round",
+    "verifiedAgainstBaseline": true
+  },
+  {
+    "path": "foundation/atlas/packages/knowledge/src/write/router.ts",
+    "gitBlob": "c74d1ab3a8e0839cfdee465b4fe5ecb82c60ac45",
+    "lines": 415,
+    "readScope": "complete file returned by Remote Desktop read_multiple_files this round",
+    "verifiedAgainstBaseline": true
+  },
+  {
+    "path": "foundation/atlas/packages/memory/src/logbook.ts",
+    "gitBlob": "c060de2c710f4762997cfa8ce98cedd7bc24abfa",
+    "lines": 201,
+    "readScope": "complete file returned by Remote Desktop read_multiple_files this round",
+    "verifiedAgainstBaseline": true
+  },
+  {
+    "path": "foundation/atlas/packages/memory/src/orient.ts",
+    "gitBlob": "4f7b69067999a4b250f0cea2e9b83235ca196b41",
+    "lines": 214,
+    "readScope": "complete file returned by Remote Desktop read_multiple_files this round",
+    "verifiedAgainstBaseline": true
+  },
+  {
+    "path": "foundation/atlas/packages/memory/src/index.ts",
+    "gitBlob": "d842ca2f99271c80cbe005f2f8520fbbaac7e233",
+    "lines": 29,
+    "readScope": "complete file returned by Remote Desktop read_multiple_files this round",
+    "verifiedAgainstBaseline": true
+  }
+]

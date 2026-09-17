@@ -1,0 +1,1141 @@
+{
+  "compiledComparisons": [
+    {
+      "path": "foundation/atlas/packages/tools/dist/src/bands.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/tools/dist/src/types.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/tools/dist/src/slots.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/tools/dist/src/transport.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/tools/dist/src/query.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/tools/dist/src/index.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/tools/dist/src/handler.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/tools/dist/src/check.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/tools/dist/src/emit.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/tools/dist/src/init.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/tools/dist/src/fault.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/tools/dist/src/push.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/tools/dist/src/draft.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/tools/dist/src/reconcile.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/tools/dist/src/doctor.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/tools/dist/src/anchors.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/tools/dist/src/guard.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/tools/dist/src/diff.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/grounding/dist/src/types.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/grounding/dist/src/subtree.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/grounding/dist/src/drift.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/grounding/dist/src/freshness.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/grounding/dist/src/index.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/grounding/dist/src/ground.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/grounding/dist/src/emit-guard.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/grounding/dist/src/span.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/grounding/dist/src/gate.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/memory/dist/src/kinds.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/memory/dist/src/respawn.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/memory/dist/src/types.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/memory/dist/src/rules.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/memory/dist/src/index.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/memory/dist/src/orient.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/memory/dist/src/awareness.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/memory/dist/src/inject.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/memory/dist/src/portable.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/memory/dist/src/logbook.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/memory/dist/src/template.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/src/doctor-source.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/src/governed-emit-route.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/src/identity-schema.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/src/governed-emit-gates.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/src/git-history.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/src/governed-emit-address.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/src/llm.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/src/reverify-store.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/src/compose-test-vacuity.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/src/verify-fact-source.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/src/pack-shape.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/src/policy.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/src/sidecar-commit.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/src/own-bands.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/src/scanner.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/src/test-vacuity-source.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/src/memory-read.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/src/model-config.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/src/compose-mine-admission.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/src/run-git.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/src/index-adapter.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/src/okf-store.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/src/sidecar-abstained.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/src/store.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/src/relation-source.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/src/compose-runtime.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/src/governed-emit-reasons.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/src/compose.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/src/memory-emit.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/src/author-verdicts.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/src/sidecar.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/src/index.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/src/unit-count-candidates.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/src/governed-link.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/src/unit-def-candidates.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/src/skeleton-source.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/src/unit-source.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/src/unit-candidates.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/src/calibration-verdicts.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/src/governed-emit-incumbent.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/src/freshness-watermark.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/src/governed-emit-identity.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/src/prompt.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/src/governed-emit-negation.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/src/indexer-report.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/src/relation-derive-run.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/src/rev-index.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/src/governed-link-retract.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/src/grounding-computer.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/src/memory-store.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/src/governed-emit.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/src/store-provenance.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/src/projection-query-index.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/src/durable-log.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/src/retrieval-model.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/src/containment.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/src/transition-source.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/src/git-forge.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/src/anchor-scope.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/src/draft-incumbent-source.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/src/wire.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/src/governed-promote.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/src/governed-emit-transition.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/src/governed-emit-test-vacuity.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/src/orientation-store.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/src/test-vacuity.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/src/git-drift.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/src/negation-source.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/src/relation-derive.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/src/scip.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/src/poke-file.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/src/read-access.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/src/calibration-ledger.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/src/own-source.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/src/memory-verdicts.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/src/ast.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/src/awareness-store.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/src/read-provenance.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/src/check-source.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/src/fs.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/src/escape/dynamic-reach.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/src/escape/classifier.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/src/escape/target-escapes.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/mcp-server/dist/src/bin.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/mcp-server/dist/src/server.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/mcp-server/dist/src/index.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/mcp-server/dist/src/server-read-tools.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/mcp-server/dist/src/server-memory-tools.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/e2e-blackbox/dist/src/harness.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/cli/dist/src/transition.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/cli/dist/src/mine-arms.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/cli/dist/src/cli-dispatch.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/cli/dist/src/reverify.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/cli/dist/src/mine-frontier.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/cli/dist/src/mine-decide.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/cli/dist/src/promote.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/cli/dist/src/cli-verdict.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/cli/dist/src/bin.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/cli/dist/src/marshal.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/cli/dist/src/mine.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/cli/dist/src/okf-cli.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/cli/dist/src/derive-relations.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/cli/dist/src/mine-proposer.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/cli/dist/src/slots.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/cli/dist/src/render.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/cli/dist/src/index.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/cli/dist/src/help.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/cli/dist/src/mine-answer.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/cli/dist/src/mine-render.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/cli/dist/src/doctor-index.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/cli/dist/src/parse.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/cli/dist/src/mine-claim-scrub.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/cli/dist/src/mine-worker.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/cli/dist/src/draft.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/cli/dist/src/mine-pool.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/cli/dist/src/doctor.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/cli/dist/src/mine-gate.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/cli/dist/src/cli.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/cli/dist/src/anchors.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/cli/dist/src/own.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/cli/dist/src/gitignore.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/cli/dist/src/test-vacuity.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/cli/dist/src/map.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/cli/dist/src/mine-staging.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/retrieval/dist/src/poke.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/retrieval/dist/src/offatlas.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/retrieval/dist/src/types.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/retrieval/dist/src/own-snapshot.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/retrieval/dist/src/ledger.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/retrieval/dist/src/pack.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/retrieval/dist/src/index.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/retrieval/dist/src/relate.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/retrieval/dist/src/drop.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/retrieval/dist/src/own-coverage.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/retrieval/dist/src/own-model.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/retrieval/dist/src/own.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/retrieval/dist/src/own-artifact.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/knowledge/dist/src/types.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/knowledge/dist/src/index.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/knowledge/dist/src/transition-types.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/knowledge/dist/src/negation-types.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/knowledge/dist/src/test-vacuity-types.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/knowledge/dist/src/write/negation-key.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/knowledge/dist/src/write/test-vacuity-key.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/knowledge/dist/src/write/closed-slot.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/knowledge/dist/src/write/link.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/knowledge/dist/src/write/authz.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/knowledge/dist/src/write/router.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/knowledge/dist/src/write/relation-key.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/knowledge/dist/src/write/transition-key.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/knowledge/dist/src/write/upsert.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/knowledge/dist/src/write/projection-types.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/knowledge/dist/src/write/archive.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/knowledge/dist/src/write/template.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/knowledge/dist/src/read/relations.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/knowledge/dist/src/read/subsumes.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/knowledge/dist/src/read/sameas.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/knowledge/dist/src/read/negations.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/knowledge/dist/src/read/transitions.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/knowledge/dist/src/read/anchor-match.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/knowledge/dist/src/read/test-vacuity.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/knowledge/dist/src/ratify/ratify.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/knowledge/dist/src/ratify/fastpath.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/knowledge/dist/src/ratify/init.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/knowledge/dist/src/ratify/tier.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/knowledge/dist/src/lifecycle/produce.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/knowledge/dist/src/lifecycle/freshness.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/knowledge/dist/src/lifecycle/emit.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/knowledge/dist/src/lifecycle/hits.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/knowledge/dist/src/lifecycle/status.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/knowledge/dist/src/lifecycle/evaluator.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/knowledge/dist/src/lifecycle/reconcile.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/index/dist/src/territory.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/index/dist/src/types.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/index/dist/src/coverage.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/index/dist/src/ownership.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/index/dist/src/rollup.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/index/dist/src/build.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/index/dist/src/compose.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/index/dist/src/depgraph.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/index/dist/src/unit-deps.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/index/dist/src/index.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/index/dist/src/unit-defs.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/index/dist/src/resolve.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/index/dist/src/fold.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/index/dist/src/symbol-reverse.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/index/dist/src/cas.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/index/dist/src/own-impact.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/index/dist/src/retrieval.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/index/dist/src/unit-exports.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/persist/dist/src/metering.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/persist/dist/src/host-adapter.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/persist/dist/src/reinvoke.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/persist/dist/src/types.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/persist/dist/src/attach.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/persist/dist/src/transcript-store.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/persist/dist/src/merge.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/persist/dist/src/scrub-scan.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/persist/dist/src/index.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/persist/dist/src/reconstruct.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/persist/dist/src/provenance.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/persist/dist/src/placement.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/persist/dist/src/scrub-shapes.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/persist/dist/src/source.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/persist/dist/src/diff.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/persist/dist/src/scrub.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/genesis/dist/src/budget-types.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/genesis/dist/src/admit-relation.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/genesis/dist/src/run-controller.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/genesis/dist/src/admit-proposals.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/genesis/dist/src/types.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/genesis/dist/src/coverage.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/genesis/dist/src/verify-negation.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/genesis/dist/src/admit-harness.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/genesis/dist/src/admit-test-vacuity.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/genesis/dist/src/index.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/genesis/dist/src/align.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/genesis/dist/src/cost-policy.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/genesis/dist/src/scope-predicate.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/genesis/dist/src/verify-fact.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/genesis/dist/src/seeds.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/genesis/dist/src/verify-fact.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/genesis/dist/src/verify-count.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/genesis/dist/src/verify-negation.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/genesis/dist/src/extract.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/genesis/dist/src/drive.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/genesis/dist/src/rank.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/genesis/dist/src/admit-transition.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/genesis/dist/src/verify-count.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/genesis/dist/src/seed.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/genesis/dist/src/loops.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/genesis/dist/src/admit-negation.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/genesis/dist/src/verify-fact-relation.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/genesis/dist/src/usefulness.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/genesis/dist/src/unit-order.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/genesis/dist/src/verify-definition.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/kernel/dist/src/encoder.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/kernel/dist/src/types.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/kernel/dist/src/store.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/kernel/dist/src/log.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/kernel/dist/src/index.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/kernel/dist/src/fold.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/kernel/dist/src/brand.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/kernel/dist/src/portable.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/kernel/dist/src/jsonl.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/kernel/dist/src/canonical.js",
+      "equal": true
+    }
+  ],
+  "trackedProductDiff": []
+}

@@ -1,0 +1,314 @@
+{
+  "sha": "b0c33d2f6567a2c741240f3c44bc00ca2f01e7e7",
+  "root": "/private/tmp/hugr-deep-round4.zjlitC/repo/foundation/atlas",
+  "node": "v22.17.1",
+  "platform": "darwin",
+  "indexInput": "controlled minimal protobuf with installed original schema; no scip-typescript execution",
+  "results": [
+    {
+      "id": "GRAPH-01-target-without-own-fact",
+      "status": "observation-confirmed",
+      "fixture": {
+        "dir": "/private/tmp/atlas-graph-fixture-RboGJt",
+        "provider": "src/provider.ts",
+        "consumer": "src/consumer.ts"
+      },
+      "graph": {
+        "closure": [
+          "ad31179fcf53e6b3972d8963a14061c04144ee68cd3e0487b2ceb1e7950e82b7"
+        ],
+        "underApprox": false,
+        "coChanged": []
+      },
+      "dependent": "e66071bb8eb39e2b1bc603fb8628b8f4bd113bc17a06d4190cc0ed62595d6402",
+      "scope": [
+        "e66071bb8eb39e2b1bc603fb8628b8f4bd113bc17a06d4190cc0ed62595d6402"
+      ],
+      "before": [],
+      "after": [
+        "e66071bb8eb39e2b1bc603fb8628b8f4bd113bc17a06d4190cc0ed62595d6402"
+      ],
+      "defect": true
+    },
+    {
+      "id": "GRAPH-02-escaped-provider-impact",
+      "status": "observation-confirmed",
+      "variants": [
+        {
+          "provider": "src/provider.ts",
+          "encoded": "src/provider.ts",
+          "receipt": {
+            "baseSnapshot": "before",
+            "headSnapshot": "after",
+            "delta": {
+              "idChanged": true,
+              "stateChanged": false,
+              "changedBuckets": [
+                ".",
+                "src",
+                "src/provider.ts"
+              ]
+            },
+            "changedUnits": [
+              ".",
+              "src",
+              "src/provider.ts"
+            ],
+            "removedUnits": [],
+            "impactedUnits": [
+              ".",
+              "src",
+              "src/consumer.ts",
+              "src/provider.ts"
+            ],
+            "reverseBlast": [
+              {
+                "origin": ".",
+                "closure": [],
+                "underApprox": false,
+                "coChanged": []
+              },
+              {
+                "origin": "src",
+                "closure": [],
+                "underApprox": false,
+                "coChanged": []
+              },
+              {
+                "origin": "src/provider.ts",
+                "closure": [
+                  "src/consumer.ts"
+                ],
+                "underApprox": false,
+                "coChanged": []
+              }
+            ],
+            "coverage": "COMPLETE"
+          },
+          "direct": {
+            "closure": [
+              "ad31179fcf53e6b3972d8963a14061c04144ee68cd3e0487b2ceb1e7950e82b7"
+            ],
+            "underApprox": false,
+            "coChanged": []
+          },
+          "consumerIncluded": true
+        },
+        {
+          "provider": "src/provider%value.ts",
+          "encoded": "src/provider%25value.ts",
+          "receipt": {
+            "baseSnapshot": "before",
+            "headSnapshot": "after",
+            "delta": {
+              "idChanged": true,
+              "stateChanged": false,
+              "changedBuckets": [
+                ".",
+                "src",
+                "src/provider%25value.ts"
+              ]
+            },
+            "changedUnits": [
+              ".",
+              "src",
+              "src/provider%25value.ts"
+            ],
+            "removedUnits": [],
+            "impactedUnits": [
+              ".",
+              "src",
+              "src/provider%25value.ts"
+            ],
+            "reverseBlast": [
+              {
+                "origin": ".",
+                "closure": [],
+                "underApprox": false,
+                "coChanged": []
+              },
+              {
+                "origin": "src",
+                "closure": [],
+                "underApprox": false,
+                "coChanged": []
+              },
+              {
+                "origin": "src/provider%25value.ts",
+                "closure": [],
+                "underApprox": false,
+                "coChanged": []
+              }
+            ],
+            "coverage": "COMPLETE"
+          },
+          "direct": {
+            "closure": [
+              "ad31179fcf53e6b3972d8963a14061c04144ee68cd3e0487b2ceb1e7950e82b7"
+            ],
+            "underApprox": false,
+            "coChanged": []
+          },
+          "consumerIncluded": false
+        },
+        {
+          "provider": "src/provider:value.ts",
+          "encoded": "src/provider%3Avalue.ts",
+          "receipt": {
+            "baseSnapshot": "before",
+            "headSnapshot": "after",
+            "delta": {
+              "idChanged": true,
+              "stateChanged": false,
+              "changedBuckets": [
+                ".",
+                "src",
+                "src/provider%3Avalue.ts"
+              ]
+            },
+            "changedUnits": [
+              ".",
+              "src",
+              "src/provider%3Avalue.ts"
+            ],
+            "removedUnits": [],
+            "impactedUnits": [
+              ".",
+              "src",
+              "src/provider%3Avalue.ts"
+            ],
+            "reverseBlast": [
+              {
+                "origin": ".",
+                "closure": [],
+                "underApprox": false,
+                "coChanged": []
+              },
+              {
+                "origin": "src",
+                "closure": [],
+                "underApprox": false,
+                "coChanged": []
+              },
+              {
+                "origin": "src/provider%3Avalue.ts",
+                "closure": [],
+                "underApprox": false,
+                "coChanged": []
+              }
+            ],
+            "coverage": "COMPLETE"
+          },
+          "direct": {
+            "closure": [
+              "ad31179fcf53e6b3972d8963a14061c04144ee68cd3e0487b2ceb1e7950e82b7"
+            ],
+            "underApprox": false,
+            "coChanged": []
+          },
+          "consumerIncluded": false
+        }
+      ],
+      "defect": true
+    },
+    {
+      "id": "GRAPH-03-symbol-anchored-dependent",
+      "status": "observation-confirmed",
+      "fixture": {
+        "dir": "/private/tmp/atlas-graph-fixture-b2VUM8",
+        "provider": "src/provider.ts",
+        "consumer": "src/consumer.ts"
+      },
+      "symbolAnchor": "src/consumer.ts::lexical_declaration:0:readValue",
+      "symbolFact": "5b8ba9cb1d320116ba97062a094979e8dd5e9c9f487fe4b874a8b889987b323a",
+      "fileFact": "e66071bb8eb39e2b1bc603fb8628b8f4bd113bc17a06d4190cc0ed62595d6402",
+      "scope": [
+        "5b8ba9cb1d320116ba97062a094979e8dd5e9c9f487fe4b874a8b889987b323a",
+        "8e4d425cb257dab1e7a32f40af5efe588f6a8f376e0dc5a2940642a459442afd"
+      ],
+      "before": [],
+      "after": [
+        "e66071bb8eb39e2b1bc603fb8628b8f4bd113bc17a06d4190cc0ed62595d6402"
+      ],
+      "defect": true
+    },
+    {
+      "id": "GRAPH-04-unresolved-outside-reached-set",
+      "status": "observation-confirmed",
+      "fixture": {
+        "dir": "/private/tmp/atlas-graph-fixture-O8knTV",
+        "provider": "src/provider.ts",
+        "consumer": "src/consumer.ts"
+      },
+      "direct": {
+        "closure": [],
+        "underApprox": false,
+        "coChanged": []
+      },
+      "result": {
+        "baseSnapshot": "a",
+        "headSnapshot": "b",
+        "delta": {
+          "idChanged": true,
+          "stateChanged": false,
+          "changedBuckets": [
+            ".",
+            "src",
+            "src/provider.ts"
+          ]
+        },
+        "changedUnits": [
+          ".",
+          "src",
+          "src/provider.ts"
+        ],
+        "removedUnits": [],
+        "impactedUnits": [
+          ".",
+          "src",
+          "src/provider.ts"
+        ],
+        "reverseBlast": [
+          {
+            "origin": ".",
+            "closure": [],
+            "underApprox": false,
+            "coChanged": []
+          },
+          {
+            "origin": "src",
+            "closure": [],
+            "underApprox": false,
+            "coChanged": []
+          },
+          {
+            "origin": "src/provider.ts",
+            "closure": [],
+            "underApprox": false,
+            "coChanged": []
+          }
+        ],
+        "coverage": "COMPLETE"
+      },
+      "graphWithResolvedEdge": {
+        "closure": [
+          "ad31179fcf53e6b3972d8963a14061c04144ee68cd3e0487b2ceb1e7950e82b7"
+        ],
+        "underApprox": true,
+        "coChanged": []
+      },
+      "classification": "coverage-contract gap: unknown target cannot be excluded from whole-graph reachability by already-reached-set filtering; controlled index, not actual indexer output"
+    },
+    {
+      "id": "GRAPH-05-drift-fold-cache-invalidation",
+      "status": "observation-confirmed",
+      "initial": "c3eae302e9f7337c106149f757e7f3de3511aada90d766758d5b30c8d7c6d276",
+      "reused": "c3eae302e9f7337c106149f757e7f3de3511aada90d766758d5b30c8d7c6d276",
+      "independent": "17dd673a1bed7ac3c87fca3ccf3af9db81518cd3a05dbd3ff63c5fc54cef3210",
+      "dirty": true,
+      "stateResolved": true,
+      "onReadResolves": 1,
+      "classification": "unwired reference-model limitation, not live runtime stale-state incident"
+    }
+  ]
+}
