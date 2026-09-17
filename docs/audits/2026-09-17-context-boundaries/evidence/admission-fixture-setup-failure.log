@@ -1,0 +1,111 @@
+bun test v1.3.14 (0d9b296a)
+
+test/maestro/audit-context-admission.test.ts:
+[22:18:07.661] ERROR (#2): 439 |         if (!yielding && !this.currentPreventYield && this.currentScheduler.shouldYield(this)) {
+440 |           yielding = true;
+441 |           const prev = current;
+442 |           current = flatMap(yieldNow, () => prev);
+443 |         }
+444 |         current = this.currentTracerContext ? this.currentTracerContext(current, this) : current[evaluate](this);
+                                                                                                       ^
+error: Service not found: @opencode/Truncate (defined at <AUDIT_CHECKOUT>/packages/opencode/src/tool/truncate.ts:46:38)
+      at runLoop (<DEPENDENCY_CHECKOUT>/node_modules/.bun/effect@4.0.0-beta.83/node_modules/effect/dist/internal/effect.js:444:98)
+      at evaluate (<DEPENDENCY_CHECKOUT>/node_modules/.bun/effect@4.0.0-beta.83/node_modules/effect/dist/internal/effect.js:380:20)
+      at <DEPENDENCY_CHECKOUT>/node_modules/.bun/effect@4.0.0-beta.83/node_modules/effect/dist/internal/effect.js:734:14
+      at processTicksAndRejections (native:7:39)
+
+439 |         if (!yielding && !this.currentPreventYield && this.currentScheduler.shouldYield(this)) {
+440 |           yielding = true;
+441 |           const prev = current;
+442 |           current = flatMap(yieldNow, () => prev);
+443 |         }
+444 |         current = this.currentTracerContext ? this.currentTracerContext(current, this) : current[evaluate](this);
+                                                                                                       ^
+error: Service not found: @opencode/Truncate (defined at <AUDIT_CHECKOUT>/packages/opencode/src/tool/truncate.ts:46:38)
+      at runLoop (<DEPENDENCY_CHECKOUT>/node_modules/.bun/effect@4.0.0-beta.83/node_modules/effect/dist/internal/effect.js:444:98)
+      at evaluate (<DEPENDENCY_CHECKOUT>/node_modules/.bun/effect@4.0.0-beta.83/node_modules/effect/dist/internal/effect.js:380:20)
+      at <DEPENDENCY_CHECKOUT>/node_modules/.bun/effect@4.0.0-beta.83/node_modules/effect/dist/internal/effect.js:734:14
+      at processTicksAndRejections (native:7:39)
+(fail) admission preserves direct-user provenance: direct-only [1447.20ms]
+[22:18:08.016] ERROR (#11448): 439 |         if (!yielding && !this.currentPreventYield && this.currentScheduler.shouldYield(this)) {
+440 |           yielding = true;
+441 |           const prev = current;
+442 |           current = flatMap(yieldNow, () => prev);
+443 |         }
+444 |         current = this.currentTracerContext ? this.currentTracerContext(current, this) : current[evaluate](this);
+                                                                                                       ^
+error: Service not found: @opencode/Truncate (defined at <AUDIT_CHECKOUT>/packages/opencode/src/tool/truncate.ts:46:38)
+      at runLoop (<DEPENDENCY_CHECKOUT>/node_modules/.bun/effect@4.0.0-beta.83/node_modules/effect/dist/internal/effect.js:444:98)
+      at evaluate (<DEPENDENCY_CHECKOUT>/node_modules/.bun/effect@4.0.0-beta.83/node_modules/effect/dist/internal/effect.js:380:20)
+      at <DEPENDENCY_CHECKOUT>/node_modules/.bun/effect@4.0.0-beta.83/node_modules/effect/dist/internal/effect.js:734:14
+      at processTicksAndRejections (native:7:39)
+
+439 |         if (!yielding && !this.currentPreventYield && this.currentScheduler.shouldYield(this)) {
+440 |           yielding = true;
+441 |           const prev = current;
+442 |           current = flatMap(yieldNow, () => prev);
+443 |         }
+444 |         current = this.currentTracerContext ? this.currentTracerContext(current, this) : current[evaluate](this);
+                                                                                                       ^
+error: Service not found: @opencode/Truncate (defined at <AUDIT_CHECKOUT>/packages/opencode/src/tool/truncate.ts:46:38)
+      at runLoop (<DEPENDENCY_CHECKOUT>/node_modules/.bun/effect@4.0.0-beta.83/node_modules/effect/dist/internal/effect.js:444:98)
+      at evaluate (<DEPENDENCY_CHECKOUT>/node_modules/.bun/effect@4.0.0-beta.83/node_modules/effect/dist/internal/effect.js:380:20)
+      at <DEPENDENCY_CHECKOUT>/node_modules/.bun/effect@4.0.0-beta.83/node_modules/effect/dist/internal/effect.js:734:14
+      at processTicksAndRejections (native:7:39)
+(fail) admission preserves direct-user provenance: direct-then-auto-continue [164.85ms]
+[22:18:08.094] ERROR (#13579): 439 |         if (!yielding && !this.currentPreventYield && this.currentScheduler.shouldYield(this)) {
+440 |           yielding = true;
+441 |           const prev = current;
+442 |           current = flatMap(yieldNow, () => prev);
+443 |         }
+444 |         current = this.currentTracerContext ? this.currentTracerContext(current, this) : current[evaluate](this);
+                                                                                                       ^
+error: Service not found: @opencode/Truncate (defined at <AUDIT_CHECKOUT>/packages/opencode/src/tool/truncate.ts:46:38)
+      at runLoop (<DEPENDENCY_CHECKOUT>/node_modules/.bun/effect@4.0.0-beta.83/node_modules/effect/dist/internal/effect.js:444:98)
+      at evaluate (<DEPENDENCY_CHECKOUT>/node_modules/.bun/effect@4.0.0-beta.83/node_modules/effect/dist/internal/effect.js:380:20)
+      at <DEPENDENCY_CHECKOUT>/node_modules/.bun/effect@4.0.0-beta.83/node_modules/effect/dist/internal/effect.js:734:14
+      at processTicksAndRejections (native:7:39)
+
+439 |         if (!yielding && !this.currentPreventYield && this.currentScheduler.shouldYield(this)) {
+440 |           yielding = true;
+441 |           const prev = current;
+442 |           current = flatMap(yieldNow, () => prev);
+443 |         }
+444 |         current = this.currentTracerContext ? this.currentTracerContext(current, this) : current[evaluate](this);
+                                                                                                       ^
+error: Service not found: @opencode/Truncate (defined at <AUDIT_CHECKOUT>/packages/opencode/src/tool/truncate.ts:46:38)
+      at runLoop (<DEPENDENCY_CHECKOUT>/node_modules/.bun/effect@4.0.0-beta.83/node_modules/effect/dist/internal/effect.js:444:98)
+      at evaluate (<DEPENDENCY_CHECKOUT>/node_modules/.bun/effect@4.0.0-beta.83/node_modules/effect/dist/internal/effect.js:380:20)
+      at <DEPENDENCY_CHECKOUT>/node_modules/.bun/effect@4.0.0-beta.83/node_modules/effect/dist/internal/effect.js:734:14
+      at processTicksAndRejections (native:7:39)
+(fail) admission preserves direct-user provenance: auto-continue-only [78.58ms]
+[22:18:08.186] ERROR (#15710): 439 |         if (!yielding && !this.currentPreventYield && this.currentScheduler.shouldYield(this)) {
+440 |           yielding = true;
+441 |           const prev = current;
+442 |           current = flatMap(yieldNow, () => prev);
+443 |         }
+444 |         current = this.currentTracerContext ? this.currentTracerContext(current, this) : current[evaluate](this);
+                                                                                                       ^
+error: Service not found: @opencode/Truncate (defined at <AUDIT_CHECKOUT>/packages/opencode/src/tool/truncate.ts:46:38)
+      at runLoop (<DEPENDENCY_CHECKOUT>/node_modules/.bun/effect@4.0.0-beta.83/node_modules/effect/dist/internal/effect.js:444:98)
+      at evaluate (<DEPENDENCY_CHECKOUT>/node_modules/.bun/effect@4.0.0-beta.83/node_modules/effect/dist/internal/effect.js:380:20)
+      at <DEPENDENCY_CHECKOUT>/node_modules/.bun/effect@4.0.0-beta.83/node_modules/effect/dist/internal/effect.js:734:14
+      at processTicksAndRejections (native:7:39)
+
+439 |         if (!yielding && !this.currentPreventYield && this.currentScheduler.shouldYield(this)) {
+440 |           yielding = true;
+441 |           const prev = current;
+442 |           current = flatMap(yieldNow, () => prev);
+443 |         }
+444 |         current = this.currentTracerContext ? this.currentTracerContext(current, this) : current[evaluate](this);
+                                                                                                       ^
+error: Service not found: @opencode/Truncate (defined at <AUDIT_CHECKOUT>/packages/opencode/src/tool/truncate.ts:46:38)
+      at runLoop (<DEPENDENCY_CHECKOUT>/node_modules/.bun/effect@4.0.0-beta.83/node_modules/effect/dist/internal/effect.js:444:98)
+      at evaluate (<DEPENDENCY_CHECKOUT>/node_modules/.bun/effect@4.0.0-beta.83/node_modules/effect/dist/internal/effect.js:380:20)
+      at <DEPENDENCY_CHECKOUT>/node_modules/.bun/effect@4.0.0-beta.83/node_modules/effect/dist/internal/effect.js:734:14
+      at processTicksAndRejections (native:7:39)
+(fail) admission preserves direct-user provenance: non-maestro [269.60ms]
+
+ 0 pass
+ 4 fail
+Ran 4 tests across 1 file. [7.05s]

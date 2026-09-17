@@ -1,0 +1,52 @@
+bun test v1.3.14 (0d9b296a)
+
+test/maestro/governed-task.test.ts:
+(pass) Maestro governed Task guard > permits exact approved decision [0.20ms]
+(pass) Maestro governed Task guard > holds missing, declined, duplicate, and mismatched decisions [0.14ms]
+
+test/maestro/admission-record.test.ts:
+(pass) Maestro admission record > persists and replays one deterministic admission result [402.30ms]
+(pass) Maestro admission record > refuses altered input for an existing admission key [81.70ms]
+
+test/maestro/governed-lifecycle.test.ts:
+(pass) Maestro governed lifecycle > records intake, direct approval, then exact governed child Task [1145.00ms]
+(pass) Maestro governed lifecycle > shows governance tools only to Maestro [459.09ms]
+(pass) Maestro governed lifecycle > refuses model-supplied validation until durable validation reader exists [166.01ms]
+(pass) Maestro governed lifecycle > denies governed Task before child Session creation without exact approval [211.95ms]
+(pass) Maestro governed lifecycle > creates governed Task only from exact approved event [129.91ms]
+
+test/maestro/approval-record.test.ts:
+(pass) Maestro approval record > records direct approval from exact rendered tool evidence [183.63ms]
+(pass) Maestro approval record > holds when tool output differs from immutable presentation [69.38ms]
+(pass) Maestro approval record > holds when discussion intervenes before direct approval [75.67ms]
+(pass) Maestro approval record > replays one presentation for same revision after a retried tool call [79.57ms]
+
+test/maestro/task-hash.test.ts:
+(pass) Maestro task hash > mutation probe: every governed task intent and evidence field changes hash [7.33ms]
+
+test/maestro/admit-request.test.ts:
+(pass) Maestro admit request > returns ORIENT for valid orient assessment [0.07ms]
+(pass) Maestro admit request > clarifies work without usable goal [0.06ms]
+(pass) Maestro admit request > clarifies material blocker before draft [0.05ms]
+(pass) Maestro admit request > returns READY_TO_DRAFT while preserving labeled claims [0.03ms]
+(pass) Maestro admit request > invalid or partial assessment never reaches READY_TO_DRAFT [0.05ms]
+(pass) Maestro admit request > clarifies work that may redirect active approved work [0.03ms]
+(pass) Maestro admit request > mutation probe: claim labels cannot cross fact and proposal boundary [0.05ms]
+
+test/maestro/approval.test.ts:
+(pass) Maestro approval > binds explicit direct approval to visible exact revision and validation [6.90ms]
+(pass) Maestro approval > accepts exact English approval and explicit decline [0.17ms]
+(pass) Maestro approval > keeps questions and sentiment pending [0.22ms]
+(pass) Maestro approval > mutation probe: assistant or tool text cannot self-approve [0.17ms]
+(pass) Maestro approval > mutation probe: synthetic user text cannot approve [0.09ms]
+(pass) Maestro approval > mutation probe: reply must follow exact visible presentation in same session [0.23ms]
+(pass) Maestro approval > holds stale presentation when a newer presentation intervenes [0.16ms]
+(pass) Maestro approval > mutation probe: duplicated presentation identity holds [0.11ms]
+(pass) Maestro approval > replays only same decision; reused reply against another presentation holds [0.22ms]
+(pass) Maestro approval > holds when revision evidence no longer current [0.07ms]
+(pass) Maestro approval > holds malformed actor identity and timestamp before interpreting approval [0.10ms]
+
+ 32 pass
+ 0 fail
+ 69 expect() calls
+Ran 32 tests across 7 files. [6.12s]

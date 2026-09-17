@@ -1,0 +1,160 @@
+bun test v1.3.14 (0d9b296a)
+
+test/maestro/audit-context-admission.test.ts:
+AUDIT_ADMISSION {"scenario":"direct-only","succeeded":true,"boundToDirect":true,"boundToSynthetic":false,"directOutcome":"READY_TO_DRAFT","fixtureSyntheticMarkers":0}
+(pass) admission preserves direct-user provenance: direct-only [934.83ms]
+AUDIT_ADMISSION {"scenario":"direct-then-auto-continue","succeeded":true,"boundToDirect":false,"boundToSynthetic":true,"syntheticOutcome":"READY_TO_DRAFT","fixtureSyntheticMarkers":1}
+[22:18:54.616] ERROR (#11573): 84 |       expect(Exit.isFailure(result)).toBe(true)
+85 |       expect(directRecord).toBeUndefined()
+86 |     } else {
+87 |       // A refusal or explicit continuity onto genuine input can be a valid policy;
+88 |       // attributing direct stakeholder intake to an internal auto-continue is not.
+89 |       expect(syntheticRecord).toBeUndefined()
+     ^
+error: expect(received).toBeUndefined()
+
+Received: {
+  sessionID: "ses_f4e8c7609ffeEtZo3v0AWKgPgq",
+  messageID: "msg_0b1738a29001Ojrlm4ZRSYkqcp",
+  methodVersion: "audit-admission-v1",
+  outcome: "READY_TO_DRAFT",
+  assessment: {
+    kind: "work",
+    goal: "Document the fixture module.",
+    known: [
+      {
+        text: "The stakeholder requested documentation.",
+        source: "stakeholder",
+      }
+    ],
+    proposals: [],
+    unknowns: [],
+    uncertainty: "Code inspection remains necessary.",
+    activeWorkEffect: "none",
+    reason: "A documentation draft is requested.",
+  },
+}
+
+      at toBeUndefined (unknown:1:1)
+      at <AUDIT_CHECKOUT>/packages/opencode/test/maestro/audit-context-admission.test.ts:89:31
+
+84 |       expect(Exit.isFailure(result)).toBe(true)
+85 |       expect(directRecord).toBeUndefined()
+86 |     } else {
+87 |       // A refusal or explicit continuity onto genuine input can be a valid policy;
+88 |       // attributing direct stakeholder intake to an internal auto-continue is not.
+89 |       expect(syntheticRecord).toBeUndefined()
+     ^
+error: expect(received).toBeUndefined()
+
+Received: {
+  sessionID: "ses_f4e8c7609ffeEtZo3v0AWKgPgq",
+  messageID: "msg_0b1738a29001Ojrlm4ZRSYkqcp",
+  methodVersion: "audit-admission-v1",
+  outcome: "READY_TO_DRAFT",
+  assessment: {
+    kind: "work",
+    goal: "Document the fixture module.",
+    known: [
+      {
+        text: "The stakeholder requested documentation.",
+        source: "stakeholder",
+      }
+    ],
+    proposals: [],
+    unknowns: [],
+    uncertainty: "Code inspection remains necessary.",
+    activeWorkEffect: "none",
+    reason: "A documentation draft is requested.",
+  },
+}
+
+      at toBeUndefined (unknown:1:1)
+      at <AUDIT_CHECKOUT>/packages/opencode/test/maestro/audit-context-admission.test.ts:89:31
+      at ~effect/Effect/successCont (<DEPENDENCY_CHECKOUT>/node_modules/.bun/effect@4.0.0-beta.83/node_modules/effect/dist/internal/effect.js:910:23)
+      at runLoop (<DEPENDENCY_CHECKOUT>/node_modules/.bun/effect@4.0.0-beta.83/node_modules/effect/dist/internal/effect.js:420:66)
+      at evaluate (<DEPENDENCY_CHECKOUT>/node_modules/.bun/effect@4.0.0-beta.83/node_modules/effect/dist/internal/effect.js:380:20)
+      at <DEPENDENCY_CHECKOUT>/node_modules/.bun/effect@4.0.0-beta.83/node_modules/effect/dist/internal/effect.js:734:14
+      at processTicksAndRejections (native:7:39)
+(fail) admission preserves direct-user provenance: direct-then-auto-continue [355.25ms]
+AUDIT_ADMISSION {"scenario":"auto-continue-only","succeeded":true,"boundToDirect":false,"boundToSynthetic":true,"syntheticOutcome":"READY_TO_DRAFT","fixtureSyntheticMarkers":1}
+[22:18:54.738] ERROR (#13829): 84 |       expect(Exit.isFailure(result)).toBe(true)
+85 |       expect(directRecord).toBeUndefined()
+86 |     } else {
+87 |       // A refusal or explicit continuity onto genuine input can be a valid policy;
+88 |       // attributing direct stakeholder intake to an internal auto-continue is not.
+89 |       expect(syntheticRecord).toBeUndefined()
+     ^
+error: expect(received).toBeUndefined()
+
+Received: {
+  sessionID: "ses_f4e8c74c3ffedqta56RRFj9LP5",
+  messageID: "msg_0b1738b6d001LzT9C96TwgfDcE",
+  methodVersion: "audit-admission-v1",
+  outcome: "READY_TO_DRAFT",
+  assessment: {
+    kind: "work",
+    goal: "Document the fixture module.",
+    known: [
+      {
+        text: "The stakeholder requested documentation.",
+        source: "stakeholder",
+      }
+    ],
+    proposals: [],
+    unknowns: [],
+    uncertainty: "Code inspection remains necessary.",
+    activeWorkEffect: "none",
+    reason: "A documentation draft is requested.",
+  },
+}
+
+      at toBeUndefined (unknown:1:1)
+      at <AUDIT_CHECKOUT>/packages/opencode/test/maestro/audit-context-admission.test.ts:89:31
+
+84 |       expect(Exit.isFailure(result)).toBe(true)
+85 |       expect(directRecord).toBeUndefined()
+86 |     } else {
+87 |       // A refusal or explicit continuity onto genuine input can be a valid policy;
+88 |       // attributing direct stakeholder intake to an internal auto-continue is not.
+89 |       expect(syntheticRecord).toBeUndefined()
+     ^
+error: expect(received).toBeUndefined()
+
+Received: {
+  sessionID: "ses_f4e8c74c3ffedqta56RRFj9LP5",
+  messageID: "msg_0b1738b6d001LzT9C96TwgfDcE",
+  methodVersion: "audit-admission-v1",
+  outcome: "READY_TO_DRAFT",
+  assessment: {
+    kind: "work",
+    goal: "Document the fixture module.",
+    known: [
+      {
+        text: "The stakeholder requested documentation.",
+        source: "stakeholder",
+      }
+    ],
+    proposals: [],
+    unknowns: [],
+    uncertainty: "Code inspection remains necessary.",
+    activeWorkEffect: "none",
+    reason: "A documentation draft is requested.",
+  },
+}
+
+      at toBeUndefined (unknown:1:1)
+      at <AUDIT_CHECKOUT>/packages/opencode/test/maestro/audit-context-admission.test.ts:89:31
+      at ~effect/Effect/successCont (<DEPENDENCY_CHECKOUT>/node_modules/.bun/effect@4.0.0-beta.83/node_modules/effect/dist/internal/effect.js:910:23)
+      at runLoop (<DEPENDENCY_CHECKOUT>/node_modules/.bun/effect@4.0.0-beta.83/node_modules/effect/dist/internal/effect.js:420:66)
+      at evaluate (<DEPENDENCY_CHECKOUT>/node_modules/.bun/effect@4.0.0-beta.83/node_modules/effect/dist/internal/effect.js:380:20)
+      at <DEPENDENCY_CHECKOUT>/node_modules/.bun/effect@4.0.0-beta.83/node_modules/effect/dist/internal/effect.js:734:14
+      at processTicksAndRejections (native:7:39)
+(fail) admission preserves direct-user provenance: auto-continue-only [121.85ms]
+AUDIT_ADMISSION {"scenario":"non-maestro","succeeded":false,"boundToDirect":false,"boundToSynthetic":false,"fixtureSyntheticMarkers":0}
+(pass) admission preserves direct-user provenance: non-maestro [141.96ms]
+
+ 2 pass
+ 2 fail
+ 6 expect() calls
+Ran 4 tests across 1 file. [3.71s]
