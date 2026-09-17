@@ -2,7 +2,7 @@
 
 Data: 2026-09-17. Produto de referência: `b0c33d2f6567a2c741240f3c44bc00ca2f01e7e7`, branch `maestro/rebuild-fork-dev-clean`.
 
-**Estado deste documento:** índice de continuidade e especificação do próximo bloco de investigação. A elaboração deste documento incluiu leitura de fontes e reconciliação documental; NÃO incluiu nova execução do produto, correção, fechamento de issue ou merge. Não substitui os relatórios, os resultados ou as limitações das rodadas anteriores.
+**Estado deste documento:** norte e registro de continuidade. A versão original em `8ff7f8c93f178edf6c18892bab1be68833ede4b2` foi somente documental. A execução posterior está em [host-consumption/README.md](host-consumption/README.md): duas execuções independentes, com captura do contexto recebido pelo provedor local e controles de rotas. O WP permanece parcial; não houve correção, fechamento de issue ou merge. Os cinco axiomas abaixo continuam vigentes.
 
 ## Decisão: seguir do mecanismo isolado até o consumidor real
 
@@ -43,7 +43,7 @@ Pergunta a responder: **a sessão efetivamente utilizada consome o mesmo agente,
 
 ## WP-HOST-01 — mapa e prova do consumo real
 
-**Estado:** investigação iniciada por leitura de fonte; rastreamento completo e experimentos pendentes. Este WP é de auditoria, não de implementação de uma feature ausente.
+**Estado:** executado parcialmente; [provas e limites](host-consumption/README.md). Foram exercitados 12 cenários de contexto e 2 de rotas em duas execuções, com 68 testes originais selecionados passando. A #36 ganhou prova até o provedor local. Permanecem pendentes UI/CLI completa, sessão Core V2 configurada até o provedor, troca de projeto/worktree, duplicatas/recibos inválidos e reinício da mesma sessão persistida. Nenhuma correção foi aplicada.
 
 ### Trabalho
 

@@ -8,12 +8,13 @@ A publicação no GitHub está disponível e foi executada. Os avisos iniciais d
 
 | Leitura | Conteúdo e força de evidência |
 |---|---|
-| [Genesis: workers e publicação parcial](genesis-workers/README.md) | Rodada atual: três novos defeitos, dois conjuntos independentes de experimentos, CLI compilado no caso de seleção de braços, workers reais, armazenamento real e injeções de falha explicitamente delimitadas. |
+| [Host: Own até o request do provedor](host-consumption/README.md) | WP-HOST-01 executado parcialmente: 12 cenários de contexto e 2 de rotas, duas execuções independentes; reforça #36 sem duplicá-la. Cinco controles passam e seis propriedades de atualidade falham em cada conjunto. |
+| [Genesis: workers e publicação parcial](genesis-workers/README.md) | Rodada Genesis anterior: três novos defeitos, dois conjuntos independentes de experimentos, CLI compilado no caso de seleção de braços, workers reais, armazenamento real e injeções de falha explicitamente delimitadas. |
 | [Provas de runtime anteriores](runtime-proof/README.md) | Evidências originais publicadas em `14e74743d02a97bc577e1dffb6cb04d213c57569`; consultar o relatório para comandos, controles e limites. Não são uma nova execução da rodada Genesis. |
 | [Primeira publicação, histórica](HISTORICAL-INITIAL.md) | Nove cartões iniciais, parte com isolamento/modelo comportamental. As issues e os relatórios posteriores prevalecem sobre os limites já superados. |
 | [Registro inicial de experimentos](EVIDENCE.md) | Evidência histórica da primeira fase; não representa a soma de todas as rodadas. |
 
-## Issues novas desta rodada
+## Issues da rodada Genesis anterior
 
 | Issue | Achado | Prova executada |
 |---|---|---|
@@ -46,6 +47,10 @@ Instalação Atlas pelo lockfile e `bun run typecheck` concluíram com exit 0. P
 As verificações explícitas das propriedades desejadas sobre as observações capturadas reportam **6 controles passando e 4 violações em cada conjunto**: seleção de braços, término após perda de worker e duas formas de falha de publicação. O verificador dessas propriedades sai com código 1. Isso é evidência de defeitos ainda presentes, não correções ou uma suíte de produto toda verde.
 
 Não houve inferência de LLM nem uso da configuração real de modelo do usuário nos diagnósticos. O índice SCIP é uma fixture controlada, não uma execução do indexador externo. A suíte interna do Maestro não prova disponibilidade da apresentação pública de aprovação, que continua deliberadamente bloqueada até suas dependências de autoridade existirem.
+
+## Continuidade atual
+
+O [WP-HOST-01](host-consumption/README.md) confirma contexto Own desatualizado chegando ao provedor local por ferramenta, comando e rota pública de sessão. Há controles positivos e distinção executada entre /agent e /api/agent. Não houve inferência real, correção ou merge. O [norte](CONTINUIDADE.md) permanece com cobertura explicitamente parcial.
 
 ## Cobertura e limites
 
