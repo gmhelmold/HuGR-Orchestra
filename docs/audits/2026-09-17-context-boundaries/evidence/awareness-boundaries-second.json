@@ -1,0 +1,398 @@
+{
+  "productRevision": "b0c33d2f6567a2c741240f3c44bc00ca2f01e7e7",
+  "boundary": "Original durable adapter/reducer/kernel; T0 rows fixture-seeded using original upsert, NOT a live governance or automatic wave test",
+  "first": {
+    "awareness": {
+      "mission": {
+        "content": "UN-SEEDED (mission): source absent — no self-model line fabricated",
+        "grounding": [],
+        "state": "UN-SEEDED"
+      },
+      "constitution": {
+        "content": "constitution: 1 ratified T0 invariant(s)",
+        "grounding": [
+          {
+            "kind": "symbol",
+            "qualifiedPath": "claim:aaa",
+            "subtreeHash": "26626ffe28d69b34c7a3eedd1ad52818caf263f4d2f94a4e78097a8959762505"
+          }
+        ],
+        "state": "seeded"
+      },
+      "terrain": {
+        "content": "UN-SEEDED (terrain): source absent — no self-model line fabricated",
+        "grounding": [],
+        "state": "UN-SEEDED"
+      },
+      "ontology": {
+        "content": "UN-SEEDED (ontology): source absent — no self-model line fabricated",
+        "grounding": [],
+        "state": "UN-SEEDED"
+      },
+      "taste": {
+        "content": "taste: CONVENTIONS.md@sha",
+        "grounding": [
+          {
+            "kind": "file",
+            "qualifiedPath": "CONVENTIONS.md",
+            "subtreeHash": "33e787a287ef16292f290ab91e9611a8c10fb88850ee2f438d0a1cbea4ca1912"
+          }
+        ],
+        "state": "seeded"
+      }
+    },
+    "receipt": {
+      "key": "b7cfd223e5d0d75d6d0f6e495058717d91fdb49a32ef4bdac8f9ed0479ad92bd",
+      "reRolls": 5,
+      "driftChecks": 5
+    },
+    "assemblies": 1,
+    "seats": [
+      "fixture-seat"
+    ]
+  },
+  "unchanged": {
+    "awareness": {
+      "mission": {
+        "content": "UN-SEEDED (mission): source absent — no self-model line fabricated",
+        "grounding": [],
+        "state": "UN-SEEDED"
+      },
+      "constitution": {
+        "content": "constitution: 1 ratified T0 invariant(s)",
+        "grounding": [
+          {
+            "kind": "symbol",
+            "qualifiedPath": "claim:aaa",
+            "subtreeHash": "26626ffe28d69b34c7a3eedd1ad52818caf263f4d2f94a4e78097a8959762505"
+          }
+        ],
+        "state": "seeded"
+      },
+      "terrain": {
+        "content": "UN-SEEDED (terrain): source absent — no self-model line fabricated",
+        "grounding": [],
+        "state": "UN-SEEDED"
+      },
+      "ontology": {
+        "content": "UN-SEEDED (ontology): source absent — no self-model line fabricated",
+        "grounding": [],
+        "state": "UN-SEEDED"
+      },
+      "taste": {
+        "content": "taste: CONVENTIONS.md@sha",
+        "grounding": [
+          {
+            "kind": "file",
+            "qualifiedPath": "CONVENTIONS.md",
+            "subtreeHash": "33e787a287ef16292f290ab91e9611a8c10fb88850ee2f438d0a1cbea4ca1912"
+          }
+        ],
+        "state": "seeded"
+      }
+    },
+    "receipt": {
+      "key": "b7cfd223e5d0d75d6d0f6e495058717d91fdb49a32ef4bdac8f9ed0479ad92bd",
+      "reRolls": 0,
+      "driftChecks": 0
+    },
+    "assemblies": 1,
+    "seats": [
+      "fixture-seat"
+    ]
+  },
+  "afterAdd": {
+    "awareness": {
+      "mission": {
+        "content": "UN-SEEDED (mission): source absent — no self-model line fabricated",
+        "grounding": [],
+        "state": "UN-SEEDED"
+      },
+      "constitution": {
+        "content": "constitution: 1 ratified T0 invariant(s)",
+        "grounding": [
+          {
+            "kind": "symbol",
+            "qualifiedPath": "claim:aaa",
+            "subtreeHash": "26626ffe28d69b34c7a3eedd1ad52818caf263f4d2f94a4e78097a8959762505"
+          }
+        ],
+        "state": "seeded"
+      },
+      "terrain": {
+        "content": "UN-SEEDED (terrain): source absent — no self-model line fabricated",
+        "grounding": [],
+        "state": "UN-SEEDED"
+      },
+      "ontology": {
+        "content": "UN-SEEDED (ontology): source absent — no self-model line fabricated",
+        "grounding": [],
+        "state": "UN-SEEDED"
+      },
+      "taste": {
+        "content": "taste: CONVENTIONS.md@sha",
+        "grounding": [
+          {
+            "kind": "file",
+            "qualifiedPath": "CONVENTIONS.md",
+            "subtreeHash": "33e787a287ef16292f290ab91e9611a8c10fb88850ee2f438d0a1cbea4ca1912"
+          }
+        ],
+        "state": "seeded"
+      }
+    },
+    "receipt": {
+      "key": "b7cfd223e5d0d75d6d0f6e495058717d91fdb49a32ef4bdac8f9ed0479ad92bd",
+      "reRolls": 0,
+      "driftChecks": 0
+    },
+    "assemblies": 1,
+    "seats": [
+      "fixture-seat"
+    ]
+  },
+  "coldAfterAdd": {
+    "mission": {
+      "content": "UN-SEEDED (mission): source absent — no self-model line fabricated",
+      "grounding": [],
+      "state": "UN-SEEDED"
+    },
+    "constitution": {
+      "content": "constitution: 2 ratified T0 invariant(s)",
+      "grounding": [
+        {
+          "kind": "symbol",
+          "qualifiedPath": "claim:aaa",
+          "subtreeHash": "26626ffe28d69b34c7a3eedd1ad52818caf263f4d2f94a4e78097a8959762505"
+        },
+        {
+          "kind": "symbol",
+          "qualifiedPath": "claim:zzz",
+          "subtreeHash": "83d5c8c8b48ed1c71f76cd71ab2b824b66d7d00891b85bf209b2250b52a48f4d"
+        }
+      ],
+      "state": "seeded"
+    },
+    "terrain": {
+      "content": "UN-SEEDED (terrain): source absent — no self-model line fabricated",
+      "grounding": [],
+      "state": "UN-SEEDED"
+    },
+    "ontology": {
+      "content": "UN-SEEDED (ontology): source absent — no self-model line fabricated",
+      "grounding": [],
+      "state": "UN-SEEDED"
+    },
+    "taste": {
+      "content": "taste: CONVENTIONS.md@sha",
+      "grounding": [
+        {
+          "kind": "file",
+          "qualifiedPath": "CONVENTIONS.md",
+          "subtreeHash": "33e787a287ef16292f290ab91e9611a8c10fb88850ee2f438d0a1cbea4ca1912"
+        }
+      ],
+      "state": "seeded"
+    }
+  },
+  "afterSecondaryChange": {
+    "awareness": {
+      "mission": {
+        "content": "UN-SEEDED (mission): source absent — no self-model line fabricated",
+        "grounding": [],
+        "state": "UN-SEEDED"
+      },
+      "constitution": {
+        "content": "constitution: 1 ratified T0 invariant(s)",
+        "grounding": [
+          {
+            "kind": "symbol",
+            "qualifiedPath": "claim:aaa",
+            "subtreeHash": "26626ffe28d69b34c7a3eedd1ad52818caf263f4d2f94a4e78097a8959762505"
+          }
+        ],
+        "state": "seeded"
+      },
+      "terrain": {
+        "content": "UN-SEEDED (terrain): source absent — no self-model line fabricated",
+        "grounding": [],
+        "state": "UN-SEEDED"
+      },
+      "ontology": {
+        "content": "UN-SEEDED (ontology): source absent — no self-model line fabricated",
+        "grounding": [],
+        "state": "UN-SEEDED"
+      },
+      "taste": {
+        "content": "taste: CONVENTIONS.md@sha",
+        "grounding": [
+          {
+            "kind": "file",
+            "qualifiedPath": "CONVENTIONS.md",
+            "subtreeHash": "33e787a287ef16292f290ab91e9611a8c10fb88850ee2f438d0a1cbea4ca1912"
+          }
+        ],
+        "state": "seeded"
+      }
+    },
+    "receipt": {
+      "key": "b7cfd223e5d0d75d6d0f6e495058717d91fdb49a32ef4bdac8f9ed0479ad92bd",
+      "reRolls": 0,
+      "driftChecks": 0
+    },
+    "assemblies": 1,
+    "seats": [
+      "fixture-seat"
+    ]
+  },
+  "coldAfterSecondaryChange": {
+    "mission": {
+      "content": "UN-SEEDED (mission): source absent — no self-model line fabricated",
+      "grounding": [],
+      "state": "UN-SEEDED"
+    },
+    "constitution": {
+      "content": "constitution: 2 ratified T0 invariant(s)",
+      "grounding": [
+        {
+          "kind": "symbol",
+          "qualifiedPath": "claim:aaa",
+          "subtreeHash": "26626ffe28d69b34c7a3eedd1ad52818caf263f4d2f94a4e78097a8959762505"
+        },
+        {
+          "kind": "symbol",
+          "qualifiedPath": "claim:zzz",
+          "subtreeHash": "fbdc3f4ec1cf6c7823a9bb04c6372b37cb985dd12d6ad38a26188b94065468b6"
+        }
+      ],
+      "state": "seeded"
+    },
+    "terrain": {
+      "content": "UN-SEEDED (terrain): source absent — no self-model line fabricated",
+      "grounding": [],
+      "state": "UN-SEEDED"
+    },
+    "ontology": {
+      "content": "UN-SEEDED (ontology): source absent — no self-model line fabricated",
+      "grounding": [],
+      "state": "UN-SEEDED"
+    },
+    "taste": {
+      "content": "taste: CONVENTIONS.md@sha",
+      "grounding": [
+        {
+          "kind": "file",
+          "qualifiedPath": "CONVENTIONS.md",
+          "subtreeHash": "33e787a287ef16292f290ab91e9611a8c10fb88850ee2f438d0a1cbea4ca1912"
+        }
+      ],
+      "state": "seeded"
+    }
+  },
+  "afterPrimaryChange": {
+    "awareness": {
+      "mission": {
+        "content": "UN-SEEDED (mission): source absent — no self-model line fabricated",
+        "grounding": [],
+        "state": "UN-SEEDED"
+      },
+      "constitution": {
+        "content": "constitution: 2 ratified T0 invariant(s)",
+        "grounding": [
+          {
+            "kind": "symbol",
+            "qualifiedPath": "claim:aaa",
+            "subtreeHash": "b7238b268fc7fe73adfcda46812d0e579519416289818ce002bd149b4bb3e76f"
+          },
+          {
+            "kind": "symbol",
+            "qualifiedPath": "claim:zzz",
+            "subtreeHash": "fbdc3f4ec1cf6c7823a9bb04c6372b37cb985dd12d6ad38a26188b94065468b6"
+          }
+        ],
+        "state": "drifted"
+      },
+      "terrain": {
+        "content": "UN-SEEDED (terrain): source absent — no self-model line fabricated",
+        "grounding": [],
+        "state": "UN-SEEDED"
+      },
+      "ontology": {
+        "content": "UN-SEEDED (ontology): source absent — no self-model line fabricated",
+        "grounding": [],
+        "state": "UN-SEEDED"
+      },
+      "taste": {
+        "content": "taste: CONVENTIONS.md@sha",
+        "grounding": [
+          {
+            "kind": "file",
+            "qualifiedPath": "CONVENTIONS.md",
+            "subtreeHash": "33e787a287ef16292f290ab91e9611a8c10fb88850ee2f438d0a1cbea4ca1912"
+          }
+        ],
+        "state": "seeded"
+      }
+    },
+    "receipt": {
+      "key": "e57f79b4d831c57523448d30a6a45be03c0483e6bd52b582c04ad46386470bfb",
+      "reRolls": 1,
+      "driftChecks": 1
+    },
+    "assemblies": 1,
+    "seats": [
+      "fixture-seat"
+    ]
+  },
+  "coldAfterPrimaryChange": {
+    "mission": {
+      "content": "UN-SEEDED (mission): source absent — no self-model line fabricated",
+      "grounding": [],
+      "state": "UN-SEEDED"
+    },
+    "constitution": {
+      "content": "constitution: 2 ratified T0 invariant(s)",
+      "grounding": [
+        {
+          "kind": "symbol",
+          "qualifiedPath": "claim:aaa",
+          "subtreeHash": "b7238b268fc7fe73adfcda46812d0e579519416289818ce002bd149b4bb3e76f"
+        },
+        {
+          "kind": "symbol",
+          "qualifiedPath": "claim:zzz",
+          "subtreeHash": "fbdc3f4ec1cf6c7823a9bb04c6372b37cb985dd12d6ad38a26188b94065468b6"
+        }
+      ],
+      "state": "seeded"
+    },
+    "terrain": {
+      "content": "UN-SEEDED (terrain): source absent — no self-model line fabricated",
+      "grounding": [],
+      "state": "UN-SEEDED"
+    },
+    "ontology": {
+      "content": "UN-SEEDED (ontology): source absent — no self-model line fabricated",
+      "grounding": [],
+      "state": "UN-SEEDED"
+    },
+    "taste": {
+      "content": "taste: CONVENTIONS.md@sha",
+      "grounding": [
+        {
+          "kind": "file",
+          "qualifiedPath": "CONVENTIONS.md",
+          "subtreeHash": "33e787a287ef16292f290ab91e9611a8c10fb88850ee2f438d0a1cbea4ca1912"
+        }
+      ],
+      "state": "seeded"
+    }
+  },
+  "checks": {
+    "unchangedCacheHit": true,
+    "unrelatedRootCacheHit": true,
+    "secondaryAdditionInvalidates": false,
+    "secondaryRevisionInvalidates": false,
+    "primaryRevisionInvalidates": true
+  }
+}
