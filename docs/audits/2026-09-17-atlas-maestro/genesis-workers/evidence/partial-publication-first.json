@@ -1,0 +1,140 @@
+{
+  "product": "b0c33d2f6567a2c741240f3c44bc00ca2f01e7e7",
+  "node": "v22.17.1",
+  "index": "controlled SCIP",
+  "proposer": "recorded synthetic seed; no model",
+  "gate": "original composed gate, not substituted",
+  "fault": "explicit second-commit refusal/throw at store port; first commit and reopened store original",
+  "results": [
+    {
+      "mode": "healthy",
+      "proposed": 2,
+      "commitAttempts": 2,
+      "report": {
+        "seeded": 2,
+        "llmCalls": 2,
+        "modelCalls": 2,
+        "budgetSpent": 2,
+        "coverage": {
+          "frontier": "planned",
+          "planned": 2,
+          "sites": [
+            {
+              "rank": 1,
+              "site": {
+                "kind": "file",
+                "qualifiedPath": "src/util.ts",
+                "subtreeHash": "0554e39238a97f6e4fcef640bd7a224129c80ca01a60d625c310bc5c1ebe757d"
+              },
+              "outcome": "seeded",
+              "facts": [
+                "src/util.ts"
+              ]
+            },
+            {
+              "rank": 2,
+              "site": {
+                "kind": "file",
+                "qualifiedPath": "src/app.ts",
+                "subtreeHash": "4f8540a73a8a464dc32a4ca5ce123cd2ca3b6bccff00dc25ac0531272767b734"
+              },
+              "outcome": "seeded",
+              "facts": [
+                "src/app.ts"
+              ]
+            }
+          ]
+        }
+      },
+      "durableRows": [
+        {
+          "nodeKey": "f7948b4fabe9aa8a8f16c4c90e0ce682f6bb6dbf7eb7fa753d5ab79b3110b6a4",
+          "claims": [
+            "The source src/util.ts declares an exported function."
+          ],
+          "contentHash": "89c9afc6377aecd02a460c4eb6371d8c3a0654dec21a6819c0b18a4b97a0486d",
+          "readable": true
+        },
+        {
+          "nodeKey": "2bda31bfa3adc1d4fd244904d7d0d6c0a8ed81c7b1e84b24168f687f5755d8da",
+          "claims": [
+            "The source src/app.ts declares an exported function."
+          ],
+          "contentHash": "33a3f0c5191578a0f9b91587bb71d8e08092c9a853b853433e1b2b0addef7081",
+          "readable": true
+        }
+      ],
+      "cliVerdict": {
+        "exitCode": 0,
+        "stdout": "genesis: seeded 2 candidate fact(s); ratified 0\ncost: llmCalls 2 · budgetSpent 2\ncoverage: coverage CLOSES — all 2 planned site(s) accounted for: 2 seeded, 0 abstained, 0 unrecorded, 0 interrupted, 0 never visited\nsite: {\"rank\":1,\"outcome\":\"seeded\",\"kind\":\"file\",\"path\":\"src/util.ts\",\"facts\":[\"src/util.ts\"]}\nsite: {\"rank\":2,\"outcome\":\"seeded\",\"kind\":\"file\",\"path\":\"src/app.ts\",\"facts\":[\"src/app.ts\"]}\n"
+      }
+    },
+    {
+      "mode": "refuse-second",
+      "proposed": 2,
+      "commitAttempts": 2,
+      "refusal": "contended",
+      "report": {
+        "seeded": 0,
+        "llmCalls": 0,
+        "modelCalls": 0,
+        "budgetSpent": 0,
+        "coverage": {
+          "frontier": "unavailable",
+          "planned": 0,
+          "sites": []
+        },
+        "resumeToken": {
+          "lastCompletedRank": -1
+        }
+      },
+      "durableRows": [
+        {
+          "nodeKey": "f7948b4fabe9aa8a8f16c4c90e0ce682f6bb6dbf7eb7fa753d5ab79b3110b6a4",
+          "claims": [
+            "The source src/util.ts declares an exported function."
+          ],
+          "contentHash": "89c9afc6377aecd02a460c4eb6371d8c3a0654dec21a6819c0b18a4b97a0486d",
+          "readable": true
+        }
+      ],
+      "cliVerdict": {
+        "exitCode": 1,
+        "stdout": "genesis: seeded 0 candidate fact(s); ratified 0\ncost: llmCalls 0 · budgetSpent 0\nstaging: REFUSED (contended) — the staging sidecar advanced under this pass more times than the protocol retries, so its candidates were NOT written. The store is alive; this write is not. Re-run the pass\nmine: 0 candidate facts — the pass did not run to completion, so this 0 is not a finished result\npartial: resume at rank -1\ncoverage: coverage UNEVALUABLE — the run never obtained a frontier (planning failed), so there is no site set to reconcile; this is not a claim that the repository is empty\n"
+      }
+    },
+    {
+      "mode": "throw-second",
+      "proposed": 2,
+      "commitAttempts": 2,
+      "report": {
+        "seeded": 0,
+        "llmCalls": 0,
+        "modelCalls": 0,
+        "budgetSpent": 0,
+        "coverage": {
+          "frontier": "unavailable",
+          "planned": 0,
+          "sites": []
+        },
+        "resumeToken": {
+          "lastCompletedRank": -1
+        }
+      },
+      "durableRows": [
+        {
+          "nodeKey": "f7948b4fabe9aa8a8f16c4c90e0ce682f6bb6dbf7eb7fa753d5ab79b3110b6a4",
+          "claims": [
+            "The source src/util.ts declares an exported function."
+          ],
+          "contentHash": "89c9afc6377aecd02a460c4eb6371d8c3a0654dec21a6819c0b18a4b97a0486d",
+          "readable": true
+        }
+      ],
+      "cliVerdict": {
+        "exitCode": 1,
+        "stdout": "genesis: seeded 0 candidate fact(s); ratified 0\ncost: llmCalls 0 · budgetSpent 0\nmine: 0 candidate facts — the pass did not run to completion, so this 0 is not a finished result\npartial: resume at rank -1\ncoverage: coverage UNEVALUABLE — the run never obtained a frontier (planning failed), so there is no site set to reconcile; this is not a claim that the repository is empty\n"
+      }
+    }
+  ]
+}

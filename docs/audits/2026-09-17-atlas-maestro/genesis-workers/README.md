@@ -4,7 +4,7 @@
 
 Product: `b0c33d2f6567a2c741240f3c44bc00ca2f01e7e7`, branch `maestro/rebuild-fork-dev-clean`. Documentation is published separately; no production fixes or merges are included. The source checkout was independently cloned from the local repository and kept detached at the product SHA. Atlas dependencies were installed with its own lockfile, and the original implementation was compiled with `bun run typecheck`.
 
-Environment: macOS x64, Node 22.17.1, Bun 1.3.14. The two diagnostics below use original compiled modules and real worker threads. CLI cases use actual temporary Git repositories and a deliberately controlled SCIP protobuf, **not an external SCIP-indexer run**. An operator-configured local Node command records stdin and returns no answer. It has no network/model integration. These experiments incurred no model inference.
+Environment: macOS x64, Node 22.17.1, Bun 1.3.14. The three diagnostics below use original compiled modules and real worker threads. CLI cases use actual temporary Git repositories and a deliberately controlled SCIP protobuf, **not an external SCIP-indexer run**. An operator-configured local Node command records stdin and returns no answer. It has no network/model integration. These experiments incurred no model inference.
 
 ## Progressive investigation journal
 
@@ -53,6 +53,24 @@ Root trace: `mine-pool.ts` increments `died` in parent-thread `exit`/`error` lis
 
 Evidence: `evidence/worker-liveness-first.json` and `worker-liveness-second.json`, including process status, duration, timeout code, stdout and stderr. This is a reliability finding; no third-party target or remote exploit was used.
 
+## GW-03 — a later staging failure erases already-completed progress from the report
+
+Repeated in two fresh fixture sets through original `driveMinePass`, the original default composed gate, scan/ranking, kernel, staging and a reopened original store. The proposer is a deterministic synthetic seed provider, not a model. The store wrapper injects a named refusal or throw on the **second** commit attempt; the first commit and independent reopen/read are real. This is controlled fault injection, not a naturally observed contention rate or a live CLI invocation. The displayed text is obtained from the original `foldVerdict` renderer.
+
+| Case | Proposals attempted | Reported seeded / modelCalls | Reopened readable staged rows | Result |
+|---|---:|---|---:|---|
+| Healthy | 2 | 2 / 2 | 2 | exit 0 |
+| Second commit returns contended | 2 | **0 / 0** | **1** | exit 1, named refusal |
+| Second commit throws | 2 | **0 / 0** | **1** | exit 1 |
+
+In both failures the report additionally states `frontier: unavailable`, `planned: 0`, empty site ledger and resume cursor `-1`. The rendered coverage explanation says planning failed and no frontier was obtained, even though original ranking completed, two proposals were attempted and the first candidate is readable after reopening.
+
+Root: `drive.ts` handles per-site visit failures through `dispatch`, but calls `ports.upsert` outside that boundary. A later staging refusal throws from `buildControllerDeps().upsert`. `run-controller.ts` catches the unwound exception around the entire fresh run, clears `pending`, and returns the same empty report used for planning failure. The successful prefix, call accounting and actual completed cursor are discarded from the returned evidence.
+
+**Counterevidence:** the failed run is correctly nonzero, and the first committed candidate is retained. This is an accounting/checkpoint/diagnostic loss, not deletion of durable candidate bytes, not clean-success reporting, and not proof of incorrect billing by a real provider. The injected proposer made two calls; no paid model was called.
+
+Evidence: `partial-publication-first.json`, `partial-publication-second.json`, and `probes/partial-publication.mjs`. Required correction: retain the actual completed prefix and classify the failed site/publication separately, with truthful call accounting and recovery state. Never turn a failed publication into a completed site or pretend the whole run had no frontier. Replaying proposals after storage failure needs its own explicit budget/retry semantics.
+
 ## Original tests executed in this round
 
 - Atlas lockfile installation and `bun run typecheck`: exit 0.
@@ -75,6 +93,8 @@ node probes/worker-arms.mjs first
 node probes/worker-arms.mjs second
 node probes/worker-liveness.mjs first
 node probes/worker-liveness.mjs second
+node probes/partial-publication.mjs first
+node probes/partial-publication.mjs second
 ```
 
 The scripts create only disposable fixture repositories, their own operator configurations, and JSON evidence. They do not use the real operator's model configuration. Keep the `evidence/` directory present. Successful product remediation must add desired-invariant regressions, not simply keep these observation collectors green.
@@ -86,3 +106,7 @@ GW-01 must propagate one authoritative resolved arm through prompt, parser, fron
 GW-02 must represent death/deadline in a mechanism visible while the caller is blocked, or change the waiting arrangement coherently. Validate startup exit, module-load error, post-dispatch exit, successful job, ordinary model timeout, cleanup and repeated close. Do not merely change the wait slice or turn unknown failure into a model abstention.
 
 No issue is fixed by this evidence publication. The public Maestro approval-presentation guard remains unchanged; its intentionally unavailable journey is not claimed exercised by the passing internal suite.
+
+## Evidence formatting
+
+Copied baseline logs preserve output text, with trailing empty lines normalized to a single final newline for repository whitespace checks. Raw local logs remain unchanged. JSON evidence preserves the original observed output strings. This formatting is not a rerun.

@@ -1,0 +1,97 @@
+{
+  "round": "first",
+  "kind": "Desired invariants asserted against independently captured original-runtime observations; not a production fix",
+  "passed": 6,
+  "failed": 4,
+  "checks": [
+    {
+      "id": "control-single-advisory",
+      "pass": true,
+      "observed": {
+        "exit": 0,
+        "count": 2
+      }
+    },
+    {
+      "id": "control-single-dependency",
+      "pass": true,
+      "observed": {
+        "exit": 0,
+        "count": 2
+      }
+    },
+    {
+      "id": "control-single-count",
+      "pass": true,
+      "observed": {
+        "exit": 0,
+        "count": 2
+      }
+    },
+    {
+      "id": "GW01-default-worker-arms-preserved",
+      "pass": false,
+      "observed": {
+        "dependency": 0,
+        "count": 0,
+        "total": 6
+      }
+    },
+    {
+      "id": "control-pool-healthy",
+      "pass": true,
+      "observed": {
+        "status": 0
+      }
+    },
+    {
+      "id": "control-pool-closed",
+      "pass": true,
+      "observed": {
+        "status": 0
+      }
+    },
+    {
+      "id": "GW02-worker-loss-returns-within-test-bound",
+      "pass": false,
+      "observed": {
+        "status": null,
+        "errorCode": "ETIMEDOUT",
+        "signal": "SIGTERM"
+      }
+    },
+    {
+      "id": "control-staging-report",
+      "pass": true,
+      "observed": {
+        "reportedSeeded": 2,
+        "durableRows": 2,
+        "reportedCalls": 2,
+        "proposed": 2,
+        "frontier": "planned"
+      }
+    },
+    {
+      "id": "GW03-progress-retained-refuse-second",
+      "pass": false,
+      "observed": {
+        "reportedSeeded": 0,
+        "durableRows": 1,
+        "reportedCalls": 0,
+        "proposed": 2,
+        "frontier": "unavailable"
+      }
+    },
+    {
+      "id": "GW03-progress-retained-throw-second",
+      "pass": false,
+      "observed": {
+        "reportedSeeded": 0,
+        "durableRows": 1,
+        "reportedCalls": 0,
+        "proposed": 2,
+        "frontier": "unavailable"
+      }
+    }
+  ]
+}
