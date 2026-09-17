@@ -1,0 +1,94 @@
+[
+  {
+    "id": "sequential-control",
+    "after": {
+      "snapshot": "B",
+      "skill": "B"
+    },
+    "desiredInvariant": true
+  },
+  {
+    "id": "interleaving-0",
+    "writerB": {
+      "code": 0,
+      "stderr": ""
+    },
+    "B": {
+      "ok": true,
+      "warnings": []
+    },
+    "writerA": {
+      "code": 1,
+      "stderr": ""
+    },
+    "A": {
+      "ok": false,
+      "error": "Error: replacement failed: ENOTEMPTY: directory not empty, rename '/private/tmp/hugr-deep-r2.4LEbkh/fixtures/own-race-oyjRm6/A.skills.tmp' -> '/private/tmp/hugr-deep-r2.4LEbkh/fixtures/own-race-oyjRm6/own'; skills rollback failed: ENOTEMPTY: directory not empty, rename '/private/tmp/hugr-deep-r2.4LEbkh/fixtures/own-race-oyjRm6/A.skills.bak' -> '/private/tmp/hugr-deep-r2.4LEbkh/fixtures/own-race-oyjRm6/own'"
+    },
+    "afterB": {
+      "snapshot": "B",
+      "skill": "B"
+    },
+    "afterA": {
+      "snapshot": "old",
+      "skill": "B"
+    },
+    "desiredInvariant": false
+  },
+  {
+    "id": "interleaving-1",
+    "writerB": {
+      "code": 0,
+      "stderr": ""
+    },
+    "B": {
+      "ok": true,
+      "warnings": []
+    },
+    "writerA": {
+      "code": 1,
+      "stderr": ""
+    },
+    "A": {
+      "ok": false,
+      "error": "Error: replacement failed: ENOTEMPTY: directory not empty, rename '/private/tmp/hugr-deep-r2.4LEbkh/fixtures/own-race-nIp1i5/A.skills.tmp' -> '/private/tmp/hugr-deep-r2.4LEbkh/fixtures/own-race-nIp1i5/own'; skills rollback failed: ENOTEMPTY: directory not empty, rename '/private/tmp/hugr-deep-r2.4LEbkh/fixtures/own-race-nIp1i5/A.skills.bak' -> '/private/tmp/hugr-deep-r2.4LEbkh/fixtures/own-race-nIp1i5/own'"
+    },
+    "afterB": {
+      "snapshot": "B",
+      "skill": "B"
+    },
+    "afterA": {
+      "snapshot": "old",
+      "skill": "B"
+    },
+    "desiredInvariant": false
+  },
+  {
+    "id": "interleaving-2",
+    "writerB": {
+      "code": 0,
+      "stderr": ""
+    },
+    "B": {
+      "ok": true,
+      "warnings": []
+    },
+    "writerA": {
+      "code": 1,
+      "stderr": ""
+    },
+    "A": {
+      "ok": false,
+      "error": "Error: replacement failed: ENOTEMPTY: directory not empty, rename '/private/tmp/hugr-deep-r2.4LEbkh/fixtures/own-race-w60FBm/A.skills.tmp' -> '/private/tmp/hugr-deep-r2.4LEbkh/fixtures/own-race-w60FBm/own'; skills rollback failed: ENOTEMPTY: directory not empty, rename '/private/tmp/hugr-deep-r2.4LEbkh/fixtures/own-race-w60FBm/A.skills.bak' -> '/private/tmp/hugr-deep-r2.4LEbkh/fixtures/own-race-w60FBm/own'"
+    },
+    "afterB": {
+      "snapshot": "B",
+      "skill": "B"
+    },
+    "afterA": {
+      "snapshot": "old",
+      "skill": "B"
+    },
+    "desiredInvariant": false
+  }
+]

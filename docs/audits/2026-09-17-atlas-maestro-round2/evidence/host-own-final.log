@@ -1,0 +1,97 @@
+bun test v1.3.14 (0d9b296a)
+
+test/tool/audit-round2-own.test.ts:
+(pass) Round2: static Own current-source contract at the real host skill tool > fresh [5734.12ms]
+[21:03:40.938] ERROR (#10915): 53 |       const checked=artifacts.verifyStaticOwnFreshness(content,currentBlob)
+54 |       const result=yield* tool.execute({name:skillName},ctx)
+55 |       const servedOldClaim=result.output.includes("The fixture exports value = 1.")
+56 |       results.push({mode,freshness:checked,title:result.title,servedOldClaim,
+57 |         identicalToInitial:result.output===initial.output,desiredInvariant:checked.status!=="HOLD" || !servedOldClaim})
+58 |       if(mode!=="fresh")expect(servedOldClaim).toBe(false)
+     ^
+error: expect(received).toBe(expected)
+
+Expected: false
+Received: true
+
+      at toBe (unknown:1:1)
+      at /private/tmp/hugr-deep-r2.4LEbkh/repo/packages/opencode/test/tool/audit-round2-own.test.ts:58:48
+
+53 |       const checked=artifacts.verifyStaticOwnFreshness(content,currentBlob)
+54 |       const result=yield* tool.execute({name:skillName},ctx)
+55 |       const servedOldClaim=result.output.includes("The fixture exports value = 1.")
+56 |       results.push({mode,freshness:checked,title:result.title,servedOldClaim,
+57 |         identicalToInitial:result.output===initial.output,desiredInvariant:checked.status!=="HOLD" || !servedOldClaim})
+58 |       if(mode!=="fresh")expect(servedOldClaim).toBe(false)
+     ^
+error: expect(received).toBe(expected)
+
+Expected: false
+Received: true
+
+      at toBe (unknown:1:1)
+      at /private/tmp/hugr-deep-r2.4LEbkh/repo/packages/opencode/test/tool/audit-round2-own.test.ts:58:48
+      at ~effect/Effect/successCont (/private/tmp/hugr-atlas-maestro-audit.BDqrxm/repo/node_modules/.bun/effect@4.0.0-beta.83/node_modules/effect/dist/internal/effect.js:910:23)
+      at runLoop (/private/tmp/hugr-atlas-maestro-audit.BDqrxm/repo/node_modules/.bun/effect@4.0.0-beta.83/node_modules/effect/dist/internal/effect.js:420:66)
+      at evaluate (/private/tmp/hugr-atlas-maestro-audit.BDqrxm/repo/node_modules/.bun/effect@4.0.0-beta.83/node_modules/effect/dist/internal/effect.js:380:20)
+      at /private/tmp/hugr-atlas-maestro-audit.BDqrxm/repo/node_modules/.bun/effect@4.0.0-beta.83/node_modules/effect/dist/internal/effect.js:734:14
+      at onExit (/private/tmp/hugr-atlas-maestro-audit.BDqrxm/repo/node_modules/.bun/effect@4.0.0-beta.83/node_modules/effect/dist/internal/effect.js:1009:2)
+      at /private/tmp/hugr-atlas-maestro-audit.BDqrxm/repo/node_modules/.bun/effect@4.0.0-beta.83/node_modules/effect/dist/internal/effect.js:1028:5
+      at evaluate (/private/tmp/hugr-atlas-maestro-audit.BDqrxm/repo/node_modules/.bun/effect@4.0.0-beta.83/node_modules/effect/dist/internal/effect.js:397:14)
+      at /private/tmp/hugr-atlas-maestro-audit.BDqrxm/repo/node_modules/.bun/effect@4.0.0-beta.83/node_modules/effect/dist/internal/effect.js:734:14
+      at doneUnsafe (/private/tmp/hugr-atlas-maestro-audit.BDqrxm/repo/node_modules/.bun/effect@4.0.0-beta.83/node_modules/effect/dist/Deferred.js:657:20)
+      at /private/tmp/hugr-atlas-maestro-audit.BDqrxm/repo/packages/core/src/cross-spawn-spawner.ts:398:21
+      at emit (node:events:98:22)
+      at #maybeClose (node:child_process:766:16)
+      at #handleOnExit (node:child_process:520:72)
+      at processTicksAndRejections (unknown:7:39)
+(fail) Round2: static Own current-source contract at the real host skill tool > stale-cold [2563.60ms]
+[21:03:44.722] ERROR (#12513): 53 |       const checked=artifacts.verifyStaticOwnFreshness(content,currentBlob)
+54 |       const result=yield* tool.execute({name:skillName},ctx)
+55 |       const servedOldClaim=result.output.includes("The fixture exports value = 1.")
+56 |       results.push({mode,freshness:checked,title:result.title,servedOldClaim,
+57 |         identicalToInitial:result.output===initial.output,desiredInvariant:checked.status!=="HOLD" || !servedOldClaim})
+58 |       if(mode!=="fresh")expect(servedOldClaim).toBe(false)
+     ^
+error: expect(received).toBe(expected)
+
+Expected: false
+Received: true
+
+      at toBe (unknown:1:1)
+      at /private/tmp/hugr-deep-r2.4LEbkh/repo/packages/opencode/test/tool/audit-round2-own.test.ts:58:48
+
+53 |       const checked=artifacts.verifyStaticOwnFreshness(content,currentBlob)
+54 |       const result=yield* tool.execute({name:skillName},ctx)
+55 |       const servedOldClaim=result.output.includes("The fixture exports value = 1.")
+56 |       results.push({mode,freshness:checked,title:result.title,servedOldClaim,
+57 |         identicalToInitial:result.output===initial.output,desiredInvariant:checked.status!=="HOLD" || !servedOldClaim})
+58 |       if(mode!=="fresh")expect(servedOldClaim).toBe(false)
+     ^
+error: expect(received).toBe(expected)
+
+Expected: false
+Received: true
+
+      at toBe (unknown:1:1)
+      at /private/tmp/hugr-deep-r2.4LEbkh/repo/packages/opencode/test/tool/audit-round2-own.test.ts:58:48
+      at ~effect/Effect/successCont (/private/tmp/hugr-atlas-maestro-audit.BDqrxm/repo/node_modules/.bun/effect@4.0.0-beta.83/node_modules/effect/dist/internal/effect.js:910:23)
+      at runLoop (/private/tmp/hugr-atlas-maestro-audit.BDqrxm/repo/node_modules/.bun/effect@4.0.0-beta.83/node_modules/effect/dist/internal/effect.js:420:66)
+      at evaluate (/private/tmp/hugr-atlas-maestro-audit.BDqrxm/repo/node_modules/.bun/effect@4.0.0-beta.83/node_modules/effect/dist/internal/effect.js:380:20)
+      at /private/tmp/hugr-atlas-maestro-audit.BDqrxm/repo/node_modules/.bun/effect@4.0.0-beta.83/node_modules/effect/dist/internal/effect.js:734:14
+      at onExit (/private/tmp/hugr-atlas-maestro-audit.BDqrxm/repo/node_modules/.bun/effect@4.0.0-beta.83/node_modules/effect/dist/internal/effect.js:1009:2)
+      at /private/tmp/hugr-atlas-maestro-audit.BDqrxm/repo/node_modules/.bun/effect@4.0.0-beta.83/node_modules/effect/dist/internal/effect.js:1028:5
+      at evaluate (/private/tmp/hugr-atlas-maestro-audit.BDqrxm/repo/node_modules/.bun/effect@4.0.0-beta.83/node_modules/effect/dist/internal/effect.js:397:14)
+      at /private/tmp/hugr-atlas-maestro-audit.BDqrxm/repo/node_modules/.bun/effect@4.0.0-beta.83/node_modules/effect/dist/internal/effect.js:734:14
+      at doneUnsafe (/private/tmp/hugr-atlas-maestro-audit.BDqrxm/repo/node_modules/.bun/effect@4.0.0-beta.83/node_modules/effect/dist/Deferred.js:657:20)
+      at /private/tmp/hugr-atlas-maestro-audit.BDqrxm/repo/packages/core/src/cross-spawn-spawner.ts:398:21
+      at emit (node:events:98:22)
+      at #maybeClose (node:child_process:766:16)
+      at #handleOnExit (node:child_process:520:72)
+      at processTicksAndRejections (native:7:39)
+(fail) Round2: static Own current-source contract at the real host skill tool > stale-warm [4266.47ms]
+
+ 1 pass
+ 2 fail
+ 6 expect() calls
+Ran 3 tests across 1 file. [21.72s]
