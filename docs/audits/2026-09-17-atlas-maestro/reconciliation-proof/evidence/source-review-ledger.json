@@ -1,0 +1,170 @@
+[
+  {
+    "path": "AGENTS.md",
+    "review": "complete contents inspected this round",
+    "lines": 161,
+    "sha256": "1c9b877668f74a1a2a735fb3aee730e8bb058d1fa34c1d96e8db1e41bbec9233"
+  },
+  {
+    "path": "packages/opencode/AGENTS.md",
+    "review": "complete contents inspected this round",
+    "lines": 131,
+    "sha256": "3eb97d68fba764fc98daa9e2410ff559f38fa2cfa5f8aa18ebed45f1e4abd8ff"
+  },
+  {
+    "path": "packages/opencode/test/AGENTS.md",
+    "review": "complete contents inspected this round",
+    "lines": 204,
+    "sha256": "0d0c71dd95b457f92fa0290886bb25633928db166a59e75ca09987295a49b305"
+  },
+  {
+    "path": "foundation/atlas/package.json",
+    "review": "complete contents inspected this round",
+    "lines": 44,
+    "sha256": "ba96e623f21698296b4a77b005c5c21fb35cf32cc975f17a7edc7e09756546b7"
+  },
+  {
+    "path": "foundation/atlas/packages/knowledge/src/lifecycle/reconcile.ts",
+    "review": "complete contents inspected this round",
+    "lines": 88,
+    "sha256": "d0fc67f898d8a05b74ff12749699715dbae728c0eafca91c577f32b6cef8b854"
+  },
+  {
+    "path": "foundation/atlas/packages/adapter-io/src/doctor-source.ts",
+    "review": "complete contents inspected this round",
+    "lines": 386,
+    "sha256": "2797384524559992fc91fc3602e5de00838c9661becfcf76f0331511a6f1023c"
+  },
+  {
+    "path": "foundation/atlas/packages/adapter-io/src/compose-runtime.ts",
+    "review": "complete contents inspected this round",
+    "lines": 215,
+    "sha256": "38ccd3abcba6bab5456e787d0f7b8acbdfd2de985c8f2eb3463456aeec15162f"
+  },
+  {
+    "path": "foundation/atlas/packages/tools/src/reconcile.ts",
+    "review": "complete contents inspected this round",
+    "lines": 106,
+    "sha256": "64e9a36d77a471953dd9a3d0910fc403e68e68801efa5055541084411426bf3c"
+  },
+  {
+    "path": "foundation/atlas/packages/adapter-io/src/git-drift.ts",
+    "review": "complete contents inspected this round",
+    "lines": 209,
+    "sha256": "0fc262212b9ee7f24eb0720cd4f2f295861c73bf22f8264a776347c3d9d57adf"
+  },
+  {
+    "path": "foundation/atlas/packages/adapter-io/src/reverify-store.ts",
+    "review": "complete contents inspected this round",
+    "lines": 597,
+    "sha256": "ca58444fe68a52b0117e11f16375b4f48ce2637553dc7c3787daaa6b51dbb65a"
+  },
+  {
+    "path": "foundation/atlas/packages/e2e-blackbox/src/harness.ts",
+    "review": "complete contents inspected this round",
+    "lines": 238,
+    "sha256": "f3593d53e2a466fab4dbdd8a81cd77e360f99a7fa2f811190d37b316bfa7b8ad"
+  },
+  {
+    "path": "foundation/atlas/packages/adapter-io/test/reverify-gate-compose.test.ts",
+    "review": "complete contents inspected this round",
+    "lines": 122,
+    "sha256": "85d91a1e88ae7a4b5615ade3e3cbf6698f573093c58ac11dc64899ea589b8613"
+  },
+  {
+    "path": "foundation/atlas/packages/adapter-io/test/doctor-entry-symmetry.test.ts",
+    "review": "complete contents inspected this round",
+    "lines": 303,
+    "sha256": "cfe05f7231e4a566452421fec71ae5977b18f2e258236719cb6b7b0779cfa919"
+  },
+  {
+    "path": "packages/opencode/src/maestro/admission-record.ts",
+    "review": "complete contents inspected this round",
+    "lines": 66,
+    "sha256": "4ba711e3e512c60edd89ee671cf8c7bff5be9a01ca3c28ccc265cab7c87e74d2"
+  },
+  {
+    "path": "packages/opencode/src/maestro/admit-request.ts",
+    "review": "complete contents inspected this round",
+    "lines": 75,
+    "sha256": "a865b17edc8d7260d0dc6b72d564f1177ebac6acde40286e4923d060bca44cb7"
+  },
+  {
+    "path": "packages/opencode/src/maestro/approval-record.ts",
+    "review": "complete contents inspected this round",
+    "lines": 298,
+    "sha256": "d341f987334958604417125bd7d5bba83c8d991034faf5baf7424c49f888725d"
+  },
+  {
+    "path": "packages/opencode/src/maestro/governed-task.ts",
+    "review": "complete contents inspected this round",
+    "lines": 52,
+    "sha256": "28da2f35a7fe0579d87c63a718628e2051b60c1ef0c64c1e66152f9fbeb23594"
+  },
+  {
+    "path": "packages/opencode/src/maestro/approval.ts",
+    "review": "complete contents inspected this round",
+    "lines": 260,
+    "sha256": "467d6b57110a8cf9552694372e4d81eaf1a2cf036f2af6b04830982b76f1a85a"
+  },
+  {
+    "path": "packages/opencode/src/maestro/task-hash.ts",
+    "review": "complete contents inspected this round",
+    "lines": 36,
+    "sha256": "3abd7ba5eb2c61d93949d600fb6b01a84dc208a4ded6abcb1ed70d042d63f4d5"
+  },
+  {
+    "path": "packages/opencode/src/tool/maestro-admission.ts",
+    "review": "complete contents inspected this round",
+    "lines": 53,
+    "sha256": "7b935da0c2cd61d272e8b5d2b58cebb4b3648f29f0c42ffe2d69dd59346ad001"
+  },
+  {
+    "path": "packages/opencode/test/maestro/governed-lifecycle.test.ts",
+    "review": "complete contents inspected this round",
+    "lines": 472,
+    "sha256": "2ece41fda82e798545dfa5a1edeb2d9c51b62ff61812fc6c03d24dc1e22cf708"
+  },
+  {
+    "path": "packages/schema/src/maestro-event.ts",
+    "review": "complete contents inspected this round",
+    "lines": 116,
+    "sha256": "a7518dd0c890fd0acea9d5119839561ad8a56d44503fa99611e48c47f02f5f4f"
+  },
+  {
+    "path": "foundation/atlas/packages/adapter-io/src/compose.ts",
+    "review": "lines 331-end directly; population construction and other bindings cross-searched",
+    "lines": 594,
+    "sha256": "13a5f136784d0e6bedd3702923195e08541504bebf7ec4c2d73ad1759d829c66"
+  },
+  {
+    "path": "foundation/atlas/packages/adapter-io/src/wire.ts",
+    "review": "targeted call-site search; not full semantic review",
+    "lines": 539,
+    "sha256": "5dd546cde30aae72f54e74a417161ea13ecbb14df65d5aee42349fe1467b89c0"
+  },
+  {
+    "path": "foundation/atlas/packages/adapter-io/src/store.ts",
+    "review": "canonical address rule inspected; exercised original module",
+    "lines": 329,
+    "sha256": "bc3463cb35d20f76cc3417aeabe4ce577e03a17ec4940cf7382fd952c787bbac"
+  },
+  {
+    "path": "foundation/atlas/packages/tools/src/handler.ts",
+    "review": "public reconciliation schema inspected; exercised original handler",
+    "lines": 466,
+    "sha256": "d5c11b52f1e75bc8af047ebc592286509829c6d775a91028dc428955052df813"
+  },
+  {
+    "path": "foundation/atlas/packages/cli/src/marshal.ts",
+    "review": "reconciliation flag routing inspected; actual CLI exercised",
+    "lines": 218,
+    "sha256": "3c89c40d8a2eb159f01e540af1da1ea244f6e47055f37af32f53a77ad818833b"
+  },
+  {
+    "path": "foundation/atlas/packages/mcp-server/src/bin.ts",
+    "review": "actual exposed entrypoint bindings cross-searched; actual server exercised",
+    "lines": 35,
+    "sha256": "ffed052d8d0d4b6486f5e16e51bd00cdd789b01bf80d5de17794cb6cf742b26b"
+  }
+]

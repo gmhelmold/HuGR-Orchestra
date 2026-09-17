@@ -1,0 +1,108 @@
+{
+  "productSHA": "b0c33d2f6567a2c741240f3c44bc00ca2f01e7e7",
+  "results": [
+    {
+      "case": "two-anchors-delete",
+      "removed": "src/a.ts",
+      "doctor": {
+        "fact": "847dd888f7c13ac73385814d2ec41e14d13e3c61e84c554c76a123d8161e5d31",
+        "class": "semantic",
+        "anchorWas": {
+          "kind": "file",
+          "qualifiedPath": "src/a.ts",
+          "subtreeHash": "00ea0b2848f4b79a5c819e5b969d0f7d57cea51cb5cb040b2d29c3e7c2dffc75"
+        },
+        "anchorNow": {
+          "kind": "file",
+          "qualifiedPath": "src/a.ts",
+          "subtreeHash": "00ea0b2848f4b79a5c819e5b969d0f7d57cea51cb5cb040b2d29c3e7c2dffc75"
+        }
+      },
+      "cli": {
+        "stdout": "status: ok\nnext: a semantic flip blocks the merge (exit 2) — re-author before merging\ninvariant: TOOLS-8: reviewable drift, block on any semantic flip\ndata:\n  reconcile: exitCode 0 — 0 mechanical, 0 semantic\n  regroundedCount: 0\n  reauthorCount: 0\n",
+        "stderr": "",
+        "exitCode": 0
+      },
+      "invalidBase": {
+        "stdout": "status: error\nnext: a semantic flip blocks the merge (exit 2) — re-author before merging\ninvariant: TOOLS-8: reviewable drift, block on any semantic flip\nreason: unresolvable-merge-base: 'no-such-audit-base' does not resolve to a commit in this repository, so there is no baseline to diff HEAD against. NOTHING WAS CLASSIFIED and nothing was written — this is a refusal, not a clean merge gate: an unresolvable base would otherwise make every fact skip and report zero drift. Pass a merge-base sha or ref that exists here (`git merge-base <base> HEAD`). fatal: Needed a single revision\n",
+        "stderr": "",
+        "exitCode": 1
+      }
+    },
+    {
+      "case": "two-anchors-delete",
+      "removed": "src/b.ts",
+      "doctor": {
+        "fact": "847dd888f7c13ac73385814d2ec41e14d13e3c61e84c554c76a123d8161e5d31",
+        "class": "semantic",
+        "anchorWas": {
+          "kind": "file",
+          "qualifiedPath": "src/b.ts",
+          "subtreeHash": "895f4a8682e8a4a05ebead028683cbe1cb5b823fab2a23206c7b31e28ef635eb"
+        },
+        "anchorNow": {
+          "kind": "file",
+          "qualifiedPath": "src/b.ts",
+          "subtreeHash": "895f4a8682e8a4a05ebead028683cbe1cb5b823fab2a23206c7b31e28ef635eb"
+        }
+      },
+      "cli": {
+        "stdout": "status: ok\nnext: a semantic flip blocks the merge (exit 2) — re-author before merging\ninvariant: TOOLS-8: reviewable drift, block on any semantic flip\ndata:\n  reconcile: exitCode 0 — 0 mechanical, 0 semantic\n  regroundedCount: 0\n  reauthorCount: 0\n",
+        "stderr": "",
+        "exitCode": 0
+      },
+      "invalidBase": {
+        "stdout": "status: error\nnext: a semantic flip blocks the merge (exit 2) — re-author before merging\ninvariant: TOOLS-8: reviewable drift, block on any semantic flip\nreason: unresolvable-merge-base: 'no-such-audit-base' does not resolve to a commit in this repository, so there is no baseline to diff HEAD against. NOTHING WAS CLASSIFIED and nothing was written — this is a refusal, not a clean merge gate: an unresolvable base would otherwise make every fact skip and report zero drift. Pass a merge-base sha or ref that exists here (`git merge-base <base> HEAD`). fatal: Needed a single revision\n",
+        "stderr": "",
+        "exitCode": 1
+      }
+    },
+    {
+      "case": "fresh-cli-verification-controls",
+      "created": {
+        "resolvedEdgeCount": 1,
+        "proven": 1,
+        "persisted": 1,
+        "refused": 0,
+        "rows": [
+          {
+            "key": "53dde4b33f668a799b7e0f9cee72c3b3f0bce33b794cdfe18e4b403e5767b6e9",
+            "endpointA": "src/b.ts",
+            "endpointB": "src/a.ts",
+            "persisted": true,
+            "id": "7724309e8380f1fe99c540a873126b1fe4e919fdef669bd997c16bb90807f0a0"
+          }
+        ]
+      },
+      "cliAfterPublication": {
+        "stdout": "status: ok\nnext: all 1 sealed-proven fact(s) replayed PROVEN against the live index — the durable store re-proves itself\ninvariant: REVERIFY-GATE: every `seal:'proven'` fact is re-proved against the LIVE index via its OWN recorded witness — re-proven / broken / unverifiable, three buckets that never merge; a witness-less `proven` seal is `unverifiable`, never a pass\nverify-store: 1 sealed-proven fact(s) — 1 re-proven, 0 broken, 0 unverifiable, 0 dangling\n  re-proven 53dde4b33f668a799b7e0f9cee72c3b3f0bce33b794cdfe18e4b403e5767b6e9: replayed PROVEN over (depends-on, scip-typescript npm fixture 1 src/a.ts/a., src)\n",
+        "stderr": "",
+        "exitCode": 0
+      },
+      "cliAfterLoss": {
+        "stdout": "status: rejected\nnext: all 0 sealed-proven fact(s) replayed PROVEN against the live index — the durable store re-proves itself\ninvariant: REVERIFY-GATE: every `seal:'proven'` fact is re-proved against the LIVE index via its OWN recorded witness — re-proven / broken / unverifiable, three buckets that never merge; a witness-less `proven` seal is `unverifiable`, never a pass\nverify-store: 1 sealed-proven fact(s) — 0 re-proven, 0 broken, 0 unverifiable, 1 dangling\n  dangling 53dde4b33f668a799b7e0f9cee72c3b3f0bce33b794cdfe18e4b403e5767b6e9: the durable projection serves this fact as seal:'proven', and its contentHash '7724309e8380f1fe99c540a873126b1fe4e919fdef669bd997c16bb90807f0a0' resolves to nothing in the CAS — the bytes ARE the fact, so there is nothing left to re-prove. Run 'atlas doctor cas' for the store-wide audit (ADR-0022).\n",
+        "stderr": "",
+        "exitCode": 2
+      },
+      "reused": {
+        "sealedProven": 2,
+        "reProven": 1,
+        "broken": 0,
+        "unverifiable": 0,
+        "dangling": 1,
+        "rows": [
+          {
+            "nodeKey": "53dde4b33f668a799b7e0f9cee72c3b3f0bce33b794cdfe18e4b403e5767b6e9",
+            "outcome": "re-proven",
+            "reason": "replayed PROVEN over (depends-on, scip-typescript npm fixture 1 src/a.ts/a., src)"
+          },
+          {
+            "nodeKey": "53dde4b33f668a799b7e0f9cee72c3b3f0bce33b794cdfe18e4b403e5767b6e9",
+            "outcome": "dangling",
+            "reason": "the durable projection serves this fact as seal:'proven', and its contentHash '7724309e8380f1fe99c540a873126b1fe4e919fdef669bd997c16bb90807f0a0' resolves to nothing in the CAS — the bytes ARE the fact, so there is nothing left to re-prove. Run 'atlas doctor cas' for the store-wide audit (ADR-0022)."
+          }
+        ]
+      }
+    }
+  ]
+}

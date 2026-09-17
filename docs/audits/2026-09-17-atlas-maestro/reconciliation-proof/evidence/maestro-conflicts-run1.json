@@ -1,0 +1,153 @@
+{
+  "scope": "Original durable producers, original EventV2 and database; no model execution or public approval activation",
+  "evidence": [
+    {
+      "case": "sequential-admission-control",
+      "conflictRejected": true
+    },
+    {
+      "case": "concurrent-admission-0",
+      "returns": [
+        {
+          "requestGoal": "Document component A.",
+          "ok": true,
+          "returnedGoal": "Document component A."
+        },
+        {
+          "requestGoal": "Document component B.",
+          "ok": false,
+          "error": "MaestroAdmissionConflict: \n    at <anonymous> (/private/tmp/hugr-audit-reconcile.QaHAhB/repo/packages/opencode/src/maestro/admission-record.ts:60:23)\n    at MaestroAdmission.record (/private/tmp/hugr-audit-reconcile.QaHAhB/repo/packages/opencode/test/maestro/audit-conflicts.test.ts:30:66)\n    at MaestroAdmission.record (definition) (/private/tmp/hugr-audit-reconcile.QaHAhB/repo/packages/opencode/src/maestro/admission-record.ts:55:39)"
+        }
+      ],
+      "recorded": {
+        "sessionID": "ses_audit_concurrent_0",
+        "messageID": "msg_audit",
+        "methodVersion": "v1",
+        "outcome": "READY_TO_DRAFT",
+        "assessment": {
+          "kind": "work",
+          "goal": "Document component A.",
+          "known": [],
+          "proposals": [],
+          "unknowns": [],
+          "uncertainty": "No blocking uncertainty.",
+          "activeWorkEffect": "none",
+          "reason": "Bounded documentation work."
+        }
+      },
+      "conflictPreserved": true
+    },
+    {
+      "case": "concurrent-admission-1",
+      "returns": [
+        {
+          "requestGoal": "Document component A.",
+          "ok": true,
+          "returnedGoal": "Document component A."
+        },
+        {
+          "requestGoal": "Document component B.",
+          "ok": false,
+          "error": "MaestroAdmissionConflict: \n    at <anonymous> (/private/tmp/hugr-audit-reconcile.QaHAhB/repo/packages/opencode/src/maestro/admission-record.ts:60:23)\n    at MaestroAdmission.record (/private/tmp/hugr-audit-reconcile.QaHAhB/repo/packages/opencode/test/maestro/audit-conflicts.test.ts:30:66)\n    at MaestroAdmission.record (definition) (/private/tmp/hugr-audit-reconcile.QaHAhB/repo/packages/opencode/src/maestro/admission-record.ts:55:39)"
+        }
+      ],
+      "recorded": {
+        "sessionID": "ses_audit_concurrent_1",
+        "messageID": "msg_audit",
+        "methodVersion": "v1",
+        "outcome": "READY_TO_DRAFT",
+        "assessment": {
+          "kind": "work",
+          "goal": "Document component A.",
+          "known": [],
+          "proposals": [],
+          "unknowns": [],
+          "uncertainty": "No blocking uncertainty.",
+          "activeWorkEffect": "none",
+          "reason": "Bounded documentation work."
+        }
+      },
+      "conflictPreserved": true
+    },
+    {
+      "case": "concurrent-admission-2",
+      "returns": [
+        {
+          "requestGoal": "Document component A.",
+          "ok": true,
+          "returnedGoal": "Document component A."
+        },
+        {
+          "requestGoal": "Document component B.",
+          "ok": false,
+          "error": "MaestroAdmissionConflict: \n    at <anonymous> (/private/tmp/hugr-audit-reconcile.QaHAhB/repo/packages/opencode/src/maestro/admission-record.ts:60:23)\n    at MaestroAdmission.record (/private/tmp/hugr-audit-reconcile.QaHAhB/repo/packages/opencode/test/maestro/audit-conflicts.test.ts:30:66)\n    at MaestroAdmission.record (definition) (/private/tmp/hugr-audit-reconcile.QaHAhB/repo/packages/opencode/src/maestro/admission-record.ts:55:39)"
+        }
+      ],
+      "recorded": {
+        "sessionID": "ses_audit_concurrent_2",
+        "messageID": "msg_audit",
+        "methodVersion": "v1",
+        "outcome": "READY_TO_DRAFT",
+        "assessment": {
+          "kind": "work",
+          "goal": "Document component A.",
+          "known": [],
+          "proposals": [],
+          "unknowns": [],
+          "uncertainty": "No blocking uncertainty.",
+          "activeWorkEffect": "none",
+          "reason": "Bounded documentation work."
+        }
+      },
+      "conflictPreserved": true
+    },
+    {
+      "case": "concurrent-presentation-0",
+      "returns": [
+        {
+          "requestPlan": "Document component A.",
+          "ok": true,
+          "returnedPlan": "Document component A."
+        },
+        {
+          "requestPlan": "Document component B.",
+          "ok": false,
+          "error": "MaestroApprovalConflict: \n    at <anonymous> (/private/tmp/hugr-audit-reconcile.QaHAhB/repo/packages/opencode/src/maestro/approval-record.ts:178:23)\n    at MaestroApproval.present (/private/tmp/hugr-audit-reconcile.QaHAhB/repo/packages/opencode/test/maestro/audit-conflicts.test.ts:45:66)\n    at MaestroApproval.present (definition) (/private/tmp/hugr-audit-reconcile.QaHAhB/repo/packages/opencode/src/maestro/approval-record.ts:125:39)"
+        }
+      ],
+      "conflictPreserved": true
+    },
+    {
+      "case": "concurrent-presentation-1",
+      "returns": [
+        {
+          "requestPlan": "Document component A.",
+          "ok": true,
+          "returnedPlan": "Document component A."
+        },
+        {
+          "requestPlan": "Document component B.",
+          "ok": false,
+          "error": "MaestroApprovalConflict: \n    at <anonymous> (/private/tmp/hugr-audit-reconcile.QaHAhB/repo/packages/opencode/src/maestro/approval-record.ts:178:23)\n    at MaestroApproval.present (/private/tmp/hugr-audit-reconcile.QaHAhB/repo/packages/opencode/test/maestro/audit-conflicts.test.ts:45:66)\n    at MaestroApproval.present (definition) (/private/tmp/hugr-audit-reconcile.QaHAhB/repo/packages/opencode/src/maestro/approval-record.ts:125:39)"
+        }
+      ],
+      "conflictPreserved": true
+    },
+    {
+      "case": "concurrent-presentation-2",
+      "returns": [
+        {
+          "requestPlan": "Document component A.",
+          "ok": true,
+          "returnedPlan": "Document component A."
+        },
+        {
+          "requestPlan": "Document component B.",
+          "ok": false,
+          "error": "MaestroApprovalConflict: \n    at <anonymous> (/private/tmp/hugr-audit-reconcile.QaHAhB/repo/packages/opencode/src/maestro/approval-record.ts:178:23)\n    at MaestroApproval.present (/private/tmp/hugr-audit-reconcile.QaHAhB/repo/packages/opencode/test/maestro/audit-conflicts.test.ts:45:66)\n    at MaestroApproval.present (definition) (/private/tmp/hugr-audit-reconcile.QaHAhB/repo/packages/opencode/src/maestro/approval-record.ts:125:39)"
+        }
+      ],
+      "conflictPreserved": true
+    }
+  ]
+}
