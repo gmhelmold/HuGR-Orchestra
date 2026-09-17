@@ -1,0 +1,707 @@
+{
+  "sha": "b0c33d2f6567a2c741240f3c44bc00ca2f01e7e7",
+  "node": "v22.17.1",
+  "transport": "original MCP stdio server and original SDK via repository harness",
+  "indexInput": "controlled minimal SCIP protobuf, not actual scip-typescript output",
+  "results": [
+    {
+      "id": "MCP-GRAPH-01-root-without-own-fact",
+      "status": "observation-confirmed",
+      "dependent": "e66071bb8eb39e2b1bc603fb8628b8f4bd113bc17a06d4190cc0ed62595d6402",
+      "scoped": {
+        "isError": false,
+        "body": {
+          "data": {
+            "pack": {
+              "territory": "src",
+              "axisHash": "ce67f19621d0670d97a3bab733dfa40ab8eecc83845b0fc6b0f23493deb3c693",
+              "invariants": [],
+              "advisory": [
+                {
+                  "nodeId": "e66071bb8eb39e2b1bc603fb8628b8f4bd113bc17a06d4190cc0ed62595d6402",
+                  "tier": "T2",
+                  "claim": "Consumer imports provider.",
+                  "freshness": "FRESH"
+                }
+              ],
+              "advisoryDropped": 0,
+              "tokenEstimate": 26,
+              "stale": false
+            },
+            "subsumes": [],
+            "sameAs": []
+          },
+          "guidance": {
+            "next": "re-ground stale packs before trusting; an advisory row is a machine proposal no ratifier saw — check its per-row freshness; scope must be a path string",
+            "invariant": "TOOLS-6: bounded read projection, two bands (governing tier>=T1 + separately capped advisory T2), every row carrying its own freshness"
+          }
+        }
+      },
+      "before": {
+        "isError": false,
+        "body": {
+          "data": {
+            "pack": {
+              "territory": "src/provider.ts",
+              "axisHash": "d224b472c97778462673d670ab34f30d6471788719258719ba57af8fbc74cd26",
+              "invariants": [],
+              "advisory": [],
+              "advisoryDropped": 0,
+              "tokenEstimate": 0,
+              "stale": false
+            },
+            "subsumes": [],
+            "sameAs": []
+          },
+          "guidance": {
+            "next": "re-ground stale packs before trusting; an advisory row is a machine proposal no ratifier saw — check its per-row freshness; scope must be a path string",
+            "invariant": "TOOLS-6: bounded read projection, two bands (governing tier>=T1 + separately capped advisory T2), every row carrying its own freshness"
+          }
+        }
+      },
+      "restarted": {
+        "isError": false,
+        "body": {
+          "data": {
+            "pack": {
+              "territory": "src/provider.ts",
+              "axisHash": "d224b472c97778462673d670ab34f30d6471788719258719ba57af8fbc74cd26",
+              "invariants": [],
+              "advisory": [],
+              "advisoryDropped": 0,
+              "tokenEstimate": 0,
+              "stale": false
+            },
+            "subsumes": [],
+            "sameAs": []
+          },
+          "guidance": {
+            "next": "re-ground stale packs before trusting; an advisory row is a machine proposal no ratifier saw — check its per-row freshness; scope must be a path string",
+            "invariant": "TOOLS-6: bounded read projection, two bands (governing tier>=T1 + separately capped advisory T2), every row carrying its own freshness"
+          }
+        }
+      },
+      "after": {
+        "isError": false,
+        "body": {
+          "data": {
+            "pack": {
+              "territory": "src/provider.ts",
+              "axisHash": "d224b472c97778462673d670ab34f30d6471788719258719ba57af8fbc74cd26",
+              "invariants": [],
+              "advisory": [
+                {
+                  "nodeId": "e66071bb8eb39e2b1bc603fb8628b8f4bd113bc17a06d4190cc0ed62595d6402",
+                  "tier": "T2",
+                  "claim": "Consumer imports provider.",
+                  "freshness": "FRESH"
+                }
+              ],
+              "advisoryDropped": 0,
+              "tokenEstimate": 26,
+              "stale": false
+            },
+            "subsumes": [],
+            "sameAs": []
+          },
+          "guidance": {
+            "next": "re-ground stale packs before trusting; an advisory row is a machine proposal no ratifier saw — check its per-row freshness; scope must be a path string",
+            "invariant": "TOOLS-6: bounded read projection, two bands (governing tier>=T1 + separately capped advisory T2), every row carrying its own freshness"
+          }
+        }
+      },
+      "defect": true
+    },
+    {
+      "id": "MCP-GRAPH-02-canonical-file-identities",
+      "status": "observation-confirmed",
+      "observations": [
+        {
+          "provider": "src/provider.ts",
+          "consumer": "src/consumer.ts",
+          "canonicalTarget": "src/provider.ts",
+          "dependent": "e66071bb8eb39e2b1bc603fb8628b8f4bd113bc17a06d4190cc0ed62595d6402",
+          "scopedIDs": [
+            "8e4d425cb257dab1e7a32f40af5efe588f6a8f376e0dc5a2940642a459442afd",
+            "e66071bb8eb39e2b1bc603fb8628b8f4bd113bc17a06d4190cc0ed62595d6402"
+          ],
+          "canonical": {
+            "isError": false,
+            "body": {
+              "data": {
+                "pack": {
+                  "territory": "src/provider.ts",
+                  "axisHash": "19dc6fc1c4a12acdbad2c88c94254cb7ad0a9cb3e7d4e1bf8c23db3b48b862a2",
+                  "invariants": [],
+                  "advisory": [
+                    {
+                      "nodeId": "e66071bb8eb39e2b1bc603fb8628b8f4bd113bc17a06d4190cc0ed62595d6402",
+                      "tier": "T2",
+                      "claim": "Consumer imports provider.",
+                      "freshness": "FRESH"
+                    }
+                  ],
+                  "advisoryDropped": 0,
+                  "tokenEstimate": 26,
+                  "stale": false
+                },
+                "subsumes": [],
+                "sameAs": []
+              },
+              "guidance": {
+                "next": "re-ground stale packs before trusting; an advisory row is a machine proposal no ratifier saw — check its per-row freshness; scope must be a path string",
+                "invariant": "TOOLS-6: bounded read projection, two bands (governing tier>=T1 + separately capped advisory T2), every row carrying its own freshness"
+              }
+            }
+          },
+          "raw": {
+            "isError": false,
+            "body": {
+              "data": {
+                "pack": {
+                  "territory": "src/provider.ts",
+                  "axisHash": "19dc6fc1c4a12acdbad2c88c94254cb7ad0a9cb3e7d4e1bf8c23db3b48b862a2",
+                  "invariants": [],
+                  "advisory": [
+                    {
+                      "nodeId": "e66071bb8eb39e2b1bc603fb8628b8f4bd113bc17a06d4190cc0ed62595d6402",
+                      "tier": "T2",
+                      "claim": "Consumer imports provider.",
+                      "freshness": "FRESH"
+                    }
+                  ],
+                  "advisoryDropped": 0,
+                  "tokenEstimate": 26,
+                  "stale": false
+                },
+                "subsumes": [],
+                "sameAs": []
+              },
+              "guidance": {
+                "next": "re-ground stale packs before trusting; an advisory row is a machine proposal no ratifier saw — check its per-row freshness; scope must be a path string",
+                "invariant": "TOOLS-6: bounded read projection, two bands (governing tier>=T1 + separately capped advisory T2), every row carrying its own freshness"
+              }
+            }
+          }
+        },
+        {
+          "provider": "src/provider%value.ts",
+          "consumer": "src/consumer.ts",
+          "canonicalTarget": "src/provider%25value.ts",
+          "dependent": "e66071bb8eb39e2b1bc603fb8628b8f4bd113bc17a06d4190cc0ed62595d6402",
+          "scopedIDs": [
+            "d285e88029ea39c883e173cb2d58a82583503a5324391b5c9b99a2d99507ada6",
+            "e66071bb8eb39e2b1bc603fb8628b8f4bd113bc17a06d4190cc0ed62595d6402"
+          ],
+          "canonical": {
+            "isError": false,
+            "body": {
+              "data": {
+                "pack": {
+                  "territory": "src/provider%25value.ts",
+                  "axisHash": "4e1b714b555c7f2b681d68b7bc6bffb9af719c20c0b571cbe8040255051c89b6",
+                  "invariants": [],
+                  "advisory": [],
+                  "advisoryDropped": 0,
+                  "tokenEstimate": 0,
+                  "stale": false
+                },
+                "subsumes": [],
+                "sameAs": []
+              },
+              "guidance": {
+                "next": "re-ground stale packs before trusting; an advisory row is a machine proposal no ratifier saw — check its per-row freshness; scope must be a path string",
+                "invariant": "TOOLS-6: bounded read projection, two bands (governing tier>=T1 + separately capped advisory T2), every row carrying its own freshness"
+              }
+            }
+          },
+          "raw": {
+            "isError": false,
+            "body": {
+              "data": {
+                "pack": {
+                  "territory": "src/provider%value.ts",
+                  "axisHash": "4e1b714b555c7f2b681d68b7bc6bffb9af719c20c0b571cbe8040255051c89b6",
+                  "invariants": [],
+                  "advisory": [],
+                  "advisoryDropped": 0,
+                  "tokenEstimate": 0,
+                  "stale": false
+                },
+                "subsumes": [],
+                "sameAs": []
+              },
+              "guidance": {
+                "next": "re-ground stale packs before trusting; an advisory row is a machine proposal no ratifier saw — check its per-row freshness; scope must be a path string",
+                "invariant": "TOOLS-6: bounded read projection, two bands (governing tier>=T1 + separately capped advisory T2), every row carrying its own freshness"
+              }
+            }
+          }
+        },
+        {
+          "provider": "src/provider:value.ts",
+          "consumer": "src/consumer.ts",
+          "canonicalTarget": "src/provider%3Avalue.ts",
+          "dependent": "e66071bb8eb39e2b1bc603fb8628b8f4bd113bc17a06d4190cc0ed62595d6402",
+          "scopedIDs": [
+            "31ff060f9dfce4bf6bf5ca2289fd06f8c33dbea5286f6882e1e32f7fad382b3e",
+            "e66071bb8eb39e2b1bc603fb8628b8f4bd113bc17a06d4190cc0ed62595d6402"
+          ],
+          "canonical": {
+            "isError": false,
+            "body": {
+              "data": {
+                "pack": {
+                  "territory": "src/provider%3Avalue.ts",
+                  "axisHash": "43fc16af11878ec2c6edb1c3ddcf4b9dc2966111a671a7903a5d8581c2cb7b3b",
+                  "invariants": [],
+                  "advisory": [],
+                  "advisoryDropped": 0,
+                  "tokenEstimate": 0,
+                  "stale": false
+                },
+                "subsumes": [],
+                "sameAs": []
+              },
+              "guidance": {
+                "next": "re-ground stale packs before trusting; an advisory row is a machine proposal no ratifier saw — check its per-row freshness; scope must be a path string",
+                "invariant": "TOOLS-6: bounded read projection, two bands (governing tier>=T1 + separately capped advisory T2), every row carrying its own freshness"
+              }
+            }
+          },
+          "raw": {
+            "isError": false,
+            "body": {
+              "data": {
+                "pack": {
+                  "territory": "src/provider:value.ts",
+                  "axisHash": "43fc16af11878ec2c6edb1c3ddcf4b9dc2966111a671a7903a5d8581c2cb7b3b",
+                  "invariants": [],
+                  "advisory": [],
+                  "advisoryDropped": 0,
+                  "tokenEstimate": 0,
+                  "stale": false
+                },
+                "subsumes": [],
+                "sameAs": []
+              },
+              "guidance": {
+                "next": "re-ground stale packs before trusting; an advisory row is a machine proposal no ratifier saw — check its per-row freshness; scope must be a path string",
+                "invariant": "TOOLS-6: bounded read projection, two bands (governing tier>=T1 + separately capped advisory T2), every row carrying its own freshness"
+              }
+            }
+          }
+        },
+        {
+          "provider": "src/provider.ts",
+          "consumer": "src/consumer%value.ts",
+          "canonicalTarget": "src/provider.ts",
+          "dependent": "cf82698b93abf40eb8e0d5a7d984e6a08b53cf89a38ac72486bc42ad0fa97b94",
+          "scopedIDs": [
+            "8e4d425cb257dab1e7a32f40af5efe588f6a8f376e0dc5a2940642a459442afd",
+            "cf82698b93abf40eb8e0d5a7d984e6a08b53cf89a38ac72486bc42ad0fa97b94"
+          ],
+          "canonical": {
+            "isError": false,
+            "body": {
+              "data": {
+                "pack": {
+                  "territory": "src/provider.ts",
+                  "axisHash": "b11911973484e7fb7ff44762993bb7267afeb6fd7b5e7de5b19e05a0b3667732",
+                  "invariants": [],
+                  "advisory": [],
+                  "advisoryDropped": 0,
+                  "tokenEstimate": 0,
+                  "stale": false
+                },
+                "subsumes": [],
+                "sameAs": []
+              },
+              "guidance": {
+                "next": "re-ground stale packs before trusting; an advisory row is a machine proposal no ratifier saw — check its per-row freshness; scope must be a path string",
+                "invariant": "TOOLS-6: bounded read projection, two bands (governing tier>=T1 + separately capped advisory T2), every row carrying its own freshness"
+              }
+            }
+          },
+          "raw": {
+            "isError": false,
+            "body": {
+              "data": {
+                "pack": {
+                  "territory": "src/provider.ts",
+                  "axisHash": "b11911973484e7fb7ff44762993bb7267afeb6fd7b5e7de5b19e05a0b3667732",
+                  "invariants": [],
+                  "advisory": [],
+                  "advisoryDropped": 0,
+                  "tokenEstimate": 0,
+                  "stale": false
+                },
+                "subsumes": [],
+                "sameAs": []
+              },
+              "guidance": {
+                "next": "re-ground stale packs before trusting; an advisory row is a machine proposal no ratifier saw — check its per-row freshness; scope must be a path string",
+                "invariant": "TOOLS-6: bounded read projection, two bands (governing tier>=T1 + separately capped advisory T2), every row carrying its own freshness"
+              }
+            }
+          }
+        }
+      ],
+      "defect": true
+    },
+    {
+      "id": "MCP-GRAPH-03-subfile-fact",
+      "status": "observation-confirmed",
+      "anchor": "src/consumer.ts::lexical_declaration:0:readValue",
+      "symbol": "5b8ba9cb1d320116ba97062a094979e8dd5e9c9f487fe4b874a8b889987b323a",
+      "file": "e66071bb8eb39e2b1bc603fb8628b8f4bd113bc17a06d4190cc0ed62595d6402",
+      "scope": {
+        "isError": false,
+        "body": {
+          "data": {
+            "pack": {
+              "territory": "src",
+              "axisHash": "ce67f19621d0670d97a3bab733dfa40ab8eecc83845b0fc6b0f23493deb3c693",
+              "invariants": [],
+              "advisory": [
+                {
+                  "nodeId": "5b8ba9cb1d320116ba97062a094979e8dd5e9c9f487fe4b874a8b889987b323a",
+                  "tier": "T2",
+                  "claim": "Consumer symbol uses imported value.",
+                  "freshness": "FRESH"
+                },
+                {
+                  "nodeId": "8e4d425cb257dab1e7a32f40af5efe588f6a8f376e0dc5a2940642a459442afd",
+                  "tier": "T2",
+                  "claim": "Provider exports value.",
+                  "freshness": "FRESH"
+                },
+                {
+                  "nodeId": "e66071bb8eb39e2b1bc603fb8628b8f4bd113bc17a06d4190cc0ed62595d6402",
+                  "tier": "T2",
+                  "claim": "Consumer file imports provider.",
+                  "freshness": "FRESH"
+                }
+              ],
+              "advisoryDropped": 0,
+              "tokenEstimate": 90,
+              "stale": false
+            },
+            "subsumes": [],
+            "sameAs": []
+          },
+          "guidance": {
+            "next": "re-ground stale packs before trusting; an advisory row is a machine proposal no ratifier saw — check its per-row freshness; scope must be a path string",
+            "invariant": "TOOLS-6: bounded read projection, two bands (governing tier>=T1 + separately capped advisory T2), every row carrying its own freshness"
+          }
+        }
+      },
+      "dep": {
+        "isError": false,
+        "body": {
+          "data": {
+            "pack": {
+              "territory": "src/provider.ts",
+              "axisHash": "07593387fe6c54ee0a81f0f88b728cb560d04689e0dc932357c7c9d966c3c1d0",
+              "invariants": [],
+              "advisory": [
+                {
+                  "nodeId": "e66071bb8eb39e2b1bc603fb8628b8f4bd113bc17a06d4190cc0ed62595d6402",
+                  "tier": "T2",
+                  "claim": "Consumer file imports provider.",
+                  "freshness": "FRESH"
+                }
+              ],
+              "advisoryDropped": 0,
+              "tokenEstimate": 31,
+              "stale": false
+            },
+            "subsumes": [],
+            "sameAs": []
+          },
+          "guidance": {
+            "next": "re-ground stale packs before trusting; an advisory row is a machine proposal no ratifier saw — check its per-row freshness; scope must be a path string",
+            "invariant": "TOOLS-6: bounded read projection, two bands (governing tier>=T1 + separately capped advisory T2), every row carrying its own freshness"
+          }
+        }
+      },
+      "reopened": {
+        "isError": false,
+        "body": {
+          "data": {
+            "pack": {
+              "territory": "src/provider.ts",
+              "axisHash": "07593387fe6c54ee0a81f0f88b728cb560d04689e0dc932357c7c9d966c3c1d0",
+              "invariants": [],
+              "advisory": [
+                {
+                  "nodeId": "e66071bb8eb39e2b1bc603fb8628b8f4bd113bc17a06d4190cc0ed62595d6402",
+                  "tier": "T2",
+                  "claim": "Consumer file imports provider.",
+                  "freshness": "FRESH"
+                }
+              ],
+              "advisoryDropped": 0,
+              "tokenEstimate": 31,
+              "stale": false
+            },
+            "subsumes": [],
+            "sameAs": []
+          },
+          "guidance": {
+            "next": "re-ground stale packs before trusting; an advisory row is a machine proposal no ratifier saw — check its per-row freshness; scope must be a path string",
+            "invariant": "TOOLS-6: bounded read projection, two bands (governing tier>=T1 + separately capped advisory T2), every row carrying its own freshness"
+          }
+        }
+      },
+      "defect": true
+    },
+    {
+      "id": "MCP-GRAPH-06-coverage-erased",
+      "status": "observation-confirmed",
+      "observations": [
+        {
+          "unknown": false,
+          "closure": {
+            "closure": [
+              "ad31179fcf53e6b3972d8963a14061c04144ee68cd3e0487b2ceb1e7950e82b7"
+            ],
+            "underApprox": false,
+            "coChanged": []
+          },
+          "response": {
+            "isError": false,
+            "body": {
+              "data": {
+                "pack": {
+                  "territory": "src/provider.ts",
+                  "axisHash": "a4d1c1d330c9f997e9f43aa8911f9830e408b11eb91db4dbeb45a923f87a0544",
+                  "invariants": [],
+                  "advisory": [
+                    {
+                      "nodeId": "e66071bb8eb39e2b1bc603fb8628b8f4bd113bc17a06d4190cc0ed62595d6402",
+                      "tier": "T2",
+                      "claim": "Consumer imports provider.",
+                      "freshness": "FRESH"
+                    }
+                  ],
+                  "advisoryDropped": 0,
+                  "tokenEstimate": 26,
+                  "stale": false
+                },
+                "subsumes": [],
+                "sameAs": []
+              },
+              "guidance": {
+                "next": "re-ground stale packs before trusting; an advisory row is a machine proposal no ratifier saw — check its per-row freshness; scope must be a path string",
+                "invariant": "TOOLS-6: bounded read projection, two bands (governing tier>=T1 + separately capped advisory T2), every row carrying its own freshness"
+              }
+            }
+          },
+          "own": {
+            "tool": "own_src",
+            "pack": {
+              "unit": "src",
+              "invariants": [],
+              "shape": {
+                "contents": [
+                  "src/consumer.ts",
+                  "src/provider.ts"
+                ],
+                "owner": "graph-audit",
+                "tier": "T2"
+              },
+              "edges": {
+                "dependents": [],
+                "dependencies": []
+              },
+              "gotchas": [],
+              "memory": null,
+              "drill": {
+                "finer": [
+                  {
+                    "level": "module",
+                    "id": "src/consumer.ts",
+                    "grounding": "6564a617777724044a5e3dde361d432e7b4f0423c5dbe4d12b5ba0ca7c00b939"
+                  },
+                  {
+                    "level": "module",
+                    "id": "src/provider.ts",
+                    "grounding": "1466257aefd88d08f34f94b43b9e33243eecd94a65e39c88021a1de5d41d0cbe"
+                  }
+                ],
+                "refresh": {
+                  "pull": "poke:own_src"
+                },
+                "complement": {
+                  "pull": "relate:src"
+                }
+              },
+              "grounding": {
+                "source": "tree"
+              },
+              "tokenEstimate": 79,
+              "manifest": {
+                "pointers": [
+                  {
+                    "kind": "pack",
+                    "name": "own_consumer.ts",
+                    "digest": "6564a617777724044a5e3dde361d432e7b4f0423c5dbe4d12b5ba0ca7c00b939",
+                    "pull": "atlas own src/consumer.ts",
+                    "hits": 0
+                  },
+                  {
+                    "kind": "pack",
+                    "name": "own_provider.ts",
+                    "digest": "1466257aefd88d08f34f94b43b9e33243eecd94a65e39c88021a1de5d41d0cbe",
+                    "pull": "atlas own src/provider.ts",
+                    "hits": 0
+                  }
+                ],
+                "truncated": false
+              },
+              "pullReachable": [],
+              "advisory": [
+                {
+                  "nodeId": "8e4d425cb257dab1e7a32f40af5efe588f6a8f376e0dc5a2940642a459442afd",
+                  "tier": "T2",
+                  "claim": "Provider exports value.",
+                  "freshness": "FRESH"
+                },
+                {
+                  "nodeId": "e66071bb8eb39e2b1bc603fb8628b8f4bd113bc17a06d4190cc0ed62595d6402",
+                  "tier": "T2",
+                  "claim": "Consumer imports provider.",
+                  "freshness": "FRESH"
+                }
+              ],
+              "advisoryDropped": 0
+            }
+          },
+          "serializedCoverageFieldPresent": false
+        },
+        {
+          "unknown": true,
+          "closure": {
+            "closure": [
+              "ad31179fcf53e6b3972d8963a14061c04144ee68cd3e0487b2ceb1e7950e82b7"
+            ],
+            "underApprox": true,
+            "coChanged": []
+          },
+          "response": {
+            "isError": false,
+            "body": {
+              "data": {
+                "pack": {
+                  "territory": "src/provider.ts",
+                  "axisHash": "101eee7af5975abedf4e199e43859680306a0e66217d422048239e7c07201b0a",
+                  "invariants": [],
+                  "advisory": [
+                    {
+                      "nodeId": "e66071bb8eb39e2b1bc603fb8628b8f4bd113bc17a06d4190cc0ed62595d6402",
+                      "tier": "T2",
+                      "claim": "Consumer imports provider.",
+                      "freshness": "FRESH"
+                    }
+                  ],
+                  "advisoryDropped": 0,
+                  "tokenEstimate": 26,
+                  "stale": false
+                },
+                "subsumes": [],
+                "sameAs": []
+              },
+              "guidance": {
+                "next": "re-ground stale packs before trusting; an advisory row is a machine proposal no ratifier saw — check its per-row freshness; scope must be a path string",
+                "invariant": "TOOLS-6: bounded read projection, two bands (governing tier>=T1 + separately capped advisory T2), every row carrying its own freshness"
+              }
+            }
+          },
+          "own": {
+            "tool": "own_src",
+            "pack": {
+              "unit": "src",
+              "invariants": [],
+              "shape": {
+                "contents": [
+                  "src/consumer.ts",
+                  "src/provider.ts"
+                ],
+                "owner": "graph-audit",
+                "tier": "T2"
+              },
+              "edges": {
+                "dependents": [],
+                "dependencies": []
+              },
+              "gotchas": [],
+              "memory": null,
+              "drill": {
+                "finer": [
+                  {
+                    "level": "module",
+                    "id": "src/consumer.ts",
+                    "grounding": "6564a617777724044a5e3dde361d432e7b4f0423c5dbe4d12b5ba0ca7c00b939"
+                  },
+                  {
+                    "level": "module",
+                    "id": "src/provider.ts",
+                    "grounding": "1466257aefd88d08f34f94b43b9e33243eecd94a65e39c88021a1de5d41d0cbe"
+                  }
+                ],
+                "refresh": {
+                  "pull": "poke:own_src"
+                },
+                "complement": {
+                  "pull": "relate:src"
+                }
+              },
+              "grounding": {
+                "source": "tree"
+              },
+              "tokenEstimate": 79,
+              "manifest": {
+                "pointers": [
+                  {
+                    "kind": "pack",
+                    "name": "own_consumer.ts",
+                    "digest": "6564a617777724044a5e3dde361d432e7b4f0423c5dbe4d12b5ba0ca7c00b939",
+                    "pull": "atlas own src/consumer.ts",
+                    "hits": 0
+                  },
+                  {
+                    "kind": "pack",
+                    "name": "own_provider.ts",
+                    "digest": "1466257aefd88d08f34f94b43b9e33243eecd94a65e39c88021a1de5d41d0cbe",
+                    "pull": "atlas own src/provider.ts",
+                    "hits": 0
+                  }
+                ],
+                "truncated": false
+              },
+              "pullReachable": [],
+              "advisory": [
+                {
+                  "nodeId": "8e4d425cb257dab1e7a32f40af5efe588f6a8f376e0dc5a2940642a459442afd",
+                  "tier": "T2",
+                  "claim": "Provider exports value.",
+                  "freshness": "FRESH"
+                },
+                {
+                  "nodeId": "e66071bb8eb39e2b1bc603fb8628b8f4bd113bc17a06d4190cc0ed62595d6402",
+                  "tier": "T2",
+                  "claim": "Consumer imports provider.",
+                  "freshness": "FRESH"
+                }
+              ],
+              "advisoryDropped": 0
+            }
+          },
+          "serializedCoverageFieldPresent": false
+        }
+      ],
+      "classification": "Read completeness metadata lost; success for known facts need not be forbidden, but partial coverage must stay observable."
+    }
+  ]
+}
