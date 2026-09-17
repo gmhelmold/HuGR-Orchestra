@@ -1,0 +1,254 @@
+[
+  {
+    "path": "foundation/atlas/docs/design/234-transition-design.md",
+    "lines": 47,
+    "blob": "790695802dd229dee77719f578a0278c9c8464f9",
+    "review": "full source read during this round"
+  },
+  {
+    "path": "foundation/atlas/docs/reference/commands/transition.md",
+    "lines": 54,
+    "blob": "b20643c750cf743a8d8d9728fed34aae5f20042d",
+    "review": "full source read during this round"
+  },
+  {
+    "path": "foundation/atlas/packages/adapter-io/src/compose-test-vacuity.ts",
+    "lines": 86,
+    "blob": "9d557c65bf2a90021f5e97baa064890601057632",
+    "review": "full source read during this round"
+  },
+  {
+    "path": "foundation/atlas/packages/adapter-io/src/governed-emit-test-vacuity.ts",
+    "lines": 162,
+    "blob": "047c64ca7a5bf1ad0c5230e6c15a1082d79ecbd2",
+    "review": "full source read during this round"
+  },
+  {
+    "path": "foundation/atlas/packages/adapter-io/src/governed-emit-transition.ts",
+    "lines": 174,
+    "blob": "ce7fca5c591f1a031b87aa3b10998e376e94cb5e",
+    "review": "full source read during this round"
+  },
+  {
+    "path": "foundation/atlas/packages/adapter-io/src/governed-link.ts",
+    "lines": 389,
+    "blob": "6b5b894151bc1badfdac4bc09eb2783942b35a49",
+    "review": "full source read during this round"
+  },
+  {
+    "path": "foundation/atlas/packages/adapter-io/src/rev-index.ts",
+    "lines": 276,
+    "blob": "6d4744bb4fe9d1b1a94cae7ac360d45dc4a57a0c",
+    "review": "full source read during this round"
+  },
+  {
+    "path": "foundation/atlas/packages/adapter-io/src/test-vacuity-source.ts",
+    "lines": 267,
+    "blob": "4621238bf09367cf699c2f2e1e397ff3eb96f317",
+    "review": "full source read during this round"
+  },
+  {
+    "path": "foundation/atlas/packages/adapter-io/src/test-vacuity.ts",
+    "lines": 448,
+    "blob": "7dc6ebadc313a66f68960c1cb3651710b542134b",
+    "review": "full source read during this round"
+  },
+  {
+    "path": "foundation/atlas/packages/adapter-io/src/transition-source.ts",
+    "lines": 191,
+    "blob": "2d1b4f6f116730d9c0e30d50a827e1cf3350ef0d",
+    "review": "full source read during this round"
+  },
+  {
+    "path": "foundation/atlas/packages/adapter-io/test/test-vacuity-producer.test.ts",
+    "lines": 107,
+    "blob": "18db2355a9b14dcfa27223445fb7ecb9c003bb33",
+    "review": "full source read during this round"
+  },
+  {
+    "path": "foundation/atlas/packages/adapter-io/test/transition-producer.test.ts",
+    "lines": 189,
+    "blob": "f3a84d59d92f07347389ad1917604f38cbab3fa5",
+    "review": "full source read during this round"
+  },
+  {
+    "path": "foundation/atlas/packages/cli/src/test-vacuity.ts",
+    "lines": 67,
+    "blob": "363caa4ba003fb036327d3860afe75888ea82878",
+    "review": "full source read during this round"
+  },
+  {
+    "path": "foundation/atlas/packages/cli/src/transition.ts",
+    "lines": 73,
+    "blob": "91533bd13522fe15007b228c4ab750441d43d46b",
+    "review": "full source read during this round"
+  },
+  {
+    "path": "foundation/atlas/packages/genesis/src/admit-test-vacuity.ts",
+    "lines": 154,
+    "blob": "d963f78ecb33c26b9ea9f2c92408398d01c2b90c",
+    "review": "full source read during this round"
+  },
+  {
+    "path": "foundation/atlas/packages/genesis/src/admit-transition.ts",
+    "lines": 94,
+    "blob": "3b689c3fbdf2d443858778912b8f8bb07695d0f5",
+    "review": "full source read during this round"
+  },
+  {
+    "path": "foundation/atlas/packages/kernel/src/fold.ts",
+    "lines": 183,
+    "blob": "8538ad5f071b86bb9c8a331c99060d46cf38ed37",
+    "review": "full source read during this round"
+  },
+  {
+    "path": "foundation/atlas/packages/knowledge/src/read/test-vacuity.ts",
+    "lines": 97,
+    "blob": "1a826af9fbb5c58d46dd39c585e70b0ff5974638",
+    "review": "full source read during this round"
+  },
+  {
+    "path": "foundation/atlas/packages/knowledge/src/read/transitions.ts",
+    "lines": 115,
+    "blob": "1437eed9e007dcbbadfdb77e490eea6539a742c8",
+    "review": "full source read during this round"
+  },
+  {
+    "path": "foundation/atlas/packages/knowledge/src/write/link.ts",
+    "lines": 82,
+    "blob": "d2336f21289718fc17c80e7ab997905ce3a7e52a",
+    "review": "full source read during this round"
+  },
+  {
+    "path": "foundation/atlas/packages/knowledge/src/write/test-vacuity-key.ts",
+    "lines": 53,
+    "blob": "2c9865777a68941eeeb1f36e558da503b5447ae6",
+    "review": "full source read during this round"
+  },
+  {
+    "path": "foundation/atlas/packages/knowledge/src/write/upsert.ts",
+    "lines": 410,
+    "blob": "141ce6bec3c6333fc42a3ea0eb7d1044566d86ff",
+    "review": "full source read during this round"
+  },
+  {
+    "path": "packages/core/src/agent.ts",
+    "lines": 111,
+    "blob": "da86cf809b90a8117cfa7bb315362d3e61230fa2",
+    "review": "full source read during this round"
+  },
+  {
+    "path": "packages/core/src/config/agent.ts",
+    "lines": 25,
+    "blob": "63df995f859fb8c28422f35dbb8c511829737866",
+    "review": "full source read during this round"
+  },
+  {
+    "path": "packages/core/src/config/plugin/agent.ts",
+    "lines": 179,
+    "blob": "0635aa6291c140f210514b92ec115f38a66f494b",
+    "review": "full source read during this round"
+  },
+  {
+    "path": "packages/core/src/plugin/agent.ts",
+    "lines": 202,
+    "blob": "915df79d5be5afd6a045df867f54b361a52b6b33",
+    "review": "full source read during this round"
+  },
+  {
+    "path": "packages/opencode/src/event-v2-bridge.ts",
+    "lines": 71,
+    "blob": "8e65f2752df7cdc1d0a4946cb100fda8e89a8715",
+    "review": "full source read during this round"
+  },
+  {
+    "path": "packages/opencode/src/maestro/admission-record.ts",
+    "lines": 66,
+    "blob": "e4be41c69e2cc9fccb018064337af5a80e17bcf4",
+    "review": "full source read during this round"
+  },
+  {
+    "path": "packages/opencode/src/maestro/approval-record.ts",
+    "lines": 298,
+    "blob": "10f43f5d5b6d3b06304425ac89d2b079f6a48799",
+    "review": "full source read during this round"
+  },
+  {
+    "path": "packages/opencode/src/maestro/approval.ts",
+    "lines": 260,
+    "blob": "d0052a0a0c7aa1546328906ef8b333a757cf6547",
+    "review": "full source read during this round"
+  },
+  {
+    "path": "packages/opencode/src/maestro/governed-task.ts",
+    "lines": 52,
+    "blob": "14944d11eb7f68e76ffac324f5122dd3874e40c1",
+    "review": "full source read during this round"
+  },
+  {
+    "path": "packages/opencode/src/maestro/task-hash.ts",
+    "lines": 36,
+    "blob": "ff09eb78b74e77da782c419e08ac9ec74d701b8a",
+    "review": "full source read during this round"
+  },
+  {
+    "path": "packages/opencode/src/tool/maestro-admission.ts",
+    "lines": 53,
+    "blob": "b7bbccfd08176affcdbeee20df722e30018bcb30",
+    "review": "full source read during this round"
+  },
+  {
+    "path": "packages/opencode/src/tool/maestro-approval.ts",
+    "lines": 95,
+    "blob": "f153199fd08ed3dd51824148f05210387b3ec40f",
+    "review": "full source read during this round"
+  },
+  {
+    "path": "packages/opencode/src/tool/task.ts",
+    "lines": 596,
+    "blob": "f80e0beaf8e7cbd227d506f5769a05733d61dcda",
+    "review": "full source read during this round"
+  },
+  {
+    "path": "packages/opencode/src/tool/tool.ts",
+    "lines": 183,
+    "blob": "e5e7802858ca5cd2250f8f34c4725a25c7a3221d",
+    "review": "full source read during this round"
+  },
+  {
+    "path": "packages/opencode/test/lib/effect.ts",
+    "lines": 177,
+    "blob": "255d4b3947502b971ffb4ab3ab15cfb184c2db4f",
+    "review": "full source read during this round"
+  },
+  {
+    "path": "packages/opencode/test/maestro/approval-record.test.ts",
+    "lines": 198,
+    "blob": "c26a568a68f20af0f453daf7d7d39eadae152b85",
+    "review": "full source read during this round"
+  },
+  {
+    "path": "packages/opencode/test/maestro/governed-lifecycle.test.ts",
+    "lines": 472,
+    "blob": "198b78b07d8037bf59f65999d728be71583f8c8d",
+    "review": "full source read during this round"
+  },
+  {
+    "path": "packages/schema/src/maestro-event.ts",
+    "lines": 116,
+    "blob": "0f1c669e9e805d812c318e498bf051506893512a",
+    "review": "full source read during this round"
+  },
+  {
+    "path": "packages/server/src/handlers/agent.ts",
+    "lines": 13,
+    "blob": "c1511e3c62cdefab6e73fcc1454c468f1710a0d7",
+    "review": "full source read during this round"
+  },
+  {
+    "path": "specs/hugr-maestro/methods/request-approval.md",
+    "lines": 150,
+    "blob": "9f28aabf6cc9d1b6ce3e633f1c78245c78134834",
+    "review": "full source read during this round"
+  }
+]

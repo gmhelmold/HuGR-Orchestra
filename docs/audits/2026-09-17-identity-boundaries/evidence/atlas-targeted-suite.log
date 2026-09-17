@@ -1,0 +1,14 @@
+Preparing worktree (detached HEAD f2f50e2)
+fatal: '/private/tmp/hugr-deep-followup.ou9sem/tmp/atlas-revcache/86267-0' is not a working tree
+Preparing worktree (detached HEAD c641b91)
+fatal: '/private/tmp/hugr-deep-followup.ou9sem/tmp/atlas-revcache/86267-0' is not a working tree
+fatal: '/private/tmp/hugr-deep-followup.ou9sem/tmp/atlas-revcache/86267-1' is not a working tree
+fatal: '/private/tmp/hugr-deep-followup.ou9sem/tmp/atlas-revcache/86267-0' is not a working tree
+fatal: '/private/tmp/hugr-deep-followup.ou9sem/tmp/atlas-revcache/86267-1' is not a working tree
+fatal: '/private/tmp/hugr-deep-followup.ou9sem/tmp/atlas-revcache/86267-2' is not a working tree
+fatal: '/private/tmp/hugr-deep-followup.ou9sem/tmp/atlas-revcache/86267-3' is not a working tree
+fatal: '/private/tmp/hugr-deep-followup.ou9sem/tmp/atlas-revcache/86267-4' is not a working tree
+fatal: '/private/tmp/hugr-deep-followup.ou9sem/tmp/atlas-revcache/86267-5' is not a working tree
+fatal: '/private/tmp/hugr-deep-followup.ou9sem/tmp/atlas-revcache/86267-6' is not a working tree
+fatal: '/private/tmp/hugr-deep-followup.ou9sem/tmp/atlas-revcache/86267-7' is not a working tree
+JSON report written to /private/tmp/hugr-deep-followup.ou9sem/evidence/atlas-targeted-suite.json
