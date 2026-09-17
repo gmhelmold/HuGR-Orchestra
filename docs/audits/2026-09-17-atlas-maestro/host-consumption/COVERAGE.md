@@ -42,4 +42,4 @@ Inventário Git: 7.821 arquivos 100644, 55 arquivos 100755, 60 symlinks 120000. 
 
 ## Evidência comportamental e exclusões
 
-Doze cenários de contexto e dois de rotas foram repetidos; 68 testes originais selecionados passaram. Detalhes estão em README e RESULTS. Não houve UI/CLI completa, sessão Core V2 configurada até o provedor, troca de projeto/worktree, duplicatas/recibos malformados no consumidor, reinício da mesma sessão persistida, full-suite monorepo ou nova CI. A captura usa HTTP local com respostas programadas, não inferência real.
+Doze cenários de contexto e dois de rotas foram repetidos; 68 testes originais selecionados passaram. Detalhes estão em README e RESULTS. Não houve UI/CLI completa, sessão Core V2 configurada até o provedor, troca de projeto/worktree, duplicatas/recibos malformados no consumidor, reinício da mesma sessão persistida, full-suite monorepo ou verificação de CI remota. A captura usa HTTP local com respostas programadas, não inferência real.

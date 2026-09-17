@@ -26,5 +26,8 @@
     "operation": "rstrip each line",
     "reason": "initial staged diff check flagged trailing spaces in source excerpts",
     "outcomesChanged": false
-  }
+  },
+  "stagedDiffCheckExitAfterNormalization": 0,
+  "checksumVerification": "40 entries passed before initial publication",
+  "remoteCI": "not inspected; local test results are not remote CI results"
 }

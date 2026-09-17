@@ -70,7 +70,7 @@ Trechos exatos e hashes: [COVERAGE.md](COVERAGE.md). A captura prova conteúdo r
 
 ## Verificação executada
 
-Atlas `bun run typecheck` terminou com 0 e gerou os módulos usados pelo materializador. Baselines originais: **49 testes legado/Maestro/skill em 8 arquivos e 19 Core V2 em 5 arquivos, 68 testes sem falhas**. Não é full-suite monorepo nem nova CI.
+Atlas `bun run typecheck` terminou com 0 e gerou os módulos usados pelo materializador. Baselines originais: **49 testes legado/Maestro/skill em 8 arquivos e 19 Core V2 em 5 arquivos, 68 testes sem falhas**. Não é full-suite monorepo; nenhum resultado de CI remota foi usado como evidência desta rodada.
 
 Os diagnósticos finais têm **12 cenários de contexto e 2 de rotas**, executados **duas vezes** em processos e fixtures independentes. Coletores retornaram 0 por reproduzir o comportamento observado. O [verificador independente](probes/check-evidence.py) releu as mensagens e encontrou **5 controles corretos e 6 violações de atualidade em cada conjunto**, exit 1. Histórico foi excluído da contagem de defeitos. Os campos semânticos comparados coincidem entre as duas execuções; requests brutos têm IDs/caminhos diferentes.
 
