@@ -1,4 +1,8 @@
-# Atlas / Maestro audit — Genesis worker boundaries
+# Atlas / Maestro audit — Genesis worker and publication boundaries
+
+## Published issues
+
+GW-01 is [#65](https://github.com/gmhelmold/HuGR-Orchestra/issues/65); GW-02 is [#66](https://github.com/gmhelmold/HuGR-Orchestra/issues/66); GW-03 is [#67](https://github.com/gmhelmold/HuGR-Orchestra/issues/67). All were relisted/read after publication and remain open. `evidence/published-issues.json` records that readback.
 
 ## Scope and execution identity
 
@@ -77,6 +81,8 @@ Evidence: `partial-publication-first.json`, `partial-publication-second.json`, a
 - Genesis tests: **264 passed in 32 files**.
 - Selected CLI arm/budget/contention tests: **24 passed in 6 files**, including the original real-subprocess contention test.
 - Maestro tests: **32 passed in 7 files**, 69 assertions.
+
+`probes/check-invariants.mjs` separately asserts desired properties against each set of recorded original-runtime outputs: **6 positive controls pass and 4 desired-invariant checks fail in each set**. The four failures cover default arm selection, worker-loss termination, and the two partial-publication variants. It exits 1 intentionally when those defects are present. These are evidence assertions, not a replacement for product regression tests. Outputs are `desired-invariants-first.json` and `desired-invariants-second.json`.
 
 This is **320 passing existing tests**, not 320 new regressions. Their passing does not negate the additional defective scenarios. The diagnostics record observed outcomes; their process exit 0 means evidence collection completed, not that the desired product invariants passed. This round did not run the complete monorepo suite or live LLM/UI workflow. Host dependencies were reused read-only from the pristine same-SHA checkout; Atlas has a separately installed dependency tree.
 

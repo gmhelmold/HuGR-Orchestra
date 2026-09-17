@@ -1,53 +1,54 @@
-# Auditoria Atlas / Maestro — 17 de setembro de 2026
+# Auditoria progressiva Atlas / Maestro — 17 de setembro de 2026
 
-Base imutável: `b0c33d2f6567a2c741240f3c44bc00ca2f01e7e7`, branch `maestro/rebuild-fork-dev-clean`.
-Esta branch é documental. Não contém correções funcionais nem autoriza merge.
+Produto examinado: `b0c33d2f6567a2c741240f3c44bc00ca2f01e7e7`, branch `maestro/rebuild-fork-dev-clean`. Esta branch e o PR #14 são documentais: não corrigem código de produção, não fecham os achados e não autorizam merge.
 
-## Publicação de issues: bloqueada
+## Estado atual
 
-O repositório retornou `has_issues:false`. Uma tentativa efetiva de criar a issue de hits anteriores à truncagem foi recusada com HTTP 410: `Issues has been disabled in this repository.` **Zero issues foram criadas.** Os nove cartões abaixo são registros preparados, não issues publicadas. Não foram usados o upstream ou outro repositório como destino alternativo. Habilitar Issues nas configurações do repositório é necessário para a publicação solicitada.
+A publicação no GitHub está disponível e foi executada. Os avisos iniciais de Issues desabilitadas e ausência de execução do produto são **históricos**; não devem ser usados como estado atual da auditoria. O registro original foi preservado em [HISTORICAL-INITIAL.md](HISTORICAL-INITIAL.md), com seus limites e suas prioridades daquela fase.
 
-## Índice
+| Leitura | Conteúdo e força de evidência |
+|---|---|
+| [Genesis: workers e publicação parcial](genesis-workers/README.md) | Rodada atual: três novos defeitos, dois conjuntos independentes de experimentos, CLI compilado no caso de seleção de braços, workers reais, armazenamento real e injeções de falha explicitamente delimitadas. |
+| [Provas de runtime anteriores](runtime-proof/README.md) | Evidências originais publicadas em `14e74743d02a97bc577e1dffb6cb04d213c57569`; consultar o relatório para comandos, controles e limites. Não são uma nova execução da rodada Genesis. |
+| [Primeira publicação, histórica](HISTORICAL-INITIAL.md) | Nove cartões iniciais, parte com isolamento/modelo comportamental. As issues e os relatórios posteriores prevalecem sobre os limites já superados. |
+| [Registro inicial de experimentos](EVIDENCE.md) | Evidência histórica da primeira fase; não representa a soma de todas as rodadas. |
 
-| Registro | Prioridade sugerida | Evidência |
+## Issues novas desta rodada
+
+| Issue | Achado | Prova executada |
 |---|---|---|
-| [ATL-001 — perda do ledger de abstenções](issues/ATL-001.md) | P1 | Cadeia de composição confirmada estaticamente; regressão proposta não executada |
-| [ATL-002 — hits antes da seleção final](issues/ATL-002.md) | P1 | Código inspecionado e modelo comportamental executado |
-| [ATL-003 — contested constante](issues/ATL-003.md) | P1 | Wiring e contrato normativo confrontados; porta completa não executada |
-| [OWN-001 — drill sem destino](issues/OWN-001.md) | P1 | Contrato original e scripts originais, Git real, digest de teste |
-| [OWN-002 — predicate renderizado como undefined](issues/OWN-002.md) | P2 | Contrato original e scripts originais, Git real, digest de teste |
-| [OWN-003 — freshness de gotchas](issues/OWN-003.md) | P2 | Assimetria de projeção confirmada estaticamente |
-| [OWN-004 — autoridade de COMPLETE](issues/OWN-004.md) | P2 | Lacuna de contrato; comportamento da função original reproduzido |
-| [OWN-005 — orçamento do payload final](issues/OWN-005.md) | P2 | Compositor inspecionado e entrada estática adversarial executada |
-| [MAE-001 — replay versus reapresentação](issues/MAE-001.md) | P2 | Produtor inspecionado e avaliador original executado; limitação latente |
+| [#65](https://github.com/gmhelmold/HuGR-Orchestra/issues/65) | Workers perdem a seleção explícita do braço; o modo padrão envia somente prompts advisory, mas reporta três templates. | CLI compilado original, quatro cenários por conjunto, dois conjuntos independentes e captura real de stdin do comando substituto sem inferência. |
+| [#66](https://github.com/gmhelmold/HuGR-Orchestra/issues/66) | A espera síncrona do pool impede a observação da morte de um worker. | Pool e workers originais, perda de startup injetada, controles saudável/fechado e supervisor externo com limite explícito; repetido duas vezes. |
+| [#67](https://github.com/gmhelmold/HuGR-Orchestra/issues/67) | Falha na segunda publicação zera o relatório e o checkpoint, embora a primeira gravação continue persistida. | Driver, gate e store originais; proposer sintético e falha no segundo commit explicitamente injetados; reabertura independente; duas execuções. |
 
-P1/P2 são prioridades de engenharia sugeridas, não CVSS. Nem todos os registros são bugs de produção: dois tratam de garantias de contrato; o de Maestro é latente porque sua entrada pública está deliberadamente bloqueada.
+As três foram publicadas e relidas após a escrita. Todas permanecem abertas. Cada uma contém escopo, causas, contraevidências, links imutáveis, success criteria, completeness criteria, quality standards, definition of done e invariants. P2 é prioridade de engenharia, não avaliação de segurança.
 
-## Escopo e método
+## Encaminhamento dos nove cartões iniciais
 
-Cinco passagens focadas: (1) versão/publicação; (2) leitura e escrita; (3) Own, verificadores e consumidores; (4) experimentos e controles; (5) revisão adversarial das próprias conclusões. Isso **não equivale a cinco leituras integrais de todos os arquivos do monorepo**.
+Os cartões em `issues/` permanecem como evidência histórica; os registros ativos estão nas issues abaixo. Uma hipótese que ganhou prova posterior não deve continuar sendo apresentada como apenas estática, e uma prova isolada não deve ser generalizada para uma jornada inteira.
 
-A investigação seguiu `cover → query → splitBands`, `governed emit → gates → incumbent → ratify → upsert → commitLoop → publish`, Own snapshot → Markdown → verificador, e apresentação → resposta → decisão. O relatório anterior foi usado como mapa de hipóteses, não como confirmação independente.
+| Cartão inicial | Registro ativo |
+|---|---|
+| ATL-001 — abstenções descartadas pelo upsert | [#15](https://github.com/gmhelmold/HuGR-Orchestra/issues/15) |
+| ATL-002 — hits antes da entrega final | [#16](https://github.com/gmhelmold/HuGR-Orchestra/issues/16) |
+| ATL-003 — contested constante | [#30](https://github.com/gmhelmold/HuGR-Orchestra/issues/30) |
+| OWN-001 — drill sem destino | [#23](https://github.com/gmhelmold/HuGR-Orchestra/issues/23) |
+| OWN-002 — predicate malformado | [#24](https://github.com/gmhelmold/HuGR-Orchestra/issues/24) |
+| OWN-003 — freshness dos gotchas | [#22](https://github.com/gmhelmold/HuGR-Orchestra/issues/22) |
+| OWN-004 — autoridade de COMPLETE | [#29](https://github.com/gmhelmold/HuGR-Orchestra/issues/29) |
+| OWN-005 — orçamento final de Own | [#28](https://github.com/gmhelmold/HuGR-Orchestra/issues/28) |
+| MAE-001 — reapresentação de aprovação | [#25](https://github.com/gmhelmold/HuGR-Orchestra/issues/25) |
 
-## Execução real e limites
+## Verificação executada na rodada Genesis
 
-Ambiente: Node 22.16.0, TypeScript 5.8.3 e Git. Não houve checkout integral, instalação das dependências do projeto, execução de Bun, suíte oficial completa, sessão MCP ou aplicação OpenCode.
+Instalação Atlas pelo lockfile e `bun run typecheck` concluíram com exit 0. Passaram **264 testes Genesis em 32 arquivos**, **24 testes CLI selecionados em 6 arquivos** e **32 testes Maestro em 7 arquivos**: **320 testes existentes em 45 arquivos**, sem falhas nessas execuções. Logs e identidade das fontes estão no relatório da rodada.
 
-Seis arquivos foram reconstruídos e conferidos byte a byte pelos hashes Git antes dos experimentos: os três contratos Own, os dois scripts e `approval.ts`. Os testes Own substituem **somente `@atlas/kernel.id`** por um digest determinístico de teste; não testam a identidade BLAKE3 do Atlas. O guard/materializador usaram commits, blobs, arquivos e subprocessos Git reais em diretórios temporários. O avaliador puro de Maestro foi executado sem dependências substituídas. A query foi um **modelo comportamental**, não importação dos módulos originais de query.
+As verificações explícitas das propriedades desejadas sobre as observações capturadas reportam **6 controles passando e 4 violações em cada conjunto**: seleção de braços, término após perda de worker e duas formas de falha de publicação. O verificador dessas propriedades sai com código 1. Isso é evidência de defeitos ainda presentes, não correções ou uma suíte de produto toda verde.
 
-Resultados: 10 casos Own, 4 casos dos scripts com Git e 4 casos do avaliador original; mais 2 cenários do modelo de query. Todos observaram os resultados esperados, inclusive os defeitos. **Não são vinte testes que certificam a qualidade do produto.** Os probes, fontes conferidas, resultados completos e cartões expandidos são entregues no pacote offline da auditoria. [Resumo dos experimentos](EVIDENCE.md).
+Não houve inferência de LLM nem uso da configuração real de modelo do usuário nos diagnósticos. O índice SCIP é uma fixture controlada, não uma execução do indexador externo. A suíte interna do Maestro não prova disponibilidade da apresentação pública de aprovação, que continua deliberadamente bloqueada até suas dependências de autoridade existirem.
 
-## Contraevidências preservadas
+## Cobertura e limites
 
-- O guard não é apenas autocertificação: ancestralidade Git e source blobs são realmente verificados. A mudança de uma fonte real fez o guard falhar no controle.
-- A porta de negação conserva abstenções explicitamente; a perda foi delimitada à composição que publica diretamente a saída incompleta de upsert.
-- Existem gates reais de scope/tier; contested constante não foi chamado de bypass T2→T0 ou de autenticação remota.
-- O parser Markdown do host sanitiza dois-pontos em valores YAML: a hipótese simples de frontmatter inválido foi descartada.
-- Omissão de manifest no Markdown foi observada, mas informação pode estar duplicada em drill/pullReachable; não virou décima issue.
-- Não foi demonstrada omissão de um arquivo relevante nas três âncoras do snapshot atual.
-- Agregação de claims versus freshness do último fato permanece hipótese para uma fixture multi-revisão, não achado confirmado.
-- O bloqueio público de aprovação deve permanecer até existirem leitores duráveis de plano/validação. Não removê-lo para satisfazer testes.
+A rodada documenta cinco iterações focadas na cadeia de execução investigada. **Isso não satisfaz cinco leituras semânticas completas, arquivo por arquivo, de todo o monorepo.** Nenhuma contagem de chamadas, arquivos ou testes é usada para inventar essa cobertura. Um comando de triagem ampla foi bloqueado e não executado; não contribui para a cobertura.
 
-## Próxima prova exigida para concluir correções
-
-As definições de pronto dos cartões exigem regressões no caminho real quando a auditoria ainda só possui evidência estática ou isolamento. Um retorno HTTP/exit code de sucesso, paridade entre duas funções ou receipt autoconsistente não substitui observar a propriedade específica em questão. Nenhum achado foi corrigido nesta branch.
+Antes de fechar cada issue, a correção deve passar sua regressão da propriedade desejada no caminho pertinente. Saída reproduzível, hashes íntegros e testes internos isolados não provam automaticamente validade semântica, completude ou integração ponta a ponta.
