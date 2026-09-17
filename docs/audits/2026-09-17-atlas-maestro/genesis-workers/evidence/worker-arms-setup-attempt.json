@@ -1,0 +1,59 @@
+{
+  "product": "b0c33d2f6567a2c741240f3c44bc00ca2f01e7e7",
+  "node": "v22.17.1",
+  "transport": "original compiled CLI with original worker threads",
+  "model": "offline abstaining command",
+  "index": "controlled SCIP, not external indexer output",
+  "cases": [
+    {
+      "arm": "advisory",
+      "exit": 1,
+      "signal": null,
+      "stdout": "status: error\nnext: command 'mine' requires 1 positional argument(s), got 0\ninvariant: CLI-1b: a malformed invocation yields a structured error + guidance + non-zero exit, never a crash\nreason: command 'mine' requires 1 positional argument(s), got 0\n",
+      "stderr": "",
+      "prompts": []
+    },
+    {
+      "arm": "dependency",
+      "exit": 1,
+      "signal": null,
+      "stdout": "status: error\nnext: command 'mine' requires 1 positional argument(s), got 0\ninvariant: CLI-1b: a malformed invocation yields a structured error + guidance + non-zero exit, never a crash\nreason: command 'mine' requires 1 positional argument(s), got 0\n",
+      "stderr": "",
+      "prompts": []
+    },
+    {
+      "arm": "count",
+      "exit": 1,
+      "signal": null,
+      "stdout": "status: error\nnext: command 'mine' requires 1 positional argument(s), got 0\ninvariant: CLI-1b: a malformed invocation yields a structured error + guidance + non-zero exit, never a crash\nreason: command 'mine' requires 1 positional argument(s), got 0\n",
+      "stderr": "",
+      "prompts": []
+    },
+    {
+      "arm": "default",
+      "exit": 1,
+      "signal": null,
+      "stdout": "status: error\nnext: command 'mine' requires 1 positional argument(s), got 0\ninvariant: CLI-1b: a malformed invocation yields a structured error + guidance + non-zero exit, never a crash\nreason: command 'mine' requires 1 positional argument(s), got 0\n",
+      "stderr": "",
+      "prompts": []
+    }
+  ],
+  "defaultAllAdvisory": false,
+  "controls": [
+    {
+      "arm": "advisory",
+      "n": 0,
+      "exit": 1
+    },
+    {
+      "arm": "dependency",
+      "n": 0,
+      "exit": 1
+    },
+    {
+      "arm": "count",
+      "n": 0,
+      "exit": 1
+    }
+  ]
+}
