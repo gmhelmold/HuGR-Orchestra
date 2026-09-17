@@ -1,0 +1,408 @@
+{
+  "commit": "b0c33d2f6567a2c741240f3c44bc00ca2f01e7e7",
+  "node": "v22.17.1",
+  "platform": "darwin",
+  "transport": "original MCP binary, SDK client, real stdio child process",
+  "scanner": {
+    "name": "gitleaks",
+    "version": "8.30.1",
+    "substituted": false
+  },
+  "results": [
+    {
+      "id": "MCP-MEM-R3-01-acknowledged-torn-tail-loss",
+      "status": "observation-verified",
+      "first": {
+        "isError": false,
+        "body": {
+          "data": {
+            "admitted": true,
+            "record": {
+              "owner": "audit",
+              "kind": "task",
+              "entry": {
+                "taskId": "before",
+                "attempted": [
+                  "read source"
+                ],
+                "failedWith": [],
+                "stoppedAt": "checkpoint",
+                "lesson": "Use the checked source."
+              }
+            }
+          },
+          "guidance": {
+            "next": "a refused write named the gate that declined (undetermined-kind / template-invalid / unowned / logbook-duplicate / logbook-unauthorized / over-cap / scanner-blocked / scanner-unavailable) — fix and re-emit; nothing is persisted on a refusal",
+            "invariant": "MEM-1..9 / WP-11.W8: atlas-memory-emit is a governed fail-closed write door (WRITE_PATHS: atlas-emit, atlas-link, atlas-memory-emit — GOVERNANCE_SURFACE six members) — one append on admission, nothing on refusal"
+          }
+        }
+      },
+      "acknowledgedSecond": {
+        "isError": false,
+        "body": {
+          "data": {
+            "admitted": true,
+            "record": {
+              "owner": "audit",
+              "kind": "task",
+              "entry": {
+                "taskId": "after",
+                "attempted": [
+                  "read source"
+                ],
+                "failedWith": [],
+                "stoppedAt": "checkpoint",
+                "lesson": "Use the checked source."
+              }
+            }
+          },
+          "guidance": {
+            "next": "a refused write named the gate that declined (undetermined-kind / template-invalid / unowned / logbook-duplicate / logbook-unauthorized / over-cap / scanner-blocked / scanner-unavailable) — fix and re-emit; nothing is persisted on a refusal",
+            "invariant": "MEM-1..9 / WP-11.W8: atlas-memory-emit is a governed fail-closed write door (WRITE_PATHS: atlas-emit, atlas-link, atlas-memory-emit — GOVERNANCE_SURFACE six members) — one append on admission, nothing on refusal"
+          }
+        }
+      },
+      "afterProcessRestart": {
+        "isError": false,
+        "body": {
+          "data": [
+            {
+              "owner": "audit",
+              "kind": "task",
+              "entry": {
+                "taskId": "before",
+                "attempted": [
+                  "read source"
+                ],
+                "failedWith": [],
+                "stoppedAt": "checkpoint",
+                "lesson": "Use the checked source."
+              }
+            }
+          ],
+          "guidance": {
+            "next": "1 matching record(s) — task/pr/logbook memory is never auto-injected; this is the sole general read path for it (the MEM-13 re-spawn push is separate)",
+            "invariant": "MEM-4b: atlas-memory-recall is the ONE handler that returns consultable memory (task/pr/logbook), and ONLY in response to an explicit query — an unqualified query (no owner/kind/taskId/prId selector) answers the empty set, never a throw; task/pr/logbook never auto-inject on a running turn (see atlas-memory-header)"
+          }
+        }
+      },
+      "lowLevelRejected": 1,
+      "defectReproduced": true
+    },
+    {
+      "id": "MCP-MEM-R3-02-corruption-read-status",
+      "status": "experiment-error",
+      "error": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n+ actual - expected\n\n+ undefined\n- true\n\n    at file://<AUDIT_ROOT>/probes/memory-mcp.mjs:25:118\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async story (file://<AUDIT_ROOT>/probes/memory-mcp.mjs:12:279)\n    at async file://<AUDIT_ROOT>/probes/memory-mcp.mjs:22:1"
+    },
+    {
+      "id": "MCP-MEM-R3-03-current-rule-vs-history-cap",
+      "status": "observation-verified",
+      "emitted": [
+        {
+          "version": 1,
+          "isError": false,
+          "body": {
+            "data": {
+              "admitted": true,
+              "record": {
+                "owner": "audit",
+                "kind": "project",
+                "entry": {
+                  "rule": "check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check",
+                  "scope": "src",
+                  "frecency": 1
+                }
+              }
+            },
+            "guidance": {
+              "next": "a refused write named the gate that declined (undetermined-kind / template-invalid / unowned / logbook-duplicate / logbook-unauthorized / over-cap / scanner-blocked / scanner-unavailable) — fix and re-emit; nothing is persisted on a refusal",
+              "invariant": "MEM-1..9 / WP-11.W8: atlas-memory-emit is a governed fail-closed write door (WRITE_PATHS: atlas-emit, atlas-link, atlas-memory-emit — GOVERNANCE_SURFACE six members) — one append on admission, nothing on refusal"
+            }
+          }
+        },
+        {
+          "version": 2,
+          "isError": false,
+          "body": {
+            "data": {
+              "admitted": true,
+              "record": {
+                "owner": "audit",
+                "kind": "project",
+                "entry": {
+                  "rule": "check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check",
+                  "scope": "src",
+                  "frecency": 2
+                }
+              }
+            },
+            "guidance": {
+              "next": "a refused write named the gate that declined (undetermined-kind / template-invalid / unowned / logbook-duplicate / logbook-unauthorized / over-cap / scanner-blocked / scanner-unavailable) — fix and re-emit; nothing is persisted on a refusal",
+              "invariant": "MEM-1..9 / WP-11.W8: atlas-memory-emit is a governed fail-closed write door (WRITE_PATHS: atlas-emit, atlas-link, atlas-memory-emit — GOVERNANCE_SURFACE six members) — one append on admission, nothing on refusal"
+            }
+          }
+        },
+        {
+          "version": 3,
+          "isError": false,
+          "body": {
+            "data": {
+              "admitted": true,
+              "record": {
+                "owner": "audit",
+                "kind": "project",
+                "entry": {
+                  "rule": "check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check",
+                  "scope": "src",
+                  "frecency": 3
+                }
+              }
+            },
+            "guidance": {
+              "next": "a refused write named the gate that declined (undetermined-kind / template-invalid / unowned / logbook-duplicate / logbook-unauthorized / over-cap / scanner-blocked / scanner-unavailable) — fix and re-emit; nothing is persisted on a refusal",
+              "invariant": "MEM-1..9 / WP-11.W8: atlas-memory-emit is a governed fail-closed write door (WRITE_PATHS: atlas-emit, atlas-link, atlas-memory-emit — GOVERNANCE_SURFACE six members) — one append on admission, nothing on refusal"
+            }
+          }
+        },
+        {
+          "version": 4,
+          "isError": false,
+          "body": {
+            "data": {
+              "admitted": true,
+              "record": {
+                "owner": "audit",
+                "kind": "project",
+                "entry": {
+                  "rule": "check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check",
+                  "scope": "src",
+                  "frecency": 4
+                }
+              }
+            },
+            "guidance": {
+              "next": "a refused write named the gate that declined (undetermined-kind / template-invalid / unowned / logbook-duplicate / logbook-unauthorized / over-cap / scanner-blocked / scanner-unavailable) — fix and re-emit; nothing is persisted on a refusal",
+              "invariant": "MEM-1..9 / WP-11.W8: atlas-memory-emit is a governed fail-closed write door (WRITE_PATHS: atlas-emit, atlas-link, atlas-memory-emit — GOVERNANCE_SURFACE six members) — one append on admission, nothing on refusal"
+            }
+          }
+        },
+        {
+          "version": 5,
+          "isError": false,
+          "body": {
+            "data": {
+              "admitted": true,
+              "record": {
+                "owner": "audit",
+                "kind": "project",
+                "entry": {
+                  "rule": "check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check",
+                  "scope": "src",
+                  "frecency": 5
+                }
+              }
+            },
+            "guidance": {
+              "next": "a refused write named the gate that declined (undetermined-kind / template-invalid / unowned / logbook-duplicate / logbook-unauthorized / over-cap / scanner-blocked / scanner-unavailable) — fix and re-emit; nothing is persisted on a refusal",
+              "invariant": "MEM-1..9 / WP-11.W8: atlas-memory-emit is a governed fail-closed write door (WRITE_PATHS: atlas-emit, atlas-link, atlas-memory-emit — GOVERNANCE_SURFACE six members) — one append on admission, nothing on refusal"
+            }
+          }
+        },
+        {
+          "version": 6,
+          "isError": false,
+          "body": {
+            "data": {
+              "admitted": true,
+              "record": {
+                "owner": "audit",
+                "kind": "project",
+                "entry": {
+                  "rule": "check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check",
+                  "scope": "src",
+                  "frecency": 6
+                }
+              }
+            },
+            "guidance": {
+              "next": "a refused write named the gate that declined (undetermined-kind / template-invalid / unowned / logbook-duplicate / logbook-unauthorized / over-cap / scanner-blocked / scanner-unavailable) — fix and re-emit; nothing is persisted on a refusal",
+              "invariant": "MEM-1..9 / WP-11.W8: atlas-memory-emit is a governed fail-closed write door (WRITE_PATHS: atlas-emit, atlas-link, atlas-memory-emit — GOVERNANCE_SURFACE six members) — one append on admission, nothing on refusal"
+            }
+          }
+        },
+        {
+          "version": 7,
+          "isError": true,
+          "body": {
+            "fault": "refused",
+            "rejected": "over-cap: MEM-3 cap: the injected project set would exceed its bound",
+            "guidance": {
+              "next": "a refused write named the gate that declined (undetermined-kind / template-invalid / unowned / logbook-duplicate / logbook-unauthorized / over-cap / scanner-blocked / scanner-unavailable) — fix and re-emit; nothing is persisted on a refusal",
+              "invariant": "MEM-1..9 / WP-11.W8: atlas-memory-emit is a governed fail-closed write door (WRITE_PATHS: atlas-emit, atlas-link, atlas-memory-emit — GOVERNANCE_SURFACE six members) — one append on admission, nothing on refusal"
+            }
+          }
+        }
+      ],
+      "header": {
+        "isError": false,
+        "body": {
+          "data": {
+            "awareness": {
+              "mission": {
+                "content": "UN-SEEDED (mission): source absent — no self-model line fabricated",
+                "grounding": [],
+                "state": "UN-SEEDED"
+              },
+              "constitution": {
+                "content": "UN-SEEDED (constitution): source absent — no self-model line fabricated",
+                "grounding": [],
+                "state": "UN-SEEDED"
+              },
+              "terrain": {
+                "content": "UN-SEEDED (terrain): source absent — no self-model line fabricated",
+                "grounding": [],
+                "state": "UN-SEEDED"
+              },
+              "ontology": {
+                "content": "UN-SEEDED (ontology): source absent — no self-model line fabricated",
+                "grounding": [],
+                "state": "UN-SEEDED"
+              },
+              "taste": {
+                "content": "UN-SEEDED (taste): source absent — no self-model line fabricated",
+                "grounding": [],
+                "state": "UN-SEEDED"
+              }
+            },
+            "orientation": {
+              "goal": "",
+              "last": "",
+              "current": "",
+              "state": ""
+            },
+            "rules": [
+              {
+                "rule": "check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check check",
+                "scope": "src",
+                "frecency": 6
+              }
+            ]
+          },
+          "guidance": {
+            "next": "1 project rule(s) injected this turn — recall task/pr/logbook explicitly with atlas-memory-recall",
+            "invariant": "MEM-1/4/7: atlas-memory-header is the running-turn header for the composed actor — awareness + orientation pass through unchanged (shared, derived elsewhere), rules is the seat's OWN top project entries by effective frecency; task/pr/logbook are structurally excluded (no field on TurnHeader) — MEM-4"
+          }
+        }
+      },
+      "defectReproduced": true
+    },
+    {
+      "id": "MCP-MEM-R3-06-logbook-section-parity",
+      "status": "observation-verified",
+      "oversize": {
+        "isError": false,
+        "body": {
+          "data": {
+            "admitted": true,
+            "record": {
+              "owner": "orch",
+              "kind": "logbook",
+              "entry": {
+                "prId": "pr-a",
+                "at": "2026-09-17",
+                "territories": [
+                  "src"
+                ],
+                "shipped": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+                "decisions": "chosen",
+                "tradeoffs": "cost",
+                "risks": "risk",
+                "openThreads": "none",
+                "links": []
+              }
+            }
+          },
+          "guidance": {
+            "next": "a refused write named the gate that declined (undetermined-kind / template-invalid / unowned / logbook-duplicate / logbook-unauthorized / over-cap / scanner-blocked / scanner-unavailable) — fix and re-emit; nothing is persisted on a refusal",
+            "invariant": "MEM-1..9 / WP-11.W8: atlas-memory-emit is a governed fail-closed write door (WRITE_PATHS: atlas-emit, atlas-link, atlas-memory-emit — GOVERNANCE_SURFACE six members) — one append on admission, nothing on refusal"
+          }
+        }
+      },
+      "empty": {
+        "isError": false,
+        "body": {
+          "data": {
+            "admitted": true,
+            "record": {
+              "owner": "orch",
+              "kind": "logbook",
+              "entry": {
+                "prId": "pr-b",
+                "at": "2026-09-17",
+                "territories": [
+                  "src"
+                ],
+                "shipped": "",
+                "decisions": "chosen",
+                "tradeoffs": "cost",
+                "risks": "risk",
+                "openThreads": "none",
+                "links": []
+              }
+            }
+          },
+          "guidance": {
+            "next": "a refused write named the gate that declined (undetermined-kind / template-invalid / unowned / logbook-duplicate / logbook-unauthorized / over-cap / scanner-blocked / scanner-unavailable) — fix and re-emit; nothing is persisted on a refusal",
+            "invariant": "MEM-1..9 / WP-11.W8: atlas-memory-emit is a governed fail-closed write door (WRITE_PATHS: atlas-emit, atlas-link, atlas-memory-emit — GOVERNANCE_SURFACE six members) — one append on admission, nothing on refusal"
+          }
+        }
+      },
+      "afterRestart": {
+        "isError": false,
+        "body": {
+          "data": [
+            {
+              "owner": "orch",
+              "kind": "logbook",
+              "entry": {
+                "prId": "pr-a",
+                "at": "2026-09-17",
+                "territories": [
+                  "src"
+                ],
+                "shipped": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+                "decisions": "chosen",
+                "tradeoffs": "cost",
+                "risks": "risk",
+                "openThreads": "none",
+                "links": []
+              }
+            },
+            {
+              "owner": "orch",
+              "kind": "logbook",
+              "entry": {
+                "prId": "pr-b",
+                "at": "2026-09-17",
+                "territories": [
+                  "src"
+                ],
+                "shipped": "",
+                "decisions": "chosen",
+                "tradeoffs": "cost",
+                "risks": "risk",
+                "openThreads": "none",
+                "links": []
+              }
+            }
+          ],
+          "guidance": {
+            "next": "2 matching record(s) — task/pr/logbook memory is never auto-injected; this is the sole general read path for it (the MEM-13 re-spawn push is separate)",
+            "invariant": "MEM-4b: atlas-memory-recall is the ONE handler that returns consultable memory (task/pr/logbook), and ONLY in response to an explicit query — an unqualified query (no owner/kind/taskId/prId selector) answers the empty set, never a throw; task/pr/logbook never auto-inject on a running turn (see atlas-memory-header)"
+          }
+        }
+      },
+      "defectReproduced": true
+    }
+  ]
+}

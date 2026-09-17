@@ -1,0 +1,61 @@
+{
+  "productCommit": "b0c33d2f6567a2c741240f3c44bc00ca2f01e7e7",
+  "productTrackedDiff": "clean",
+  "builtFromPinnedSource": true,
+  "runtime": {
+    "node": "v22.17.1",
+    "bun": "1.3.14",
+    "platform": "darwin",
+    "scanner": {
+      "name": "gitleaks",
+      "version": "8.30.1",
+      "substituted": false
+    }
+  },
+  "originalTests": {
+    "memory": {
+      "files": 4,
+      "passed": 50
+    },
+    "taskResume": {
+      "passed": 2,
+      "filtered": 24
+    }
+  },
+  "additionalHostTests": {
+    "passed": 2,
+    "identicalAdmissionAttempts": 24,
+    "identicalAdmissionFailures": 0,
+    "differentKeySuccesses": 4
+  },
+  "diagnostics": {
+    "originalModuleCases": 6,
+    "realMcpStories": 4,
+    "realConcurrentMcpRounds": 3
+  },
+  "issueActions": {
+    "newOpen": [
+      39,
+      40,
+      41,
+      42
+    ],
+    "additionalEvidenceFor": [
+      32,
+      33,
+      34,
+      37
+    ],
+    "duplicateClosed": {
+      "issue": 38,
+      "canonical": 32
+    }
+  },
+  "caveats": [
+    "Diagnostic exit 0 means a predicted observation was verified, not that the product satisfies its acceptance contract.",
+    "Initial MCP probe serialized-schema assertion and CLI flag typo were experiment errors, preserved separately.",
+    "Module-level memory probes substitute only a named clean scanner; MCP uses installed gitleaks.",
+    "The host tests do not invoke an LLM or enable the unavailable public approval tool.",
+    "Source paths in published runtime logs are normalized; hashes cover the published normalized files."
+  ]
+}
