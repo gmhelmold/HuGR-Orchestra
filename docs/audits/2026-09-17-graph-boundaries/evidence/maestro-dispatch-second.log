@@ -1,0 +1,12 @@
+bun test v1.3.14 (0d9b296a)
+
+test/maestro/audit-graph-dispatch.test.ts:
+AUDIT_OBSERVATION {"case":"success-control","prompts":1,"children":1,"consumed":1,"duplicate":"Failure(Cause([Die(Error: Governed Task denied: approval-consumed)]))"}
+(pass) Audit: governed dispatch fault recovery (internal authority fixture) > positive control performs one prompt and refuses duplicate [3034.53ms]
+AUDIT_OBSERVATION {"case":"metadata-fault","prompts":0,"children":1,"consumed":1,"fault":"Failure(Cause([Die(Error: AUDIT metadata persistence fault)]))","retry":"Failure(Cause([Die(Error: Governed Task denied: approval-consumed)]))"}
+(pass) Audit: governed dispatch fault recovery (internal authority fixture) > post-consumption metadata fault prevents prompt and cannot be retried [1399.58ms]
+
+ 2 pass
+ 0 fail
+ 10 expect() calls
+Ran 2 tests across 1 file. [11.61s]
