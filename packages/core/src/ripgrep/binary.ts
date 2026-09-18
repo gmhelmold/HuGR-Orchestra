@@ -93,7 +93,7 @@ export namespace RipgrepBinary {
         filepath: yield* Effect.cached(
           Effect.scoped(
             Effect.gen(function* () {
-              yield* Flock.effect("ripgrep-binary-materialize")
+              yield* Flock.effect("ripgrep-binary-materialize", { dir: path.join(Global.Path.bin, ".locks") })
               const system = yield* Effect.sync(() => which(process.platform === "win32" ? "rg.exe" : "rg"))
               if (system && (yield* fs.isFile(system).pipe(Effect.orDie))) return system
 
