@@ -82,3 +82,7 @@ Os dois resultados foram cruzados por código-fonte e execução. #85 é distint
 ## Aprofundamento do #24 — shapes das famílias GroundedFact
 
 [Validação das famílias complexas de gotcha](own-snapshot-family-shapes/README.md): usando o snapshot real como controle, `relation`, `negation`, `transition` e `test-vacuity` contendo apenas `id/kind/tier/freshness` foram aceitos por parser/exporter, materializados com claim vazio e certificados `READY`. O probe passou 4/4 em duas execuções; a suíte original `own-snapshot.test.ts` passou 20/20. O resultado amplia a prova da issue [#24](https://github.com/gmhelmold/HuGR-Orchestra/issues/24), sem duplicá-la.
+
+## Revisão adversarial do head atual
+
+[Self-review consolidado](self-review-current/README.md): revisa a cadeia `a360219b..eca0aa8`, corrige duas imprecisões documentais, reforça #86 com retorno `background/running`, reforça #24 com blobs Git reais e reexecuta #85. Nenhuma mudança de produção; as issues permanecem abertas.

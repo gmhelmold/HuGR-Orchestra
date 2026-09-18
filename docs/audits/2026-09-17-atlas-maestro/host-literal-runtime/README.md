@@ -30,6 +30,8 @@ O coletor cria um Git real descartável, constrói uma fixture de snapshot com r
 
 Cada caso foi executado em duas fixtures/processos independentes. Cinco casos Own exibem alteração indevida; quatro controles permanecem corretos. Os coletores dão 9 pass/0 fail porque caracterizam o comportamento atual, inclusive o defeito. **Não são nove critérios de aceitação atendidos.**
 
+A revisão adversarial confirmou ainda que, no caso de caminho `src/cost$1.ts`, a interpolação alcança o receipt textual entregue ao provedor: a chave `sourceBlobs` aparece como `src/cost.ts`, enquanto o artefato verificado em disco permanece `src/cost$1.ts`. A transformação portanto afeta também metadados de proveniência presentes na mensagem consumida.
+
 ### Causa e limite
 
 [own-artifact.ts, linhas 105–162](https://github.com/gmhelmold/HuGR-Orchestra/blob/b0c33d2f6567a2c741240f3c44bc00ca2f01e7e7/foundation/atlas/packages/retrieval/src/own-artifact.ts#L105-L162) escreve claims e paths literalmente e produz o receipt. [Command, linhas 134–151](https://github.com/gmhelmold/HuGR-Orchestra/blob/b0c33d2f6567a2c741240f3c44bc00ca2f01e7e7/packages/opencode/src/command/index.ts#L134-L151) transforma toda skill em template. [SessionPrompt, linhas 1400–1422](https://github.com/gmhelmold/HuGR-Orchestra/blob/b0c33d2f6567a2c741240f3c44bc00ca2f01e7e7/packages/opencode/src/session/prompt.ts#L1400-L1422) aplica interpolação no template inteiro, sem distinguir o corpo factual de Own. `hints: []` não é consultado como uma proibição de interpolar.
@@ -54,7 +56,7 @@ O teste usa `State`, `SkillV2`, registro de ferramentas, serialização da ferra
 | Diretório lido, dispose, arquivo alterado, mesma fonte registrada novamente | Arquivo B | **A** |
 | Mesmo ciclo, fonte em novo diretório | Arquivo B | B, controle |
 
-Nos cinco casos, a listagem ficou vazia imediatamente após dispose: a remoção funciona. No caso embedded decisivo, `sources()` contém de fato B, mas `list()` e a ferramenta retornam A. As duas execuções deram os mesmos resultados. Não se confundiu a rejeição de duas fontes simultâneas de mesmo nome com substituição: a inscrição A é removida antes de registrar B.
+Nos cinco casos, a listagem ficou vazia imediatamente após dispose: a remoção funciona. No caso embedded decisivo, `sources()` contém de fato B, mas `list()` e a ferramenta retornam A. As duas execuções deram os mesmos resultados semânticos; os JSONs brutos diferem nos diretórios temporários gerados por cada fixture. Não se confundiu a rejeição de duas fontes simultâneas de mesmo nome com substituição: a inscrição A é removida antes de registrar B.
 
 [SkillV2, linhas 109–124](https://github.com/gmhelmold/HuGR-Orchestra/blob/b0c33d2f6567a2c741240f3c44bc00ca2f01e7e7/packages/core/src/skill.ts#L109-L124) mantém o cache fora do estado recomposto e consulta-o pela chave antes de carregar a fonte atual. [Source.key](https://github.com/gmhelmold/HuGR-Orchestra/blob/b0c33d2f6567a2c741240f3c44bc00ca2f01e7e7/packages/schema/src/skill.ts#L40-L53) usa apenas nome para embedded e caminho para diretório. [State](https://github.com/gmhelmold/HuGR-Orchestra/blob/b0c33d2f6567a2c741240f3c44bc00ca2f01e7e7/packages/core/src/state.ts#L78-L125) refaz as fontes corretamente, mas não possui autoridade sobre esse cache externo. A [ponte do host de plugins](https://github.com/gmhelmold/HuGR-Orchestra/blob/b0c33d2f6567a2c741240f3c44bc00ca2f01e7e7/packages/core/src/plugin/host.ts#L208-L216) expõe essas operações.
 
@@ -74,7 +76,7 @@ Uma tentativa de criar checker separado foi bloqueada antes de executar; o arqui
 
 ## Ambiente, reprodução e escopo pendente
 
-Veja [REPRODUCING.md](REPRODUCING.md), [COVERAGE.md](COVERAGE.md), [JOURNAL.md](JOURNAL.md) e [ambiente](evidence/environment.json). macOS x64, Node 22.17.1, Bun 1.3.14. Checkout descartável; 38 links para dependências já instaladas. Não é instalação hermética. HOME/XDG e identidade Git de fixtures foram isolados; não se usaram credenciais de modelo ou dados pessoais em testes. As capturas publicadas são mensagens sintéticas sem headers de autenticação. Caminhos temporários foram normalizados na publicação, sem alterar os textos/dólares testados.
+Veja [REPRODUCING.md](REPRODUCING.md), [COVERAGE.md](COVERAGE.md), [JOURNAL.md](JOURNAL.md) e [ambiente](evidence/environment.json). macOS x64, Node 22.17.1, Bun 1.3.14. Checkout descartável; 38 links para dependências já instaladas. Não é instalação hermética. HOME/XDG e identidade Git de fixtures foram isolados; não se usaram credenciais de modelo ou dados pessoais em testes. As capturas publicadas são mensagens sintéticas sem headers de autenticação. Os JSONs brutos preservam caminhos descartáveis sob `/private/tmp/opencode-*`; eles diferem entre execuções e não foram normalizados. A revisão adversarial não encontrou caminhos de HOME pessoal nem credenciais reais nesses artefatos.
 
 O WP-HOST-01 permanece aberto: UI/CLI completa, sessão Core V2 configurada até o provedor, duplicatas e identidade de Own entre worktrees, recibos ausentes/não canônicos no consumidor e retomada da mesma sessão persistida ainda exigem suas próprias provas. Não habilitar a apresentação pública de aprovação para contornar essas lacunas. As cinco passagens globais do repositório continuam abertas; estas são revisões focadas, não leituras integrais do monorepo.
 

@@ -35,3 +35,7 @@ See [probe](probes/own-snapshot-family-audit.test.ts) and [results](evidence/res
 This strengthens #24; it does not justify a second issue. The underlying defect is one parser/renderer shape contract that accepts states the downstream renderer cannot faithfully represent.
 
 The right correction is an authoritative runtime decoder/validator for every accepted GroundedFact variant (or a deliberately narrower gotcha contract), not a sequence of one-off field checks per issue.
+
+## Adversarial self-review qualification
+
+The originally published probe passed `currentBlob` by looking up the reviewed snapshot's own `sourceBlobs`. That was sufficient to isolate parser/renderer shape behavior but was not an independent current-source witness. A subsequent self-review verified all three committed snapshot blobs against real `git hash-object` output and reran all four malformed-family cases with `git hash-object` supplying `currentBlob`; all four still returned `READY` with empty rendered claims. See [`../self-review-current/`](../self-review-current/).
