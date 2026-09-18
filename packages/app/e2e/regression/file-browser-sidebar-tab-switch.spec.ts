@@ -30,7 +30,12 @@ test("keeps the file-browser sidebar mounted when switching file tabs", async ({
   await expect(sidebar).toBeVisible()
   await expect(panel.getByRole("button", { name: "file-00.ts" })).toBeVisible()
 
+  const file00 = page.waitForResponse((response) => {
+    const url = new URL(response.url())
+    return url.pathname === "/file/content" && url.searchParams.get("path") === "file-00.ts" && response.ok()
+  })
   await panel.getByRole("button", { name: "file-00.ts" }).click()
+  await file00
   await expect(panel.getByRole("tab", { name: "file-00.ts" })).toHaveAttribute("data-selected", "")
   await expect(panel.getByText("contents:file-00.ts", { exact: true })).toBeVisible()
 
@@ -44,7 +49,12 @@ test("keeps the file-browser sidebar mounted when switching file tabs", async ({
   expect(scrolled).toBeGreaterThan(0)
   await writeProbe(page)
 
+  const file79 = page.waitForResponse((response) => {
+    const url = new URL(response.url())
+    return url.pathname === "/file/content" && url.searchParams.get("path") === "file-79.ts" && response.ok()
+  })
   await panel.getByRole("button", { name: "file-79.ts" }).click()
+  await file79
   await expect(panel.getByRole("tab", { name: "file-79.ts" })).toHaveAttribute("data-selected", "")
   await expect(panel.getByText("contents:file-79.ts", { exact: true })).toBeVisible()
   expect(await readProbe(page)).toBe(PROBE)
