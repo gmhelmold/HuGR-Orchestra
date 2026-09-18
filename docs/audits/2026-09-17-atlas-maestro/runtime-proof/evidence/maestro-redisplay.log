@@ -1,0 +1,13 @@
+bun test v1.3.14 (0d9b296a)
+
+test/maestro/audit-redisplay.test.ts:
+(pass) Audit: persisted approval redisplay boundary (public presentation remains disabled) > direct [1893.81ms]
+(pass) Audit: persisted approval redisplay boundary (public presentation remains disabled) > redisplay-same-revision [320.49ms]
+(pass) Audit: persisted approval redisplay boundary (public presentation remains disabled) > new-revision [212.53ms]
+(pass) Audit: persisted approval redisplay boundary (public presentation remains disabled) > synthetic [146.66ms]
+(pass) Audit: persisted approval redisplay boundary (public presentation remains disabled) > tampered-output [142.45ms]
+
+ 5 pass
+ 0 fail
+ 6 expect() calls
+Ran 5 tests across 1 file. [7.30s]

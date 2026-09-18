@@ -1,0 +1,3283 @@
+{
+  "product": "b0c33d2f6567a2c741240f3c44bc00ca2f01e7e7",
+  "trackedDiff": "",
+  "donorTrackedDiff": "",
+  "compiledComparison": [
+    {
+      "path": "foundation/atlas/packages/tools/dist/test/wp-7.26-c-tools.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/tools/dist/test/wp-4.11-a-tools.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/tools/dist/test/push-pull-optimize.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/tools/dist/test/wp-7.32-tools.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/tools/dist/test/wp-6.22-tools.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/tools/dist/test/wp-10.a5-tools.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/tools/dist/test/wp-10.a1-tools.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/tools/dist/test/wp-10.a4-tools.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/tools/dist/test/wp-6.19-tools.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/tools/dist/test/wp-4.12-a-tools.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/tools/dist/test/wp-8.27-tools.heldout.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/tools/dist/test/error-attribution.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/tools/dist/test/refusal-visibility.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/tools/dist/test/wp-4.12-a-tools.heldout.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/tools/dist/test/link-retract-schema.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/tools/dist/test/guard-fail-closed.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/tools/dist/test/wp-4.11-a-tools.heldout.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/tools/dist/test/wp-8.27-tools.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/tools/dist/test/fault-vocabulary.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/tools/dist/test/wp-7.26-a-tools.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/tools/dist/test/wp-7.26-b-tools.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/tools/dist/src/bands.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/tools/dist/src/types.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/tools/dist/src/slots.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/tools/dist/src/transport.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/tools/dist/src/query.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/tools/dist/src/index.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/tools/dist/src/handler.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/tools/dist/src/check.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/tools/dist/src/emit.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/tools/dist/src/init.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/tools/dist/src/fault.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/tools/dist/src/push.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/tools/dist/src/draft.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/tools/dist/src/reconcile.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/tools/dist/src/doctor.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/tools/dist/src/anchors.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/tools/dist/src/guard.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/tools/dist/src/diff.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/grounding/dist/test/wp-4.10-c-grd.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/grounding/dist/test/wp-4.11-a-grd.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/grounding/dist/test/wp-4.10-b-grd.multiset.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/grounding/dist/test/wp-4.11-a-grd.heldout.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/grounding/dist/test/ground-fail-closed.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/grounding/dist/test/wp-4.10-b-grd.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/grounding/dist/test/wp-4.10-c-grd.heldout.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/grounding/dist/test/wp-4.10-b-grd.heldout.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/grounding/dist/test/wp-4.10-a-grd.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/grounding/dist/test/wp-4.10-a-grd.heldout.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/grounding/dist/test/wp-4.10-d-grd.heldout.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/grounding/dist/test/wp-4.10-d-grd.units.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/grounding/dist/test/wp-4.10-d-grd.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/grounding/dist/src/types.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/grounding/dist/src/subtree.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/grounding/dist/src/drift.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/grounding/dist/src/freshness.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/grounding/dist/src/index.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/grounding/dist/src/ground.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/grounding/dist/src/emit-guard.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/grounding/dist/src/span.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/grounding/dist/src/gate.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/memory/dist/test/wp-6.25-a-mem.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/memory/dist/test/mem-9.wp35a.heldout.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/memory/dist/test/mem-5-field-types.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/memory/dist/test/wp-6.23-mem.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/memory/dist/test/mem-kind-derivation.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/memory/dist/test/wp-6.24-a-mem.heldout.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/memory/dist/test/wp-6.25-b-mem.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/memory/dist/test/wp-6.24-b-mem.heldout.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/memory/dist/test/mem-9-portable-scangate.wp35a.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/memory/dist/test/wp-3.5-b-mem.heldout.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/memory/dist/test/wp-6.24-b-mem.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/memory/dist/test/wp-3.5-b-mem.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/memory/dist/test/wp-6.24-a-mem.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/memory/dist/src/kinds.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/memory/dist/src/respawn.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/memory/dist/src/types.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/memory/dist/src/rules.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/memory/dist/src/index.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/memory/dist/src/orient.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/memory/dist/src/awareness.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/memory/dist/src/inject.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/memory/dist/src/portable.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/memory/dist/src/logbook.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/memory/dist/src/template.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/test/governance-carrier-controls.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/test/store-fail-closed-cas.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/test/rev-index.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/test/unit-source.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/test/wp-10.a3-check.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/test/own-two-bands.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/test/reverify-test-vacuity.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/test/memory-read.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/test/wire-precomputed-parity.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/test/git-drift.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/test/test-vacuity.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/test/index-adapter.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/test/store-fail-closed-door.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/test/governed-link-retract-disclosure.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/test/reverify-store.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/test/sidecar.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/test/llm.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/test/door-regression-reject-disclosure.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/test/governed-link-endpoint-authz.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/test/git-history.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/test/scanner.wp-11.w5.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/test/memory-emit.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/test/calibration-ledger.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/test/own-availability.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/test/enrich-sibling.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/test/git-history-memo.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/test/governed-emit-addressable.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/test/rev-index-stable-across-builds.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/test/indexer-report.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/test/reconcile-entry-symmetry.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/test/git-forge.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/test/memory-store.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/test/scip-raw-cache.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/test/governed-link-endpoint-existence.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/test/governed-emit-transition-door.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/test/git-drift-entries.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/test/negation-edgemodel-freshness.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/test/dynamic-reach.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/test/git-history-frontier-szz.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/test/semantic-bench.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/test/reverify-negation.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/test/negation-door-v2-escape.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/test/governed-emit.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/test/governed-link.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/test/doctor-source.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/test/negation-bench.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/test/scip-corrupt-guard.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/test/relation-derive.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/test/identity-schema.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/test/sidecar-generation-filename.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/test/relation-door.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/test/travel-by-reproof-compose.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/test/wp-per-fact-freshness.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/test/wire-scip-guard.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/test/escape-classifier.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/test/relation-seal-door.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/test/compose.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/test/uncanonicalizable-shapes.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/test/ast-normalize.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/test/negation-recall-win-blackbox.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/test/commit-superseded.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/test/negation-proposer-bench.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/test/verify-fact-source.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/test/fs-tracked-symlink.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/test/door-regression-supersede-sameas.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/test/compose-recon.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/test/wp-10.a2a-authoring.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/test/model-config.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/test/reverify-dangling.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/test/transition-producer.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/test/orientation-store.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/test/compose-negation-promote-deps.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/test/governed-emit-test-vacuity-door.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/test/governed-link-retract.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/test/doctor-entry-symmetry.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/test/negation-authz-scope-split.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/test/door-regression-kind-check.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/test/wire-query-envelope.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/test/arch-d3b-claim-launder.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/test/promotion-ratify-context.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/test/door-regression-commit-retry.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/test/read-access.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/test/door-regression-scope-wellformed.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/test/policy.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/test/actor-is-unauthenticated.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/test/awareness-store.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/test/reverify-relation.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/test/negation-door.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/test/fs.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/test/memory-emit-template-reach.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/test/llm-dependency-parser.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/test/compose-mine-admission.count-leg.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/test/prompt.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/test/wp-d3b-a-wire-verdicts.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/test/skeleton-source.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/test/governed-emit-shape-gate.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/test/door-regression-support.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/test/scanner-conformance.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/test/llm-answer-provenance.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/test/scip.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/test/wire.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/test/ast-parser-lifecycle.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/test/negation-collapsed-local.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/test/poke-file.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/test/skeleton-memo-key.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/test/wire-retrieval-freshness.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/test/doctor-cas-integrity.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/test/store.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/test/symbol-frontier.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/test/anchor-identity.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/test/arch9-door-derivation.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/test/wp-10.a2b-adapter-retire-door.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/test/test-vacuity-bench.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/test/git-history-bridge.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/test/retrieval-tier-bound.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/test/governed-emit-incumbent.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/test/projection-query-index.use-or-seal.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/test/projection-query-index.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/test/llm-semantic-parser.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/test/escape-assemble.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/test/identity-goldens.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/test/test-vacuity-producer.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/test/relation-derive-reachability.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/test/reverify-gate-compose.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/test/okf-store.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/test/ast-gap2-doc-comment.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/test/read-provenance-refusal.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/test/governed-link-support.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/test/store-provenance.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/test/ast.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/test/store-staging.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/test/rev-index-content-resolve.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/test/skeleton-priors-leak.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/test/compose-recon-n10.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/test/containment.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/test/grounding-computer.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/test/scip-forgery-freshness.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/test/wp-10.a2b-draft.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/test/negation-seal-promote-carry.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/test/llm-command-client.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/test/governed-promote.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/test/door-regression-malformed-check-shape.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/test/rev-index-scip-parity.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/test/memory-read-kind-filter.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/test/llm-count-parser.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/src/doctor-source.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/src/governed-emit-route.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/src/identity-schema.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/src/governed-emit-gates.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/src/git-history.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/src/governed-emit-address.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/src/llm.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/src/reverify-store.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/src/compose-test-vacuity.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/src/verify-fact-source.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/src/pack-shape.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/src/policy.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/src/sidecar-commit.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/src/own-bands.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/src/scanner.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/src/test-vacuity-source.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/src/memory-read.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/src/model-config.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/src/compose-mine-admission.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/src/run-git.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/src/index-adapter.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/src/okf-store.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/src/sidecar-abstained.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/src/store.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/src/relation-source.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/src/compose-runtime.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/src/governed-emit-reasons.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/src/compose.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/src/memory-emit.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/src/author-verdicts.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/src/sidecar.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/src/index.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/src/unit-count-candidates.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/src/governed-link.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/src/unit-def-candidates.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/src/skeleton-source.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/src/unit-source.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/src/unit-candidates.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/src/calibration-verdicts.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/src/governed-emit-incumbent.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/src/freshness-watermark.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/src/governed-emit-identity.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/src/prompt.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/src/governed-emit-negation.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/src/indexer-report.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/src/relation-derive-run.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/src/rev-index.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/src/governed-link-retract.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/src/grounding-computer.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/src/memory-store.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/src/governed-emit.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/src/store-provenance.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/src/projection-query-index.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/src/durable-log.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/src/retrieval-model.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/src/containment.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/src/transition-source.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/src/git-forge.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/src/anchor-scope.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/src/draft-incumbent-source.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/src/wire.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/src/governed-promote.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/src/governed-emit-transition.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/src/governed-emit-test-vacuity.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/src/orientation-store.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/src/test-vacuity.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/src/git-drift.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/src/negation-source.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/src/relation-derive.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/src/scip.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/src/poke-file.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/src/read-access.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/src/calibration-ledger.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/src/own-source.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/src/memory-verdicts.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/src/ast.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/src/awareness-store.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/src/read-provenance.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/src/check-source.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/src/fs.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/src/escape/dynamic-reach.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/src/escape/classifier.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/src/escape/target-escapes.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/test/harness/fix-scip-py.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/test/harness/git-sbx.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/test/harness/fix-repo.smoke.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/test/harness/promote-fixtures.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/test/harness/forge-scip.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/test/harness/git-sbx.smoke.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/test/harness/fix-scip.smoke.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/test/harness/fix-repo.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/test/harness/fix-scip.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/test/harness/governed-fixtures.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/test/harness/recon-fixtures.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/test/support/test-vacuity-corpus.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/test/support/test-vacuity-scorer.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/test/support/sem-bench-driver.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/test/support/neg-bench-lib.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/test/support/bench-scorer.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/dist/test/support/mutation-contract.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/contracts/dist/territory.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/contracts/dist/pack.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/contracts/dist/index.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/contracts/dist/struct.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/contracts/dist/status.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/contracts/dist/tool.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/contracts/dist/hash.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/contracts/dist/tier.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/mcp-server/dist/test/relations-mcp.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/mcp-server/dist/test/memory-emit-mcp.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/mcp-server/dist/test/surface-conformance-req-mcp-1e.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/mcp-server/dist/test/memory-read-mcp.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/mcp-server/dist/test/negations-mcp.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/mcp-server/dist/test/error-attribution-mcp.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/mcp-server/dist/test/wp-9.4.7-mcp.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/mcp-server/dist/src/bin.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/mcp-server/dist/src/server.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/mcp-server/dist/src/index.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/mcp-server/dist/src/server-read-tools.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/mcp-server/dist/src/server-memory-tools.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/e2e-blackbox/dist/test/harness.smoke.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/e2e-blackbox/dist/test/s10-node-door.blackbox.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/e2e-blackbox/dist/test/s12-grounding-kinds.blackbox.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/e2e-blackbox/dist/test/s18-durability.blackbox.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/e2e-blackbox/dist/test/s-author8-round-trip.blackbox.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/e2e-blackbox/dist/test/s9-retrieval-modes.blackbox.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/e2e-blackbox/dist/test/s35-semantic-justified.blackbox.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/e2e-blackbox/dist/test/s234-transition.blackbox.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/e2e-blackbox/dist/test/s26-doctor-index.blackbox.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/e2e-blackbox/dist/test/s26-promote.blackbox.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/e2e-blackbox/dist/test/s17-degenerate-anchor.blackbox.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/e2e-blackbox/dist/test/s28-own-briefing.blackbox.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/e2e-blackbox/dist/test/s36-definition-proven.blackbox.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/e2e-blackbox/dist/test/s95-test-vacuity.blackbox.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/e2e-blackbox/dist/test/s33-seal-witness.blackbox.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/e2e-blackbox/dist/test/s1-genesis.blackbox.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/e2e-blackbox/dist/test/s17-nested-scope.blackbox.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/e2e-blackbox/dist/test/s239-node-witness.blackbox.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/e2e-blackbox/dist/test/s31-negation.blackbox.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/e2e-blackbox/dist/test/s3-dedup.blackbox.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/e2e-blackbox/dist/test/s29-closed-slot.blackbox.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/e2e-blackbox/dist/test/s25-sameas-retraction.blackbox.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/e2e-blackbox/dist/test/s34-mine-history-frontier.blackbox.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/e2e-blackbox/dist/test/s15-freshness-watermark.blackbox.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/e2e-blackbox/dist/test/s26-symbol-arm.blackbox.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/e2e-blackbox/dist/test/support.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/e2e-blackbox/dist/test/s27-reconcile-merge-base.blackbox.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/e2e-blackbox/dist/test/s24-model-config.blackbox.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/e2e-blackbox/dist/test/s4-drift.blackbox.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/e2e-blackbox/dist/test/s21-scip-forgery.blackbox.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/e2e-blackbox/dist/test/s6-edge.blackbox.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/e2e-blackbox/dist/test/s-mcp-authoring.blackbox.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/e2e-blackbox/dist/test/s11-predicate-lineage.blackbox.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/e2e-blackbox/dist/test/s5-mcp-parity.blackbox.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/e2e-blackbox/dist/test/s14-mine.blackbox.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/e2e-blackbox/dist/test/stage.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/e2e-blackbox/dist/test/s7-governance.blackbox.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/e2e-blackbox/dist/test/s16-sameas.blackbox.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/e2e-blackbox/dist/test/s32-verify-fact.blackbox.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/e2e-blackbox/dist/test/s37-sound-relation.blackbox.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/e2e-blackbox/dist/test/s20-committed-store-refusal.blackbox.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/e2e-blackbox/dist/test/s19-init-gitignore.blackbox.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/e2e-blackbox/dist/test/adversarial-fixtures.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/e2e-blackbox/dist/test/s-sound-default.blackbox.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/e2e-blackbox/dist/test/door-regression-scope-brick.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/e2e-blackbox/dist/test/s8-doctor.blackbox.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/e2e-blackbox/dist/test/s22-scip-device-read.blackbox.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/e2e-blackbox/dist/test/s13-pack-fields.blackbox.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/e2e-blackbox/dist/test/s25-model-reachability.blackbox.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/e2e-blackbox/dist/test/s30-relation.blackbox.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/e2e-blackbox/dist/test/author8-subprocess.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/e2e-blackbox/dist/test/s-mcp-4-draft-parity.blackbox.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/e2e-blackbox/dist/test/s237-mine-summary-agrees-with-store.blackbox.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/e2e-blackbox/dist/test/s2-guardrails.blackbox.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/e2e-blackbox/dist/test/s26-surface-lies.blackbox.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/e2e-blackbox/dist/test/s23-error-attribution.blackbox.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/e2e-blackbox/dist/test/s24-uncanonicalizable-row.blackbox.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/e2e-blackbox/dist/test/s34-reverify-store.blackbox.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/e2e-blackbox/dist/test/s26-query-description.blackbox.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/e2e-blackbox/dist/test/s26-watermark-laundering.blackbox.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/e2e-blackbox/dist/src/harness.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/cli/dist/test/doctor-provenance-total.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/cli/dist/test/render-data.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/cli/dist/test/mine-arms-backcompat.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/cli/dist/test/mine-semantic-arm.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/cli/dist/test/mine-arms-isolation.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/cli/dist/test/mine-provable-frontier-driver.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/cli/dist/test/anchors-cli.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/cli/dist/test/calibration-cli.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/cli/dist/test/error-attribution-cli.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/cli/dist/test/write-spy-store.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/cli/dist/test/mine-fixtures.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/cli/dist/test/enrich-env-gating.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/cli/dist/test/wp-9.3.6-b-mine.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/cli/dist/test/memory-read-cli.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/cli/dist/test/wp-196a-proposer-dependency.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/cli/dist/test/negations-cli.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/cli/dist/test/mine-coverage-render.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/cli/dist/test/relations-seal-render.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/cli/dist/test/mine-provenance-seam.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/cli/dist/test/mine-arms-render.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/cli/dist/test/derive-relations-cli.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/cli/dist/test/mine-history-wired.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/cli/dist/test/slots-draft-cli.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/cli/dist/test/resolve-mine-slots.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/cli/dist/test/mine-contention-fixtures.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/cli/dist/test/mine-arms-union.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/cli/dist/test/mine-slot-gating.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/cli/dist/test/mine-claim-scrub.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/cli/dist/test/mine-render-seeded-count.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/cli/dist/test/check-cli.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/cli/dist/test/mine-claim-scrub-audit.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/cli/dist/test/task-proposer.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/cli/dist/test/wp-f6-mine-empty-explained.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/cli/dist/test/reverify-cli.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/cli/dist/test/mine-superseded-publish.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/cli/dist/test/task-proposer-dispatch.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/cli/dist/test/mine-decide-family-identity.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/cli/dist/test/mine-grounding-scrub.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/cli/dist/test/init-gitignore.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/cli/dist/test/mine-proposer-identity.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/cli/dist/test/mine-cold-grammar.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/cli/dist/test/wp-seedgate-compose.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/cli/dist/test/mine-governance-seam.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/cli/dist/test/mine-cas-unaddressable-refusal.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/cli/dist/test/mine-seed-awareness.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/cli/dist/test/help-cli.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/cli/dist/test/mine-answer-provenance.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/cli/dist/test/mine-budget-cap.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/cli/dist/test/marshal-link-retract.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/cli/dist/test/wp-96-r-relation-e2e.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/cli/dist/test/wp-9.x-compose-b.integration.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/cli/dist/test/mine-projection-surface.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/cli/dist/test/mine-provable-frontier-proposer.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/cli/dist/test/wp-96-predicate-e2e.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/cli/dist/test/promote-cli.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/cli/dist/test/okf-cli.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/cli/dist/test/draft-json-cli.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/cli/dist/test/own-cli.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/cli/dist/test/mine-claim-scrub-fitness-rel-neg.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/cli/dist/test/mine-claim-scrub-fitness.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/cli/dist/test/mine-answer-scrub-fitness.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/cli/dist/test/mine-gate-shape-dispatch.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/cli/dist/test/mine-model-wired.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/cli/dist/test/mine-decide-seal-carry.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/cli/dist/test/wp-doctor-cli.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/cli/dist/test/wp-9.1.1-a-cli.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/cli/dist/test/mine-provenance-report.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/cli/dist/test/memory-emit-cli.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/cli/dist/test/wp-96-identity-scrub.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/cli/dist/test/wp-9.x-argmarshal.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/cli/dist/test/relations-cli.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/cli/dist/test/wp-f4-parse-at.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/cli/dist/test/mined-tier-mirror-pin.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/cli/dist/test/mine-contention.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/cli/dist/test/skel-mine-default-skeleton.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/cli/dist/test/mine-predicate-check-scrub.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/cli/dist/src/transition.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/cli/dist/src/mine-arms.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/cli/dist/src/cli-dispatch.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/cli/dist/src/reverify.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/cli/dist/src/mine-frontier.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/cli/dist/src/mine-decide.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/cli/dist/src/promote.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/cli/dist/src/cli-verdict.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/cli/dist/src/bin.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/cli/dist/src/marshal.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/cli/dist/src/mine.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/cli/dist/src/okf-cli.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/cli/dist/src/derive-relations.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/cli/dist/src/mine-proposer.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/cli/dist/src/slots.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/cli/dist/src/render.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/cli/dist/src/index.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/cli/dist/src/help.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/cli/dist/src/mine-answer.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/cli/dist/src/mine-render.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/cli/dist/src/doctor-index.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/cli/dist/src/parse.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/cli/dist/src/mine-claim-scrub.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/cli/dist/src/mine-worker.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/cli/dist/src/draft.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/cli/dist/src/mine-pool.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/cli/dist/src/doctor.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/cli/dist/src/mine-gate.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/cli/dist/src/cli.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/cli/dist/src/anchors.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/cli/dist/src/own.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/cli/dist/src/gitignore.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/cli/dist/src/test-vacuity.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/cli/dist/src/map.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/cli/dist/src/mine-staging.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/retrieval/dist/test/wp-6.20-retr.own.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/retrieval/dist/test/wp-6.18-retr.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/retrieval/dist/test/own-snapshot.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/retrieval/dist/test/wp-2.8-b-retr.heldout.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/retrieval/dist/test/wp-2.8-b-retr.relate.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/retrieval/dist/test/wp-6.21-retr.poke.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/retrieval/dist/test/wp-6.19-retr.pack.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/retrieval/dist/test/wp-6.22-retr.drop.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/retrieval/dist/test/own-artifact.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/retrieval/dist/src/poke.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/retrieval/dist/src/offatlas.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/retrieval/dist/src/types.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/retrieval/dist/src/own-snapshot.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/retrieval/dist/src/ledger.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/retrieval/dist/src/pack.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/retrieval/dist/src/index.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/retrieval/dist/src/relate.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/retrieval/dist/src/drop.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/retrieval/dist/src/own-coverage.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/retrieval/dist/src/own-model.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/retrieval/dist/src/own.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/retrieval/dist/src/own-artifact.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/knowledge/dist/test/wp-5.15-know.tier-ratify.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/knowledge/dist/test/degenerate-anchor.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/knowledge/dist/test/wp-5.13-a-know.router.heldout.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/knowledge/dist/test/relation-key.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/knowledge/dist/test/upsert-raise-carry-forward.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/knowledge/dist/test/wp-owner-not-required.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/knowledge/dist/test/test-vacuity-key.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/knowledge/dist/test/fastpath-isgrounded-parity.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/knowledge/dist/test/negation-witness-drift.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/knowledge/dist/test/relations-fold.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/knowledge/dist/test/reconcile.know5.heldout.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/knowledge/dist/test/wp-5.14-know.lifecycle.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/knowledge/dist/test/produce.know13.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/knowledge/dist/test/hits.know17.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/knowledge/dist/test/wp-5.15-know.tier-ratify.heldout.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/knowledge/dist/test/freshness.know3.realmint.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/knowledge/dist/test/wp-dedup-2.subsumes.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/knowledge/dist/test/hits.auth16.heldout.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/knowledge/dist/test/wp-4.12-a-know.stale.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/knowledge/dist/test/evaluator.admit-grammar.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/knowledge/dist/test/produce.know13.heldout.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/knowledge/dist/test/wp-4.11-a-know.heldout.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/knowledge/dist/test/wp-4.11-a-know.truthgate.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/knowledge/dist/test/negation-key.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/knowledge/dist/test/wp-closed-slot-gate.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/knowledge/dist/test/freshness.know3.heldout.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/knowledge/dist/test/wp-sameas.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/knowledge/dist/test/evaluator.know16.heldout.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/knowledge/dist/test/test-vacuity-fold.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/knowledge/dist/test/wp-5.13-a-know.router.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/knowledge/dist/test/wp-242-neardup-deleted.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/knowledge/dist/test/wp-196a-seal.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/knowledge/dist/test/archive-unaddressable.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/knowledge/dist/test/upsert-seal-carry.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/knowledge/dist/test/negations-fold.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/knowledge/dist/test/relations-seal-fold.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/knowledge/dist/test/hits.know17.heldout.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/knowledge/dist/test/freshness.know3.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/knowledge/dist/test/wp-9.x-adjacency-b.near-dup.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/knowledge/dist/test/tier.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/knowledge/dist/test/sameas-retraction.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/knowledge/dist/test/reconcile.know5.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/knowledge/dist/test/arch-9-10-authority.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/knowledge/dist/test/evaluator.know16.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/knowledge/dist/test/sameas-pairkey-forgery.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/knowledge/dist/test/upsert-answerref-update.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/knowledge/dist/test/fastpath-promotion-origin.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/knowledge/dist/test/hits.auth16.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/knowledge/dist/test/wp-9.2.4-know.writedecision.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/knowledge/dist/test/wp-5.13-b-know.anchor-identity.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/knowledge/dist/test/wp-9.x-adjacency-a.carrier.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/knowledge/dist/src/types.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/knowledge/dist/src/index.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/knowledge/dist/src/transition-types.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/knowledge/dist/src/negation-types.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/knowledge/dist/src/test-vacuity-types.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/knowledge/dist/src/write/negation-key.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/knowledge/dist/src/write/test-vacuity-key.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/knowledge/dist/src/write/closed-slot.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/knowledge/dist/src/write/link.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/knowledge/dist/src/write/authz.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/knowledge/dist/src/write/router.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/knowledge/dist/src/write/relation-key.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/knowledge/dist/src/write/transition-key.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/knowledge/dist/src/write/upsert.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/knowledge/dist/src/write/projection-types.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/knowledge/dist/src/write/archive.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/knowledge/dist/src/write/template.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/knowledge/dist/src/read/relations.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/knowledge/dist/src/read/subsumes.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/knowledge/dist/src/read/sameas.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/knowledge/dist/src/read/negations.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/knowledge/dist/src/read/transitions.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/knowledge/dist/src/read/anchor-match.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/knowledge/dist/src/read/test-vacuity.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/knowledge/dist/src/ratify/ratify.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/knowledge/dist/src/ratify/fastpath.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/knowledge/dist/src/ratify/init.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/knowledge/dist/src/ratify/tier.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/knowledge/dist/src/lifecycle/produce.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/knowledge/dist/src/lifecycle/freshness.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/knowledge/dist/src/lifecycle/emit.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/knowledge/dist/src/lifecycle/hits.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/knowledge/dist/src/lifecycle/status.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/knowledge/dist/src/lifecycle/evaluator.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/knowledge/dist/src/lifecycle/reconcile.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/index/dist/test/rollup.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/index/dist/test/resolve.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/index/dist/test/coverage.heldout.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/index/dist/test/depgraph.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/index/dist/test/build-key-mint.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/index/dist/test/compose.compose-index.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/index/dist/test/merkle-core.regression.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/index/dist/test/resolve.heldout.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/index/dist/test/retrieval.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/index/dist/test/territory.heldout.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/index/dist/test/cas.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/index/dist/test/own-impact.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/index/dist/test/resolve.depth.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/index/dist/test/ownership.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/index/dist/test/cas.heldout.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/index/dist/test/unit-defs-memo.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/index/dist/test/territory.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/index/dist/test/depgraph.heldout.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/index/dist/test/identity-goldens.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/index/dist/test/fold.heldout.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/index/dist/test/symbol-reverse.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/index/dist/test/fold.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/index/dist/test/build.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/index/dist/test/unit-deps.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/index/dist/test/fold-drift.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/index/dist/test/depgraph-honest.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/index/dist/test/coverage.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/index/dist/test/unit-exports.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/index/dist/src/territory.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/index/dist/src/types.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/index/dist/src/coverage.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/index/dist/src/ownership.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/index/dist/src/rollup.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/index/dist/src/build.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/index/dist/src/compose.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/index/dist/src/depgraph.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/index/dist/src/unit-deps.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/index/dist/src/index.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/index/dist/src/unit-defs.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/index/dist/src/resolve.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/index/dist/src/fold.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/index/dist/src/symbol-reverse.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/index/dist/src/cas.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/index/dist/src/own-impact.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/index/dist/src/retrieval.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/index/dist/src/unit-exports.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/e2e/dist/test/s03-truth-gate.e2e.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/e2e/dist/test/s09-persist-provenance.e2e.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/e2e/dist/test/s10-full-pipeline.e2e.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/e2e/dist/test/s05-write-governance.e2e.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/e2e/dist/test/s07-memory-scoping.e2e.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/e2e/dist/test/s02-genesis-mining.e2e.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/e2e/dist/test/s04-drift-lifecycle.e2e.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/e2e/dist/test/s08-transport-writedoor.e2e.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/e2e/dist/test/s01-move-in.e2e.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/e2e/dist/test/s06-retrieval-budget.e2e.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/persist/dist/test/attach-unaddressable.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/persist/dist/test/reinvoke.heldout.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/persist/dist/test/heldout-pst-source.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/persist/dist/test/scrub-adjacent-fuzz.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/persist/dist/test/transcript-store-door-fitness.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/persist/dist/test/wp-3.4-b.heldout.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/persist/dist/test/transcript-store-known-limits.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/persist/dist/test/transcript-door-fitness.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/persist/dist/test/reconstruct.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/persist/dist/test/scrub-seam.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/persist/dist/test/merge.heldout.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/persist/dist/test/transcript-persist.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/persist/dist/test/wp-3.4-a.heldout.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/persist/dist/test/merge.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/persist/dist/test/scrub-adjacent-store.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/persist/dist/test/heldout-pst-reconstruct.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/persist/dist/test/wp-3.4-b.hostadapter-placement.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/persist/dist/test/adjacency-oracle.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/persist/dist/test/transcript-3.5-a.heldout.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/persist/dist/test/scrub-declared-families.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/persist/dist/test/wp-3.4-a-persist.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/persist/dist/test/reinvoke.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/persist/dist/test/transcript-store-redaction.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/persist/dist/test/source.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/persist/dist/test/scrub-cross-family.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/persist/dist/test/wp-7.32-persist.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/persist/dist/src/metering.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/persist/dist/src/host-adapter.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/persist/dist/src/reinvoke.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/persist/dist/src/types.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/persist/dist/src/attach.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/persist/dist/src/transcript-store.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/persist/dist/src/merge.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/persist/dist/src/scrub-scan.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/persist/dist/src/index.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/persist/dist/src/reconstruct.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/persist/dist/src/provenance.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/persist/dist/src/placement.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/persist/dist/src/scrub-shapes.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/persist/dist/src/source.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/persist/dist/src/diff.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/persist/dist/src/scrub.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/genesis/dist/test/wp-8.28-a-gen.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/genesis/dist/test/unit-frontier.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/genesis/dist/test/wp-8.30-gen.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/genesis/dist/test/wp-8.29-gen.heldout.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/genesis/dist/test/wp-8.30-gen.heldout.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/genesis/dist/test/extract-answer-malformed.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/genesis/dist/test/coverage-ledger.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/genesis/dist/test/wp-8.29-gen.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/genesis/dist/test/admit-test-vacuity.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/genesis/dist/test/transition-family.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/genesis/dist/test/admit-harness.justified-leg.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/genesis/dist/test/admit-harness.count-leg.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/genesis/dist/test/ppr-damping-teeth.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/genesis/dist/test/wp-8.30-gen-witness.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/genesis/dist/test/admit-harness.definition-leg.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/genesis/dist/test/admit-harness.relation-leg.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/genesis/dist/test/wp-fix-concurrency.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/genesis/dist/test/wp-8.28-b-gen.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/genesis/dist/test/wp-6.18-gen.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/genesis/dist/test/wp-8.31-gen.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/genesis/dist/test/capped-budget.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/genesis/dist/test/wp-8.28-c-gen.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/genesis/dist/test/wp-8.28-c-gen.heldout.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/genesis/dist/test/admit-harness.no-fabricated-check.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/genesis/dist/test/wp-8.28-b-gen.heldout.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/genesis/dist/test/admit-harness.witness.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/genesis/dist/test/wp-8.27-gen.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/genesis/dist/test/admit-harness.dependency-leg.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/genesis/dist/test/canon-skeleton-memo.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/genesis/dist/test/wp-8.28-a-gen.heldout.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/genesis/dist/test/provable-frontier.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/genesis/dist/test/seeds-qualified-path.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/genesis/dist/src/budget-types.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/genesis/dist/src/admit-relation.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/genesis/dist/src/run-controller.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/genesis/dist/src/admit-proposals.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/genesis/dist/src/types.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/genesis/dist/src/coverage.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/genesis/dist/src/verify-negation.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/genesis/dist/src/admit-harness.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/genesis/dist/src/admit-test-vacuity.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/genesis/dist/src/index.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/genesis/dist/src/align.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/genesis/dist/src/cost-policy.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/genesis/dist/src/scope-predicate.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/genesis/dist/src/verify-fact.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/genesis/dist/src/seeds.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/genesis/dist/src/verify-fact.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/genesis/dist/src/verify-count.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/genesis/dist/src/verify-negation.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/genesis/dist/src/extract.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/genesis/dist/src/drive.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/genesis/dist/src/rank.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/genesis/dist/src/admit-transition.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/genesis/dist/src/verify-count.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/genesis/dist/src/seed.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/genesis/dist/src/loops.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/genesis/dist/src/admit-negation.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/genesis/dist/src/verify-fact-relation.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/genesis/dist/src/usefulness.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/genesis/dist/src/unit-order.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/genesis/dist/src/verify-definition.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/kernel/dist/test/encoder.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/kernel/dist/test/heldout-krn.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/kernel/dist/test/heldout-krn-portable.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/kernel/dist/test/heldout-krn-event.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/kernel/dist/test/heldout-krn-store.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/kernel/dist/test/fold-convergence.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/kernel/dist/test/heldout-krn-merge.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/kernel/dist/test/totality.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/kernel/dist/test/merge-fold.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/kernel/dist/test/canonical.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/kernel/dist/test/event-identity.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/kernel/dist/test/store.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/kernel/dist/test/arb.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/kernel/dist/test/heldout-krn-fold.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/kernel/dist/test/identity-goldens.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/kernel/dist/test/fold.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/kernel/dist/test/event-builders.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/kernel/dist/test/log.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/kernel/dist/test/portable.test.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/kernel/dist/src/encoder.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/kernel/dist/src/types.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/kernel/dist/src/store.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/kernel/dist/src/log.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/kernel/dist/src/index.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/kernel/dist/src/fold.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/kernel/dist/src/brand.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/kernel/dist/src/portable.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/kernel/dist/src/jsonl.js",
+      "equal": true
+    },
+    {
+      "path": "foundation/atlas/packages/kernel/dist/src/canonical.js",
+      "equal": true
+    }
+  ]
+}

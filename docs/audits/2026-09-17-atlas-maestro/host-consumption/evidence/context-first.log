@@ -1,0 +1,20 @@
+bun test v1.3.14 (0d9b296a)
+
+test/session/audit-host-context.test.ts:
+(pass) fresh-tool [5628.78ms]
+(pass) dirty-cold-tool [3851.68ms]
+(pass) dirty-warm-tool [5753.88ms]
+(pass) committed-cold-tool [4136.39ms]
+(pass) deleted-cold-tool [5826.19ms]
+(pass) fresh-command [4360.98ms]
+(pass) dirty-command [4250.24ms]
+(pass) missing-tool [4517.10ms]
+(pass) ordinary-skill [5225.53ms]
+(pass) http-fresh-tool [5646.69ms]
+(pass) http-dirty-tool [4623.31ms]
+(pass) history-after-dirty [6013.57ms]
+
+ 12 pass
+ 0 fail
+ 65 expect() calls
+Ran 12 tests across 1 file. [65.25s]

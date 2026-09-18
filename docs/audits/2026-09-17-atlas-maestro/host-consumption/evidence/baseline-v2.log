@@ -1,0 +1,35 @@
+bun test v1.3.14 (0d9b296a)
+
+test/tool-skill.test.ts:
+(pass) SkillTool > lists available skills, authorizes the selected name, and loads model-facing content [82.40ms]
+
+test/location-layer.test.ts:
+(pass) LocationServiceMap > reuses cached services for constructed and decoded location refs [267.89ms]
+(pass) LocationServiceMap > isolates location state while sharing location policy with catalog [221.64ms]
+(pass) LocationServiceMap > rejects an unavailable selected model during location model resolution [74.27ms]
+(pass) LocationServiceMap > installs public plugins into a location [93.03ms]
+
+test/agent.test.ts:
+(pass) AgentV2 > starts without agents [1.59ms]
+(pass) AgentV2 > materializes replayable agent transforms [1.21ms]
+(pass) AgentV2 > rebuilds state when a transform is replaced [1.09ms]
+(pass) AgentV2 > removes a transform when its scope closes [1.35ms]
+(pass) AgentV2 > applies direct agent updates [1.00ms]
+(pass) AgentV2 > creates agents with runtime defaults and supports direct removal [1.41ms]
+(pass) AgentV2 > does not ambiently opt built-in agents into bash [1.54ms]
+
+test/skill.test.ts:
+(pass) SkillV2 > registers sources and resolves later source precedence [24.84ms]
+(pass) SkillV2 > loads URL sources and filters skills for agents [5.28ms]
+
+test/skill/guidance.test.ts:
+(pass) SkillGuidance > renders described agent skills and reconciles the complete available list [5.22ms]
+(pass) SkillGuidance > omits guidance when the selected agent denies all skills [1.44ms]
+(pass) SkillGuidance > omits guidance when a resource-specific denial follows the global denial [0.97ms]
+(pass) SkillGuidance > retains specifically allowed skills after a global denial [1.19ms]
+(pass) SkillGuidance > omits guidance when a specifically allowed skill is denied again [0.97ms]
+
+ 19 pass
+ 0 fail
+ 50 expect() calls
+Ran 19 tests across 5 files. [1.65s]

@@ -1,0 +1,77 @@
+packages/opencode/src/tool/task.ts:20:import { MaestroEvent } from "@opencode-ai/schema/maestro-event"
+packages/opencode/src/tool/task.ts:22:import { verifyGovernedTask } from "@/maestro/governed-task"
+packages/opencode/src/tool/task.ts:23:import { taskHash } from "@/maestro/task-hash"
+packages/opencode/src/tool/task.ts:202:        if (caller?.id !== "maestro") return yield* Effect.fail(new Error("Governed Task requires Maestro"))
+packages/opencode/src/tool/task.ts:227:              eq(EventTable.type, EventV2.versionedType(MaestroEvent.Approval.Decided.type, 1)),
+packages/opencode/src/tool/task.ts:239:              eq(EventTable.type, EventV2.versionedType(MaestroEvent.Approval.Presented.type, 1)),
+packages/opencode/src/tool/task.ts:246:          Schema.decodeUnknownSync(MaestroEvent.Approval.Decided.data)(decision.data),
+packages/opencode/src/tool/task.ts:249:          ? Schema.decodeUnknownSync(MaestroEvent.Approval.Presented.data)(presentations.at(-1)!.data).id
+packages/opencode/src/tool/task.ts:268:              eq(EventTable.type, EventV2.versionedType(MaestroEvent.Approval.Consumed.type, 1)),
+packages/opencode/src/tool/task.ts:275:            const data = Schema.decodeUnknownSync(MaestroEvent.Approval.Consumed.data)(event.data)
+packages/opencode/src/tool/task.ts:282:          `evt_maestro_approval_consumed_${createHash("sha256")
+packages/opencode/src/tool/task.ts:288:            MaestroEvent.Approval.Consumed,
+packages/opencode/src/tool/registry.ts:13:import { MaestroPresentApprovalTool, MaestroRecordApprovalTool } from "./maestro-approval"
+packages/opencode/src/tool/registry.ts:14:import { MaestroRecordAdmissionTool } from "./maestro-admission"
+packages/opencode/src/tool/registry.ts:105:    const maestroPresentApproval = yield* MaestroPresentApprovalTool
+packages/opencode/src/tool/registry.ts:106:    const maestroRecordApproval = yield* MaestroRecordApprovalTool
+packages/opencode/src/tool/registry.ts:107:    const maestroRecordAdmission = yield* MaestroRecordAdmissionTool
+packages/opencode/src/tool/registry.ts:223:          maestroPresentApproval: Tool.init(maestroPresentApproval),
+packages/opencode/src/tool/registry.ts:224:          maestroRecordApproval: Tool.init(maestroRecordApproval),
+packages/opencode/src/tool/registry.ts:225:          maestroRecordAdmission: Tool.init(maestroRecordAdmission),
+packages/opencode/src/tool/registry.ts:249:            tool.maestroPresentApproval,
+packages/opencode/src/tool/registry.ts:250:            tool.maestroRecordApproval,
+packages/opencode/src/tool/registry.ts:251:            tool.maestroRecordAdmission,
+packages/opencode/src/tool/registry.ts:319:          (tool.id === MaestroPresentApprovalTool.id ||
+packages/opencode/src/tool/registry.ts:320:            tool.id === MaestroRecordApprovalTool.id ||
+packages/opencode/src/tool/registry.ts:321:            tool.id === MaestroRecordAdmissionTool.id) &&
+packages/opencode/src/tool/registry.ts:322:          input.agent.id !== "maestro"
+packages/opencode/src/tool/maestro-approval.ts:2:import { recordApproval } from "@/maestro/approval-record"
+packages/opencode/src/tool/maestro-approval.ts:29:export const MaestroPresentApprovalTool = Tool.define(
+packages/opencode/src/tool/maestro-approval.ts:30:  "maestro_present_approval",
+packages/opencode/src/tool/maestro-approval.ts:40:          if (agent?.id !== "maestro") return yield* Effect.fail(new Error("Approval presentation requires Maestro"))
+packages/opencode/src/tool/maestro-approval.ts:52:export const MaestroRecordApprovalTool = Tool.define(
+packages/opencode/src/tool/maestro-approval.ts:53:  "maestro_record_approval",
+packages/opencode/src/tool/maestro-approval.ts:59:      description: "Record direct user approval or decline for current exact Maestro plan presentation. Maestro only.",
+packages/opencode/src/tool/maestro-approval.ts:64:          if (agent?.id !== "maestro") return yield* Effect.fail(new Error("Approval decision requires Maestro"))
+packages/opencode/src/tool/maestro-admission.ts:2:import { recordAdmission } from "@/maestro/admission-record"
+packages/opencode/src/tool/maestro-admission.ts:13:export const MaestroRecordAdmissionTool = Tool.define(
+packages/opencode/src/tool/maestro-admission.ts:14:  "maestro_record_admission",
+packages/opencode/src/tool/maestro-admission.ts:20:      description: "Record one governed Maestro request assessment against current direct user message. Maestro only.",
+packages/opencode/src/tool/maestro-admission.ts:25:          if (agent?.id !== "maestro") return yield* Effect.fail(new Error("Admission recording requires Maestro"))
+packages/opencode/src/maestro/approval-record.ts:4:import { MaestroEvent } from "@opencode-ai/schema/maestro-event"
+packages/opencode/src/maestro/approval-record.ts:31:type PresentedData = Schema.Schema.Type<typeof MaestroEvent.Approval.Presented.data>
+packages/opencode/src/maestro/approval-record.ts:32:type DecidedData = Schema.Schema.Type<typeof MaestroEvent.Approval.Decided.data>
+packages/opencode/src/maestro/approval-record.ts:34:export class ApprovalConflictError extends Schema.TaggedErrorClass<ApprovalConflictError>()("MaestroApprovalConflict", {
+packages/opencode/src/maestro/approval-record.ts:48:    `evt_maestro_approval_presentation_${hash([
+packages/opencode/src/maestro/approval-record.ts:59:    `evt_maestro_approval_decision_${hash([input.sessionID, input.approvalMessageID, input.methodVersion])}`,
+packages/opencode/src/maestro/approval-record.ts:117:        part.tool === "maestro_present_approval" &&
+packages/opencode/src/maestro/approval-record.ts:125:export const presentApproval = Effect.fn("MaestroApproval.present")(function* (input: PresentApprovalInput) {
+packages/opencode/src/maestro/approval-record.ts:162:    const recorded = Schema.decodeUnknownSync(MaestroEvent.Approval.Presented.data)(existing.data)
+packages/opencode/src/maestro/approval-record.ts:169:      existing.type === EventV2.versionedType(MaestroEvent.Approval.Presented.type, 1) &&
+packages/opencode/src/maestro/approval-record.ts:181:  const recorded = yield* events.publish(MaestroEvent.Approval.Presented, presentation, {
+packages/opencode/src/maestro/approval-record.ts:187:export const recordApproval = Effect.fn("MaestroApproval.record")(function* (sessionID: string) {
+packages/opencode/src/maestro/approval-record.ts:197:    .filter((row) => row.type === EventV2.versionedType(MaestroEvent.Approval.Presented.type, 1))
+packages/opencode/src/maestro/approval-record.ts:198:    .map((row) => Schema.decodeUnknownSync(MaestroEvent.Approval.Presented.data)(row.data))
+packages/opencode/src/maestro/approval-record.ts:200:    .filter((row) => row.type === EventV2.versionedType(MaestroEvent.Approval.Decided.type, 1))
+packages/opencode/src/maestro/approval-record.ts:201:    .map((row) => decisionFromEvent(Schema.decodeUnknownSync(MaestroEvent.Approval.Decided.data)(row.data)))
+packages/opencode/src/maestro/approval-record.ts:268:    MaestroEvent.Approval.Decided,
+packages/opencode/src/maestro/approval-record.ts:292:export const presentApprovalFromSession = Effect.fn("MaestroApproval.presentFromSession")(function* (
+packages/opencode/src/agent/prompt/maestro.txt:1:You are Maestro, a high-agency development orchestrator. Make software progress, not process theater.
+packages/opencode/src/agent/prompt/maestro.txt:37:After `frame-request` produces an assessment that must enter governed planning, call `maestro_record_admission`. Its
+packages/opencode/src/maestro/admission-record.ts:4:import { MaestroEvent } from "@opencode-ai/schema/maestro-event"
+packages/opencode/src/maestro/admission-record.ts:19:export type AdmissionRecord = Schema.Schema.Type<typeof MaestroEvent.Admission.Decided.data>
+packages/opencode/src/maestro/admission-record.ts:21:export class AdmissionConflictError extends Schema.TaggedErrorClass<AdmissionConflictError>()("MaestroAdmissionConflict", {
+packages/opencode/src/maestro/admission-record.ts:29:  return EventV2.ID.make(`evt_maestro_admission_${createHash("sha256").update(key).digest("hex")}`)
+packages/opencode/src/maestro/admission-record.ts:44:export const readAdmission = Effect.fn("MaestroAdmission.read")(function* (
+packages/opencode/src/maestro/admission-record.ts:50:  if (row.type !== EventV2.versionedType(MaestroEvent.Admission.Decided.type, 1)) return undefined
+packages/opencode/src/maestro/admission-record.ts:51:  return Schema.decodeUnknownSync(MaestroEvent.Admission.Decided.data)(row.data)
+packages/opencode/src/maestro/admission-record.ts:55:export const recordAdmission = Effect.fn("MaestroAdmission.record")(function* (input: RecordAdmissionInput) {
+packages/opencode/src/maestro/admission-record.ts:64:  const recorded = yield* events.publish(MaestroEvent.Admission.Decided, wanted, { id: eventID(input) })
+packages/opencode/src/agent/agent.ts:15:import PROMPT_MAESTRO from "./prompt/maestro.txt"
+packages/opencode/src/agent/agent.ts:186:          maestro: {
+packages/opencode/src/agent/agent.ts:187:            id: "maestro",
+packages/opencode/src/agent/agent.ts:188:            name: "maestro",
+packages/opencode/src/agent/agent.ts:190:            prompt: PROMPT_MAESTRO,
+packages/opencode/src/maestro/admit-request.ts:8:  source: "maestro"
+packages/opencode/src/maestro/admit-request.ts:47:    value.every((item) => typeof item === "object" && item !== null && text(item.text) && item.source === "maestro")
+packages/opencode/src/maestro/approval.ts:88:    "Maestro plan approval",

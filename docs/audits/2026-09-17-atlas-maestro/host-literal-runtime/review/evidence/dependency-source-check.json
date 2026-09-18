@@ -1,0 +1,32 @@
+[
+  {
+    "resolutionFrom": "packages/opencode",
+    "package": "core",
+    "comparedSourceFiles": 322,
+    "mismatches": []
+  },
+  {
+    "resolutionFrom": "packages/opencode",
+    "package": "schema",
+    "comparedSourceFiles": 65,
+    "mismatches": []
+  },
+  {
+    "resolutionFrom": "packages/opencode",
+    "package": "llm",
+    "comparedSourceFiles": 56,
+    "mismatches": []
+  },
+  {
+    "resolutionFrom": "packages/core",
+    "package": "schema",
+    "comparedSourceFiles": 65,
+    "mismatches": []
+  },
+  {
+    "resolutionFrom": "packages/core",
+    "package": "llm",
+    "comparedSourceFiles": 56,
+    "mismatches": []
+  }
+]

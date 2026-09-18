@@ -1,0 +1,21 @@
+bun install v1.3.14 (0d9b296a)
+Resolving dependencies
+Resolved, downloaded and extracted [38]
+
++ @actions/artifact@5.0.1
++ @tsconfig/bun@1.0.9
++ @types/mime-types@3.0.1
++ @typescript/native-preview@7.0.0-dev.20251207.1
++ glob@13.0.5
++ husky@9.1.7
++ oxlint@1.60.0
++ oxlint-tsgolint@0.21.0
++ prettier@3.6.2
++ semver@7.8.1 (v7.8.5 available)
++ sst@4.13.1
++ turbo@2.10.2
++ @aws-sdk/client-s3@3.933.0
++ heap-snapshot-toolkit@1.1.3
++ typescript@5.8.2 (v7.0.2 available)
+
+4687 packages installed [18.45s]

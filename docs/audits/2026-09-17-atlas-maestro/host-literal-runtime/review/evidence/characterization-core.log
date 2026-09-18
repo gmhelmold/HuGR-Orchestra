@@ -1,0 +1,13 @@
+bun test v1.3.14 (0d9b296a)
+
+test/audit-skill-replacement.test.ts:
+(pass) embedded-cached-replace [55.30ms]
+(pass) embedded-uncached-replace [10.59ms]
+(pass) embedded-new-name [5.13ms]
+(pass) directory-reload [26.00ms]
+(pass) directory-new-path [15.51ms]
+
+ 5 pass
+ 0 fail
+ 32 expect() calls
+Ran 5 tests across 1 file. [1.51s]

@@ -1,0 +1,42 @@
+# Complex GroundedFact family shape evidence
+
+Audited product SHA: b0c33d2f6567a2c741240f3c44bc00ca2f01e7e7
+Runtime: Node/npm + Vitest 2.1.9
+Atlas typecheck before probe: exit 0.
+
+The current committed OWN-SNAPSHOT.json was used as the control source.
+For each case only pack.invariants/advisory/gotchas changed:
+- invariants=[]
+- advisory=[]
+- gotchas=[{ id, kind, tier:"T1", freshness:"FRESH" }]
+
+No required family-specific fields were supplied.
+
+## Run 1
+
+relation:
+{"kind":"relation","parsed":true,"verified":"READY","renderedEmptyClaim":true}
+negation:
+{"kind":"negation","parsed":true,"verified":"READY","renderedEmptyClaim":true}
+transition:
+{"kind":"transition","parsed":true,"verified":"READY","renderedEmptyClaim":true}
+test-vacuity:
+{"kind":"test-vacuity","parsed":true,"verified":"READY","renderedEmptyClaim":true}
+
+4 tests passed, 0 failed.
+
+## Run 2
+
+Same four observations.
+4 tests passed, 0 failed.
+
+## Existing snapshot-suite control
+
+npx vitest run packages/retrieval/test/own-snapshot.test.ts
+20 tests passed, 0 failed.
+
+Interpretation:
+parseOwnSnapshot/isFact accepts each complex family from kind+id+tier+freshness alone.
+exportOwnSnapshot accepts it as reviewed/fresh.
+materializeStaticOwnSnapshot renders an empty gotcha claim for all four families.
+verifyStaticOwnSnapshot returns READY for the deterministic output.

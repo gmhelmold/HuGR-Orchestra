@@ -1,0 +1,90 @@
+{
+  "product": "b0c33d2f6567a2c741240f3c44bc00ca2f01e7e7",
+  "sourceFiles": [
+    {
+      "path": "foundation/atlas/packages/cli/src/mine.ts",
+      "expectedGitBlob": "ecb83226cd9bdaba5fce54c13771e69ddd3574b1",
+      "actualGitBlob": "ecb83226cd9bdaba5fce54c13771e69ddd3574b1",
+      "matches": true
+    },
+    {
+      "path": "foundation/atlas/packages/cli/src/mine-arms.ts",
+      "expectedGitBlob": "8799d8956b89ff356b2bcaf4fc9a89db7e5bbbe4",
+      "actualGitBlob": "8799d8956b89ff356b2bcaf4fc9a89db7e5bbbe4",
+      "matches": true
+    },
+    {
+      "path": "foundation/atlas/packages/cli/src/mine-pool.ts",
+      "expectedGitBlob": "2b9fdf5da4aaaf04f4a721a428a26326a7c67e1c",
+      "actualGitBlob": "2b9fdf5da4aaaf04f4a721a428a26326a7c67e1c",
+      "matches": true
+    },
+    {
+      "path": "foundation/atlas/packages/cli/src/mine-worker.ts",
+      "expectedGitBlob": "9b193e0231f33ca7e945825a520a32fc4fe4f3c4",
+      "actualGitBlob": "9b193e0231f33ca7e945825a520a32fc4fe4f3c4",
+      "matches": true
+    },
+    {
+      "path": "foundation/atlas/packages/cli/src/mine-proposer.ts",
+      "expectedGitBlob": "69379130880de8b666611b9ed95059de1b71b88b",
+      "actualGitBlob": "69379130880de8b666611b9ed95059de1b71b88b",
+      "matches": true
+    },
+    {
+      "path": "foundation/atlas/packages/cli/src/cli-dispatch.ts",
+      "expectedGitBlob": "a8bc7385ce02efd87fccd7f39bd8b6c90e8a8ec6",
+      "actualGitBlob": "a8bc7385ce02efd87fccd7f39bd8b6c90e8a8ec6",
+      "matches": true
+    },
+    {
+      "path": "foundation/atlas/packages/cli/src/bin.ts",
+      "expectedGitBlob": "fbf062bf82c75cb4418e187f2edf2074da090261",
+      "actualGitBlob": "fbf062bf82c75cb4418e187f2edf2074da090261",
+      "matches": true
+    },
+    {
+      "path": "foundation/atlas/packages/genesis/src/drive.ts",
+      "expectedGitBlob": "485409feebaf66b23a8af03393c0ab10c5706524",
+      "actualGitBlob": "485409feebaf66b23a8af03393c0ab10c5706524",
+      "matches": true
+    },
+    {
+      "path": "foundation/atlas/packages/genesis/src/run-controller.ts",
+      "expectedGitBlob": "3dca50a5533248472ede2e08e5aff89d217887c0",
+      "actualGitBlob": "3dca50a5533248472ede2e08e5aff89d217887c0",
+      "matches": true
+    },
+    {
+      "path": "foundation/atlas/packages/genesis/src/extract.ts",
+      "expectedGitBlob": "e6eef86a095cb1f59c24450d701215d415704d14",
+      "actualGitBlob": "e6eef86a095cb1f59c24450d701215d415704d14",
+      "matches": true
+    },
+    {
+      "path": "foundation/atlas/packages/cli/test/mine-arms-isolation.test.ts",
+      "expectedGitBlob": "fd087c96b720e0ccd40d76ee49f9b05c7b04c8c7",
+      "actualGitBlob": "fd087c96b720e0ccd40d76ee49f9b05c7b04c8c7",
+      "matches": true
+    },
+    {
+      "path": "foundation/atlas/packages/cli/test/mine-arms-union.test.ts",
+      "expectedGitBlob": "8ea9605c3637b2f27a705288f8e2f943d0c58012",
+      "actualGitBlob": "8ea9605c3637b2f27a705288f8e2f943d0c58012",
+      "matches": true
+    },
+    {
+      "path": "foundation/atlas/packages/cli/test/mine-model-wired.test.ts",
+      "expectedGitBlob": "6f262d643d69f978575199c0b7dac500b9ef82a7",
+      "actualGitBlob": "6f262d643d69f978575199c0b7dac500b9ef82a7",
+      "matches": true
+    },
+    {
+      "path": "foundation/atlas/packages/cli/test/mine-contention.test.ts",
+      "expectedGitBlob": "d98ee5fc016ac9d64f8354b65ff634e8aab5351a",
+      "actualGitBlob": "d98ee5fc016ac9d64f8354b65ff634e8aab5351a",
+      "matches": true
+    }
+  ],
+  "sourceWorktreeStatus": ""
+}
