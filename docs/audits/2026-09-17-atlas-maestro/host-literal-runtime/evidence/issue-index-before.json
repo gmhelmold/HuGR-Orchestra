@@ -1,0 +1,362 @@
+[
+  {
+    "number": 82,
+    "title": "[Atlas/Index][P2] composeIndex.drift accepts dependency axis and can certify changed code as FRESH",
+    "state": "open",
+    "updated_at": "2026-09-17T23:58:21Z"
+  },
+  {
+    "number": 81,
+    "title": "[Atlas/Index][P2] INDEX-12 dependency rState does not fold forward-closure state",
+    "state": "open",
+    "updated_at": "2026-09-17T23:56:10Z"
+  },
+  {
+    "number": 80,
+    "title": "[Atlas/Grounding][P2][Improvement] Implement GROUND-12 policy-artifact anchors for block/repo/project rules",
+    "state": "open",
+    "updated_at": "2026-09-17T23:49:46Z"
+  },
+  {
+    "number": 79,
+    "title": "[Atlas/Grounding][P1] GROUND-11 transitive interface freshness is tested but not wired into driftDetect",
+    "state": "open",
+    "updated_at": "2026-09-17T23:47:05Z"
+  },
+  {
+    "number": 78,
+    "title": "[Atlas/Persist/Adapter][P2] configurePushRefspec is in-memory only; Git never pushes refs/notes/orchestra",
+    "state": "open",
+    "updated_at": "2026-09-17T23:44:21Z"
+  },
+  {
+    "number": 77,
+    "title": "[Atlas/Persist][P2] TranscriptRef is process-local: PERSIST-10 large-object store has no durable backend",
+    "state": "open",
+    "updated_at": "2026-09-17T23:40:33Z"
+  },
+  {
+    "number": 76,
+    "title": "[Atlas/Kernel][P2] parseJsonl and lineMerge violate KERNEL-7 totality on malformed or torn lines",
+    "state": "open",
+    "updated_at": "2026-09-17T23:35:01Z"
+  },
+  {
+    "number": 75,
+    "title": "[Atlas/Kernel/Persist][P2] KERNEL-12/PERSIST-11 merge safety is not installed, and real Git fallback is not a lossless JSONL union",
+    "state": "open",
+    "updated_at": "2026-09-17T23:34:59Z"
+  },
+  {
+    "number": 74,
+    "title": "[Atlas/Kernel][P2] Mutable aliases break CAS content addresses and append-only EventLog snapshots",
+    "state": "open",
+    "updated_at": "2026-09-17T23:34:57Z"
+  },
+  {
+    "number": 72,
+    "title": "[Maestro][P2] Pre-commit consumption write failures are mislabeled approval-consumed even when no durable record exists",
+    "state": "open",
+    "updated_at": "2026-09-17T23:04:21Z"
+  },
+  {
+    "number": 71,
+    "title": "[Atlas][P2] Test-vacuity CLI hides parser failures as no findings and omits incomplete-scan evidence on partial success",
+    "state": "open",
+    "updated_at": "2026-09-17T23:03:54Z"
+  },
+  {
+    "number": 70,
+    "title": "[Atlas][P2] RevIndex caches moving Git refs as immutable identities and makes retained transition producers miss later changes",
+    "state": "open",
+    "updated_at": "2026-09-17T23:03:25Z"
+  },
+  {
+    "number": 69,
+    "title": "[Atlas][P2] Test-vacuity identity collapses distinct same-name tests and makes the surviving finding depend on suite order",
+    "state": "open",
+    "updated_at": "2026-09-17T22:52:03Z"
+  },
+  {
+    "number": 68,
+    "title": "[Atlas][P2] Legitimate Git reverts collapse transition history into a content cycle with no current head",
+    "state": "open",
+    "updated_at": "2026-09-17T22:51:29Z"
+  },
+  {
+    "number": 67,
+    "title": "[Atlas/Genesis][P2] Mid-run staging failure erases completed progress and call accounting from the report",
+    "state": "open",
+    "updated_at": "2026-09-17T22:49:45Z"
+  },
+  {
+    "number": 66,
+    "title": "[Atlas/Genesis][P2] Proposer pool cannot observe worker death while blocked in Atomics.wait",
+    "state": "open",
+    "updated_at": "2026-09-17T22:48:15Z"
+  },
+  {
+    "number": 65,
+    "title": "[Atlas/Genesis][P2] Default mining workers ignore the selected arm and misattribute prompt provenance",
+    "state": "open",
+    "updated_at": "2026-09-17T22:46:12Z"
+  },
+  {
+    "number": 62,
+    "title": "[Maestro][P2] Admission records synthetic auto-continue messages as direct stakeholder requests",
+    "state": "open",
+    "updated_at": "2026-09-17T22:27:28Z"
+  },
+  {
+    "number": 61,
+    "title": "[Atlas][P2] Doctor CAS integrity reports sound when referenced blobs are stored in the wrong shard",
+    "state": "open",
+    "updated_at": "2026-09-17T22:33:50Z"
+  },
+  {
+    "number": 60,
+    "title": "[Atlas][P2] Reverify mixes captured fact rows with live dangling rows, omitting new proofs and double-counting missing ones",
+    "state": "open",
+    "updated_at": "2026-09-17T22:33:41Z"
+  },
+  {
+    "number": 59,
+    "title": "[Atlas][P2] Doctor's semantic-retirement plan is rejected by the governed write path it recommends",
+    "state": "open",
+    "updated_at": "2026-09-17T22:33:30Z"
+  },
+  {
+    "number": 58,
+    "title": "[Atlas][P2] Injection ceiling double-subtracts repeated kinds and understates surviving context",
+    "state": "open",
+    "updated_at": "2026-09-17T22:27:25Z"
+  },
+  {
+    "number": 57,
+    "title": "[Atlas][P2] --accept-reground reports completed repairs without publishing any repair",
+    "state": "open",
+    "updated_at": "2026-09-17T22:33:21Z"
+  },
+  {
+    "number": 56,
+    "title": "[Atlas][P2] Awareness memo ignores added or changed secondary constitution anchors",
+    "state": "open",
+    "updated_at": "2026-09-17T22:27:23Z"
+  },
+  {
+    "number": 55,
+    "title": "[Atlas][P1] Reconcile returns a clean merge gate when a cited source is deleted",
+    "state": "open",
+    "updated_at": "2026-09-17T22:33:08Z"
+  },
+  {
+    "number": 51,
+    "title": "[Own][P2] Preserve freshness and provenance when projecting a definition into the Role field",
+    "state": "open",
+    "updated_at": "2026-09-17T21:58:57Z"
+  },
+  {
+    "number": 50,
+    "title": "[Own][P2] Ownership briefing ignores anchor-to-scope policy and can name the wrong owner",
+    "state": "open",
+    "updated_at": "2026-09-17T21:58:56Z"
+  },
+  {
+    "number": 49,
+    "title": "[Maestro][P2] Record a terminal or recoverable outcome when governed dispatch fails after approval consumption",
+    "state": "open",
+    "updated_at": "2026-09-17T21:54:51Z"
+  },
+  {
+    "number": 48,
+    "title": "[Atlas][P2] Preserve dependency incompleteness metadata through query and Own context assembly",
+    "state": "open",
+    "updated_at": "2026-09-17T21:54:49Z"
+  },
+  {
+    "number": 47,
+    "title": "[Own][P2] OwnImpact omits resolved dependents of escaped source paths while returning COMPLETE",
+    "state": "open",
+    "updated_at": "2026-09-17T21:54:48Z"
+  },
+  {
+    "number": 46,
+    "title": "[Atlas][P2] File dependency lookup drops facts with escaped or sub-file structural anchors",
+    "state": "open",
+    "updated_at": "2026-09-17T21:54:46Z"
+  },
+  {
+    "number": 45,
+    "title": "[Atlas][P2] Dependency queries silently require a knowledge fact on the queried source",
+    "state": "open",
+    "updated_at": "2026-09-17T21:54:44Z"
+  },
+  {
+    "number": 42,
+    "title": "[Maestro/Task][P2] Make missing-session fallback explicit when a caller requests continuation",
+    "state": "open",
+    "updated_at": "2026-09-17T21:20:56Z"
+  },
+  {
+    "number": 41,
+    "title": "[Atlas Memory][P2] Resume projection silently selects the oldest retained task checkpoint",
+    "state": "open",
+    "updated_at": "2026-09-17T21:20:55Z"
+  },
+  {
+    "number": 40,
+    "title": "[Atlas Memory][P2] Public memory reads erase durable-log corruption diagnostics and report healthy empty results",
+    "state": "open",
+    "updated_at": "2026-09-17T21:20:53Z"
+  },
+  {
+    "number": 39,
+    "title": "[Atlas Memory][P1] Concurrent governed writers violate the one-logbook-entry-per-PR invariant",
+    "state": "open",
+    "updated_at": "2026-09-17T21:20:52Z"
+  },
+  {
+    "number": 38,
+    "title": "[Atlas Memory][P1] An acknowledged append is lost after a torn JSONL tail",
+    "state": "closed",
+    "updated_at": "2026-09-17T21:20:51Z"
+  },
+  {
+    "number": 37,
+    "title": "[Atlas][P2] Orientation event identity cannot represent a legitimate return to an earlier state label",
+    "state": "open",
+    "updated_at": "2026-09-17T21:20:50Z"
+  },
+  {
+    "number": 36,
+    "title": "[Maestro/Own][P2] Host skill loading serves stale static Own artifacts despite the freshness contract returning HOLD",
+    "state": "open",
+    "updated_at": "2026-09-17T23:24:14Z"
+  },
+  {
+    "number": 35,
+    "title": "[Own][P1] A failed materializer rollback can overwrite another writer's completed publication",
+    "state": "open",
+    "updated_at": "2026-09-17T21:12:47Z"
+  },
+  {
+    "number": 34,
+    "title": "[Atlas][P2] Governed memory emit persists logbook sections rejected by the dedicated logbook validator",
+    "state": "open",
+    "updated_at": "2026-09-17T21:20:48Z"
+  },
+  {
+    "number": 33,
+    "title": "[Atlas][P2] Project-memory cap counts retries and archived versions instead of the injected rule set",
+    "state": "open",
+    "updated_at": "2026-09-17T21:20:47Z"
+  },
+  {
+    "number": 32,
+    "title": "[Atlas][P1] Memory emit acknowledges a record that becomes unreadable after an unterminated log tail",
+    "state": "open",
+    "updated_at": "2026-09-17T21:20:46Z"
+  },
+  {
+    "number": 31,
+    "title": "[Own][P2] Materializer exits successfully without doing work when invoked through a symlinked path",
+    "state": "open",
+    "updated_at": "2026-09-17T20:38:16Z"
+  },
+  {
+    "number": 30,
+    "title": "[Atlas][P2] Reconcile constant contested=false with the declared incumbent-conflict policy",
+    "state": "open",
+    "updated_at": "2026-09-17T20:38:14Z"
+  },
+  {
+    "number": 29,
+    "title": "[Own][P2] Define and carry graph-coverage authority instead of materializing literal COMPLETE",
+    "state": "open",
+    "updated_at": "2026-09-17T21:54:52Z"
+  },
+  {
+    "number": 28,
+    "title": "[Own][P2] Final ownership payload is not bounded by its reported selection budget",
+    "state": "open",
+    "updated_at": "2026-09-17T20:38:11Z"
+  },
+  {
+    "number": 27,
+    "title": "fix(atlas): bind negation admission and freshness to the SCIP source snapshot",
+    "state": "open",
+    "updated_at": "2026-09-17T20:22:58Z"
+  },
+  {
+    "number": 26,
+    "title": "[Atlas][P2] Check reports wouldEmit for a closed-slot violation that emit deterministically refuses",
+    "state": "open",
+    "updated_at": "2026-09-17T20:38:09Z"
+  },
+  {
+    "number": 25,
+    "title": "[Maestro][P2] Re-presenting the same revision reuses an old message binding and cannot accept the new reply",
+    "state": "open",
+    "updated_at": "2026-09-17T20:38:08Z"
+  },
+  {
+    "number": 24,
+    "title": "[Own][P2] Malformed predicate checks render undefined and pass the static snapshot gate",
+    "state": "open",
+    "updated_at": "2026-09-17T20:38:06Z"
+  },
+  {
+    "number": 23,
+    "title": "[Own][P2] Snapshot verifier and materializer accept dangling drill targets",
+    "state": "open",
+    "updated_at": "2026-09-17T20:38:05Z"
+  },
+  {
+    "number": 22,
+    "title": "[Own][P1] Gotchas retain stored FRESH after their grounded source changes",
+    "state": "open",
+    "updated_at": "2026-09-17T20:38:03Z"
+  },
+  {
+    "number": 21,
+    "title": "fix(atlas): make successful re-grounding persist the newly verified evidence",
+    "state": "open",
+    "updated_at": "2026-09-17T20:13:55Z"
+  },
+  {
+    "number": 20,
+    "title": "[Atlas][P2] Draft advertises full ratification but drops the provenance that would require it",
+    "state": "open",
+    "updated_at": "2026-09-17T20:38:01Z"
+  },
+  {
+    "number": 19,
+    "title": "fix(atlas): reject or repair corrupt existing CAS blobs before acknowledging emit",
+    "state": "open",
+    "updated_at": "2026-09-17T20:12:59Z"
+  },
+  {
+    "number": 18,
+    "title": "[Atlas][P1] Long-lived runtime certifies stale grounding with the new HEAD watermark",
+    "state": "open",
+    "updated_at": "2026-09-17T20:38:00Z"
+  },
+  {
+    "number": 17,
+    "title": "fix(atlas): preserve per-claim grounding when advisory updates span revisions",
+    "state": "open",
+    "updated_at": "2026-09-17T20:10:49Z"
+  },
+  {
+    "number": 16,
+    "title": "[Atlas][P1] Facts dropped from query output earn delivery hits and become governing",
+    "state": "open",
+    "updated_at": "2026-09-17T20:37:58Z"
+  },
+  {
+    "number": 15,
+    "title": "[Atlas][P1] Unrelated upserts discard the negation abstention ledger",
+    "state": "open",
+    "updated_at": "2026-09-17T22:32:22Z"
+  }
+]

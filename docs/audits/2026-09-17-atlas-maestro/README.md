@@ -57,3 +57,7 @@ O [WP-HOST-01](host-consumption/README.md) confirma contexto Own desatualizado c
 A rodada documenta cinco iterações focadas na cadeia de execução investigada. **Isso não satisfaz cinco leituras semânticas completas, arquivo por arquivo, de todo o monorepo.** Nenhuma contagem de chamadas, arquivos ou testes é usada para inventar essa cobertura. Um comando de triagem ampla foi bloqueado e não executado; não contribui para a cobertura.
 
 Antes de fechar cada issue, a correção deve passar sua regressão da propriedade desejada no caminho pertinente. Saída reproduzível, hashes íntegros e testes internos isolados não provam automaticamente validade semântica, completude ou integração ponta a ponta.
+
+## Continuidade: literais e substituição de fontes
+
+[Runtime original — fidelidade literal e cache V2](host-literal-runtime/README.md): dois conjuntos independentes de nove cenários host e cinco cenários V2. A fonte Own continua READY, mas comandos podem alterar literais antes do provedor; fontes V2 substituídas podem continuar servindo bytes antigos. Baseline selecionado: 63 testes existentes passando; nenhuma correção de produção ou encerramento da auditoria global. Consulte os limites e controles no relatório, inclusive a ausência de execução de um checker separado.
