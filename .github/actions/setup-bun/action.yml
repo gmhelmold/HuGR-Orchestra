@@ -24,7 +24,7 @@ runs:
           case "$RUNNER_OS" in
             macOS)   OS=darwin ;;
             Linux)   OS=linux ;;
-            Windows) OS=windows; V=1.4.2 ;;
+            Windows) OS=windows ;;
           esac
           echo "url=https://github.com/oven-sh/bun/releases/download/bun-v${V}/bun-${OS}-x64-baseline.zip" >> "$GITHUB_OUTPUT"
         fi
@@ -59,7 +59,19 @@ runs:
         # e.g. ./patches/ for standard-openapi
         # https://github.com/oven-sh/bun/issues/28147
         if [ "$RUNNER_OS" = "Windows" ]; then
-          bun install --linker hoisted ${{ inputs.install-flags }}
+          log="$RUNNER_TEMP/bun-install.log"
+          set +e
+          bun install --linker hoisted ${{ inputs.install-flags }} 2>&1 | tee "$log"
+          status=${PIPESTATUS[0]}
+          set -e
+          if [ "$status" -ne 0 ]; then
+            if ! grep -qE 'ENOTEMPTY:.*NtSetInformationFile' "$log"; then
+              exit "$status"
+            fi
+            echo "Detected Bun Windows cache rename race; clearing Bun cache and retrying once."
+            bun pm cache rm || true
+            bun install --linker hoisted ${{ inputs.install-flags }}
+          fi
         else
           bun install ${{ inputs.install-flags }}
         fi
