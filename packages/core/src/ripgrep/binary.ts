@@ -118,7 +118,8 @@ export namespace RipgrepBinary {
 
               yield* fs.writeWithDirs(archive, new Uint8Array(bytes))
               yield* extract(archive, config, target)
-                yield* fs.remove(archive, { force: true }).pipe(Effect.ignore)              return target
+              yield* fs.remove(archive, { force: true }).pipe(Effect.ignore)
+              return target
             }),
           ),
         ),
