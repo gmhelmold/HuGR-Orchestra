@@ -77,3 +77,8 @@ Duas novas fronteiras foram reproduzidas duas vezes no runtime original, em fixt
 | [Binding foreground/background](maestro-background-binding/README.md) | [#86](https://github.com/gmhelmold/HuGR-Orchestra/issues/86) | O lifecycle governado aceita `background:true` usando o mesmo taskHash/aprovação do caso foreground, pois o modo não participa do intent/hash. |
 
 Os dois resultados foram cruzados por código-fonte e execução. #85 é distinto de freshness (#36) e transformação pós-verificação (#83). #86 é latente em relação à entrada pública de apresentação, que continua corretamente bloqueada até existirem leitores duráveis de plano e validação.
+
+
+## Aprofundamento do #24 — shapes das famílias GroundedFact
+
+[Validação das famílias complexas de gotcha](own-snapshot-family-shapes/README.md): usando o snapshot real como controle, `relation`, `negation`, `transition` e `test-vacuity` contendo apenas `id/kind/tier/freshness` foram aceitos por parser/exporter, materializados com claim vazio e certificados `READY`. O probe passou 4/4 em duas execuções; a suíte original `own-snapshot.test.ts` passou 20/20. O resultado amplia a prova da issue [#24](https://github.com/gmhelmold/HuGR-Orchestra/issues/24), sem duplicá-la.
