@@ -35,12 +35,18 @@ runs:
         bun-version-file: ${{ !steps.bun-url.outputs.url && 'package.json' || '' }}
         bun-download-url: ${{ steps.bun-url.outputs.url }}
 
+    - name: Isolate Windows Bun package cache
+      if: runner.os == 'Windows'
+      shell: bash
+      run: echo "BUN_INSTALL_CACHE_DIR=$RUNNER_TEMP/bun-pm-cache" >> "$GITHUB_ENV"
+
     - name: Get cache directory
       id: cache
       shell: bash
       run: echo "dir=$(bun pm cache)" >> "$GITHUB_OUTPUT"
 
     - name: Restore Bun dependencies
+      if: runner.os != 'Windows'
       id: bun-cache
       uses: actions/cache/restore@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
       with:
@@ -87,7 +93,7 @@ runs:
         test "$actual" = "$expected"
 
     - name: Save Bun dependencies
-      if: steps.bun-cache.outputs.cache-hit != 'true' && github.event_name != 'pull_request' && github.event_name != 'pull_request_target'
+      if: runner.os != 'Windows' && steps.bun-cache.outputs.cache-hit != 'true' && github.event_name != 'pull_request' && github.event_name != 'pull_request_target'
       uses: actions/cache/save@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
       with:
         path: ${{ steps.cache.outputs.dir }}
