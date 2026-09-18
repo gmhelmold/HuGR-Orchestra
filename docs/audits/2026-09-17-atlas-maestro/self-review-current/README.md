@@ -25,6 +25,7 @@ The review covers the work added from `a360219b` through `eca0aa8`: the host lit
 - #86 strengthened rerun: 1 pass / 0 fail / 6 assertions; the returned dispatch is explicitly background/running.
 - #24 strengthened rerun: 4 pass / 0 fail using real Git blob computation.
 - The audit commits reviewed remain documentation-only; no product path appears in the diff from `a360219b` to `eca0aa8`, and `git diff --check` is clean.
+- Whole-PR boundary check against product base: **205 changed paths, all under `docs/audits/`**. Full `git diff --check b0c33d2..HEAD` has one preserved historical warning in `runtime-proof/evidence/atlas-official-suite.log`: an extra blank line at EOF. That raw historical test log is intentionally not rewritten merely to cosmetically green the aggregate diff check; recent reviewed/corrective ranges themselves pass `diff --check`.
 
 ## Claims that remain deliberately bounded
 

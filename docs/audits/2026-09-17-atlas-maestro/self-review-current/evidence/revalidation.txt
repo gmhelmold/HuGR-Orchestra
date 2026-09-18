@@ -23,3 +23,6 @@ This confirms the approved dispatch reaches the background execution result shap
 
 ## Static review
 Current host-literal SHA256 manifest matched every listed file before this corrective commit. All reviewed JSON parsed. Local Markdown links resolved. `review/final` observed runs exit 0; desired runs exit 1 with host 4 pass/5 fail and Core 3 pass/2 fail. Diff from a360219b through eca0aa8 contains docs/audits paths only and passes git diff --check.
+
+## Whole PR audit-only boundary
+205 changed paths from product base to reviewed head; every path is under `docs/audits/`. The aggregate base-to-head `git diff --check` reports one historical raw-evidence warning: `runtime-proof/evidence/atlas-official-suite.log` has one extra blank line at EOF. The log is preserved byte-for-byte rather than normalized retroactively. Recent audit ranges and the corrective self-review commit pass `git diff --check`.
