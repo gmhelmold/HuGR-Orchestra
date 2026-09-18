@@ -204,12 +204,13 @@ test.describe("regression: session timeline local row state", () => {
       ...editPart,
       state: {
         ...editPart.state,
+        input: { filePath: "src/regression.txt" },
         metadata: {
           ...editPart.state.metadata,
           filediff: {
-            file: "src/regression.ts",
-            additions: 1,
-            deletions: 1,
+            file: "src/regression.txt",
+            additions: 5,
+            deletions: 5,
             before: lines,
             after,
           },
@@ -226,6 +227,7 @@ test.describe("regression: session timeline local row state", () => {
     const trigger = wrapper.locator('[data-slot="collapsible-trigger"]').first()
     const diff = wrapper.locator('[data-component="edit-content"]').first()
     await expectAppVisible(diff)
+    await expect(diff.locator("[data-line]").first()).toBeVisible()
     await expect.poll(() => wrapper.evaluate((element) => element.getBoundingClientRect().height)).toBeGreaterThan(500)
     const samples = await wrapper.evaluate(async (element) => {
       const root = element.closest<HTMLElement>(".scroll-view__viewport")!
