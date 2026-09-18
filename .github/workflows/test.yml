@@ -181,7 +181,12 @@ jobs:
             bun --cwd packages/function test
             bun --cwd packages/ui test
             bun --cwd packages/session-ui test
-            bun --cwd packages/app test
+            bun --cwd packages/app run test:unit
+            for file in packages/app/test-browser/*.test.ts; do
+              relative="./test-browser/$(basename "$file")"
+              echo "[browser-test] $relative"
+              bun --cwd packages/app test --conditions=browser --preload ./happydom.ts "$relative"
+            done
             bun --cwd packages/core test
             bun --cwd packages/opencode test
           else
