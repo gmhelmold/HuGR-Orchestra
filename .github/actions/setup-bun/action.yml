@@ -59,6 +59,13 @@ runs:
       run: python3 -m pip install setuptools || pip install setuptools || true
       shell: bash
 
+    - name: Install Windows node-gyp toolchain shim
+      if: runner.os == 'Windows'
+      shell: bash
+      run: |
+        npm install --global node-gyp@12.3.0
+        node-gyp --version
+
     - name: Setup Windows install Bun
       if: runner.os == 'Windows'
       uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
