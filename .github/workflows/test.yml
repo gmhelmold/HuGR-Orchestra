@@ -27,9 +27,13 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+        with:
+          fetch-depth: 0
 
       - name: Fetch target branch
-        run: git fetch origin +dev:refs/remotes/origin/dev --depth=1
+        env:
+          TARGET_BRANCH: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.ref || 'dev' }}
+        run: git fetch origin "+${TARGET_BRANCH}:refs/remotes/origin/${TARGET_BRANCH}"
 
       - name: Setup Bun
         uses: ./.github/actions/setup-bun
@@ -38,6 +42,8 @@ jobs:
         run: bun --cwd packages/core test test/godfile.test.ts
 
       - name: Run godfile gate
+        env:
+          GODFILE_BASE_REF: origin/${{ github.event_name == 'pull_request' && github.event.pull_request.base.ref || 'dev' }}
         run: bun run check:godfile
 
   atlas:

@@ -1,3 +1,6 @@
+// ── REFERENCE MODEL — NO PRODUCTION CALLERS ──────────────────────────────────────────────────────────
+// Declared in harness/gates/reference-model-guard.mjs; this module is executable specification until wired.
+
 import { nodeHashOfPath } from './build.js';
 import { createDepgraph } from './depgraph.js';
 import { delta } from './fold.js';
