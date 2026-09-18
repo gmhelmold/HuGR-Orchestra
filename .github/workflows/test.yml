@@ -171,7 +171,19 @@ jobs:
         timeout-minutes: 20
         run: |
           if [ "$RUNNER_OS" = "Windows" ]; then
-            GITHUB_ACTIONS=false bun turbo test --ui=stream --no-daemon
+            # Turbo 2.10.2 leaves the Windows orchestration process alive after
+            # every real test task has completed. Execute the exact non-empty
+            # task graph reported by `bun turbo test --dry=json` directly.
+            bun --cwd packages/http-recorder run build
+            bun --cwd packages/plugin run build
+            bun --cwd packages/sdk/js run build
+            bun --cwd packages/ui run build
+            bun --cwd packages/function test
+            bun --cwd packages/ui test
+            bun --cwd packages/session-ui test
+            bun --cwd packages/app test
+            bun --cwd packages/core test
+            bun --cwd packages/opencode test
           else
             GITHUB_ACTIONS=false bun turbo test
           fi

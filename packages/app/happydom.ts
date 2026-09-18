@@ -1,11 +1,6 @@
-import { afterAll } from "bun:test"
 import { GlobalRegistrator } from "@happy-dom/global-registrator"
 
 GlobalRegistrator.register()
-
-afterAll(async () => {
-  await GlobalRegistrator.unregister()
-})
 
 const originalGetContext = HTMLCanvasElement.prototype.getContext
 // @ts-expect-error - we're overriding with a simplified mock
