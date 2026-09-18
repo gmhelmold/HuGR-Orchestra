@@ -171,7 +171,7 @@ jobs:
         timeout-minutes: 20
         run: |
           if [ "$RUNNER_OS" = "Windows" ]; then
-            GITHUB_ACTIONS=false bun turbo test --ui=stream --no-daemon --concurrency=1
+            GITHUB_ACTIONS=false bun turbo test --ui=stream --no-daemon
           else
             GITHUB_ACTIONS=false bun turbo test
           fi
