@@ -65,3 +65,15 @@ Antes de fechar cada issue, a correção deve passar sua regressão da proprieda
 ## Revisão da última publicação
 
 [Revisão de a360219b](host-literal-runtime/review/REVIEW.md): 38 arquivos e issues [#83](https://github.com/gmhelmold/HuGR-Orchestra/issues/83)/[#84](https://github.com/gmhelmold/HuGR-Orchestra/issues/84). Ambos os achados confirmados; documentação e probes corrigidos. Modo desired: 5 falhas Own e 2 V2; baseline selecionado de 63 testes e três typechecks passam. Resultados antigos preservados, sem correção de produção.
+
+
+## Rodada adicional — identidade de Own e binding de execução do Maestro
+
+Duas novas fronteiras foram reproduzidas duas vezes no runtime original, em fixtures novas, sem alteração de código de produção:
+
+| Evidência | Issue | Resultado |
+|---|---|---|
+| [Namespace canônico de Own](own-namespace-runtime/README.md) | [#85](https://github.com/gmhelmold/HuGR-Orchestra/issues/85) | Um `.claude` skill não canônico declarando `own_c3Jj` é resolvido e servido pelo SkillTool como `Loaded skill: own_c3Jj`. Duplicidade não gera HOLD. |
+| [Binding foreground/background](maestro-background-binding/README.md) | [#86](https://github.com/gmhelmold/HuGR-Orchestra/issues/86) | O lifecycle governado aceita `background:true` usando o mesmo taskHash/aprovação do caso foreground, pois o modo não participa do intent/hash. |
+
+Os dois resultados foram cruzados por código-fonte e execução. #85 é distinto de freshness (#36) e transformação pós-verificação (#83). #86 é latente em relação à entrada pública de apresentação, que continua corretamente bloqueada até existirem leitores duráveis de plano e validação.
