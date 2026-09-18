@@ -57,27 +57,20 @@ export namespace RipgrepBinary {
         const dir = yield* fs.makeTempDirectoryScoped({ directory: Global.Path.bin, prefix: "ripgrep-" })
 
         if (config.extension === "zip") {
-          const tar = yield* Effect.sync(() => which("tar.exe") ?? which("tar"))
-          if (tar) {
-            const result = yield* run(tar, ["-xf", archive, "-C", dir])
-            if (result.code !== 0)
-              throw new Error(
-                result.stderr.trim() || result.stdout.trim() || `ripgrep extraction failed with code ${result.code}`,
-              )
-          } else {
-            const shell =
-              (yield* Effect.sync(() => which("powershell.exe") ?? which("pwsh.exe"))) ?? "powershell.exe"
-            const result = yield* run(shell, [
-              "-NoProfile",
-              "-NonInteractive",
-              "-Command",
-              `$global:ProgressPreference = 'SilentlyContinue'; Expand-Archive -LiteralPath '${archive.replaceAll("'", "''")}' -DestinationPath '${dir.replaceAll("'", "''")}' -Force`,
-            ])
-            if (result.code !== 0)
-              throw new Error(
-                result.stderr.trim() || result.stdout.trim() || `ripgrep extraction failed with code ${result.code}`,
-              )
-          }
+          const shell = (yield* Effect.sync(() => which("pwsh.exe") ?? which("powershell.exe"))) ?? "powershell.exe"
+          const zip = archive.replaceAll("'", "''")
+          const destination = dir.replaceAll("'", "''")
+          const result = yield* run(shell, [
+            "-NoLogo",
+            "-NoProfile",
+            "-NonInteractive",
+            "-Command",
+            `$ErrorActionPreference = 'Stop'; try { Add-Type -AssemblyName System.IO.Compression.ZipFile } catch { }; [System.IO.Compression.ZipFile]::ExtractToDirectory('${zip}', '${destination}', $true)`,
+          ])
+          if (result.code !== 0)
+            throw new Error(
+              result.stderr.trim() || result.stdout.trim() || `ripgrep extraction failed with code ${result.code}`,
+            )
         }
 
         if (config.extension === "tar.gz") {
