@@ -1,5 +1,5 @@
 import path from "path"
-import { Context, Effect, Layer, Semaphore, Stream } from "effect"
+import { Context, Effect, Layer, Stream } from "effect"
 import { FetchHttpClient, HttpClient, HttpClientRequest } from "effect/unstable/http"
 import { ChildProcess } from "effect/unstable/process"
 import { ChildProcessSpawner } from "effect/unstable/process/ChildProcessSpawner"
@@ -8,11 +8,11 @@ import { makeGlobalNode } from "../effect/app-node"
 import { httpClient } from "../effect/app-node-platform"
 import { FSUtil } from "../fs-util"
 import { Global } from "../global"
+import { Flock } from "../util/flock"
 import { which } from "../util/which"
 
 export namespace RipgrepBinary {
   const VERSION = "15.1.0"
-  const materialize = Semaphore.makeUnsafe(1)
   const PLATFORM = {
     "arm64-darwin": { platform: "aarch64-apple-darwin", extension: "tar.gz" },
     "arm64-linux": { platform: "aarch64-unknown-linux-gnu", extension: "tar.gz" },
@@ -91,8 +91,9 @@ export namespace RipgrepBinary {
 
       return Service.of({
         filepath: yield* Effect.cached(
-          materialize.withPermit(
+          Effect.scoped(
             Effect.gen(function* () {
+              yield* Flock.effect("ripgrep-binary-materialize")
               const system = yield* Effect.sync(() => which(process.platform === "win32" ? "rg.exe" : "rg"))
               if (system && (yield* fs.isFile(system).pipe(Effect.orDie))) return system
 
