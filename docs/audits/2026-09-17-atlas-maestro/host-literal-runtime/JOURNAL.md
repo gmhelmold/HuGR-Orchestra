@@ -8,3 +8,7 @@
 5. Final observations: both host runs completed nine cases each; both V2 runs completed five cases each. Read back actual marked lines from captured provider messages, not only the receipt boolean. Same literal changes occurred twice while materialized files and freshness checks remained unchanged/READY.
 6. Counterevidence and review: existing selected suites passed (51 host, 12 Core); package typechecks passed for Atlas, Core and OpenCode. Source integrity check finds no tracked production diff; all 819 compiled JS files examined under Atlas package dist directories match the clean same-SHA donor (this universe includes compiled tests, not only src).
 7. Instrumentation limit: a request to create a standalone acceptance checker was blocked before execution. The file does not exist, it was not retried via another route, and no checker exit-1 or checker self-test is claimed. Continued read-only review of captured messages and active-source/list/tool records. The collectors intentionally assert baseline behavior; their green status is not product acceptance.
+
+## Revisão posterior da entrega
+
+Veja [review/REVIEW.md](review/REVIEW.md): escopo de 38 arquivos, rechecagem histórica, repetição original, modos observed/desired, correção de readback e isolamento das saídas. Os registros anteriores permanecem históricos. A revisão não amplia a cobertura global nem corrige o produto.

@@ -1,7 +1,8 @@
 // Copy to packages/core/test/audit-skill-replacement.test.ts in a disposable checkout.
-// Original state, skill, registry and output serializers. Only permission is a named allow fixture.
+// Original state, skill, registry and output serializers. Permission is an allow fixture;
+// ToolOutputStore uses its original config-free nodeWithoutConfig variant.
 import { afterAll, expect } from "bun:test"
-import { mkdirSync, writeFileSync } from "node:fs"
+import { mkdirSync, writeFileSync, readFileSync, existsSync } from "node:fs"
 import path from "node:path"
 import { Effect, Layer } from "effect"
 import { AppNodeBuilder } from "../src/effect/app-node-builder"
@@ -18,7 +19,11 @@ import { testEffect } from "./lib/effect"
 import { executeTool, toolIdentity } from "./lib/tool"
 
 const records: object[] = []
-const output = process.env.AUDIT_OUT!
+const output = process.env.AUDIT_OUT
+if (!output) throw new Error("AUDIT_OUT must name a new output file outside the published evidence directory")
+if (existsSync(output)) throw new Error("AUDIT_OUT already exists; refusing to overwrite evidence")
+const assertionMode = process.env.AUDIT_EXPECT ?? "observed"
+if (assertionMode !== "observed" && assertionMode !== "desired") throw new Error("AUDIT_EXPECT must be observed or desired")
 const permission = Layer.mock(PermissionV2.Service, { assert: () => Effect.void })
 const it = testEffect(AppNodeBuilder.build(LayerNode.group([
   SkillV2.node, ToolRegistry.node, ToolRegistry.toolsNode, SkillTool.node,
@@ -26,7 +31,7 @@ const it = testEffect(AppNodeBuilder.build(LayerNode.group([
   [PermissionV2.node, permission],
   [ToolOutputStore.node, ToolOutputStore.nodeWithoutConfig],
 ]))
-afterAll(() => writeFileSync(output, JSON.stringify(records, null, 2) + "\n"))
+afterAll(() => writeFileSync(output, JSON.stringify(records, null, 2) + "\n", { flag: "wx" }))
 
 for (const mode of ["embedded-cached-replace", "embedded-uncached-replace", "embedded-new-name", "directory-reload", "directory-new-path"] as const) {
   it.live(mode, () => Effect.acquireRelease(
@@ -71,12 +76,16 @@ for (const mode of ["embedded-cached-replace", "embedded-uncached-replace", "emb
       sessionID: SessionV2.ID.make("ses_audit_replacement"), ...toolIdentity,
       call: { type: "tool-call", id: "call-audit-replacement", name: "skill", input: { name: nextName } },
     })
-    records.push({ mode, primed, afterDisposal, sources, listed, reloaded, tool,
-      expected: newInfo.content, currentDiskOrEmbeddedContent: newInfo.content,
+    const currentDiskContent = embedded ? undefined : readFileSync(newInfo.location, "utf8")
+    if (currentDiskContent !== undefined) expect(currentDiskContent).toContain("AUDIT_VERSION_B")
+    records.push({ assertionMode, mode, primed, afterDisposal, sources, listed, reloaded, tool,
+      currentDiskContent,
+      expected: newInfo.content,
       desiredSourceAgreement: listed[0]?.content === newInfo.content,
       desiredReloadAgreement: reloaded[0]?.content === newInfo.content })
-    const observed = mode === "embedded-cached-replace" || mode === "directory-reload" ? "AUDIT_VERSION_A" : "AUDIT_VERSION_B"
-    expect(listed[0]?.content).toBe(observed) // characterization, not an acceptance pass
+    const observed = assertionMode === "desired" ? newInfo.content
+      : mode === "embedded-cached-replace" || mode === "directory-reload" ? "AUDIT_VERSION_A" : "AUDIT_VERSION_B"
+    expect(listed[0]?.content).toBe(observed) // desired mode checks agreement, observed mode characterizes the baseline
     expect(reloaded[0]?.content).toBe(observed)
     expect(tool.type).toBe("text")
     expect(tool.value).toContain(observed)

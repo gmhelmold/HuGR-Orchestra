@@ -1,0 +1,328 @@
+[
+  {
+    "assertionMode": "observed",
+    "mode": "own-tool-dollar",
+    "route": "tool",
+    "args": "",
+    "original": "The module returns the literal \"$1\".",
+    "observed": [
+      "The module returns the literal \"$1\"."
+    ],
+    "before": {
+      "status": "READY"
+    },
+    "after": {
+      "status": "READY"
+    },
+    "source": "src/a.ts",
+    "sourceBlob": "c1958ac28167996ebd9fc1226417989739409ffe",
+    "materializeOutput": "materialize-own-snapshot: wrote OWN-SNAPSHOT.json and 2 file(s) under .opencode/skills/own; replacement uses transactional rollback, not crash-atomic commit",
+    "artifactUnchanged": true,
+    "requestCount": 2,
+    "endpoint": "/v1/chat/completions",
+    "desiredLiteralEquality": true,
+    "expectedCommandSemantics": null,
+    "renderedArtifact": "---\nname: own_c3Jj\ndescription: Atlas ownership context for src.\n---\n\n<!-- own-receipt:begin -->\n{\"schemaVersion\":1,\"unit\":\"src\",\"skillName\":\"own_c3Jj\",\"snapshot\":\"literal-fixture\",\"sourceRevision\":\"6b1bbc56734010351b1ef3c18974765f527eadab\",\"graphCoverage\":\"COMPLETE\",\"sourceBlobs\":{\"src/a.ts\":\"c1958ac28167996ebd9fc1226417989739409ffe\"},\"factIds\":[\"genesis:deterministic-bootstrap\"],\"drillUnits\":[],\"contentHash\":\"2ab703fb87641d739bb002b4924b348df9532fe46b83f44b5043f2a924bdc937\"}\n<!-- own-receipt:end -->\n\n# own_c3Jj\n\n## Role\n\nControlled literal fixture.\n\n## Terrain\n\n- Owner: atlas-foundation\n- Tier: T1\n- Contains: `src/a.ts`\n\n## Governing Facts\n\n- [T1] `genesis:deterministic-bootstrap`: AUDIT_LITERAL_BEGIN[The module returns the literal \"$1\".]AUDIT_LITERAL_END\n\n## Advisory Facts\n\n\n## Relations\n\n\n## Drill\n",
+    "capturedMessages": [
+      {
+        "role": "user",
+        "content": "Load the audit skill."
+      },
+      {
+        "role": "assistant",
+        "content": "",
+        "tool_calls": [
+          {
+            "id": "call_1",
+            "type": "function",
+            "function": {
+              "name": "skill",
+              "arguments": "{\"name\":\"own_c3Jj\"}"
+            }
+          }
+        ]
+      },
+      {
+        "role": "tool",
+        "tool_call_id": "call_1",
+        "content": "<skill_content name=\"own_c3Jj\">\n# Skill: own_c3Jj\n\n<!-- own-receipt:begin -->\n{\"schemaVersion\":1,\"unit\":\"src\",\"skillName\":\"own_c3Jj\",\"snapshot\":\"literal-fixture\",\"sourceRevision\":\"6b1bbc56734010351b1ef3c18974765f527eadab\",\"graphCoverage\":\"COMPLETE\",\"sourceBlobs\":{\"src/a.ts\":\"c1958ac28167996ebd9fc1226417989739409ffe\"},\"factIds\":[\"genesis:deterministic-bootstrap\"],\"drillUnits\":[],\"contentHash\":\"2ab703fb87641d739bb002b4924b348df9532fe46b83f44b5043f2a924bdc937\"}\n<!-- own-receipt:end -->\n\n# own_c3Jj\n\n## Role\n\nControlled literal fixture.\n\n## Terrain\n\n- Owner: atlas-foundation\n- Tier: T1\n- Contains: `src/a.ts`\n\n## Governing Facts\n\n- [T1] `genesis:deterministic-bootstrap`: AUDIT_LITERAL_BEGIN[The module returns the literal \"$1\".]AUDIT_LITERAL_END\n\n## Advisory Facts\n\n\n## Relations\n\n\n## Drill\n\nBase directory for this skill: <FIXTURE>/.opencode/skills/own/c3Jj\nRelative paths in this skill (e.g., scripts/, reference/) are relative to this base directory.\nNote: file list is sampled.\n\n<skill_files>\n\n</skill_files>\n</skill_content>"
+      }
+    ],
+    "sourceReadback": "export const literal = \"The module returns the literal \\\"$1\\\".\";\n"
+  },
+  {
+    "assertionMode": "observed",
+    "mode": "own-command-dollar",
+    "route": "command",
+    "args": "",
+    "original": "The module returns the literal \"$1\".",
+    "observed": [
+      "The module returns the literal \"\"."
+    ],
+    "before": {
+      "status": "READY"
+    },
+    "after": {
+      "status": "READY"
+    },
+    "source": "src/a.ts",
+    "sourceBlob": "c1958ac28167996ebd9fc1226417989739409ffe",
+    "materializeOutput": "materialize-own-snapshot: wrote OWN-SNAPSHOT.json and 2 file(s) under .opencode/skills/own; replacement uses transactional rollback, not crash-atomic commit",
+    "artifactUnchanged": true,
+    "requestCount": 1,
+    "endpoint": "/v1/chat/completions",
+    "desiredLiteralEquality": false,
+    "expectedCommandSemantics": null,
+    "renderedArtifact": "---\nname: own_c3Jj\ndescription: Atlas ownership context for src.\n---\n\n<!-- own-receipt:begin -->\n{\"schemaVersion\":1,\"unit\":\"src\",\"skillName\":\"own_c3Jj\",\"snapshot\":\"literal-fixture\",\"sourceRevision\":\"e790085d60b8333526cfcaf86a0984e846770b6c\",\"graphCoverage\":\"COMPLETE\",\"sourceBlobs\":{\"src/a.ts\":\"c1958ac28167996ebd9fc1226417989739409ffe\"},\"factIds\":[\"genesis:deterministic-bootstrap\"],\"drillUnits\":[],\"contentHash\":\"c4be353bc7d1c86c0602b7dc13667abf691df2e5401498fc49217833fba917e7\"}\n<!-- own-receipt:end -->\n\n# own_c3Jj\n\n## Role\n\nControlled literal fixture.\n\n## Terrain\n\n- Owner: atlas-foundation\n- Tier: T1\n- Contains: `src/a.ts`\n\n## Governing Facts\n\n- [T1] `genesis:deterministic-bootstrap`: AUDIT_LITERAL_BEGIN[The module returns the literal \"$1\".]AUDIT_LITERAL_END\n\n## Advisory Facts\n\n\n## Relations\n\n\n## Drill\n",
+    "capturedMessages": [
+      {
+        "role": "user",
+        "content": "<!-- own-receipt:begin -->\n{\"schemaVersion\":1,\"unit\":\"src\",\"skillName\":\"own_c3Jj\",\"snapshot\":\"literal-fixture\",\"sourceRevision\":\"e790085d60b8333526cfcaf86a0984e846770b6c\",\"graphCoverage\":\"COMPLETE\",\"sourceBlobs\":{\"src/a.ts\":\"c1958ac28167996ebd9fc1226417989739409ffe\"},\"factIds\":[\"genesis:deterministic-bootstrap\"],\"drillUnits\":[],\"contentHash\":\"c4be353bc7d1c86c0602b7dc13667abf691df2e5401498fc49217833fba917e7\"}\n<!-- own-receipt:end -->\n\n# own_c3Jj\n\n## Role\n\nControlled literal fixture.\n\n## Terrain\n\n- Owner: atlas-foundation\n- Tier: T1\n- Contains: `src/a.ts`\n\n## Governing Facts\n\n- [T1] `genesis:deterministic-bootstrap`: AUDIT_LITERAL_BEGIN[The module returns the literal \"\".]AUDIT_LITERAL_END\n\n## Advisory Facts\n\n\n## Relations\n\n\n## Drill\n\n\nBase directory for this skill: <FIXTURE>/.opencode/skills/own/c3Jj\nRelative paths in this skill (e.g., scripts/, references/) are relative to this base directory."
+      }
+    ],
+    "sourceReadback": "export const literal = \"The module returns the literal \\\"$1\\\".\";\n"
+  },
+  {
+    "assertionMode": "observed",
+    "mode": "own-command-arguments",
+    "route": "command",
+    "args": "",
+    "original": "The module returns the literal \"$ARGUMENTS\".",
+    "observed": [
+      "The module returns the literal \"\"."
+    ],
+    "before": {
+      "status": "READY"
+    },
+    "after": {
+      "status": "READY"
+    },
+    "source": "src/a.ts",
+    "sourceBlob": "086da3f57e8ce381cb952b8fdbe135c899677e35",
+    "materializeOutput": "materialize-own-snapshot: wrote OWN-SNAPSHOT.json and 2 file(s) under .opencode/skills/own; replacement uses transactional rollback, not crash-atomic commit",
+    "artifactUnchanged": true,
+    "requestCount": 1,
+    "endpoint": "/v1/chat/completions",
+    "desiredLiteralEquality": false,
+    "expectedCommandSemantics": null,
+    "renderedArtifact": "---\nname: own_c3Jj\ndescription: Atlas ownership context for src.\n---\n\n<!-- own-receipt:begin -->\n{\"schemaVersion\":1,\"unit\":\"src\",\"skillName\":\"own_c3Jj\",\"snapshot\":\"literal-fixture\",\"sourceRevision\":\"e4ce849d883f4765f703470a48e34b90990a661f\",\"graphCoverage\":\"COMPLETE\",\"sourceBlobs\":{\"src/a.ts\":\"086da3f57e8ce381cb952b8fdbe135c899677e35\"},\"factIds\":[\"genesis:deterministic-bootstrap\"],\"drillUnits\":[],\"contentHash\":\"57d89503f9a654c1045a64164cf10a582a961ae44c5b403a0111925ee9785438\"}\n<!-- own-receipt:end -->\n\n# own_c3Jj\n\n## Role\n\nControlled literal fixture.\n\n## Terrain\n\n- Owner: atlas-foundation\n- Tier: T1\n- Contains: `src/a.ts`\n\n## Governing Facts\n\n- [T1] `genesis:deterministic-bootstrap`: AUDIT_LITERAL_BEGIN[The module returns the literal \"$ARGUMENTS\".]AUDIT_LITERAL_END\n\n## Advisory Facts\n\n\n## Relations\n\n\n## Drill\n",
+    "capturedMessages": [
+      {
+        "role": "user",
+        "content": "<!-- own-receipt:begin -->\n{\"schemaVersion\":1,\"unit\":\"src\",\"skillName\":\"own_c3Jj\",\"snapshot\":\"literal-fixture\",\"sourceRevision\":\"e4ce849d883f4765f703470a48e34b90990a661f\",\"graphCoverage\":\"COMPLETE\",\"sourceBlobs\":{\"src/a.ts\":\"086da3f57e8ce381cb952b8fdbe135c899677e35\"},\"factIds\":[\"genesis:deterministic-bootstrap\"],\"drillUnits\":[],\"contentHash\":\"57d89503f9a654c1045a64164cf10a582a961ae44c5b403a0111925ee9785438\"}\n<!-- own-receipt:end -->\n\n# own_c3Jj\n\n## Role\n\nControlled literal fixture.\n\n## Terrain\n\n- Owner: atlas-foundation\n- Tier: T1\n- Contains: `src/a.ts`\n\n## Governing Facts\n\n- [T1] `genesis:deterministic-bootstrap`: AUDIT_LITERAL_BEGIN[The module returns the literal \"\".]AUDIT_LITERAL_END\n\n## Advisory Facts\n\n\n## Relations\n\n\n## Drill\n\n\nBase directory for this skill: <FIXTURE>/.opencode/skills/own/c3Jj\nRelative paths in this skill (e.g., scripts/, references/) are relative to this base directory."
+      }
+    ],
+    "sourceReadback": "export const literal = \"The module returns the literal \\\"$ARGUMENTS\\\".\";\n"
+  },
+  {
+    "assertionMode": "observed",
+    "mode": "own-command-money",
+    "route": "command",
+    "args": "",
+    "original": "The documented threshold is $100.",
+    "observed": [
+      "The documented threshold is ."
+    ],
+    "before": {
+      "status": "READY"
+    },
+    "after": {
+      "status": "READY"
+    },
+    "source": "src/a.ts",
+    "sourceBlob": "ca3a5e2c34378c4dbb2220527b753bb06a8240ba",
+    "materializeOutput": "materialize-own-snapshot: wrote OWN-SNAPSHOT.json and 2 file(s) under .opencode/skills/own; replacement uses transactional rollback, not crash-atomic commit",
+    "artifactUnchanged": true,
+    "requestCount": 1,
+    "endpoint": "/v1/chat/completions",
+    "desiredLiteralEquality": false,
+    "expectedCommandSemantics": null,
+    "renderedArtifact": "---\nname: own_c3Jj\ndescription: Atlas ownership context for src.\n---\n\n<!-- own-receipt:begin -->\n{\"schemaVersion\":1,\"unit\":\"src\",\"skillName\":\"own_c3Jj\",\"snapshot\":\"literal-fixture\",\"sourceRevision\":\"14c36ac616a55b68dea7f334f2b47104a54c748f\",\"graphCoverage\":\"COMPLETE\",\"sourceBlobs\":{\"src/a.ts\":\"ca3a5e2c34378c4dbb2220527b753bb06a8240ba\"},\"factIds\":[\"genesis:deterministic-bootstrap\"],\"drillUnits\":[],\"contentHash\":\"36da18000c8b55458b532035201b321cb3240696f21d9c9e12db73c6542166ef\"}\n<!-- own-receipt:end -->\n\n# own_c3Jj\n\n## Role\n\nControlled literal fixture.\n\n## Terrain\n\n- Owner: atlas-foundation\n- Tier: T1\n- Contains: `src/a.ts`\n\n## Governing Facts\n\n- [T1] `genesis:deterministic-bootstrap`: AUDIT_LITERAL_BEGIN[The documented threshold is $100.]AUDIT_LITERAL_END\n\n## Advisory Facts\n\n\n## Relations\n\n\n## Drill\n",
+    "capturedMessages": [
+      {
+        "role": "user",
+        "content": "<!-- own-receipt:begin -->\n{\"schemaVersion\":1,\"unit\":\"src\",\"skillName\":\"own_c3Jj\",\"snapshot\":\"literal-fixture\",\"sourceRevision\":\"14c36ac616a55b68dea7f334f2b47104a54c748f\",\"graphCoverage\":\"COMPLETE\",\"sourceBlobs\":{\"src/a.ts\":\"ca3a5e2c34378c4dbb2220527b753bb06a8240ba\"},\"factIds\":[\"genesis:deterministic-bootstrap\"],\"drillUnits\":[],\"contentHash\":\"36da18000c8b55458b532035201b321cb3240696f21d9c9e12db73c6542166ef\"}\n<!-- own-receipt:end -->\n\n# own_c3Jj\n\n## Role\n\nControlled literal fixture.\n\n## Terrain\n\n- Owner: atlas-foundation\n- Tier: T1\n- Contains: `src/a.ts`\n\n## Governing Facts\n\n- [T1] `genesis:deterministic-bootstrap`: AUDIT_LITERAL_BEGIN[The documented threshold is .]AUDIT_LITERAL_END\n\n## Advisory Facts\n\n\n## Relations\n\n\n## Drill\n\n\nBase directory for this skill: <FIXTURE>/.opencode/skills/own/c3Jj\nRelative paths in this skill (e.g., scripts/, references/) are relative to this base directory."
+      }
+    ],
+    "sourceReadback": "export const literal = \"The documented threshold is $100.\";\n"
+  },
+  {
+    "assertionMode": "observed",
+    "mode": "own-command-path",
+    "route": "command",
+    "args": "",
+    "original": "The source path is src/cost$1.ts.",
+    "observed": [
+      "The source path is src/cost.ts."
+    ],
+    "before": {
+      "status": "READY"
+    },
+    "after": {
+      "status": "READY"
+    },
+    "source": "src/cost$1.ts",
+    "sourceBlob": "c8ee1a5f0127f508c23c85060d978252de6c8821",
+    "materializeOutput": "materialize-own-snapshot: wrote OWN-SNAPSHOT.json and 2 file(s) under .opencode/skills/own; replacement uses transactional rollback, not crash-atomic commit",
+    "artifactUnchanged": true,
+    "requestCount": 1,
+    "endpoint": "/v1/chat/completions",
+    "desiredLiteralEquality": false,
+    "expectedCommandSemantics": null,
+    "renderedArtifact": "---\nname: own_c3Jj\ndescription: Atlas ownership context for src.\n---\n\n<!-- own-receipt:begin -->\n{\"schemaVersion\":1,\"unit\":\"src\",\"skillName\":\"own_c3Jj\",\"snapshot\":\"literal-fixture\",\"sourceRevision\":\"444a976a3c2934501eafa33272241fc39f650828\",\"graphCoverage\":\"COMPLETE\",\"sourceBlobs\":{\"src/cost$1.ts\":\"c8ee1a5f0127f508c23c85060d978252de6c8821\"},\"factIds\":[\"genesis:deterministic-bootstrap\"],\"drillUnits\":[],\"contentHash\":\"c2580673d9d9f517f3d4a0da94c5d22978ea10ddc179b8b02c0b453d3c8522cd\"}\n<!-- own-receipt:end -->\n\n# own_c3Jj\n\n## Role\n\nControlled literal fixture.\n\n## Terrain\n\n- Owner: atlas-foundation\n- Tier: T1\n- Contains: `src/cost$1.ts`\n\n## Governing Facts\n\n- [T1] `genesis:deterministic-bootstrap`: AUDIT_LITERAL_BEGIN[The source path is src/cost$1.ts.]AUDIT_LITERAL_END\n\n## Advisory Facts\n\n\n## Relations\n\n\n## Drill\n",
+    "capturedMessages": [
+      {
+        "role": "user",
+        "content": "<!-- own-receipt:begin -->\n{\"schemaVersion\":1,\"unit\":\"src\",\"skillName\":\"own_c3Jj\",\"snapshot\":\"literal-fixture\",\"sourceRevision\":\"444a976a3c2934501eafa33272241fc39f650828\",\"graphCoverage\":\"COMPLETE\",\"sourceBlobs\":{\"src/cost.ts\":\"c8ee1a5f0127f508c23c85060d978252de6c8821\"},\"factIds\":[\"genesis:deterministic-bootstrap\"],\"drillUnits\":[],\"contentHash\":\"c2580673d9d9f517f3d4a0da94c5d22978ea10ddc179b8b02c0b453d3c8522cd\"}\n<!-- own-receipt:end -->\n\n# own_c3Jj\n\n## Role\n\nControlled literal fixture.\n\n## Terrain\n\n- Owner: atlas-foundation\n- Tier: T1\n- Contains: `src/cost.ts`\n\n## Governing Facts\n\n- [T1] `genesis:deterministic-bootstrap`: AUDIT_LITERAL_BEGIN[The source path is src/cost.ts.]AUDIT_LITERAL_END\n\n## Advisory Facts\n\n\n## Relations\n\n\n## Drill\n\n\nBase directory for this skill: <FIXTURE>/.opencode/skills/own/c3Jj\nRelative paths in this skill (e.g., scripts/, references/) are relative to this base directory."
+      }
+    ],
+    "sourceReadback": "export const literal = \"The source path is src/cost$1.ts.\";\n"
+  },
+  {
+    "assertionMode": "observed",
+    "mode": "own-command-argument-value",
+    "route": "command",
+    "args": "review",
+    "original": "The module returns the literal \"$1\".",
+    "observed": [
+      "The module returns the literal \"review\"."
+    ],
+    "before": {
+      "status": "READY"
+    },
+    "after": {
+      "status": "READY"
+    },
+    "source": "src/a.ts",
+    "sourceBlob": "c1958ac28167996ebd9fc1226417989739409ffe",
+    "materializeOutput": "materialize-own-snapshot: wrote OWN-SNAPSHOT.json and 2 file(s) under .opencode/skills/own; replacement uses transactional rollback, not crash-atomic commit",
+    "artifactUnchanged": true,
+    "requestCount": 1,
+    "endpoint": "/v1/chat/completions",
+    "desiredLiteralEquality": false,
+    "expectedCommandSemantics": null,
+    "renderedArtifact": "---\nname: own_c3Jj\ndescription: Atlas ownership context for src.\n---\n\n<!-- own-receipt:begin -->\n{\"schemaVersion\":1,\"unit\":\"src\",\"skillName\":\"own_c3Jj\",\"snapshot\":\"literal-fixture\",\"sourceRevision\":\"0194e5f03fa098ba52995031f8f91cda18594177\",\"graphCoverage\":\"COMPLETE\",\"sourceBlobs\":{\"src/a.ts\":\"c1958ac28167996ebd9fc1226417989739409ffe\"},\"factIds\":[\"genesis:deterministic-bootstrap\"],\"drillUnits\":[],\"contentHash\":\"b9461fa6638246c2eed1563d58de2135c562b547f4d9d895605fb67a3e24b91b\"}\n<!-- own-receipt:end -->\n\n# own_c3Jj\n\n## Role\n\nControlled literal fixture.\n\n## Terrain\n\n- Owner: atlas-foundation\n- Tier: T1\n- Contains: `src/a.ts`\n\n## Governing Facts\n\n- [T1] `genesis:deterministic-bootstrap`: AUDIT_LITERAL_BEGIN[The module returns the literal \"$1\".]AUDIT_LITERAL_END\n\n## Advisory Facts\n\n\n## Relations\n\n\n## Drill\n",
+    "capturedMessages": [
+      {
+        "role": "user",
+        "content": "<!-- own-receipt:begin -->\n{\"schemaVersion\":1,\"unit\":\"src\",\"skillName\":\"own_c3Jj\",\"snapshot\":\"literal-fixture\",\"sourceRevision\":\"0194e5f03fa098ba52995031f8f91cda18594177\",\"graphCoverage\":\"COMPLETE\",\"sourceBlobs\":{\"src/a.ts\":\"c1958ac28167996ebd9fc1226417989739409ffe\"},\"factIds\":[\"genesis:deterministic-bootstrap\"],\"drillUnits\":[],\"contentHash\":\"b9461fa6638246c2eed1563d58de2135c562b547f4d9d895605fb67a3e24b91b\"}\n<!-- own-receipt:end -->\n\n# own_c3Jj\n\n## Role\n\nControlled literal fixture.\n\n## Terrain\n\n- Owner: atlas-foundation\n- Tier: T1\n- Contains: `src/a.ts`\n\n## Governing Facts\n\n- [T1] `genesis:deterministic-bootstrap`: AUDIT_LITERAL_BEGIN[The module returns the literal \"review\".]AUDIT_LITERAL_END\n\n## Advisory Facts\n\n\n## Relations\n\n\n## Drill\n\n\nBase directory for this skill: <FIXTURE>/.opencode/skills/own/c3Jj\nRelative paths in this skill (e.g., scripts/, references/) are relative to this base directory."
+      }
+    ],
+    "sourceReadback": "export const literal = \"The module returns the literal \\\"$1\\\".\";\n"
+  },
+  {
+    "assertionMode": "observed",
+    "mode": "own-command-plain",
+    "route": "command",
+    "args": "",
+    "original": "The source exports a literal value.",
+    "observed": [
+      "The source exports a literal value."
+    ],
+    "before": {
+      "status": "READY"
+    },
+    "after": {
+      "status": "READY"
+    },
+    "source": "src/a.ts",
+    "sourceBlob": "464435de080bb9551679d89293c59dc594e34242",
+    "materializeOutput": "materialize-own-snapshot: wrote OWN-SNAPSHOT.json and 2 file(s) under .opencode/skills/own; replacement uses transactional rollback, not crash-atomic commit",
+    "artifactUnchanged": true,
+    "requestCount": 1,
+    "endpoint": "/v1/chat/completions",
+    "desiredLiteralEquality": true,
+    "expectedCommandSemantics": null,
+    "renderedArtifact": "---\nname: own_c3Jj\ndescription: Atlas ownership context for src.\n---\n\n<!-- own-receipt:begin -->\n{\"schemaVersion\":1,\"unit\":\"src\",\"skillName\":\"own_c3Jj\",\"snapshot\":\"literal-fixture\",\"sourceRevision\":\"c661cf52a6318efbf7c3e504ae022e9bdc5bd45d\",\"graphCoverage\":\"COMPLETE\",\"sourceBlobs\":{\"src/a.ts\":\"464435de080bb9551679d89293c59dc594e34242\"},\"factIds\":[\"genesis:deterministic-bootstrap\"],\"drillUnits\":[],\"contentHash\":\"c3f8e90a49dfdd064333460d7d35bd4a123626f164186ec755e4a29912594dd9\"}\n<!-- own-receipt:end -->\n\n# own_c3Jj\n\n## Role\n\nControlled literal fixture.\n\n## Terrain\n\n- Owner: atlas-foundation\n- Tier: T1\n- Contains: `src/a.ts`\n\n## Governing Facts\n\n- [T1] `genesis:deterministic-bootstrap`: AUDIT_LITERAL_BEGIN[The source exports a literal value.]AUDIT_LITERAL_END\n\n## Advisory Facts\n\n\n## Relations\n\n\n## Drill\n",
+    "capturedMessages": [
+      {
+        "role": "user",
+        "content": "<!-- own-receipt:begin -->\n{\"schemaVersion\":1,\"unit\":\"src\",\"skillName\":\"own_c3Jj\",\"snapshot\":\"literal-fixture\",\"sourceRevision\":\"c661cf52a6318efbf7c3e504ae022e9bdc5bd45d\",\"graphCoverage\":\"COMPLETE\",\"sourceBlobs\":{\"src/a.ts\":\"464435de080bb9551679d89293c59dc594e34242\"},\"factIds\":[\"genesis:deterministic-bootstrap\"],\"drillUnits\":[],\"contentHash\":\"c3f8e90a49dfdd064333460d7d35bd4a123626f164186ec755e4a29912594dd9\"}\n<!-- own-receipt:end -->\n\n# own_c3Jj\n\n## Role\n\nControlled literal fixture.\n\n## Terrain\n\n- Owner: atlas-foundation\n- Tier: T1\n- Contains: `src/a.ts`\n\n## Governing Facts\n\n- [T1] `genesis:deterministic-bootstrap`: AUDIT_LITERAL_BEGIN[The source exports a literal value.]AUDIT_LITERAL_END\n\n## Advisory Facts\n\n\n## Relations\n\n\n## Drill\n\n\nBase directory for this skill: <FIXTURE>/.opencode/skills/own/c3Jj\nRelative paths in this skill (e.g., scripts/, references/) are relative to this base directory."
+      }
+    ],
+    "sourceReadback": "export const literal = \"The source exports a literal value.\";\n"
+  },
+  {
+    "assertionMode": "observed",
+    "mode": "own-tool-path",
+    "route": "tool",
+    "args": "",
+    "original": "The source path is src/cost$1.ts.",
+    "observed": [
+      "The source path is src/cost$1.ts."
+    ],
+    "before": {
+      "status": "READY"
+    },
+    "after": {
+      "status": "READY"
+    },
+    "source": "src/cost$1.ts",
+    "sourceBlob": "c8ee1a5f0127f508c23c85060d978252de6c8821",
+    "materializeOutput": "materialize-own-snapshot: wrote OWN-SNAPSHOT.json and 2 file(s) under .opencode/skills/own; replacement uses transactional rollback, not crash-atomic commit",
+    "artifactUnchanged": true,
+    "requestCount": 2,
+    "endpoint": "/v1/chat/completions",
+    "desiredLiteralEquality": true,
+    "expectedCommandSemantics": null,
+    "renderedArtifact": "---\nname: own_c3Jj\ndescription: Atlas ownership context for src.\n---\n\n<!-- own-receipt:begin -->\n{\"schemaVersion\":1,\"unit\":\"src\",\"skillName\":\"own_c3Jj\",\"snapshot\":\"literal-fixture\",\"sourceRevision\":\"2be743a13218230e3eb3298ebd2cbe3e7a7bf132\",\"graphCoverage\":\"COMPLETE\",\"sourceBlobs\":{\"src/cost$1.ts\":\"c8ee1a5f0127f508c23c85060d978252de6c8821\"},\"factIds\":[\"genesis:deterministic-bootstrap\"],\"drillUnits\":[],\"contentHash\":\"94fb31c35157aa2fe6b22dbf3403e46f934475ea6c70837dc7ee8f42df0bc5fe\"}\n<!-- own-receipt:end -->\n\n# own_c3Jj\n\n## Role\n\nControlled literal fixture.\n\n## Terrain\n\n- Owner: atlas-foundation\n- Tier: T1\n- Contains: `src/cost$1.ts`\n\n## Governing Facts\n\n- [T1] `genesis:deterministic-bootstrap`: AUDIT_LITERAL_BEGIN[The source path is src/cost$1.ts.]AUDIT_LITERAL_END\n\n## Advisory Facts\n\n\n## Relations\n\n\n## Drill\n",
+    "capturedMessages": [
+      {
+        "role": "user",
+        "content": "Load the audit skill."
+      },
+      {
+        "role": "assistant",
+        "content": "",
+        "tool_calls": [
+          {
+            "id": "call_1",
+            "type": "function",
+            "function": {
+              "name": "skill",
+              "arguments": "{\"name\":\"own_c3Jj\"}"
+            }
+          }
+        ]
+      },
+      {
+        "role": "tool",
+        "tool_call_id": "call_1",
+        "content": "<skill_content name=\"own_c3Jj\">\n# Skill: own_c3Jj\n\n<!-- own-receipt:begin -->\n{\"schemaVersion\":1,\"unit\":\"src\",\"skillName\":\"own_c3Jj\",\"snapshot\":\"literal-fixture\",\"sourceRevision\":\"2be743a13218230e3eb3298ebd2cbe3e7a7bf132\",\"graphCoverage\":\"COMPLETE\",\"sourceBlobs\":{\"src/cost$1.ts\":\"c8ee1a5f0127f508c23c85060d978252de6c8821\"},\"factIds\":[\"genesis:deterministic-bootstrap\"],\"drillUnits\":[],\"contentHash\":\"94fb31c35157aa2fe6b22dbf3403e46f934475ea6c70837dc7ee8f42df0bc5fe\"}\n<!-- own-receipt:end -->\n\n# own_c3Jj\n\n## Role\n\nControlled literal fixture.\n\n## Terrain\n\n- Owner: atlas-foundation\n- Tier: T1\n- Contains: `src/cost$1.ts`\n\n## Governing Facts\n\n- [T1] `genesis:deterministic-bootstrap`: AUDIT_LITERAL_BEGIN[The source path is src/cost$1.ts.]AUDIT_LITERAL_END\n\n## Advisory Facts\n\n\n## Relations\n\n\n## Drill\n\nBase directory for this skill: <FIXTURE>/.opencode/skills/own/c3Jj\nRelative paths in this skill (e.g., scripts/, reference/) are relative to this base directory.\nNote: file list is sampled.\n\n<skill_files>\n\n</skill_files>\n</skill_content>"
+      }
+    ],
+    "sourceReadback": "export const literal = \"The source path is src/cost$1.ts.\";\n"
+  },
+  {
+    "assertionMode": "observed",
+    "mode": "ordinary-command-control",
+    "route": "ordinary",
+    "args": "sample",
+    "original": "Review $1: $ARGUMENTS",
+    "observed": [
+      "Review sample: sample"
+    ],
+    "before": {
+      "status": "READY"
+    },
+    "after": {
+      "status": "READY"
+    },
+    "source": "src/a.ts",
+    "sourceBlob": "08a0263aa228a6f4b57a1e2d1a6baca37402721a",
+    "materializeOutput": "materialize-own-snapshot: wrote OWN-SNAPSHOT.json and 2 file(s) under .opencode/skills/own; replacement uses transactional rollback, not crash-atomic commit",
+    "artifactUnchanged": true,
+    "requestCount": 1,
+    "endpoint": "/v1/chat/completions",
+    "desiredLiteralEquality": null,
+    "expectedCommandSemantics": true,
+    "renderedArtifact": "---\nname: own_c3Jj\ndescription: Atlas ownership context for src.\n---\n\n<!-- own-receipt:begin -->\n{\"schemaVersion\":1,\"unit\":\"src\",\"skillName\":\"own_c3Jj\",\"snapshot\":\"literal-fixture\",\"sourceRevision\":\"05b8af2b7cf0a4251784a9c6f88a0f7560936a75\",\"graphCoverage\":\"COMPLETE\",\"sourceBlobs\":{\"src/a.ts\":\"08a0263aa228a6f4b57a1e2d1a6baca37402721a\"},\"factIds\":[\"genesis:deterministic-bootstrap\"],\"drillUnits\":[],\"contentHash\":\"24cb819e9c2e8ea6206a6a56d493d1265199fb9cfdc2a5825dfd91f883837274\"}\n<!-- own-receipt:end -->\n\n# own_c3Jj\n\n## Role\n\nControlled literal fixture.\n\n## Terrain\n\n- Owner: atlas-foundation\n- Tier: T1\n- Contains: `src/a.ts`\n\n## Governing Facts\n\n- [T1] `genesis:deterministic-bootstrap`: AUDIT_LITERAL_BEGIN[Review $1: $ARGUMENTS]AUDIT_LITERAL_END\n\n## Advisory Facts\n\n\n## Relations\n\n\n## Drill\n",
+    "capturedMessages": [
+      {
+        "role": "user",
+        "content": "AUDIT_LITERAL_BEGIN[Review sample: sample]AUDIT_LITERAL_END"
+      }
+    ],
+    "sourceReadback": "export const literal = \"Review $1: $ARGUMENTS\";\n"
+  }
+]

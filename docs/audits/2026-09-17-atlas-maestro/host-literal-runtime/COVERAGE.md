@@ -23,3 +23,7 @@ Produto fixado. Faixas realmente retornadas e relidas nesta execução; leituras
 Os dois novos probes foram executados duas vezes e revisados; a fixture original do host foi lida integralmente (157 linhas) antes da adaptação. Baselines executados não significam leitura integral de todos os seus testes. O inventário/compilação de 819 JS não é cobertura semântica.
 
 Nenhuma nova passagem global completa é declarada. Matriz de host/worktree/restart e outras pendências continuam no README e no norte canônico.
+
+## Revisão posterior da entrega
+
+Veja [review/REVIEW.md](review/REVIEW.md): escopo de 38 arquivos, rechecagem histórica, repetição original, modos observed/desired, correção de readback e isolamento das saídas. Os registros anteriores permanecem históricos. A revisão não amplia a cobertura global nem corrige o produto.

@@ -11,3 +11,7 @@ DoD: scripts and results published to audit PR; canonical issues deduplicated an
 Invariants: preserve literal evidence through consumption; cached bytes must agree with active source revision; no rewriting user files; no shell execution samples; no authority-bypass experiments.
 
 Global five-pass repository obligation remains open; this focused follow-up does not certify whole-monorepo reading.
+
+## Revisão posterior da entrega
+
+Veja [review/REVIEW.md](review/REVIEW.md): escopo de 38 arquivos, rechecagem histórica, repetição original, modos observed/desired, correção de readback e isolamento das saídas. Os registros anteriores permanecem históricos. A revisão não amplia a cobertura global nem corrige o produto.

@@ -2,7 +2,7 @@
 // Original materializer, Git, session, command/tool, serializer and local HTTP provider boundary.
 import { afterAll, expect } from "bun:test"
 import { execFileSync } from "node:child_process"
-import { mkdirSync, readFileSync, writeFileSync, realpathSync } from "node:fs"
+import { mkdirSync, readFileSync, writeFileSync, realpathSync, existsSync } from "node:fs"
 import path from "node:path"
 import { pathToFileURL } from "node:url"
 import { Effect, Layer } from "effect"
@@ -22,7 +22,11 @@ import { testEffect } from "../lib/effect"
 import { TestLLMServer } from "../lib/llm-server"
 
 const atlas = realpathSync(process.env.ATLAS_ROOT!)
-const output = process.env.AUDIT_OUT!
+const output = process.env.AUDIT_OUT
+if (!output) throw new Error("AUDIT_OUT must name a new output file outside the published evidence directory")
+if (existsSync(output)) throw new Error("AUDIT_OUT already exists; refusing to overwrite evidence")
+const assertionMode = process.env.AUDIT_EXPECT ?? "observed"
+if (assertionMode !== "observed" && assertionMode !== "desired") throw new Error("AUDIT_EXPECT must be observed or desired")
 const artifacts = await import(pathToFileURL(path.join(atlas, "packages/retrieval/dist/src/own-artifact.js")).href)
 const snapshots = await import(pathToFileURL(path.join(atlas, "packages/retrieval/dist/src/own-snapshot.js")).href)
 const records: object[] = []
@@ -35,7 +39,7 @@ const it = testEffect(LayerNode.compile(LayerNode.group([
   })],
   [RuntimeFlags.node, RuntimeFlags.layer({ experimentalEventSystem: true })],
 ]))
-afterAll(async () => { await disposeAllInstances(); writeFileSync(output, JSON.stringify(records, null, 2) + "\n") })
+afterAll(async () => { await disposeAllInstances(); writeFileSync(output, JSON.stringify(records, null, 2) + "\n", { flag: "wx" }) })
 
 const cases = [
   { mode: "own-tool-dollar", text: 'The module returns the literal "$1".', route: "tool", args: "", expected: 'The module returns the literal "$1".' },
@@ -75,9 +79,9 @@ for (const scenario of cases) {
     const artifactPath = artifacts.staticOwnArtifactPath("src") as string
     const artifact = readFileSync(path.join(dir, artifactPath), "utf8")
     const coveragePath = ".opencode/skills/own/OWN-COVERAGE.json"
-    const files = [{ path: artifactPath, content: artifact }, { path: coveragePath, content: readFileSync(path.join(dir, coveragePath), "utf8") }]
+    const readFiles = () => [{ path: artifactPath, content: readFileSync(path.join(dir, artifactPath), "utf8") }, { path: coveragePath, content: readFileSync(path.join(dir, coveragePath), "utf8") }]
     const currentBlob = (p: string) => { try { return git("hash-object", "--", p) } catch { return undefined } }
-    const verify = () => snapshots.verifyStaticOwnSnapshot(snapshots.parseOwnSnapshot(readFileSync(path.join(dir, "OWN-SNAPSHOT.json"), "utf8")), files, currentBlob)
+    const verify = () => snapshots.verifyStaticOwnSnapshot(snapshots.parseOwnSnapshot(readFileSync(path.join(dir, "OWN-SNAPSHOT.json"), "utf8")), readFiles(), currentBlob)
     const before = verify(); expect(before.status).toBe("READY")
     const configuration = {
       model: "test/test-model", permission: { "*": "allow" },
@@ -107,17 +111,20 @@ for (const scenario of cases) {
       ? m.content.flatMap((c) => typeof c?.text === "string" ? [c.text] : []) : [])
     const markedTexts = texts.filter((text) => text.includes("AUDIT_LITERAL_BEGIN["))
     const delivered = markedTexts.flatMap((text) => [...text.matchAll(/AUDIT_LITERAL_BEGIN\[([\s\S]*?)\]AUDIT_LITERAL_END/g)].map((m) => m[1]))
-    expect(delivered).toEqual([scenario.expected]) // characterization; acceptance is checked independently
     expect(JSON.stringify(messages)).toContain("You are Maestro")
     const after = verify(); expect(after.status).toBe("READY")
     expect(readFileSync(path.join(dir, artifactPath), "utf8")).toBe(artifact)
-    records.push({ mode: scenario.mode, route: scenario.route, args: scenario.args,
+    records.push({ assertionMode, mode: scenario.mode, route: scenario.route, args: scenario.args,
       original: scenario.text, observed: delivered, before, after, source,
       sourceBlob: currentBlob(source), materializeOutput: materializeOutput.trim(),
       artifactUnchanged: true, requestCount: hits.length, endpoint: last.url.pathname,
       desiredLiteralEquality: scenario.route === "ordinary" ? null : delivered[0] === scenario.text,
       expectedCommandSemantics: scenario.route === "ordinary" ? delivered[0] === scenario.expected : null,
       renderedArtifact: artifact, capturedMessages: nonSystem,
+      sourceReadback: readFileSync(path.join(dir, source), "utf8"),
     })
+    // Preserve the capture before the desired invariant fails on the audited product.
+    const expected = assertionMode === "desired" && scenario.route !== "ordinary" ? scenario.text : scenario.expected
+    expect(delivered).toEqual([expected])
   }), { git: true }, 60000)
 }

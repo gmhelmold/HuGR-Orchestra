@@ -1,37 +1,69 @@
-# Reprodução em checkout descartável
+# Reprodução em checkout descartável, sem sobrescrever evidências
 
-Produto: `b0c33d2f6567a2c741240f3c44bc00ca2f01e7e7`. Nunca copie estes coletores para uma árvore de trabalho com alterações do usuário. Eles caracterizam o defeito atual; após corrigir o produto, substitua as expectativas observacionais pelas propriedades desejadas das issues.
+Produto: `b0c33d2f6567a2c741240f3c44bc00ca2f01e7e7`. Use um clone descartável novo, não a árvore de trabalho do usuário. Instale as dependências conforme os lockfiles do repositório e do subprojeto Atlas. As execuções registradas reutilizaram dependências: não são instalação hermética.
 
-## Preparação
+Os probes atuais têm dois modos: `AUDIT_EXPECT=observed` caracteriza o comportamento existente; `AUDIT_EXPECT=desired` exige fidelidade do literal/acordo com a nova fonte. O segundo **falha no produto auditado**. Os resultados históricos originais pertencem à versão dos probes no commit `a360219b`; consulte [a revisão](review/REVIEW.md) para não misturar versões.
 
-Use as dependências do lockfile do repositório e do subprojeto Atlas. A execução registrada reutilizou uma instalação existente, com 38 links documentados; não se anuncia instalação limpa. Preserve o preload de testes original. O runner usado forneceu somente PATH/TMPDIR/LANG/LC_ALL herdados e HOME, OPENCODE_TEST_HOME, quatro diretórios XDG, OPENCODE_DISABLE_MODELS_FETCH=true e identidade Git de teste. Nenhuma chave de inferência foi herdada.
+## Preparação e ambiente mínimo
+
+Na raiz do clone descartável do produto, defina `AUDIT` como caminho absoluto deste pacote publicado, que pode estar em outro checkout. `RUN` é um diretório novo para resultados, nunca `AUDIT/evidence`.
 
 ```sh
-# A partir da raiz do checkout descartável, após instalar suas dependências:
-ROOT="$PWD"
-AUDIT=/caminho/para/este/pacote
-mkdir -p "$AUDIT/evidence"
+ROOT="$(pwd -P)"
+AUDIT="/caminho/absoluto/para/host-literal-runtime"
+[ "$(git rev-parse HEAD)" = b0c33d2f6567a2c741240f3c44bc00ca2f01e7e7 ] || exit 1
+[ -z "$(git status --porcelain)" ] || exit 1
+[ ! -e packages/core/test/audit-skill-replacement.test.ts ] || exit 1
+[ ! -e packages/opencode/test/session/audit-own-literal.test.ts ] || exit 1
+RUN="$(mktemp -d)"
+mkdir -p "$RUN/home" "$RUN/data" "$RUN/cache" "$RUN/config" "$RUN/state"
 cp "$AUDIT/probes/audit-own-literal.test.ts" packages/opencode/test/session/
 cp "$AUDIT/probes/audit-skill-replacement.test.ts" packages/core/test/
-(cd foundation/atlas && bun run typecheck)
-# Defina HOME/XDG isolados para o processo de teste; mantenha PATH para Node/Bun/Git.
-(cd packages/core && AUDIT_OUT="$AUDIT/evidence/v2-replacement-1.json" bun test test/audit-skill-replacement.test.ts --timeout 60000)
-(cd packages/opencode && ATLAS_ROOT="$ROOT/foundation/atlas" AUDIT_OUT="$AUDIT/evidence/host-literal-1.json" bun test test/session/audit-own-literal.test.ts --timeout 60000)
-# Repita cada comando em um processo novo com sufixo -2.json.
-(cd packages/core && bun test test/state.test.ts test/skill.test.ts test/tool-skill.test.ts test/skill/guidance.test.ts --timeout 60000)
-(cd packages/opencode && bun test test/maestro test/skill/skill.test.ts test/tool/skill.test.ts --timeout 60000)
-(cd packages/core && bun run typecheck)
-(cd packages/opencode && bun run typecheck)
+isolated() {
+  env -i PATH="$PATH" HOME="$RUN/home" OPENCODE_TEST_HOME="$RUN/home" \
+    XDG_DATA_HOME="$RUN/data" XDG_CACHE_HOME="$RUN/cache" \
+    XDG_CONFIG_HOME="$RUN/config" XDG_STATE_HOME="$RUN/state" \
+    OPENCODE_DISABLE_MODELS_FETCH=true \
+    GIT_AUTHOR_NAME="Audit Fixture" GIT_COMMITTER_NAME="Audit Fixture" \
+    GIT_AUTHOR_EMAIL=audit@example.invalid GIT_COMMITTER_EMAIL=audit@example.invalid "$@"
+}
+(cd "$ROOT/foundation/atlas" && isolated bun run typecheck)
+for MODE in observed desired; do
+  (cd "$ROOT/packages/core" && isolated AUDIT_EXPECT="$MODE" AUDIT_OUT="$RUN/$MODE-core.json" \
+    bun test test/audit-skill-replacement.test.ts --timeout 60000) >"$RUN/$MODE-core.log" 2>&1
+  echo "$?" >"$RUN/$MODE-core.exit"
+  (cd "$ROOT/packages/opencode" && isolated AUDIT_EXPECT="$MODE" AUDIT_OUT="$RUN/$MODE-host.json" \
+    ATLAS_ROOT="$ROOT/foundation/atlas" bun test test/session/audit-own-literal.test.ts --timeout 60000) >"$RUN/$MODE-host.log" 2>&1
+  echo "$?" >"$RUN/$MODE-host.exit"
+done
+printf 'Resultados: %s\n' "$RUN"
 ```
 
-## Oráculos, sem confundir caracterização com aceitação
+Não habilite `set -e` nesse laço: desired deve produzir exit 1 no produto auditado, e o código precisa ser registrado. **Exit 1 sozinho não comprova o defeito**: confira nomes das falhas, controles e todos os registros. O modo observed não é um teste de aceitação. Cada processo exige arquivo `AUDIT_OUT` novo; para repetir, crie outro diretório RUN ou outros nomes. Saída existente é recusada antes do coletor poder sobrescrevê-la.
 
-Em cada registro host, compare `renderedArtifact` e `original` com a linha entre AUDIT_LITERAL_BEGIN/AUDIT_LITERAL_END em `capturedMessages`, efetivamente recebida pelo servidor HTTP. Só o comando ordinário deve interpolar intencionalmente. `before` e `after` ficam READY e o teste compara o arquivo original após o consumo. Cinco casos Own divergiram por rodada; quatro controles funcionaram.
+## Baseline e typecheck
 
-Em cada registro V2, `afterDisposal` deve estar vazio. Para embedded, a própria `sources[0].skill.content` é a nova entrada autoritativa B; compare-a com `listed`, `reloaded` e a saída `tool.value`. O arquivo de diretório foi alterado pelo probe antes de registrar novamente a fonte. Dois ciclos entregaram A, três controles entregaram B. O caso embedded não depende de filesystem watcher.
+Ainda com a função `isolated` definida:
 
-Não execute ou anuncie um checker separado: sua criação nesta rodada não ocorreu. Os resultados brutos, os testes executados e as comparações acima são a evidência disponível. `pass` nos logs significa que o comportamento observado foi reproduzido, não que o literal foi preservado ou o cache corrigido.
+```sh
+(cd "$ROOT/packages/core" && isolated bun test test/state.test.ts test/skill.test.ts test/tool-skill.test.ts test/skill/guidance.test.ts --timeout 60000)
+(cd "$ROOT/packages/opencode" && isolated bun test test/maestro test/skill/skill.test.ts test/tool/skill.test.ts --timeout 60000)
+(cd "$ROOT/packages/core" && isolated bun run typecheck)
+(cd "$ROOT/packages/opencode" && isolated bun run typecheck)
+```
 
-## Limites
+Na revisão: 12 testes Core e 51 host passaram; três typechecks passaram. Desired: host 4 pass/5 fail e Core 3 pass/2 fail. O caso de diretório impõe a propriedade de acordo após substituição explícita; não inventa uma política já implementada de watcher.
 
-O servidor de provedor tem respostas programadas, não um LLM. O host usa seu SessionPrompt original diretamente; a ferramenta V2 usa o registro original, com a permissão explicitamente permitida na fixture. Não se lança uma sessão Core V2 completa. SQLite é em memória. Repetir um teste em outro processo não prova recuperação da mesma sessão durável. Não se executam templates shell.
+## O que comparar
+
+Own: compare o trecho entre `AUDIT_LITERAL_BEGIN` / `AUDIT_LITERAL_END` em `renderedArtifact` com `capturedMessages`. `observed` é apenas uma projeção dessa captura. `sourceReadback` contém a fonte realmente lida; seu Git blob deve coincidir com `sourceBlob`. As verificações before/after releem artefato e manifesto; o teste também compara o artefato byte a byte. O comando ordinário deve interpolar; o texto factual de Own não.
+
+V2: `afterDisposal` deve ficar vazio. Para embedded, a fonte ativa está em `sources[0].skill.content`; compare com `listed`, `reloaded` e `tool.value`. Para diretórios, `currentDiskContent` é readback real. O antigo campo histórico `currentDiskOrEmbeddedContent` era o valor esperado da fixture, não uma leitura independente; os JSONs antigos foram preservados com essa qualificação.
+
+As capturas são gravadas antes das assertions desejadas, permitindo inspecionar as falhas. Não existe checker separado executado nesta rodada ou na original; agora a própria execução original é acompanhada de assertions explícitas de aceitação e rechecagem dos dados capturados.
+
+## Limites e limpeza
+
+Provedor HTTP local com respostas programadas, sem inferência; SessionSummary neutralizado; SQLite em memória. Core usa permissão explicitamente permitida e a variante original `ToolOutputStore.nodeWithoutConfig`. Não há sessão V2 completa, UI, autorização real ou recuperação da mesma sessão após restart. Templates shell não são usados.
+
+Depois de preservar os resultados, remova somente as duas cópias de probes que você criou no clone descartável. Não altere nem apague dados de uma árvore de trabalho real. O diretório RUN conserva a evidência; não use seus arquivos para substituir resultados históricos publicados.

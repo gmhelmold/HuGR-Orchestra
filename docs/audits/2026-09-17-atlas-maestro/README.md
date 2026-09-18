@@ -61,3 +61,7 @@ Antes de fechar cada issue, a correção deve passar sua regressão da proprieda
 ## Continuidade: literais e substituição de fontes
 
 [Runtime original — fidelidade literal e cache V2](host-literal-runtime/README.md): dois conjuntos independentes de nove cenários host e cinco cenários V2. A fonte Own continua READY, mas comandos podem alterar literais antes do provedor; fontes V2 substituídas podem continuar servindo bytes antigos. Baseline selecionado: 63 testes existentes passando; nenhuma correção de produção ou encerramento da auditoria global. Consulte os limites e controles no relatório, inclusive a ausência de execução de um checker separado.
+
+## Revisão da última publicação
+
+[Revisão de a360219b](host-literal-runtime/review/REVIEW.md): 38 arquivos e issues [#83](https://github.com/gmhelmold/HuGR-Orchestra/issues/83)/[#84](https://github.com/gmhelmold/HuGR-Orchestra/issues/84). Ambos os achados confirmados; documentação e probes corrigidos. Modo desired: 5 falhas Own e 2 V2; baseline selecionado de 63 testes e três typechecks passam. Resultados antigos preservados, sem correção de produção.

@@ -4,13 +4,15 @@ Produto: `b0c33d2f6567a2c741240f3c44bc00ca2f01e7e7`. Norte: [CONTINUIDADE.md](..
 
 **Rodada de auditoria, não correção:** nenhuma alteração de produção, habilitação da aprovação pública, fechamento de issue ou merge. Esta publicação supera o limite anterior de fragmentos isolados para os casos aqui executados, não amplia retroativamente a evidência antiga.
 
+> **Revisão posterior:** [resultado e correções da auditoria](review/REVIEW.md). Os JSONs abaixo são históricos; os probes atuais suportam modos observed/desired. As evidências novas estão em `review/evidence/`.
+
 ## Resultado principal
 
 O artefato Own pode estar atualizado, íntegro no disco e aprovado pelo verificador original, mas seu texto ser alterado no caminho de comando de barra antes de chegar ao endpoint do provedor. Separadamente, o Core V2 pode listar a nova fonte B como ativa e ainda entregar o conteúdo antigo A pela ferramenta registrada. São duas causas independentes, não duas formas de corrupção do CAS.
 
 ## 1. Literais Own até o provedor
 
-[Coletor original-host](probes/audit-own-literal.test.ts) — [execução 1](evidence/host-literal-1.json) — [execução 2](evidence/host-literal-2.json).
+[Coletor original-host em a360219b](https://github.com/gmhelmold/HuGR-Orchestra/blob/a360219b7f3b8d317c6bf24712f6ac88103f27e1/docs/audits/2026-09-17-atlas-maestro/host-literal-runtime/probes/audit-own-literal.test.ts) — [execução 1](evidence/host-literal-1.json) — [execução 2](evidence/host-literal-2.json).
 
 O coletor cria um Git real descartável, constrói uma fixture de snapshot com revisão e blobs reais, executa o **materializador original** e o **verifyStaticOwnSnapshot original**, chama **SessionPrompt/Command/SkillTool originais**, e captura as mensagens recebidas pelo **TestLLMServer por HTTP local**. Não transcreve o renderer nem a interpolação. A fonte não muda depois da materialização; o verificador dá READY antes e depois, e o arquivo materializado permanece byte a byte igual.
 
@@ -40,9 +42,9 @@ Preservar o conteúdo factual como dados, distinguindo-o de comandos intencional
 
 ## 2. SkillV2: fonte ativa B, conteúdo servido A
 
-[Coletor Core original](probes/audit-skill-replacement.test.ts) — [execução 1](evidence/v2-replacement-1.json) — [execução 2](evidence/v2-replacement-2.json).
+[Coletor Core original em a360219b](https://github.com/gmhelmold/HuGR-Orchestra/blob/a360219b7f3b8d317c6bf24712f6ac88103f27e1/docs/audits/2026-09-17-atlas-maestro/host-literal-runtime/probes/audit-skill-replacement.test.ts) — [execução 1](evidence/v2-replacement-1.json) — [execução 2](evidence/v2-replacement-2.json).
 
-O teste usa `State`, `SkillV2`, registro de ferramentas, serialização da ferramenta e arquivos reais. A única substituição funcional é `PermissionV2.assert` permitindo o experimento; não serve como prova de autorização. A ferramenta é executada pelo registro original, não por uma cópia da implementação.
+O teste usa `State`, `SkillV2`, registro de ferramentas, serialização da ferramenta e arquivos reais. A composição usa `PermissionV2.assert` permitindo o experimento e `ToolOutputStore.nodeWithoutConfig`, variante original com limites padrão e sem a dependência de configuração. O primeiro é um mock funcional; o segundo é uma adaptação explícita de composição. Não serve como prova de autorização ou de configuração de produção. A ferramenta é executada pelo registro original, não por uma cópia da implementação.
 
 | Ciclo de substituição | Fonte/conteúdo novo | `list()` e ferramenta depois de reload |
 |---|---|---|
@@ -75,3 +77,7 @@ Uma tentativa de criar checker separado foi bloqueada antes de executar; o arqui
 Veja [REPRODUCING.md](REPRODUCING.md), [COVERAGE.md](COVERAGE.md), [JOURNAL.md](JOURNAL.md) e [ambiente](evidence/environment.json). macOS x64, Node 22.17.1, Bun 1.3.14. Checkout descartável; 38 links para dependências já instaladas. Não é instalação hermética. HOME/XDG e identidade Git de fixtures foram isolados; não se usaram credenciais de modelo ou dados pessoais em testes. As capturas publicadas são mensagens sintéticas sem headers de autenticação. Caminhos temporários foram normalizados na publicação, sem alterar os textos/dólares testados.
 
 O WP-HOST-01 permanece aberto: UI/CLI completa, sessão Core V2 configurada até o provedor, duplicatas e identidade de Own entre worktrees, recibos ausentes/não canônicos no consumidor e retomada da mesma sessão persistida ainda exigem suas próprias provas. Não habilitar a apresentação pública de aprovação para contornar essas lacunas. As cinco passagens globais do repositório continuam abertas; estas são revisões focadas, não leituras integrais do monorepo.
+
+## Issues canônicas
+
+[#83 — fidelidade literal](https://github.com/gmhelmold/HuGR-Orchestra/issues/83) e [#84 — substituição de fonte V2](https://github.com/gmhelmold/HuGR-Orchestra/issues/84). Ambas continuam abertas; a [revisão posterior](review/REVIEW.md) confirma os achados e corrige a instrumentação/documentação.
