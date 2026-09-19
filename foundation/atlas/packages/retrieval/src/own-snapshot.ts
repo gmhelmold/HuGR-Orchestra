@@ -1,3 +1,6 @@
+// ── REFERENCE MODEL — NO PRODUCTION CALLERS ──────────────────────────────────────────────────────────
+// Declared in harness/gates/reference-model-guard.mjs; this module is executable specification until wired.
+
 import { materializeStaticOwn } from './own-artifact.js';
 import { materializeStaticOwnCoverage, OWN_COVERAGE_PATH } from './own-coverage.js';
 import type { StaticOwnFile, StaticOwnInput } from './own-artifact.js';

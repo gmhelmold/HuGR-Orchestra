@@ -402,6 +402,12 @@ export const locationLayer = Layer.effect(
           return value
         }),
         key: Effect.fn("Integration.connection.key")(function* (input) {
+          const entry = state.get().integrations.get(input.integrationID)
+          if (!entry?.methods.some((method) => method.type === "key")) {
+            return yield* Effect.fail(
+              new AuthorizationError({ cause: new Error(`Key method not found: ${input.integrationID}`) }),
+            )
+          }
           yield* credentials.create({
             integrationID: input.integrationID,
             label: input.label,

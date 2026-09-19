@@ -2,7 +2,7 @@ export * as FileSystemSearch from "./search"
 
 import { makeLocationNode } from "../effect/app-node"
 import path from "path"
-import { Context, Effect, Layer, Scope } from "effect"
+import { Context, Deferred, Effect, Layer, Scope } from "effect"
 import { Fff } from "#fff"
 import fuzzysort from "fuzzysort"
 import { FileSystem } from "../filesystem"
@@ -32,6 +32,7 @@ export const ripgrepLayer = Layer.effect(
       directories: [] as string[],
     }
     const directories = new Set<string>()
+    const ready = yield* Deferred.make<void>()
     yield* ripgrep
       .find({
         cwd: location.directory,
@@ -45,7 +46,12 @@ export const ripgrepLayer = Layer.effect(
             state.directories = Array.from(directories)
           }),
       })
-      .pipe(Effect.orDie, Effect.asVoid, Effect.forkIn(scope))
+      .pipe(
+        Effect.orDie,
+        Effect.asVoid,
+        Effect.ensuring(Deferred.succeed(ready, undefined).pipe(Effect.ignore)),
+        Effect.forkIn(scope),
+      )
     return Service.of({
       glob: (input) =>
         Effect.gen(function* () {
@@ -100,6 +106,7 @@ export const ripgrepLayer = Layer.effect(
         }),
       find: (input) =>
         Effect.gen(function* () {
+          yield* Deferred.await(ready)
           const items =
             input.type === "file"
               ? state.files

@@ -1,11 +1,10 @@
 import { afterEach, describe, expect, test } from "bun:test"
-import { Context, Effect } from "effect"
+import { Context } from "effect"
 import path from "path"
 import { HttpApiApp } from "../../src/server/routes/instance/httpapi/server"
 import { FilePaths } from "../../src/server/routes/instance/httpapi/groups/file"
 import { resetDatabase } from "../fixture/db"
 import { disposeAllInstances, tmpdir } from "../fixture/fixture"
-import { pollWithTimeout } from "../lib/effect"
 
 const context = Context.empty() as Context.Context<unknown>
 
@@ -60,24 +59,18 @@ describe("file HttpApi", () => {
       request(FilePaths.findText, tmp.path, { pattern: "needle" }),
       request(FilePaths.findSymbol, tmp.path, { query: "hello" }),
     ])
-    const files = await Effect.runPromise(
-      pollWithTimeout(
-        Effect.promise(async () => {
-          const response = await request(FilePaths.findFile, tmp.path, { query: "hello", type: "file" })
-          const body = await response.json()
-          return body.includes("hello.txt") ? { response, body } : undefined
-        }),
-        "file search index was not ready",
-      ),
-    )
+    const files = await request(FilePaths.findFile, tmp.path, { query: "hello", type: "file" })
+    const fileBody = await files.json()
 
-    expect(text.status).toBe(200)
+    if (text.status !== 200) {
+      throw new Error(`findText failed with ${text.status}: ${await text.clone().text()}`)
+    }
     expect(await text.json()).toContainEqual(expect.objectContaining({ line_number: 1 }))
 
-    expect(files.response.status).toBe(200)
-    expect(files.body).toContain("hello.txt")
+    expect(files.status).toBe(200)
+    expect(fileBody).toContain("hello.txt")
 
     expect(symbols.status).toBe(200)
     expect(await symbols.json()).toEqual([])
-  })
+  }, 30_000)
 })

@@ -27,9 +27,13 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+        with:
+          fetch-depth: 0
 
       - name: Fetch target branch
-        run: git fetch origin +dev:refs/remotes/origin/dev --depth=1
+        env:
+          TARGET_BRANCH: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.ref || 'dev' }}
+        run: git fetch origin "+${TARGET_BRANCH}:refs/remotes/origin/${TARGET_BRANCH}"
 
       - name: Setup Bun
         uses: ./.github/actions/setup-bun
@@ -38,6 +42,8 @@ jobs:
         run: bun --cwd packages/core test test/godfile.test.ts
 
       - name: Run godfile gate
+        env:
+          GODFILE_BASE_REF: origin/${{ github.event_name == 'pull_request' && github.event.pull_request.base.ref || 'dev' }}
         run: bun run check:godfile
 
   atlas:
@@ -163,7 +169,29 @@ jobs:
 
       - name: Run unit tests
         timeout-minutes: 20
-        run: GITHUB_ACTIONS=false bun turbo test
+        run: |
+          if [ "$RUNNER_OS" = "Windows" ]; then
+            # Turbo 2.10.2 leaves the Windows orchestration process alive after
+            # every real test task has completed. Execute the exact non-empty
+            # task graph reported by `bun turbo test --dry=json` directly.
+            bun --cwd packages/http-recorder run build
+            bun --cwd packages/plugin run build
+            bun --cwd packages/sdk/js run build
+            bun --cwd packages/ui run build
+            bun --cwd packages/function test
+            bun --cwd packages/ui test
+            bun --cwd packages/session-ui test
+            bun --cwd packages/app run test:unit
+            for file in packages/app/test-browser/*.test.ts; do
+              relative="./test-browser/$(basename "$file")"
+              echo "[browser-test] $relative"
+              bun --cwd packages/app test --conditions=browser --preload ./happydom.ts "$relative"
+            done
+            bun --cwd packages/core test
+            bun --cwd packages/opencode test
+          else
+            GITHUB_ACTIONS=false bun turbo test
+          fi
         env:
           OPENCODE_EXPERIMENTAL_DISABLE_FILEWATCHER: ${{ runner.os == 'Windows' && 'true' || 'false' }}
 

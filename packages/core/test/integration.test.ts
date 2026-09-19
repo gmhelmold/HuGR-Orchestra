@@ -98,6 +98,18 @@ describe("Integration", () => {
     }),
   )
 
+  it.effect("rejects key credentials when the integration has no key method", () =>
+    Effect.gen(function* () {
+      const integrations = yield* Integration.Service
+      const credentials = yield* Credential.Service
+      const integrationID = Integration.ID.make("missing")
+
+      const exit = yield* integrations.connection.key({ integrationID, key: "secret" }).pipe(Effect.exit)
+      expect(Exit.isFailure(exit)).toBe(true)
+      expect(yield* credentials.list(integrationID)).toEqual([])
+    }),
+  )
+
   it.effect("connects with a key and stores the credential", () =>
     Effect.gen(function* () {
       const integrations = yield* Integration.Service
