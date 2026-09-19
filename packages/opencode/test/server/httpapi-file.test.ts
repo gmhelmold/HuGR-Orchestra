@@ -62,7 +62,9 @@ describe("file HttpApi", () => {
     const files = await request(FilePaths.findFile, tmp.path, { query: "hello", type: "file" })
     const fileBody = await files.json()
 
-    expect(text.status).toBe(200)
+    if (text.status !== 200) {
+      throw new Error(`findText failed with ${text.status}: ${await text.clone().text()}`)
+    }
     expect(await text.json()).toContainEqual(expect.objectContaining({ line_number: 1 }))
 
     expect(files.status).toBe(200)
