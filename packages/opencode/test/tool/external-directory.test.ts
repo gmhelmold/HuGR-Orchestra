@@ -116,10 +116,10 @@ describe("tool.assertExternalDirectory", () => {
           yield* Effect.promise(() => Bun.write(path.join(outerTmp, "outside.txt"), "x"))
 
           const target = path.join(outerTmp, "outside.txt")
-          const alt = target
-            .replace(/^[A-Za-z]:/, "")
-            .replaceAll("\\", "/")
-            .toLowerCase()
+          const parsed = path.parse(target)
+          const drive = parsed.root[0]?.toLowerCase()
+          const rest = target.slice(parsed.root.length).replaceAll("\\", "/")
+          const alt = `/${drive}/${rest}`
 
           yield* assertExternalDirectoryEffect(ctx, alt)
 
