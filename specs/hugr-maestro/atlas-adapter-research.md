@@ -1,6 +1,6 @@
 # Atlas Adapter Research
 
-Status: blocked before implementation. Researched 2026-09-08 against vendored Atlas snapshot.
+Status: frozen for issue #112. Researched 2026-09-08 against vendored Atlas snapshot.
 
 ## Verified Source
 
@@ -41,3 +41,39 @@ Required properties:
 4. No write, shell, network, model, or ambient current-project inference.
 
 After this contract exists as an installable/current Atlas seam, implement ACE-1 through ACE-9 in OpenCode adapter.
+
+## Frozen Contract (#112)
+
+```text
+territoryCatalog(projectId) -> { projectId, catalogVersion, territories: readonly Territory[] }
+```
+
+`Territory` is Atlas canonical `{ name, owner, tier: T0|T1|T2, globs: readonly string[] }`.
+`Territory.name` is scope identity. Path/glob/prose never identify scope.
+
+Producer: `@opencode-ai/atlas-territory-catalog` (workspace-installable, read-only, pure).
+Consumer: `packages/opencode/src/maestro/territory-catalog.ts` imports producer by package
+name only. Direct relative import from `foundation/atlas` and `@atlas/*` runtime import
+in Maestro source fail the boundary gate.
+
+Validation (fail closed, before plan/Task):
+
+```text
+READY  projectId exact match, catalogVersion non-empty, territories non-empty,
+       every Territory well-formed, every Territory.name unique
+HOLD   wrong-project | missing-version | empty-catalog | malformed-territory |
+       duplicate-name | unavailable
+```
+
+Version/freshness receipt is response itself: `{ projectId, catalogVersion, territories }`.
+Replay keys on `(projectId, catalogVersion)`. Changed catalog version yields new receipt,
+never mutation. Empty catalog is HOLD, never all-repository scope.
+
+Forbidden in catalog read: write, shell, network, model, ambient project inference.
+Caller supplies explicit `projectId`; reader is injected, never inferred.
+
+Operational installation path: workspace dependency
+`"@opencode-ai/atlas-territory-catalog": "workspace:*"` in `packages/opencode/package.json`.
+No `foundation/atlas` checkout needed at Maiden runtime; Atlas owner data enters only
+through injected reader returning real `Territory` objects valid for
+`Packer.pack` / `Packer.mergedPack`.
