@@ -22,6 +22,7 @@ export * from './own-impact.js';   // Static Own PR impact receipt: delta + reve
 export * from './resolve.js';      // WP-2.8-a.INDEX — three-mode resolve (ResolveApi)
 export * from './retrieval.js';    // WP-2.8-a.INDEX — read-model retrieval (RetrievalApi/Fact)
 export * from './territory.js';    // WP-2.9-a.INDEX — territory assignment (TerritoryApi/TerritoryAssignment)
+export * from './territory-catalog.js'; // ACE catalog seam — explicit versioned read-only project catalogs
 export * from './ownership.js';    // WP-2.9-a.INDEX — ownership reconcile (OwnershipApi/OwnerMap/BlameEntry)
 export * from './coverage.js';     // WP-2.9-b.INDEX — per-territory unresolved-ratio gate (CoverageApi)
 export * from './compose.js';      // WP-2.6-b.INDEX — composed index: one structure backs drift + discovery
