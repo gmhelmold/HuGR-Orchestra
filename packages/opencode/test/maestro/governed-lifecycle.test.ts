@@ -598,8 +598,6 @@ describe("Maestro governed Task consumption attribution", () => {
         expect(yield* sessions.children(chat.id)).toHaveLength(0)
       }),
   )
-})
-
   it.instance("refuses re-dispatch when durable consumption marker already exists", () =>
     Effect.gen(function* () {
       const events = yield* EventV2Bridge.Service
@@ -695,3 +693,4 @@ describe("Maestro governed Task consumption attribution", () => {
       expect(yield* sessions.children(chat.id)).toHaveLength(0)
     }),
   )
+})
