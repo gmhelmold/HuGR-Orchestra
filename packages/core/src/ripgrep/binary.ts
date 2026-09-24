@@ -58,7 +58,12 @@ export namespace RipgrepBinary {
         const dir = yield* fs.makeTempDirectoryScoped({ directory: Global.Path.bin, prefix: "ripgrep-" })
 
         if (config.extension === "zip") {
-          const tar = process.platform === "win32" ? null : yield* Effect.sync(() => which("tar"))
+          const tar =
+            process.platform === "win32"
+              ? yield* Effect.sync(() =>
+                  which("tar.exe", { Path: path.join(process.env.SystemRoot ?? "C:\\Windows", "System32") }),
+                )
+              : yield* Effect.sync(() => which("tar"))
           const result = tar
             ? yield* run(tar, ["-xf", archive, "-C", dir])
             : yield* run((yield* Effect.sync(() => which("powershell.exe") ?? which("pwsh.exe"))) ?? "powershell.exe", [
