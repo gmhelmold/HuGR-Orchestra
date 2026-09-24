@@ -11,7 +11,7 @@ import { Config } from "@/config/config"
 import { CrossSpawnSpawner } from "@opencode-ai/core/cross-spawn-spawner"
 import { Ripgrep } from "@opencode-ai/core/ripgrep"
 import { Session } from "@/session/session"
-import { MessageID, PartID } from "../../src/session/schema"
+import { MessageID, PartID, SessionID } from "../../src/session/schema"
 import { SessionRunState } from "@/session/run-state"
 import { SessionStatus } from "@/session/status"
 import { Truncate } from "@/tool/truncate"
@@ -87,7 +87,7 @@ function countingAssessor(assessment: unknown) {
 
 const createUserMessage = Effect.fn("AdmissionTriggerTest.createUserMessage")(function* (
   sessions: Session.Interface,
-  sessionID: string,
+  sessionID: SessionID,
   input: { agent?: string; time?: number } = {},
 ) {
   return yield* sessions.updateMessage({
@@ -452,35 +452,46 @@ describe("Maestro automatic admission trigger", () => {
 
 describe("Maestro direct-request selection", () => {
   bunTest("selects latest direct with equal-timestamp tie-break", () => {
+    const sessionID = SessionID.make("ses_01")
     const base = {
-      sessionID: "ses_01",
+      sessionID,
       role: "user" as const,
       time: { created: 100 },
       agent: "maestro",
-      model: { providerID: "test", modelID: "test-model" },
+      model: { providerID: ProviderV2.ID.make("test"), modelID: ModelV2.ID.make("test-model") },
     }
     const direct = (id: string, time: number, text: string): SessionV1.WithParts => ({
-      info: { ...base, id, time: { created: time } } as SessionV1.WithParts["info"],
-      parts: [{ id: `prt_${id}`, sessionID: "ses_01", messageID: id, type: "text", text } as SessionV1.Part],
-    })
-    const synthetic = (id: string, time: number): SessionV1.WithParts => ({
-      info: { ...base, id, time: { created: time } } as SessionV1.WithParts["info"],
+      info: { ...base, id: MessageID.make(id), time: { created: time } } as SessionV1.WithParts["info"],
       parts: [
         {
-          id: `prt_${id}`,
-          sessionID: "ses_01",
-          messageID: id,
+          id: PartID.make(`prt_${id.slice(4)}`),
+          sessionID,
+          messageID: MessageID.make(id),
+          type: "text",
+          text,
+        } as SessionV1.Part,
+      ],
+    })
+    const synthetic = (id: string, time: number): SessionV1.WithParts => ({
+      info: { ...base, id: MessageID.make(id), time: { created: time } } as SessionV1.WithParts["info"],
+      parts: [
+        {
+          id: PartID.make(`prt_${id.slice(4)}`),
+          sessionID,
+          messageID: MessageID.make(id),
           type: "text",
           synthetic: true,
           metadata: { compaction_continue: true },
           text: "Continue",
-        } as SessionV1.Part,
+        } as unknown as SessionV1.Part,
       ],
     })
-    expect(selectDirectCandidate([direct("msg_a", 100, "first"), direct("msg_b", 100, "second")])?.info.id).toBe("msg_b")
-    expect(
-      selectDirectCandidate([direct("msg_a", 100, "first"), synthetic("msg_z", 200)])?.info.id,
-    ).toBe("msg_a")
+    expect(selectDirectCandidate([direct("msg_a", 100, "first"), direct("msg_b", 100, "second")])?.info.id).toBe(
+      MessageID.make("msg_b"),
+    )
+    expect(selectDirectCandidate([direct("msg_a", 100, "first"), synthetic("msg_z", 200)])?.info.id).toBe(
+      MessageID.make("msg_a"),
+    )
     expect(selectDirectCandidate([synthetic("msg_z", 200)])).toBeUndefined()
   })
 })
