@@ -283,31 +283,33 @@ export const TaskTool = Tool.define(
             .update([governed.sessionID, approvedDecision.presentationID, governed.taskHash].join("\u0000"))
             .digest("hex")}`,
         )
-        yield* events
-          .publish(
-            MaestroEvent.Approval.Consumed,
-            {
-              sessionID: governed.sessionID,
-              presentationID: approvedDecision.presentationID,
-              approvalMessageID: governed.approvalMessageID,
-              taskHash: governed.taskHash,
-              callID,
-            },
-            { id: consumeID },
-          )
-          .pipe(
-            Effect.catchCause(() =>
-              database.db
-                .select({ id: EventTable.id })
-                .from(EventTable)
-                .where(eq(EventTable.id, consumeID))
-                .get()
-                .pipe(
-                  Effect.orDie,
-                  Effect.flatMap(() => Effect.fail(new Error("Governed Task denied: approval-consumed"))),
+        const consumeEvent = {
+          sessionID: governed.sessionID,
+          presentationID: approvedDecision.presentationID,
+          approvalMessageID: governed.approvalMessageID,
+          taskHash: governed.taskHash,
+          callID,
+        }
+        const consumePublish = events.publish(MaestroEvent.Approval.Consumed, consumeEvent, { id: consumeID })
+        yield* consumePublish.pipe(
+          Effect.catchCause((publishCause) =>
+            database.db
+              .select({ id: EventTable.id })
+              .from(EventTable)
+              .where(eq(EventTable.id, consumeID))
+              .get()
+              .pipe(
+                Effect.catchCause(() =>
+                  Effect.fail(new Error("Governed Task denied: consumption publish failed; readback unavailable")),
                 ),
-            ),
-          )
+                Effect.flatMap((row) =>
+                  row
+                    ? Effect.fail(new Error("Governed Task denied: approval-consumed"))
+                    : Effect.failCause(publishCause),
+                ),
+              ),
+          ),
+        )
       }
       let current = parent
       let depth = 0

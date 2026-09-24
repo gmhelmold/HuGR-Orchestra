@@ -3,7 +3,7 @@ import { SessionV1 } from "@opencode-ai/core/v1/session"
 import { Database } from "@opencode-ai/core/database/database"
 import { LayerNode } from "@opencode-ai/core/effect/layer-node"
 import { SessionProjector } from "@opencode-ai/core/session/projector"
-import { Effect, Exit } from "effect"
+import { Cause, Effect, Exit } from "effect"
 import { Agent } from "../../src/agent/agent"
 import { BackgroundJob } from "@/background/job"
 import { EventV2Bridge } from "@/event-v2-bridge"
@@ -470,3 +470,228 @@ describe("Maestro governed lifecycle", () => {
     }),
   )
 })
+
+describe("Maestro governed Task consumption attribution", () => {
+  it.instance(
+    "reports publish failure when no durable consumption exists (pre-commit fault)",
+    () =>
+      Effect.gen(function* () {
+        const events = yield* EventV2Bridge.Service
+        const { chat, assistant, sessions } = yield* seed()
+        yield* events.publish(MaestroEvent.Approval.Presented, {
+          id: "apr_01",
+          sessionID: chat.id,
+          assistantMessageID: assistant.id,
+          callID: "call_present",
+          planRevisionID: "plan_v1",
+          validationRecordID: "val_01",
+          projectID: chat.projectID,
+          memberID: "maestro",
+          revisionHash: "rev-hash",
+          validationHash: "val-hash",
+          contextHash: "context-hash",
+          policyHash: "policy-hash",
+          taskHash: taskHash({
+            subagentType: "general",
+            prompt: "implement dark mode",
+            planRevisionID: "plan_v1",
+            revisionHash: "rev-hash",
+            validationRecordID: "val_01",
+            validationHash: "val-hash",
+            contextHash: "context-hash",
+            policyHash: "policy-hash",
+          }),
+          intent: { subagentType: "general", prompt: "implement dark mode" },
+          methodVersion: "request-approval-v1",
+          plan: "implement dark mode",
+          provenance: "test",
+          assumptions: [],
+          validationLedger: "VALID",
+          contextState: "CURRENT",
+        })
+        yield* events.publish(MaestroEvent.Approval.Decided, {
+          sessionID: chat.id,
+          projectID: chat.projectID,
+          memberID: "maestro",
+          approvalMessageID: "msg_approve",
+          planRevisionID: "plan_v1",
+          revisionHash: "rev-hash",
+          validationRecordID: "val_01",
+          validationHash: "val-hash",
+          contextHash: "context-hash",
+          policyHash: "policy-hash",
+          taskHash: taskHash({
+            subagentType: "general",
+            prompt: "implement dark mode",
+            planRevisionID: "plan_v1",
+            revisionHash: "rev-hash",
+            validationRecordID: "val_01",
+            validationHash: "val-hash",
+            contextHash: "context-hash",
+            policyHash: "policy-hash",
+          }),
+          presentationID: "apr_01",
+          presentationMessageID: "msg_presentation",
+          methodVersion: "request-approval-v1",
+          outcome: "APPROVED",
+          decisionTime: Date.now(),
+        })
+        const tool = yield* TaskTool
+        const def = yield* tool.init()
+        const bridge = events as { publish: any }
+        const originalPublish = bridge.publish
+        bridge.publish = (definition: any, data: any, options: any) =>
+          definition.type === MaestroEvent.Approval.Consumed.type
+            ? Effect.fail(new Error("AUDIT_CONSUME_WRITE_UNAVAILABLE"))
+            : originalPublish(definition, data, options)
+        const governed = {
+          sessionID: chat.id,
+          projectID: chat.projectID,
+          memberID: "maestro",
+          approvalMessageID: "msg_approve",
+          planRevisionID: "plan_v1",
+          revisionHash: "rev-hash",
+          validationRecordID: "val_01",
+          validationHash: "val-hash",
+          contextHash: "context-hash",
+          policyHash: "policy-hash",
+          taskHash: taskHash({
+            subagentType: "general",
+            prompt: "implement dark mode",
+            planRevisionID: "plan_v1",
+            revisionHash: "rev-hash",
+            validationRecordID: "val_01",
+            validationHash: "val-hash",
+            contextHash: "context-hash",
+            policyHash: "policy-hash",
+          }),
+        }
+        const exit = yield* Effect.exit(
+          def.execute(
+            {
+              description: "implement dark mode",
+              prompt: "implement dark mode",
+              subagent_type: "general",
+              governed,
+            },
+            {
+              sessionID: chat.id,
+              messageID: assistant.id,
+              callID: "call_task_fault",
+              agent: "maestro",
+              abort: new AbortController().signal,
+              extra: { promptOps: stubOps() },
+              messages: [],
+              metadata: () => Effect.void,
+              ask: () => Effect.void,
+            },
+          ),
+        )
+        bridge.publish = originalPublish
+        if (!Exit.isFailure(exit)) throw new Error("expected publication failure")
+        const cause = Cause.squash(exit.cause)
+        expect(cause).toBeInstanceOf(Error)
+        if (cause instanceof Error) {
+          expect(cause.message).toContain("AUDIT_CONSUME_WRITE_UNAVAILABLE")
+          expect(cause.message).not.toContain("approval-consumed")
+        }
+        expect(yield* sessions.children(chat.id)).toHaveLength(0)
+      }),
+  )
+})
+
+  it.instance("refuses re-dispatch when durable consumption marker already exists", () =>
+    Effect.gen(function* () {
+      const events = yield* EventV2Bridge.Service
+      const { chat, assistant, sessions } = yield* seed()
+      const governed = {
+        sessionID: chat.id,
+        projectID: chat.projectID,
+        memberID: "maestro",
+        approvalMessageID: "msg_approve",
+        planRevisionID: "plan_v1",
+        revisionHash: "rev-hash",
+        validationRecordID: "val_01",
+        validationHash: "val-hash",
+        contextHash: "context-hash",
+        policyHash: "policy-hash",
+        taskHash: taskHash({
+          subagentType: "general",
+          prompt: "implement dark mode",
+          planRevisionID: "plan_v1",
+          revisionHash: "rev-hash",
+          validationRecordID: "val_01",
+          validationHash: "val-hash",
+          contextHash: "context-hash",
+          policyHash: "policy-hash",
+        }),
+      }
+      yield* events.publish(MaestroEvent.Approval.Presented, {
+        id: "apr_01",
+        sessionID: chat.id,
+        assistantMessageID: assistant.id,
+        callID: "call_present",
+        planRevisionID: governed.planRevisionID,
+        validationRecordID: governed.validationRecordID,
+        projectID: governed.projectID,
+        memberID: governed.memberID,
+        revisionHash: governed.revisionHash,
+        validationHash: governed.validationHash,
+        contextHash: governed.contextHash,
+        policyHash: governed.policyHash,
+        taskHash: governed.taskHash,
+        intent: { subagentType: "general", prompt: "implement dark mode" },
+        methodVersion: "request-approval-v1",
+        plan: "implement dark mode",
+        provenance: "test",
+        assumptions: [],
+        validationLedger: "VALID",
+        contextState: "CURRENT",
+      })
+      yield* events.publish(MaestroEvent.Approval.Decided, {
+        ...governed,
+        presentationID: "apr_01",
+        presentationMessageID: "msg_presentation",
+        methodVersion: "request-approval-v1",
+        outcome: "APPROVED",
+        decisionTime: Date.now(),
+      })
+      yield* events.publish(MaestroEvent.Approval.Consumed, {
+        sessionID: governed.sessionID,
+        presentationID: "apr_01",
+        approvalMessageID: governed.approvalMessageID,
+        taskHash: governed.taskHash,
+        callID: "call_task_01",
+      })
+      const tool = yield* TaskTool
+      const def = yield* tool.init()
+      const exit = yield* Effect.exit(
+        def.execute(
+          {
+            description: "implement dark mode",
+            prompt: "implement dark mode",
+            subagent_type: "general",
+            governed,
+          },
+          {
+            sessionID: chat.id,
+            messageID: assistant.id,
+            callID: "call_task_retry",
+            agent: "maestro",
+            abort: new AbortController().signal,
+            extra: { promptOps: stubOps() },
+            messages: [],
+            metadata: () => Effect.void,
+            ask: () => Effect.void,
+          },
+        ),
+      )
+      if (!Exit.isFailure(exit)) throw new Error("expected consumed denial")
+      const cause = Cause.squash(exit.cause)
+      expect(cause).toBeInstanceOf(Error)
+      if (cause instanceof Error) {
+        expect(cause.message).toContain("approval-consumed")
+      }
+      expect(yield* sessions.children(chat.id)).toHaveLength(0)
+    }),
+  )
