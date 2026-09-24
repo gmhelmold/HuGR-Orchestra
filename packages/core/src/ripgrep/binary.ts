@@ -126,6 +126,7 @@ export namespace RipgrepBinary {
                 return target
               }).pipe(Effect.mapError((error) => (error instanceof Error ? error : new Error(String(error))))),
               `ripgrep-bootstrap:${platformKey}`,
+              Global.Path.bin,
             )
           }),
         ),

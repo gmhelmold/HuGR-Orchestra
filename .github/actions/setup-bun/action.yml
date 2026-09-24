@@ -61,7 +61,7 @@ runs:
         if [ "$RUNNER_OS" = "Windows" ]; then
           # Bun can leave a patched package directory half-renamed on Windows.
           bun pm cache rm
-          bun install --linker hoisted ${{ inputs.install-flags }}
+          bun install --no-cache --linker hoisted ${{ inputs.install-flags }}
         else
           bun install ${{ inputs.install-flags }}
         fi
