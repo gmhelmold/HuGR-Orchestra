@@ -1,5 +1,6 @@
 import { Effect, Schema } from "effect"
 import { recordAdmission } from "@/maestro/admission-record"
+import { selectDirectCandidate } from "@/maestro/admission-origin"
 import { Database } from "@opencode-ai/core/database/database"
 import { EventV2Bridge } from "@/event-v2-bridge"
 import { Agent } from "@/agent/agent"
@@ -23,14 +24,9 @@ export const MaestroRecordAdmissionTool = Tool.define(
         Effect.gen(function* () {
           const agent = yield* agents.get(ctx.agent)
           if (agent?.id !== "maestro") return yield* Effect.fail(new Error("Admission recording requires Maestro"))
-          const message = ctx.messages
-            .filter((message) => message.info.role === "user")
-            .sort(
-              (left, right) =>
-                left.info.time.created - right.info.time.created || left.info.id.localeCompare(right.info.id),
-            )
-            .at(-1)
-          if (!message) return yield* Effect.fail(new Error("Admission recording requires direct user message"))
+          const message = selectDirectCandidate(ctx.messages)
+          if (!message)
+            return yield* Effect.fail(new Error("Admission recording requires direct user message (HOLD: no-direct-request)"))
           const record = yield* recordAdmission({
             sessionID: ctx.sessionID,
             messageID: message.info.id,
