@@ -56,6 +56,16 @@ function mergeBase(cwd: string, baseRef: string) {
   }
 }
 
+function resolveBase(cwd: string, baseRef: string) {
+  const base = mergeBase(cwd, baseRef)
+  if (base) return base
+  try {
+    return git(cwd, ["rev-parse", "--verify", `${baseRef}^{commit}`]).trim()
+  } catch {
+    return undefined
+  }
+}
+
 type Waiver = {
   maximumLines: number
   reason: string
@@ -97,7 +107,7 @@ function waivers(cwd: string): { entries: Record<string, Waiver>; errors: string
 }
 
 export function runGodfileGate(input: { cwd: string; baseRef: string }): Report {
-  const base = mergeBase(input.cwd, input.baseRef)
+  const base = resolveBase(input.cwd, input.baseRef)
   if (!base) {
     return {
       checked: 0,
