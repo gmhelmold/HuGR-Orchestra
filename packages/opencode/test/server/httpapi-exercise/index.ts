@@ -681,7 +681,7 @@ const scenarios: Scenario[] = [
       headers: ctx.headers(),
       body: { key: "test" },
     }))
-    .status(500, undefined, "status"),
+    .status(204, undefined, "status"),
   http.protected
     .post("/api/integration/{integrationID}/connect/oauth", "v2.integration.connect.oauth")
     .at((ctx) => ({

@@ -228,21 +228,8 @@ const itFragmentFailure = testEffect(fragmentFailureEnv)
 
 let interruptBarrier: Deferred.Deferred<void> | undefined
 
-const interruptLLM = Layer.succeed(
-  LLM.Service,
-  LLM.Service.of({
-    stream: () =>
-      Stream.unwrap(
-        Effect.sync(() => interruptBarrier).pipe(
-          Effect.flatMap((barrier) =>
-            barrier
-              ? Deferred.succeed(barrier, undefined).pipe(Effect.as(Stream.never))
-              : Effect.die("missing interrupt barrier"),
-          ),
-        ),
-      ),
-  }),
-)
+// prettier-ignore
+const interruptLLM = Layer.succeed(LLM.Service, LLM.Service.of({ stream: () => Stream.unwrap(Effect.sync(() => interruptBarrier).pipe(Effect.flatMap((barrier) => barrier ? Deferred.succeed(barrier, undefined).pipe(Effect.as(Stream.never)) : Effect.die("missing interrupt barrier")))) }))
 const interruptEnv = LayerNode.compile(root, [...replacements, [LLM.node, interruptLLM]])
 const itInterrupt = testEffect(interruptEnv)
 
@@ -270,11 +257,8 @@ it.live("session.processor effect tests capture llm input cleanly", () =>
         const parent = yield* user(chat.id, "hi")
         const msg = yield* assistant(chat.id, parent.id, path.resolve(dir))
         const mdl = yield* provider.getModel(ref.providerID, ref.modelID)
-        const handle = yield* processors.create({
-          assistantMessage: msg,
-          sessionID: chat.id,
-          model: mdl,
-        })
+        // prettier-ignore
+        const handle = yield* processors.create({ assistantMessage: msg, sessionID: chat.id, model: mdl })
 
         const input = {
           user: {
@@ -1051,30 +1035,10 @@ itInterrupt.instance(
       const parent = yield* user(chat.id, "interrupt")
       const msg = yield* assistant(chat.id, parent.id, path.resolve(dir))
       const mdl = yield* provider.getModel(ref.providerID, ref.modelID)
-      const handle = yield* processors.create({
-        assistantMessage: msg,
-        sessionID: chat.id,
-        model: mdl,
-      })
+      const handle = yield* processors.create({ assistantMessage: msg, sessionID: chat.id, model: mdl })
 
-      const run = yield* handle
-        .process({
-          user: {
-            id: parent.id,
-            sessionID: chat.id,
-            role: "user",
-            time: parent.time,
-            agent: parent.agent,
-            model: { providerID: ref.providerID, modelID: ref.modelID },
-          } satisfies SessionV1.User,
-          sessionID: chat.id,
-          model: mdl,
-          agent: agent(),
-          system: [],
-          messages: [{ role: "user", content: "interrupt" }],
-          tools: {},
-        })
-        .pipe(Effect.forkChild)
+      // prettier-ignore
+      const run = yield* handle.process({ user: { id: parent.id, sessionID: chat.id, role: "user", time: parent.time, agent: parent.agent, model: { providerID: ref.providerID, modelID: ref.modelID } } satisfies SessionV1.User, sessionID: chat.id, model: mdl, agent: agent(), system: [], messages: [{ role: "user", content: "interrupt" }], tools: {} }).pipe(Effect.forkChild)
 
       yield* Deferred.await(barrier)
       yield* Fiber.interrupt(run)

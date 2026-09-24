@@ -1050,24 +1050,12 @@ it.instance(
   () =>
     Effect.gen(function* () {
       const { llm } = yield* useServerConfig(providerCfg)
-      const events = yield* EventV2Bridge.Service
       const prompt = yield* SessionPrompt.Service
       const sessions = yield* Session.Service
-      const metadataSet = yield* Deferred.make<void>()
       const chat = yield* sessions.create({ title: "Pinned" })
-      yield* events.listen((event) => {
-        if (event.type !== MessageV2.Event.PartUpdated.type) return Effect.void
-        const part = (event.data as typeof MessageV2.Event.PartUpdated.data.Type).part
-        if (
-          part.type === "tool" &&
-          part.sessionID === chat.id &&
-          part.state.status === "running" &&
-          part.state.metadata?.sessionId
-        ) {
-          return Deferred.succeed(metadataSet, undefined)
-        }
-        return Effect.void
-      })
+      const metadataSet = yield* Deferred.make<void>()
+      // prettier-ignore
+      yield* (yield* EventV2Bridge.Service).listen((event) => { const part = event.type === MessageV2.Event.PartUpdated.type ? (event.data as typeof MessageV2.Event.PartUpdated.data.Type).part : undefined; return part?.type === "tool" && part.sessionID === chat.id && part.state.status === "running" && part.state.metadata?.sessionId ? Deferred.succeed(metadataSet, undefined) : Effect.void })
       yield* llm.hang
       const msg = yield* user(chat.id, "hello")
       yield* addSubtask(chat.id, msg.id)
@@ -1079,11 +1067,8 @@ it.instance(
       const taskMsg = msgs.find((item) => item.info.role === "assistant" && item.info.agent === "general")
       const tool = taskMsg?.parts.find((part): part is SessionV1.ToolPart => part.type === "tool")
 
-      expect(tool?.state.status).toBe("running")
-      if (!tool || tool.state.status !== "running") return
-      expect(typeof tool.state.metadata?.sessionId).toBe("string")
-      expect(tool.state.title).toBeDefined()
-      expect(tool.state.metadata?.model).toBeDefined()
+      // prettier-ignore
+      expect(tool?.state).toMatchObject({ status: "running", title: expect.any(String), metadata: { sessionId: expect.any(String), model: expect.anything() } })
 
       yield* prompt.cancel(chat.id)
       yield* Fiber.await(fiber)
