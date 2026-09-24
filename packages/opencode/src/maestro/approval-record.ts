@@ -41,16 +41,12 @@ function hash(parts: readonly string[]) {
   return createHash("sha256").update(parts.join("\u0000")).digest("hex")
 }
 
-function presentationEventID(
-  input: Pick<PresentApprovalInput, "sessionID" | "planRevisionID" | "validationRecordID" | "methodVersion">,
-) {
+// Attempt identity: one visible presentation opportunity is one assistant message + tool call.
+// Plan revision identity stays in the payload so retries of the same attempt stay idempotent
+// while a genuinely new redisplay binds to its current message/call.
+function presentationEventID(input: Pick<PresentApprovalInput, "sessionID" | "assistantMessageID" | "callID">) {
   return EventV2.ID.make(
-    `evt_maestro_approval_presentation_${hash([
-      input.sessionID,
-      input.planRevisionID,
-      input.validationRecordID,
-      input.methodVersion,
-    ])}`,
+    `evt_maestro_approval_presentation_${hash([input.sessionID, input.assistantMessageID, input.callID])}`,
   )
 }
 
@@ -123,12 +119,7 @@ function visiblePresentation(input: { presentation: PresentedData; message: Sess
 }
 
 export const presentApproval = Effect.fn("MaestroApproval.present")(function* (input: PresentApprovalInput) {
-  const presentationID = `apr_${hash([
-    input.sessionID,
-    input.planRevisionID,
-    input.validationRecordID,
-    input.methodVersion,
-  ])}`
+  const presentationID = `apr_${hash([input.sessionID, input.assistantMessageID, input.callID])}`
   const presentation: PresentedData = {
     id: presentationID,
     sessionID: input.sessionID,
@@ -160,14 +151,10 @@ export const presentApproval = Effect.fn("MaestroApproval.present")(function* (i
     .pipe(Effect.orDie)
   if (existing) {
     const recorded = Schema.decodeUnknownSync(MaestroEvent.Approval.Presented.data)(existing.data)
-    const sameRevision =
-      recorded.sessionID === presentation.sessionID &&
-      recorded.planRevisionID === presentation.planRevisionID &&
-      recorded.validationRecordID === presentation.validationRecordID &&
-      recorded.methodVersion === presentation.methodVersion
     if (
       existing.type === EventV2.versionedType(MaestroEvent.Approval.Presented.type, 1) &&
-      sameRevision &&
+      recorded.assistantMessageID === presentation.assistantMessageID &&
+      recorded.callID === presentation.callID &&
       isDeepStrictEqual(
         { ...recorded, id: "", assistantMessageID: "", callID: "" },
         { ...presentation, id: "", assistantMessageID: "", callID: "" },
@@ -177,6 +164,26 @@ export const presentApproval = Effect.fn("MaestroApproval.present")(function* (i
     }
     return yield* new ApprovalConflictError(input)
   }
+  const sessionRows = yield* db
+    .select({ type: EventTable.type, data: EventTable.data })
+    .from(EventTable)
+    .where(eq(EventTable.aggregate_id, input.sessionID))
+    .all()
+    .pipe(Effect.orDie)
+  const revisionClash = sessionRows
+    .filter((row) => row.type === EventV2.versionedType(MaestroEvent.Approval.Presented.type, 1))
+    .map((row) => Schema.decodeUnknownSync(MaestroEvent.Approval.Presented.data)(row.data))
+    .some(
+      (recorded) =>
+        recorded.planRevisionID === presentation.planRevisionID &&
+        recorded.validationRecordID === presentation.validationRecordID &&
+        recorded.methodVersion === presentation.methodVersion &&
+        !isDeepStrictEqual(
+          { ...recorded, id: "", assistantMessageID: "", callID: "" },
+          { ...presentation, id: "", assistantMessageID: "", callID: "" },
+        ),
+    )
+  if (revisionClash) return yield* new ApprovalConflictError(input)
   const events = yield* EventV2Bridge.Service
   const recorded = yield* events.publish(MaestroEvent.Approval.Presented, presentation, {
     id: presentationEventID(input),
