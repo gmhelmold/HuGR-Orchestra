@@ -33,6 +33,19 @@ test("closes pending watcher subscriptions after they resolve", async () => {
   expect(unsubscribed).toBe(true)
 })
 
+test("finishes resolved watcher cleanup before its deadline", async () => {
+  const pending = Promise.resolve({ unsubscribe: async () => {} })
+  let cleared = false
+  await Watcher.closeSubscriptions(new Set([pending]), 1_000, {
+    set: (callback, delay) => setTimeout(callback, delay),
+    clear: (timer) => {
+      cleared = true
+      clearTimeout(timer)
+    },
+  })
+  expect(cleared).toBe(true)
+})
+
 test("bounds watcher subscription teardown when native request never resolves", async () => {
   const pending = new Promise<{ unsubscribe: () => Promise<void> }>(() => {})
   const result = await Promise.race([

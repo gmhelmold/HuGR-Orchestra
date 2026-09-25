@@ -20,6 +20,11 @@ import { Protected } from "./protected"
 declare const OPENCODE_LIBC: string | undefined
 
 const SUBSCRIBE_TIMEOUT_MS = 10_000
+type Timer = ReturnType<typeof setTimeout>
+type TimerApi = {
+  set: (callback: () => void, delay: number) => Timer
+  clear: (timer: Timer) => void
+}
 
 export const Event = FileSystemWatcher.Event
 
@@ -53,6 +58,7 @@ export const hasNativeBinding = () => !!watcher()
 export function closeSubscriptions(
   pendingSubscriptions: Iterable<Promise<{ unsubscribe: () => Promise<void> }>>,
   timeoutMs = SUBSCRIBE_TIMEOUT_MS,
+  timerApi: TimerApi = { set: setTimeout, clear: clearTimeout },
 ) {
   const cleanup = [...pendingSubscriptions].map((pending) =>
     pending.then(
@@ -60,10 +66,20 @@ export function closeSubscriptions(
       () => undefined,
     ),
   )
-  return Promise.race([
-    Promise.allSettled(cleanup).then(() => undefined),
-    new Promise<void>((resolve) => setTimeout(resolve, timeoutMs)),
-  ])
+  return new Promise<void>((resolve) => {
+    let settled = false
+    const timer = timerApi.set(() => {
+      if (settled) return
+      settled = true
+      resolve()
+    }, timeoutMs)
+    Promise.allSettled(cleanup).then(() => {
+      if (settled) return
+      settled = true
+      timerApi.clear(timer)
+      resolve()
+    })
+  })
 }
 
 export interface Interface {}
