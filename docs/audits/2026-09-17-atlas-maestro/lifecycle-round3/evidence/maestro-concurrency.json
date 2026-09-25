@@ -1,0 +1,86 @@
+[
+  {
+    "kind": "concurrent-identical",
+    "rounds": [
+      {
+        "round": 0,
+        "attempts": 8,
+        "successes": 8,
+        "failures": 0,
+        "errors": [],
+        "stored": {
+          "sessionID": "ses_round3_0",
+          "messageID": "msg_round3_0",
+          "methodVersion": "audit-concurrency-v1",
+          "outcome": "READY_TO_DRAFT",
+          "assessment": {
+            "kind": "work",
+            "goal": "Review a fixture.",
+            "known": [],
+            "proposals": [],
+            "unknowns": [],
+            "uncertainty": "none",
+            "activeWorkEffect": "none",
+            "reason": "Clear review goal."
+          }
+        },
+        "replayMatches": true
+      },
+      {
+        "round": 1,
+        "attempts": 8,
+        "successes": 8,
+        "failures": 0,
+        "errors": [],
+        "stored": {
+          "sessionID": "ses_round3_1",
+          "messageID": "msg_round3_1",
+          "methodVersion": "audit-concurrency-v1",
+          "outcome": "READY_TO_DRAFT",
+          "assessment": {
+            "kind": "work",
+            "goal": "Review a fixture.",
+            "known": [],
+            "proposals": [],
+            "unknowns": [],
+            "uncertainty": "none",
+            "activeWorkEffect": "none",
+            "reason": "Clear review goal."
+          }
+        },
+        "replayMatches": true
+      },
+      {
+        "round": 2,
+        "attempts": 8,
+        "successes": 8,
+        "failures": 0,
+        "errors": [],
+        "stored": {
+          "sessionID": "ses_round3_2",
+          "messageID": "msg_round3_2",
+          "methodVersion": "audit-concurrency-v1",
+          "outcome": "READY_TO_DRAFT",
+          "assessment": {
+            "kind": "work",
+            "goal": "Review a fixture.",
+            "known": [],
+            "proposals": [],
+            "unknowns": [],
+            "uncertainty": "none",
+            "activeWorkEffect": "none",
+            "reason": "Clear review goal."
+          }
+        },
+        "replayMatches": true
+      }
+    ],
+    "scope": "original admission recorder, Effect, SQLite, EventV2; no model or public approval",
+    "defectObserved": false
+  },
+  {
+    "kind": "controls",
+    "alteredPayloadRejected": true,
+    "distinctKeySuccesses": 4
+  }
+]

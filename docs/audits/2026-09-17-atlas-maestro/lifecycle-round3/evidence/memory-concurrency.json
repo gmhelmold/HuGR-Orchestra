@@ -1,0 +1,235 @@
+{
+  "commit": "b0c33d2f6567a2c741240f3c44bc00ca2f01e7e7",
+  "runtime": "v22.17.1",
+  "transport": "two original MCP stdio server processes, actual gitleaks; no synchronization seam substituted",
+  "rounds": [
+    {
+      "round": 0,
+      "writes": [
+        {
+          "isError": false,
+          "body": {
+            "data": {
+              "admitted": true,
+              "record": {
+                "owner": "orch",
+                "kind": "logbook",
+                "entry": {
+                  "prId": "concurrent-pr-0",
+                  "at": "2026-09-17",
+                  "territories": [
+                    "src"
+                  ],
+                  "shipped": "A verified change.",
+                  "decisions": "Independent writer 0 recorded its decision.",
+                  "tradeoffs": "A tradeoff.",
+                  "risks": "A risk.",
+                  "openThreads": "None.",
+                  "links": []
+                }
+              }
+            },
+            "guidance": {
+              "next": "a refused write named the gate that declined (undetermined-kind / template-invalid / unowned / logbook-duplicate / logbook-unauthorized / over-cap / scanner-blocked / scanner-unavailable) — fix and re-emit; nothing is persisted on a refusal",
+              "invariant": "MEM-1..9 / WP-11.W8: atlas-memory-emit is a governed fail-closed write door (WRITE_PATHS: atlas-emit, atlas-link, atlas-memory-emit — GOVERNANCE_SURFACE six members) — one append on admission, nothing on refusal"
+            }
+          }
+        },
+        {
+          "isError": false,
+          "body": {
+            "data": {
+              "admitted": true,
+              "record": {
+                "owner": "orch",
+                "kind": "logbook",
+                "entry": {
+                  "prId": "concurrent-pr-0",
+                  "at": "2026-09-17",
+                  "territories": [
+                    "src"
+                  ],
+                  "shipped": "A verified change.",
+                  "decisions": "Independent writer 1 recorded its decision.",
+                  "tradeoffs": "A tradeoff.",
+                  "risks": "A risk.",
+                  "openThreads": "None.",
+                  "links": []
+                }
+              }
+            },
+            "guidance": {
+              "next": "a refused write named the gate that declined (undetermined-kind / template-invalid / unowned / logbook-duplicate / logbook-unauthorized / over-cap / scanner-blocked / scanner-unavailable) — fix and re-emit; nothing is persisted on a refusal",
+              "invariant": "MEM-1..9 / WP-11.W8: atlas-memory-emit is a governed fail-closed write door (WRITE_PATHS: atlas-emit, atlas-link, atlas-memory-emit — GOVERNANCE_SURFACE six members) — one append on admission, nothing on refusal"
+            }
+          }
+        }
+      ],
+      "recordCount": 2,
+      "sequentialControl": {
+        "isError": true,
+        "body": {
+          "fault": "refused",
+          "rejected": "logbook-duplicate: MEM-8 logbook: an entry for PR 'concurrent-pr-0' already exists; a correction appends a supersede pointer and never rewrites the extant entry",
+          "guidance": {
+            "next": "a refused write named the gate that declined (undetermined-kind / template-invalid / unowned / logbook-duplicate / logbook-unauthorized / over-cap / scanner-blocked / scanner-unavailable) — fix and re-emit; nothing is persisted on a refusal",
+            "invariant": "MEM-1..9 / WP-11.W8: atlas-memory-emit is a governed fail-closed write door (WRITE_PATHS: atlas-emit, atlas-link, atlas-memory-emit — GOVERNANCE_SURFACE six members) — one append on admission, nothing on refusal"
+          }
+        }
+      },
+      "uniquenessViolated": true
+    },
+    {
+      "round": 1,
+      "writes": [
+        {
+          "isError": false,
+          "body": {
+            "data": {
+              "admitted": true,
+              "record": {
+                "owner": "orch",
+                "kind": "logbook",
+                "entry": {
+                  "prId": "concurrent-pr-1",
+                  "at": "2026-09-17",
+                  "territories": [
+                    "src"
+                  ],
+                  "shipped": "A verified change.",
+                  "decisions": "Independent writer 0 recorded its decision.",
+                  "tradeoffs": "A tradeoff.",
+                  "risks": "A risk.",
+                  "openThreads": "None.",
+                  "links": []
+                }
+              }
+            },
+            "guidance": {
+              "next": "a refused write named the gate that declined (undetermined-kind / template-invalid / unowned / logbook-duplicate / logbook-unauthorized / over-cap / scanner-blocked / scanner-unavailable) — fix and re-emit; nothing is persisted on a refusal",
+              "invariant": "MEM-1..9 / WP-11.W8: atlas-memory-emit is a governed fail-closed write door (WRITE_PATHS: atlas-emit, atlas-link, atlas-memory-emit — GOVERNANCE_SURFACE six members) — one append on admission, nothing on refusal"
+            }
+          }
+        },
+        {
+          "isError": false,
+          "body": {
+            "data": {
+              "admitted": true,
+              "record": {
+                "owner": "orch",
+                "kind": "logbook",
+                "entry": {
+                  "prId": "concurrent-pr-1",
+                  "at": "2026-09-17",
+                  "territories": [
+                    "src"
+                  ],
+                  "shipped": "A verified change.",
+                  "decisions": "Independent writer 1 recorded its decision.",
+                  "tradeoffs": "A tradeoff.",
+                  "risks": "A risk.",
+                  "openThreads": "None.",
+                  "links": []
+                }
+              }
+            },
+            "guidance": {
+              "next": "a refused write named the gate that declined (undetermined-kind / template-invalid / unowned / logbook-duplicate / logbook-unauthorized / over-cap / scanner-blocked / scanner-unavailable) — fix and re-emit; nothing is persisted on a refusal",
+              "invariant": "MEM-1..9 / WP-11.W8: atlas-memory-emit is a governed fail-closed write door (WRITE_PATHS: atlas-emit, atlas-link, atlas-memory-emit — GOVERNANCE_SURFACE six members) — one append on admission, nothing on refusal"
+            }
+          }
+        }
+      ],
+      "recordCount": 2,
+      "sequentialControl": {
+        "isError": true,
+        "body": {
+          "fault": "refused",
+          "rejected": "logbook-duplicate: MEM-8 logbook: an entry for PR 'concurrent-pr-1' already exists; a correction appends a supersede pointer and never rewrites the extant entry",
+          "guidance": {
+            "next": "a refused write named the gate that declined (undetermined-kind / template-invalid / unowned / logbook-duplicate / logbook-unauthorized / over-cap / scanner-blocked / scanner-unavailable) — fix and re-emit; nothing is persisted on a refusal",
+            "invariant": "MEM-1..9 / WP-11.W8: atlas-memory-emit is a governed fail-closed write door (WRITE_PATHS: atlas-emit, atlas-link, atlas-memory-emit — GOVERNANCE_SURFACE six members) — one append on admission, nothing on refusal"
+          }
+        }
+      },
+      "uniquenessViolated": true
+    },
+    {
+      "round": 2,
+      "writes": [
+        {
+          "isError": false,
+          "body": {
+            "data": {
+              "admitted": true,
+              "record": {
+                "owner": "orch",
+                "kind": "logbook",
+                "entry": {
+                  "prId": "concurrent-pr-2",
+                  "at": "2026-09-17",
+                  "territories": [
+                    "src"
+                  ],
+                  "shipped": "A verified change.",
+                  "decisions": "Independent writer 0 recorded its decision.",
+                  "tradeoffs": "A tradeoff.",
+                  "risks": "A risk.",
+                  "openThreads": "None.",
+                  "links": []
+                }
+              }
+            },
+            "guidance": {
+              "next": "a refused write named the gate that declined (undetermined-kind / template-invalid / unowned / logbook-duplicate / logbook-unauthorized / over-cap / scanner-blocked / scanner-unavailable) — fix and re-emit; nothing is persisted on a refusal",
+              "invariant": "MEM-1..9 / WP-11.W8: atlas-memory-emit is a governed fail-closed write door (WRITE_PATHS: atlas-emit, atlas-link, atlas-memory-emit — GOVERNANCE_SURFACE six members) — one append on admission, nothing on refusal"
+            }
+          }
+        },
+        {
+          "isError": false,
+          "body": {
+            "data": {
+              "admitted": true,
+              "record": {
+                "owner": "orch",
+                "kind": "logbook",
+                "entry": {
+                  "prId": "concurrent-pr-2",
+                  "at": "2026-09-17",
+                  "territories": [
+                    "src"
+                  ],
+                  "shipped": "A verified change.",
+                  "decisions": "Independent writer 1 recorded its decision.",
+                  "tradeoffs": "A tradeoff.",
+                  "risks": "A risk.",
+                  "openThreads": "None.",
+                  "links": []
+                }
+              }
+            },
+            "guidance": {
+              "next": "a refused write named the gate that declined (undetermined-kind / template-invalid / unowned / logbook-duplicate / logbook-unauthorized / over-cap / scanner-blocked / scanner-unavailable) — fix and re-emit; nothing is persisted on a refusal",
+              "invariant": "MEM-1..9 / WP-11.W8: atlas-memory-emit is a governed fail-closed write door (WRITE_PATHS: atlas-emit, atlas-link, atlas-memory-emit — GOVERNANCE_SURFACE six members) — one append on admission, nothing on refusal"
+            }
+          }
+        }
+      ],
+      "recordCount": 2,
+      "sequentialControl": {
+        "isError": true,
+        "body": {
+          "fault": "refused",
+          "rejected": "logbook-duplicate: MEM-8 logbook: an entry for PR 'concurrent-pr-2' already exists; a correction appends a supersede pointer and never rewrites the extant entry",
+          "guidance": {
+            "next": "a refused write named the gate that declined (undetermined-kind / template-invalid / unowned / logbook-duplicate / logbook-unauthorized / over-cap / scanner-blocked / scanner-unavailable) — fix and re-emit; nothing is persisted on a refusal",
+            "invariant": "MEM-1..9 / WP-11.W8: atlas-memory-emit is a governed fail-closed write door (WRITE_PATHS: atlas-emit, atlas-link, atlas-memory-emit — GOVERNANCE_SURFACE six members) — one append on admission, nothing on refusal"
+          }
+        }
+      },
+      "uniquenessViolated": true
+    }
+  ]
+}

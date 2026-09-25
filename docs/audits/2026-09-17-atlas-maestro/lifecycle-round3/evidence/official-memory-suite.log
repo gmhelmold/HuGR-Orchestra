@@ -1,0 +1,14 @@
+
+ RUN  v2.1.9 <PRODUCT_ROOT>/foundation/atlas
+
+ ✓ |unit| packages/adapter-io/test/memory-read.test.ts (12 tests) 214ms
+ ✓ |unit| packages/adapter-io/test/memory-emit.test.ts (19 tests) 168ms
+ ✓ |unit| packages/adapter-io/test/memory-store.test.ts (10 tests) 926ms
+   ✓ A4 — concurrent writers do not lose each other (REAL subprocesses) > 8 processes × 5 appends = 40 durable records, 0 lost 818ms
+ ✓ |unit| packages/adapter-io/test/orientation-store.test.ts (9 tests) 820ms
+   ✓ concurrent appends do not lose events (REAL, CONCURRENT subprocesses) > 8 processes × 5 appends = 40 durable events, 0 lost 752ms
+
+ Test Files  4 passed (4)
+      Tests  50 passed (50)
+   Start at  18:02:52
+   Duration  7.56s (transform 466ms, setup 0ms, collect 1.16s, tests 2.13s, environment 3ms, prepare 966ms)

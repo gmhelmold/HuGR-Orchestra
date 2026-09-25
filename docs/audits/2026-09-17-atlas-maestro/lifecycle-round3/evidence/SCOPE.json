@@ -1,0 +1,300 @@
+{
+  "commit": "b0c33d2f6567a2c741240f3c44bc00ca2f01e7e7",
+  "note": "Explicit investigation reference scope with immutable Git blobs; source reading may be partial as marked. This is NOT execution/statement/branch coverage or semantic coverage of the entire monorepo.",
+  "files": [
+    {
+      "path": "foundation/atlas/packages/adapter-io/src/durable-log.ts",
+      "gitBlob": "04ddc359ee398ca72eaa9606234120eb36750123",
+      "bytes": 9080,
+      "lines": 150,
+      "inspection": "source reading and cross-reference"
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/src/memory-store.ts",
+      "gitBlob": "2611a8f19d66b8d6d1612d341e53e486eda94a4a",
+      "bytes": 3332,
+      "lines": 62,
+      "inspection": "source reading and cross-reference"
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/src/memory-read.ts",
+      "gitBlob": "2e3a4d532296c11ffd13b50a5e724586cebc131d",
+      "bytes": 12831,
+      "lines": 239,
+      "inspection": "source reading and cross-reference"
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/src/memory-emit.ts",
+      "gitBlob": "6c5e0c147d6c8c54a21ff73121c48f260f28cba2",
+      "bytes": 12457,
+      "lines": 245,
+      "inspection": "source reading and cross-reference"
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/src/memory-verdicts.ts",
+      "gitBlob": "3978b8d1bc0b157e7301ea400194bd52b69955d1",
+      "bytes": 7590,
+      "lines": 112,
+      "inspection": "source reading and cross-reference"
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/src/orientation-store.ts",
+      "gitBlob": "a551836241b13d58d38cfbc89cad70f649d1a3ef",
+      "bytes": 5194,
+      "lines": 77,
+      "inspection": "source reading and cross-reference"
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/src/awareness-store.ts",
+      "gitBlob": "f05dc2fe8833f0a426742f42146dc18f80e2d1ea",
+      "bytes": 9004,
+      "lines": 145,
+      "inspection": "source reading and cross-reference"
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/src/scanner.ts",
+      "gitBlob": "34d1d01e7bc32d49bd58490033a32aea018d5c7f",
+      "bytes": 11127,
+      "lines": 195,
+      "inspection": "source reading and cross-reference"
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/src/compose.ts",
+      "gitBlob": "6db0403297bf573be189136aa99a043039a36c70",
+      "bytes": 44446,
+      "lines": 594,
+      "inspection": "selected sections, call-site searches and/or execution"
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/src/compose-runtime.ts",
+      "gitBlob": "89946e28ead3eaaddca1deac8d02684d0464f68f",
+      "bytes": 16531,
+      "lines": 215,
+      "inspection": "selected sections, call-site searches and/or execution"
+    },
+    {
+      "path": "foundation/atlas/packages/memory/src/types.ts",
+      "gitBlob": "caf7ec016985420b80b18d0fde9ea890ac0ff2d7",
+      "bytes": 14446,
+      "lines": 255,
+      "inspection": "source reading and cross-reference"
+    },
+    {
+      "path": "foundation/atlas/packages/memory/src/portable.ts",
+      "gitBlob": "7c798bf42280caea18b2d6c88a5c76ad61be4f20",
+      "bytes": 6353,
+      "lines": 141,
+      "inspection": "source reading and cross-reference"
+    },
+    {
+      "path": "foundation/atlas/packages/memory/src/orient.ts",
+      "gitBlob": "4f7b69067999a4b250f0cea2e9b83235ca196b41",
+      "bytes": 10261,
+      "lines": 214,
+      "inspection": "source reading and cross-reference"
+    },
+    {
+      "path": "foundation/atlas/packages/memory/src/logbook.ts",
+      "gitBlob": "c060de2c710f4762997cfa8ce98cedd7bc24abfa",
+      "bytes": 10065,
+      "lines": 201,
+      "inspection": "source reading and cross-reference"
+    },
+    {
+      "path": "foundation/atlas/packages/memory/src/inject.ts",
+      "gitBlob": "f4fd024be30f1e6ecef173924369ea64114648e6",
+      "bytes": 10519,
+      "lines": 207,
+      "inspection": "source reading and cross-reference"
+    },
+    {
+      "path": "foundation/atlas/packages/memory/src/respawn.ts",
+      "gitBlob": "21d4d813adb53a973183bac385c8ebf88fda2641",
+      "bytes": 9422,
+      "lines": 185,
+      "inspection": "source reading and cross-reference"
+    },
+    {
+      "path": "foundation/atlas/packages/memory/src/template.ts",
+      "gitBlob": "c9c930f30311774f303ab22f8d6c9690d52dcc19",
+      "bytes": 17607,
+      "lines": 333,
+      "inspection": "source reading and cross-reference"
+    },
+    {
+      "path": "foundation/atlas/packages/memory/src/rules.ts",
+      "gitBlob": "8b738dc8c4253b1e86496fba5e1adeacbec0b502",
+      "bytes": 17610,
+      "lines": 334,
+      "inspection": "selected sections, call-site searches and/or execution"
+    },
+    {
+      "path": "foundation/atlas/packages/kernel/src/log.ts",
+      "gitBlob": "56f8570ff9429029507d612dc3efef4966f9dafb",
+      "bytes": 5347,
+      "lines": 108,
+      "inspection": "source reading and cross-reference"
+    },
+    {
+      "path": "foundation/atlas/packages/mcp-server/src/server-memory-tools.ts",
+      "gitBlob": "3137a31eed64e70bdc0b90d387c657d77fbeb289",
+      "bytes": 6875,
+      "lines": 119,
+      "inspection": "source reading and cross-reference"
+    },
+    {
+      "path": "foundation/atlas/packages/mcp-server/src/server.ts",
+      "gitBlob": "4f771a6ea86f722f578b320f4bd989394882de01",
+      "bytes": 19538,
+      "lines": 325,
+      "inspection": "selected sections, call-site searches and/or execution"
+    },
+    {
+      "path": "foundation/atlas/packages/cli/src/cli-dispatch.ts",
+      "gitBlob": "a8bc7385ce02efd87fccd7f39bd8b6c90e8a8ec6",
+      "bytes": 15297,
+      "lines": 227,
+      "inspection": "selected sections, call-site searches and/or execution"
+    },
+    {
+      "path": "foundation/atlas/packages/e2e-blackbox/src/harness.ts",
+      "gitBlob": "7eb59ae581404cb8627a21526f9026285fea06e5",
+      "bytes": 11808,
+      "lines": 238,
+      "inspection": "selected sections, call-site searches and/or execution"
+    },
+    {
+      "path": "packages/opencode/src/maestro/admission-record.ts",
+      "gitBlob": "e4be41c69e2cc9fccb018064337af5a80e17bcf4",
+      "bytes": 2806,
+      "lines": 66,
+      "inspection": "source reading and cross-reference"
+    },
+    {
+      "path": "packages/opencode/src/maestro/approval-record.ts",
+      "gitBlob": "10f43f5d5b6d3b06304425ac89d2b079f6a48799",
+      "bytes": 11626,
+      "lines": 298,
+      "inspection": "source reading and cross-reference"
+    },
+    {
+      "path": "packages/opencode/src/maestro/governed-task.ts",
+      "gitBlob": "14944d11eb7f68e76ffac324f5122dd3874e40c1",
+      "bytes": 1973,
+      "lines": 52,
+      "inspection": "source reading and cross-reference"
+    },
+    {
+      "path": "packages/opencode/src/tool/maestro-admission.ts",
+      "gitBlob": "b7bbccfd08176affcdbeee20df722e30018bcb30",
+      "bytes": 2216,
+      "lines": 53,
+      "inspection": "source reading and cross-reference"
+    },
+    {
+      "path": "packages/opencode/src/tool/task.ts",
+      "gitBlob": "f80e0beaf8e7cbd227d506f5769a05733d61dcda",
+      "bytes": 24263,
+      "lines": 596,
+      "inspection": "selected sections, call-site searches and/or execution"
+    },
+    {
+      "path": "packages/opencode/src/tool/task.txt",
+      "gitBlob": "0c5b8eeedebc7ae37ddaf7e5e79223fd83ec4678",
+      "bytes": 3374,
+      "lines": 22,
+      "inspection": "source reading and cross-reference"
+    },
+    {
+      "path": "packages/opencode/src/tool/maestro-approval.ts",
+      "gitBlob": "f153199fd08ed3dd51824148f05210387b3ec40f",
+      "bytes": 3771,
+      "lines": 95,
+      "inspection": "selected sections, call-site searches and/or execution"
+    },
+    {
+      "path": "packages/opencode/src/event-v2-bridge.ts",
+      "gitBlob": "8e65f2752df7cdc1d0a4946cb100fda8e89a8715",
+      "bytes": 2823,
+      "lines": 71,
+      "inspection": "selected sections, call-site searches and/or execution"
+    },
+    {
+      "path": "packages/core/src/event.ts",
+      "gitBlob": "dc0e37474507fc22f93b05d124bfc418151ac426",
+      "bytes": 33161,
+      "lines": 826,
+      "inspection": "selected sections, call-site searches and/or execution"
+    },
+    {
+      "path": "packages/core/src/agent.ts",
+      "gitBlob": "da86cf809b90a8117cfa7bb315362d3e61230fa2",
+      "bytes": 3600,
+      "lines": 111,
+      "inspection": "source reading and cross-reference"
+    },
+    {
+      "path": "packages/core/src/tool/builtins.ts",
+      "gitBlob": "a558124378dfaffbd3673d63715ecf2e47b3d879",
+      "bytes": 1619,
+      "lines": 48,
+      "inspection": "source reading and cross-reference"
+    },
+    {
+      "path": "packages/schema/src/maestro-event.ts",
+      "gitBlob": "0f1c669e9e805d812c318e498bf051506893512a",
+      "bytes": 3781,
+      "lines": 116,
+      "inspection": "source reading and cross-reference"
+    },
+    {
+      "path": "packages/opencode/test/maestro/admission-record.test.ts",
+      "gitBlob": "ef72ca36b702630ab996f3012aa8c15919503c2f",
+      "bytes": 2013,
+      "lines": 56,
+      "inspection": "source reading and cross-reference"
+    },
+    {
+      "path": "packages/opencode/test/maestro/governed-lifecycle.test.ts",
+      "gitBlob": "198b78b07d8037bf59f65999d728be71583f8c8d",
+      "bytes": 16928,
+      "lines": 472,
+      "inspection": "source reading and cross-reference"
+    },
+    {
+      "path": "packages/opencode/test/tool/task.test.ts",
+      "gitBlob": "716759c9ae1e1b7439f084ff3b66305b03bc9e9b",
+      "bytes": 41620,
+      "lines": 1282,
+      "inspection": "selected sections, call-site searches and/or execution"
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/test/memory-store.test.ts",
+      "gitBlob": "77d0d79896a2b79e241c484e162c768a0908bedd",
+      "bytes": 7847,
+      "lines": 165,
+      "inspection": "source reading and cross-reference"
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/test/memory-read.test.ts",
+      "gitBlob": "314a6d86647da9aad580961ca9abe9d2240cf8ff",
+      "bytes": 10821,
+      "lines": 239,
+      "inspection": "selected sections, call-site searches and/or execution"
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/test/memory-emit.test.ts",
+      "gitBlob": "c737028ec1ab3fff81de60751189a75bc358bbee",
+      "bytes": 10209,
+      "lines": 210,
+      "inspection": "selected sections, call-site searches and/or execution"
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/test/orientation-store.test.ts",
+      "gitBlob": "8640bf87abd64821dc649d99157174b45615a0c4",
+      "bytes": 6005,
+      "lines": 123,
+      "inspection": "selected sections, call-site searches and/or execution"
+    }
+  ]
+}
