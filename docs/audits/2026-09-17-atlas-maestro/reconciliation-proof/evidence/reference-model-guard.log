@@ -1,0 +1,33 @@
+$ node harness/gates/reference-model-guard.mjs
+reference-model-guard: FAIL
+
+  ✗ HEADER COUNT DRIFT — declared-modules
+      The header's DECLARED COUNTS line says 38, the analyser measures 39.
+      Correct the number in the header comment to 39 — do not silence this check.
+
+  ✗ HEADER COUNT DRIFT — dead-value-exports
+      The header's DECLARED COUNTS line says 139, the analyser measures 142.
+      Correct the number in the header comment to 142 — do not silence this check.
+
+  ✗ HEADER COUNT DRIFT — type-reachable
+      The header's DECLARED COUNTS line says 5, the analyser measures 4.
+      Correct the number in the header comment to 4 — do not silence this check.
+
+  ✗ NEW REFERENCE MODEL — packages/index/src/own-impact.ts
+      1 exported value(s) with ZERO production callers: ownImpact
+      Nothing in packages/*/src references it at all.
+      Either wire it to a product path, or put a header banner on it (see packages/tools/src/guard.ts)
+      and add it to the LEDGER here — with `shipped:` and `banner:`, both of which are checked.
+
+  ✗ NEW REFERENCE MODEL — packages/retrieval/src/own-snapshot.ts
+      6 exported value(s) with ZERO production callers: OWN_SNAPSHOT_PATH, OWN_SNAPSHOT_SCHEMA, exportOwnSnapshot, materializeStaticOwnSnapshot, parseOwnSnapshot, verifyStaticOwnSnapshot
+      Nothing in packages/*/src references it at all.
+      Either wire it to a product path, or put a header banner on it (see packages/tools/src/guard.ts)
+      and add it to the LEDGER here — with `shipped:` and `banner:`, both of which are checked.
+
+  ✗ STALE LEDGER ENTRY — packages/index/src/fold.ts
+      Listed as a reference model, but it now HAS production callers — the reference model became shipped code.
+      Delete the entry (and its banner) so the ledger keeps meaning what it says.
+
+6 violation(s). A reference model is legal; an UNDECLARED one is not.
+error: script "reference-model-guard" exited with code 1

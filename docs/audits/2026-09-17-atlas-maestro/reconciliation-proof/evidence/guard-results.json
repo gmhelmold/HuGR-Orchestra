@@ -1,0 +1,10 @@
+[
+  {
+    "command": "bun run reference-model-guard",
+    "exitCode": 1
+  },
+  {
+    "command": "bun run own-snapshot-guard",
+    "exitCode": 0
+  }
+]

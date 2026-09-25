@@ -1,0 +1,1 @@
+[{"case":"two-anchors-delete","removed":"src/a.ts","cliExit":0,"invalidBaseExit":1},{"case":"two-anchors-delete","removed":"src/b.ts","cliExit":0,"invalidBaseExit":1},{"case":"fresh-cli-verification-controls","publicationExit":0,"lossExit":2}]

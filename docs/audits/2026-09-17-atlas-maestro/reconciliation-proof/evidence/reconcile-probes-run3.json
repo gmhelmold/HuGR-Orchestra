@@ -1,0 +1,683 @@
+{
+  "sha": "b0c33d2f6567a2c741240f3c44bc00ca2f01e7e7",
+  "root": "/private/tmp/hugr-audit-reconcile.QaHAhB/repo/foundation/atlas",
+  "node": "v22.17.1",
+  "results": [
+    {
+      "id": "REC-01-deleted-citation-versus-rename-and-rewrite",
+      "status": "confirmed-observation",
+      "cases": [
+        {
+          "change": "unchanged",
+          "base": "5da46814e8ed481fcf8b9af71fbbf9427bed9271",
+          "head": "5da46814e8ed481fcf8b9af71fbbf9427bed9271",
+          "nodeKey": "8e4d425cb257dab1e7a32f40af5efe588f6a8f376e0dc5a2940642a459442afd",
+          "reconcile": {
+            "ok": true,
+            "data": {
+              "drift": [],
+              "mechanical": [],
+              "semantic": [],
+              "regroundedCount": 0,
+              "reauthorCount": 0,
+              "exitCode": 0
+            },
+            "guidance": {
+              "next": "a semantic flip blocks the merge (exit 2) — re-author before merging",
+              "invariant": "TOOLS-8: reviewable drift, block on any semantic flip"
+            }
+          },
+          "cli": {
+            "stdout": "status: ok\nnext: a semantic flip blocks the merge (exit 2) — re-author before merging\ninvariant: TOOLS-8: reviewable drift, block on any semantic flip\ndata:\n  reconcile: exitCode 0 — 0 mechanical, 0 semantic\n  regroundedCount: 0\n  reauthorCount: 0\n",
+            "stderr": "",
+            "exitCode": 0
+          },
+          "mcp": {
+            "isError": false,
+            "body": {
+              "data": {
+                "drift": [],
+                "mechanical": [],
+                "semantic": [],
+                "regroundedCount": 0,
+                "reauthorCount": 0,
+                "exitCode": 0
+              },
+              "guidance": {
+                "next": "a semantic flip blocks the merge (exit 2) — re-author before merging",
+                "invariant": "TOOLS-8: reviewable drift, block on any semantic flip"
+              }
+            }
+          }
+        },
+        {
+          "change": "rename",
+          "base": "acc7c6176002f629f29be1410797536a7892b293",
+          "head": "8dd03c0bbe8233105fbfe180ca681190fd9748a1",
+          "nodeKey": "8e4d425cb257dab1e7a32f40af5efe588f6a8f376e0dc5a2940642a459442afd",
+          "drift": {
+            "fact": "8e4d425cb257dab1e7a32f40af5efe588f6a8f376e0dc5a2940642a459442afd",
+            "class": "mechanical",
+            "anchorWas": {
+              "kind": "file",
+              "qualifiedPath": "src/provider.ts",
+              "subtreeHash": "50b01b1ff6198bb28eb1b2dfa8d29543b684b1610789cbe4f29233089fadd2db"
+            },
+            "anchorNow": {
+              "kind": "block",
+              "qualifiedPath": "src/moved.ts",
+              "subtreeHash": "50b01b1ff6198bb28eb1b2dfa8d29543b684b1610789cbe4f29233089fadd2db"
+            }
+          },
+          "reconcile": {
+            "ok": true,
+            "data": {
+              "drift": [
+                {
+                  "fact": "8e4d425cb257dab1e7a32f40af5efe588f6a8f376e0dc5a2940642a459442afd",
+                  "class": "mechanical",
+                  "anchorWas": {
+                    "kind": "block",
+                    "qualifiedPath": "src/provider.ts",
+                    "subtreeHash": "50b01b1ff6198bb28eb1b2dfa8d29543b684b1610789cbe4f29233089fadd2db"
+                  },
+                  "anchorNow": {
+                    "kind": "block",
+                    "qualifiedPath": "src/moved.ts",
+                    "subtreeHash": "50b01b1ff6198bb28eb1b2dfa8d29543b684b1610789cbe4f29233089fadd2db"
+                  }
+                }
+              ],
+              "mechanical": [
+                "8e4d425cb257dab1e7a32f40af5efe588f6a8f376e0dc5a2940642a459442afd"
+              ],
+              "semantic": [],
+              "regroundedCount": 0,
+              "reauthorCount": 0,
+              "exitCode": 0
+            },
+            "guidance": {
+              "next": "a semantic flip blocks the merge (exit 2) — re-author before merging",
+              "invariant": "TOOLS-8: reviewable drift, block on any semantic flip"
+            }
+          },
+          "cli": {
+            "stdout": "status: ok\nnext: a semantic flip blocks the merge (exit 2) — re-author before merging\ninvariant: TOOLS-8: reviewable drift, block on any semantic flip\ndata:\n  reconcile: exitCode 0 — 1 mechanical, 0 semantic\n  drift mechanical 8e4d425cb257dab1e7a32f40af5efe588f6a8f376e0dc5a2940642a459442afd\n  mechanical: 8e4d425cb257dab1e7a32f40af5efe588f6a8f376e0dc5a2940642a459442afd\n  regroundedCount: 0\n  reauthorCount: 0\n",
+            "stderr": "",
+            "exitCode": 0
+          },
+          "mcp": {
+            "isError": false,
+            "body": {
+              "data": {
+                "drift": [
+                  {
+                    "fact": "8e4d425cb257dab1e7a32f40af5efe588f6a8f376e0dc5a2940642a459442afd",
+                    "class": "mechanical",
+                    "anchorWas": {
+                      "kind": "block",
+                      "qualifiedPath": "src/provider.ts",
+                      "subtreeHash": "50b01b1ff6198bb28eb1b2dfa8d29543b684b1610789cbe4f29233089fadd2db"
+                    },
+                    "anchorNow": {
+                      "kind": "block",
+                      "qualifiedPath": "src/moved.ts",
+                      "subtreeHash": "50b01b1ff6198bb28eb1b2dfa8d29543b684b1610789cbe4f29233089fadd2db"
+                    }
+                  }
+                ],
+                "mechanical": [
+                  "8e4d425cb257dab1e7a32f40af5efe588f6a8f376e0dc5a2940642a459442afd"
+                ],
+                "semantic": [],
+                "regroundedCount": 0,
+                "reauthorCount": 0,
+                "exitCode": 0
+              },
+              "guidance": {
+                "next": "a semantic flip blocks the merge (exit 2) — re-author before merging",
+                "invariant": "TOOLS-8: reviewable drift, block on any semantic flip"
+              }
+            }
+          }
+        },
+        {
+          "change": "rewrite",
+          "base": "ad02352fda63cb0e32d07dfeed2103a3cd412c43",
+          "head": "2bcdb053f7753fb09432890390cb27cf6e601a49",
+          "nodeKey": "8e4d425cb257dab1e7a32f40af5efe588f6a8f376e0dc5a2940642a459442afd",
+          "drift": {
+            "fact": "8e4d425cb257dab1e7a32f40af5efe588f6a8f376e0dc5a2940642a459442afd",
+            "class": "semantic",
+            "anchorWas": {
+              "kind": "file",
+              "qualifiedPath": "src/provider.ts",
+              "subtreeHash": "50b01b1ff6198bb28eb1b2dfa8d29543b684b1610789cbe4f29233089fadd2db"
+            },
+            "anchorNow": {
+              "kind": "block",
+              "qualifiedPath": "src/provider.ts",
+              "subtreeHash": "52c4646615de98d4e64a174369f04a737236d6ea6956c044939e848c7f31719c"
+            }
+          },
+          "reconcile": {
+            "ok": true,
+            "data": {
+              "drift": [
+                {
+                  "fact": "8e4d425cb257dab1e7a32f40af5efe588f6a8f376e0dc5a2940642a459442afd",
+                  "class": "semantic",
+                  "anchorWas": {
+                    "kind": "block",
+                    "qualifiedPath": "src/provider.ts",
+                    "subtreeHash": "50b01b1ff6198bb28eb1b2dfa8d29543b684b1610789cbe4f29233089fadd2db"
+                  },
+                  "anchorNow": {
+                    "kind": "block",
+                    "qualifiedPath": "src/provider.ts",
+                    "subtreeHash": "52c4646615de98d4e64a174369f04a737236d6ea6956c044939e848c7f31719c"
+                  }
+                }
+              ],
+              "mechanical": [],
+              "semantic": [
+                "8e4d425cb257dab1e7a32f40af5efe588f6a8f376e0dc5a2940642a459442afd"
+              ],
+              "regroundedCount": 0,
+              "reauthorCount": 1,
+              "exitCode": 2
+            },
+            "guidance": {
+              "next": "a semantic flip blocks the merge (exit 2) — re-author before merging",
+              "invariant": "TOOLS-8: reviewable drift, block on any semantic flip"
+            }
+          },
+          "cli": {
+            "stdout": "status: rejected\nnext: a semantic flip blocks the merge (exit 2) — re-author before merging\ninvariant: TOOLS-8: reviewable drift, block on any semantic flip\ndata:\n  reconcile: exitCode 2 — 0 mechanical, 1 semantic\n  drift semantic 8e4d425cb257dab1e7a32f40af5efe588f6a8f376e0dc5a2940642a459442afd\n  semantic: 8e4d425cb257dab1e7a32f40af5efe588f6a8f376e0dc5a2940642a459442afd\n  regroundedCount: 0\n  reauthorCount: 1\n",
+            "stderr": "",
+            "exitCode": 2
+          },
+          "mcp": {
+            "isError": false,
+            "body": {
+              "data": {
+                "drift": [
+                  {
+                    "fact": "8e4d425cb257dab1e7a32f40af5efe588f6a8f376e0dc5a2940642a459442afd",
+                    "class": "semantic",
+                    "anchorWas": {
+                      "kind": "block",
+                      "qualifiedPath": "src/provider.ts",
+                      "subtreeHash": "50b01b1ff6198bb28eb1b2dfa8d29543b684b1610789cbe4f29233089fadd2db"
+                    },
+                    "anchorNow": {
+                      "kind": "block",
+                      "qualifiedPath": "src/provider.ts",
+                      "subtreeHash": "52c4646615de98d4e64a174369f04a737236d6ea6956c044939e848c7f31719c"
+                    }
+                  }
+                ],
+                "mechanical": [],
+                "semantic": [
+                  "8e4d425cb257dab1e7a32f40af5efe588f6a8f376e0dc5a2940642a459442afd"
+                ],
+                "regroundedCount": 0,
+                "reauthorCount": 1,
+                "exitCode": 2
+              },
+              "guidance": {
+                "next": "a semantic flip blocks the merge (exit 2) — re-author before merging",
+                "invariant": "TOOLS-8: reviewable drift, block on any semantic flip"
+              }
+            }
+          }
+        },
+        {
+          "change": "delete",
+          "base": "bd1394fe58ce209416cc1951ea01299fde94469c",
+          "head": "d5fa30c015309a6abef589965a1acd6dbb8ce93d",
+          "nodeKey": "8e4d425cb257dab1e7a32f40af5efe588f6a8f376e0dc5a2940642a459442afd",
+          "drift": {
+            "fact": "8e4d425cb257dab1e7a32f40af5efe588f6a8f376e0dc5a2940642a459442afd",
+            "class": "semantic",
+            "anchorWas": {
+              "kind": "file",
+              "qualifiedPath": "src/provider.ts",
+              "subtreeHash": "50b01b1ff6198bb28eb1b2dfa8d29543b684b1610789cbe4f29233089fadd2db"
+            },
+            "anchorNow": {
+              "kind": "file",
+              "qualifiedPath": "src/provider.ts",
+              "subtreeHash": "50b01b1ff6198bb28eb1b2dfa8d29543b684b1610789cbe4f29233089fadd2db"
+            }
+          },
+          "reconcile": {
+            "ok": true,
+            "data": {
+              "drift": [],
+              "mechanical": [],
+              "semantic": [],
+              "regroundedCount": 0,
+              "reauthorCount": 0,
+              "exitCode": 0
+            },
+            "guidance": {
+              "next": "a semantic flip blocks the merge (exit 2) — re-author before merging",
+              "invariant": "TOOLS-8: reviewable drift, block on any semantic flip"
+            }
+          },
+          "cli": {
+            "stdout": "status: ok\nnext: a semantic flip blocks the merge (exit 2) — re-author before merging\ninvariant: TOOLS-8: reviewable drift, block on any semantic flip\ndata:\n  reconcile: exitCode 0 — 0 mechanical, 0 semantic\n  regroundedCount: 0\n  reauthorCount: 0\n",
+            "stderr": "",
+            "exitCode": 0
+          },
+          "mcp": {
+            "isError": false,
+            "body": {
+              "data": {
+                "drift": [],
+                "mechanical": [],
+                "semantic": [],
+                "regroundedCount": 0,
+                "reauthorCount": 0,
+                "exitCode": 0
+              },
+              "guidance": {
+                "next": "a semantic flip blocks the merge (exit 2) — re-author before merging",
+                "invariant": "TOOLS-8: reviewable drift, block on any semantic flip"
+              }
+            }
+          }
+        }
+      ],
+      "summary": "Fresh CLI and fresh MCP both return a clean reconcile for a deleted sole citation; rewrite blocks, rename is mechanical, unchanged stays clean."
+    },
+    {
+      "id": "REC-02-accept-reground-reports-without-publication",
+      "status": "confirmed-observation",
+      "reportOnly": {
+        "stdout": "status: ok\nnext: a semantic flip blocks the merge (exit 2) — re-author before merging\ninvariant: TOOLS-8: reviewable drift, block on any semantic flip\ndata:\n  reconcile: exitCode 0 — 1 mechanical, 0 semantic\n  drift mechanical 8e4d425cb257dab1e7a32f40af5efe588f6a8f376e0dc5a2940642a459442afd\n  mechanical: 8e4d425cb257dab1e7a32f40af5efe588f6a8f376e0dc5a2940642a459442afd\n  regroundedCount: 0\n  reauthorCount: 0\n",
+        "stderr": "",
+        "exitCode": 0
+      },
+      "accepted": {
+        "stdout": "status: ok\nnext: a semantic flip blocks the merge (exit 2) — re-author before merging\ninvariant: TOOLS-8: reviewable drift, block on any semantic flip\ndata:\n  reconcile: exitCode 0 — 1 mechanical, 0 semantic\n  drift mechanical 8e4d425cb257dab1e7a32f40af5efe588f6a8f376e0dc5a2940642a459442afd\n  mechanical: 8e4d425cb257dab1e7a32f40af5efe588f6a8f376e0dc5a2940642a459442afd\n  regroundedCount: 1\n  reauthorCount: 0\n",
+        "stderr": "",
+        "exitCode": 0
+      },
+      "mcp": {
+        "isError": false,
+        "body": {
+          "data": {
+            "drift": [
+              {
+                "fact": "8e4d425cb257dab1e7a32f40af5efe588f6a8f376e0dc5a2940642a459442afd",
+                "class": "mechanical",
+                "anchorWas": {
+                  "kind": "block",
+                  "qualifiedPath": "src/provider.ts",
+                  "subtreeHash": "50b01b1ff6198bb28eb1b2dfa8d29543b684b1610789cbe4f29233089fadd2db"
+                },
+                "anchorNow": {
+                  "kind": "block",
+                  "qualifiedPath": "src/moved.ts",
+                  "subtreeHash": "50b01b1ff6198bb28eb1b2dfa8d29543b684b1610789cbe4f29233089fadd2db"
+                }
+              }
+            ],
+            "mechanical": [
+              "8e4d425cb257dab1e7a32f40af5efe588f6a8f376e0dc5a2940642a459442afd"
+            ],
+            "semantic": [],
+            "regroundedCount": 1,
+            "reauthorCount": 0,
+            "exitCode": 0
+          },
+          "guidance": {
+            "next": "a semantic flip blocks the merge (exit 2) — re-author before merging",
+            "invariant": "TOOLS-8: reviewable drift, block on any semantic flip"
+          }
+        }
+      },
+      "before": [
+        [
+          "cas/3c/3c43223a5633de381ad8222059a6a7f96c9087cc3a21758d7301ae2c10b51bff",
+          "7e916345e37be0896ed67f001c7278bd419090266c3ead60146caecacfeae8cf"
+        ],
+        [
+          "index.scip",
+          "c7ad66302ccad0ad64fd855751b06d65262281d3df74a282ba072ff6a9b9bcff"
+        ],
+        [
+          "policy.json",
+          "de6c55dcbdfeb10143e62e44b6848f3fde2734eaf35b3b5d760d58c59e520a65"
+        ],
+        [
+          "projection.1.json",
+          "2466b2e9d7ec28fabfc42ea064347f3643716b312d1e34d2dfcc743062565222"
+        ],
+        [
+          "projection.json",
+          "2466b2e9d7ec28fabfc42ea064347f3643716b312d1e34d2dfcc743062565222"
+        ]
+      ],
+      "afterCLI": [
+        [
+          "cas/3c/3c43223a5633de381ad8222059a6a7f96c9087cc3a21758d7301ae2c10b51bff",
+          "7e916345e37be0896ed67f001c7278bd419090266c3ead60146caecacfeae8cf"
+        ],
+        [
+          "index.scip",
+          "c7ad66302ccad0ad64fd855751b06d65262281d3df74a282ba072ff6a9b9bcff"
+        ],
+        [
+          "policy.json",
+          "de6c55dcbdfeb10143e62e44b6848f3fde2734eaf35b3b5d760d58c59e520a65"
+        ],
+        [
+          "projection.1.json",
+          "2466b2e9d7ec28fabfc42ea064347f3643716b312d1e34d2dfcc743062565222"
+        ],
+        [
+          "projection.json",
+          "2466b2e9d7ec28fabfc42ea064347f3643716b312d1e34d2dfcc743062565222"
+        ]
+      ],
+      "afterMCP": [
+        [
+          "cas/3c/3c43223a5633de381ad8222059a6a7f96c9087cc3a21758d7301ae2c10b51bff",
+          "7e916345e37be0896ed67f001c7278bd419090266c3ead60146caecacfeae8cf"
+        ],
+        [
+          "index.scip",
+          "c7ad66302ccad0ad64fd855751b06d65262281d3df74a282ba072ff6a9b9bcff"
+        ],
+        [
+          "policy.json",
+          "de6c55dcbdfeb10143e62e44b6848f3fde2734eaf35b3b5d760d58c59e520a65"
+        ],
+        [
+          "projection.1.json",
+          "2466b2e9d7ec28fabfc42ea064347f3643716b312d1e34d2dfcc743062565222"
+        ],
+        [
+          "projection.json",
+          "2466b2e9d7ec28fabfc42ea064347f3643716b312d1e34d2dfcc743062565222"
+        ]
+      ],
+      "stillDrifted": {
+        "fact": "8e4d425cb257dab1e7a32f40af5efe588f6a8f376e0dc5a2940642a459442afd",
+        "class": "mechanical",
+        "anchorWas": {
+          "kind": "file",
+          "qualifiedPath": "src/provider.ts",
+          "subtreeHash": "50b01b1ff6198bb28eb1b2dfa8d29543b684b1610789cbe4f29233089fadd2db"
+        },
+        "anchorNow": {
+          "kind": "block",
+          "qualifiedPath": "src/moved.ts",
+          "subtreeHash": "50b01b1ff6198bb28eb1b2dfa8d29543b684b1610789cbe4f29233089fadd2db"
+        }
+      },
+      "recordedAnchors": [
+        {
+          "anchor": {
+            "kind": "file",
+            "qualifiedPath": "src/provider.ts",
+            "subtreeHash": "50b01b1ff6198bb28eb1b2dfa8d29543b684b1610789cbe4f29233089fadd2db"
+          },
+          "path": "src/provider.ts"
+        }
+      ],
+      "summary": "Both public transports report regroundedCount=1; every .atlas file is byte-identical and the original citation remains drifted after reopening."
+    },
+    {
+      "id": "DOC-01-semantic-retire-plan-fails-own-write-door",
+      "status": "confirmed-observation",
+      "plan": {
+        "action": "retire",
+        "emit": {
+          "kind": "advisory",
+          "id": "8e4d425cb257dab1e7a32f40af5efe588f6a8f376e0dc5a2940642a459442afd",
+          "tier": "T2",
+          "claimNorm": "The provider declares the original value.",
+          "grounding": {
+            "entries": [
+              {
+                "anchor": {
+                  "kind": "file",
+                  "qualifiedPath": "src/provider.ts",
+                  "subtreeHash": "50b01b1ff6198bb28eb1b2dfa8d29543b684b1610789cbe4f29233089fadd2db"
+                },
+                "path": "src/provider.ts"
+              }
+            ]
+          },
+          "freshness": "FRESH",
+          "claims": [],
+          "authoring": "SUPERSEDED",
+          "scope": "src",
+          "predicateSlot": "invariant"
+        }
+      },
+      "check": {
+        "wouldEmit": false,
+        "gates": [
+          {
+            "gate": "shape",
+            "pass": true
+          },
+          {
+            "gate": "truth",
+            "pass": false,
+            "reason": "ungrounded: citation does not re-derive FRESH at source (TOOLS-7b / GROUND-6)",
+            "remedy": "re-derive the citation against the CURRENT source tree, or re-anchor the claim to a unit that still exists"
+          }
+        ]
+      },
+      "emitResult": {
+        "ok": false,
+        "data": {
+          "emitted": false,
+          "rejected": "ungrounded: citation does not re-derive FRESH at source (TOOLS-7b / GROUND-6)"
+        },
+        "rejected": "ungrounded: citation does not re-derive FRESH at source (TOOLS-7b / GROUND-6)",
+        "guidance": {
+          "next": "a rejected write did not re-derive at source@sha — fix the citation and re-emit",
+          "invariant": "TOOLS-1/7: atlas-emit is a governed fail-closed write door (WRITE_PATHS: atlas-emit, atlas-link — ADR-0003)"
+        }
+      },
+      "mcp": {
+        "isError": true,
+        "body": {
+          "fault": "refused",
+          "rejected": "ungrounded: citation does not re-derive FRESH at source (TOOLS-7b / GROUND-6)",
+          "guidance": {
+            "next": "a rejected write did not re-derive at source@sha — fix the citation and re-emit",
+            "invariant": "TOOLS-1/7: atlas-emit is a governed fail-closed write door (WRITE_PATHS: atlas-emit, atlas-link — ADR-0003)"
+          }
+        }
+      },
+      "stillPresent": true,
+      "positiveControl": {
+        "emitted": true,
+        "id": "ddf12964262064a5ca4636c09712276ffc3ed984290d6195aa27f0e1827ac571",
+        "nodeKey": "e66071bb8eb39e2b1bc603fb8628b8f4bd113bc17a06d4190cc0ed62595d6402"
+      },
+      "summary": "Doctor recommends retiring semantic drift, but its exact payload is rejected as ungrounded by the governed door; authorized fresh writing still succeeds."
+    },
+    {
+      "id": "VER-01-new-proof-is-invisible-to-composed-reverify",
+      "status": "confirmed-observation",
+      "head": "78e97d15901295b8966d141316a42b06ebc5c137",
+      "indexSHA256": "449fc21aa59b805363d99d3a20859156e93a0de3df7e13fd5478a1186969a006",
+      "before": {
+        "sealedProven": 0,
+        "reProven": 0,
+        "broken": 0,
+        "unverifiable": 0,
+        "dangling": 0,
+        "rows": []
+      },
+      "derived": {
+        "resolvedEdgeCount": 1,
+        "proven": 1,
+        "persisted": 1,
+        "refused": 0,
+        "rows": [
+          {
+            "key": "ecf0b81e8f512459ffa1a7a5d788f277d81090cee061a8014ea08de00c0706f9",
+            "endpointA": "src/consumer.ts",
+            "endpointB": "src/provider.ts",
+            "persisted": true,
+            "id": "cbbb430b4db06b5ec5c625b86580fdad83455b6772e7636873dfb4f5fea8a6d6"
+          }
+        ]
+      },
+      "count": 1,
+      "same": {
+        "sealedProven": 0,
+        "reProven": 0,
+        "broken": 0,
+        "unverifiable": 0,
+        "dangling": 0,
+        "rows": []
+      },
+      "fresh": {
+        "sealedProven": 1,
+        "reProven": 1,
+        "broken": 0,
+        "unverifiable": 0,
+        "dangling": 0,
+        "rows": [
+          {
+            "nodeKey": "ecf0b81e8f512459ffa1a7a5d788f277d81090cee061a8014ea08de00c0706f9",
+            "outcome": "re-proven",
+            "reason": "replayed PROVEN over (depends-on, scip-typescript npm audit 1 src/provider.ts/value., src)"
+          }
+        ]
+      },
+      "summary": "With unchanged source and SCIP, original deriveRelations publishes proven facts invisible to the same runtime reverify; fresh runtime sees and proves them."
+    },
+    {
+      "id": "VER-02-mixed-snapshot-double-counts-pruned-proof",
+      "status": "confirmed-observation",
+      "before": {
+        "sealedProven": 1,
+        "reProven": 1,
+        "broken": 0,
+        "unverifiable": 0,
+        "dangling": 0,
+        "rows": [
+          {
+            "nodeKey": "ecf0b81e8f512459ffa1a7a5d788f277d81090cee061a8014ea08de00c0706f9",
+            "outcome": "re-proven",
+            "reason": "replayed PROVEN over (depends-on, scip-typescript npm audit 1 src/provider.ts/value., src)"
+          }
+        ]
+      },
+      "row": {
+        "nodeKey": "ecf0b81e8f512459ffa1a7a5d788f277d81090cee061a8014ea08de00c0706f9",
+        "family": "relation",
+        "contentHash": "cbbb430b4db06b5ec5c625b86580fdad83455b6772e7636873dfb4f5fea8a6d6",
+        "claims": [
+          "src/consumer.ts\u0000depends-on\u0000src/provider.ts"
+        ],
+        "primaryAnchor": "src/consumer.ts",
+        "seal": "proven",
+        "scope": "src",
+        "tier": "T2",
+        "endpointA": "src/consumer.ts",
+        "endpointB": "src/provider.ts",
+        "relationKind": "depends-on",
+        "derivedAt": "3afd02a828a739011d3c21d18e636fc066693738"
+      },
+      "same": {
+        "sealedProven": 2,
+        "reProven": 1,
+        "broken": 0,
+        "unverifiable": 0,
+        "dangling": 1,
+        "rows": [
+          {
+            "nodeKey": "ecf0b81e8f512459ffa1a7a5d788f277d81090cee061a8014ea08de00c0706f9",
+            "outcome": "re-proven",
+            "reason": "replayed PROVEN over (depends-on, scip-typescript npm audit 1 src/provider.ts/value., src)"
+          },
+          {
+            "nodeKey": "ecf0b81e8f512459ffa1a7a5d788f277d81090cee061a8014ea08de00c0706f9",
+            "outcome": "dangling",
+            "reason": "the durable projection serves this fact as seal:'proven', and its contentHash 'cbbb430b4db06b5ec5c625b86580fdad83455b6772e7636873dfb4f5fea8a6d6' resolves to nothing in the CAS — the bytes ARE the fact, so there is nothing left to re-prove. Run 'atlas doctor cas' for the store-wide audit (ADR-0022)."
+          }
+        ]
+      },
+      "fresh": {
+        "sealedProven": 1,
+        "reProven": 0,
+        "broken": 0,
+        "unverifiable": 0,
+        "dangling": 1,
+        "rows": [
+          {
+            "nodeKey": "ecf0b81e8f512459ffa1a7a5d788f277d81090cee061a8014ea08de00c0706f9",
+            "outcome": "dangling",
+            "reason": "the durable projection serves this fact as seal:'proven', and its contentHash 'cbbb430b4db06b5ec5c625b86580fdad83455b6772e7636873dfb4f5fea8a6d6' resolves to nothing in the CAS — the bytes ARE the fact, so there is nothing left to re-prove. Run 'atlas doctor cas' for the store-wide audit (ADR-0022)."
+          }
+        ]
+      },
+      "summary": "One pruned proven row is counted both re-proven and dangling by the reused runtime; fresh runtime correctly counts it once as dangling."
+    },
+    {
+      "id": "DOC-02-wrong-shard-cas-object-reports-sound",
+      "status": "confirmed-observation",
+      "hash": "3c43223a5633de381ad8222059a6a7f96c9087cc3a21758d7301ae2c10b51bff",
+      "expectedShard": "3c",
+      "actualShard": "00",
+      "before": {
+        "objects": 1,
+        "corrupt": [],
+        "unreadable": [],
+        "missing": [],
+        "orphan": 0,
+        "referenced": 1,
+        "sound": true
+      },
+      "after": {
+        "objects": 1,
+        "corrupt": [],
+        "unreadable": [],
+        "missing": [],
+        "orphan": 0,
+        "referenced": 1,
+        "sound": true
+      },
+      "cli": {
+        "stdout": "status: ok\ndoctor: cas\ncasIntegrity: objects=1 referenced=1 corrupt=0 unreadable=0 missing=0 orphan=0 sound=true\nnext: doctor is read-only — run any proposed RegroundPlan through atlas-emit to persist it\ninvariant: TOOLS-12: read/advisory-only diagnosis, persists nothing, carries no write authority\n",
+        "stderr": "",
+        "exitCode": 0
+      },
+      "mcp": {
+        "isError": false,
+        "body": {
+          "data": {
+            "casIntegrity": {
+              "objects": 1,
+              "corrupt": [],
+              "unreadable": [],
+              "missing": [],
+              "orphan": 0,
+              "referenced": 1,
+              "sound": true
+            }
+          },
+          "guidance": {
+            "next": "doctor is read-only — run any proposed RegroundPlan through atlas-emit to persist it",
+            "invariant": "TOOLS-12: read/advisory-only diagnosis, persists nothing, carries no write authority"
+          }
+        }
+      },
+      "unchanged": true,
+      "summary": "An intact blob at the wrong shard is unreachable by the actual store but doctor cas reports sound=true, no missing objects, through CLI and MCP."
+    }
+  ]
+}

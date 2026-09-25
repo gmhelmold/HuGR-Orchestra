@@ -1,0 +1,2 @@
+$ node harness/gates/own-snapshot-guard.mjs
+own-snapshot-guard: OK — 1 Genesis unit(s), 2 static Own file(s), source blobs fresh. Snapshot facts/units/blobs exactly recompose committed skills.

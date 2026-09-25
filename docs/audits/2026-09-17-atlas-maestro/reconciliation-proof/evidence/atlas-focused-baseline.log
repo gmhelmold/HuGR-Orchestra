@@ -1,0 +1,32 @@
+$ vitest run packages/adapter-io/test/doctor-cas-integrity.test.ts packages/adapter-io/test/doctor-entry-symmetry.test.ts packages/adapter-io/test/doctor-source.test.ts packages/adapter-io/test/reconcile-entry-symmetry.test.ts packages/adapter-io/test/reverify-gate-compose.test.ts packages/adapter-io/test/reverify-dangling.test.ts packages/adapter-io/test/reverify-relation.test.ts "--maxWorkers=2" "--minWorkers=1"
+▲ [WARNING] Cannot find base config file "@tsconfig/bun/tsconfig.json" [tsconfig.json]
+
+    ../../tsconfig.json:3:13:
+      3 │   "extends": "@tsconfig/bun/tsconfig.json",
+        ╵              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+▲ [WARNING] Cannot find base config file "@tsconfig/bun/tsconfig.json" [tsconfig.json]
+
+    ../../tsconfig.json:3:13:
+      3 │   "extends": "@tsconfig/bun/tsconfig.json",
+        ╵              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+ RUN  v2.1.9 /private/tmp/hugr-audit-reconcile.QaHAhB/repo/foundation/atlas
+
+ ✓ |unit| packages/adapter-io/test/reverify-relation.test.ts (14 tests) 10ms
+ ✓ |unit| packages/adapter-io/test/doctor-entry-symmetry.test.ts (8 tests) 402ms
+ ✓ |unit| packages/adapter-io/test/doctor-source.test.ts (7 tests) 386ms
+ ✓ |unit| packages/adapter-io/test/doctor-cas-integrity.test.ts (11 tests) 402ms
+ ✓ |unit| packages/adapter-io/test/reconcile-entry-symmetry.test.ts (3 tests) 2144ms
+   ✓ THE MERGE GATE — one classifier, spanning every citation (detection now spans every citation too, #185) > a fact whose non-primary citation ROTTED blocks the merge: exitCode 2 (the entry-0 copy answered 0) 534ms
+   ✓ THE MERGE GATE — one classifier, spanning every citation (detection now spans every citation too, #185) > the NEGATIVE direction — no rotted citation anywhere ⇒ the gate still passes 426ms
+ ✓ |unit| packages/adapter-io/test/reverify-gate-compose.test.ts (2 tests) 637ms
+   ✓ REVERIFY-GATE — composeRuntime(repoPath).reverify() over the REAL durable store + REAL oracle > an EMPTY store reports the honest all-zero (never a throw, never a silent skip) 344ms
+ ✓ |unit| packages/adapter-io/test/reverify-dangling.test.ts (5 tests) 4ms
+
+ Test Files  7 passed (7)
+      Tests  50 passed (50)
+   Start at  19:14:44
+   Duration  5.25s (transform 919ms, setup 0ms, collect 3.01s, tests 3.99s, environment 1ms, prepare 509ms)
+
