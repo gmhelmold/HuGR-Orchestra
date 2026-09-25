@@ -1401,7 +1401,7 @@ const layer = Layer.effect(
       const args = raw.map((arg) => arg.replace(quoteTrimRegex, ""))
       const templateCommand = yield* Effect.promise(async () => cmd.template)
 
-      const placeholders = templateCommand.match(placeholderRegex) ?? []
+      const placeholders = cmd.source === "skill" ? [] : (templateCommand.match(placeholderRegex) ?? [])
       let last = 0
       for (const item of placeholders) {
         const value = Number(item.slice(1))
@@ -1409,14 +1409,15 @@ const layer = Layer.effect(
       }
 
       const withArgs = templateCommand.replaceAll(placeholderRegex, (_, index) => {
+        if (cmd.source === "skill") return "$" + index
         const position = Number(index)
         const argIndex = position - 1
         if (argIndex >= args.length) return ""
         if (position === last) return args.slice(argIndex).join(" ")
         return args[argIndex]
       })
-      const usesArgumentsPlaceholder = templateCommand.includes("$ARGUMENTS")
-      let template = withArgs.replaceAll("$ARGUMENTS", input.arguments)
+      const usesArgumentsPlaceholder = cmd.source !== "skill" && templateCommand.includes("$ARGUMENTS")
+      let template = withArgs.replaceAll("$ARGUMENTS", cmd.source === "skill" ? "$ARGUMENTS" : input.arguments)
 
       if (placeholders.length === 0 && !usesArgumentsPlaceholder && input.arguments.trim()) {
         template = template + "\n\n" + input.arguments

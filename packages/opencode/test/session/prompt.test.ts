@@ -1810,6 +1810,36 @@ it.instance(
 )
 
 unix(
+  "skill commands preserve literal placeholders while ordinary commands still interpolate",
+  () =>
+    Effect.gen(function* () {
+      const { dir, llm } = yield* useServerConfig((url) => ({
+        ...providerCfg(url),
+        command: { ordinary: { template: "Review $1: $ARGUMENTS" } },
+      }))
+      yield* writeText(
+        path.join(dir, ".opencode", "skill", "literal-command", "SKILL.md"),
+        "---\nname: literal-command\ndescription: Literal skill command.\n---\n\nLiteral $1 and $ARGUMENTS",
+      )
+
+      const { prompt, chat } = yield* boot()
+      yield* llm.text("done")
+      yield* prompt.command({ sessionID: chat.id, command: "literal-command", arguments: "sample" })
+      const first = JSON.stringify((yield* llm.inputs).at(-1)?.messages)
+      expect(first).toContain("Literal $1 and $ARGUMENTS")
+      expect(first).toContain("sample")
+
+      const second = yield* (yield* Session.Service).create({ title: "ordinary-command" })
+      yield* llm.text("done")
+      yield* prompt.command({ sessionID: second.id, command: "ordinary", arguments: "sample" })
+      const ordinary = JSON.stringify((yield* llm.inputs).at(-1)?.messages)
+      expect(ordinary).toContain("Review sample: sample")
+    }),
+  { git: true },
+  30_000,
+)
+
+unix(
   "command ! expansion uses configured shell over env shell",
   () =>
     withSh(() =>
