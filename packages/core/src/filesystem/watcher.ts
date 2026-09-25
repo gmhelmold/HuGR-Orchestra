@@ -50,6 +50,22 @@ function protecteds(dir: string) {
 
 export const hasNativeBinding = () => !!watcher()
 
+export function closeSubscriptions(
+  pendingSubscriptions: Iterable<Promise<{ unsubscribe: () => Promise<void> }>>,
+  timeoutMs = SUBSCRIBE_TIMEOUT_MS,
+) {
+  const cleanup = [...pendingSubscriptions].map((pending) =>
+    pending.then(
+      (subscription) => subscription.unsubscribe(),
+      () => undefined,
+    ),
+  )
+  return Promise.race([
+    Promise.allSettled(cleanup).then(() => undefined),
+    new Promise<void>((resolve) => setTimeout(resolve, timeoutMs)),
+  ])
+}
+
 export interface Interface {}
 
 export class Service extends Context.Service<Service, Interface>()("@opencode/v2/FileWatcher") {}
@@ -80,12 +96,7 @@ const layer = Layer.effect(
     const runFork = Effect.runForkWith(context)
     const pendingSubscriptions = new Set<Promise<ParcelWatcher.AsyncSubscription>>()
     yield* Effect.addFinalizer(() =>
-      Effect.promise(async () => {
-        const results = await Promise.allSettled(pendingSubscriptions)
-        await Promise.allSettled(
-          results.flatMap((result) => (result.status === "fulfilled" ? [result.value.unsubscribe()] : [])),
-        )
-      }),
+      Effect.promise(() => closeSubscriptions(pendingSubscriptions)),
     )
 
     const callback: ParcelWatcher.SubscribeCallback = (_error, updates) => {
