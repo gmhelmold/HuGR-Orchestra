@@ -1,0 +1,75 @@
+bun test v1.3.14 (0d9b296a)
+
+test/skill/skill.test.ts:
+(pass) skill > formats verbose locations as XML-safe filesystem paths [243.90ms]
+(pass) skill > discovers skills from .opencode/skill/ directory [2579.63ms]
+(pass) skill > returns skill directories from Skill.dirs [1064.06ms]
+(pass) skill > discovers multiple skills from .opencode/skill/ directory [1090.85ms]
+(pass) skill > skips skills with missing frontmatter [1075.82ms]
+(pass) skill > discovers skills without descriptions [1962.61ms]
+(pass) skill > discovers skills from .claude/skills/ directory [1496.32ms]
+(pass) skill > discovers global skills from ~/.claude/skills/ directory [2705.30ms]
+(pass) skill > returns empty array when no skills exist [1631.14ms]
+(pass) skill > fails with typed error when requiring a missing skill [1657.57ms]
+(pass) skill > exposes tagged expected skill failure classes [48.08ms]
+(pass) skill > discovers skills from .agents/skills/ directory [2770.52ms]
+(pass) skill > discovers global skills from ~/.agents/skills/ directory [6638.42ms]
+(pass) skill > discovers skills from both .claude/skills/ and .agents/skills/ [1567.55ms]
+(pass) skill > skips Claude Code skills when disabled [1221.03ms]
+(pass) skill > skips external skill directories when disabled [1380.16ms]
+(pass) skill > properly resolves directories that skills live in [3811.37ms]
+
+test/maestro/governed-task.test.ts:
+(pass) Maestro governed Task guard > permits exact approved decision [1.50ms]
+(pass) Maestro governed Task guard > holds missing, declined, duplicate, and mismatched decisions [0.39ms]
+
+test/maestro/admission-record.test.ts:
+(pass) Maestro admission record > persists and replays one deterministic admission result [811.47ms]
+(pass) Maestro admission record > refuses altered input for an existing admission key [178.16ms]
+
+test/maestro/governed-lifecycle.test.ts:
+(pass) Maestro governed lifecycle > records intake, direct approval, then exact governed child Task [1284.30ms]
+(pass) Maestro governed lifecycle > shows governance tools only to Maestro [825.54ms]
+(pass) Maestro governed lifecycle > refuses model-supplied validation until durable validation reader exists [273.07ms]
+(pass) Maestro governed lifecycle > denies governed Task before child Session creation without exact approval [320.28ms]
+(pass) Maestro governed lifecycle > creates governed Task only from exact approved event [295.30ms]
+
+test/maestro/approval-record.test.ts:
+(pass) Maestro approval record > records direct approval from exact rendered tool evidence [235.97ms]
+(pass) Maestro approval record > holds when tool output differs from immutable presentation [261.42ms]
+(pass) Maestro approval record > holds when discussion intervenes before direct approval [248.26ms]
+(pass) Maestro approval record > replays one presentation for same revision after a retried tool call [182.71ms]
+
+test/maestro/task-hash.test.ts:
+(pass) Maestro task hash > mutation probe: every governed task intent and evidence field changes hash [1.02ms]
+
+test/maestro/admit-request.test.ts:
+(pass) Maestro admit request > returns ORIENT for valid orient assessment [2.14ms]
+(pass) Maestro admit request > clarifies work without usable goal [0.17ms]
+(pass) Maestro admit request > clarifies material blocker before draft [0.10ms]
+(pass) Maestro admit request > returns READY_TO_DRAFT while preserving labeled claims [0.09ms]
+(pass) Maestro admit request > invalid or partial assessment never reaches READY_TO_DRAFT [0.09ms]
+(pass) Maestro admit request > clarifies work that may redirect active approved work [0.07ms]
+(pass) Maestro admit request > mutation probe: claim labels cannot cross fact and proposal boundary [0.11ms]
+
+test/maestro/approval.test.ts:
+(pass) Maestro approval > binds explicit direct approval to visible exact revision and validation [0.72ms]
+(pass) Maestro approval > accepts exact English approval and explicit decline [0.36ms]
+(pass) Maestro approval > keeps questions and sentiment pending [0.38ms]
+(pass) Maestro approval > mutation probe: assistant or tool text cannot self-approve [0.48ms]
+(pass) Maestro approval > mutation probe: synthetic user text cannot approve [0.18ms]
+(pass) Maestro approval > mutation probe: reply must follow exact visible presentation in same session [0.40ms]
+(pass) Maestro approval > holds stale presentation when a newer presentation intervenes [0.36ms]
+(pass) Maestro approval > mutation probe: duplicated presentation identity holds [0.23ms]
+(pass) Maestro approval > replays only same decision; reused reply against another presentation holds [0.46ms]
+(pass) Maestro approval > holds when revision evidence no longer current [0.33ms]
+(pass) Maestro approval > holds malformed actor identity and timestamp before interpreting approval [0.30ms]
+
+test/tool/skill.test.ts:
+(pass) tool.skill > execute returns skill content block with files [830.25ms]
+(pass) tool.skill > execute preserves not found message [238.98ms]
+
+ 51 pass
+ 0 fail
+ 130 expect() calls
+Ran 51 tests across 9 files. [51.29s]

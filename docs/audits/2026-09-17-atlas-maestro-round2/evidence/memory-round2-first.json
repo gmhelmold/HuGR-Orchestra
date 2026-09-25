@@ -1,0 +1,540 @@
+{
+  "sha": "b0c33d2f6567a2c741240f3c44bc00ca2f01e7e7",
+  "node": "v22.17.1",
+  "scanner": "8.30.1",
+  "cases": [
+    {
+      "id": "tail-clean",
+      "first": {
+        "ok": true,
+        "data": {
+          "admitted": true,
+          "record": {
+            "owner": "alice",
+            "kind": "project",
+            "entry": {
+              "rule": "Keep the initial fixture rule.",
+              "scope": "src",
+              "frecency": 1
+            }
+          }
+        },
+        "guidance": {
+          "next": "a refused write named the gate that declined (undetermined-kind / template-invalid / unowned / logbook-duplicate / logbook-unauthorized / over-cap / scanner-blocked / scanner-unavailable) — fix and re-emit; nothing is persisted on a refusal",
+          "invariant": "MEM-1..9 / WP-11.W8: atlas-memory-emit is a governed fail-closed write door (WRITE_PATHS: atlas-emit, atlas-link, atlas-memory-emit — GOVERNANCE_SURFACE six members) — one append on admission, nothing on refusal"
+        }
+      },
+      "second": {
+        "ok": true,
+        "data": {
+          "admitted": true,
+          "record": {
+            "owner": "alice",
+            "kind": "project",
+            "entry": {
+              "rule": "Keep the next fixture rule.",
+              "scope": "src",
+              "frecency": 1
+            }
+          }
+        },
+        "guidance": {
+          "next": "a refused write named the gate that declined (undetermined-kind / template-invalid / unowned / logbook-duplicate / logbook-unauthorized / over-cap / scanner-blocked / scanner-unavailable) — fix and re-emit; nothing is persisted on a refusal",
+          "invariant": "MEM-1..9 / WP-11.W8: atlas-memory-emit is a governed fail-closed write door (WRITE_PATHS: atlas-emit, atlas-link, atlas-memory-emit — GOVERNANCE_SURFACE six members) — one append on admission, nothing on refusal"
+        }
+      },
+      "before": {
+        "count": 1,
+        "rejected": 0,
+        "rules": [
+          "Keep the initial fixture rule."
+        ]
+      },
+      "after": {
+        "count": 2,
+        "rejected": 0,
+        "rules": [
+          "Keep the initial fixture rule.",
+          "Keep the next fixture rule."
+        ]
+      },
+      "recall": [
+        "Keep the initial fixture rule.",
+        "Keep the next fixture rule."
+      ],
+      "desiredInvariant": true,
+      "hasFinalNewline": true
+    },
+    {
+      "id": "tail-damaged-terminated",
+      "first": {
+        "ok": true,
+        "data": {
+          "admitted": true,
+          "record": {
+            "owner": "alice",
+            "kind": "project",
+            "entry": {
+              "rule": "Keep the initial fixture rule.",
+              "scope": "src",
+              "frecency": 1
+            }
+          }
+        },
+        "guidance": {
+          "next": "a refused write named the gate that declined (undetermined-kind / template-invalid / unowned / logbook-duplicate / logbook-unauthorized / over-cap / scanner-blocked / scanner-unavailable) — fix and re-emit; nothing is persisted on a refusal",
+          "invariant": "MEM-1..9 / WP-11.W8: atlas-memory-emit is a governed fail-closed write door (WRITE_PATHS: atlas-emit, atlas-link, atlas-memory-emit — GOVERNANCE_SURFACE six members) — one append on admission, nothing on refusal"
+        }
+      },
+      "second": {
+        "ok": true,
+        "data": {
+          "admitted": true,
+          "record": {
+            "owner": "alice",
+            "kind": "project",
+            "entry": {
+              "rule": "Keep the next fixture rule.",
+              "scope": "src",
+              "frecency": 1
+            }
+          }
+        },
+        "guidance": {
+          "next": "a refused write named the gate that declined (undetermined-kind / template-invalid / unowned / logbook-duplicate / logbook-unauthorized / over-cap / scanner-blocked / scanner-unavailable) — fix and re-emit; nothing is persisted on a refusal",
+          "invariant": "MEM-1..9 / WP-11.W8: atlas-memory-emit is a governed fail-closed write door (WRITE_PATHS: atlas-emit, atlas-link, atlas-memory-emit — GOVERNANCE_SURFACE six members) — one append on admission, nothing on refusal"
+        }
+      },
+      "before": {
+        "count": 1,
+        "rejected": 1,
+        "rules": [
+          "Keep the initial fixture rule."
+        ]
+      },
+      "after": {
+        "count": 2,
+        "rejected": 1,
+        "rules": [
+          "Keep the initial fixture rule.",
+          "Keep the next fixture rule."
+        ]
+      },
+      "recall": [
+        "Keep the initial fixture rule.",
+        "Keep the next fixture rule."
+      ],
+      "desiredInvariant": true,
+      "hasFinalNewline": true
+    },
+    {
+      "id": "tail-damaged-unterminated",
+      "first": {
+        "ok": true,
+        "data": {
+          "admitted": true,
+          "record": {
+            "owner": "alice",
+            "kind": "project",
+            "entry": {
+              "rule": "Keep the initial fixture rule.",
+              "scope": "src",
+              "frecency": 1
+            }
+          }
+        },
+        "guidance": {
+          "next": "a refused write named the gate that declined (undetermined-kind / template-invalid / unowned / logbook-duplicate / logbook-unauthorized / over-cap / scanner-blocked / scanner-unavailable) — fix and re-emit; nothing is persisted on a refusal",
+          "invariant": "MEM-1..9 / WP-11.W8: atlas-memory-emit is a governed fail-closed write door (WRITE_PATHS: atlas-emit, atlas-link, atlas-memory-emit — GOVERNANCE_SURFACE six members) — one append on admission, nothing on refusal"
+        }
+      },
+      "second": {
+        "ok": true,
+        "data": {
+          "admitted": true,
+          "record": {
+            "owner": "alice",
+            "kind": "project",
+            "entry": {
+              "rule": "Keep the next fixture rule.",
+              "scope": "src",
+              "frecency": 1
+            }
+          }
+        },
+        "guidance": {
+          "next": "a refused write named the gate that declined (undetermined-kind / template-invalid / unowned / logbook-duplicate / logbook-unauthorized / over-cap / scanner-blocked / scanner-unavailable) — fix and re-emit; nothing is persisted on a refusal",
+          "invariant": "MEM-1..9 / WP-11.W8: atlas-memory-emit is a governed fail-closed write door (WRITE_PATHS: atlas-emit, atlas-link, atlas-memory-emit — GOVERNANCE_SURFACE six members) — one append on admission, nothing on refusal"
+        }
+      },
+      "before": {
+        "count": 1,
+        "rejected": 1,
+        "rules": [
+          "Keep the initial fixture rule."
+        ]
+      },
+      "after": {
+        "count": 1,
+        "rejected": 1,
+        "rules": [
+          "Keep the initial fixture rule."
+        ]
+      },
+      "recall": [
+        "Keep the initial fixture rule."
+      ],
+      "desiredInvariant": false,
+      "hasFinalNewline": true
+    },
+    {
+      "id": "retry-250",
+      "firstOK": true,
+      "retry": {
+        "ok": true,
+        "data": {
+          "admitted": true,
+          "record": {
+            "owner": "alice",
+            "kind": "project",
+            "entry": {
+              "rule": "word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word",
+              "scope": "src",
+              "frecency": 1
+            }
+          }
+        },
+        "guidance": {
+          "next": "a refused write named the gate that declined (undetermined-kind / template-invalid / unowned / logbook-duplicate / logbook-unauthorized / over-cap / scanner-blocked / scanner-unavailable) — fix and re-emit; nothing is persisted on a refusal",
+          "invariant": "MEM-1..9 / WP-11.W8: atlas-memory-emit is a governed fail-closed write door (WRITE_PATHS: atlas-emit, atlas-link, atlas-memory-emit — GOVERNANCE_SURFACE six members) — one append on admission, nothing on refusal"
+        }
+      },
+      "readback": {
+        "count": 1,
+        "rejected": 0,
+        "rules": [
+          "word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word"
+        ]
+      },
+      "activeTokens": 250,
+      "desiredInvariant": true
+    },
+    {
+      "id": "retry-300",
+      "firstOK": true,
+      "retry": {
+        "ok": false,
+        "data": {
+          "admitted": false,
+          "refusal": "over-cap",
+          "rejected": "over-cap: MEM-3 cap: the injected project set would exceed its bound"
+        },
+        "rejected": "over-cap: MEM-3 cap: the injected project set would exceed its bound",
+        "guidance": {
+          "next": "a refused write named the gate that declined (undetermined-kind / template-invalid / unowned / logbook-duplicate / logbook-unauthorized / over-cap / scanner-blocked / scanner-unavailable) — fix and re-emit; nothing is persisted on a refusal",
+          "invariant": "MEM-1..9 / WP-11.W8: atlas-memory-emit is a governed fail-closed write door (WRITE_PATHS: atlas-emit, atlas-link, atlas-memory-emit — GOVERNANCE_SURFACE six members) — one append on admission, nothing on refusal"
+        }
+      },
+      "readback": {
+        "count": 1,
+        "rejected": 0,
+        "rules": [
+          "word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word"
+        ]
+      },
+      "activeTokens": 300,
+      "desiredInvariant": false
+    },
+    {
+      "id": "archive-cap",
+      "writes": [
+        {
+          "ok": true,
+          "data": {
+            "admitted": true,
+            "record": {
+              "owner": "alice",
+              "kind": "project",
+              "entry": {
+                "rule": "guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance",
+                "scope": "src",
+                "frecency": 1
+              }
+            }
+          }
+        },
+        {
+          "ok": true,
+          "data": {
+            "admitted": true,
+            "record": {
+              "owner": "alice",
+              "kind": "project",
+              "entry": {
+                "rule": "guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance",
+                "scope": "src",
+                "frecency": 2
+              }
+            }
+          }
+        },
+        {
+          "ok": true,
+          "data": {
+            "admitted": true,
+            "record": {
+              "owner": "alice",
+              "kind": "project",
+              "entry": {
+                "rule": "guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance",
+                "scope": "src",
+                "frecency": 3
+              }
+            }
+          }
+        },
+        {
+          "ok": true,
+          "data": {
+            "admitted": true,
+            "record": {
+              "owner": "alice",
+              "kind": "project",
+              "entry": {
+                "rule": "guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance",
+                "scope": "src",
+                "frecency": 4
+              }
+            }
+          }
+        },
+        {
+          "ok": true,
+          "data": {
+            "admitted": true,
+            "record": {
+              "owner": "alice",
+              "kind": "project",
+              "entry": {
+                "rule": "guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance",
+                "scope": "src",
+                "frecency": 5
+              }
+            }
+          }
+        },
+        {
+          "ok": false,
+          "data": {
+            "admitted": false,
+            "refusal": "over-cap",
+            "rejected": "over-cap: MEM-3 cap: the injected project set would exceed its bound"
+          }
+        }
+      ],
+      "durable": {
+        "count": 5,
+        "rejected": 0,
+        "rules": [
+          "guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance",
+          "guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance",
+          "guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance",
+          "guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance",
+          "guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance guidance"
+        ]
+      },
+      "activeRules": 1,
+      "activeTokens": 100
+    },
+    {
+      "id": "logbook-valid",
+      "pure": {
+        "valid": true,
+        "reasons": []
+      },
+      "actual": {
+        "ok": true,
+        "data": {
+          "admitted": true,
+          "record": {
+            "owner": "orch",
+            "kind": "logbook",
+            "entry": {
+              "prId": "fixture-valid",
+              "at": "1",
+              "territories": [
+                "src"
+              ],
+              "shipped": "ssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss",
+              "decisions": "Decision recorded.",
+              "tradeoffs": "No material tradeoffs.",
+              "risks": "No new risks.",
+              "openThreads": "None.",
+              "links": []
+            }
+          }
+        },
+        "guidance": {
+          "next": "a refused write named the gate that declined (undetermined-kind / template-invalid / unowned / logbook-duplicate / logbook-unauthorized / over-cap / scanner-blocked / scanner-unavailable) — fix and re-emit; nothing is persisted on a refusal",
+          "invariant": "MEM-1..9 / WP-11.W8: atlas-memory-emit is a governed fail-closed write door (WRITE_PATHS: atlas-emit, atlas-link, atlas-memory-emit — GOVERNANCE_SURFACE six members) — one append on admission, nothing on refusal"
+        }
+      },
+      "present": true,
+      "desiredInvariant": true
+    },
+    {
+      "id": "logbook-over",
+      "pure": {
+        "valid": false,
+        "reasons": [
+          "section over cap: shipped"
+        ]
+      },
+      "actual": {
+        "ok": true,
+        "data": {
+          "admitted": true,
+          "record": {
+            "owner": "orch",
+            "kind": "logbook",
+            "entry": {
+              "prId": "fixture-over",
+              "at": "1",
+              "territories": [
+                "src"
+              ],
+              "shipped": "sssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss",
+              "decisions": "Decision recorded.",
+              "tradeoffs": "No material tradeoffs.",
+              "risks": "No new risks.",
+              "openThreads": "None.",
+              "links": []
+            }
+          }
+        },
+        "guidance": {
+          "next": "a refused write named the gate that declined (undetermined-kind / template-invalid / unowned / logbook-duplicate / logbook-unauthorized / over-cap / scanner-blocked / scanner-unavailable) — fix and re-emit; nothing is persisted on a refusal",
+          "invariant": "MEM-1..9 / WP-11.W8: atlas-memory-emit is a governed fail-closed write door (WRITE_PATHS: atlas-emit, atlas-link, atlas-memory-emit — GOVERNANCE_SURFACE six members) — one append on admission, nothing on refusal"
+        }
+      },
+      "present": true,
+      "desiredInvariant": false
+    },
+    {
+      "id": "logbook-empty",
+      "pure": {
+        "valid": false,
+        "reasons": [
+          "unfilled section: shipped"
+        ]
+      },
+      "actual": {
+        "ok": true,
+        "data": {
+          "admitted": true,
+          "record": {
+            "owner": "orch",
+            "kind": "logbook",
+            "entry": {
+              "prId": "fixture-empty",
+              "at": "1",
+              "territories": [
+                "src"
+              ],
+              "shipped": "",
+              "decisions": "Decision recorded.",
+              "tradeoffs": "No material tradeoffs.",
+              "risks": "No new risks.",
+              "openThreads": "None.",
+              "links": []
+            }
+          }
+        },
+        "guidance": {
+          "next": "a refused write named the gate that declined (undetermined-kind / template-invalid / unowned / logbook-duplicate / logbook-unauthorized / over-cap / scanner-blocked / scanner-unavailable) — fix and re-emit; nothing is persisted on a refusal",
+          "invariant": "MEM-1..9 / WP-11.W8: atlas-memory-emit is a governed fail-closed write door (WRITE_PATHS: atlas-emit, atlas-link, atlas-memory-emit — GOVERNANCE_SURFACE six members) — one append on admission, nothing on refusal"
+        }
+      },
+      "present": true,
+      "desiredInvariant": false
+    },
+    {
+      "id": "logbook-blank",
+      "pure": {
+        "valid": false,
+        "reasons": [
+          "unfilled section: shipped"
+        ]
+      },
+      "actual": {
+        "ok": true,
+        "data": {
+          "admitted": true,
+          "record": {
+            "owner": "orch",
+            "kind": "logbook",
+            "entry": {
+              "prId": "fixture-blank",
+              "at": "1",
+              "territories": [
+                "src"
+              ],
+              "shipped": "   ",
+              "decisions": "Decision recorded.",
+              "tradeoffs": "No material tradeoffs.",
+              "risks": "No new risks.",
+              "openThreads": "None.",
+              "links": []
+            }
+          }
+        },
+        "guidance": {
+          "next": "a refused write named the gate that declined (undetermined-kind / template-invalid / unowned / logbook-duplicate / logbook-unauthorized / over-cap / scanner-blocked / scanner-unavailable) — fix and re-emit; nothing is persisted on a refusal",
+          "invariant": "MEM-1..9 / WP-11.W8: atlas-memory-emit is a governed fail-closed write door (WRITE_PATHS: atlas-emit, atlas-link, atlas-memory-emit — GOVERNANCE_SURFACE six members) — one append on admission, nothing on refusal"
+        }
+      },
+      "present": true,
+      "desiredInvariant": false
+    },
+    {
+      "id": "orientation-complete",
+      "before": {
+        "goal": "",
+        "last": "",
+        "current": "",
+        "state": "blocked"
+      },
+      "after": {
+        "goal": "",
+        "last": "",
+        "current": "",
+        "state": "complete"
+      },
+      "expectedState": "complete",
+      "physicalLines": 3,
+      "logicalEvents": 3,
+      "rejected": 0,
+      "desiredInvariant": true
+    },
+    {
+      "id": "orientation-running",
+      "before": {
+        "goal": "",
+        "last": "",
+        "current": "",
+        "state": "blocked"
+      },
+      "after": {
+        "goal": "",
+        "last": "",
+        "current": "",
+        "state": "blocked"
+      },
+      "expectedState": "running",
+      "physicalLines": 3,
+      "logicalEvents": 2,
+      "rejected": 0,
+      "desiredInvariant": false
+    }
+  ]
+}

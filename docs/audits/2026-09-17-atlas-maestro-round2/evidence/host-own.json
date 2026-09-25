@@ -1,0 +1,38 @@
+[
+  {
+    "mode": "fresh",
+    "freshness": {
+      "status": "READY"
+    },
+    "title": "Loaded skill: own_c3Jj",
+    "servedOldClaim": true,
+    "identicalToInitial": true,
+    "desiredInvariant": true
+  },
+  {
+    "mode": "stale-cold",
+    "freshness": {
+      "status": "HOLD",
+      "staleSources": [
+        "src/a.ts"
+      ]
+    },
+    "title": "Loaded skill: own_c3Jj",
+    "servedOldClaim": true,
+    "identicalToInitial": true,
+    "desiredInvariant": false
+  },
+  {
+    "mode": "stale-warm",
+    "freshness": {
+      "status": "HOLD",
+      "staleSources": [
+        "src/a.ts"
+      ]
+    },
+    "title": "Loaded skill: own_c3Jj",
+    "servedOldClaim": true,
+    "identicalToInitial": true,
+    "desiredInvariant": false
+  }
+]

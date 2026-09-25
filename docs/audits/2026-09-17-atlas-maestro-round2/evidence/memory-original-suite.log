@@ -1,0 +1,32 @@
+
+> atlas@0.0.0 test
+> vitest run packages/memory/test packages/adapter-io/test/memory-emit.test.ts packages/adapter-io/test/memory-store.test.ts packages/adapter-io/test/memory-read.test.ts packages/adapter-io/test/orientation-store.test.ts
+
+
+ RUN  v2.1.9 /private/tmp/hugr-atlas-maestro-audit.BDqrxm/repo/foundation/atlas
+
+ ✓ |unit| packages/memory/test/mem-5-field-types.test.ts (28 tests) 14ms
+ ✓ |unit| packages/memory/test/wp-6.23-mem.test.ts (6 tests) 9ms
+ ✓ |unit| packages/memory/test/mem-9-portable-scangate.wp35a.test.ts (8 tests) 9ms
+ ✓ |unit| packages/memory/test/wp-3.5-b-mem.test.ts (5 tests) 12ms
+ ✓ |unit| packages/memory/test/wp-6.24-b-mem.test.ts (6 tests) 12ms
+ ✓ |unit| packages/memory/test/wp-6.25-b-mem.test.ts (7 tests) 12ms
+ ✓ |unit| packages/memory/test/wp-6.25-a-mem.test.ts (8 tests) 18ms
+ ✓ |unit| packages/memory/test/wp-6.24-a-mem.test.ts (11 tests) 36ms
+ ✓ |unit| packages/adapter-io/test/memory-read.test.ts (12 tests) 259ms
+ ✓ |unit| packages/adapter-io/test/memory-emit.test.ts (19 tests) 338ms
+ ✓ |unit| packages/adapter-io/test/memory-store.test.ts (10 tests) 618ms
+   ✓ A4 — concurrent writers do not lose each other (REAL subprocesses) > 8 processes × 5 appends = 40 durable records, 0 lost 561ms
+ ✓ |unit| packages/memory/test/wp-6.24-b-mem.heldout.test.ts (6 tests) 59ms
+ ✓ |unit| packages/memory/test/wp-3.5-b-mem.heldout.test.ts (5 tests) 134ms
+ ✓ |unit| packages/memory/test/mem-9.wp35a.heldout.test.ts (2 tests) 6ms
+ ✓ |unit| packages/memory/test/mem-kind-derivation.test.ts (14 tests) 19ms
+ ✓ |unit| packages/memory/test/wp-6.24-a-mem.heldout.test.ts (2 tests) 128ms
+ ✓ |unit| packages/adapter-io/test/orientation-store.test.ts (9 tests) 463ms
+   ✓ concurrent appends do not lose events (REAL, CONCURRENT subprocesses) > 8 processes × 5 appends = 40 durable events, 0 lost 368ms
+
+ Test Files  17 passed (17)
+      Tests  158 passed (158)
+   Start at  17:52:31
+   Duration  3.12s (transform 975ms, setup 0ms, collect 4.16s, tests 2.15s, environment 6ms, prepare 5.85s)
+

@@ -1,0 +1,12 @@
+{"id":"tail-clean","desiredInvariant":true,"after":{"count":2,"rejected":0,"rules":["Keep the initial fixture rule.","Keep the next fixture rule."]}}
+{"id":"tail-damaged-terminated","desiredInvariant":true,"after":{"count":2,"rejected":1,"rules":["Keep the initial fixture rule.","Keep the next fixture rule."]}}
+{"id":"tail-damaged-unterminated","desiredInvariant":false,"after":{"count":1,"rejected":1,"rules":["Keep the initial fixture rule."]}}
+{"id":"retry-250","desiredInvariant":true,"retryOK":true,"activeTokens":250}
+{"id":"retry-300","desiredInvariant":false,"retryOK":false,"activeTokens":300}
+{"id":"archive-cap","desiredInvariant":false,"activeRules":1,"activeTokens":100}
+{"id":"logbook-valid","desiredInvariant":true,"present":true,"pure":{"valid":true,"reasons":[]}}
+{"id":"logbook-over","desiredInvariant":false,"present":true,"pure":{"valid":false,"reasons":["section over cap: shipped"]}}
+{"id":"logbook-empty","desiredInvariant":false,"present":true,"pure":{"valid":false,"reasons":["unfilled section: shipped"]}}
+{"id":"logbook-blank","desiredInvariant":false,"present":true,"pure":{"valid":false,"reasons":["unfilled section: shipped"]}}
+{"id":"orientation-complete","desiredInvariant":true,"after":{"goal":"","last":"","current":"","state":"complete"}}
+{"id":"orientation-running","desiredInvariant":false,"after":{"goal":"","last":"","current":"","state":"blocked"}}

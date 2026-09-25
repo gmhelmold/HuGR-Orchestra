@@ -1,0 +1,277 @@
+{
+  "commit": "b0c33d2f6567a2c741240f3c44bc00ca2f01e7e7",
+  "files": [
+    {
+      "path": "foundation/atlas/packages/adapter-io/src/durable-log.ts",
+      "blob": "04ddc359ee398ca72eaa9606234120eb36750123",
+      "matchesCommit": true,
+      "reviewScope": "full",
+      "focus": "read; append; JSONL framing",
+      "lines": 150
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/src/memory-store.ts",
+      "blob": "2611a8f19d66b8d6d1612d341e53e486eda94a4a",
+      "matchesCommit": true,
+      "reviewScope": "full",
+      "focus": "versioning and durable fold",
+      "lines": 62
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/src/memory-emit.ts",
+      "blob": "6c5e0c147d6c8c54a21ff73121c48f260f28cba2",
+      "matchesCommit": true,
+      "reviewScope": "full",
+      "focus": "governed write chain and cap",
+      "lines": 245
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/src/memory-read.ts",
+      "blob": "2e3a4d532296c11ffd13b50a5e724586cebc131d",
+      "matchesCommit": true,
+      "reviewScope": "full",
+      "focus": "live rule projection and read status",
+      "lines": 239
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/src/orientation-store.ts",
+      "blob": "a551836241b13d58d38cfbc89cad70f649d1a3ef",
+      "matchesCommit": true,
+      "reviewScope": "full",
+      "focus": "payload identity and durable reads",
+      "lines": 77
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/src/scanner.ts",
+      "blob": "34d1d01e7bc32d49bd58490033a32aea018d5c7f",
+      "matchesCommit": true,
+      "reviewScope": "full",
+      "focus": "real scanner binding; exit mapping",
+      "lines": 195
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/src/compose-runtime.ts",
+      "blob": "89946e28ead3eaaddca1deac8d02684d0464f68f",
+      "matchesCommit": true,
+      "reviewScope": "full",
+      "focus": "public composition interface",
+      "lines": 215
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/src/compose.ts",
+      "blob": "6db0403297bf573be189136aa99a043039a36c70",
+      "matchesCommit": true,
+      "reviewScope": "targeted",
+      "focus": "memory and orientation binding",
+      "lines": 594
+    },
+    {
+      "path": "foundation/atlas/packages/tools/src/handler.ts",
+      "blob": "ca39c85ef6f51f880d5cb9010f9c32a3bbebe6dc",
+      "matchesCommit": true,
+      "reviewScope": "targeted",
+      "focus": "memory emit public schema and refusal",
+      "lines": 466
+    },
+    {
+      "path": "foundation/atlas/packages/memory/src/inject.ts",
+      "blob": "f4fd024be30f1e6ecef173924369ea64114648e6",
+      "matchesCommit": true,
+      "reviewScope": "full",
+      "focus": "owner scoping vs universal recall",
+      "lines": 207
+    },
+    {
+      "path": "foundation/atlas/packages/memory/src/logbook.ts",
+      "blob": "c060de2c710f4762997cfa8ce98cedd7bc24abfa",
+      "matchesCommit": true,
+      "reviewScope": "full",
+      "focus": "dedicated section validator",
+      "lines": 201
+    },
+    {
+      "path": "foundation/atlas/packages/memory/src/rules.ts",
+      "blob": "8b738dc8c4253b1e86496fba5e1adeacbec0b502",
+      "matchesCommit": true,
+      "reviewScope": "full",
+      "focus": "cap; tokenizer; archive vs active",
+      "lines": 334
+    },
+    {
+      "path": "foundation/atlas/packages/memory/src/orient.ts",
+      "blob": "4f7b69067999a4b250f0cea2e9b83235ca196b41",
+      "matchesCommit": true,
+      "reviewScope": "full",
+      "focus": "causal identity; fold; head",
+      "lines": 214
+    },
+    {
+      "path": "foundation/atlas/packages/memory/src/template.ts",
+      "blob": "c9c930f30311774f303ab22f8d6c9690d52dcc19",
+      "matchesCommit": true,
+      "reviewScope": "full",
+      "focus": "shape and type validation",
+      "lines": 333
+    },
+    {
+      "path": "foundation/atlas/scripts/materialize-own-snapshot.mjs",
+      "blob": "ce9f1eb4a23a6358f3c2bae781f4022cce1dd8c0",
+      "matchesCommit": true,
+      "reviewScope": "full",
+      "focus": "original CLI and replacement transaction",
+      "lines": 255
+    },
+    {
+      "path": "foundation/atlas/packages/retrieval/src/own-artifact.ts",
+      "blob": "3f8ff4c6d7f01b6e2071652b764b06680798420b",
+      "matchesCommit": true,
+      "reviewScope": "executed; prior source context",
+      "focus": "original static artifact freshness verifier",
+      "lines": 366
+    },
+    {
+      "path": "foundation/atlas/packages/retrieval/src/own-snapshot.ts",
+      "blob": "758a4b4df5165d0cdc2d2c773cfcd652a6b4ce6e",
+      "matchesCommit": true,
+      "reviewScope": "executed; prior source context",
+      "focus": "original static snapshot projection",
+      "lines": 173
+    },
+    {
+      "path": "foundation/atlas/OWN-SNAPSHOT.json",
+      "blob": "c73ac4cf01583b2cf916843bcd21f48d50742188",
+      "matchesCommit": true,
+      "reviewScope": "inspected",
+      "focus": "template adapted only inside fixtures",
+      "lines": 65
+    },
+    {
+      "path": "packages/opencode/src/maestro/admission-record.ts",
+      "blob": "e4be41c69e2cc9fccb018064337af5a80e17bcf4",
+      "matchesCommit": true,
+      "reviewScope": "full",
+      "focus": "durable admission and retry",
+      "lines": 66
+    },
+    {
+      "path": "packages/opencode/src/maestro/approval-record.ts",
+      "blob": "10f43f5d5b6d3b06304425ac89d2b079f6a48799",
+      "matchesCommit": true,
+      "reviewScope": "full",
+      "focus": "durable presentation and reply",
+      "lines": 298
+    },
+    {
+      "path": "packages/opencode/src/maestro/governed-task.ts",
+      "blob": "14944d11eb7f68e76ffac324f5122dd3874e40c1",
+      "matchesCommit": true,
+      "reviewScope": "full",
+      "focus": "exact approval comparison",
+      "lines": 52
+    },
+    {
+      "path": "packages/opencode/src/tool/task.ts",
+      "blob": "f80e0beaf8e7cbd227d506f5769a05733d61dcda",
+      "matchesCommit": true,
+      "reviewScope": "targeted, dispatch sections",
+      "focus": "preflight; consumption; child settlement",
+      "lines": 596
+    },
+    {
+      "path": "packages/core/src/event.ts",
+      "blob": "dc0e37474507fc22f93b05d124bfc418151ac426",
+      "matchesCommit": true,
+      "reviewScope": "targeted, transaction and publish",
+      "focus": "duplicate event handling and publication",
+      "lines": 826
+    },
+    {
+      "path": "packages/opencode/src/session/compaction.ts",
+      "blob": "fec53ace51ef12e22f7011cdf97bbbf8b25d9166",
+      "matchesCommit": true,
+      "reviewScope": "full",
+      "focus": "poda stores compacted marker, preserves output",
+      "lines": 609
+    },
+    {
+      "path": "packages/opencode/src/skill/index.ts",
+      "blob": "5a04ec213994a65dd25098b843efca1fbd1c4e0e",
+      "matchesCommit": true,
+      "reviewScope": "executed; prior source context",
+      "focus": "host discovery and require",
+      "lines": 354
+    },
+    {
+      "path": "packages/opencode/src/tool/skill.ts",
+      "blob": "9149bcc5ff0de554828b5c2b08ee85ce1cc6502a",
+      "matchesCommit": true,
+      "reviewScope": "executed; prior source context",
+      "focus": "actual text consumer",
+      "lines": 70
+    },
+    {
+      "path": "packages/opencode/test/maestro/admission-record.test.ts",
+      "blob": "ef72ca36b702630ab996f3012aa8c15919503c2f",
+      "matchesCommit": true,
+      "reviewScope": "full",
+      "focus": "original sequential test controls",
+      "lines": 56
+    },
+    {
+      "path": "packages/opencode/test/maestro/governed-lifecycle.test.ts",
+      "blob": "198b78b07d8037bf59f65999d728be71583f8c8d",
+      "matchesCommit": true,
+      "reviewScope": "full",
+      "focus": "original integration boundaries/stub executor",
+      "lines": 472
+    },
+    {
+      "path": "packages/opencode/test/tool/skill.test.ts",
+      "blob": "1c25b253cd5620d6f679b2e7d380b77b520c7ae5",
+      "matchesCommit": true,
+      "reviewScope": "full",
+      "focus": "real tool test fixture",
+      "lines": 134
+    },
+    {
+      "path": "packages/opencode/test/skill/skill.test.ts",
+      "blob": "f365b63f0d7214a84c6889fcc0b356e0bab5caa3",
+      "matchesCommit": true,
+      "reviewScope": "targeted",
+      "focus": "discovery scaffolding",
+      "lines": 585
+    },
+    {
+      "path": "packages/opencode/test/lib/effect.ts",
+      "blob": "255d4b3947502b971ffb4ab3ab15cfb184c2db4f",
+      "matchesCommit": true,
+      "reviewScope": "full",
+      "focus": "real service-layer test harness",
+      "lines": 177
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/test/orientation-store.test.ts",
+      "blob": "8640bf87abd64821dc649d99157174b45615a0c4",
+      "matchesCommit": true,
+      "reviewScope": "full",
+      "focus": "distinct label and malformed line controls",
+      "lines": 123
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/test/memory-store.test.ts",
+      "blob": "77d0d79896a2b79e241c484e162c768a0908bedd",
+      "matchesCommit": true,
+      "reviewScope": "targeted",
+      "focus": "torn-line and concurrency controls",
+      "lines": 165
+    },
+    {
+      "path": "foundation/atlas/packages/adapter-io/test/memory-emit.test.ts",
+      "blob": "c737028ec1ab3fff81de60751189a75bc358bbee",
+      "matchesCommit": true,
+      "reviewScope": "targeted",
+      "focus": "write controls",
+      "lines": 210
+    }
+  ]
+}

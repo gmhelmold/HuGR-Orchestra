@@ -1,0 +1,37 @@
+{
+  "verifiedAt": "2026-09-17T21:10:20.907508+00:00",
+  "productCommit": "b0c33d2f6567a2c741240f3c44bc00ca2f01e7e7",
+  "originalWorktreeClean": true,
+  "platform": "Darwin",
+  "versions": {
+    "node": "v22.17.1",
+    "bun": "1.3.14",
+    "gitleaks": "8.30.1"
+  },
+  "exitCodes": {
+    "forced-build.exit": 0,
+    "memory-original-suite-final.exit": 0,
+    "host-original-suite.exit": 0,
+    "maestro-concurrency.exit": 0,
+    "host-own-final.exit": 1,
+    "memory-round2-final.exit": 1,
+    "own-replacement-race-final.exit": 1
+  },
+  "originalSuiteDistinctTests": 209,
+  "sourceFiles": 34,
+  "compiledSha256": {
+    "packages/adapter-io/dist/src/compose.js": "87db77a78d02d339212c3f2b57bfabb7c1dbfb6eb0f84274dd2676e04d73ce8c",
+    "packages/adapter-io/dist/src/memory-emit.js": "44a2304fb8c107b868ff999536a89615bc697f453a06ecf1216aefae5c8c2c50",
+    "packages/adapter-io/dist/src/durable-log.js": "e7b95dff8414877f817a10d147e7e7149227d3d75e549fe17353578f6e89598a",
+    "packages/memory/dist/src/orient.js": "6a8d3a77fa9e983e5e65efa2a046b9a0c3c617666a7cb9e9e38c5f961eb11af7",
+    "packages/retrieval/dist/src/own-artifact.js": "1a95d950f18a851e1af09be9f2cab20fc7d098afd603433e6daceb62ead291f6"
+  },
+  "newIssues": [
+    32,
+    33,
+    34,
+    35,
+    36,
+    37
+  ]
+}

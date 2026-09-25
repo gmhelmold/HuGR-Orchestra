@@ -1,0 +1,10 @@
+bun test v1.3.14 (0d9b296a)
+
+test/maestro/audit-round2-concurrency.test.ts:
+[{"id":"sequential-admission"},{"id":"concurrent-admission-0","desiredInvariant":true,"successes":8},{"id":"concurrent-admission-1","desiredInvariant":true,"successes":8},{"id":"concurrent-admission-2","desiredInvariant":true,"successes":8},{"id":"concurrent-presentation-0","desiredInvariant":true,"successes":8},{"id":"concurrent-presentation-1","desiredInvariant":true,"successes":8},{"id":"concurrent-presentation-2","desiredInvariant":true,"successes":8}]
+(pass) Round2: original durable producers under concurrent identical retry > preserves sequential and concurrent idempotence [355.26ms]
+
+ 1 pass
+ 0 fail
+ 2 expect() calls
+Ran 1 test across 1 file. [4.64s]
