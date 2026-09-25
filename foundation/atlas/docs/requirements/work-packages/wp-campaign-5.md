@@ -14,10 +14,10 @@
 
 epic: EPIC-13-a
 id: WP-5.13-a.KNOW
-content_hash: <filled-at-freeze>
+content*hash: <filled-at-freeze>
 title: Write-routing rules — every write an upsert (create/update/supersede)
 intent: >
-_(non-authoritative handle)_ the three-hash route mechanically picks create/update/supersede so a re-emitted fact upserts instead of duplicating: identical fact is idempotent, changed advisory edits in place, changed predicate supersedes with lineage, one current node per subject.
+*(non-authoritative handle)\_ the three-hash route mechanically picks create/update/supersede so a re-emitted fact upserts instead of duplicating: identical fact is idempotent, changed advisory edits in place, changed predicate supersedes with lineage, one current node per subject.
 source_reqs: # ptr+digest
 
 - source: ../req-knw.md#REQ-KNOW-4a # ptr+digest
@@ -66,10 +66,10 @@ source_reqs: # ptr+digest
 
 epic: EPIC-13-a
 id: WP-5.13-a.TOOLS
-content_hash: <filled-at-freeze>
+content*hash: <filled-at-freeze>
 title: Templated writes — upserts not blind inserts
 intent: >
-_(non-authoritative handle)_ the emit surface issues templated writes that upsert (not blind inserts), consuming the KNOW write-decision contract frozen upstream.
+*(non-authoritative handle)\_ the emit surface issues templated writes that upsert (not blind inserts), consuming the KNOW write-decision contract frozen upstream.
 source_reqs: # ptr+digest
 
 - source: ../req-tls.md#REQ-TOOLS-7c # ptr+digest
@@ -113,10 +113,10 @@ source_reqs: # ptr+digest
 
 epic: EPIC-13-b
 id: WP-5.13-b.KNOW
-content_hash: <filled-at-freeze>
+content*hash: <filled-at-freeze>
 title: Anchor-identity facet — mechanical nodeKey & primaryAnchorId (no LLM in the write-decision)
 intent: >
-_(non-authoritative handle)_ the write-decision is a pure function of three hashes; nodeKey and primaryAnchorId are computed mechanically (move-aware re-anchoring, secondary citations feed drift only, a `claimNorm`-collision report that is a signal not a write-time merge, slot from a closed vocabulary) with no LLM choosing an anchor.
+*(non-authoritative handle)\_ the write-decision is a pure function of three hashes; nodeKey and primaryAnchorId are computed mechanically (move-aware re-anchoring, secondary citations feed drift only, a `claimNorm`-collision report that is a signal not a write-time merge, slot from a closed vocabulary) with no LLM choosing an anchor.
 source_reqs: # ptr+digest
 
 - source: ../req-knw.md#REQ-KNOW-15a # ptr+digest
@@ -177,10 +177,10 @@ source_reqs: # ptr+digest
 
 epic: EPIC-14
 id: WP-5.14.KNOW
-content_hash: <filled-at-freeze>
+content*hash: <filled-at-freeze>
 title: Fact lifecycle — templated + scope-checked upserts, prior versions deduped in CAS
 intent: >
-_(non-authoritative handle)_ no free prose and no lost fact-history: facts are templated (violation rejected), carry owner & scope (read universal, out-of-scope write rejected), prior versions live deduped in CAS, advisory keeps no lineage pointer while predicate supersede adds only a pointer, and the working store stays lean.
+*(non-authoritative handle)\_ no free prose and no lost fact-history: facts are templated (violation rejected), carry owner & scope (read universal, out-of-scope write rejected), prior versions live deduped in CAS, advisory keeps no lineage pointer while predicate supersede adds only a pointer, and the working store stays lean.
 source_reqs: # ptr+digest
 
 - source: ../req-knw.md#REQ-KNOW-10a # ptr+digest
@@ -241,10 +241,10 @@ source_reqs: # ptr+digest
 
 epic: EPIC-15
 id: WP-5.15.KNOW
-content_hash: <filled-at-freeze>
+content*hash: <filled-at-freeze>
 title: Tier-routed ratification — T0 human-only + billy, confidence fast-path for low-risk advisory
 intent: >
-_(non-authoritative handle)_ truth is graduated by tier: init carries zero invariants, territories default T2/advisory, no T0 auto-promotion (heuristics only flag), explorer writes only candidates, ratification is the ratifier's, T0 requires billy, and a low-risk advisory takes the confidence fast-path while risky routes to full ratification.
+*(non-authoritative handle)\_ truth is graduated by tier: init carries zero invariants, territories default T2/advisory, no T0 auto-promotion (heuristics only flag), explorer writes only candidates, ratification is the ratifier's, T0 requires billy, and a low-risk advisory takes the confidence fast-path while risky routes to full ratification.
 source_reqs: # ptr+digest
 
 - source: ../req-knw.md#REQ-KNOW-6a # ptr+digest
@@ -302,10 +302,10 @@ source_reqs: # ptr+digest
 
 epic: EPIC-16
 id: WP-5.16.KNOW
-content_hash: <filled-at-freeze>
+content*hash: <filled-at-freeze>
 title: Predicate check-engine — deterministic index-query, no code execution
 intent: >
-_(non-authoritative handle)_ both fact families exist day-one; advisory stands alone without an evaluator; a checkable predicate is a deterministic index-query (no code execution/sandbox), a runtime check stays advisory, the evaluator is pure, and the HOLDS/BROKEN/NA verdict feeds the drift reconcile.
+*(non-authoritative handle)\_ both fact families exist day-one; advisory stands alone without an evaluator; a checkable predicate is a deterministic index-query (no code execution/sandbox), a runtime check stays advisory, the evaluator is pure, and the HOLDS/BROKEN/NA verdict feeds the drift reconcile.
 source_reqs: # ptr+digest
 
 - source: ../req-knw.md#REQ-KNOW-9a # ptr+digest
@@ -358,10 +358,10 @@ source_reqs: # ptr+digest
 
 epic: EPIC-17
 id: WP-5.17.KNOW
-content_hash: <filled-at-freeze>
+content*hash: <filled-at-freeze>
 title: Production-moments — writes fire only at the three moments; sealing wave fed-or-why-not
 intent: >
-_(non-authoritative handle)_ knowledge is produced only at the three governed moments and never freelanced; a sealing wave must feed the atlas or emit a why-not.
+*(non-authoritative handle)\_ knowledge is produced only at the three governed moments and never freelanced; a sealing wave must feed the atlas or emit a why-not.
 source_reqs: # ptr+digest
 
 - source: ../req-knw.md#REQ-KNOW-13a # ptr+digest
@@ -400,10 +400,10 @@ source_reqs: # ptr+digest
 
 epic: EPIC-17
 id: WP-5.17.TOOLS
-content_hash: <filled-at-freeze>
+content*hash: <filled-at-freeze>
 title: Wave-close write driven by absorb — sealing wave must feed or emit why-not
 intent: >
-_(non-authoritative handle)_ the wave-close write is driven by absorb; a sealing wave must feed the atlas or emit a why-not, and the probe records a fed-or-why-not violation otherwise.
+*(non-authoritative handle)\_ the wave-close write is driven by absorb; a sealing wave must feed the atlas or emit a why-not, and the probe records a fed-or-why-not violation otherwise.
 disposition: delegated-to-orchestra / out-of-atlas-core
 ownership_note: ResultCard and wave-close driver are Orchestra-owned; Atlas keeps the opaque EmitApi.absorb seam and does not invent payload/driver.
 source_reqs: # ptr+digest

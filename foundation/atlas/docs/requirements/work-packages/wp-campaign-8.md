@@ -22,12 +22,12 @@ WP; the GEN WP holds only a consumed-from pointer.
 
 epic: EPIC-27
 id: WP-8.27.TOOLS
-content_hash: <filled-at-freeze>
+content*hash: <filled-at-freeze>
 title: atlas-init move-in — $0-LLM structural skeleton, blast radius, T0-candidate flags
 intent: >
 atlas-init performs move-in as a $0-LLM structural operation, returning the territory skeleton +
 blast radius + T0-candidate flags. It never sets a tier above T2, never auto-promotes a T0, and
-heuristics may only _flag_ a T0 candidate. (Human handle only — nothing is verified against this.)
+heuristics may only \_flag* a T0 candidate. (Human handle only — nothing is verified against this.)
 source_reqs: # ptr+digest
 
 - source: ../req-tls.md#REQ-TOOLS-5a # ptr+digest

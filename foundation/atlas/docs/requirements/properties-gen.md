@@ -101,9 +101,9 @@ inv: INV-GEN-8
 source: method-tags-gen.md#INV-GEN-8 # ptr+digest
 law: ∀ input i (well-formed ∨ malformed). genesis(i) returns (partial GenesisReport, resumeToken) ∧ ¬throws(i) ∧ ∀ interrupted run at completed site k. resume(i) = k+1 [sites ≤ k not re-called]
 arbitrary: `arbMalformedRepo` — corrupt objects, non-UTF8 paths, empty repo, detached HEAD, non-existent rev (10k corner-biased); `arbKillPoint` for resume. **PBT-fuzz differential** vs the total reference (`method-tags-gen.md` §GEN-8 — the total reference IS the oracle; tag stays reference-model).
-covers_reqs: [ req-gen.md#REQ-GEN-8a, req-gen.md#REQ-GEN-8b, req-gen.md#REQ-GEN-8c ] # ptr+digest
+covers*reqs: [ req-gen.md#REQ-GEN-8a, req-gen.md#REQ-GEN-8b, req-gen.md#REQ-GEN-8c ] # ptr+digest
 witness: [ goldens-gen.md#SCN-GEN-8a-1, goldens-gen.md#SCN-GEN-8b-1, goldens-gen.md#SCN-GEN-8c-1 ]
-teeth: breaks-on "a corrupt-object path that throws an uncaught exception or a fabricated-_full_ skeleton on a malformed rev — the fuzz ∀ reaches corners no fixed witness enumerates."
+teeth: breaks-on "a corrupt-object path that throws an uncaught exception or a fabricated-\_full* skeleton on a malformed rev — the fuzz ∀ reaches corners no fixed witness enumerates."
 
 ### PROP-GEN-8b — the run's site set CLOSES over its own frontier
 
@@ -191,8 +191,8 @@ teeth: breaks-on "a ranker that hard-requires history (empty log ⟹ error/no ra
 
 inv: INV-GEN-16
 source: method-tags-gen.md#INV-GEN-16 # ptr+digest
-law: ∀ candidate c. admit(c) ⊥ any proposer self-assessment field (self_score / importance) ∧ ∀ fact f. ( hits(f, window) = 0 ⟹ decay(f) → archived ∧ re-enterable ) ∧ threshold = f(observed hits)
-FLAG (non-mechanical core, no pure ∀-form — not forced): the usefulness _judgment_ itself — "is this seed non-obvious ∧ actionable / actually useful" — has **no write-time ∀-property**: usefulness is a **measured a-posteriori outcome** via `hits`/decay, not a correctness oracle (`method-tags-gen.md` §Refuse-to-model "usefulness a-priori"). Only the mechanical sub-laws above are rendered; the graded judgment is deliberately left un-quantified per the frozen tag.
+law: ∀ candidate c. admit(c) ⊥ any proposer self-assessment field (self*score / importance) ∧ ∀ fact f. ( hits(f, window) = 0 ⟹ decay(f) → archived ∧ re-enterable ) ∧ threshold = f(observed hits)
+FLAG (non-mechanical core, no pure ∀-form — not forced): the usefulness \_judgment* itself — "is this seed non-obvious ∧ actionable / actually useful" — has **no write-time ∀-property**: usefulness is a **measured a-posteriori outcome** via `hits`/decay, not a correctness oracle (`method-tags-gen.md` §Refuse-to-model "usefulness a-priori"). Only the mechanical sub-laws above are rendered; the graded judgment is deliberately left un-quantified per the frozen tag.
 NOT REPLACED BY ADR-0012 — the two COMPOSE (ADR-0012 §"KNOW-17 hits-decay survives"): the a-priori obviousness score is the **cold-start prior** (on a cold graph every fact has 0 hits, so hits-decay is a no-op and a trivial fact would rank identically to a brilliant one), and hits-decay is the **warm update** (the only signal reflecting what readers actually consulted). Neither subsumes the other, and the first law above — `admit(c) ⊥ any proposer self-assessment field` — is untouched: the score is computed by the HARNESS's predicate over the source bytes, never read off a field the proposer wrote.
 arbitrary: `arbCandidate` (with / without `self_score`) × `arbHitStream` (0..N consults over a window) — reuses the KNOW-17 hits/decay shape.
 covers_reqs: [ req-gen.md#REQ-GEN-16a, req-gen.md#REQ-GEN-16b, req-gen.md#REQ-GEN-16c, req-gen.md#REQ-GEN-16d, req-gen.md#REQ-GEN-16e ] # ptr+digest

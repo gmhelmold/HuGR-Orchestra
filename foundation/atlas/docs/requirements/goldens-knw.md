@@ -112,8 +112,8 @@ gen: conformance
 ### SCN-KNOW-2-2 — a partially-grounded node (one empty subtreeHash among many) fails closed (guard · held-out)
 
 source: REQ-KNOW-2
-held_out: true
-Given a candidate with three `grounding` entries — two carrying a non-empty `subtreeHash` and one whose `subtreeHash` is empty (`isGrounded ⇔ every entry has a non-empty subtreeHash`, so _any_ empty entry ⇒ ungrounded)
+held*out: true
+Given a candidate with three `grounding` entries — two carrying a non-empty `subtreeHash` and one whose `subtreeHash` is empty (`isGrounded ⇔ every entry has a non-empty subtreeHash`, so \_any* empty entry ⇒ ungrounded)
 When `atlas-emit` admits it via `knowledge/ref/emit.ts`
 Then it returns `emitted:false`, 0 objects persisted — a single empty-`subtreeHash` entry among well-formed ones still fails closed (a structured rejection, never a throw)
 teeth: breaks-on "the admitter checks only that entry-count > 0 (ignores the per-entry empty `subtreeHash`) — the partially-grounded node enters the store (`emitted:true`)"
@@ -201,11 +201,11 @@ gen: conformance # differential over the {semantic ⇒ DRIFTED} corpus
 ### SCN-KNOW-3c-2 — a real body change on fn popTail DRIFTs (happy · held-out)
 
 source: REQ-KNOW-3c
-held_out: true
+held*out: true
 Given the cited unit `fn popTail`'s body semantically changed (an early-return added) so `subtreeHash` moves `st-42 → st-D1`
 When `freshness` runs over this semantic-edit corpus row
 Then the fact is marked `DRIFTED`
-teeth: breaks-on "the subtreeHash is computed over the unit's _signature only_ (ignores the body) — the added early-return leaves the fact FRESH"
+teeth: breaks-on "the subtreeHash is computed over the unit's \_signature only* (ignores the body) — the added early-return leaves the fact FRESH"
 gen: conformance
 
 ## REQ-KNOW-4 — every write is an upsert (enumerated universe A)

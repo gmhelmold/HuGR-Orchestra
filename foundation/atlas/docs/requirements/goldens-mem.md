@@ -224,10 +224,10 @@ gen: conformance
 ### SCN-MEM-4b-2 — pr memory is returned only on an explicit memory-recall (held-out 2nd fixture) (happy)
 
 source: REQ-MEM-4b
-held_out: true
+held*out: true
 Given `pr` memory present but not injected on bob's running turn
 When bob issues an explicit `memory-recall` for it, and — separately — no recall is issued
-Then it is returned **only** in response to the explicit `memory-recall`, and on no other read path (the MEM-13 re-spawn push of the seat's _own resumed_ fold being the sole carve-out)
+Then it is returned **only** in response to the explicit `memory-recall`, and on no other read path (the MEM-13 re-spawn push of the seat's \_own resumed* fold being the sole carve-out)
 teeth: breaks-on "`pr` memory is returned on a non-recall read path — the explicit-recall gate is bypassed"
 gen: conformance # held-out — DIFFERENT consultable kind (`pr`, not `task`) + seat (bob), SAME explicit-recall-only branch as SCN-MEM-4b-1
 

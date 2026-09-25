@@ -170,10 +170,10 @@ inv: INV-TOOLS-15
 source: ./method-tags-tls.md#INV-TOOLS-15 @sha256:e769215c
 law: ∀ direct write d bypassing emit. ¬lands(d) (append-only/permission) ∨ rejectedAtRead(d) (content-address integrity) — never served; ∧ ungroundedRowsServed == 0 ∧ (∀ new emit write. Δbytes(priorRows) == 0)
 arbitrary: arb over rows injected directly (bypassing emit) ∪ grounded rows via emit; recompute content address at read; attempt in-place overwrite of a prior row
-covers_reqs: [ REQ-TOOLS-15a, REQ-TOOLS-15b, REQ-TOOLS-15c ]
+covers*reqs: [ REQ-TOOLS-15a, REQ-TOOLS-15b, REQ-TOOLS-15c ]
 witness: [ SCN-TOOLS-15a-1, SCN-TOOLS-15b-1, SCN-TOOLS-15c-1 ]
 teeth: breaks-on "a directly-injected row that is served, or a new write that mutates a prior row's bytes — the ∀ over injected rows kills an integrity-skip the single N1 witness cannot enumerate"
-note: adversarial _exploitability_ of this door (a shell-armed seat red-teaming append-only/permission) = FR-12 / billy, NOT rendered here — this law is the functional refusal only
+note: adversarial \_exploitability* of this door (a shell-armed seat red-teaming append-only/permission) = FR-12 / billy, NOT rendered here — this law is the functional refusal only
 
 ### PROP-TOOLS-16 — read-only version-diff projection
 

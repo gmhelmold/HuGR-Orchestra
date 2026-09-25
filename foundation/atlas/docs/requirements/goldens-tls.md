@@ -83,9 +83,9 @@ gen: conformance # differential vs `tools/ref/store.ts` 6-tool surface
 ### SCN-TOOLS-1a-2 — the surface still counts six with all read projections wired (happy · held-out)
 
 source: REQ-TOOLS-1a
-held_out: true
+held*out: true
 Given the tools layer wired against `tools/ref/store.ts` with the read projections (node-tools, `atlas doctor`, `atlas-diff`) ALSO present alongside the governance surface
-When the _governance_ surface set is enumerated (read projections excluded by construction)
+When the \_governance* surface set is enumerated (read projections excluded by construction)
 Then it is still exactly `{atlas-init, atlas-query, atlas-emit, atlas-reconcile, atlas-link, atlas-memory-emit}` — surface count `== 6`; the co-present read projections do not swell the governance surface
 teeth: breaks-on "a seventh governance tool `atlas-purge` is registered on the surface — surface count `== 7`"
 gen: conformance # held-out · different setup (read projections co-present), same 6-tool surface behaviour vs `tools/ref/store.ts`
@@ -352,10 +352,10 @@ gen: conformance
 ### SCN-TOOLS-5e-2 — the heuristic on a different territory also only writes a flag (happy · held-out)
 
 source: REQ-TOOLS-5e
-held_out: true
+held*out: true
 Given the T0-keyword heuristic firing on `kernel/`
 When its effect on state is observed
-Then it produced exactly `t0Candidate:true` with `tier=='T2'` unchanged — the heuristic _only_ flags, it sets no tier and writes no other state
+Then it produced exactly `t0Candidate:true` with `tier=='T2'` unchanged — the heuristic \_only* flags, it sets no tier and writes no other state
 teeth: breaks-on "the heuristic that detects the `kernel/` T0 candidate also rewrites the `blastRadius` — it does more than flag"
 gen: conformance # held-out · different territory (`kernel/`), same flag-only effect vs `tools/ref/init.ts`
 
@@ -833,10 +833,10 @@ gen: conformance
 ### SCN-TOOLS-11-c-2 — the ladder returns tier-2 when tier-1 is the unavailable one (happy · held-out)
 
 source: REQ-TOOLS-11-c
-held_out: true
+held*out: true
 Given a seat issuing an ad-hoc pull on a harness where tier-1 `SDK-MCP` is unavailable but tier-2 `registered-MCP+grant` is available
 When the ladder resolves
-Then it walks the fixed order `SDK-MCP → registered-MCP+grant → poke-as-file → relay → CLI` and returns the first _available_ tier (`registered-MCP+grant`) — native-first, order preserved
+Then it walks the fixed order `SDK-MCP → registered-MCP+grant → poke-as-file → relay → CLI` and returns the first \_available* tier (`registered-MCP+grant`) — native-first, order preserved
 teeth: breaks-on "the ladder skips the available tier-2 and drops straight to the CLI — the fixed native-first order is not honoured"
 gen: conformance # held-out · different tier-availability (tier-1 down), same fixed native-first walk vs `tools/ref/ladder.ts`
 

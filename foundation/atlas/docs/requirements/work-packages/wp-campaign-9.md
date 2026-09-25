@@ -1021,11 +1021,11 @@ source_reqs: # ptr+digest
 
 epic: EPIC-8
 id: WP-9.4.8.FORGE
-content_hash: <filled-at-freeze>
-title: Forge carries the atlas onto a real host — rewrite-honest, executes PERSIST-_ semantics unchanged
+content*hash: <filled-at-freeze>
+title: Forge carries the atlas onto a real host — rewrite-honest, executes PERSIST-* semantics unchanged
 intent: >
 The `Forge` writes the provenance trailer + a `refs/notes/orchestra` note + the PR projection onto a real
-host; a history rewrite keeps trailer data and orphans note-carried data exactly as PERSIST-_ specifies — the
+host; a history rewrite keeps trailer data and orphans note-carried data exactly as PERSIST-\_ specifies — the
 adapter executes that semantics, never alters it. Consumes the persist/host-adapter semantics (frozen core
 seam). (Non-authoritative handle.)
 source_reqs: # ptr+digest
@@ -1044,11 +1044,11 @@ source_reqs: # ptr+digest
   inputs: # ptr+digest
 - source: ../../reference/atlas-adapters.md#adapt-git-3 # ptr+digest
   action: Implement the Forge over a git-sandbox host; verify it writes the provenance trailer + a `refs/notes/orchestra` note + the PR projection, that a rebase keeps the trailer and orphans the note-carried data exactly as PERSIST-_ specifies, and that the observed outcome equals the PERSIST-_ oracle at every step (0 semantics altered).
-  action_surface: [ read-repo, edit(packages/adapter-io/src/git-forge.ts), run(test:adapter-io), typecheck ]
+  action*surface: [ read-repo, edit(packages/adapter-io/src/git-forge.ts), run(test:adapter-io), typecheck ]
   guardrails: >
   Edit only under packages/adapter-io/src/git-forge.ts. Note MUST land under `refs/notes/orchestra` (not the
-  default namespace). A rewrite MUST keep the trailer and orphan the note per PERSIST-_ — never re-point or drop
-  it. Execute PERSIST-_ semantics, change NONE. Tested against a local git sandbox, never a live host. Do not
+  default namespace). A rewrite MUST keep the trailer and orphan the note per PERSIST-* — never re-point or drop
+  it. Execute PERSIST-\_ semantics, change NONE. Tested against a local git sandbox, never a live host. Do not
   touch other modules/core.
   repair_budget: N=3 · early-stop: { repeated-identical-failure, no-change-diff, semantic-dup-edit }
   acceptance: # ptr+digest = frozen goldens
@@ -1056,7 +1056,7 @@ source_reqs: # ptr+digest
 - source: ../goldens-adapters.md#SCN-ADAPTER-10b-1 # ptr+digest
 - source: ../goldens-adapters.md#SCN-ADAPTER-10c-1 # ptr+digest
   deps: [ WP-9.2.3.STORE ]
-  exit_predicate: all acceptance SCNs green ∧ trailer + orchestra note + PR projection written ∧ rewrite keeps trailer + orphans note per PERSIST-_ ∧ outcome == PERSIST-_ oracle (0 altered) ∧ module gates pass ∧ all pointer digests resolve (no STALE)
+  exit*predicate: all acceptance SCNs green ∧ trailer + orchestra note + PR projection written ∧ rewrite keeps trailer + orphans note per PERSIST-* ∧ outcome == PERSIST-\_ oracle (0 altered) ∧ module gates pass ∧ all pointer digests resolve (no STALE)
   context_refs: # closed list
 - source: ../../reference/atlas-adapters.md
 - source: ../requirements-adapters.md

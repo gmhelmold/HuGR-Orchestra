@@ -1250,11 +1250,11 @@ gen: conformance
 ### SCN-GEN-8b-2 — a truncated-packfile beacon clone yields an honest partial skeleton (held-out · guard)
 
 source: REQ-GEN-8b
-held_out: true
+held*out: true
 Given a malformed input — a beacon clone with a **truncated packfile** (most objects readable, one pack object corrupt)
 When genesis runs on it
 Then it returns an honest partial `GenesisReport` + a `resumeToken` — the reachable objects are skeletonized, the corrupt pack object reported missing
-teeth: breaks-on "the truncated pack produces a fabricated _full_ skeleton (invented nodes for the unreadable pack object) instead of an honest partial"
+teeth: breaks-on "the truncated pack produces a fabricated \_full* skeleton (invented nodes for the unreadable pack object) instead of an honest partial"
 gen: conformance # PBT-fuzz differential over malformed clones; tag stays reference-model (§GEN-8)
 
 ### SCN-GEN-8c-2 — a distinct malformed-repo fuzz family never throws (held-out · guard)
@@ -1420,8 +1420,8 @@ gen: conformance
 ### SCN-GEN-12j-2 — a beacon check that survives every mutant is dropped as vacuous (held-out · guard) ★ held-out leg of the block's teeth axis
 
 source: REQ-GEN-12j
-held_out: true
-Given predicate candidate `V2` whose synthesized check returns **HOLDS** on the current code **and** also returns HOLDS on _every_ mechanically-mutated counterfactual of the anchored subtree `st-e50` — i.e. it flips to BROKEN on **0** mutants (a tautology / matches nothing)
+held*out: true
+Given predicate candidate `V2` whose synthesized check returns **HOLDS** on the current code **and** also returns HOLDS on \_every* mechanically-mutated counterfactual of the anchored subtree `st-e50` — i.e. it flips to BROKEN on **0** mutants (a tautology / matches nothing)
 When the admit-harness runs the mutation-flip gate — this held-out golden asserts the same **META-property** (mutation-of-the-mutation) on independent data: _a synthesized check with no teeth is REJECTED_
 Then `V2` is **dropped as vacuous** — admission requires HOLDS-on-current ∧ BROKEN-on-≥1-mutant, and `V2` fails the second conjunct
 teeth: breaks-on "the harness admits on HOLDS alone and **skips the mutant-flip conjunct** — the tautological check `V2` (survives every mutant of `st-e50`) is admitted, i.e. a toothless check enters the Atlas as a fact"
