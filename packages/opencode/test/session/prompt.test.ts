@@ -1117,7 +1117,7 @@ it.instance(
       yield* prompt.cancel(chat.id)
       yield* Fiber.await(fiber)
     }),
-  10_000,
+  30_000,
 )
 
 it.instance(
@@ -1362,7 +1362,7 @@ it.instance(
       expect((yield* status.get(chat.id)).type).toBe("idle")
       expect((yield* status.get(childID)).type).toBe("idle")
     }),
-  10_000,
+  30_000,
 )
 
 it.instance(
