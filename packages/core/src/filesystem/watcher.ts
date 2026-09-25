@@ -111,9 +111,7 @@ const layer = Layer.effect(
     const context = yield* Effect.context()
     const runFork = Effect.runForkWith(context)
     const pendingSubscriptions = new Set<Promise<ParcelWatcher.AsyncSubscription>>()
-    yield* Effect.addFinalizer(() =>
-      Effect.promise(() => closeSubscriptions(pendingSubscriptions)),
-    )
+    yield* Effect.addFinalizer(() => Effect.promise(() => closeSubscriptions(pendingSubscriptions)))
 
     const callback: ParcelWatcher.SubscribeCallback = (_error, updates) => {
       for (const update of updates) {
