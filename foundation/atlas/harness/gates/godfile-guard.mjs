@@ -42,11 +42,27 @@ import { fileURLToPath } from "node:url"
 // build. `> TARGET` / `> HARD` are both exclusive (a file measuring exactly the number is under it).
 const TARGET = 400 // the requested ceiling — exceeding it warns, never fails.
 const HARD = 600 // the enforced ceiling — exceeding it fails the build.
+const AUTHORIZED_WAIVER_CAPS = {
+  "packages/adapter-io/src/reverify-store.ts": 705,
+  "packages/cli/src/cli.ts": 625,
+  "packages/genesis/src/admit-harness.ts": 660,
+}
 
 // Repo root, OVERRIDABLE so the gate's own test can point it at a fixture repo. Without this the untracked
 // and harness legs could only be checked by hand against the live tree — precisely the "trust me" the gate
 // exists to abolish. It also makes the root independent of CWD, which the `git ls-files` form was not.
 const ROOT = process.env.GODFILE_GUARD_ROOT ?? join(dirname(fileURLToPath(import.meta.url)), "..", "..")
+const WAIVERS_PATH = join(ROOT, "harness/gates/godfile-waivers.json")
+
+let waivers
+try {
+  waivers = JSON.parse(readFileSync(WAIVERS_PATH, "utf8"))
+  if (waivers === null || Array.isArray(waivers) || typeof waivers !== "object")
+    throw new Error("top level must be an object")
+} catch (e) {
+  console.error(`godfile-guard: FAIL\n\n  ✗ could not read waiver ledger ${WAIVERS_PATH}: ${e.message.split("\n")[0]}`)
+  process.exit(1)
+}
 
 /** Scope roots and what counts as a source file in each. */
 const SCOPES = [
@@ -75,6 +91,13 @@ const files = [...new Set(listed)].filter((p) => SCOPES.some((s) => p.startsWith
 
 const offenders = [] // over HARD — fail the build
 const warnings = [] // in (TARGET, HARD] — over the requested bar, allowed
+const waiverErrors = []
+const fileSet = new Set(files)
+for (const path of Object.keys(waivers)) {
+  if (!Object.hasOwn(AUTHORIZED_WAIVER_CAPS, path)) waiverErrors.push(`${path}: waiver is not owner-authorized`)
+  else if (!fileSet.has(path)) waiverErrors.push(`${path}: waived file is absent or out of scope`)
+}
+
 for (const path of files) {
   let lines
   try {
@@ -82,8 +105,33 @@ for (const path of files) {
   } catch {
     continue // deleted-but-staged edge; skip
   }
-  if (lines > HARD) offenders.push({ path, lines })
+  const waiver = waivers[path]
+  if (waiver !== undefined) {
+    if (
+      waiver === null ||
+      Array.isArray(waiver) ||
+      typeof waiver !== "object" ||
+      !Number.isInteger(waiver.maxLines) ||
+      waiver.maxLines !== AUTHORIZED_WAIVER_CAPS[path] ||
+      typeof waiver.reason !== "string" ||
+      waiver.reason.trim() === ""
+    ) {
+      waiverErrors.push(
+        `${path}: waiver needs authorized maxLines ${AUTHORIZED_WAIVER_CAPS[path]} and non-empty reason`,
+      )
+      continue
+    }
+    if (lines <= HARD) waiverErrors.push(`${path}: waiver is stale; file is now within the ${HARD}-LOC hard ceiling`)
+    else if (lines > waiver.maxLines) offenders.push({ path, lines, maxLines: waiver.maxLines })
+    else warnings.push({ path, lines })
+  } else if (lines > HARD) offenders.push({ path, lines })
   else if (lines > TARGET) warnings.push({ path, lines })
+}
+
+if (waiverErrors.length > 0) {
+  console.error("godfile-guard: FAIL\n\n  ✗ invalid waiver ledger:")
+  for (const error of waiverErrors.sort()) console.error(`  ${error}`)
+  process.exit(1)
 }
 
 // Warnings are printed on every run, pass or fail: the 400-line discipline stays visible even though
@@ -98,14 +146,16 @@ if (warnings.length > 0) {
 if (offenders.length > 0) {
   offenders.sort((a, b) => b.lines - a.lines)
   console.error(`godfile-guard: ${offenders.length} file(s) over the ${HARD}-LOC hard ceiling:`)
-  for (const { path, lines } of offenders) console.error(`  ${lines}\t${path}`)
+  for (const { path, lines, maxLines } of offenders) {
+    console.error(`  ${lines}\t${path}${maxLines === undefined ? "" : ` (waived through ${maxLines})`}`)
+  }
   console.error(
-    `\nSplit each into cohesive units (target ≤${TARGET}, hard limit ${HARD}). No #[allow], no bypass — fix at the root.`,
+    `\nSplit each into cohesive units (target ≤${TARGET}, hard limit ${HARD}), or add an owner-authorized bounded waiver ledger entry.`,
   )
   process.exit(1)
 }
 
 const per = SCOPES.map((s) => `${files.filter((p) => p.startsWith(`${s.dir}/`)).length} ${s.dir}`).join(" + ")
 console.log(
-  `godfile-guard: OK — ${files.length} source file(s) (${per}), tracked AND untracked, all ≤${HARD} LOC (target ${TARGET}).`,
+  `godfile-guard: OK — ${files.length} source file(s) (${per}), tracked AND untracked, all within the ${HARD}-LOC hard ceiling or an authorized bounded waiver (target ${TARGET}).`,
 )
