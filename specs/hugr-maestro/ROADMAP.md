@@ -93,13 +93,13 @@ No worktree is removed, reset, or force-updated by this roadmap. Cleanup require
 
 ## CI Operating Policy
 
-| Workflow    | Fork policy                                 | Current condition                                                  |
-| ----------- | ------------------------------------------- | ------------------------------------------------------------------ |
-| `generate`  | Must run and may commit generated output    | Restored; last observed run succeeded.                             |
-| `publish`   | Must skip                                   | Restored; fork skips upstream-only release job.                    |
-| `typecheck` | Must pass                                   | Last observed post-merge run passed.                               |
-| `test`      | Must pass on Linux and Windows              | Windows Core failure remains open under #102.                      |
-| `nix-eval`  | Must complete its defined evaluation policy | Last observed workflow succeeded with desktop evaluation warnings. |
+| Workflow    | Fork policy                                 | Current condition                                                                                                                                            |
+| ----------- | ------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `generate`  | Must run and may commit generated output    | Generated successor is `102e763599`; record its workflow URL before claiming matrix health.                                                                  |
+| `publish`   | Must skip                                   | Fork policy is upstream-only release; record workflow URL when used as evidence.                                                                             |
+| `typecheck` | Must pass                                   | No `102e763599` run citation recorded in this snapshot.                                                                                                      |
+| `test`      | Must pass on Linux and Windows              | `688d264010` test run passed: [36169196802](https://github.com/gmhelmold/HuGR-Orchestra/actions/runs/36169196802). No successor evidence; #102 remains open. |
+| `nix-eval`  | Must complete its defined evaluation policy | No `102e763599` run citation recorded in this snapshot.                                                                                                      |
 
 Rules:
 

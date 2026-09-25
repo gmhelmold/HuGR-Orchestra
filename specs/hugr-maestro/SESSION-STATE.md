@@ -22,7 +22,8 @@ This is the short operational snapshot. Read [ROADMAP.md](ROADMAP.md) for depend
 - PR #125 fixed malformed Atlas HTML, restored `generate`, and limits final `publish` to upstream `anomalyco/opencode`.
 - Post-merge `generate` completed and created baseline commit `102e763599`.
 - Fork `publish` is intentionally skipped.
-- Parent commit `688d264010` had a Windows unit failure in `@opencode-ai/core#test`; rerun status is not a substitute for root-cause evidence. Track #102 before claiming Windows stability.
+- Windows Core instability remains tracked in #102. A successful rerun is not root-cause evidence; require a reproducer and focused regression gate before claiming Windows stability.
+- GitHub Actions evidence must name its SHA. `102e763599` is generated successor baseline; do not inherit matrix evidence from parent `688d264010`.
 
 ## Active Blockers
 
