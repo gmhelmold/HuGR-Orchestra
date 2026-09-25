@@ -1,0 +1,78 @@
+{
+  "COVERAGE.md": {
+    "bytes": 8145,
+    "sha256": "504253578f3934b7a36398fd279114a9f28268ccb2832a93b635719b60246a5d"
+  },
+  "LEARNING-LOG.md": {
+    "bytes": 4091,
+    "sha256": "52d5e22b3a2191756f72730401cc81f673c34760632669164baf5c66ef77de6b"
+  },
+  "README.md": {
+    "bytes": 16684,
+    "sha256": "1845ea51b34c4c9c3950c2104c5b9372b2a8c098c80707ff520cfe6f21101dcc"
+  },
+  "RESULTS.json": {
+    "bytes": 1058,
+    "sha256": "499d2d0580fdeed17640fade9252d2f4b8270b5eacf9f70afc05eee5307ed5fa"
+  },
+  "evidence/admission-first.log": {
+    "bytes": 6692,
+    "sha256": "94ed25d4f9f8ad0dd7bf74381218a8a48e52b5797e0eac4a24766da3a69d940e"
+  },
+  "evidence/admission-fixture-setup-failure.log": {
+    "bytes": 8768,
+    "sha256": "261f2b10d069bc792ce640b7151deffb9f2e019cea23babeb84d5c697d61f90e"
+  },
+  "evidence/admission-results.json": {
+    "bytes": 1721,
+    "sha256": "0268d319fe73244879ae1b82b06539f161ec536a8b192ad17fb2c459aa5ef7c9"
+  },
+  "evidence/admission-second.log": {
+    "bytes": 6693,
+    "sha256": "553b2dd9028f6ce3e1fedbc9b83a7e501e7e224fa7e78c7d51b527d899e5ebfe"
+  },
+  "evidence/atlas-baseline-tests.log": {
+    "bytes": 538,
+    "sha256": "0126b50f56e8a29c70da4e623239761b86b5a536691fc92c0b43ff3d46b71b9a"
+  },
+  "evidence/audit-context-admission.test.ts": {
+    "bytes": 5594,
+    "sha256": "6c57d22998710ca8b178c92d0e86aa6483242553e24b2c8abf98841e8c450883"
+  },
+  "evidence/awareness-boundaries-first.json": {
+    "bytes": 11891,
+    "sha256": "f4c23c6adfd288a6e8915156ecd0ff35a03e4e88060d41722a8ce0a6b2e92b05"
+  },
+  "evidence/awareness-boundaries-second.json": {
+    "bytes": 11891,
+    "sha256": "f4c23c6adfd288a6e8915156ecd0ff35a03e4e88060d41722a8ce0a6b2e92b05"
+  },
+  "evidence/awareness-boundaries.mjs": {
+    "bytes": 3594,
+    "sha256": "9079589d204ddc4386aa94ff990fa63d622f5035c2556187fb9dedb673423510"
+  },
+  "evidence/ceiling-boundaries-first.json": {
+    "bytes": 6055,
+    "sha256": "fc2fd65306eb740ec989b17ce1942fcb999b5fa289aec76ad14ee0ddc2b8a7e5"
+  },
+  "evidence/ceiling-boundaries-second.json": {
+    "bytes": 6055,
+    "sha256": "fc2fd65306eb740ec989b17ce1942fcb999b5fa289aec76ad14ee0ddc2b8a7e5"
+  },
+  "evidence/ceiling-boundaries.mjs": {
+    "bytes": 1456,
+    "sha256": "d2295b781048c5536ca7174af91b1c730557173eaf988e2fdf8b0e8b442b5ea3"
+  },
+  "evidence/maestro-baseline-tests.log": {
+    "bytes": 3492,
+    "sha256": "cb47ff203d649dc7fa6147e93f6b5c0dc2f3c835146e8368ef5b86c5a8c424f9"
+  },
+  "evidence/typecheck-final.log": {
+    "bytes": 9,
+    "sha256": "faeaa94bcf7012d86f91ca647580449f56a263fb7eaf572c54789764f60a9b8f"
+  },
+  "inventory.json": {
+    "bytes": 1844913,
+    "sha256": "50c0544f2a2eeb5fda963cc6d7b13632e345fe5066958624a983392e6be6f77f"
+  }
+}

@@ -1,0 +1,282 @@
+{
+  "productRevision": "b0c33d2f6567a2c741240f3c44bc00ca2f01e7e7",
+  "boundary": "Original budget function; no production caller found. Numeric supplied estimates, not measured tokenizer output.",
+  "cases": {
+    "uniqueKinds": {
+      "input": [
+        {
+          "kind": "awareness",
+          "tokenEstimate": 400,
+          "hitRate": 0,
+          "hits": 0
+        },
+        {
+          "kind": "protocols.safetyCritical",
+          "tokenEstimate": 300,
+          "hitRate": 0,
+          "hits": 0
+        },
+        {
+          "kind": "pack",
+          "tokenEstimate": 2000,
+          "hitRate": 0,
+          "hits": 0
+        },
+        {
+          "kind": "own",
+          "tokenEstimate": 1500,
+          "hitRate": 0,
+          "hits": 0
+        },
+        {
+          "kind": "projectMem",
+          "tokenEstimate": 500,
+          "hitRate": 0,
+          "hits": 0
+        },
+        {
+          "kind": "poke",
+          "tokenEstimate": 500,
+          "hitRate": 0,
+          "hits": 0
+        }
+      ],
+      "result": {
+        "survivors": [
+          {
+            "kind": "awareness",
+            "tokenEstimate": 400,
+            "hitRate": 0,
+            "hits": 0
+          },
+          {
+            "kind": "protocols.safetyCritical",
+            "tokenEstimate": 300,
+            "hitRate": 0,
+            "hits": 0
+          },
+          {
+            "kind": "pack",
+            "tokenEstimate": 2000,
+            "hitRate": 0,
+            "hits": 0
+          },
+          {
+            "kind": "own",
+            "tokenEstimate": 1500,
+            "hitRate": 0,
+            "hits": 0
+          },
+          {
+            "kind": "projectMem",
+            "tokenEstimate": 500,
+            "hitRate": 0,
+            "hits": 0
+          }
+        ],
+        "dropped": [
+          "poke"
+        ],
+        "sum": 4700
+      },
+      "actual": 4700,
+      "accountingAgrees": true,
+      "ceilingOrPinsOnly": true
+    },
+    "repeatedKind": {
+      "input": [
+        {
+          "kind": "awareness",
+          "tokenEstimate": 400,
+          "hitRate": 0,
+          "hits": 0
+        },
+        {
+          "kind": "pack",
+          "tokenEstimate": 1000,
+          "hitRate": 0,
+          "hits": 0
+        },
+        {
+          "kind": "pack",
+          "tokenEstimate": 1000,
+          "hitRate": 0,
+          "hits": 0
+        },
+        {
+          "kind": "pack",
+          "tokenEstimate": 1000,
+          "hitRate": 0,
+          "hits": 0
+        },
+        {
+          "kind": "pack",
+          "tokenEstimate": 1000,
+          "hitRate": 0,
+          "hits": 0
+        },
+        {
+          "kind": "pack",
+          "tokenEstimate": 1000,
+          "hitRate": 0,
+          "hits": 0
+        },
+        {
+          "kind": "pack",
+          "tokenEstimate": 1000,
+          "hitRate": 0,
+          "hits": 0
+        }
+      ],
+      "result": {
+        "survivors": [
+          {
+            "kind": "awareness",
+            "tokenEstimate": 400,
+            "hitRate": 0,
+            "hits": 0
+          },
+          {
+            "kind": "pack",
+            "tokenEstimate": 1000,
+            "hitRate": 0,
+            "hits": 0
+          },
+          {
+            "kind": "pack",
+            "tokenEstimate": 1000,
+            "hitRate": 0,
+            "hits": 0
+          },
+          {
+            "kind": "pack",
+            "tokenEstimate": 1000,
+            "hitRate": 0,
+            "hits": 0
+          },
+          {
+            "kind": "pack",
+            "tokenEstimate": 1000,
+            "hitRate": 0,
+            "hits": 0
+          },
+          {
+            "kind": "pack",
+            "tokenEstimate": 1000,
+            "hitRate": 0,
+            "hits": 0
+          }
+        ],
+        "dropped": [
+          "pack",
+          "pack"
+        ],
+        "sum": 4400
+      },
+      "actual": 5400,
+      "accountingAgrees": false,
+      "ceilingOrPinsOnly": false
+    },
+    "repeatedSameObject": {
+      "input": [
+        {
+          "kind": "awareness",
+          "tokenEstimate": 400,
+          "hitRate": 0,
+          "hits": 0
+        },
+        {
+          "kind": "pack",
+          "tokenEstimate": 1000,
+          "hitRate": 0,
+          "hits": 0
+        },
+        {
+          "kind": "pack",
+          "tokenEstimate": 1000,
+          "hitRate": 0,
+          "hits": 0
+        },
+        {
+          "kind": "pack",
+          "tokenEstimate": 1000,
+          "hitRate": 0,
+          "hits": 0
+        },
+        {
+          "kind": "pack",
+          "tokenEstimate": 1000,
+          "hitRate": 0,
+          "hits": 0
+        },
+        {
+          "kind": "pack",
+          "tokenEstimate": 1000,
+          "hitRate": 0,
+          "hits": 0
+        },
+        {
+          "kind": "pack",
+          "tokenEstimate": 1000,
+          "hitRate": 0,
+          "hits": 0
+        }
+      ],
+      "result": {
+        "survivors": [
+          {
+            "kind": "awareness",
+            "tokenEstimate": 400,
+            "hitRate": 0,
+            "hits": 0
+          }
+        ],
+        "dropped": [
+          "pack",
+          "pack"
+        ],
+        "sum": 4400
+      },
+      "actual": 400,
+      "accountingAgrees": false,
+      "ceilingOrPinsOnly": true
+    },
+    "pinsOnly": {
+      "input": [
+        {
+          "kind": "awareness",
+          "tokenEstimate": 3000,
+          "hitRate": 0,
+          "hits": 0
+        },
+        {
+          "kind": "protocols.safetyCritical",
+          "tokenEstimate": 3000,
+          "hitRate": 0,
+          "hits": 0
+        }
+      ],
+      "result": {
+        "survivors": [
+          {
+            "kind": "awareness",
+            "tokenEstimate": 3000,
+            "hitRate": 0,
+            "hits": 0
+          },
+          {
+            "kind": "protocols.safetyCritical",
+            "tokenEstimate": 3000,
+            "hitRate": 0,
+            "hits": 0
+          }
+        ],
+        "dropped": [],
+        "sum": 6000
+      },
+      "actual": 6000,
+      "accountingAgrees": true,
+      "ceilingOrPinsOnly": true
+    }
+  }
+}
