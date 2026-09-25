@@ -59,6 +59,7 @@ const layer = Layer.effect(
     const discovery = yield* SkillDiscovery.Service
     const fs = yield* FSUtil.Service
 
+    const cache = new Map<string, Info[]>()
     const state = State.create<Data, Draft>({
       initial: () => ({ sources: [] }),
       draft: (draft) => ({
@@ -68,6 +69,7 @@ const layer = Layer.effect(
         },
         list: () => draft.sources as Source[],
       }),
+      finalize: () => Effect.sync(() => cache.clear()),
     })
 
     const load = Effect.fn("SkillV2.load")(function* (source: Source) {
@@ -106,7 +108,6 @@ const layer = Layer.effect(
 
     // QUESTION(Dax): Should local skill sources invalidate on filesystem watch
     // events, following the reload policy chosen for other context sources?
-    const cache = new Map<string, Info[]>()
     const list = Effect.fn("SkillV2.list")(function* () {
       const skills = new Map<string, Info>()
       for (const source of state.get().sources) {

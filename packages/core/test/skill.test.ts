@@ -122,4 +122,34 @@ describe("SkillV2", () => {
       ),
     ),
   )
+
+  it.live("invalidates cached embedded content when a source is replaced under the same name", () =>
+    Effect.gen(function* () {
+      const skill = yield* SkillV2.Service
+      const first = SkillV2.Info.make({
+        name: "replaceable",
+        description: "first",
+        location: AbsolutePath.make("/builtin/replaceable.md"),
+        content: "VERSION_A",
+      })
+      const second = SkillV2.Info.make({
+        name: "replaceable",
+        description: "second",
+        location: AbsolutePath.make("/builtin/replaceable.md"),
+        content: "VERSION_B",
+      })
+      const registration = yield* skill.transform((editor) =>
+        editor.source({ type: "embedded", skill: first }),
+      )
+      expect((yield* skill.list())[0]?.content).toBe("VERSION_A")
+      yield* registration.dispose
+      expect(yield* skill.list()).toEqual([])
+      yield* skill.transform((editor) => editor.source({ type: "embedded", skill: second }))
+      expect((yield* skill.sources())[0]).toEqual({ type: "embedded", skill: second })
+      expect((yield* skill.list())[0]?.content).toBe("VERSION_B")
+      yield* skill.reload()
+      expect((yield* skill.list())[0]?.content).toBe("VERSION_B")
+    }),
+  )
+
 })
