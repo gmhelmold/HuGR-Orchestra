@@ -40,22 +40,16 @@
 // it is a behaviour change to the reconcile/doctor classifier, not a comment fix, and it belongs to whoever
 // owns that classifier. What this header must not do is claim a parity the code does not have.
 
-import { mkdirSync, rmSync } from 'node:fs';
-import { tmpdir } from 'node:os';
-import { join } from 'node:path';
-import type { Axes, IndexNode } from '@atlas/index';
-import { driftDetect } from '@atlas/grounding';
-import type { Hash, StructRef } from '@atlas/contracts';
-import type { GroundedFact } from '@atlas/knowledge';
-import { walkFileTree } from './fs.js';
-import { deriveGroundingAxes } from './grounding-computer.js';
-import {
-  runGit as gitExec,
-  isDeterministicGitError,
-  gitYieldMs,
-  GIT_BACKOFF_MS,
-  GIT_MAX_ATTEMPTS,
-} from './run-git.js';
+import { mkdirSync, rmSync } from "node:fs"
+import { tmpdir } from "node:os"
+import { join } from "node:path"
+import type { Axes, IndexNode } from "@atlas/index"
+import { driftDetect } from "@atlas/grounding"
+import type { Hash, StructRef } from "@atlas/contracts"
+import type { GroundedFact } from "@atlas/knowledge"
+import { walkFileTree } from "./fs.js"
+import { deriveGroundingAxes } from "./grounding-computer.js"
+import { runGit as gitExec, isDeterministicGitError, gitYieldMs, GIT_BACKOFF_MS, GIT_MAX_ATTEMPTS } from "./run-git.js"
 
 /** The arbitrary-rev code-index capability. `axesAt` builds (once, memoized) the index at a rev; the two
  *  derived readers ride on it — `resolveAnchorAt` re-derives a grounding anchor's `StructRef` at that rev,
@@ -63,11 +57,11 @@ import {
 export interface RevIndex {
   /** The built `Axes` at `rev` (via a temp detached worktree), memoized — a rev is immutable so it is
    *  built at most once. A bad/unknown rev or checkout failure returns an empty snapshot, never throws. */
-  axesAt(rev: string): Axes;
+  axesAt(rev: string): Axes
   /** The `StructRef` for `qp` in `axesAt(rev)` (kind/qualifiedPath/subtreeHash), or `undefined` if `qp`
    *  is not a structural unit in that rev's tree. Mirrors grounding's `resolveCurrent` (drift.ts): a node
    *  is keyed by `IndexNode.key` (= the FileTree path). Total: never throws. */
-  resolveAnchorAt(rev: string, qp: string): StructRef | undefined;
+  resolveAnchorAt(rev: string, qp: string): StructRef | undefined
   /** The `StructRef` of the UNIQUE unit in `axesAt(rev)` whose `subtreeHash` equals `subtreeHash` — the
    *  re-derivability oracle keyed on the drift oracle (`subtreeHash`, GROUND-1), NOT on the anchor's
    *  `qualifiedPath`. A moved anchor whose content survives at a NEW path re-derives here (⇒ mechanical,
@@ -77,10 +71,10 @@ export interface RevIndex {
    *  NOWHERE in the rev; the content resolves at ≥2 distinct paths, which is genuine AMBIGUITY and is
    *  refused rather than guessed (see the implementation note); or the rev's checkout FAILED, in which case
    *  there is no snapshot to answer from. Total: never throws. */
-  resolveBySubtreeAt(rev: string, subtreeHash: string): StructRef | undefined;
+  resolveBySubtreeAt(rev: string, subtreeHash: string): StructRef | undefined
   /** Does `fact`'s grounding still hold at `newSha` — `driftDetect(fact.grounding, axesAt(newSha))` is
    *  `FRESH`. `false` on any drift, an absent unit, or a bad `newSha` (fail-closed, never throws). */
-  reDerives(fact: GroundedFact, newSha: Hash): boolean;
+  reDerives(fact: GroundedFact, newSha: Hash): boolean
 }
 
 /**
@@ -91,24 +85,24 @@ export interface RevIndex {
  * the temp worktree) is NOT routed through here — it is a frozen dependency, consumed as-is.
  */
 export interface RevIndexDeps {
-  readonly runGit?: (repo: string, args: readonly string[]) => string;
+  readonly runGit?: (repo: string, args: readonly string[]) => string
 }
 
 /** The deterministic empty snapshot returned on any checkout/build failure (fail-closed totality). Built
  *  once from an empty tree — `build` is deterministic, so this is a stable, side-effect-free sentinel: no
  *  real file-path anchor resolves in it, so `driftDetect` against it is DRIFTED (⇒ `reDerives` false). */
-const EMPTY_AXES: Axes = deriveGroundingAxes({ path: '.', children: [] }, { documents: [] }).axes;
+const EMPTY_AXES: Axes = deriveGroundingAxes({ path: ".", children: [] }, { documents: [] }).axes
 
 /** Resolve the `IndexNode` whose key is `qp`, across the three axes — the SAME traversal grounding's
  *  `resolveCurrent`/`findByKey` (drift.ts) uses, so `resolveAnchorAt` and `reDerives` agree by construction.
  *  Total: an absent unit returns `undefined`, never a throw. */
 function findNode(node: IndexNode, key: string): IndexNode | undefined {
-  if (node.key === key) return node;
+  if (node.key === key) return node
   for (const child of node.children) {
-    const hit = findNode(child, key);
-    if (hit !== undefined) return hit;
+    const hit = findNode(child, key)
+    if (hit !== undefined) return hit
   }
-  return undefined;
+  return undefined
 }
 
 /** Collect EVERY node in `node`'s subtree whose `subtreeHash` equals `hash`, keyed by `qualifiedPath` —
@@ -118,17 +112,17 @@ function findNode(node: IndexNode, key: string): IndexNode | undefined {
  *  over the SAME tree, so every file matches at least TWICE across axes. Counting raw hits would make every
  *  content look ambiguous and would disable the mechanical arm entirely; distinct paths is the real arity. */
 function collectBySubtree(node: IndexNode, hash: string, into: Map<string, IndexNode>): void {
-  if (String(node.subtreeHash) === hash && !into.has(node.key)) into.set(node.key, node);
-  for (const child of node.children) collectBySubtree(child, hash, into);
+  if (String(node.subtreeHash) === hash && !into.has(node.key)) into.set(node.key, node)
+  for (const child of node.children) collectBySubtree(child, hash, into)
 }
 
 /** Classify a resolved node into a `StructRef.kind`. The build's `IndexNode.level` is DEPTH-based
  *  (repo→crate→module→file→…), so it is NOT a reliable `kind` source; the structural shape is. The root is
  *  the `repo`; a leaf spatial/territory node is a `file`; any interior unit is a `block`. `kind` is NEVER
  *  the drift oracle (that is `subtreeHash` alone, GROUND-1) — it is descriptive metadata only. */
-function kindOf(node: IndexNode): StructRef['kind'] {
-  if (node.key === '.') return 'repo';
-  return node.children.length === 0 ? 'file' : 'block';
+function kindOf(node: IndexNode): StructRef["kind"] {
+  if (node.key === ".") return "repo"
+  return node.children.length === 0 ? "file" : "block"
 }
 
 /**
@@ -144,19 +138,19 @@ function kindOf(node: IndexNode): StructRef['kind'] {
  * concurrent-reconcile contention can no longer masquerade as a genuinely-empty rev (finding #73).
  */
 export function createRevIndex(repoPath: string, deps: RevIndexDeps = {}): RevIndex {
-  const runGit = deps.runGit ?? gitExec;
-  const cache = new Map<string, Axes>();
+  const runGit = deps.runGit ?? gitExec
+  const cache = new Map<string, Axes>()
   /** Revs whose checkout FAILED, so `axesAt` served the `EMPTY_AXES` sentinel rather than that rev's real
    *  tree. Tracked because the sentinel is a genuine built snapshot of an empty tree and is therefore
    *  INDISTINGUISHABLE BY VALUE from a rev that honestly has one — the readers must key on PROVENANCE. */
-  const unresolved = new Set<string>();
-  const base = join(tmpdir(), 'atlas-revcache');
-  let seq = 0;
+  const unresolved = new Set<string>()
+  const base = join(tmpdir(), "atlas-revcache")
+  let seq = 0
 
   /** A fresh, non-pre-existing worktree path (git creates the leaf dir; a colliding leaf would make
    *  `worktree add` fail). Pid-scoped + a monotonic counter — deterministic per process, off the identity
    *  path (it never enters the built `Axes`). */
-  const nextDir = (): string => join(base, `${process.pid}-${seq++}`);
+  const nextDir = (): string => join(base, `${process.pid}-${seq++}`)
 
   /** One checkout+build attempt in a FRESH throwaway worktree, torn down per-attempt (so a half-created
    *  worktree from a failed attempt can never wedge the next). Returns the built `Axes` on success; RE-THROWS
@@ -166,21 +160,21 @@ export function createRevIndex(repoPath: string, deps: RevIndexDeps = {}): RevIn
   function attemptBuild(rev: string, dir: string): Axes {
     try {
       // Detach the rev into the throwaway worktree; a bad/unknown rev OR a transient lock makes this throw.
-      runGit(repoPath, ['worktree', 'add', '--detach', dir, rev]);
+      runGit(repoPath, ["worktree", "add", "--detach", dir, rev])
       // Route through the ONE grounding derivation (`deriveGroundingAxes`, grounding-computer.ts) — the SAME
       // fold→build the HEAD gate + `anchors` planner use (AUTHOR-1), so this rev's index carries the `::`
       // symbol nodes a fact is grounded against, byte-identical to compose-time. Warmup-gated no-op otherwise.
       // The rev's own `.scip` is not read here (empty documents) — the deliberate asymmetry the header states.
-      return deriveGroundingAxes(walkFileTree(dir), { documents: [] }).axes;
+      return deriveGroundingAxes(walkFileTree(dir), { documents: [] }).axes
     } finally {
       // Tear down this attempt's worktree unconditionally so the repo stays pristine — each step guarded.
       try {
-        runGit(repoPath, ['worktree', 'remove', '--force', dir]);
+        runGit(repoPath, ["worktree", "remove", "--force", dir])
       } catch {
         /* not a registered worktree (add failed) — ignore */
       }
       try {
-        rmSync(dir, { recursive: true, force: true });
+        rmSync(dir, { recursive: true, force: true })
       } catch {
         /* dir may never have been created — ignore */
       }
@@ -188,10 +182,10 @@ export function createRevIndex(repoPath: string, deps: RevIndexDeps = {}): RevIn
   }
 
   function axesAt(rev: string): Axes {
-    const cached = cache.get(rev);
-    if (cached !== undefined) return cached;
+    const cached = cache.get(rev)
+    if (cached !== undefined) return cached
 
-    mkdirSync(base, { recursive: true });
+    mkdirSync(base, { recursive: true })
 
     // A bad rev fails deterministically (fast EMPTY, no retry); a TRANSIENT `git worktree` lock — many
     // concurrent reconcile/doctor subprocesses racing the shared `.git/worktrees` admin area — clears after a
@@ -200,24 +194,24 @@ export function createRevIndex(repoPath: string, deps: RevIndexDeps = {}): RevIn
     // masquerades as a genuinely-empty rev (finding #73: that masquerade silently dropped drift).
     for (let attempt = 0; attempt < GIT_MAX_ATTEMPTS; attempt++) {
       try {
-        const axes = attemptBuild(rev, nextDir());
-        cache.set(rev, axes); // memoize the immutable rev's Axes (NOT the worktree)
-        unresolved.delete(rev); // a retry that CLEARED a transient makes the rev genuinely resolved
-        return axes;
+        const axes = attemptBuild(rev, nextDir())
+        cache.set(rev, axes) // memoize the immutable rev's Axes (NOT the worktree)
+        unresolved.delete(rev) // a retry that CLEARED a transient makes the rev genuinely resolved
+        return axes
       } catch (err) {
         // DETERMINISTIC bad rev ⇒ genuine empty, immediately (retrying a bad rev only wastes latency). The
         // classifier is the shared run-git.ts one (superset of the former local BAD_REV_RE; same result).
         if (isDeterministicGitError(err)) {
-          unresolved.add(rev);
-          return EMPTY_AXES;
+          unresolved.add(rev)
+          return EMPTY_AXES
         }
         // Transient/lock/unclassified ⇒ yield briefly (clock-free) and retry, unless attempts are exhausted.
         if (attempt < GIT_MAX_ATTEMPTS - 1)
-          gitYieldMs(GIT_BACKOFF_MS[attempt] ?? GIT_BACKOFF_MS[GIT_BACKOFF_MS.length - 1]!);
+          gitYieldMs(GIT_BACKOFF_MS[attempt] ?? GIT_BACKOFF_MS[GIT_BACKOFF_MS.length - 1]!)
       }
     }
-    unresolved.add(rev);
-    return EMPTY_AXES; // fail-closed: a transient that never cleared within the bounded attempts ⇒ empty
+    unresolved.add(rev)
+    return EMPTY_AXES // fail-closed: a transient that never cleared within the bounded attempts ⇒ empty
   }
 
   /** `axesAt(rev)`, but ONLY when that rev's checkout actually succeeded — otherwise `undefined`.
@@ -229,28 +223,28 @@ export function createRevIndex(repoPath: string, deps: RevIndexDeps = {}): RevIn
    *  the readers rather than in the transient-retry classifier. The gate is on the REV's provenance, never on
    *  the hash VALUE — so a rev that is genuinely empty still resolves exactly as before. */
   function axesIfResolved(rev: string): Axes | undefined {
-    const axes = axesAt(rev); // populates `unresolved` as a side effect — must run BEFORE the check
-    return unresolved.has(rev) ? undefined : axes;
+    const axes = axesAt(rev) // populates `unresolved` as a side effect — must run BEFORE the check
+    return unresolved.has(rev) ? undefined : axes
   }
 
   function resolveAnchorAt(rev: string, qp: string): StructRef | undefined {
-    const axes = axesIfResolved(rev);
-    if (axes === undefined) return undefined;
+    const axes = axesIfResolved(rev)
+    if (axes === undefined) return undefined
     for (const root of [axes.spatial, axes.territory, axes.dependency]) {
-      const node = findNode(root, qp);
+      const node = findNode(root, qp)
       if (node !== undefined) {
-        return { kind: kindOf(node), qualifiedPath: node.key, subtreeHash: node.subtreeHash };
+        return { kind: kindOf(node), qualifiedPath: node.key, subtreeHash: node.subtreeHash }
       }
     }
-    return undefined;
+    return undefined
   }
 
   function resolveBySubtreeAt(rev: string, subtreeHash: string): StructRef | undefined {
-    const axes = axesIfResolved(rev);
-    if (axes === undefined) return undefined;
-    const matches = new Map<string, IndexNode>();
+    const axes = axesIfResolved(rev)
+    if (axes === undefined) return undefined
+    const matches = new Map<string, IndexNode>()
     for (const root of [axes.spatial, axes.territory, axes.dependency]) {
-      collectBySubtree(root, subtreeHash, matches);
+      collectBySubtree(root, subtreeHash, matches)
     }
     // AMBIGUITY IS REFUSED, NOT GUESSED. This resolver licenses an AUTOMATIC re-ground: compose.ts and
     // doctor-source.ts read a defined result as MECHANICAL, and git-drift.ts reports the returned
@@ -259,18 +253,18 @@ export function createRevIndex(repoPath: string, deps: RevIndexDeps = {}): RevIn
     // only name one — so the preorder-first pick bound the fact to an ARBITRARY duplicate, a wrong anchor
     // that then reads FRESH forever. Refusing degrades an unsafe automatic re-ground into a SEMANTIC one
     // (human adjudication), which is the fail-closed direction and the only answer that is never wrong.
-    if (matches.size !== 1) return undefined;
-    const node = [...matches.values()][0]!;
-    return { kind: kindOf(node), qualifiedPath: node.key, subtreeHash: node.subtreeHash };
+    if (matches.size !== 1) return undefined
+    const node = [...matches.values()][0]!
+    return { kind: kindOf(node), qualifiedPath: node.key, subtreeHash: node.subtreeHash }
   }
 
   function reDerives(fact: GroundedFact, newSha: Hash): boolean {
     // Gated on the same provenance: an anchor on the repo ROOT would otherwise re-derive FRESH against the
     // EMPTY sentinel, i.e. a failed checkout could CERTIFY a fact. Fail-closed — a rev we could not read
     // never certifies anything.
-    const axes = axesIfResolved(String(newSha));
-    return axes !== undefined && driftDetect(fact.grounding, axes) === 'FRESH';
+    const axes = axesIfResolved(String(newSha))
+    return axes !== undefined && driftDetect(fact.grounding, axes) === "FRESH"
   }
 
-  return { axesAt, resolveAnchorAt, resolveBySubtreeAt, reDerives };
+  return { axesAt, resolveAnchorAt, resolveBySubtreeAt, reDerives }
 }

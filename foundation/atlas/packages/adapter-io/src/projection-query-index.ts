@@ -40,24 +40,24 @@
 // whole `atlas query` that takes ~5 s — dominated by the AST fold + axes build `composeRuntime` ALREADY
 // does — the added work is inside the run-to-run noise of the command.
 
-import type { Hash, PackInvariant } from '@atlas/contracts';
-import type { QueryIndex } from '@atlas/tools';
-import { isAdvisory } from '@atlas/tools';
-import { currentNodes } from '@atlas/knowledge';
-import type { BoundHits, GroundedFact } from '@atlas/knowledge';
-import { asNodeKey } from '@atlas/kernel';
-import { underScope } from './anchor-scope.js';
-import { rowBehindHead } from './freshness-watermark.js';
-import { factToInvariant, resolveFreshness } from './pack-shape.js';
-import type { FreshnessOracle } from './pack-shape.js';
-import type { DiskStore } from './store.js';
-import { rehydrateProjection } from './store.js';
+import type { Hash, PackInvariant } from "@atlas/contracts"
+import type { QueryIndex } from "@atlas/tools"
+import { isAdvisory } from "@atlas/tools"
+import { currentNodes } from "@atlas/knowledge"
+import type { BoundHits, GroundedFact } from "@atlas/knowledge"
+import { asNodeKey } from "@atlas/kernel"
+import { underScope } from "./anchor-scope.js"
+import { rowBehindHead } from "./freshness-watermark.js"
+import { factToInvariant, resolveFreshness } from "./pack-shape.js"
+import type { FreshnessOracle } from "./pack-shape.js"
+import type { DiskStore } from "./store.js"
+import { rehydrateProjection } from "./store.js"
 
 // `underScope` MOVED to `./anchor-scope.js` (a leaf), so the WRITE door's authz can be bound to the very
 // predicate the READ projection scopes on rather than to a second copy of it (ADR-0010 open item 3). It is
 // RE-EXPORTED from here unchanged: this module is where every existing consumer and test imports it from,
 // and moving a symbol out from under its importers is how a mechanical extraction becomes a behaviour change.
-export { underScope } from './anchor-scope.js';
+export { underScope } from "./anchor-scope.js"
 
 /**
  * Wrap the pure structural `QueryIndex` with the durable projection readback. `cover(scope)` delegates the
@@ -101,19 +101,19 @@ export function createProjectionQueryIndex(
 ): QueryIndex {
   return {
     cover(scope: string) {
-      const base = structural.cover(scope); // territory resolution STAYS in the pure @atlas/index adapter
-      const proj = rehydrateProjection(store);
-      const invariants: PackInvariant[] = [];
+      const base = structural.cover(scope) // territory resolution STAYS in the pure @atlas/index adapter
+      const proj = rehydrateProjection(store)
+      const invariants: PackInvariant[] = []
       // N11: live HEAD, read ONCE for the whole cover (one `git rev-parse`, never one per row).
-      const head = headSha?.();
-      let stale = false;
+      const head = headSha?.()
+      let stale = false
       for (const node of currentNodes(proj)) {
-        if (node.primaryAnchor === undefined) continue; // anchorless ⇒ not locatable under a scope
-        if (!underScope(node.primaryAnchor, scope)) continue; // out-of-scope facts never leak into the pack
-        const fact = store.get(node.contentHash as Hash) as GroundedFact | undefined;
-        if (fact === undefined) continue; // the CAS bytes ARE the fact; a miss ⇒ skip (never a throw)
+        if (node.primaryAnchor === undefined) continue // anchorless ⇒ not locatable under a scope
+        if (!underScope(node.primaryAnchor, scope)) continue // out-of-scope facts never leak into the pack
+        const fact = store.get(node.contentHash as Hash) as GroundedFact | undefined
+        if (fact === undefined) continue // the CAS bytes ARE the fact; a miss ⇒ skip (never a throw)
         // The ONE shared shaping (shared with retrieval-model.ts), now carrying this row's OWN verdict.
-        let inv = factToInvariant(node, fact, resolveFreshness(freshness, fact));
+        let inv = factToInvariant(node, fact, resolveFreshness(freshness, fact))
         // USE-OR-SEAL (INV-AUTH-16): this is the serve path that WRITES the USE ledger. An ADVISORY node
         // delivered in this pack accrues one hit (REQ-AUTH-16a — SCN-16a "served-in-a-pack increments").
         // The class it is SERVED at is decided FIRST, from the ledger state BEFORE this serve's own `logHit`
@@ -122,19 +122,19 @@ export function createProjectionQueryIndex(
         // A risen (or human-sealed) node is served at the RAISED class (the next governance band above
         // ADVISORY); a node earning neither stays at its advisory tier and decays by non-use (REQ-AUTH-16d).
         if (hits !== undefined && isAdvisory(inv)) {
-          const served = hits.servedClass(asNodeKey(node.nodeKey));
-          hits.logHit(asNodeKey(node.nodeKey)); // SCN-16a: served-in-a-pack increments the usage counter.
-          if (served === 'governing') inv = { ...inv, tier: 'T1' }; // raised: the next class above advisory
+          const served = hits.servedClass(asNodeKey(node.nodeKey))
+          hits.logHit(asNodeKey(node.nodeKey)) // SCN-16a: served-in-a-pack increments the usage counter.
+          if (served === "governing") inv = { ...inv, tier: "T1" } // raised: the next class above advisory
         }
-        invariants.push(inv);
-        if (fact.freshness === 'DRIFTED') stale = true; // any drifted backing grounding ⇒ re-ground signal
+        invariants.push(inv)
+        if (fact.freshness === "DRIFTED") stale = true // any drifted backing grounding ⇒ re-ground signal
         // N11 per-ROW: this row's own stamp (falling back to the projection watermark for an unstamped row)
         // against live HEAD. Placed beside the DRIFTED leg deliberately — both answer "must this PACK be
         // re-grounded before it is trusted", so both are decided over exactly the rows the pack serves.
-        if (rowBehindHead(node, proj.builtAt, head)) stale = true;
+        if (rowBehindHead(node, proj.builtAt, head)) stale = true
       }
-      invariants.sort((a, b) => (a.nodeId < b.nodeId ? -1 : a.nodeId > b.nodeId ? 1 : 0));
-      return { territory: base.territory, axisHash: base.axisHash, invariants, stale };
+      invariants.sort((a, b) => (a.nodeId < b.nodeId ? -1 : a.nodeId > b.nodeId ? 1 : 0))
+      return { territory: base.territory, axisHash: base.axisHash, invariants, stale }
     },
-  };
+  }
 }

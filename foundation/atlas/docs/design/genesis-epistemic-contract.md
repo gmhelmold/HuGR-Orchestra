@@ -7,7 +7,7 @@
 > not be emitted.
 
 This document is the governing principle the whole genesis pipeline serves. `propose.md` (ADR-0020),
-the grounding span (ADR-0011 Decision 3 / KNOW-15), and the state machine phases are all *mechanisms*
+the grounding span (ADR-0011 Decision 3 / KNOW-15), and the state machine phases are all _mechanisms_
 that enforce this one law. If any mechanism contradicts it, the mechanism is wrong.
 
 ## Two admissible grounds — and nothing else
@@ -18,13 +18,13 @@ it**, so a reader (or a machine) can re-check without trusting the model.
 1. **PROVEN** — a mechanically re-checkable witness exists, and the fact carries it. This is the
    narrow band where a deterministic procedure decides the claim: a type the type-checker confirms, a
    call that a symbol index shows is present. The witness is re-runnable; anyone gets the same answer.
-   *This band is small, and — crucially — it is also the band the harness could have derived on its
-   own.* A proven fact is honest but rarely the interesting one.
+   _This band is small, and — crucially — it is also the band the harness could have derived on its
+   own._ A proven fact is honest but rarely the interesting one.
 
 2. **JUSTIFIED** — no deterministic procedure decides the claim (it is semantic / about intent /
    about an assumption), but the model can **point to the exact bytes** that make it true and give a
    derivation a competent reader can follow to the same conclusion **and contest**. The justification
-   (the grounding span into content-addressed bytes + the derivation from *these* bytes) travels with
+   (the grounding span into content-addressed bytes + the derivation from _these_ bytes) travels with
    the fact. Trust does not come from the model's authority — it comes from the fact being
    **traceable, re-readable, and refutable** against the source it names.
 
@@ -36,18 +36,18 @@ common, expected, correct outcome for most units.
 - If a fact is **deterministically verifiable**, it is deterministically **derivable** → the model
   is not needed to find it; enumerate it.
 - If a fact **needs the model** to be found (it is not mechanically derivable), then **no
-  deterministic checker is sound for it** — any mechanical check is a *structural proxy* for a
+  deterministic checker is sound for it** — any mechanical check is a _structural proxy_ for a
   semantic claim, and "passes the proxy" never entails "the claim is true".
 
-So the two sets — *needs-a-model* and *mechanically-provable* — are complementary. There is no
+So the two sets — _needs-a-model_ and _mechanically-provable_ — are complementary. There is no
 quadrant "needs a model AND a machine can prove it". Chasing a deterministic oracle to bless
 model-proposed semantic facts is a category error: it can only ever re-derive the trivial band and
 **reject the semantic facts that are the entire point.** A sound oracle used as the truth gate for
-model facts is worthless and actively harmful — it filters *for* uselessness.
+model facts is worthless and actively harmful — it filters _for_ uselessness.
 
 The resolution is not a stronger oracle. It is shifting the **burden of proof onto the proposer**:
-the model does the hard work (find the grounds), and admission checks that the grounds are *present
-and honest*, never that a machine re-derived the claim.
+the model does the hard work (find the grounds), and admission checks that the grounds are _present
+and honest_, never that a machine re-derived the claim.
 
 ## What "justify" is made of (so it is not "trust me")
 
@@ -57,7 +57,7 @@ already encodes the justification discipline. Named explicitly, a justified fact
 - **Derivable from the shown bytes** — not from library knowledge, not from a stale/past-tense
   comment the current code may contradict. Atlas's whole claim is that a fact **re-derives at
   source@sha**; a fact the bytes do not contain cannot.
-- **Self-refutation before emission** — the model reasons freely in a *scratch* region (never
+- **Self-refutation before emission** — the model reasons freely in a _scratch_ region (never
   persisted) and actively tries to **refute** its own candidate against the source; only a survivor
   is emitted. The model carries the burden of attacking its own claim first.
 - **Grounded** — the emitted claim is anchored to a span in the content-addressed target bytes
@@ -77,14 +77,14 @@ oracle. Its job:
 - **Force the phases in order** — ANCHOR (name the unit as a closed vocabulary) → PROPOSE
   (reason-freely-and-refute → emit-one-block or `NO-FACT`) → ADMIT (record).
 - **Freeze the prompt** — `propose.md` is hashed into the run's provenance; an operator override is
-  recorded, never silent. The prompt is a committed artifact so the refusal *rate* is a readable
+  recorded, never silent. The prompt is a committed artifact so the refusal _rate_ is a readable
   signal.
 - **Keep reasoning scratch** — only the block's `claim` + its grounding is persisted; the free
   reasoning is parsed away and never stored as a fact.
 - **Record who answered and over which bytes** — the fact is reproducible with respect to the model
   and the source@sha that produced it (#195/#210).
 
-The state machine is a **passive** enforcer of *process*, not a judge of *truth*. That passivity is
+The state machine is a **passive** enforcer of _process_, not a judge of _truth_. That passivity is
 correct here: for a model-proposed fact the teeth are the **protocol** (derive-or-abstain,
 self-refute, ground) + provenance, not a deterministic hook. A verify hook that re-derives the claim
 is the wrong mechanism and is removed from this path.
@@ -97,7 +97,7 @@ A stored fact carries **which ground admitted it**, and the two never blur:
 - `justified` (advisory / grounded) — the model's grounded, self-refuted, contestable assertion. It
   is **not** labeled "proven". Honesty is the label plus the grounding, not a false claim of proof.
 
-Confidence in a `justified` fact is raised — never converted to "proof" — by *model-independent*
+Confidence in a `justified` fact is raised — never converted to "proof" — by _model-independent_
 means: an independent-model ensemble agreeing, human ratification, and the fact surviving re-read at a
 later sha. These lower the lie rate; they do not manufacture soundness, and they are never described
 as if they did.

@@ -7,7 +7,7 @@ MCP tool — the ignore-rule step below only happens on the CLI.
 ## Prerequisites
 
 - The `atlas` binary. The workspace is not published, so build it from a checkout — `npm ci && npm run
-  build` — and run `packages/cli/dist/src/bin.js`, which `packages/cli/package.json` declares as `atlas`.
+build` — and run `packages/cli/dist/src/bin.js`, which `packages/cli/package.json` declares as `atlas`.
   A workspace install does **not** put `atlas` on your `PATH`; alias it or call the file directly. The
   transcripts below were produced with such an alias.
 - A repository. Git is not required for `init` itself, but everything downstream (drift, reconcile, the
@@ -44,7 +44,7 @@ Every transcript below is a real run, with absolute paths shortened to `/tmp/dem
    `.atlas/**` gets committed, Atlas refuses to serve or write it, because content-addressing proves
    integrity and says nothing about provenance — knowledge that arrived by `git add` never passed a gate.
    The rule `init` writes is deliberately `.atlas/*` plus `!.atlas/policy.json`, in that order: git cannot
-   re-include a path under an excluded *directory*, so `.atlas/` would make the negation unreachable and
+   re-include a path under an excluded _directory_, so `.atlas/` would make the negation unreachable and
    silently drop your policy file.
 
 4. **Declare who may write, in `.atlas/policy.json`.** This is the one file under `.atlas/` that is source,

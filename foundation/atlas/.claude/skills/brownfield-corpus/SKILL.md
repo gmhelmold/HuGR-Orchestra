@@ -79,7 +79,7 @@ becomes a property of the generator instead of a property of your attention.
 
 - **Do not lift behaviour that has not shipped.** If one work package is still in flight, mark its clauses
   as out of scope and say why — writing them early is the one thing a lift may not do.
-- **Do not smuggle new behaviour in as a lift.** If the exercise reveals something the code *should* do and
+- **Do not smuggle new behaviour in as a lift.** If the exercise reveals something the code _should_ do and
   does not, that is a finding and a backlog item, not a clause.
 - **Do not reuse the subsystem's own invariant family** for the ring around it. They are different
   invariants at different layers; colliding ids merge two claims that were never the same.

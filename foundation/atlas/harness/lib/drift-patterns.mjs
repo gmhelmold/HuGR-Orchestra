@@ -10,10 +10,17 @@
 /** Pre-amendment governance-count forms. A line matching any of these is drift unless {@link ALLOW} clears it. */
 export const STALE = [
   /\b(4|four)[ -]?(governance|governed|legs?|tools?|write)\b/i,
-  /\bfour-leg\b/i, /\b4-leg\b/i, /\b4-tool\b/i,
-  /\bno fifth\b/i, /\bfifth (governance|write) tool\b/i,
-  /writePaths ?== ?1\b/i, /write-?[sS]urface ?== ?4\b/i, /cardinality ?== ?4\b/i,
-  /\bthe closed four\b/i, /\bthe four governed tools\b/i, /\bexactly four\b/i,
+  /\bfour-leg\b/i,
+  /\b4-leg\b/i,
+  /\b4-tool\b/i,
+  /\bno fifth\b/i,
+  /\bfifth (governance|write) tool\b/i,
+  /writePaths ?== ?1\b/i,
+  /write-?[sS]urface ?== ?4\b/i,
+  /cardinality ?== ?4\b/i,
+  /\bthe closed four\b/i,
+  /\bthe four governed tools\b/i,
+  /\bexactly four\b/i,
   // The SINGULAR-write-door form. Previously unmatched by ANY pattern — which is how `handler.ts` shipped
   // "the single fail-closed write door" as the MCP-published description of `atlas-emit`, telling every
   // agent seat there is one write door, for four days after the amendment.
@@ -97,15 +104,20 @@ export const STALE = [
   /\b(?:2|two)-door\b[^.\n]{0,40}\b(?:non-?obvious|usefulness)\b/i,
   /\b(?:non-?obvious|usefulness)\b[^.\n]{0,40}\b(?:2|two)-door\b/i,
   /\bobvious\b[^.\n]{0,24}\bseed is rejected\b/i,
-];
+]
 
 /** A line matching any of these is a LEGITIMATE use of the words above, not drift. */
 export const ALLOW = [
   // NARROW on purpose: `ADR-0003` specifically, not `ADR-\d+`. This clears the ONE amendment whose
   // narrative must quote the pre-amendment count; a general ADR reference would let any future document
   // re-assert a retired count merely by citing an ADR nearby.
-  /ADR-0003/, /\bformer\b/i, /\bamend/i, /\baccidental\b/i, /\bevolves\b/i, /\bwording\b/i, // amendment narrative
-  /single-write-door structural/i,            // INV-TOOLS-15 term-of-art (store-row medium)
+  /ADR-0003/,
+  /\bformer\b/i,
+  /\bamend/i,
+  /\baccidental\b/i,
+  /\bevolves\b/i,
+  /\bwording\b/i, // amendment narrative
+  /single-write-door structural/i, // INV-TOOLS-15 term-of-art (store-row medium)
   // Doctor's READ legs. The `DoctorApi` port still has exactly four (`packages/tools/src/doctor.ts`) and
   // saying so is true, so `four read legs` stays. What was REMOVED is the pair that cleared claims about the
   // CLI SUBCOMMAND surface — `the four legs, no more` and `exactly the four legs` — because that surface is
@@ -113,18 +125,33 @@ export const ALLOW = [
   // standing licence to re-assert a retired count. `DOCTOR_SUBCOMMANDS` went with them: it was the broadest
   // entry in this list, clearing ANY count claim on any line that merely NAMED the constant, which is how
   // "Exactly four subcommands (`DOCTOR_SUBCOMMANDS`)" sat in the shipped command reference unflagged.
-  /four read legs?/i, /ALL FOUR legs/i, // doctor read legs (the port, not the CLI surface)
-  /GATE's four legs/i, /the four legs route/i,
+  /four read legs?/i,
+  /ALL FOUR legs/i, // doctor read legs (the port, not the CLI surface)
+  /GATE's four legs/i,
+  /the four legs route/i,
   // Unenforced-control narrative: a line that NAMES the mechanism in order to say it is absent, aspirational
   // or historical is the honest form and must survive. Kept deliberately narrow — these are words that
   // negate or hypothesise, never words that assert.
-  /\bNOT IN FORCE\b/i, /\bnever in force\b/i, /\bnot enforced\b/i, /\bby intent\b/i,
-  /\bused to claim\b/i, /\bis NOT\b/, /\bwould require\b/i, /\bunavailable\b/i,
-  /\baspirational\b/i, /\bonce the team exists\b/i, /\bUpgrade to GitHub\b/i, /\bunknown owner\b/i,
+  /\bNOT IN FORCE\b/i,
+  /\bnever in force\b/i,
+  /\bnot enforced\b/i,
+  /\bby intent\b/i,
+  /\bused to claim\b/i,
+  /\bis NOT\b/,
+  /\bwould require\b/i,
+  /\bunavailable\b/i,
+  /\baspirational\b/i,
+  /\bonce the team exists\b/i,
+  /\bUpgrade to GitHub\b/i,
+  /\bunknown owner\b/i,
   // five→union narrative. NARROW on purpose — `ADR-0006` specifically, exactly as `ADR-0003` is handled
   // above: a general `ADR-\d+` would let any future doc re-assert a retired claim just by citing an ADR.
-  /ADR-0006/, /\bprogressive disclosure\b/i, /\bpermanent(ly)?\b/i, /\bretired\b/i,
-  /\bsuperseded\b/i, /\bold rule\b/i,
+  /ADR-0006/,
+  /\bprogressive disclosure\b/i,
+  /\bpermanent(ly)?\b/i,
+  /\bretired\b/i,
+  /\bsuperseded\b/i,
+  /\bold rule\b/i,
   // `GOVERNANCE_SURFACE` on the line is the tell that "five" qualifies the GOVERNED set — which IS closed at
   // five (INV-TOOLS-1 / ADR-0003) and is pinned by check (1) of this guard. ADR-0006 killed the claim about
   // the set the MCP server ADVERTISES (now `GOVERNANCE_SURFACE ∪ READ_SURFACE`), not this one. Without this
@@ -136,8 +163,13 @@ export const ALLOW = [
   // doors (atlas-emit / atlas-link), which ADR-0012 does not touch; `K/M` and `partition` clear the
   // structure doc's one-door/two-door split, which is about module shape, not admission. `harmful to
   // store` is the door that SURVIVED — a line asserting it rejects is stating the amendment, not drifting.
-  /ADR-0012/, /\bscored\b/i, /\bnever gated\b/i, /\bnever a veto\b/i, /\bharmful to store\b/i,
-  /WRITE_PATHS/, /\bpartition\b/i,
+  /ADR-0012/,
+  /\bscored\b/i,
+  /\bnever gated\b/i,
+  /\bnever a veto\b/i,
+  /\bharmful to store\b/i,
+  /WRITE_PATHS/,
+  /\bpartition\b/i,
   // Sibling of `used to claim` above, and needed for the same reason: a comment that QUOTES the killed
   // sentence in order to record that it is dead is the honest form. Without this the guard flags the
   // amendment's own tombstone — measured on `grounding/src/emit-guard.ts`, which does exactly that.
@@ -147,9 +179,9 @@ export const ALLOW = [
   // mutant would produce — flagging it would delete the very assertion that keeps the gate from coming
   // back. Same shape as `retired` / `superseded` in the ADR-0006 block above.
   /\bresurrect\w*/i,
-];
+]
 
 /** Is this line a stale governance-count claim? Pure + total — the guard's per-line verdict, verbatim. */
 export function isStaleGovernanceClaim(line) {
-  return STALE.some((r) => r.test(line)) && !ALLOW.some((r) => r.test(line));
+  return STALE.some((r) => r.test(line)) && !ALLOW.some((r) => r.test(line))
 }

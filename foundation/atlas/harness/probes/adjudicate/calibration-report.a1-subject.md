@@ -16,15 +16,15 @@ measures inter-judge self-consistency and is a secondary signal only.
 
 ## Result (n=20; 10 true, 10 false)
 
-| metric | value | reading |
-| --- | --- | --- |
+| metric                                                    | value                                       | reading                                             |
+| --------------------------------------------------------- | ------------------------------------------- | --------------------------------------------------- |
 | **false-admit-rate** (planted-false called GROUNDED_TRUE) | **1/10 = 0.100** — Wilson95% [0.018, 0.404] | the headline: how often a false claim slips through |
-| catch-rate (planted-false called HALLUCINATED) | 9/10 = 0.900 | — |
-| false-alarm-rate (grounded-true called HALLUCINATED) | 0/10 = 0.000 | the subject rejected no true fact |
+| catch-rate (planted-false called HALLUCINATED)            | 9/10 = 0.900                                | —                                                   |
+| false-alarm-rate (grounded-true called HALLUCINATED)      | 0/10 = 0.000                                | the subject rejected no true fact                   |
 
 **The one leak:** `F03` (falseKind `wrong-constant`). Code: `const ABSTAIN = 'NO-FACT'`; the fact claims the
-sentinel string is `"ABSTAIN"`. The subject was fooled by the variable *name* matching the claimed value while
-its actual *value* is `'NO-FACT'` — the name/value confusion class. Every other lie class (negated-condition,
+sentinel string is `"ABSTAIN"`. The subject was fooled by the variable _name_ matching the claimed value while
+its actual _value_ is `'NO-FACT'` — the name/value confusion class. Every other lie class (negated-condition,
 wrong-callee, wrong-default, past-comment-as-present, fabricated-behavior) was caught.
 
 ## Honest limits (state as limits, not TODOs)

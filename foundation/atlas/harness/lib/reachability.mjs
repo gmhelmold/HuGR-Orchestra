@@ -70,17 +70,17 @@
 // gate fails LOUD with MISCLASSIFIED REACH rather than dropping anything. Stated because "no current
 // instance" is what let three fail-opens ship.
 
-import { readFileSync, readdirSync, existsSync } from 'node:fs';
-import { join, dirname, relative, sep } from 'node:path';
-import ts from 'typescript';
+import { readFileSync, readdirSync, existsSync } from "node:fs"
+import { join, dirname, relative, sep } from "node:path"
+import ts from "typescript"
 
 /** Packages that EXIST to be consumed by tests. Their `src` is harness, not product; "no production
  *  caller" is their normal, correct state and flagging them would be noise. */
-const TEST_ONLY_PACKAGES = new Set(['e2e', 'e2e-blackbox']);
+const TEST_ONLY_PACKAGES = new Set(["e2e", "e2e-blackbox"])
 
 /** Every production `.ts` under `packages/<pkg>/src`. Tests, declarations and build output are not product. */
 export function productionModules(pkgsDir) {
-  const out = [];
+  const out = []
   const walk = (dir) => {
     for (const e of readdirSync(dir, { withFileTypes: true })) {
       // `.claude` holds one full worktree checkout PER SEAT. Descending into it would count a sibling
@@ -89,47 +89,47 @@ export function productionModules(pkgsDir) {
       // reachability.test.mjs rather than by a runtime assertion here: an assertion that cannot fire is
       // the same decoration this gate exists to argue against.
       if (e.isDirectory()) {
-        if (e.name === 'node_modules' || e.name === 'dist' || e.name === '.claude') continue;
-        walk(join(dir, e.name));
-        continue;
+        if (e.name === "node_modules" || e.name === "dist" || e.name === ".claude") continue
+        walk(join(dir, e.name))
+        continue
       }
-      if (!/\.ts$/.test(e.name) || /\.d\.ts$/.test(e.name) || /\.test\.ts$/.test(e.name)) continue;
-      out.push(join(dir, e.name));
+      if (!/\.ts$/.test(e.name) || /\.d\.ts$/.test(e.name) || /\.test\.ts$/.test(e.name)) continue
+      out.push(join(dir, e.name))
     }
-  };
-  for (const pkg of readdirSync(pkgsDir)) {
-    if (TEST_ONLY_PACKAGES.has(pkg)) continue;
-    const src = join(pkgsDir, pkg, 'src');
-    if (existsSync(src)) walk(src);
   }
-  return out.sort();
+  for (const pkg of readdirSync(pkgsDir)) {
+    if (TEST_ONLY_PACKAGES.has(pkg)) continue
+    const src = join(pkgsDir, pkg, "src")
+    if (existsSync(src)) walk(src)
+  }
+  return out.sort()
 }
 
 /** `'./x.js'` → the sibling `x.ts`; `'@atlas/pkg'` → that package's barrel. Every workspace package
  *  publishes exactly one entry (`exports: { "." : … }`), so there is no subpath case to handle. */
 function resolveSpecifier(pkgsDir, fromFile, spec) {
-  if (spec.startsWith('.')) {
-    const p = join(dirname(fromFile), spec.replace(/\.js$/, '.ts'));
-    return existsSync(p) ? p : null;
+  if (spec.startsWith(".")) {
+    const p = join(dirname(fromFile), spec.replace(/\.js$/, ".ts"))
+    return existsSync(p) ? p : null
   }
-  const m = /^@atlas\/([a-z][a-z-]*)$/.exec(spec);
-  if (m === null) return null;
-  const p = join(pkgsDir, m[1], 'src', 'index.ts');
-  return existsSync(p) ? p : null;
+  const m = /^@atlas\/([a-z][a-z-]*)$/.exec(spec)
+  if (m === null) return null
+  const p = join(pkgsDir, m[1], "src", "index.ts")
+  return existsSync(p) ? p : null
 }
 
 const hasExportModifier = (node) =>
-  ts.canHaveModifiers(node) && (ts.getModifiers(node) ?? []).some((m) => m.kind === ts.SyntaxKind.ExportKeyword);
+  ts.canHaveModifiers(node) && (ts.getModifiers(node) ?? []).some((m) => m.kind === ts.SyntaxKind.ExportKeyword)
 const hasDefaultModifier = (node) =>
-  ts.canHaveModifiers(node) && (ts.getModifiers(node) ?? []).some((m) => m.kind === ts.SyntaxKind.DefaultKeyword);
+  ts.canHaveModifiers(node) && (ts.getModifiers(node) ?? []).some((m) => m.kind === ts.SyntaxKind.DefaultKeyword)
 
 /** Every binding name a destructuring pattern introduces — `export const { a, b } = x` exports both. */
 function bindingNames(name, out) {
-  if (ts.isIdentifier(name)) out.push(name.text);
+  if (ts.isIdentifier(name)) out.push(name.text)
   else if (ts.isObjectBindingPattern(name) || ts.isArrayBindingPattern(name)) {
-    for (const el of name.elements) if (ts.isBindingElement(el)) bindingNames(el.name, out);
+    for (const el of name.elements) if (ts.isBindingElement(el)) bindingNames(el.name, out)
   }
-  return out;
+  return out
 }
 
 /**
@@ -141,46 +141,47 @@ function bindingNames(name, out) {
  * `imports`  { spec, name, kind }      (`name: '*'` = default or namespace binding: the whole module)
  */
 function parseModule(file) {
-  const text = readFileSync(file, 'utf8');
-  const sf = ts.createSourceFile(file, text, ts.ScriptTarget.Latest, false, ts.ScriptKind.TS);
-  const exports = new Map();
-  const reexports = [];
-  const imports = [];
+  const text = readFileSync(file, "utf8")
+  const sf = ts.createSourceFile(file, text, ts.ScriptTarget.Latest, false, ts.ScriptKind.TS)
+  const exports = new Map()
+  const reexports = []
+  const imports = []
 
   for (const node of sf.statements) {
     // ── imports ──────────────────────────────────────────────────────────────────────────────────────
     if (ts.isImportDeclaration(node) && ts.isStringLiteral(node.moduleSpecifier)) {
-      const spec = node.moduleSpecifier.text;
-      const clause = node.importClause;
-      if (clause === undefined) continue; // bare `import './x.js'` for side effects: no binding to credit
-      const clauseType = clause.isTypeOnly;
+      const spec = node.moduleSpecifier.text
+      const clause = node.importClause
+      if (clause === undefined) continue // bare `import './x.js'` for side effects: no binding to credit
+      const clauseType = clause.isTypeOnly
       // A default binding takes the module's runtime object; recorded as the whole module.
-      if (clause.name !== undefined) imports.push({ spec, name: '*', kind: clauseType ? 'type' : 'value' });
-      const nb = clause.namedBindings;
+      if (clause.name !== undefined) imports.push({ spec, name: "*", kind: clauseType ? "type" : "value" })
+      const nb = clause.namedBindings
       if (nb !== undefined && ts.isNamespaceImport(nb)) {
-        imports.push({ spec, name: '*', kind: clauseType ? 'type' : 'value' });
+        imports.push({ spec, name: "*", kind: clauseType ? "type" : "value" })
       } else if (nb !== undefined && ts.isNamedImports(nb)) {
         for (const el of nb.elements) {
           // `propertyName` is the name in the TARGET module; `name` is the local alias.
-          const external = (el.propertyName ?? el.name).text;
-          imports.push({ spec, name: external, kind: clauseType || el.isTypeOnly ? 'type' : 'value' });
+          const external = (el.propertyName ?? el.name).text
+          imports.push({ spec, name: external, kind: clauseType || el.isTypeOnly ? "type" : "value" })
         }
       }
-      continue;
+      continue
     }
 
     // ── export declarations: re-exports, and local `export { … }` ────────────────────────────────────
     if (ts.isExportDeclaration(node)) {
-      const clause = node.exportClause;
+      const clause = node.exportClause
       if (node.moduleSpecifier !== undefined && ts.isStringLiteral(node.moduleSpecifier)) {
-        const spec = node.moduleSpecifier.text;
-        const kind = node.isTypeOnly ? 'type' : 'value';
-        if (clause === undefined) reexports.push({ spec, kind, names: null }); // export * from
+        const spec = node.moduleSpecifier.text
+        const kind = node.isTypeOnly ? "type" : "value"
+        if (clause === undefined)
+          reexports.push({ spec, kind, names: null }) // export * from
         else if (ts.isNamespaceExport(clause)) {
           // `export * as ns from './x.js'` — `ns` IS the whole target module, so the chain resolves to it
           // wholesale. The hand-written revisions could not see this form at all and reported modules
           // reached only that way as dead.
-          reexports.push({ spec, kind, names: [{ as: clause.name.text, local: '*' }] });
+          reexports.push({ spec, kind, names: [{ as: clause.name.text, local: "*" }] })
         } else {
           reexports.push({
             spec,
@@ -190,37 +191,38 @@ function parseModule(file) {
               local: (el.propertyName ?? el.name).text,
               typeOnly: el.isTypeOnly,
             })),
-          });
+          })
         }
       } else if (clause !== undefined && ts.isNamedExports(clause)) {
         for (const el of clause.elements) {
-          exports.set(el.name.text, node.isTypeOnly || el.isTypeOnly ? 'type' : 'value');
+          exports.set(el.name.text, node.isTypeOnly || el.isTypeOnly ? "type" : "value")
         }
       }
-      continue;
+      continue
     }
 
     // ── `export default <expression>` ────────────────────────────────────────────────────────────────
     if (ts.isExportAssignment(node)) {
-      exports.set('default', 'value');
-      continue;
+      exports.set("default", "value")
+      continue
     }
 
     // ── exported declarations ────────────────────────────────────────────────────────────────────────
-    if (!hasExportModifier(node)) continue;
-    const named = hasDefaultModifier(node) ? 'default' : undefined;
+    if (!hasExportModifier(node)) continue
+    const named = hasDefaultModifier(node) ? "default" : undefined
     if (ts.isVariableStatement(node)) {
       // Every declarator, so `export const A = 1, B = 2` counts as TWO — the hand-written revision
       // counted one, which quietly weakened the ledger's exact-count pin.
-      for (const d of node.declarationList.declarations) for (const n of bindingNames(d.name, [])) exports.set(n, 'value');
+      for (const d of node.declarationList.declarations)
+        for (const n of bindingNames(d.name, [])) exports.set(n, "value")
     } else if (ts.isFunctionDeclaration(node) || ts.isClassDeclaration(node)) {
-      exports.set(named ?? node.name?.text ?? 'default', 'value');
+      exports.set(named ?? node.name?.text ?? "default", "value")
     } else if (ts.isEnumDeclaration(node)) {
-      exports.set(node.name.text, 'value'); // an enum is a runtime object too
+      exports.set(node.name.text, "value") // an enum is a runtime object too
     } else if (ts.isInterfaceDeclaration(node) || ts.isTypeAliasDeclaration(node)) {
-      exports.set(node.name.text, 'type');
+      exports.set(node.name.text, "type")
     } else if (ts.isModuleDeclaration(node)) {
-      exports.set(node.name.text, 'value'); // `export namespace X` emits an object
+      exports.set(node.name.text, "value") // `export namespace X` emits an object
     } else {
       // ── FAIL-CLOSED TRIPWIRE (AST-keyed) ─────────────────────────────────────────────────────────
       // Every historical fail-open here worked one way: something made a module look export-less, it
@@ -241,21 +243,21 @@ function parseModule(file) {
         `reachability: UNRECOGNISED EXPORT in ${file} — a \`${ts.SyntaxKind[node.kind]}\` carries an export ` +
           `modifier and no branch of this parser handles it, so its exports would be silently dropped. ` +
           `Classify it explicitly (value or type) before this module can be measured.`,
-      );
+      )
     }
   }
 
   // A file the parser could not read is not a file with no exports. `export` alone yields one parse
   // diagnostic and zero statements — the AST tripwire above cannot see what was never parsed, so refuse
   // the source outright rather than report it as export-less.
-  const diagnostics = sf.parseDiagnostics ?? [];
+  const diagnostics = sf.parseDiagnostics ?? []
   if (diagnostics.length > 0) {
     throw new Error(
       `reachability: UNPARSEABLE ${file} — ${diagnostics.length} parse diagnostic(s); ` +
         `refusing to report a module whose syntax the parser rejected.`,
-    );
+    )
   }
-  return { exports, reexports, imports };
+  return { exports, reexports, imports }
 }
 
 /**
@@ -269,28 +271,28 @@ function parseModule(file) {
  * target module.
  */
 function declaringModule(mods, pkgsDir, file, name, kind, seen = new Set()) {
-  const key = `${file}::${name}`;
-  if (seen.has(key)) return null; // cyclic barrels are legal TypeScript; do not hang on them
-  seen.add(key);
-  const mod = mods.get(file);
-  if (mod === undefined) return null;
-  if (mod.exports.has(name)) return { file, name, kind };
+  const key = `${file}::${name}`
+  if (seen.has(key)) return null // cyclic barrels are legal TypeScript; do not hang on them
+  seen.add(key)
+  const mod = mods.get(file)
+  if (mod === undefined) return null
+  if (mod.exports.has(name)) return { file, name, kind }
   for (const rx of mod.reexports) {
-    let downstream = name;
-    let next = rx.kind === 'type' ? 'type' : kind;
+    let downstream = name
+    let next = rx.kind === "type" ? "type" : kind
     if (rx.names !== null) {
-      const hit = rx.names.find((n) => n.as === name);
-      if (hit === undefined) continue;
-      if (hit.typeOnly === true) next = 'type';
-      if (hit.local === '*') return { file: resolveSpecifier(pkgsDir, file, rx.spec), name: '*', kind: next };
-      downstream = hit.local;
+      const hit = rx.names.find((n) => n.as === name)
+      if (hit === undefined) continue
+      if (hit.typeOnly === true) next = "type"
+      if (hit.local === "*") return { file: resolveSpecifier(pkgsDir, file, rx.spec), name: "*", kind: next }
+      downstream = hit.local
     }
-    const target = resolveSpecifier(pkgsDir, file, rx.spec);
-    if (target === null) continue;
-    const found = declaringModule(mods, pkgsDir, target, downstream, next, seen);
-    if (found !== null) return found;
+    const target = resolveSpecifier(pkgsDir, file, rx.spec)
+    if (target === null) continue
+    const found = declaringModule(mods, pkgsDir, target, downstream, next, seen)
+    if (found !== null) return found
   }
-  return null;
+  return null
 }
 
 /**
@@ -305,58 +307,58 @@ function declaringModule(mods, pkgsDir, file, name, kind, seen = new Set()) {
  * construction. They remain fully live as CALLERS.
  */
 export function analyse(pkgsDir) {
-  const files = productionModules(pkgsDir);
-  const mods = new Map(files.map((f) => [f, parseModule(f)]));
+  const files = productionModules(pkgsDir)
+  const mods = new Map(files.map((f) => [f, parseModule(f)]))
 
-  const valueUse = new Map();
-  const typeUse = new Map();
+  const valueUse = new Map()
+  const typeUse = new Map()
   const record = (map, key, caller) => {
-    if (!map.has(key)) map.set(key, new Set());
-    map.get(key).add(caller);
-  };
+    if (!map.has(key)) map.set(key, new Set())
+    map.get(key).add(caller)
+  }
 
   for (const [file, mod] of mods) {
     for (const imp of mod.imports) {
-      const target = resolveSpecifier(pkgsDir, file, imp.spec);
-      if (target === null) continue;
-      if (imp.name === '*') {
-        record(imp.kind === 'type' ? typeUse : valueUse, `*::${target}`, file);
-        continue;
+      const target = resolveSpecifier(pkgsDir, file, imp.spec)
+      if (target === null) continue
+      if (imp.name === "*") {
+        record(imp.kind === "type" ? typeUse : valueUse, `*::${target}`, file)
+        continue
       }
-      const decl = declaringModule(mods, pkgsDir, target, imp.name, imp.kind);
-      if (decl === null || decl.file === null || decl.file === file) continue; // self-reference is not a caller
-      const slot = decl.name === '*' ? `*::${decl.file}` : `${decl.file}::${decl.name}`;
-      record(decl.kind === 'type' ? typeUse : valueUse, slot, file);
+      const decl = declaringModule(mods, pkgsDir, target, imp.name, imp.kind)
+      if (decl === null || decl.file === null || decl.file === file) continue // self-reference is not a caller
+      const slot = decl.name === "*" ? `*::${decl.file}` : `${decl.file}::${decl.name}`
+      record(decl.kind === "type" ? typeUse : valueUse, slot, file)
     }
   }
 
-  const rows = [];
+  const rows = []
   for (const [file, mod] of mods) {
-    const base = file.split(sep).pop();
-    if (base === 'index.ts' || base === 'bin.ts') continue;
-    const valueExports = [...mod.exports].filter(([, k]) => k === 'value').map(([n]) => n);
-    if (valueExports.length === 0) continue;
+    const base = file.split(sep).pop()
+    if (base === "index.ts" || base === "bin.ts") continue
+    const valueExports = [...mod.exports].filter(([, k]) => k === "value").map(([n]) => n)
+    if (valueExports.length === 0) continue
 
-    const callers = new Set();
-    const typeCallers = new Set();
+    const callers = new Set()
+    const typeCallers = new Set()
     for (const [name, kind] of mod.exports) {
-      for (const c of valueUse.get(`${file}::${name}`) ?? []) if (kind === 'value') callers.add(c);
-      for (const c of typeUse.get(`${file}::${name}`) ?? []) typeCallers.add(c);
+      for (const c of valueUse.get(`${file}::${name}`) ?? []) if (kind === "value") callers.add(c)
+      for (const c of typeUse.get(`${file}::${name}`) ?? []) typeCallers.add(c)
     }
     // A namespace import (or namespace re-export) takes everything the module has, values included.
-    for (const c of valueUse.get(`*::${file}`) ?? []) callers.add(c);
-    for (const c of typeUse.get(`*::${file}`) ?? []) typeCallers.add(c);
-    callers.delete(file);
-    typeCallers.delete(file);
+    for (const c of valueUse.get(`*::${file}`) ?? []) callers.add(c)
+    for (const c of typeUse.get(`*::${file}`) ?? []) typeCallers.add(c)
+    callers.delete(file)
+    typeCallers.delete(file)
 
     rows.push({
-      path: relative(dirname(pkgsDir), file).split(sep).join('/'),
+      path: relative(dirname(pkgsDir), file).split(sep).join("/"),
       valueExports: valueExports.sort(),
       valueCallers: [...callers].sort(),
       typeCallers: [...typeCallers].sort(),
-    });
+    })
   }
-  return rows.sort((a, b) => a.path.localeCompare(b.path));
+  return rows.sort((a, b) => a.path.localeCompare(b.path))
 }
 
 /** The rows with ZERO value callers — the reference models. `typeReachable` separates the two shapes:
@@ -364,5 +366,10 @@ export function analyse(pkgsDir) {
 export function referenceModels(pkgsDir) {
   return analyse(pkgsDir)
     .filter((r) => r.valueCallers.length === 0)
-    .map((r) => ({ path: r.path, values: r.valueExports.length, typeReachable: r.typeCallers.length > 0, names: r.valueExports }));
+    .map((r) => ({
+      path: r.path,
+      values: r.valueExports.length,
+      typeReachable: r.typeCallers.length > 0,
+      names: r.valueExports,
+    }))
 }

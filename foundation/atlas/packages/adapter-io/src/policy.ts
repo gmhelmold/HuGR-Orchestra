@@ -40,23 +40,23 @@
 // still carry a `nearDup` key are UNCHANGED by this — an extra, unvalidated JSON key is simply ignored, the
 // same fail-open-on-extra-data posture every other unrecognised key in this file already had.
 
-import { readFileSync } from 'node:fs';
-import { join } from 'node:path';
-import { underScope } from './anchor-scope.js';
+import { readFileSync } from "node:fs"
+import { join } from "node:path"
+import { underScope } from "./anchor-scope.js"
 
 // ── the policy shape ─────────────────────────────────────────────────────────────────────────────────
 
 /** The T0-candidate heuristic tunable — the keyword set that flags a fact as a T0 (human-ratification)
  *  candidate, feeding the T0 heuristic seam. Empty ⇒ the heuristic proposes nothing on its own. */
 export interface T0HeuristicPolicy {
-  readonly keywords: readonly string[];
+  readonly keywords: readonly string[]
 }
 
 /** The authorization config — the actor↔scope membership map ("who may write to which scope"), feeding the
  *  KNOW-11 gate {@link actorInScope}. `scopes[scope]` is the list of actor ids authorized to write that
  *  scope. An UNLISTED scope (or an absent actor) is fail-closed: no write. */
 export interface AuthzPolicy {
-  readonly scopes: Record<string, readonly string[]>;
+  readonly scopes: Record<string, readonly string[]>
   /**
    * [ARCH-9 · ADR-0010 open item 3] The scope↔ANCHOR binding: which governance scope OWNS which anchor
    * prefix. `anchors['src/payments'] = 'payments'` means every fact whose computed `primaryAnchor` lies
@@ -84,15 +84,15 @@ export interface AuthzPolicy {
    * required field would force every existing policy to invent a value, and an invented derivation is the
    * one thing ARCH-9 names as NOT satisfying the clause.
    */
-  readonly anchors?: Record<string, string>;
+  readonly anchors?: Record<string, string>
 }
 
 /** The admin-owned, versioned governance policy. Carries only DATA the governance seams consume — no code,
  *  no judgement. Sourced from `<repoPath>/.atlas/policy.json`; resolves to {@link defaultPolicy} when absent
  *  or malformed (fail-closed). */
 export interface AtlasPolicy {
-  readonly t0Heuristic: T0HeuristicPolicy;
-  readonly authz: AuthzPolicy;
+  readonly t0Heuristic: T0HeuristicPolicy
+  readonly authz: AuthzPolicy
 }
 
 // ── the conservative fail-closed default ───────────────────────────────────────────────────────────────
@@ -112,14 +112,14 @@ export function defaultPolicy(): AtlasPolicy {
   return {
     t0Heuristic: { keywords: [] },
     authz: { scopes: emptyScopes() },
-  };
+  }
 }
 
 /** A null-prototype scopes map: no inherited `Object.prototype` members, no `__proto__` accessor. Untrusted
  *  JSON keys (`'constructor'`, `'__proto__'`, `'toString'`, …) land as plain own data props or nowhere —
  *  never resolving to an inherited function and never polluting the prototype. */
 function emptyScopes(): Record<string, readonly string[]> {
-  return Object.create(null) as Record<string, readonly string[]>;
+  return Object.create(null) as Record<string, readonly string[]>
 }
 
 // ── the fail-closed loader ───────────────────────────────────────────────────────────────────────────
@@ -132,31 +132,31 @@ function emptyScopes(): Record<string, readonly string[]> {
  * degrades to the default for the offending leg by falling through validation (whole-policy fallback).
  */
 export function loadPolicy(repoPath: string): AtlasPolicy {
-  let raw: unknown;
+  let raw: unknown
   try {
-    raw = JSON.parse(readFileSync(join(repoPath, '.atlas', 'policy.json'), 'utf8'));
+    raw = JSON.parse(readFileSync(join(repoPath, ".atlas", "policy.json"), "utf8"))
   } catch {
-    return defaultPolicy(); // missing / unreadable / non-JSON — fail closed to the denying default
+    return defaultPolicy() // missing / unreadable / non-JSON — fail closed to the denying default
   }
-  return parsePolicy(raw);
+  return parsePolicy(raw)
 }
 
 /** Narrow arbitrary parsed JSON to a valid {@link AtlasPolicy}, or fall back to {@link defaultPolicy}.
  *  Total — returns a policy for ANY input, never throws. */
 function parsePolicy(raw: unknown): AtlasPolicy {
-  if (!isRecord(raw)) return defaultPolicy();
-  const t0Heuristic = parseT0(raw.t0Heuristic);
-  const authz = parseAuthz(raw.authz);
-  if (t0Heuristic === undefined || authz === undefined) return defaultPolicy();
-  return { t0Heuristic, authz };
+  if (!isRecord(raw)) return defaultPolicy()
+  const t0Heuristic = parseT0(raw.t0Heuristic)
+  const authz = parseAuthz(raw.authz)
+  if (t0Heuristic === undefined || authz === undefined) return defaultPolicy()
+  return { t0Heuristic, authz }
 }
 
 /** Validate `t0Heuristic` — requires a `keywords` array of strings. Fail-closed ⇒ `undefined`. */
 function parseT0(v: unknown): T0HeuristicPolicy | undefined {
-  if (!isRecord(v)) return undefined;
-  const kw = v.keywords;
-  if (!Array.isArray(kw) || !kw.every((k): k is string => typeof k === 'string')) return undefined;
-  return { keywords: [...kw] };
+  if (!isRecord(v)) return undefined
+  const kw = v.keywords
+  if (!Array.isArray(kw) || !kw.every((k): k is string => typeof k === "string")) return undefined
+  return { keywords: [...kw] }
 }
 
 /** Validate `authz` — requires a `scopes` object mapping scope → string[] of actors, and accepts an OPTIONAL
@@ -164,30 +164,30 @@ function parseT0(v: unknown): T0HeuristicPolicy | undefined {
  *  (no write authorized); a malformed `anchors` map denies the WHOLE policy rather than degrading to "no
  *  binding", because a typo'd binding that silently disappears is a control that was never there. */
 function parseAuthz(v: unknown): AuthzPolicy | undefined {
-  if (!isRecord(v)) return undefined;
-  const s = v.scopes;
-  if (!isRecord(s)) return undefined;
-  const scopes = emptyScopes(); // null-proto: untrusted keys land as own props, never invoke the __proto__ setter
+  if (!isRecord(v)) return undefined
+  const s = v.scopes
+  if (!isRecord(s)) return undefined
+  const scopes = emptyScopes() // null-proto: untrusted keys land as own props, never invoke the __proto__ setter
   for (const [scope, actors] of Object.entries(s)) {
-    if (!Array.isArray(actors) || !actors.every((a): a is string => typeof a === 'string')) return undefined;
-    scopes[scope] = [...actors];
+    if (!Array.isArray(actors) || !actors.every((a): a is string => typeof a === "string")) return undefined
+    scopes[scope] = [...actors]
   }
-  if (v.anchors === undefined) return { scopes }; // ABSENT ⇒ no binding declared (the pre-ADR-0010 shape)
-  if (!isRecord(v.anchors)) return undefined;
-  const anchors = Object.create(null) as Record<string, string>; // null-proto, same reason as `emptyScopes`
+  if (v.anchors === undefined) return { scopes } // ABSENT ⇒ no binding declared (the pre-ADR-0010 shape)
+  if (!isRecord(v.anchors)) return undefined
+  const anchors = Object.create(null) as Record<string, string> // null-proto, same reason as `emptyScopes`
   for (const [prefix, owner] of Object.entries(v.anchors)) {
     // A prefix owned by a NON-string, an EMPTY owner, or the reserved `__proto__` name binds nothing and is
     // refused rather than skipped: the whole point of the map is that a declared prefix is enforced.
-    if (typeof owner !== 'string' || owner.length === 0) return undefined;
-    if (prefix.length === 0 || prefix === '__proto__' || owner === '__proto__') return undefined;
-    anchors[prefix] = owner;
+    if (typeof owner !== "string" || owner.length === 0) return undefined
+    if (prefix.length === 0 || prefix === "__proto__" || owner === "__proto__") return undefined
+    anchors[prefix] = owner
   }
-  return { scopes, anchors };
+  return { scopes, anchors }
 }
 
 /** A plain (non-null, non-array) object guard. */
 function isRecord(v: unknown): v is Record<string, unknown> {
-  return typeof v === 'object' && v !== null && !Array.isArray(v);
+  return typeof v === "object" && v !== null && !Array.isArray(v)
 }
 
 // ── pure helpers the wiring consumes ──────────────────────────────────────────────────────────────────
@@ -234,19 +234,19 @@ function isRecord(v: unknown): v is Record<string, unknown> {
  * Pure + total: no IO, no throw, and an undeclared/empty map answers `undefined` for every anchor.
  */
 export function anchorOwner(policy: AtlasPolicy, primaryAnchor: string | undefined): string | undefined {
-  const anchors = policy.authz.anchors;
-  if (anchors === undefined || primaryAnchor === undefined) return undefined;
-  let best: string | undefined;
-  let bestDepth = -1;
+  const anchors = policy.authz.anchors
+  if (anchors === undefined || primaryAnchor === undefined) return undefined
+  let best: string | undefined
+  let bestDepth = -1
   for (const [prefix, owner] of Object.entries(anchors)) {
-    if (!underScope(primaryAnchor, prefix)) continue;
-    const depth = prefix.split('/').length;
+    if (!underScope(primaryAnchor, prefix)) continue
+    const depth = prefix.split("/").length
     if (depth > bestDepth) {
-      bestDepth = depth;
-      best = owner;
+      bestDepth = depth
+      best = owner
     }
   }
-  return best;
+  return best
 }
 
 /**
@@ -258,15 +258,15 @@ export function anchorOwner(policy: AtlasPolicy, primaryAnchor: string | undefin
  * answers the question authz structurally cannot, because authz is handed the very string under dispute.
  */
 export function scopeOwnsAnchor(policy: AtlasPolicy, scope: string, primaryAnchor: string | undefined): boolean {
-  const owner = anchorOwner(policy, primaryAnchor);
-  return owner === undefined || owner === scope;
+  const owner = anchorOwner(policy, primaryAnchor)
+  return owner === undefined || owner === scope
 }
 
 export function actorInScope(policy: AtlasPolicy, actor: string, scope: string | undefined): boolean {
-  if (scope === undefined || scope.length === 0) return false; // no ownership anchor ⇒ fail closed
-  if (scope === '__proto__') return false; // reserved name (an own key after JSON.parse) ⇒ never anchors a scope
-  const scopes = policy.authz.scopes;
-  if (!Object.prototype.hasOwnProperty.call(scopes, scope)) return false; // undeclared / inherited-proto name ⇒ fail closed (total, never throws)
-  const members = scopes[scope]; // own key ⇒ defined; the `!== undefined` is only the noUncheckedIndexedAccess narrowing (it does NOT swallow the inherited-fn throw — that is what the hasOwnProperty guard prevents)
-  return members !== undefined && members.includes(actor);
+  if (scope === undefined || scope.length === 0) return false // no ownership anchor ⇒ fail closed
+  if (scope === "__proto__") return false // reserved name (an own key after JSON.parse) ⇒ never anchors a scope
+  const scopes = policy.authz.scopes
+  if (!Object.prototype.hasOwnProperty.call(scopes, scope)) return false // undeclared / inherited-proto name ⇒ fail closed (total, never throws)
+  const members = scopes[scope] // own key ⇒ defined; the `!== undefined` is only the noUncheckedIndexedAccess narrowing (it does NOT swallow the inherited-fn throw — that is what the hasOwnProperty guard prevents)
+  return members !== undefined && members.includes(actor)
 }

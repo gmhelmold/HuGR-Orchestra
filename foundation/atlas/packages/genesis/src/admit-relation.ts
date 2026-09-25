@@ -10,28 +10,28 @@
 // NO NEW TRUTH RULE lives here: the relation reuses `deps.doors.grounded` (the advisory truth door) in the
 // harness. This module only mints identity and shapes the node once the harness's door has said yes.
 
-import type { ObviousnessScore, RelationKind, RelationNode, RelationWitness } from '@atlas/knowledge';
+import type { ObviousnessScore, RelationKind, RelationNode, RelationWitness } from "@atlas/knowledge"
 // The relation identity leg + its closed-vocabulary guard — the SEALED mint (`relationKey`) and the
 // value-boundary membership check (`isKnownRelationKind`), consumed EXACTLY as the governed door does
 // (governed-emit-identity.ts). Identity is minted from the proposal's endpoints, NEVER trusted off a payload.
-import { relationKey, isKnownRelationKind } from '@atlas/knowledge';
-import type { RelationProposal } from './admit-proposals.js';
+import { relationKey, isKnownRelationKind } from "@atlas/knowledge"
+import type { RelationProposal } from "./admit-proposals.js"
 
 // The two honest, distinct relation refusals (ADR-0015 D2), mirroring the intrinsic door's gate-0/gate-1
 // split (`relationWellFormed` then the truth door): a malformed triple has no address, an ungrounded one
 // fails the citation. The `shape-not-yet-emitted` stub reason is GONE (deleted, not commented) so a
 // resurrected stub cannot reach a ready-made string.
 export const DROP_RELATION_MALFORMED =
-  'malformed relation: endpointA/endpointB are not two DISTINCT non-empty unit keys, or relationKind is off the closed vocabulary (ADR-0015 D2 — no address to mint)';
+  "malformed relation: endpointA/endpointB are not two DISTINCT non-empty unit keys, or relationKind is off the closed vocabulary (ADR-0015 D2 — no address to mint)"
 export const DROP_RELATION_UNGROUNDED =
-  'relation fails the truth door — an endpoint citation does not re-derive FRESH (GEN-12e / ADR-0015 D2, the 2-entry AND-fold)';
+  "relation fails the truth door — an endpoint citation does not re-derive FRESH (GEN-12e / ADR-0015 D2, the 2-entry AND-fold)"
 
 /** The canonical relation triple — the obviousness input AND the KNOW-4c set-union element. MIRRORS the
  *  governed door's `claimNormOf(node, 'relation')` (adapter-io/src/governed-emit-identity.ts:54-57) and the
  *  mine staging `claimNormOf` (cli/src/mine-decide.ts) verbatim, so a mined relation and a governed-emitted
  *  one score + dedup on byte-identical text. */
 export function relationClaimNorm(p: RelationProposal): string {
-  return `${p.endpointA} ${p.relationKind} ${p.endpointB}`;
+  return `${p.endpointA} ${p.relationKind} ${p.endpointB}`
 }
 
 /** Gate-0 well-formedness for a relation (ADR-0015 D2). MIRRORS the door's `relationWellFormed`
@@ -42,11 +42,13 @@ export function relationClaimNorm(p: RelationProposal): string {
  *  every leg is re-checked at the value boundary exactly as the door does. */
 export function relationEndpointsResolve(p: RelationProposal): boolean {
   return (
-    typeof p.endpointA === 'string' && p.endpointA.length > 0 &&
-    typeof p.endpointB === 'string' && p.endpointB.length > 0 &&
+    typeof p.endpointA === "string" &&
+    p.endpointA.length > 0 &&
+    typeof p.endpointB === "string" &&
+    p.endpointB.length > 0 &&
     p.endpointA !== p.endpointB &&
     isKnownRelationKind(p.relationKind)
-  );
+  )
 }
 
 /**
@@ -61,7 +63,7 @@ export function relationEndpointsResolve(p: RelationProposal): boolean {
  */
 export function buildRelation(p: RelationProposal, obviousness: ObviousnessScore): RelationNode {
   return {
-    kind: 'relation',
+    kind: "relation",
     obviousness,
     id: relationKey(p.endpointA, p.relationKind, p.endpointB),
     tier: p.tier,
@@ -69,11 +71,11 @@ export function buildRelation(p: RelationProposal, obviousness: ObviousnessScore
     endpointA: p.endpointA,
     endpointB: p.endpointB,
     grounding: p.grounding,
-    freshness: 'FRESH',
+    freshness: "FRESH",
     claims: [],
-    authoring: 'RELATED',
+    authoring: "RELATED",
     ...(p.scope !== undefined ? { scope: p.scope } : {}),
-  };
+  }
 }
 
 /**
@@ -84,9 +86,9 @@ export function buildRelation(p: RelationProposal, obviousness: ObviousnessScore
  * is never read off model/endpoint prose — it is exactly what reverify (WP-R5) re-runs `verifyRelation` against.
  */
 export function relationWitnessOf(p: RelationProposal): RelationWitness | undefined {
-  if (typeof p.target !== 'string' || p.target.length === 0) return undefined;
-  if (typeof p.sourceScope !== 'string' || p.sourceScope.length === 0) return undefined;
-  return { relationKind: p.relationKind, target: p.target, sourceScope: p.sourceScope };
+  if (typeof p.target !== "string" || p.target.length === 0) return undefined
+  if (typeof p.sourceScope !== "string" || p.sourceScope.length === 0) return undefined
+  return { relationKind: p.relationKind, target: p.target, sourceScope: p.sourceScope }
 }
 
 /**
@@ -99,7 +101,7 @@ export function relationWitnessOf(p: RelationProposal): RelationWitness | undefi
  * sentence must not repeat the known-lying `callers` name. Pure + total.
  */
 export function relationClaimNormFromWitness(w: RelationWitness): string {
-  return `${w.sourceScope} ${w.relationKind} ${w.target} (witnessed cross-unit reference, sound oracle)`;
+  return `${w.sourceScope} ${w.relationKind} ${w.target} (witnessed cross-unit reference, sound oracle)`
 }
 
 /**
@@ -117,7 +119,7 @@ export function buildSoundRelation(
   obviousness: ObviousnessScore,
 ): RelationNode {
   return {
-    kind: 'relation',
+    kind: "relation",
     obviousness,
     id: relationKey(p.endpointA, p.relationKind, p.endpointB),
     tier: p.tier,
@@ -125,13 +127,13 @@ export function buildSoundRelation(
     endpointA: p.endpointA,
     endpointB: p.endpointB,
     grounding: p.grounding,
-    freshness: 'FRESH',
+    freshness: "FRESH",
     claims: [],
-    authoring: 'RELATED',
-    seal: 'proven',
+    authoring: "RELATED",
+    seal: "proven",
     witness,
     ...(p.scope !== undefined ? { scope: p.scope } : {}),
-  };
+  }
 }
 
 /**
@@ -147,15 +149,22 @@ export function buildSoundRelation(
 export function trySoundRelation(
   p: RelationProposal,
   verifyRelation:
-    | ((relationKind: RelationKind, target: string, sourceScope: string, endpointA: string, endpointB: string) => 'proven' | 'abstain')
+    | ((
+        relationKind: RelationKind,
+        target: string,
+        sourceScope: string,
+        endpointA: string,
+        endpointB: string,
+      ) => "proven" | "abstain")
     | undefined,
   score: (claimNorm: string) => ObviousnessScore,
 ): RelationNode | undefined {
-  const witness = relationWitnessOf(p);
-  if (witness === undefined || verifyRelation === undefined) return undefined;
+  const witness = relationWitnessOf(p)
+  if (witness === undefined || verifyRelation === undefined) return undefined
   // A relation is a unit→unit edge (TWO anchors): the oracle binds BOTH endpoint FILES to the witnessed edge
   // (endpointA a real referrer, endpointB the definer), so the proposal's endpoints are passed alongside the
   // witness legs. The stored witness needs no endpoints — the RelationNode already carries them for reverify.
-  if (verifyRelation(witness.relationKind, witness.target, witness.sourceScope, p.endpointA, p.endpointB) !== 'proven') return undefined;
-  return buildSoundRelation(p, witness, score(relationClaimNormFromWitness(witness)));
+  if (verifyRelation(witness.relationKind, witness.target, witness.sourceScope, p.endpointA, p.endpointB) !== "proven")
+    return undefined
+  return buildSoundRelation(p, witness, score(relationClaimNormFromWitness(witness)))
 }

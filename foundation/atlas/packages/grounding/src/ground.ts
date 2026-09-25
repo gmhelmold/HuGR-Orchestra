@@ -22,9 +22,9 @@
 // there (and reused by adapter-io's grounding-computer + governed-emit-negation), but the minimal axes walk
 // is replicated here rather than editing the sealed sibling to widen its private surface.
 
-import type { StructRef, SubtreeHash } from '@atlas/contracts';
-import type { Axes, IndexNode } from '@atlas/index';
-import type { Grounding, GroundingEntry } from './types.js';
+import type { StructRef, SubtreeHash } from "@atlas/contracts"
+import type { Axes, IndexNode } from "@atlas/index"
+import type { Grounding, GroundingEntry } from "./types.js"
 
 /**
  * A CITATION TARGET on a groundable unit: the anchor coordinates `ground` re-resolves — everything a
@@ -33,15 +33,15 @@ import type { Grounding, GroundingEntry } from './types.js';
  * `displayLines`/line-ranges are NEVER the oracle, only an optional nav hint).
  */
 export interface Citation {
-  readonly kind: StructRef['kind'];
-  readonly qualifiedPath: string;
-  readonly path: string;
-  readonly displayLines?: string;
+  readonly kind: StructRef["kind"]
+  readonly qualifiedPath: string
+  readonly path: string
+  readonly displayLines?: string
 }
 
 /** The groundable unit `ground` re-derives an anchor for: a bag of citation targets. */
 export interface GroundableUnit {
-  readonly citations: readonly Citation[];
+  readonly citations: readonly Citation[]
 }
 
 /** Resolve a unit's CURRENT subtreeHash under `n` by its qualified key. Total: an absent unit returns
@@ -51,12 +51,12 @@ export interface GroundableUnit {
  *  `driftDetect` MUST agree on what resolves, or `ground` would build an anchor `driftDetect` then reads
  *  as gone. */
 function findByKey(n: IndexNode, key: string): SubtreeHash | undefined {
-  if (n.key === key) return String(n.subtreeHash) === n.key ? undefined : n.subtreeHash;
+  if (n.key === key) return String(n.subtreeHash) === n.key ? undefined : n.subtreeHash
   for (const child of n.children) {
-    const hit = findByKey(child, key);
-    if (hit !== undefined) return hit;
+    const hit = findByKey(child, key)
+    if (hit !== undefined) return hit
   }
-  return undefined;
+  return undefined
 }
 
 /** The current subtreeHash of `qualifiedPath` across the CONTENT-COMMITTING built-index axes, or
@@ -66,10 +66,10 @@ function findByKey(n: IndexNode, key: string): SubtreeHash | undefined {
  *  full note on the sealed sibling `drift.ts::resolveCurrent`, whose axis list this MIRRORS. */
 function resolveCurrent(src: Axes, qualifiedPath: string): SubtreeHash | undefined {
   for (const root of [src.spatial, src.territory]) {
-    const hit = findByKey(root, qualifiedPath);
-    if (hit !== undefined) return hit;
+    const hit = findByKey(root, qualifiedPath)
+    if (hit !== undefined) return hit
   }
-  return undefined;
+  return undefined
 }
 
 /**
@@ -99,17 +99,15 @@ function resolveCurrent(src: Axes, qualifiedPath: string): SubtreeHash | undefin
  * owner adjudication + a docs/requirements amendment; the goldens file is NOT edited here.]
  */
 export function ground(node: GroundableUnit, src: Axes): Grounding {
-  const entries: GroundingEntry[] = [];
+  const entries: GroundingEntry[] = []
   for (const c of node.citations) {
-    const subtreeHash = resolveCurrent(src, c.qualifiedPath);
+    const subtreeHash = resolveCurrent(src, c.qualifiedPath)
     // GROUND-3, fact-level: one unresolvable citation sinks the whole receipt. Never a throw.
-    if (subtreeHash === undefined) return { entries: [] };
-    const anchor: StructRef = { kind: c.kind, qualifiedPath: c.qualifiedPath, subtreeHash };
+    if (subtreeHash === undefined) return { entries: [] }
+    const anchor: StructRef = { kind: c.kind, qualifiedPath: c.qualifiedPath, subtreeHash }
     entries.push(
-      c.displayLines === undefined
-        ? { anchor, path: c.path }
-        : { anchor, path: c.path, displayLines: c.displayLines },
-    );
+      c.displayLines === undefined ? { anchor, path: c.path } : { anchor, path: c.path, displayLines: c.displayLines },
+    )
   }
-  return { entries };
+  return { entries }
 }

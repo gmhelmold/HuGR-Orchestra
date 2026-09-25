@@ -5,8 +5,8 @@
 // owned by GROUND (above index) and consumed via an INJECTED `DriftPort`, keeping the layer DAG intact.
 // Identity is minted only through the sealed kernel store seam (no hash computed here).
 
-import type { Hash, Freshness } from '@atlas/contracts';
-import type { CasObject, StoreApi } from '@atlas/kernel';
+import type { Hash, Freshness } from "@atlas/contracts"
+import type { CasObject, StoreApi } from "@atlas/kernel"
 
 /**
  * Universal content-addressing (INDEX-11): `put` canonicalizes ANY object kind (incl. a `Doc`) through
@@ -17,7 +17,7 @@ export interface CasIndexApi {
    *  hash. Shares the KERNEL CAS reference `kernel/ref/store.ts` — one store, not a second.
    *  `object` is the kernel's `CasObject` (the stored-object type).
    *  (atlas-index:216; method-tags-idx:95) */
-  put(object: CasObject): Hash;
+  put(object: CasObject): Hash
 }
 
 /**
@@ -27,7 +27,7 @@ export interface CasIndexApi {
  * (@atlas/contracts). Structurally compatible with GROUND's `driftDetect(grounding, src): Freshness`.
  */
 export interface DriftPort<G, S> {
-  driftDetect(grounding: G, src: S): Freshness;
+  driftDetect(grounding: G, src: S): Freshness
 }
 
 /**
@@ -38,11 +38,11 @@ export interface DriftPort<G, S> {
  */
 export interface CasIndex extends CasIndexApi {
   /** Content-address ANY object kind (incl. a `Doc`) into the ONE CAS; returns its BLAKE3 `Hash`. */
-  put(object: CasObject): Hash;
+  put(object: CasObject): Hash
   /** Was this hash registered by `put`? — the drift-eligibility witness (every kind, no exemption). */
-  isDriftEligible(h: Hash): boolean;
+  isDriftEligible(h: Hash): boolean
   /** Route the drift verdict through GROUND's oracle — identical call for every kind; never redefined. */
-  checkDrift<G, S>(port: DriftPort<G, S>, grounding: G, src: S): Freshness;
+  checkDrift<G, S>(port: DriftPort<G, S>, grounding: G, src: S): Freshness
 }
 
 /**
@@ -52,21 +52,21 @@ export interface CasIndex extends CasIndexApi {
  * empty handle and is NOT registered (an un-stored object is not drift-eligible).
  */
 export function createCasIndex(store: StoreApi): CasIndex {
-  const registered = new Set<Hash>();
+  const registered = new Set<Hash>()
   return {
     put(object: CasObject): Hash {
       // canonicalize → BLAKE3 → store, via the sealed kernel seam; the caller never supplies the key.
-      const h = store.put(object);
+      const h = store.put(object)
       // register EVERY stored kind uniformly (incl. a Doc) — no kind is side-stored or exempted.
-      if (h) registered.add(h);
-      return h;
+      if (h) registered.add(h)
+      return h
     },
     isDriftEligible(h: Hash): boolean {
-      return registered.has(h);
+      return registered.has(h)
     },
     checkDrift<G, S>(port: DriftPort<G, S>, grounding: G, src: S): Freshness {
       // INDEX owns the ROUTING (uniform across kinds); GROUND owns the FRESH/DRIFTED verdict.
-      return port.driftDetect(grounding, src);
+      return port.driftDetect(grounding, src)
     },
-  };
+  }
 }

@@ -37,84 +37,86 @@
 //
 // Run standalone: node harness/probes/a2r-reproof-teeth.mjs
 
-import { fileURLToPath } from 'node:url';
-import { CORPUS } from './a2r-corpus/index.mjs';
+import { fileURLToPath } from "node:url"
+import { CORPUS } from "./a2r-corpus/index.mjs"
 
 function alwaysBroken(_entry) {
-  return 'broken';
+  return "broken"
 }
 function alwaysReProven(_entry) {
-  return 're-proven';
+  return "re-proven"
 }
 
 /** `scope`-only: ignores WHAT changed, only WHERE. */
 function naiveScopeOnly(entry) {
-  const touchesScope = entry.edits.some((e) => e.file === entry.witness.scope || e.file.startsWith(`${entry.witness.scope}/`));
-  return touchesScope ? 'broken' : 're-proven';
+  const touchesScope = entry.edits.some(
+    (e) => e.file === entry.witness.scope || e.file.startsWith(`${entry.witness.scope}/`),
+  )
+  return touchesScope ? "broken" : "re-proven"
 }
 
 /** The target's bare identifier — the descriptor's trailing name component, punctuation stripped
  *  (`…/defaultEncoder.` → `defaultEncoder`, `…/VersionDelta#` → `VersionDelta`, `…/isWeakerTier().` →
  *  `isWeakerTier`). Pure string surgery, no SCIP parsing. */
 function shortNameOf(target) {
-  const last = target.split('/').pop() ?? target;
-  return last.replace(/[().#]+$/g, '');
+  const last = target.split("/").pop() ?? target
+  return last.replace(/[().#]+$/g, "")
 }
 
 function nameVanish(entry) {
-  const name = shortNameOf(entry.witness.target);
-  const wordRe = new RegExp(`\\b${name}\\b`);
-  const vanished = entry.edits.some((e) => wordRe.test(e.find) && !wordRe.test(e.replace));
-  return vanished ? 'broken' : 're-proven';
+  const name = shortNameOf(entry.witness.target)
+  const wordRe = new RegExp(`\\b${name}\\b`)
+  const vanished = entry.edits.some((e) => wordRe.test(e.find) && !wordRe.test(e.replace))
+  return vanished ? "broken" : "re-proven"
 }
 
 const MUTANTS = [
-  ['always-broken (trivial constant)', alwaysBroken],
-  ['always-re-proven (trivial constant)', alwaysReProven],
-  ['naive scope-only (any edit under witness.scope ⇒ broken)', naiveScopeOnly],
-  ['name-vanish (target short name disappears from an edit, word-boundary)', nameVanish],
-];
+  ["always-broken (trivial constant)", alwaysBroken],
+  ["always-re-proven (trivial constant)", alwaysReProven],
+  ["naive scope-only (any edit under witness.scope ⇒ broken)", naiveScopeOnly],
+  ["name-vanish (target short name disappears from an edit, word-boundary)", nameVanish],
+]
 
 function scoreVerdictFn(fn, corpus) {
-  const matrix = { true_stale_caught: 0, true_stale_missed: 0, correct_fresh: 0, false_stale: 0 };
+  const matrix = { true_stale_caught: 0, true_stale_missed: 0, correct_fresh: 0, false_stale: 0 }
   for (const entry of corpus) {
-    const actual = fn(entry);
-    if (entry.class === 'invalidating') {
-      if (actual === entry.expected) matrix.true_stale_caught += 1;
-      else matrix.true_stale_missed += 1;
+    const actual = fn(entry)
+    if (entry.class === "invalidating") {
+      if (actual === entry.expected) matrix.true_stale_caught += 1
+      else matrix.true_stale_missed += 1
     } else {
-      if (actual === entry.expected) matrix.correct_fresh += 1;
-      else matrix.false_stale += 1;
+      if (actual === entry.expected) matrix.correct_fresh += 1
+      else matrix.false_stale += 1
     }
   }
-  return matrix;
+  return matrix
 }
 
 function fmtRow(label, m) {
-  const invTotal = m.true_stale_caught + m.true_stale_missed;
-  const preTotal = m.correct_fresh + m.false_stale;
-  return `${label.padEnd(66)} ${String(m.true_stale_caught).padStart(2)}/${invTotal}   ${String(m.correct_fresh).padStart(2)}/${preTotal}`;
+  const invTotal = m.true_stale_caught + m.true_stale_missed
+  const preTotal = m.correct_fresh + m.false_stale
+  return `${label.padEnd(66)} ${String(m.true_stale_caught).padStart(2)}/${invTotal}   ${String(m.correct_fresh).padStart(2)}/${preTotal}`
 }
 
 function main() {
-  const lines = [];
-  lines.push('A2r mutation-teeth matrix — deliberately dumb mutants over the SAME corpus (no oracle run — data-only)');
-  lines.push('');
-  lines.push(`${'checker'.padEnd(66)} invalidating   preserving`);
+  const lines = []
+  lines.push("A2r mutation-teeth matrix — deliberately dumb mutants over the SAME corpus (no oracle run — data-only)")
+  lines.push("")
+  lines.push(`${"checker".padEnd(66)} invalidating   preserving`)
   for (const [label, fn] of MUTANTS) {
-    lines.push(fmtRow(label, scoreVerdictFn(fn, CORPUS)));
+    lines.push(fmtRow(label, scoreVerdictFn(fn, CORPUS)))
   }
-  lines.push('');
-  lines.push('Read: invalidating = true_stale_caught/total; preserving = correct_fresh/total.');
-  lines.push("always-broken ties EVERY invalidating row BY CONSTRUCTION (the class label IS the expected answer) —");
-  lines.push('that half of `a2r-reproof.mjs`s matrix is a THEOREM, not a discriminating measurement, exactly the');
-  lines.push('same structural fact `a2-staleness-teeth.mjs` found for A2. naive-scope-only ties invalidating (same');
-  lines.push('reason: every invalidating edit here happens to land inside the witness scope) but FAILS preserving —');
-  lines.push('the preserving half is where this corpus actually discriminates. See the module header for name-vanish.');
-  console.log(lines.join('\n'));
+  lines.push("")
+  lines.push("Read: invalidating = true_stale_caught/total; preserving = correct_fresh/total.")
+  lines.push("always-broken ties EVERY invalidating row BY CONSTRUCTION (the class label IS the expected answer) —")
+  lines.push("that half of `a2r-reproof.mjs`s matrix is a THEOREM, not a discriminating measurement, exactly the")
+  lines.push("same structural fact `a2-staleness-teeth.mjs` found for A2. naive-scope-only ties invalidating (same")
+  lines.push("reason: every invalidating edit here happens to land inside the witness scope) but FAILS preserving —")
+  lines.push("the preserving half is where this corpus actually discriminates. See the module header for name-vanish.")
+  console.log(lines.join("\n"))
 }
 
-export { MUTANTS, scoreVerdictFn, shortNameOf, fmtRow };
+export { MUTANTS, scoreVerdictFn, shortNameOf, fmtRow }
 
-const isMain = process.argv[1] !== undefined && fileURLToPath(import.meta.url) === process.argv[1];
-if (isMain) main();
+const isMain = process.argv[1] !== undefined && fileURLToPath(import.meta.url) === process.argv[1]
+if (isMain) main()

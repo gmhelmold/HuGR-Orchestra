@@ -8,15 +8,15 @@
 // other governance tools (`-init`/`-query`/`-reconcile`) + diff/doctor/node are read-only. See
 // docs/adr/ADR-0003-governed-write-doors.md.
 
-import type { Hash, NodeKey, Pack, StructRef, Territory, ToolSchema } from '@atlas/contracts';
-import type { GroundedFact, PredicateSlot, SameAs, Subsumes } from '@atlas/knowledge';
-import type { MemoryRecord } from '@atlas/memory';
-import type { VersionDelta } from '@atlas/persist';
-import type { OwnPack, OwnUnit, RelationSet } from '@atlas/retrieval';
+import type { Hash, NodeKey, Pack, StructRef, Territory, ToolSchema } from "@atlas/contracts"
+import type { GroundedFact, PredicateSlot, SameAs, Subsumes } from "@atlas/knowledge"
+import type { MemoryRecord } from "@atlas/memory"
+import type { VersionDelta } from "@atlas/persist"
+import type { OwnPack, OwnUnit, RelationSet } from "@atlas/retrieval"
 
 // Re-export the contracts-owned surface vocab so consumers can pull the whole dialect from the bare
 // package root. Owned by @atlas/contracts — re-exported, NOT redefined.
-export type { Hash, Pack, PackInvariant, Territory } from '@atlas/contracts';
+export type { Hash, Pack, PackInvariant, Territory } from "@atlas/contracts"
 
 /**
  * The closed governance-tool vocabulary. Transcribed from atlas-tools:15 — `Tool = 'atlas-init' |
@@ -38,7 +38,7 @@ export type { Hash, Pack, PackInvariant, Territory } from '@atlas/contracts';
  * is DERIVED and BUDGETED — `advertised ≡ invocable ≡ Tool`, bounded at 30 — not a fixed count; six is well
  * inside that budget).
  */
-export type Tool = 'atlas-init' | 'atlas-query' | 'atlas-emit' | 'atlas-reconcile' | 'atlas-link' | 'atlas-memory-emit';
+export type Tool = "atlas-init" | "atlas-query" | "atlas-emit" | "atlas-reconcile" | "atlas-link" | "atlas-memory-emit"
 
 /**
  * The guidance envelope shipped with EVERY result (TOOLS-4). Transcribed EXACTLY from atlas-tools:16 —
@@ -46,8 +46,8 @@ export type Tool = 'atlas-init' | 'atlas-query' | 'atlas-emit' | 'atlas-reconcil
  * caller is never left to guess the follow-up. Both fields MUST be non-empty on every path (§Acceptance).
  */
 export interface Guidance {
-  readonly next: string;
-  readonly invariant: string;
+  readonly next: string
+  readonly invariant: string
 }
 
 /**
@@ -60,10 +60,10 @@ export interface Guidance {
  * `exactOptionalPropertyTypes`, `data?` / `rejected?` are genuinely present-on-ok / present-on-reject.
  */
 export interface Verdict<T = unknown> {
-  readonly ok: boolean;
-  readonly data?: T;
-  readonly rejected?: string;
-  readonly guidance: Guidance; // TOOLS-4 — non-empty on every path
+  readonly ok: boolean
+  readonly data?: T
+  readonly rejected?: string
+  readonly guidance: Guidance // TOOLS-4 — non-empty on every path
 }
 
 /**
@@ -79,9 +79,9 @@ export interface Verdict<T = unknown> {
  * reverse-dep closure already lives in index axis-3, so the *set* of reached nodes is the honest carrier.
  */
 export interface InitOut {
-  readonly territories: readonly Territory[]; // all at T2/advisory, ZERO invariants (TOOLS-5)
-  readonly blastRadius: readonly NodeKey[]; // [PINNED theme #3] reachability set — reverse-dep closure (atlas-tools:19)
-  readonly t0Candidates: readonly string[]; // T0-keyword territory NAMES flagged, NOT promoted (A-6)
+  readonly territories: readonly Territory[] // all at T2/advisory, ZERO invariants (TOOLS-5)
+  readonly blastRadius: readonly NodeKey[] // [PINNED theme #3] reachability set — reverse-dep closure (atlas-tools:19)
+  readonly t0Candidates: readonly string[] // T0-keyword territory NAMES flagged, NOT promoted (A-6)
 }
 
 /**
@@ -102,7 +102,7 @@ export interface InitOut {
  * separately, so this comment describes the SHIPPED type and names the divergence rather than transcribing
  * a line that the code has outgrown.
  */
-export type QueryOut = Pack;
+export type QueryOut = Pack
 
 /**
  * `atlas-emit` result (TOOLS-7). Transcribed EXACTLY from atlas-tools:21 —
@@ -125,10 +125,10 @@ export type QueryOut = Pack;
  * absent-on-reject / present-on-emit, mirroring `id?`.
  */
 export interface EmitOut {
-  readonly emitted: boolean;
-  readonly id?: Hash; // [FLAG] CAS id of the persisted object — mirrors knowledge EmitApi.admit
-  readonly nodeKey?: NodeKey; // [AUTHOR-14, ADDITIVE] read-door identity — same type as NodeApi.node's arg
-  readonly rejected?: string; // structured fail-closed reason (TOOLS-7)
+  readonly emitted: boolean
+  readonly id?: Hash // [FLAG] CAS id of the persisted object — mirrors knowledge EmitApi.admit
+  readonly nodeKey?: NodeKey // [AUTHOR-14, ADDITIVE] read-door identity — same type as NodeApi.node's arg
+  readonly rejected?: string // structured fail-closed reason (TOOLS-7)
 }
 
 /**
@@ -145,14 +145,14 @@ export interface LinkOut {
    *  holds — read it together with {@link LinkOut.retracted}. `linked:false` is the ONE fail-closed
    *  discriminator every transport keys off (handler `isFailClosedWrite`, CLI exit 2, MCP `isError`), so
    *  both modes' refusals are visible everywhere with no new plumbing. */
-  readonly linked: boolean;
-  readonly rejected?: string; // structured fail-closed reason (distinct/unknown/unauthorized/unratified/pair-state)
-  readonly a?: string; // the first equated nodeKey (present on linked:true)
-  readonly b?: string; // the second equated nodeKey (present on linked:true)
+  readonly linked: boolean
+  readonly rejected?: string // structured fail-closed reason (distinct/unknown/unauthorized/unratified/pair-state)
+  readonly a?: string // the first equated nodeKey (present on linked:true)
+  readonly b?: string // the second equated nodeKey (present on linked:true)
   /** [A-D3 / task #83] the act was a RETRACTION (`atlas-link --retract`) — the withdrawal of a previously
    *  asserted equivalence — rather than an assertion. Present only on `linked:true` of the retract mode;
    *  ABSENT (not `false`) on an assertion, so every existing consumer of this record is byte-unchanged. */
-  readonly retracted?: boolean;
+  readonly retracted?: boolean
 }
 
 /**
@@ -169,10 +169,10 @@ export interface LinkOut {
  * `rejected`/`refusal`/`record` are present-on-the-relevant-path only.
  */
 export interface MemoryEmitOut {
-  readonly admitted: boolean;
-  readonly rejected?: string; // structured fail-closed reason (the gate's own `reason`, human-readable)
-  readonly refusal?: string; // the NAMED MEM gate that declined — a machine value (MemoryRefusal, stringified)
-  readonly record?: MemoryRecord; // present on admitted:true only
+  readonly admitted: boolean
+  readonly rejected?: string // structured fail-closed reason (the gate's own `reason`, human-readable)
+  readonly refusal?: string // the NAMED MEM gate that declined — a machine value (MemoryRefusal, stringified)
+  readonly record?: MemoryRecord // present on admitted:true only
 }
 
 /**
@@ -187,10 +187,10 @@ export interface MemoryEmitOut {
  * redefined. Reconciled to `StructRef` per the oracle-pin map (grounding anchor carrier).
  */
 export interface DriftItem {
-  readonly fact: string;
-  readonly class: 'mechanical' | 'semantic'; // the KNOW-5 split (referenced, not redefined)
-  readonly anchorWas: StructRef; // [PINNED] old grounding anchor (@atlas/contracts, atlas-tools:24)
-  readonly anchorNow: StructRef; // [PINNED] new grounding anchor (@atlas/contracts, atlas-tools:24)
+  readonly fact: string
+  readonly class: "mechanical" | "semantic" // the KNOW-5 split (referenced, not redefined)
+  readonly anchorWas: StructRef // [PINNED] old grounding anchor (@atlas/contracts, atlas-tools:24)
+  readonly anchorNow: StructRef // [PINNED] new grounding anchor (@atlas/contracts, atlas-tools:24)
 }
 
 /**
@@ -208,12 +208,12 @@ export interface DriftItem {
  * richer subset per the frozen reference, NOT collapsed to a bare count.
  */
 export interface ReconcileOut {
-  readonly drift: readonly DriftItem[]; // the reviewable set, never all-or-nothing (TOOLS-8)
-  readonly mechanical: readonly string[]; // auto-re-groundable fact names (anchor moved, claim re-derives)
-  readonly semantic: readonly string[]; // BROKEN fact names — blocks (exit 2)
-  readonly regroundedCount: number; // == |mechanical| under --accept-reground (TOOLS-13)
-  readonly reauthorCount: number; // == |semantic| (A-4) — never the whole store
-  readonly exitCode: number; // 2 ONLY when |semantic|>0, else 0 (TOOLS-8) — reference names only {0,2}
+  readonly drift: readonly DriftItem[] // the reviewable set, never all-or-nothing (TOOLS-8)
+  readonly mechanical: readonly string[] // auto-re-groundable fact names (anchor moved, claim re-derives)
+  readonly semantic: readonly string[] // BROKEN fact names — blocks (exit 2)
+  readonly regroundedCount: number // == |mechanical| under --accept-reground (TOOLS-13)
+  readonly reauthorCount: number // == |semantic| (A-4) — never the whole store
+  readonly exitCode: number // 2 ONLY when |semantic|>0, else 0 (TOOLS-8) — reference names only {0,2}
 }
 
 /**
@@ -222,9 +222,9 @@ export interface ReconcileOut {
  * hot-set. Read-only; `atlas doctor` persists nothing.
  */
 export interface HotSet {
-  readonly size: number;
-  readonly budget: number;
-  readonly over: boolean; // advisory over-budget flag (TOOLS-12)
+  readonly size: number
+  readonly budget: number
+  readonly over: boolean // advisory over-budget flag (TOOLS-12)
 }
 
 /**
@@ -239,9 +239,9 @@ export interface HotSet {
  * GroundedFact)`), imported, NOT redefined.
  */
 export interface RegroundPlan {
-  readonly fact: string; // the drifted fact the plan targets
-  readonly action: 'reground' | 'retire'; // the guided flow (TOOLS-12 "re-ground / retire")
-  readonly emit: GroundedFact; // [PINNED] templated candidate fact run through atlas-emit (@atlas/knowledge)
+  readonly fact: string // the drifted fact the plan targets
+  readonly action: "reground" | "retire" // the guided flow (TOOLS-12 "re-ground / retire")
+  readonly emit: GroundedFact // [PINNED] templated candidate fact run through atlas-emit (@atlas/knowledge)
 }
 
 /**
@@ -259,11 +259,11 @@ export interface RegroundPlan {
  * reviewable `DriftItem` (imported from this module), NOT a fresh record.
  */
 export interface DoctorOut {
-  readonly archive?: readonly Hash[]; // [PINNED] monotone supersede-lineage — ordered CAS chain (atlas-tools:136)
-  readonly whyBroken?: DriftItem; // [PINNED] drift-explain — the reviewable DriftItem (atlas-tools:25)
-  readonly hotSet?: HotSet; // hot-set size vs budget (advisory)
-  readonly plan?: RegroundPlan; // guided re-ground/retire plan — emits via atlas-emit, never direct
-  readonly casIntegrity?: CasIntegrity; // ADR-0022 — the storage-layer audit of the store doctor diagnoses
+  readonly archive?: readonly Hash[] // [PINNED] monotone supersede-lineage — ordered CAS chain (atlas-tools:136)
+  readonly whyBroken?: DriftItem // [PINNED] drift-explain — the reviewable DriftItem (atlas-tools:25)
+  readonly hotSet?: HotSet // hot-set size vs budget (advisory)
+  readonly plan?: RegroundPlan // guided re-ground/retire plan — emits via atlas-emit, never direct
+  readonly casIntegrity?: CasIntegrity // ADR-0022 — the storage-layer audit of the store doctor diagnoses
 }
 
 /**
@@ -279,22 +279,22 @@ export interface DoctorOut {
  */
 export interface CasIntegrity {
   /** Value files found under the CAS root. */
-  readonly objects: number;
+  readonly objects: number
   /** Files whose bytes do NOT hash to the address they are filed under — the defect this leg exists for. */
-  readonly corrupt: readonly Hash[];
+  readonly corrupt: readonly Hash[]
   /** Files whose bytes do not parse as a CAS object at all. Distinct from `corrupt`: a truncated write and a
    *  tampered payload are different incidents, and collapsing them would lose which one happened. */
-  readonly unreadable: readonly Hash[];
+  readonly unreadable: readonly Hash[]
   /** Hashes a sidecar references with no value file on disk — a dangling pointer into the store. */
-  readonly missing: readonly Hash[];
+  readonly missing: readonly Hash[]
   /** Value files no sidecar references. REPORTED, never acted on: the CAS is append-only and content-keyed,
    *  so a superseded object legitimately outlives the sidecar that referenced it. A count, not a verdict. */
-  readonly orphan: number;
+  readonly orphan: number
   /** Distinct hashes the sidecars reference — the denominator `missing` is measured against. */
-  readonly referenced: number;
+  readonly referenced: number
   /** True iff `corrupt`, `unreadable` and `missing` are ALL empty. Named rather than left to the caller so
    *  two renderers cannot disagree about what "healthy" means. `orphan` is deliberately NOT a factor. */
-  readonly sound: boolean;
+  readonly sound: boolean
 }
 
 /**
@@ -305,7 +305,7 @@ export interface CasIntegrity {
  * write authority; the governance write surface is exactly the two governed doors `atlas-emit` + `atlas-link`
  * (TOOLS-1/16, ADR-0003).
  */
-export type DiffOut = VersionDelta;
+export type DiffOut = VersionDelta
 
 // ── authoring data model (CAMPAIGN-10 · ADR-0004 planner surface) ─────────────────────────────────────
 // The authoring surface's OWN result records — transcribed from `reference/atlas-authoring.md` §Data model.
@@ -323,10 +323,10 @@ export type DiffOut = VersionDelta;
  * NOT the finer 6-kind `StructRef.kind`; no core shape is duplicated (the grounding anchor stays `StructRef`).
  */
 export interface AnchorUnit {
-  readonly qualifiedPath: string;
-  readonly kind: 'file' | 'dir' | 'symbol';
-  readonly subtreeHash: string;
-  readonly path: string;
+  readonly qualifiedPath: string
+  readonly kind: "file" | "dir" | "symbol"
+  readonly subtreeHash: string
+  readonly path: string
 }
 
 /**
@@ -336,9 +336,9 @@ export interface AnchorUnit {
  * under the path (never a constant — SCN-AUTH-4b asserts it against the fixture).
  */
 export interface LanguageHole {
-  readonly ext: string;
-  readonly fileCount: number;
-  readonly reason: string;
+  readonly ext: string
+  readonly fileCount: number
+  readonly reason: string
 }
 
 /**
@@ -352,10 +352,10 @@ export interface LanguageHole {
  * honest-empty path (under `exactOptionalPropertyTypes`, genuinely absent-or-present).
  */
 export interface AnchorsOut {
-  readonly rev: string;
-  readonly units: readonly AnchorUnit[];
-  readonly holes: readonly LanguageHole[];
-  readonly reason?: string; // AUTHOR-3 honest-empty reason — present iff `units` is empty (path not groundable)
+  readonly rev: string
+  readonly units: readonly AnchorUnit[]
+  readonly holes: readonly LanguageHole[]
+  readonly reason?: string // AUTHOR-3 honest-empty reason — present iff `units` is empty (path not groundable)
 }
 
 /**
@@ -363,8 +363,8 @@ export interface AnchorsOut {
  * `PredicateSlot` is the @atlas/knowledge-owned CLOSED vocabulary — IMPORTED, never redefined.
  */
 export interface SlotInfo {
-  readonly slot: PredicateSlot;
-  readonly meaning: string;
+  readonly slot: PredicateSlot
+  readonly meaning: string
 }
 
 /**
@@ -372,7 +372,7 @@ export interface SlotInfo {
  * Transcribed from §Data model — `{ slots }`. FROZEN for WP-10.A2-a.TOOLS (not exercised here).
  */
 export interface SlotsOut {
-  readonly slots: readonly SlotInfo[];
+  readonly slots: readonly SlotInfo[]
 }
 
 /**
@@ -384,18 +384,18 @@ export interface SlotsOut {
  * 'full-ratify'` (AUTHOR-9). FROZEN for WP-10.A2-a.TOOLS (not exercised here).
  */
 export interface DraftOut {
-  readonly fact: GroundedFact;
-  readonly rev: string;
-  readonly operation: 'CREATE' | 'UPDATE';
-  readonly route: 'auto-accept' | 'full-ratify';
-  readonly requires?: string;
+  readonly fact: GroundedFact
+  readonly rev: string
+  readonly operation: "CREATE" | "UPDATE"
+  readonly route: "auto-accept" | "full-ratify"
+  readonly requires?: string
 }
 
 /**
  * The CLOSED set of governed-door gates (AUTHOR-11/12). Transcribed EXACTLY from §Data model —
  * `'shape' | 'truth' | 'authz' | 'ratify'`. FROZEN for WP-10.A3.TOOLS.
  */
-export type GateName = 'shape' | 'truth' | 'authz' | 'ratify';
+export type GateName = "shape" | "truth" | "authz" | "ratify"
 
 /**
  * One gate's verdict inside a `check` dry-run (AUTHOR-11/12) — the row shape of `CheckOut.gates`. Every
@@ -403,10 +403,10 @@ export type GateName = 'shape' | 'truth' | 'authz' | 'ratify';
  * error ever reaches a user as the reason).
  */
 export interface GateResult {
-  readonly gate: GateName;
-  readonly pass: boolean;
-  readonly reason?: string;
-  readonly remedy?: string;
+  readonly gate: GateName
+  readonly pass: boolean
+  readonly reason?: string
+  readonly remedy?: string
 }
 
 /**
@@ -415,8 +415,8 @@ export interface GateResult {
  * WP-10.A3.TOOLS (not exercised here).
  */
 export interface CheckOut {
-  readonly wouldEmit: boolean;
-  readonly gates: readonly GateResult[];
+  readonly wouldEmit: boolean
+  readonly gates: readonly GateResult[]
 }
 
 // ── co-located handler surface (was ref/handler.ts — consumed by handler.ts + transport.ts + diff.ts) ──
@@ -432,24 +432,32 @@ export interface CheckOut {
  * `QueryOut`; `subsumes` is the deterministically-sorted `broader ⊃ narrower` edge set, scoped to the pack.
  */
 export interface QueryEnvelope {
-  readonly pack: Pack;
-  readonly subsumes: readonly Subsumes[];
+  readonly pack: Pack
+  readonly subsumes: readonly Subsumes[]
   // [WP-SAMEAS — ADDITIVE] the derived human `sameAs` equivalence edges (`deriveSameAs`), scoped to the pack
   // exactly as `subsumes` is (both endpoints under the covering scope). Transitive (union-find), sorted,
   // NON-destructive — rides ALONGSIDE the frozen `Pack`/`subsumes`, mutating neither. `SameAs` is the
   // @atlas/knowledge-owned edge shape (`{a,b}`, canonical a<b) — imported, NOT redefined.
-  readonly sameAs: readonly SameAs[];
+  readonly sameAs: readonly SameAs[]
 }
 
 /** The per-tool result payload carried on a `Verdict.data` — the union of the governance-tool result records
  *  (TOOLS-5/6/7/8 + WP-SAMEAS `LinkOut`), plus the `atlas-query` observability envelope (Seam-3). The handler
  *  is one oracle over all; the concrete leg is fixed by `tool`. */
-export type ToolData = InitOut | QueryOut | EmitOut | ReconcileOut | LinkOut | QueryEnvelope | AnchorsOut | MemoryEmitOut;
+export type ToolData =
+  | InitOut
+  | QueryOut
+  | EmitOut
+  | ReconcileOut
+  | LinkOut
+  | QueryEnvelope
+  | AnchorsOut
+  | MemoryEmitOut
 
 /** The transport a call arrived on (TOOLS-3/10). Transcribed from the reference's "one contract, two
  *  transports" (CLI≡MCP) plus the tri-transport node reads (MCP tool | poke | CLI). Behaviour MUST NOT
  *  diverge across these — the handler is the single oracle. */
-export type Transport = 'cli' | 'mcp' | 'poke';
+export type Transport = "cli" | "mcp" | "poke"
 
 export interface HandlerApi {
   /** THE one handler. Pure + total (TOOLS-2): malformed `args` ⇒ a structured rejected `Verdict`, never a
@@ -460,17 +468,17 @@ export interface HandlerApi {
    *  malformed argument fails CLOSED to a rejected `Verdict`, so the input MUST be untyped at the door).
    *  The `Verdict` payload is the per-tool result union `ToolData` (`InitOut | QueryOut | EmitOut |
    *  ReconcileOut`) the reference frames — the concrete leg is fixed by `tool`. */
-  handle(tool: Tool, args: unknown): Verdict<ToolData>;
+  handle(tool: Tool, args: unknown): Verdict<ToolData>
 
   /** Resolve a node by CONTENT ADDRESS through the same one handler (TOOLS-10) — the oracle behind the
    *  tri-transport reads (MCP tool | poke | CLI), byte-identical across all three. READ-ONLY: this opens
    *  NO write path (writes still funnel through `atlas-emit`, TOOLS-1). (method-tags-tls:86) */
-  resolveNode(nodeAddr: NodeKey, transport: Transport): Verdict;
+  resolveNode(nodeAddr: NodeKey, transport: Transport): Verdict
 
   /** The one PUBLISHED input schema for a tool (TOOLS-3) — CLI and MCP share it; the two transports MUST
    *  NOT diverge. [PINNED theme #2] the shared MCP tool-schema record → `ToolSchema` from @atlas/contracts
    *  (decide once, share; retrieval `NodeTool.schema` pins to the SAME type — byte-identical schemas). */
-  schema(tool: Tool): ToolSchema;
+  schema(tool: Tool): ToolSchema
 }
 
 // ── co-located node projection (was ref/node.ts — impl-less; no src file re-exports NodeApi) ────────────
@@ -487,15 +495,15 @@ export interface NodeApi {
    *  [FLAG — `nodeAddr` = `NodeKey`] atlas-tools:131 names `atlas node <nodeAddr>`; the node identity leg
    *  is the `nodeKey` (mirrors retrieval `NodeTool.nodeId: NodeKey`). Transcribed as `NodeKey`. The return
    *  is the @atlas/knowledge `GroundedFact` (the node). */
-  node(nodeAddr: NodeKey): GroundedFact;
+  node(nodeAddr: NodeKey): GroundedFact
 
   /** The deterministic related-node set for a scope (atlas-tools:132, RETR-10). READ-ONLY; owned by
    *  @atlas/retrieval (`RelationSet`), imported, NOT redefined.
    *
    *  [PINNED — `scope` arg] pinned to `string` (cf retrieval `Path = string`), NOT a brand. */
-  relate(scope: string): RelationSet;
+  relate(scope: string): RelationSet
 
   /** The CURATED zero-assembly briefing for a scope-unit (atlas-tools:133, RETR-12). READ-ONLY; owned by
    *  @atlas/retrieval (`OwnPack` / `OwnUnit`), imported, NOT redefined. */
-  own(unit: OwnUnit): OwnPack;
+  own(unit: OwnUnit): OwnPack
 }

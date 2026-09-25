@@ -12,20 +12,20 @@
 // ordered pair + kind (direction matters); freshness is elsewhere (the two grounding entries + `driftDetect`'s
 // AND-fold). See docs/design/99a-relation-fact-contract.md.
 
-import { asNodeKey, canonicalForm, defaultEncoder } from '@atlas/kernel';
-import type { NodeKey } from '@atlas/contracts';
-import type { RelationKind } from '../types.js';
+import { asNodeKey, canonicalForm, defaultEncoder } from "@atlas/kernel"
+import type { NodeKey } from "@atlas/contracts"
+import type { RelationKind } from "../types.js"
 
 /** The closed relation vocabulary as a RUNTIME list (the value-boundary companion to the erased `RelationKind`
  *  type — mirrors `PREDICATE_SLOTS`). CLOSED: a new kind is a `cv` bump. THE ONE runtime copy. */
-export const RELATION_KINDS: readonly RelationKind[] = ['depends-on', 'calls'];
-const RELATION_KIND_SET: ReadonlySet<string> = new Set(RELATION_KINDS);
+export const RELATION_KINDS: readonly RelationKind[] = ["depends-on", "calls"]
+const RELATION_KIND_SET: ReadonlySet<string> = new Set(RELATION_KINDS)
 
 /** Closed-vocabulary membership guard for a relation kind. TOTAL over `unknown` (mirror `isKnownSlot`): a
  *  non-string, an off-vocabulary string, an object or an absent value all answer `false` at the value
  *  boundary where the erased `RelationKind` type stops helping. */
 export function isKnownRelationKind(kind: unknown): kind is RelationKind {
-  return typeof kind === 'string' && RELATION_KIND_SET.has(kind);
+  return typeof kind === "string" && RELATION_KIND_SET.has(kind)
 }
 
 /**
@@ -41,16 +41,16 @@ export function isKnownRelationKind(kind: unknown): kind is RelationKind {
  * a relation's clothes. Refused so a relation always means what it says: two units, one directed edge.
  */
 export const MALFORMED_RELATION_REASON =
-  'malformed relation: a relation identity is the ordered pair (endpointA, relationKind, endpointB), and one ' +
-  'of the three is not well-formed. endpointA and endpointB must each be a non-empty unit key (a ' +
-  'qualifiedPath), they must be DISTINCT (no self-relation — that is an intrinsic predicate about one unit, ' +
-  'not a two-ended fact), and relationKind must be one of the closed vocabulary members. Re-state the ' +
-  'relation naming both units it connects with a supported kind';
+  "malformed relation: a relation identity is the ordered pair (endpointA, relationKind, endpointB), and one " +
+  "of the three is not well-formed. endpointA and endpointB must each be a non-empty unit key (a " +
+  "qualifiedPath), they must be DISTINCT (no self-relation — that is an intrinsic predicate about one unit, " +
+  "not a two-ended fact), and relationKind must be one of the closed vocabulary members. Re-state the " +
+  "relation naming both units it connects with a supported kind"
 
 export class MalformedRelationError extends Error {
   constructor() {
-    super(MALFORMED_RELATION_REASON);
-    this.name = 'MalformedRelationError';
+    super(MALFORMED_RELATION_REASON)
+    this.name = "MalformedRelationError"
   }
 }
 
@@ -63,9 +63,9 @@ export class MalformedRelationError extends Error {
  * raw `TypeError`. No LLM/clock/seq.
  */
 export function relationKey(a: unknown, kind: unknown, b: unknown): NodeKey {
-  if (typeof a !== 'string' || a.length === 0) throw new MalformedRelationError();
-  if (typeof b !== 'string' || b.length === 0) throw new MalformedRelationError();
-  if (a === b) throw new MalformedRelationError(); // no self-relation — see MALFORMED_RELATION_REASON
-  if (!isKnownRelationKind(kind)) throw new MalformedRelationError();
-  return asNodeKey(defaultEncoder.hash(canonicalForm({ a, k: kind, b })));
+  if (typeof a !== "string" || a.length === 0) throw new MalformedRelationError()
+  if (typeof b !== "string" || b.length === 0) throw new MalformedRelationError()
+  if (a === b) throw new MalformedRelationError() // no self-relation — see MALFORMED_RELATION_REASON
+  if (!isKnownRelationKind(kind)) throw new MalformedRelationError()
+  return asNodeKey(defaultEncoder.hash(canonicalForm({ a, k: kind, b })))
 }

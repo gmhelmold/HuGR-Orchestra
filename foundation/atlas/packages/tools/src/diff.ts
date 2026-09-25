@@ -20,8 +20,8 @@
 //
 // Declared in the ledger at `harness/gates/reference-model-guard.mjs`.
 
-import type { Hash } from '@atlas/contracts';
-import type { DiffOut, Guidance, Transport, Verdict } from './types.js';
+import type { Hash } from "@atlas/contracts"
+import type { DiffOut, Guidance, Transport, Verdict } from "./types.js"
 
 export interface DiffApi {
   /** Read-only fold-diff between two commit states (TOOLS-16). Surfaces the PERSIST-14 delta faithfully;
@@ -30,28 +30,27 @@ export interface DiffApi {
    *
    *  [FLAG — `shaA`/`shaB` = `Hash`] atlas-tools:114 names `atlas-diff <shaA> <shaB>`; transcribed as
    *  `Hash` exactly as @atlas/persist `DiffApi.diff(shaA,shaB)` pins them. */
-  diff(shaA: Hash, shaB: Hash): DiffOut;
+  diff(shaA: Hash, shaB: Hash): DiffOut
 }
 
 /** The read-only version-delta source atlas-diff projects — the @atlas/persist `DiffApi`
  *  (`persist/ref/diff.ts`), injected. atlas-diff READS this delta; it does NOT compute the fold-diff (that
  *  is @atlas/persist / WP-7.32.PERSIST). Read-only: it surfaces no store-mutating method. */
-export type DiffSource = DiffApi;
+export type DiffSource = DiffApi
 
 /** The `next + invariant` guidance every atlas-diff result ships (TOOLS-4) — non-empty on the ok AND the
  *  fail-closed reject paths. The follow-up for any change is ALWAYS a governed write door (`atlas-emit` for facts). */
 export const DIFF_GUIDANCE: Guidance = {
-  next: 'atlas-diff is a read-only version-delta projection — to change a version, emit through atlas-emit',
-  invariant: 'TOOLS-16: read-only projection of the PERSIST-14 delta, no write path, write surface stays four',
-};
+  next: "atlas-diff is a read-only version-delta projection — to change a version, emit through atlas-emit",
+  invariant: "TOOLS-16: read-only projection of the PERSIST-14 delta, no write path, write surface stays four",
+}
 
 /** The fail-closed rejection reason for a malformed sha — identical on every transport (no divergence). */
-const REJECT_BAD_SHA =
-  'malformed sha — atlas-diff requires two content-address strings (fail-closed, TOOLS-16)';
+const REJECT_BAD_SHA = "malformed sha — atlas-diff requires two content-address strings (fail-closed, TOOLS-16)"
 
 /** A sha argument is well-formed iff it is a string (the `Hash` carrier). A number/array/object fails
  *  CLOSED — never coerced (the coercion-vs-reject divergence is exactly what TOOLS-16c forbids). */
-const isHash = (v: unknown): v is Hash => typeof v === 'string';
+const isHash = (v: unknown): v is Hash => typeof v === "string"
 
 /**
  * The `atlas-diff` read-only projection handle. Conforms EXACTLY to the frozen `DiffApi` (`diff`) and adds
@@ -62,12 +61,12 @@ const isHash = (v: unknown): v is Hash => typeof v === 'string';
 export interface AtlasDiff extends DiffApi {
   /** The read-only fold-diff between two commit states — surfaces the PERSIST-14 delta faithfully (frozen
    *  `DiffApi`). 0 mutation, 0 write path — it READS the @atlas/persist `VersionDelta`. */
-  diff(shaA: Hash, shaB: Hash): DiffOut;
+  diff(shaA: Hash, shaB: Hash): DiffOut
   /** Render the delta as a byte-identical read-only `Verdict` over a transport (CLI ≡ MCP, TOOLS-16). The
    *  `transport` records the ROUTE only — it NEVER changes the result. A malformed sha fails CLOSED to the
    *  SAME structured rejected `Verdict` on every transport; a well-formed pair surfaces the raw delta with
    *  NO per-transport envelope (the divergence this seam forbids). */
-  render(transport: Transport, shaA: unknown, shaB: unknown): Verdict<DiffOut>;
+  render(transport: Transport, shaA: unknown, shaB: unknown): Verdict<DiffOut>
 }
 
 /**
@@ -77,23 +76,23 @@ export interface AtlasDiff extends DiffApi {
  * regardless of transport, so the two adapters return a byte-identical `Verdict` — they cannot diverge.
  */
 export function createAtlasDiff(source: DiffSource): AtlasDiff {
-  const diff = (shaA: Hash, shaB: Hash): DiffOut => source.diff(shaA, shaB);
+  const diff = (shaA: Hash, shaB: Hash): DiffOut => source.diff(shaA, shaB)
 
   const render = (_transport: Transport, shaA: unknown, shaB: unknown): Verdict<DiffOut> => {
     // fail-closed on a malformed sha — the SAME structured rejection on every transport (no coercion).
     if (!isHash(shaA) || !isHash(shaB)) {
-      return { ok: false, rejected: REJECT_BAD_SHA, guidance: DIFF_GUIDANCE };
+      return { ok: false, rejected: REJECT_BAD_SHA, guidance: DIFF_GUIDANCE }
     }
     // read-only: surface the PERSIST-14 delta faithfully — no envelope, no per-transport wrapping.
-    return { ok: true, data: source.diff(shaA, shaB), guidance: DIFF_GUIDANCE };
-  };
+    return { ok: true, data: source.diff(shaA, shaB), guidance: DIFF_GUIDANCE }
+  }
 
-  return { diff, render };
+  return { diff, render }
 }
 
 // differential-vs-oracle (compile-time): the projection conforms to the co-located frozen `DiffApi` —
 // a read-only handle with NO write-returning method (the write surface is the two governed doors atlas-emit + atlas-link, TOOLS-1/16).
 const _diffConforms: DiffApi = createAtlasDiff({
   diff: () => ({ added: [], edited: [], superseded: [], decayed: [] }),
-});
-void _diffConforms;
+})
+void _diffConforms

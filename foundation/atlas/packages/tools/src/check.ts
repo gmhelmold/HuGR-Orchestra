@@ -23,9 +23,9 @@
 // claim to rule out is a store mutation BETWEEN the read-only snapshot read and a later real `emit` — the
 // door's own header states the identical caveat for `runGateChain`.
 
-import type { Hash } from '@atlas/contracts';
-import type { GroundedFact } from '@atlas/knowledge';
-import type { CheckOut } from './types.js';
+import type { Hash } from "@atlas/contracts"
+import type { GroundedFact } from "@atlas/knowledge"
+import type { CheckOut } from "./types.js"
 
 /**
  * The ONE gate-chain runner (AUTHOR-11) — the PORT declared by @atlas/tools and IMPLEMENTED by
@@ -38,14 +38,14 @@ export interface GateChainRunner {
   /** Fold the WHOLE gate chain — shape → truth → authz → ratify — over `candidate` at `at`, WITHOUT any
    *  write, and report it in the exact `CheckOut` shape (`wouldEmit` + the per-gate `gates` row set, in door
    *  order, each failing row carrying a non-empty `remedy` — AUTHOR-12b). */
-  runChain(candidate: GroundedFact, at: Hash): CheckOut;
+  runChain(candidate: GroundedFact, at: Hash): CheckOut
 }
 
 export interface CheckApi {
   /** Dry-run the governed emit door's WHOLE gate chain over a candidate — WITHOUT any write (AUTHOR-11).
    *  Pure + total over the injected `GateChainRunner`; the verdict AND the first-refusing gate agree with
    *  the real door's by construction (PROP-AUTH-11), never by a second gate implementation. */
-  check(candidate: GroundedFact, at: Hash): CheckOut;
+  check(candidate: GroundedFact, at: Hash): CheckOut
 }
 
 /**
@@ -55,14 +55,14 @@ export interface CheckApi {
  * folds no gate itself; every one of those is the injected port's job.
  */
 export function createCheck(runner: GateChainRunner): CheckApi {
-  const check = (candidate: GroundedFact, at: Hash): CheckOut => runner.runChain(candidate, at);
-  return { check };
+  const check = (candidate: GroundedFact, at: Hash): CheckOut => runner.runChain(candidate, at)
+  return { check }
 }
 
 // differential-vs-oracle (compile-time): the impl's `check` conforms to the co-located frozen `CheckApi.check`
 // signature. `GateChainRunner` is the SAME seam the governed door's `runGateChain` fold answers — the port
 // stays UNIMPLEMENTED here, satisfied by injection.
-const _checkConforms: CheckApi['check'] = createCheck({
+const _checkConforms: CheckApi["check"] = createCheck({
   runChain: () => ({ wouldEmit: true, gates: [] }),
-}).check;
-void _checkConforms;
+}).check
+void _checkConforms

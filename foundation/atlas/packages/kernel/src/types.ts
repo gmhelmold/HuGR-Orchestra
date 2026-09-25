@@ -3,7 +3,7 @@
 // The CAS store, the append-only event log, and the OR-Set fold node. Shared identity types
 // (`Hash`, `NodeKey`) are imported from @atlas/contracts — NEVER redefined here.
 
-import type { Hash, NodeKey } from '@atlas/contracts';
+import type { Hash, NodeKey } from "@atlas/contracts"
 
 /**
  * A folded-in log entry. Transcribed EXACTLY from the fspec-merge reference model (fspec-merge:106-107),
@@ -22,28 +22,28 @@ import type { Hash, NodeKey } from '@atlas/contracts';
  *   fields (`kind`/`actor`/`at`) are NOT transcribed — flagged for the two references to reconcile.
  */
 export interface Event {
-  readonly id: Hash;
-  readonly seq: number;
-  readonly nodeKey?: NodeKey;
-  readonly contentHash: Hash;
-  readonly fresh: boolean;
-  readonly supersedes: readonly Hash[];
-  readonly payload: unknown;
+  readonly id: Hash
+  readonly seq: number
+  readonly nodeKey?: NodeKey
+  readonly contentHash: Hash
+  readonly fresh: boolean
+  readonly supersedes: readonly Hash[]
+  readonly payload: unknown
 }
 
 /**
  * The append-only, content-keyed event SET. `hash → event` keyed by the event id; combining two logs
  * is set-union on the id (KERNEL-9). (atlas-kernel:21)
  */
-export type EventLog = Map<Hash, Event>;
+export type EventLog = Map<Hash, Event>
 
 /**
  * A per-nodeKey OR-Set node: the grow-only set of `ClaimEntry`/lineage keyed by `contentHash`
  * (fspec-merge:138). `entries` are keyed by each event's `contentHash`; union never drops.
  */
 export interface Node {
-  readonly nodeKey: NodeKey;
-  readonly entries: Map<Hash, Event>;
+  readonly nodeKey: NodeKey
+  readonly entries: Map<Hash, Event>
 }
 
 /**
@@ -52,7 +52,7 @@ export interface Node {
  * transcribed as that projection. The byte-identical AtlasState (KERNEL-11) is the canonical
  * serialization of this map.
  */
-export type AtlasState = Map<NodeKey, Node>;
+export type AtlasState = Map<NodeKey, Node>
 
 /**
  * Any typed Atlas object stored in the CAS. Reference (atlas-kernel:17):
@@ -65,12 +65,12 @@ export type AtlasState = Map<NodeKey, Node>;
  * fspec-merge:107). Transcribed here as the honest layer-1 generic (`unknown`) — the union arms are NOT
  * invented as kernel-local types. Flagged for the arm types to be surfaced from their owning layers.
  */
-export type CasObject = unknown;
+export type CasObject = unknown
 
 /**
  * The whole content-addressed store: `hash → object` (atlas-kernel:18).
  */
-export type Cas = Map<Hash, CasObject>;
+export type Cas = Map<Hash, CasObject>
 
 /**
  * One entry in a Node's OR-Set (the grow-only claim/lineage keyed by `contentHash`, referenced in
@@ -81,4 +81,4 @@ export type Cas = Map<Hash, CasObject>;
  * entry value is an `Event`, fspec-merge:138), never a distinct `ClaimEntry` record. Aliased to `Event`
  * to match the only concrete reference (Node.entries), NOT invented with new fields. Flagged.
  */
-export type ClaimEntry = Event;
+export type ClaimEntry = Event

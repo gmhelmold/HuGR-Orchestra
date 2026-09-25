@@ -19,12 +19,12 @@
 //      OR the over-budget fail-loud (AR-30): the resolved-edge count exceeded the ceiling, nothing was derived
 // There is no exit-1 leg here: reaching this function means the invocation parsed and the runtime composed.
 
-import type { DeriveRelationsRun } from '@atlas/adapter-io';
-import type { CliVerdict } from './render.js';
+import type { DeriveRelationsRun } from "@atlas/adapter-io"
+import type { CliVerdict } from "./render.js"
 
 /** The invariant line every derive outcome carries — the one property a reader should check the bytes against. */
 const INVARIANT =
-  '#99 R7: a `depends-on` relation is PROVEN by the index alone (a witnessed cross-unit reference, re-derivable) and persisted only THROUGH the governed emit door — the count reported is what SETTLED durably, never what was derived; no LLM anywhere (the derivation is the proof)';
+  "#99 R7: a `depends-on` relation is PROVEN by the index alone (a witnessed cross-unit reference, re-derivable) and persisted only THROUGH the governed emit door — the count reported is what SETTLED durably, never what was derived; no LLM anywhere (the derivation is the proof)"
 
 /**
  * Project one finished derive-and-persist pass to the CLI's process outcome. PURE — a function of the
@@ -42,18 +42,18 @@ export function deriveRelationsVerdict(run: DeriveRelationsRun): CliVerdict {
     return {
       exitCode: 2,
       stdout:
-        'status: rejected\n' +
+        "status: rejected\n" +
         `next: derive-relations refused — the projection resolved ${run.overBudget.resolvedEdgeCount} distinct ` +
         `intra-repo edges, exceeding the ${run.overBudget.maxRelations} row ceiling. Nothing was derived or ` +
         `persisted: an "exhaustive" run that silently truncated would be unfalsifiable (AR-30). Raise the ` +
         `ceiling deliberately or scope the projection.\n` +
         `invariant: ${INVARIANT}\n`,
-    };
+    }
   }
 
-  const refused = run.refused > 0;
+  const refused = run.refused > 0
   const lines = [
-    `status: ${refused ? 'rejected' : 'ok'}`,
+    `status: ${refused ? "rejected" : "ok"}`,
     `next: ${nextLine(run)}`,
     `invariant: ${INVARIANT}`,
     `derive-relations: resolved ${run.resolvedEdgeCount} intra-repo edge(s), proved ${run.proven}, ` +
@@ -62,11 +62,11 @@ export function deriveRelationsVerdict(run: DeriveRelationsRun): CliVerdict {
     // unactionable: an operator has to know WHICH relation the door declined and WHY.
     ...run.rows.map((r) =>
       r.persisted
-        ? `  persisted ${r.endpointA} --depends-on--> ${r.endpointB} (${r.id ?? ''})`
-        : `  refused ${r.endpointA} --depends-on--> ${r.endpointB}: ${r.rejected ?? 'unknown'}`,
+        ? `  persisted ${r.endpointA} --depends-on--> ${r.endpointB} (${r.id ?? ""})`
+        : `  refused ${r.endpointA} --depends-on--> ${r.endpointB}: ${r.rejected ?? "unknown"}`,
     ),
-  ];
-  return { exitCode: refused ? 2 : 0, stdout: `${lines.join('\n')}\n` };
+  ]
+  return { exitCode: refused ? 2 : 0, stdout: `${lines.join("\n")}\n` }
 }
 
 /** The one actionable sentence, derived from the pass's own numbers — never a guess about the wiring. */
@@ -74,19 +74,19 @@ function nextLine(run: DeriveRelationsRun): string {
   if (run.resolvedEdgeCount === 0) {
     // HONESTLY EMPTY: the index holds no resolved cross-unit reference (a fresh/tiny repo, or a missing SCIP
     // dump — `atlas doctor index` reports how to build one).
-    return 'the index holds no resolved cross-unit edges — nothing to derive. Build a SCIP dump (`atlas doctor index`) if this repo has cross-file references';
+    return "the index holds no resolved cross-unit edges — nothing to derive. Build a SCIP dump (`atlas doctor index`) if this repo has cross-file references"
   }
   if (run.proven === 0) {
-    return `resolved ${run.resolvedEdgeCount} edge(s) but the sound oracle proved none — the projection admitted no proven relation to persist`;
+    return `resolved ${run.resolvedEdgeCount} edge(s) but the sound oracle proved none — the projection admitted no proven relation to persist`
   }
   if (run.refused === 0) {
     // `atlas relations <unit>` reads each persisted proven edge back, both directions (the #99a fold), with its seal.
-    return `${run.persisted} proven \`depends-on\` relation(s) are now durable — \`atlas relations <unit>\` reads each one back (both directions) carrying its proven seal`;
+    return `${run.persisted} proven \`depends-on\` relation(s) are now durable — \`atlas relations <unit>\` reads each one back (both directions) carrying its proven seal`
   }
   if (run.persisted === 0) {
-    return `every proven relation was refused by the governed door (${run.proven}) — read the per-row reasons below; nothing was persisted (most often an actor not in the endpoint's scope)`;
+    return `every proven relation was refused by the governed door (${run.proven}) — read the per-row reasons below; nothing was persisted (most often an actor not in the endpoint's scope)`
   }
-  return `${run.persisted} persisted, ${run.refused} refused — read the per-row reasons below`;
+  return `${run.persisted} persisted, ${run.refused} refused — read the per-row reasons below`
 }
 
 /**
@@ -95,5 +95,5 @@ function nextLine(run: DeriveRelationsRun): string {
  * stand up a second runtime, or the store it persists into stops being the store `atlas relations` reads.
  */
 export function runDeriveRelationsCli(deriveRelations: () => DeriveRelationsRun): CliVerdict {
-  return deriveRelationsVerdict(deriveRelations());
+  return deriveRelationsVerdict(deriveRelations())
 }

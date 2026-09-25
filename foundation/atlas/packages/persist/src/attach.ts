@@ -3,16 +3,16 @@
 // What is attached is the `{hash}` POINTER; the body lives in the CAS, never inlined in a git object.
 // Hashing flows ONLY through the SEALED @atlas/kernel `put`/`id` seam, so equal content collapses to one slot.
 
-import type { Hash } from '@atlas/contracts';
-import type { CasObject, StoreApi } from '@atlas/kernel';
-import { createStore } from '@atlas/kernel';
+import type { Hash } from "@atlas/contracts"
+import type { CasObject, StoreApi } from "@atlas/kernel"
+import { createStore } from "@atlas/kernel"
 
 /** The honest-empty content handle `StoreApi.put` answers for an object the CAS cannot address
  *  (`kernel/store.ts` `asHash('')` — the sole EMPTY sentinel). Matched by EQUALITY on that one value and
  *  nothing wider, exactly as `adapter-io/src/sidecar-commit.ts` matches it: an injected store is free to
  *  answer anything else it likes, and narrowing further would turn this guard into a shape check on a seam
  *  whose shape is the caller's business. */
-const CAS_EMPTY = '';
+const CAS_EMPTY = ""
 
 /**
  * A body the CAS REFUSED to address (task #136). A NAMED `Error` carrying the discriminant
@@ -29,25 +29,25 @@ const CAS_EMPTY = '';
 export class UnaddressableAttachmentError extends Error {
   constructor() {
     super(
-      'unaddressable-cas-object: refusing to attach — the CAS could not address this body (its canonical ' +
-        'form or its JSON serialization does not exist), so the `{hash}` pointer would name bytes that were ' +
-        'never written. An attachment is pointer-only BECAUSE the body is in the CAS. Nothing was written.',
-    );
-    this.name = 'UnaddressableAttachmentError';
+      "unaddressable-cas-object: refusing to attach — the CAS could not address this body (its canonical " +
+        "form or its JSON serialization does not exist), so the `{hash}` pointer would name bytes that were " +
+        "never written. An attachment is pointer-only BECAUSE the body is in the CAS. Nothing was written.",
+    )
+    this.name = "UnaddressableAttachmentError"
   }
 }
 
 /** A CAS pointer — the ONLY thing attached; the content resolves from the CAS by this hash
  *  (PERSIST-4, method-tags-pst:42). */
 export interface Pointer {
-  readonly hash: Hash;
+  readonly hash: Hash
 }
 
 /** Index-as-attachment surface (PERSIST-4): `attach(B)` stores the body and yields the `{hash}` pointer
  *  (SCN-PERSIST-4a-1); `get(hash)` resolves the body from the single CAS (SCN-PERSIST-4b-1). */
 export interface AttachApi {
-  attach(body: CasObject): Pointer;
-  get(hash: Hash): CasObject;
+  attach(body: CasObject): Pointer
+  get(hash: Hash): CasObject
 }
 
 /**
@@ -60,21 +60,21 @@ export function createAttach(store: StoreApi = createStore()): AttachApi {
     /** Attach a content body; store it in the CAS (content-keyed via the sealed seam) and return the
      *  hashed `{hash}` pointer — never the body bytes (SCN-PERSIST-4a-1). */
     attach(body: CasObject): Pointer {
-      const hash: Hash = store.put(body);
+      const hash: Hash = store.put(body)
       // The answer is CHECKED, not assumed. `put` is deliberately TOTAL over a value it cannot address — it
       // writes nothing and answers the EMPTY sentinel rather than throwing — so an unchecked read of it hands
       // back a pointer to a body that does not exist. See UnaddressableAttachmentError.
-      if (hash === CAS_EMPTY) throw new UnaddressableAttachmentError();
-      return { hash };
+      if (hash === CAS_EMPTY) throw new UnaddressableAttachmentError()
+      return { hash }
     },
     /** Resolve the content body from the single CAS by its content hash (SCN-PERSIST-4b-1). Total: a miss
      *  is an honest empty handle (`undefined` widens to the `unknown` CasObject), never a throw. */
     get(hash: Hash): CasObject {
-      return store.get(hash) as CasObject;
+      return store.get(hash) as CasObject
     },
-  };
+  }
 }
 
 // differential-vs-oracle (compile-time): the facet conforms to the co-located frozen AttachApi.
-const _apiCheck: AttachApi = createAttach();
-void _apiCheck;
+const _apiCheck: AttachApi = createAttach()
+void _apiCheck

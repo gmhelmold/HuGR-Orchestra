@@ -23,36 +23,36 @@
 // CLI and MCP paths are complete and proven over a SEEDED projection (N3's tests seed both a grounded negation
 // and an AbstainedRecord directly); the end-to-end emit→persist→read of an abstention is N2+N4's close.
 
-import { abstentionsOf, negationsOf } from '@atlas/knowledge';
-import type { AbstainedRecord, CurrentNode, GroundedFact, GroundedNegation, KnowledgeFreshness } from '@atlas/knowledge';
-import type { Guidance, Verdict } from '@atlas/tools';
-import type { Hash } from '@atlas/contracts';
-import { resolveFreshness } from './pack-shape.js';
-import type { FreshnessOracle } from './pack-shape.js';
-import { rehydrateProjection } from './store.js';
-import type { DiskStore } from './store.js';
+import { abstentionsOf, negationsOf } from "@atlas/knowledge"
+import type { AbstainedRecord, CurrentNode, GroundedFact, GroundedNegation, KnowledgeFreshness } from "@atlas/knowledge"
+import type { Guidance, Verdict } from "@atlas/tools"
+import type { Hash } from "@atlas/contracts"
+import { resolveFreshness } from "./pack-shape.js"
+import type { FreshnessOracle } from "./pack-shape.js"
+import { rehydrateProjection } from "./store.js"
+import type { DiskStore } from "./store.js"
 
 /** What one negation read yields off the live projection: the grounded negatives AND the honest abstentions
  *  under the scope. BOTH are always computed — the abstention is surfaced beside the negation, never behind a
  *  gate, so "the door declined to decide" is observable by default (#202). */
 export interface NegationsRead {
-  readonly negations: readonly GroundedNegation[];
-  readonly abstentions: readonly AbstainedRecord[];
+  readonly negations: readonly GroundedNegation[]
+  readonly abstentions: readonly AbstainedRecord[]
 }
 
 /** The composition-root leg: `scope` → the grounded negatives + abstentions under it. TOTAL — both folds are
  *  pure + total (an empty/absent scope reads the whole ledger, never a throw). Re-reads the LIVE projection per
  *  call, so an in-session negation/abstention filed through the door is visible to the very next call. */
-export type NegationLeg = (scope: string) => NegationsRead;
+export type NegationLeg = (scope: string) => NegationsRead
 
 /** The data payload a `negations` verdict carries — the negatives, the abstentions, the query scope, and the
  *  `abstained` view flag. BOTH arrays are ALWAYS present (an empty result is a measured fact, never an absent
  *  line), so abstention observability rides the bytes on both transports regardless of the flag. */
 export interface NegationsData {
-  readonly negations: readonly GroundedNegation[];
-  readonly abstentions: readonly AbstainedRecord[];
-  readonly scope: string;
-  readonly abstained: boolean;
+  readonly negations: readonly GroundedNegation[]
+  readonly abstentions: readonly AbstainedRecord[]
+  readonly scope: string
+  readonly abstained: boolean
 }
 
 /** Build the composition-root read leg over the durable `store` — the SAME store the handler's query leg and
@@ -73,34 +73,34 @@ export function createNegationLeg(store: DiskStore, freshness?: FreshnessOracle)
   // oracle. A CAS miss / absent oracle ⇒ `DRIFTED` (`resolveFreshness`, fail-closed). The oracle already
   // collapses STALE→DRIFTED for a negation; `resolveFreshness` collapses the advisory STALE the same way here.
   const freshnessOf = (node: CurrentNode): KnowledgeFreshness => {
-    const fact = store.get(node.contentHash as Hash) as GroundedFact | undefined;
-    if (fact === undefined) return 'DRIFTED';
-    return resolveFreshness(freshness, fact) === 'FRESH' ? 'FRESH' : 'DRIFTED';
-  };
+    const fact = store.get(node.contentHash as Hash) as GroundedFact | undefined
+    if (fact === undefined) return "DRIFTED"
+    return resolveFreshness(freshness, fact) === "FRESH" ? "FRESH" : "DRIFTED"
+  }
   return (scope) => {
-    const projection = rehydrateProjection(store);
+    const projection = rehydrateProjection(store)
     return {
       negations: negationsOf(projection, scope, freshnessOf),
       abstentions: abstentionsOf(projection, scope),
-    };
-  };
+    }
+  }
 }
 
 /** The one property a reader should check the bytes against — stated identically on both transports. */
 const INVARIANT =
-  'NEG-1: `atlas negations` reads GROUNDED negatives (family:negation) AND honest ABSTENTIONS off the live projection the query readback rides — scope-contained (segment-wise path-prefix, #153-safe), sorted for byte-identical output, never a throw, no write path; an abstention that FIRED is observable (closes #202)';
+  "NEG-1: `atlas negations` reads GROUNDED negatives (family:negation) AND honest ABSTENTIONS off the live projection the query readback rides — scope-contained (segment-wise path-prefix, #153-safe), sorted for byte-identical output, never a throw, no write path; an abstention that FIRED is observable (closes #202)"
 
 /** The one actionable sentence, derived from the result's own numbers — never a guess about the wiring. */
 function nextLine(scope: string, r: NegationsRead): string {
-  const n = r.negations.length;
-  const a = r.abstentions.length;
+  const n = r.negations.length
+  const a = r.abstentions.length
   if (n === 0 && a === 0) {
-    return `no grounded negative and no abstention under scope '${scope}' — a negation is filed by the truth door (\`atlas emit\` a family:negation fact over a CLOSED scope); check the scope spelling, or widen it`;
+    return `no grounded negative and no abstention under scope '${scope}' — a negation is filed by the truth door (\`atlas emit\` a family:negation fact over a CLOSED scope); check the scope spelling, or widen it`
   }
   if (a > 0) {
-    return `${n} grounded negative(s) and ${a} ABSTENTION(s) under '${scope}' — an abstention is the door declining to decide a negative over an OPEN scope (see its reason + witness), NOT a negative; it fired and is on the record (#202)`;
+    return `${n} grounded negative(s) and ${a} ABSTENTION(s) under '${scope}' — an abstention is the door declining to decide a negative over an OPEN scope (see its reason + witness), NOT a negative; it fired and is on the record (#202)`
   }
-  return `${n} grounded negative(s) under '${scope}', 0 abstentions — each carries its own nodeKey; inspect one with \`atlas doctor why <nodeKey>\``;
+  return `${n} grounded negative(s) under '${scope}', 0 abstentions — each carries its own nodeKey; inspect one with \`atlas doctor why <nodeKey>\``
 }
 
 /**
@@ -117,14 +117,14 @@ function nextLine(scope: string, r: NegationsRead): string {
  * (abstentions only) but NEVER changes the data: both arrays are always present, so parity + observability hold.
  */
 export function negationsVerdict(leg: NegationLeg, scope: string, abstained: boolean): Verdict<NegationsData> {
-  if (typeof scope !== 'string' || scope.length === 0) {
+  if (typeof scope !== "string" || scope.length === 0) {
     const guidance: Guidance = {
       next: "`atlas negations <scope> [--abstained]` requires the scope key whose grounded negatives + abstentions to read (schema `required:['scope']`)",
-      invariant: 'CLI-1b: a malformed invocation yields a structured error + guidance + non-zero exit, never a crash',
-    };
-    return { ok: false, rejected: 'missing scope: `atlas negations` requires a non-empty scope key', guidance };
+      invariant: "CLI-1b: a malformed invocation yields a structured error + guidance + non-zero exit, never a crash",
+    }
+    return { ok: false, rejected: "missing scope: `atlas negations` requires a non-empty scope key", guidance }
   }
-  const read = leg(scope);
-  const guidance: Guidance = { next: nextLine(scope, read), invariant: INVARIANT };
-  return { ok: true, guidance, data: { negations: read.negations, abstentions: read.abstentions, scope, abstained } };
+  const read = leg(scope)
+  const guidance: Guidance = { next: nextLine(scope, read), invariant: INVARIANT }
+  return { ok: true, guidance, data: { negations: read.negations, abstentions: read.abstentions, scope, abstained } }
 }

@@ -7,12 +7,12 @@
 // Nothing here asserts anything about the WIRING: every leg is READ OFF the run's own outcome, which is
 // what keeps the "why is it 0" line from going stale when a seam upstream of it is wired or unwired later.
 
-import type { GenesisReport, SiteOutcome } from '@atlas/genesis';
-import { reconcile } from '@atlas/genesis';
-import type { CommitRefusal } from '@atlas/adapter-io';
-import type { Awareness } from '@atlas/memory';
-import { STAGING_REFUSAL_TEXT as REFUSAL_TEXT } from './mine-staging.js';
-import type { CliVerdict } from './render.js';
+import type { GenesisReport, SiteOutcome } from "@atlas/genesis"
+import { reconcile } from "@atlas/genesis"
+import type { CommitRefusal } from "@atlas/adapter-io"
+import type { Awareness } from "@atlas/memory"
+import { STAGING_REFUSAL_TEXT as REFUSAL_TEXT } from "./mine-staging.js"
+import type { CliVerdict } from "./render.js"
 
 /**
  * One finished pass: the run's `GenesisReport` plus the four things the report cannot carry.
@@ -30,14 +30,14 @@ import type { CliVerdict } from './render.js';
  *                      set that is silently truncated reads as "we covered everything" (#130).
  */
 export interface MinePass {
-  readonly report: GenesisReport;
+  readonly report: GenesisReport
   /** GEN-9 — the pass's assembled Awareness (the output of seed.ts, mined/assembled by the run itself).
    *  Present on every pass so a caller can read what was (and was not) seeded — never fabricated. */
-  readonly seed: Awareness;
-  readonly refusal?: CommitRefusal;
-  readonly modelWired: boolean;
-  readonly promptDigest?: string;
-  readonly seedsDropped: number;
+  readonly seed: Awareness
+  readonly refusal?: CommitRefusal
+  readonly modelWired: boolean
+  readonly promptDigest?: string
+  readonly seedsDropped: number
 }
 
 /**
@@ -54,11 +54,11 @@ export interface MinePass {
  *     empty; with an explicit `ceiling: 0` the frontier is unknown and the budget is the honest cause.
  */
 export interface MineOutcome {
-  readonly facts: number; //        grounded candidate facts the pass actually wrote
-  readonly sitesVisited: number; // sites completed against the ceiling (report.budgetSpent)
-  readonly complete: boolean; //    the pass ran to its end (no resumeToken)
-  readonly modelWired: boolean; //  a real S2 proposer actually ran this pass
-  readonly ceiling?: number; //     the caller's explicit budget ceiling, when one was given
+  readonly facts: number //        grounded candidate facts the pass actually wrote
+  readonly sitesVisited: number // sites completed against the ceiling (report.budgetSpent)
+  readonly complete: boolean //    the pass ran to its end (no resumeToken)
+  readonly modelWired: boolean //  a real S2 proposer actually ran this pass
+  readonly ceiling?: number //     the caller's explicit budget ceiling, when one was given
 }
 
 /**
@@ -83,17 +83,17 @@ export interface MineOutcome {
  * itself is).
  */
 export function ledgerSeededIds(r: GenesisReport): ReadonlySet<string> | undefined {
-  if (r.coverage === undefined) return undefined;
-  const ids = new Set<string>();
-  for (const s of r.coverage.sites) if (s.outcome === 'seeded') for (const factId of s.facts) ids.add(factId);
-  return ids;
+  if (r.coverage === undefined) return undefined
+  const ids = new Set<string>()
+  for (const s of r.coverage.sites) if (s.outcome === "seeded") for (const factId of s.facts) ids.add(factId)
+  return ids
 }
 
 /** The count `mineOutcome`/`foldVerdict` print — ledger-derived when the ledger exists (#237), the
  *  pre-ledger `r.seeded.length` reading otherwise. Exported so `mine-arms.ts`'s per-arm and union renders
  *  read the SAME count `mineWhyEmpty` reasons from — the two disagreeing is exactly the #237 defect. */
 export function seededCount(r: GenesisReport): number {
-  return ledgerSeededIds(r)?.size ?? r.seeded.length;
+  return ledgerSeededIds(r)?.size ?? r.seeded.length
 }
 
 /** Project the run's own report to the observed outcome — the ONLY input the explanation below reads. */
@@ -104,7 +104,7 @@ export function mineOutcome(r: GenesisReport, modelWired: boolean, ceiling?: num
     complete: r.resumeToken === undefined,
     modelWired,
     ...(ceiling !== undefined ? { ceiling } : {}),
-  };
+  }
 }
 
 /**
@@ -127,18 +127,18 @@ export function mineOutcome(r: GenesisReport, modelWired: boolean, ceiling?: num
  * Returns `null` when the pass seeded facts (there is nothing to explain).
  */
 export function mineWhyEmpty(o: MineOutcome): string | null {
-  if (o.facts > 0) return null;
+  if (o.facts > 0) return null
   if (!o.complete) {
-    return 'mine: 0 candidate facts — the pass did not run to completion, so this 0 is not a finished result';
+    return "mine: 0 candidate facts — the pass did not run to completion, so this 0 is not a finished result"
   }
   if (o.sitesVisited === 0) {
     return o.ceiling === 0
-      ? 'mine: 0 candidate facts — 0 sites visited: the run budget ceiling was 0, so nothing was ever extracted'
-      : 'mine: 0 candidate facts — 0 sites visited: the structural pass (skeleton → ranked frontier) yielded no site, so no proposer was ever consulted; wiring a model would not change this 0. Run `atlas doctor index` to see whether this repository has the SCIP index the frontier is derived from';
+      ? "mine: 0 candidate facts — 0 sites visited: the run budget ceiling was 0, so nothing was ever extracted"
+      : "mine: 0 candidate facts — 0 sites visited: the structural pass (skeleton → ranked frontier) yielded no site, so no proposer was ever consulted; wiring a model would not change this 0. Run `atlas doctor index` to see whether this repository has the SCIP index the frontier is derived from"
   }
   return o.modelWired
     ? `mine: 0 candidate facts — ${o.sitesVisited} site(s) visited and every one abstained: nothing was proposed or admitted (facts are never fabricated)`
-    : `mine: 0 candidate facts — ${o.sitesVisited} site(s) visited and every one abstained: no proposer model is wired, so nothing could be proposed (facts are never fabricated)`;
+    : `mine: 0 candidate facts — ${o.sitesVisited} site(s) visited and every one abstained: no proposer model is wired, so nothing could be proposed (facts are never fabricated)`
 }
 
 /** The DROP line (GEN-15c). A dep-graph node with no counterpart on the spatial axis has no path, so no
@@ -148,14 +148,14 @@ export function mineWhyEmpty(o: MineOutcome): string | null {
 export function frontierDropLine(dropped: number): string | null {
   return dropped > 0
     ? `frontier: ${dropped} dep-graph node(s) dropped — no path on the spatial axis, so no source could be shown to a model (INDEX-13)`
-    : null;
+    : null
 }
 
 /** The PROVENANCE line (ADR-0011 D3). The prompt is a versioned artifact "hashed into the run's provenance",
  *  and `propose.md` leans on it: the refusal RATE is only readable as a quality signal with the prompt held
  *  fixed. That is only true if the hash of the artifact actually used LEAVES the run. */
 export function promptProvenanceLine(digest: string | undefined): string | null {
-  return digest === undefined ? null : `prompt: ${digest} — the artifact every proposal on this run was built from`;
+  return digest === undefined ? null : `prompt: ${digest} — the artifact every proposal on this run was built from`
 }
 
 /**
@@ -172,12 +172,17 @@ export function promptProvenanceLine(digest: string | undefined): string | null 
  * residual and why the row, not the count, is the thing that reconciles.
  */
 export function siteLine(o: SiteOutcome): string {
-  const row: Record<string, unknown> = { rank: o.rank, outcome: o.outcome, kind: o.site.kind, path: o.site.qualifiedPath };
-  if (o.outcome === 'seeded') row['facts'] = o.facts;
-  if (o.outcome === 'abstained') row['whyNot'] = o.whyNot.reason;
-  if (o.outcome === 'unrecorded') row['note'] = o.note;
-  if (o.outcome === 'unvisited') row['cause'] = o.cause;
-  return `site: ${JSON.stringify(row)}`;
+  const row: Record<string, unknown> = {
+    rank: o.rank,
+    outcome: o.outcome,
+    kind: o.site.kind,
+    path: o.site.qualifiedPath,
+  }
+  if (o.outcome === "seeded") row["facts"] = o.facts
+  if (o.outcome === "abstained") row["whyNot"] = o.whyNot.reason
+  if (o.outcome === "unrecorded") row["note"] = o.note
+  if (o.outcome === "unvisited") row["cause"] = o.cause
+  return `site: ${JSON.stringify(row)}`
 }
 
 /**
@@ -198,10 +203,10 @@ export function siteLine(o: SiteOutcome): string {
  * dropped. A 200-site run is the ceiling (GEN-2), so this is bounded by construction.
  */
 export function coverageLines(r: GenesisReport): readonly string[] {
-  const rec = reconcile(r.coverage);
-  const head = `coverage: ${rec.why}`;
-  if (r.coverage === undefined || r.coverage.sites.length === 0) return [head];
-  return [head, ...r.coverage.sites.map(siteLine)];
+  const rec = reconcile(r.coverage)
+  const head = `coverage: ${rec.why}`
+  if (r.coverage === undefined || r.coverage.sites.length === 0) return [head]
+  return [head, ...r.coverage.sites.map(siteLine)]
 }
 
 /**
@@ -215,8 +220,8 @@ export function coverageLines(r: GenesisReport): readonly string[] {
  * stays byte-identical (the mine-render + single-arm suites are the proof of that faithfulness).
  */
 export function passBodyLines(pass: MinePass, ceiling?: number): readonly string[] {
-  const r = pass.report;
-  const why = mineWhyEmpty(mineOutcome(r, pass.modelWired, ceiling));
+  const r = pass.report
+  const why = mineWhyEmpty(mineOutcome(r, pass.modelWired, ceiling))
   return [
     ...opt(frontierDropLine(pass.seedsDropped)),
     ...opt(promptProvenanceLine(pass.promptDigest)),
@@ -229,7 +234,7 @@ export function passBodyLines(pass: MinePass, ceiling?: number): readonly string
     // covered; it goes below the prose so the three lines `mine.md` pins verbatim keep their position, and
     // it is unconditional so that "no ledger" can only ever mean "this run has none", never "we skipped it".
     ...coverageLines(r),
-  ];
+  ]
 }
 
 /** Fold a finished pass to the CLI's process outcome. `renderVerdict` (render.ts) projects a handler
@@ -237,15 +242,15 @@ export function passBodyLines(pass: MinePass, ceiling?: number): readonly string
  *  An empty pass EXPLAINS itself with `mineWhyEmpty` — the cause is computed from the report, so the line
  *  stays true whether the 0 came from an empty frontier or from an unwired model (WP-F6). */
 export function foldVerdict(pass: MinePass, ceiling?: number): CliVerdict {
-  const r = pass.report;
+  const r = pass.report
   const lines = [
     `genesis: seeded ${seededCount(r)} candidate fact(s); ratified ${r.ratified.length}`,
     `cost: llmCalls ${r.llmCalls} · budgetSpent ${r.budgetSpent}`,
     ...passBodyLines(pass, ceiling),
-  ];
-  const failed = r.resumeToken !== undefined || pass.refusal !== undefined;
-  return { exitCode: failed ? 1 : 0, stdout: `${lines.join('\n')}\n` };
+  ]
+  const failed = r.resumeToken !== undefined || pass.refusal !== undefined
+  return { exitCode: failed ? 1 : 0, stdout: `${lines.join("\n")}\n` }
 }
 
 /** One optional line as a spreadable list — `null` contributes nothing. */
-const opt = (line: string | null): readonly string[] => (line === null ? [] : [line]);
+const opt = (line: string | null): readonly string[] => (line === null ? [] : [line])

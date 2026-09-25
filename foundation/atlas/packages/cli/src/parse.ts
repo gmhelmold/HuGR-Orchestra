@@ -4,24 +4,24 @@
 // cac/yargs/commander throw or call `process.exit` on bad input (violating CLI-1c totality). This parser
 // NEVER throws and NEVER touches `process.exit` — a malformed invocation fails CLOSED to a `ParseError`.
 
-import { COMMAND_LEG, COMMANDS } from './map.js';
-import type { Command } from './map.js';
+import { COMMAND_LEG, COMMANDS } from "./map.js"
+import type { Command } from "./map.js"
 
 /** A successful parse — the routed command plus its captured positionals/flags. */
 export interface ParseOk {
-  readonly ok: true;
-  readonly command: Command;
-  readonly positionals: readonly string[];
-  readonly flags: Readonly<Record<string, string>>;
+  readonly ok: true
+  readonly command: Command
+  readonly positionals: readonly string[]
+  readonly flags: Readonly<Record<string, string>>
 }
 
 /** A structured parse failure — a reason string, never a throw (CLI-1b). */
 export interface ParseError {
-  readonly ok: false;
-  readonly error: string;
+  readonly ok: false
+  readonly error: string
 }
 
-export type ParseResult = ParseOk | ParseError;
+export type ParseResult = ParseOk | ParseError
 
 /** The minimum positional arity each command requires (CLI-1b: a missing positional is a parse error).
  *  EXPORTED — `help.ts` (ENTRY-CLI-5) derives the help door's per-command arity line from THIS table, never
@@ -54,22 +54,22 @@ export const ARITY: Record<Command, number> = {
   transition: 3,
   // `test-vacuities <unit>` — the unit key whose grounded test-vacuity facts to read is the only positional
   // (#95, ADR-0015 D5 read door).
-  'test-vacuities': 1,
+  "test-vacuities": 1,
   // `test-vacuity <path>` — the repo path to scan is the only required positional (like `mine <repo>`, the
   // producer scans the composed `process.cwd()`); arity is 1 (#95, ADR-0015 D5 producer).
-  'test-vacuity': 1,
+  "test-vacuity": 1,
   // `verify-fact <kind> <target> --scope <s> [--world <w>] [--min <n>] [--exact]` — the class and the target
   // symbol are BOTH required positionals (the scope + count bounds ride valued flags), so arity is 2.
-  'verify-fact': 2,
+  "verify-fact": 2,
   // `verify-store` takes NO positional — same reasoning as `promote`: it re-verifies the WHOLE durable store
   // at `process.cwd()`, the same root the entrypoint composes the runtime over, so a path argument would let
   // the store re-verified diverge from the one every other command reads.
-  'verify-store': 0,
+  "verify-store": 0,
   // `derive-relations` takes NO positional — same reasoning as `promote`/`verify-store`: it projects the WHOLE
   // index at `process.cwd()` (the root the entrypoint composes the runtime over) to proven `depends-on`
   // relations and persists them into THAT repo's store, so a path argument would let the index projected diverge
   // from the store written and the one every other command reads (#99 WP-R7).
-  'derive-relations': 0,
+  "derive-relations": 0,
   // `anchors <path>` — the tree path to list groundable units under is the only required positional (AUTHOR-3/4,
   // ADR-0004 discovery planner); arity is 1. A path outside the tracked set / a non-git dir / an unreadable path
   // is NOT a parse error — it is the leg's honest-empty-with-a-reason answer (never a throw).
@@ -85,16 +85,16 @@ export const ARITY: Record<Command, number> = {
   check: 3,
   // `memory-emit <entryJsonPath>` — the MemoryEntry JSON file path is the only positional (WP-11.W8); no
   // `--at` (memory carries no source@sha anchor requirement).
-  'memory-emit': 1,
+  "memory-emit": 1,
   // `memory-recall [--owner o] [--kind k] [--task-id t] [--pr-id p]` — MEM-4b's explicit-consult path takes
   // NO positional; the query is built entirely from optional valued flags.
-  'memory-recall': 0,
+  "memory-recall": 0,
   // `memory-header` — the composed actor's running-turn header; no positional (MEM-1/4/7).
-  'memory-header': 0,
+  "memory-header": 0,
   // `memory-awareness` — the SHARED Awareness slab; no positional (MEM-11/12).
-  'memory-awareness': 0,
+  "memory-awareness": 0,
   // `memory-orientation` — the SHARED Orientation slab; no positional (MEM-6).
-  'memory-orientation': 0,
+  "memory-orientation": 0,
   // `budget` — the RETR-8 per-kind calibration ledger; no positional (WP-3-RETR).
   budget: 0,
   // `territories` — the RETR-13 per-territory off-atlas MISS-oracle; no positional (WP-3-RETR).
@@ -107,16 +107,16 @@ export const ARITY: Record<Command, number> = {
   // into (EPIC-1-b PERSIST-9). A target that already hosts a store is REFUSED by the leg, not merged with.
   // Exactly TWO positionals.
   import: 2,
-};
+}
 
 // [ENTRY-CLI-5 clean-up] this used to be a HAND-TRANSCRIBED string literal — a second copy of `COMMANDS`
 // (map.ts), three feet from the array that already enumerates the surface, and exactly the smell that made
 // `COMMAND_LEG`'s own count-in-a-comment wrong twice (map.ts:63-65). DERIVED now: an error message built
 // from this is automatically current the moment a command joins `COMMANDS`, never a second list to remember.
-const COMMAND_LIST = COMMANDS.join('|');
+const COMMAND_LIST = COMMANDS.join("|")
 
 function isCommand(s: string): s is Command {
-  return Object.prototype.hasOwnProperty.call(COMMAND_LEG, s);
+  return Object.prototype.hasOwnProperty.call(COMMAND_LEG, s)
 }
 
 /**
@@ -127,7 +127,7 @@ function isCommand(s: string): s is Command {
  * flag simply folds into the bag (a bare `--x` becomes `'true'`) — never a parse error, preserving totality.
  *  EXPORTED — `help.ts` (ENTRY-CLI-5) lists these as the flags help names, rather than a second hand-
  *  transcribed set. */
-export const VALUED_FLAGS = new Set(['at', 'by', 'scope', 'world', 'min', 'owner', 'kind', 'task-id', 'pr-id']);
+export const VALUED_FLAGS = new Set(["at", "by", "scope", "world", "min", "owner", "kind", "task-id", "pr-id"])
 
 /**
  * Fold one `-x`/`--x`/`--x=y`/`--x y` token into the flag bag — a bare flag is `'true'`. For a VALUED flag in
@@ -138,18 +138,18 @@ export const VALUED_FLAGS = new Set(['at', 'by', 'scope', 'world', 'min', 'owner
  * `'true'`, which the emit marshaller rejects as a missing `--at`).
  */
 function foldFlag(tok: string, next: string | undefined, flags: Record<string, string>): number {
-  const body = tok.replace(/^-+/, '');
-  const eq = body.indexOf('=');
+  const body = tok.replace(/^-+/, "")
+  const eq = body.indexOf("=")
   if (eq >= 0) {
-    flags[body.slice(0, eq)] = body.slice(eq + 1);
-    return 0;
+    flags[body.slice(0, eq)] = body.slice(eq + 1)
+    return 0
   }
-  if (VALUED_FLAGS.has(body) && next !== undefined && !next.startsWith('-')) {
-    flags[body] = next;
-    return 1;
+  if (VALUED_FLAGS.has(body) && next !== undefined && !next.startsWith("-")) {
+    flags[body] = next
+    return 1
   }
-  flags[body] = 'true';
-  return 0;
+  flags[body] = "true"
+  return 0
 }
 
 /**
@@ -159,34 +159,34 @@ function foldFlag(tok: string, next: string | undefined, flags: Record<string, s
  */
 export function parse(argv: readonly string[]): ParseResult {
   if (argv.length === 0) {
-    return { ok: false, error: `no command: expected one of ${COMMAND_LIST}` };
+    return { ok: false, error: `no command: expected one of ${COMMAND_LIST}` }
   }
-  const cmd = argv[0];
-  if (cmd === undefined || cmd.startsWith('-')) {
-    return { ok: false, error: `no command: the first argument is a flag — expected one of ${COMMAND_LIST}` };
+  const cmd = argv[0]
+  if (cmd === undefined || cmd.startsWith("-")) {
+    return { ok: false, error: `no command: the first argument is a flag — expected one of ${COMMAND_LIST}` }
   }
   if (!isCommand(cmd)) {
-    return { ok: false, error: `unknown command '${cmd}': expected one of ${COMMAND_LIST}` };
+    return { ok: false, error: `unknown command '${cmd}': expected one of ${COMMAND_LIST}` }
   }
 
-  const positionals: string[] = [];
-  const flags: Record<string, string> = {};
-  const rest = argv.slice(1);
+  const positionals: string[] = []
+  const flags: Record<string, string> = {}
+  const rest = argv.slice(1)
   for (let i = 0; i < rest.length; i++) {
-    const tok = rest[i];
-    if (tok === undefined) continue;
-    if (tok.startsWith('-')) i += foldFlag(tok, rest[i + 1], flags);
-    else positionals.push(tok);
+    const tok = rest[i]
+    if (tok === undefined) continue
+    if (tok.startsWith("-")) i += foldFlag(tok, rest[i + 1], flags)
+    else positionals.push(tok)
   }
 
   // missing positional
-  const need = ARITY[cmd];
+  const need = ARITY[cmd]
   if (positionals.length < need) {
     return {
       ok: false,
       error: `command '${cmd}' requires ${need} positional argument(s), got ${positionals.length}`,
-    };
+    }
   }
 
-  return { ok: true, command: cmd, positionals, flags };
+  return { ok: true, command: cmd, positionals, flags }
 }

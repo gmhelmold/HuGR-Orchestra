@@ -43,12 +43,12 @@
 // Neither case kills the other's mutant (verified), which is the point: a single case here would leave one
 // endpoint unpinned all over again, in precisely the way SCN-GL-2's missing mirror did.
 
-import { describe, it, expect } from 'vitest';
-import { reasonOf } from './door-regression-support.js';
-import { addressOf, blindTo, fact, fixture, POLICY } from './governed-link-support.js';
-import { createGovernedLink } from '../src/governed-link.js';
-import type { DiskStore } from '../src/store.js';
-import type { AtlasPolicy } from '../src/policy.js';
+import { describe, it, expect } from "vitest"
+import { reasonOf } from "./door-regression-support.js"
+import { addressOf, blindTo, fact, fixture, POLICY } from "./governed-link-support.js"
+import { createGovernedLink } from "../src/governed-link.js"
+import type { DiskStore } from "../src/store.js"
+import type { AtlasPolicy } from "../src/policy.js"
 
 // ── the TWO-SCOPE, ONE-SIDED fixture ─────────────────────────────────────────────────────────────────
 //
@@ -57,87 +57,92 @@ import type { AtlasPolicy } from '../src/policy.js';
 // stranger to alice's, which is the actor shape the whole suite was missing.
 const TWO_SCOPE: AtlasPolicy = {
   ...POLICY,
-  authz: { scopes: { core: ['alice'], other: ['mallory', 'alice'] } },
-};
+  authz: { scopes: { core: ["alice"], other: ["mallory", "alice"] } },
+}
 
-const ALICE_NODE = fact({ claim: 'alpha', scope: 'core', tier: 'T2' }); //  n0 — mallory has NO authority here
-const MALLORY_NODE = fact({ claim: 'mu', scope: 'other', tier: 'T2' }); //  n1 — mallory IS in scope here
+const ALICE_NODE = fact({ claim: "alpha", scope: "core", tier: "T2" }) //  n0 — mallory has NO authority here
+const MALLORY_NODE = fact({ claim: "mu", scope: "other", tier: "T2" }) //  n1 — mallory IS in scope here
 
 /** THE ADVERSARY'S INSTRUMENT. mallory names two keys and reads the refusal back. The value returned is the
  *  full refusal BYTES — if the two byte-states of the store yield two different buffers, she has read one
  *  bit about a node she may not touch, and the door has an oracle. */
 function probeBytes(store: DiskStore, a: string, b: string): Buffer {
-  const door = createGovernedLink({ store, policy: TWO_SCOPE, actor: 'mallory', ratifyToken: 'billy' });
-  const out = door.link(a, b);
+  const door = createGovernedLink({ store, policy: TWO_SCOPE, actor: "mallory", ratifyToken: "billy" })
+  const out = door.link(a, b)
   // The write must never land either — recorded here so the LINKED-equivalence claim above is measured by
   // this file rather than asserted in a comment. (Under both mutants this stays false: the class walk.)
-  expect(out.linked).toBe(false);
-  return Buffer.from(out.rejected ?? '', 'utf8');
+  expect(out.linked).toBe(false)
+  return Buffer.from(out.rejected ?? "", "utf8")
 }
 
-describe('WP-SAMEAS — the endpoint authz gate is a DISCLOSURE gate, one refusal point per endpoint', () => {
-  it('SCN-GL-15 — a one-sided actor learns NOTHING about endpoint A\'s storage (kills the `a` half)', () => {
-    const fx = fixture([ALICE_NODE, MALLORY_NODE]);
+describe("WP-SAMEAS — the endpoint authz gate is a DISCLOSURE gate, one refusal point per endpoint", () => {
+  it("SCN-GL-15 — a one-sided actor learns NOTHING about endpoint A's storage (kills the `a` half)", () => {
+    const fx = fixture([ALICE_NODE, MALLORY_NODE])
     // mallory links alice's node (A = n0, out of her reach) to her own (B = n1, in her scope). The `a` half
     // of the conjunction is the ONLY thing standing between her and the 3.25 read-back.
-    const healthy = probeBytes(fx.store, 'n0', 'n1');
-    const pruned = probeBytes(blindTo(fx.store, addressOf(ALICE_NODE)), 'n0', 'n1');
+    const healthy = probeBytes(fx.store, "n0", "n1")
+    const pruned = probeBytes(blindTo(fx.store, addressOf(ALICE_NODE)), "n0", "n1")
 
-    expect(healthy.length).toBeGreaterThan(0); // anti-vacuity: two empty buffers also compare equal
+    expect(healthy.length).toBeGreaterThan(0) // anti-vacuity: two empty buffers also compare equal
     // THE MUTANT DIES HERE. With `!rowAuthorized(deps, nodeA, factA)` dropped, mallory clears the endpoint
     // gate on B alone, reaches 3.25 with A's bytes missing, and is handed `unverifiable endpoint` — while
     // the healthy store hands her `unauthorized` from the class walk. Two states, two strings, one bit.
-    expect(reasonOf(healthy.toString('utf8'))).toBe('unauthorized');
+    expect(reasonOf(healthy.toString("utf8"))).toBe("unauthorized")
     // The DISCRIMINANT comparison first, so a failure here reads as the oracle it is
     // (`expected 'unverifiable endpoint' to be 'unauthorized'`) rather than as `-1 is not +0`.
-    expect(reasonOf(pruned.toString('utf8'))).toBe(reasonOf(healthy.toString('utf8')));
-    expect(Buffer.compare(healthy, pruned)).toBe(0); // …and not one BYTE of the prose differs either
-    expect(fx.persists()).toHaveLength(0); // and no probe ever wrote anything
-  });
+    expect(reasonOf(pruned.toString("utf8"))).toBe(reasonOf(healthy.toString("utf8")))
+    expect(Buffer.compare(healthy, pruned)).toBe(0) // …and not one BYTE of the prose differs either
+    expect(fx.persists()).toHaveLength(0) // and no probe ever wrote anything
+  })
 
-  it('SCN-GL-16 — …and NOTHING about endpoint B\'s storage either (kills the `b` half)', () => {
-    const fx = fixture([ALICE_NODE, MALLORY_NODE]);
+  it("SCN-GL-16 — …and NOTHING about endpoint B's storage either (kills the `b` half)", () => {
+    const fx = fixture([ALICE_NODE, MALLORY_NODE])
     // The MIRROR: the same two nodes, named the other way round, so alice's node is now the SECOND endpoint.
     // SCN-GL-15 cannot see this one — with the `b` half dropped, the surviving `a` half checks mallory's own
     // node in SCN-GL-15's ordering and passes, but here it checks alice's node and fires. Two cases, or one
     // endpoint stays unpinned.
-    const healthy = probeBytes(fx.store, 'n1', 'n0');
-    const pruned = probeBytes(blindTo(fx.store, addressOf(ALICE_NODE)), 'n1', 'n0');
+    const healthy = probeBytes(fx.store, "n1", "n0")
+    const pruned = probeBytes(blindTo(fx.store, addressOf(ALICE_NODE)), "n1", "n0")
 
-    expect(healthy.length).toBeGreaterThan(0);
-    expect(reasonOf(healthy.toString('utf8'))).toBe('unauthorized');
-    expect(reasonOf(pruned.toString('utf8'))).toBe(reasonOf(healthy.toString('utf8')));
-    expect(Buffer.compare(healthy, pruned)).toBe(0);
-    expect(fx.persists()).toHaveLength(0);
-  });
+    expect(healthy.length).toBeGreaterThan(0)
+    expect(reasonOf(healthy.toString("utf8"))).toBe("unauthorized")
+    expect(reasonOf(pruned.toString("utf8"))).toBe(reasonOf(healthy.toString("utf8")))
+    expect(Buffer.compare(healthy, pruned)).toBe(0)
+    expect(fx.persists()).toHaveLength(0)
+  })
 
-  it('SCN-GL-17 — ANTI-VACUITY: the pruned state IS observable, to the actor entitled to observe it', () => {
+  it("SCN-GL-17 — ANTI-VACUITY: the pruned state IS observable, to the actor entitled to observe it", () => {
     // Without this, SCN-GL-15/16 could pass because the two byte-states are indistinguishable to EVERYONE —
     // i.e. because the prune never took effect — rather than because the gate withholds the difference. It
     // is the SCN-GL-7 distinction, and it is what makes the byte-comparison above a security property rather
     // than an accident of the fixture.
-    const fx = fixture([ALICE_NODE, MALLORY_NODE]);
-    const blindStore = blindTo(fx.store, addressOf(ALICE_NODE));
-    const alice = createGovernedLink({ store: blindStore, policy: TWO_SCOPE, actor: 'alice', ratifyToken: 'billy' });
+    const fx = fixture([ALICE_NODE, MALLORY_NODE])
+    const blindStore = blindTo(fx.store, addressOf(ALICE_NODE))
+    const alice = createGovernedLink({ store: blindStore, policy: TWO_SCOPE, actor: "alice", ratifyToken: "billy" })
 
     // alice holds BOTH scopes, so she has cleared the endpoint gate and is entitled to the honest, actionable
     // storage answer — a pruned CAS is not a policy gap an admin should try to fix by granting a scope.
-    const owner = alice.link('n0', 'n1');
-    expect(owner.linked).toBe(false);
-    expect(reasonOf(owner.rejected)).toBe('unverifiable endpoint');
+    const owner = alice.link("n0", "n1")
+    expect(owner.linked).toBe(false)
+    expect(reasonOf(owner.rejected)).toBe("unverifiable endpoint")
 
     // …and that string is NOT the one mallory was handed for the very same store. The oracle exists; the
     // gate is what keeps it on the authorized side of the door.
-    const strangerSaw = probeBytes(blindStore, 'n0', 'n1');
-    expect(reasonOf(strangerSaw.toString('utf8'))).not.toBe(reasonOf(owner.rejected));
-    expect(Buffer.compare(Buffer.from(owner.rejected ?? '', 'utf8'), strangerSaw)).not.toBe(0);
+    const strangerSaw = probeBytes(blindStore, "n0", "n1")
+    expect(reasonOf(strangerSaw.toString("utf8"))).not.toBe(reasonOf(owner.rejected))
+    expect(Buffer.compare(Buffer.from(owner.rejected ?? "", "utf8"), strangerSaw)).not.toBe(0)
 
     // CONTROL — the gate is MEMBERSHIP, not a blanket ban: on the HEALTHY store alice's link is hers to make,
     // so neither refusal above is an over-block masquerading as a control.
-    const fx2 = fixture([ALICE_NODE, MALLORY_NODE]);
-    const healthyAlice = createGovernedLink({ store: fx2.store, policy: TWO_SCOPE, actor: 'alice', ratifyToken: 'billy' });
-    expect(healthyAlice.link('n0', 'n1').linked).toBe(true);
-    expect(fx2.persists()).toHaveLength(1);
-    expect(fx.persists()).toHaveLength(0);
-  });
-});
+    const fx2 = fixture([ALICE_NODE, MALLORY_NODE])
+    const healthyAlice = createGovernedLink({
+      store: fx2.store,
+      policy: TWO_SCOPE,
+      actor: "alice",
+      ratifyToken: "billy",
+    })
+    expect(healthyAlice.link("n0", "n1").linked).toBe(true)
+    expect(fx2.persists()).toHaveLength(1)
+    expect(fx.persists()).toHaveLength(0)
+  })
+})

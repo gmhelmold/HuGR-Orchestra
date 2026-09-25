@@ -548,9 +548,7 @@ const layer: Layer.Layer<
           },
           sessionStartOutput,
         )
-        .pipe(
-          Effect.catch((err) => Effect.logError("session.start hook failed", { sessionID: result.id, err })),
-        )
+        .pipe(Effect.catch((err) => Effect.logError("session.start hook failed", { sessionID: result.id, err })))
 
       return result
     })
@@ -652,9 +650,7 @@ const layer: Layer.Layer<
             )
             .pipe(
               Effect.timeout(5000),
-              Effect.catch((err) =>
-                Effect.logError("session.end hook failed or timed out", { sessionID, err }),
-              ),
+              Effect.catch((err) => Effect.logError("session.end hook failed or timed out", { sessionID, err })),
             )
         }
 

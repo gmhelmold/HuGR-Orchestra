@@ -1,7 +1,7 @@
 # `atlas verify-fact`
 
-**PROVE, REFUTE, or ABSTAIN** on a typed claim about the code index — the read door of the *sound-genesis
-PROVEN family*. Three pure, total, `$0`-LLM oracles (`@atlas/genesis`) decide a claim over the live
+**PROVE, REFUTE, or ABSTAIN** on a typed claim about the code index — the read door of the _sound-genesis
+PROVEN family_. Three pure, total, `$0`-LLM oracles (`@atlas/genesis`) decide a claim over the live
 symbol-reverse view (the #99b N0 completeness feed): soundness comes from a **witnessed existence**, never
 from an absence the index cannot guarantee. This is the program-checkable half of the sound-genesis gate —
 the answers it gives are proofs against the index, not model judgements. Read-only: it opens no write path and
@@ -9,11 +9,11 @@ carries no governed token (`GOVERNANCE_SURFACE` stays 5).
 
 ## The three classes
 
-| kind | claim | verdicts | soundness |
-|---|---|---|---|
-| `dependency` | *a caller of `<target>` exists under `--scope`* | `proven` / `abstain` | `proven` = a witnessed caller, sound in **any** world; never refutes (a cross-package absence is not sound) |
-| `count` | *≥ N distinct callers of `<target>` exist under `--scope`* | `proven` / `abstain` | `proven` = a witnessed lower bound (`--exact` additionally needs a **closed** world) |
-| `negation` | *no caller of `<target>` exists under `--scope`* | `proven` / `refuted` / `abstain` | the #220 closed-world dual: `refuted` = a witnessed counterexample (any world); `proven` only when the single scope is closed |
+| kind         | claim                                                      | verdicts                         | soundness                                                                                                                     |
+| ------------ | ---------------------------------------------------------- | -------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| `dependency` | _a caller of `<target>` exists under `--scope`_            | `proven` / `abstain`             | `proven` = a witnessed caller, sound in **any** world; never refutes (a cross-package absence is not sound)                   |
+| `count`      | _≥ N distinct callers of `<target>` exist under `--scope`_ | `proven` / `abstain`             | `proven` = a witnessed lower bound (`--exact` additionally needs a **closed** world)                                          |
+| `negation`   | _no caller of `<target>` exists under `--scope`_           | `proven` / `refuted` / `abstain` | the #220 closed-world dual: `refuted` = a witnessed counterexample (any world); `proven` only when the single scope is closed |
 
 `abstain` is an **honest non-answer**, not a failure: the target is `local`/unresolvable, out of scope, or
 the world is open. It is exit `0` with the verdict on `data`, exactly as `atlas negations` surfaces an

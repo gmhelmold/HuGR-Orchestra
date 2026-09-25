@@ -4,14 +4,14 @@ Status: deterministic kernel and durable record writer implemented; automatic pe
 
 ## Verified OpenCode Seams
 
-| Need | Source | Verdict |
-|---|---|---|
-| Durable user message identity/read | `packages/opencode/src/session/message-v2.ts:506` | available: `(sessionID, messageID)` lookup reads persisted message/parts |
-| Prompt entry after user message persists | `packages/opencode/src/session/prompt.ts:1052-1070` | available: `createUserMessage` precedes LLM loop |
-| Agent prompt and skills | `packages/opencode/src/session/llm/request.ts:56-66`; `packages/opencode/src/tool/skill.ts` | available: Maestro prompt replaces provider prompt; `frame-request` is OpenCode-discoverable, permissioned, lazy-loaded skill |
-| Session metadata | `packages/opencode/src/session/session.ts:223,800-802` | inadequate alone: untyped record replacement, not append-only admission evidence |
-| Child Session creation | `packages/opencode/src/tool/task.ts:198-214` | available but unfenced: Task has no governed revision identity and creates Session directly |
-| Per-message deterministic admission hook | prompt loop inspected through `packages/opencode/src/session/prompt.ts:1052-1286` | absent: no Maestro-specific pre-LLM method runner or durable method projection |
+| Need                                     | Source                                                                                      | Verdict                                                                                                                       |
+| ---------------------------------------- | ------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| Durable user message identity/read       | `packages/opencode/src/session/message-v2.ts:506`                                           | available: `(sessionID, messageID)` lookup reads persisted message/parts                                                      |
+| Prompt entry after user message persists | `packages/opencode/src/session/prompt.ts:1052-1070`                                         | available: `createUserMessage` precedes LLM loop                                                                              |
+| Agent prompt and skills                  | `packages/opencode/src/session/llm/request.ts:56-66`; `packages/opencode/src/tool/skill.ts` | available: Maestro prompt replaces provider prompt; `frame-request` is OpenCode-discoverable, permissioned, lazy-loaded skill |
+| Session metadata                         | `packages/opencode/src/session/session.ts:223,800-802`                                      | inadequate alone: untyped record replacement, not append-only admission evidence                                              |
+| Child Session creation                   | `packages/opencode/src/tool/task.ts:198-214`                                                | available but unfenced: Task has no governed revision identity and creates Session directly                                   |
+| Per-message deterministic admission hook | prompt loop inspected through `packages/opencode/src/session/prompt.ts:1052-1286`           | absent: no Maestro-specific pre-LLM method runner or durable method projection                                                |
 
 ## Consequence
 

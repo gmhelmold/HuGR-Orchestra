@@ -11,56 +11,56 @@
 //     class); it is an EDGE, never a folded claim/tier, so it launders nothing. Severing it on an unrelated
 //     emit-tier raise would silently SHRINK a governed equivalence class.
 
-import { describe, it, expect } from 'vitest';
-import { emptyStore, upsert } from '../src/write/upsert.js';
-import type { WriteRequest } from '../src/write/router.js';
+import { describe, it, expect } from "vitest"
+import { emptyStore, upsert } from "../src/write/upsert.js"
+import type { WriteRequest } from "../src/write/router.js"
 
-const KEY = 'nk-adv';
+const KEY = "nk-adv"
 
 // A tokenless-style T2 CREATE carrying an answer receipt (the mine path stamps one).
 const seedT2 = (answerRef: string): WriteRequest => ({
   nodeKey: KEY,
-  contentHash: 'ch-v0',
-  family: 'advisory',
-  claimNorm: 'weaker prior claim',
-  tier: 'T2',
-  scope: 'core',
+  contentHash: "ch-v0",
+  family: "advisory",
+  claimNorm: "weaker prior claim",
+  tier: "T2",
+  scope: "core",
   answerRef,
-});
+})
 
 // A legitimate governing raise to T0 at the SAME node (a re-mine/human emit that omits a fresh receipt).
 const raiseToT0 = (): WriteRequest => ({
   nodeKey: KEY,
-  contentHash: 'ch-v1',
-  family: 'advisory',
-  claimNorm: 'ratified T0 claim',
-  tier: 'T0',
-  scope: 'core',
-});
+  contentHash: "ch-v1",
+  family: "advisory",
+  claimNorm: "ratified T0 claim",
+  tier: "T0",
+  scope: "core",
+})
 
-describe('upsert — a governing tier-raise severs claims but carries answerRef + sameAs forward (by design)', () => {
-  it('severs the prior claim (anti-laundering) yet preserves answerRef and a prior sameAs edge', () => {
-    let s = emptyStore();
-    s = upsert(s, seedT2('ref-mine-0')).store;
+describe("upsert — a governing tier-raise severs claims but carries answerRef + sameAs forward (by design)", () => {
+  it("severs the prior claim (anti-laundering) yet preserves answerRef and a prior sameAs edge", () => {
+    let s = emptyStore()
+    s = upsert(s, seedT2("ref-mine-0")).store
 
     // Simulate a PRIOR governed `atlas-link` act: the node carries a sameAs equivalence edge. (sameAs is a
     // per-node field set by the link door, not a WriteRequest leg — seed it directly, as a prior link would,
     // through a fresh Map since `store.current` is a ReadonlyMap.)
-    const withEdge = new Map(s.current);
-    withEdge.set(KEY, { ...withEdge.get(KEY)!, sameAs: ['nk-peer'] });
-    s = { ...s, current: withEdge };
+    const withEdge = new Map(s.current)
+    withEdge.set(KEY, { ...withEdge.get(KEY)!, sameAs: ["nk-peer"] })
+    s = { ...s, current: withEdge }
 
     // The governing raise T2 → T0.
-    s = upsert(s, raiseToT0()).store;
-    const row = s.current.get(KEY)!;
+    s = upsert(s, raiseToT0()).store
+    const row = s.current.get(KEY)!
 
     // Anti-laundering: the weaker prior claim is GONE; only the raiser's assertion survives.
-    expect(row.claims).toEqual(['ratified T0 claim']);
-    expect(row.claims).not.toContain('weaker prior claim');
-    expect(row.tier).toBe('T0'); // the raise really happened
+    expect(row.claims).toEqual(["ratified T0 claim"])
+    expect(row.claims).not.toContain("weaker prior claim")
+    expect(row.tier).toBe("T0") // the raise really happened
 
     // Carry-forward BY DESIGN: neither of these is a laundering channel, and dropping them would be wrong.
-    expect(row.answerRef).toBe('ref-mine-0'); // opaque provenance, never served as governing-band content
-    expect((row as { sameAs?: readonly string[] }).sameAs).toEqual(['nk-peer']); // signed link edge, must not shrink
-  });
-});
+    expect(row.answerRef).toBe("ref-mine-0") // opaque provenance, never served as governing-band content
+    expect((row as { sameAs?: readonly string[] }).sameAs).toEqual(["nk-peer"]) // signed link edge, must not shrink
+  })
+})

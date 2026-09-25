@@ -7,25 +7,34 @@
 // bytes on every branch — cli.ts's two call sites are now `return dispatchMine();` / `return
 // dispatchVerifyStore(deps.reverify);` where the bodies used to sit inline.
 
-import { existsSync } from 'node:fs';
-import { join } from 'node:path';
-import { CAS_REL, createHistorySource, memoryRecallVerdict, memoryHeaderVerdict, memoryAwarenessVerdict, memoryOrientationVerdict, budgetVerdict, territoriesVerdict } from '@atlas/adapter-io';
-import type { ReverifyReport, BudgetReport, TerritoriesLeg } from '@atlas/adapter-io';
-import type { Awareness, MemoryRecord, Orientation, TurnHeader } from '@atlas/memory';
-import { runOkfExport, runOkfImport } from './okf-cli.js';
-import { runPromote } from './promote.js';
-import { runDeriveRelationsCli } from './derive-relations.js';
-import { asHash } from '@atlas/kernel';
-import { headSha } from '@atlas/adapter-io';
-import type { Hash } from '@atlas/contracts';
-import type { PromoteOut } from '@atlas/adapter-io';
-import type { DeriveRelationsRun } from '@atlas/adapter-io';
-import { runMine, runMineArms } from './mine.js';
-import { loadTaskProposer, resolveMineSlot, TASK_PROPOSER_IDENTITY } from './mine-proposer.js';
-import { runReverify } from './reverify.js';
-import { renderRefusal } from './render.js';
-import { emit, emitCli, errorVerdict, refusalVerdict } from './cli-verdict.js';
-import type { CliVerdict } from './render.js';
+import { existsSync } from "node:fs"
+import { join } from "node:path"
+import {
+  CAS_REL,
+  createHistorySource,
+  memoryRecallVerdict,
+  memoryHeaderVerdict,
+  memoryAwarenessVerdict,
+  memoryOrientationVerdict,
+  budgetVerdict,
+  territoriesVerdict,
+} from "@atlas/adapter-io"
+import type { ReverifyReport, BudgetReport, TerritoriesLeg } from "@atlas/adapter-io"
+import type { Awareness, MemoryRecord, Orientation, TurnHeader } from "@atlas/memory"
+import { runOkfExport, runOkfImport } from "./okf-cli.js"
+import { runPromote } from "./promote.js"
+import { runDeriveRelationsCli } from "./derive-relations.js"
+import { asHash } from "@atlas/kernel"
+import { headSha } from "@atlas/adapter-io"
+import type { Hash } from "@atlas/contracts"
+import type { PromoteOut } from "@atlas/adapter-io"
+import type { DeriveRelationsRun } from "@atlas/adapter-io"
+import { runMine, runMineArms } from "./mine.js"
+import { loadTaskProposer, resolveMineSlot, TASK_PROPOSER_IDENTITY } from "./mine-proposer.js"
+import { runReverify } from "./reverify.js"
+import { renderRefusal } from "./render.js"
+import { emit, emitCli, errorVerdict, refusalVerdict } from "./cli-verdict.js"
+import type { CliVerdict } from "./render.js"
 
 /**
  * CLI-4 / SOUND-DEFAULT-MINE: `mine` drives the FROZEN genesis run-controller (`runMineArms`) over the repo
@@ -72,22 +81,29 @@ import type { CliVerdict } from './render.js';
  */
 export async function dispatchMine(): Promise<number> {
   try {
-    const proposer = loadTaskProposer();
-    const deps = { history: createHistorySource(process.cwd(), 'HEAD') };
+    const proposer = loadTaskProposer()
+    const deps = { history: createHistorySource(process.cwd(), "HEAD") }
     if (proposer !== undefined) {
-      return emitCli(await runMine(process.cwd(), { ...deps, proposer, slot: resolveMineSlot({}), modelIdentity: TASK_PROPOSER_IDENTITY }));
+      return emitCli(
+        await runMine(process.cwd(), {
+          ...deps,
+          proposer,
+          slot: resolveMineSlot({}),
+          modelIdentity: TASK_PROPOSER_IDENTITY,
+        }),
+      )
     }
-    return emitCli(await runMineArms(process.cwd(), deps));
+    return emitCli(await runMineArms(process.cwd(), deps))
   } catch (e) {
-    const name = (e as { name?: unknown } | null)?.name;
+    const name = (e as { name?: unknown } | null)?.name
     if (
-      name !== 'ModelConfigError' &&
-      name !== 'PromptError' &&
-      name !== 'ModelCommandError' &&
-      name !== 'UnaddressableCasObjectError'
+      name !== "ModelConfigError" &&
+      name !== "PromptError" &&
+      name !== "ModelCommandError" &&
+      name !== "UnaddressableCasObjectError"
     )
-      throw e;
-    return emitCli(renderRefusal(refusalVerdict((e as Error).message)));
+      throw e
+    return emitCli(renderRefusal(refusalVerdict((e as Error).message)))
   }
 }
 
@@ -113,7 +129,7 @@ export async function dispatchMine(): Promise<number> {
  * write, `verify-store` before any write has ever happened has nothing to check either way.
  */
 export function dispatchVerifyStore(reverify: (() => ReverifyReport) | undefined): number {
-  const atlasDir = join(process.cwd(), '.atlas');
+  const atlasDir = join(process.cwd(), ".atlas")
   if (!existsSync(atlasDir)) {
     return emitCli(
       renderRefusal(
@@ -124,12 +140,12 @@ export function dispatchVerifyStore(reverify: (() => ReverifyReport) | undefined
             `SAME "0 sealed-proven fact(s)" bytes a genuinely empty, real '.atlas/' store would print.`,
         ),
       ),
-    );
+    )
   }
   if (!reverify) {
-    return emit(errorVerdict('atlas runtime is not composed yet — the WireConfig seams need the composition-root WP'));
+    return emit(errorVerdict("atlas runtime is not composed yet — the WireConfig seams need the composition-root WP"))
   }
-  return emitCli(runReverify(reverify));
+  return emitCli(runReverify(reverify))
 }
 
 // ── WP-11.W8 / CAMPAIGN-11 — the four memory READ_SURFACE doors, pulled out here for the SAME LOC-relief
@@ -143,43 +159,49 @@ export function dispatchMemoryRecall(
   recall: ((query: unknown) => readonly MemoryRecord[]) | undefined,
   flags: Readonly<Record<string, string>>,
 ): number {
-  if (!recall) return emit(errorVerdict('atlas runtime is not composed yet — the WireConfig seams need the composition-root WP'));
-  const query: Record<string, string> = {};
-  if (flags['owner'] !== undefined) query['owner'] = flags['owner'];
-  if (flags['kind'] !== undefined) query['kind'] = flags['kind'];
-  if (flags['task-id'] !== undefined) query['taskId'] = flags['task-id'];
-  if (flags['pr-id'] !== undefined) query['prId'] = flags['pr-id'];
-  return emit(memoryRecallVerdict(recall, query));
+  if (!recall)
+    return emit(errorVerdict("atlas runtime is not composed yet — the WireConfig seams need the composition-root WP"))
+  const query: Record<string, string> = {}
+  if (flags["owner"] !== undefined) query["owner"] = flags["owner"]
+  if (flags["kind"] !== undefined) query["kind"] = flags["kind"]
+  if (flags["task-id"] !== undefined) query["taskId"] = flags["task-id"]
+  if (flags["pr-id"] !== undefined) query["prId"] = flags["pr-id"]
+  return emit(memoryRecallVerdict(recall, query))
 }
 
 /** `atlas memory-header` — MEM-1/4/7's per-seat running-turn header (no input). */
 export function dispatchMemoryHeader(header: (() => TurnHeader) | undefined): number {
-  if (!header) return emit(errorVerdict('atlas runtime is not composed yet — the WireConfig seams need the composition-root WP'));
-  return emit(memoryHeaderVerdict(header));
+  if (!header)
+    return emit(errorVerdict("atlas runtime is not composed yet — the WireConfig seams need the composition-root WP"))
+  return emit(memoryHeaderVerdict(header))
 }
 
 /** `atlas memory-awareness` — the MEM-11/12 SHARED Awareness slab (no input). */
 export function dispatchMemoryAwareness(awareness: (() => Awareness) | undefined): number {
-  if (!awareness) return emit(errorVerdict('atlas runtime is not composed yet — the WireConfig seams need the composition-root WP'));
-  return emit(memoryAwarenessVerdict(awareness));
+  if (!awareness)
+    return emit(errorVerdict("atlas runtime is not composed yet — the WireConfig seams need the composition-root WP"))
+  return emit(memoryAwarenessVerdict(awareness))
 }
 
 /** `atlas memory-orientation` — the MEM-6 DERIVED, SHARED Orientation slab (no input). */
 export function dispatchMemoryOrientation(orientation: (() => Orientation) | undefined): number {
-  if (!orientation) return emit(errorVerdict('atlas runtime is not composed yet — the WireConfig seams need the composition-root WP'));
-  return emit(memoryOrientationVerdict(orientation));
+  if (!orientation)
+    return emit(errorVerdict("atlas runtime is not composed yet — the WireConfig seams need the composition-root WP"))
+  return emit(memoryOrientationVerdict(orientation))
 }
 
 /** `atlas budget` — WP-3-RETR, the RETR-8 per-kind hits/hitRate calibration ledger (no input). */
 export function dispatchBudget(budget: (() => BudgetReport) | undefined): number {
-  if (!budget) return emit(errorVerdict('atlas runtime is not composed yet — the WireConfig seams need the composition-root WP'));
-  return emit(budgetVerdict(budget));
+  if (!budget)
+    return emit(errorVerdict("atlas runtime is not composed yet — the WireConfig seams need the composition-root WP"))
+  return emit(budgetVerdict(budget))
 }
 
 /** `atlas territories` — WP-3-RETR, the RETR-13 per-territory off-atlas MISS-oracle (no input). */
 export function dispatchTerritories(territories: TerritoriesLeg | undefined): number {
-  if (!territories) return emit(errorVerdict('atlas runtime is not composed yet — the WireConfig seams need the composition-root WP'));
-  return emit(territoriesVerdict(territories));
+  if (!territories)
+    return emit(errorVerdict("atlas runtime is not composed yet — the WireConfig seams need the composition-root WP"))
+  return emit(territoriesVerdict(territories))
 }
 
 // ── EPIC-1-b — the two OKF STORE-INSTANCE doors (`atlas export` / `atlas import`), pulled out here for the
@@ -196,8 +218,8 @@ export function dispatchTerritories(territories: TerritoriesLeg | undefined): nu
 
 /** `atlas export <outDir>` — dump the WHOLE durable CAS of cwd's store as `<outDir>/atlas-okf.json`. */
 export function dispatchExport(okfExport: ((outDir: string) => CliVerdict) | undefined, outDir: string): number {
-  const run = okfExport ?? ((out: string) => runOkfExport(join(process.cwd(), CAS_REL), out));
-  return emitCli(run(outDir));
+  const run = okfExport ?? ((out: string) => runOkfExport(join(process.cwd(), CAS_REL), out))
+  return emitCli(run(outDir))
 }
 
 /** `atlas import <bundle> <targetDir>` — replay the OKF bundle 1:1 into a FRESH EMPTY store target only. */
@@ -206,22 +228,24 @@ export function dispatchImport(
   bundlePath: string,
   targetDir: string,
 ): number {
-  const run = okfImport ?? runOkfImport;
-  return emitCli(run(bundlePath, targetDir));
+  const run = okfImport ?? runOkfImport
+  return emitCli(run(bundlePath, targetDir))
 }
 
 /** `atlas promote` — the composed governed PROMOTION leg, ONE pass over the repo at cwd (CLI-7 / ADR-0008).
  *  A WRITE command: fails closed on an uncomposed runtime like the routed ones; the anchor rev is LIVE HEAD
  *  through the total `headSha` seam (a gate that later reads it gets a fact, never a placeholder). */
 export function dispatchPromote(promote: ((at: Hash) => PromoteOut) | undefined): number {
-  if (!promote) return emit(errorVerdict('atlas runtime is not composed yet — the WireConfig seams need the composition-root WP'));
-  return emitCli(runPromote(promote, asHash(headSha(process.cwd()) ?? '')));
+  if (!promote)
+    return emit(errorVerdict("atlas runtime is not composed yet — the WireConfig seams need the composition-root WP"))
+  return emitCli(runPromote(promote, asHash(headSha(process.cwd()) ?? "")))
 }
 
 /** `atlas derive-relations` — the composed SOUND-RELATION projection ONE pass over the repo (WP-R7 / ADR-0008).
  *  A WRITE command: publishes every proven relation through the existing governed emit door; fails closed on an
  *  uncomposed runtime exactly as `promote` does. */
 export function dispatchDeriveRelations(deriveRelations: (() => DeriveRelationsRun) | undefined): number {
-  if (!deriveRelations) return emit(errorVerdict('atlas runtime is not composed yet — the WireConfig seams need the composition-root WP'));
-  return emitCli(runDeriveRelationsCli(deriveRelations));
+  if (!deriveRelations)
+    return emit(errorVerdict("atlas runtime is not composed yet — the WireConfig seams need the composition-root WP"))
+  return emitCli(runDeriveRelationsCli(deriveRelations))
 }

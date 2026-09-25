@@ -38,7 +38,7 @@
 // tokens (~4 chars/token), i.e. it under-serves rather than over-serves, which is the safe direction for a
 // budget — and it is the same number the CLI already prints as `tokenEstimate` on a query pack.
 
-import { createOwn, ownToolName } from '@atlas/retrieval';
+import { createOwn, ownToolName } from "@atlas/retrieval"
 import type {
   ManifestCandidate,
   OwnFacet,
@@ -49,50 +49,50 @@ import type {
   RelationSet,
   SizedGotcha,
   SizedInvariant,
-} from '@atlas/retrieval';
-import { createResolve } from '@atlas/index';
+} from "@atlas/retrieval"
+import { createResolve } from "@atlas/index"
 // The GROUND-1 per-fact drift oracle — the SAME function the write door's truth-gate and the query readback
 // run, over the SAME composition-root `axes` this feed already receives. Never a second freshness notion.
-import { driftDetect } from '@atlas/grounding';
-import type { Axes, AxisForest, IndexNode } from '@atlas/index';
-import { currentNodes, tierRank } from '@atlas/knowledge';
-import type { GroundedFact } from '@atlas/knowledge';
-import type { Freshness, Hash, NodeKey, Tier } from '@atlas/contracts';
-import { underScope } from './anchor-scope.js';
+import { driftDetect } from "@atlas/grounding"
+import type { Axes, AxisForest, IndexNode } from "@atlas/index"
+import { currentNodes, tierRank } from "@atlas/knowledge"
+import type { GroundedFact } from "@atlas/knowledge"
+import type { Freshness, Hash, NodeKey, Tier } from "@atlas/contracts"
+import { underScope } from "./anchor-scope.js"
 // The two bands + their row shaping — `own-bands.ts`, which owns WHICH stored facts a briefing may show.
-import { advisoryBand, governingGotchas, governingInvariants } from './own-bands.js';
-import type { Row } from './own-bands.js';
-import { resolveFreshness } from './pack-shape.js';
-import type { AtlasPolicy } from './policy.js';
-import { buildRetrievalModel } from './retrieval-model.js';
-import { rehydrateProjection } from './store.js';
-import type { DiskStore } from './store.js';
+import { advisoryBand, governingGotchas, governingInvariants } from "./own-bands.js"
+import type { Row } from "./own-bands.js"
+import { resolveFreshness } from "./pack-shape.js"
+import type { AtlasPolicy } from "./policy.js"
+import { buildRetrievalModel } from "./retrieval-model.js"
+import { rehydrateProjection } from "./store.js"
+import type { DiskStore } from "./store.js"
 
 /** The `own_<leaf>` tool name + the briefing behind it — `OwnFacet.dispatch`'s return, re-stated as a name
  *  the CLI can import without depending on a structural type. */
 export interface OwnDispatch {
-  readonly tool: string;
-  readonly pack: OwnPackPlus;
+  readonly tool: string
+  readonly pack: OwnPackPlus
 }
 
 /** The composition-root leg: a scope path → its `own_<leaf>` briefing. TOTAL (RETR-9 — a scope that names
  *  no index unit yields an empty briefing, never a throw). */
-export type OwnLeg = (scope: string) => OwnDispatch;
+export type OwnLeg = (scope: string) => OwnDispatch
 
 /** Atlas availability for post-Genesis Own materialization. Every listed ID is structural, canonical, and exact. */
 export function availableOwnUnits(axes: Axes): readonly OwnUnit[] {
-  const units: OwnUnit[] = [];
+  const units: OwnUnit[] = []
   const walk = (node: IndexNode): void => {
-    units.push({ level: 'module', id: node.key, grounding: node.subtreeHash });
-    for (const child of node.children) walk(child);
-  };
-  walk(axes.spatial);
-  return units.sort((a, b) => a.id < b.id ? -1 : a.id > b.id ? 1 : 0);
+    units.push({ level: "module", id: node.key, grounding: node.subtreeHash })
+    for (const child of node.children) walk(child)
+  }
+  walk(axes.spatial)
+  return units.sort((a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0))
 }
 
 /** `Hash` and `NodeKey` are same-string DISTINCT brands (contracts/hash.ts). One cast helper, as
  *  index-adapter.ts does at the same kind of seam — a structural key crossing into the fact vocabulary. */
-const asNodeKey = (s: string): NodeKey => s as unknown as NodeKey;
+const asNodeKey = (s: string): NodeKey => s as unknown as NodeKey
 
 /**
  * Every current node in the LIVE projection paired with the whole fact read back from CAS ("the CAS bytes
@@ -100,12 +100,12 @@ const asNodeKey = (s: string): NodeKey => s as unknown as NodeKey;
  * be visible to the very next `own`.
  */
 function allRows(store: DiskStore): readonly Row[] {
-  const rows: Row[] = [];
+  const rows: Row[] = []
   for (const node of currentNodes(rehydrateProjection(store))) {
-    const fact = store.get(node.contentHash as Hash) as GroundedFact | undefined;
-    if (fact !== undefined) rows.push({ node, fact });
+    const fact = store.get(node.contentHash as Hash) as GroundedFact | undefined
+    if (fact !== undefined) rows.push({ node, fact })
   }
-  return rows;
+  return rows
 }
 
 /**
@@ -115,7 +115,7 @@ function allRows(store: DiskStore): readonly Row[] {
  * path. An anchorless node is not locatable under any scope and is dropped.
  */
 function underScopeRows(rows: readonly Row[], scope: string): readonly Row[] {
-  return rows.filter((r) => r.node.primaryAnchor !== undefined && underScope(r.node.primaryAnchor, scope));
+  return rows.filter((r) => r.node.primaryAnchor !== undefined && underScope(r.node.primaryAnchor, scope))
 }
 
 /**
@@ -123,12 +123,12 @@ function underScopeRows(rows: readonly Row[], scope: string): readonly Row[] {
  * `contents` and its `finer` children). Returns `undefined` for a path that is not an index unit.
  */
 function findByKey(node: IndexNode, key: string): IndexNode | undefined {
-  if (node.key === key) return node;
+  if (node.key === key) return node
   for (const child of node.children) {
-    const hit = findByKey(child, key);
-    if (hit !== undefined) return hit;
+    const hit = findByKey(child, key)
+    if (hit !== undefined) return hit
   }
-  return undefined;
+  return undefined
 }
 
 /**
@@ -138,11 +138,11 @@ function findByKey(node: IndexNode, key: string): IndexNode | undefined {
  * so a reader knows the number's provenance: it is the floor of what is actually filed here, not a policy.
  */
 function terrainTier(rows: readonly Row[]): Tier {
-  let best: Tier = 'T2';
+  let best: Tier = "T2"
   for (const r of rows) {
-    if (tierRank(r.fact.tier) < tierRank(best)) best = r.fact.tier;
+    if (tierRank(r.fact.tier) < tierRank(best)) best = r.fact.tier
   }
-  return best;
+  return best
 }
 
 /**
@@ -154,9 +154,9 @@ function terrainTier(rows: readonly Row[]): Tier {
 function terrainOwner(policy: AtlasPolicy, scope: string): string {
   const covering = Object.keys(policy.authz.scopes)
     .filter((key) => underScope(scope, key))
-    .sort((a, b) => (b.length - a.length !== 0 ? b.length - a.length : a < b ? -1 : 1));
-  const key = covering[0];
-  return key === undefined ? '' : [...(policy.authz.scopes[key] ?? [])].sort().join(', ');
+    .sort((a, b) => (b.length - a.length !== 0 ? b.length - a.length : a < b ? -1 : 1))
+  const key = covering[0]
+  return key === undefined ? "" : [...(policy.authz.scopes[key] ?? [])].sort().join(", ")
 }
 
 /**
@@ -186,25 +186,25 @@ function relationSetFor(
   blastRadius: ReadonlyMap<string, readonly Hash[]>,
   byContentHash: ReadonlyMap<string, Row>,
 ): RelationSet {
-  const seen = new Set<string>();
-  const dependents: RelatedFact[] = [];
+  const seen = new Set<string>()
+  const dependents: RelatedFact[] = []
   for (const row of rows) {
-    for (const h of blastRadius.get(row.node.primaryAnchor ?? '') ?? []) {
-      const dep = byContentHash.get(String(h));
-      if (dep === undefined) continue;
+    for (const h of blastRadius.get(row.node.primaryAnchor ?? "") ?? []) {
+      const dep = byContentHash.get(String(h))
+      if (dep === undefined) continue
       // A fact anchored INSIDE the scope is the unit's own content, not something that depends on it.
-      if (dep.node.primaryAnchor !== undefined && underScope(dep.node.primaryAnchor, scope)) continue;
-      if (seen.has(dep.node.nodeKey)) continue;
-      seen.add(dep.node.nodeKey);
+      if (dep.node.primaryAnchor !== undefined && underScope(dep.node.primaryAnchor, scope)) continue
+      if (seen.has(dep.node.nodeKey)) continue
+      seen.add(dep.node.nodeKey)
       dependents.push({
         nodeId: asNodeKey(dep.node.nodeKey),
-        relation: 'dependents',
+        relation: "dependents",
         distance: 0, // SENTINEL — see the doc block; the closure reports no hop count and none is invented.
         tier: dep.fact.tier,
         ppr: 0, //     no stored ppr exists on a GroundedFact (GEN-11 lives on a genesis Candidate).
-        claim: dep.node.claims.join('; '),
-        stale: dep.fact.freshness === 'DRIFTED',
-      });
+        claim: dep.node.claims.join("; "),
+        stale: dep.fact.freshness === "DRIFTED",
+      })
     }
   }
   return {
@@ -213,21 +213,21 @@ function relationSetFor(
     dependents,
     dependents_meta: {
       maxHops: -1, // SENTINEL — the reverse closure is unbounded in hops; no bound was applied.
-      rank: 'tier-desc,ppr-desc,distance-asc,nodeKey-asc',
+      rank: "tier-desc,ppr-desc,distance-asc,nodeKey-asc",
       total: dependents.length,
       returned: dependents.length,
       truncated: false, // the cap that DOES apply is the composer's EDGE_CAP, downstream of this record.
     },
     dependencies: [], // no forward closure exists in this product — see the doc block.
     governing: [],
-  };
+  }
 }
 
 /** The deps this feed reads. All three are the composition root's own — never freshly derived here. */
 export interface OwnSourceDeps {
-  readonly axes: Axes;
-  readonly store: DiskStore;
-  readonly policy: AtlasPolicy;
+  readonly axes: Axes
+  readonly store: DiskStore
+  readonly policy: AtlasPolicy
 }
 
 /**
@@ -251,17 +251,16 @@ export interface OwnSourceDeps {
  * is the SAME bound as the first door, reached through the same `@atlas/tools` predicates.
  */
 export function buildOwnSources(deps: OwnSourceDeps): OwnSources {
-  const { axes, store, policy } = deps;
-  const forest: AxisForest = { spatial: axes.spatial, territory: axes.territory, dependency: axes.dependency };
+  const { axes, store, policy } = deps
+  const forest: AxisForest = { spatial: axes.spatial, territory: axes.territory, dependency: axes.dependency }
   // This feed's per-fact freshness oracle (ADR-0013). Bound HERE rather than injected because `axes` is
   // already a declared dep — the briefing is composed over the same snapshot the pack is.
   // TOTAL, via the one shared entry point: a fact whose CAS bytes carry no `grounding` at all (reachable —
   // `.atlas/` is committed) makes `driftDetect` raise, and a briefing door must degrade, never throw.
-  const freshnessOf = (fact: GroundedFact): Freshness =>
-    resolveFreshness((f) => driftDetect(f.grounding, axes), fact);
+  const freshnessOf = (fact: GroundedFact): Freshness => resolveFreshness((f) => driftDetect(f.grounding, axes), fact)
 
   /** The rows under one unit's scope, off ONE live read of the projection. */
-  const scopeRows = (unit: OwnUnit): readonly Row[] => underScopeRows(allRows(store), unit.id);
+  const scopeRows = (unit: OwnUnit): readonly Row[] => underScopeRows(allRows(store), unit.id)
 
   return {
     role: (unit) => {
@@ -272,11 +271,16 @@ export function buildOwnSources(deps: OwnSourceDeps): OwnSources {
       // caller's own input. None is a sentence this module composed, and the last one exists because a
       // scope outside every territory resolves to nothing and an empty role line names nothing at all.
       const defs = scopeRows(unit)
-        .filter((r) => (r.node.slot ?? (r.fact.kind === 'advisory' || r.fact.kind === 'predicate' ? r.fact.predicateSlot : undefined)) === 'definition')
-        .sort((a, b) => (a.node.nodeKey < b.node.nodeKey ? -1 : 1));
-      const def = defs[0];
-      if (def !== undefined) return def.node.claims.join('; ');
-      return createResolve(forest).resolve('territory', unit.id)?.key ?? unit.id;
+        .filter(
+          (r) =>
+            (r.node.slot ??
+              (r.fact.kind === "advisory" || r.fact.kind === "predicate" ? r.fact.predicateSlot : undefined)) ===
+            "definition",
+        )
+        .sort((a, b) => (a.node.nodeKey < b.node.nodeKey ? -1 : 1))
+      const def = defs[0]
+      if (def !== undefined) return def.node.claims.join("; ")
+      return createResolve(forest).resolve("territory", unit.id)?.key ?? unit.id
     },
 
     invariants: (unit): readonly SizedInvariant[] => governingInvariants(scopeRows(unit), freshnessOf),
@@ -287,8 +291,8 @@ export function buildOwnSources(deps: OwnSourceDeps): OwnSources {
     advisory: (unit): readonly SizedInvariant[] => advisoryBand(scopeRows(unit), freshnessOf),
 
     terrain: (unit) => {
-      const rows = scopeRows(unit);
-      const node = findByKey(axes.spatial, unit.id);
+      const rows = scopeRows(unit)
+      const node = findByKey(axes.spatial, unit.id)
       return {
         // The scope's IMMEDIATE structural children out of the spatial axis — the terrain's contents, sorted
         // for byte-stability. A scope that is not an index unit contributes none.
@@ -301,14 +305,14 @@ export function buildOwnSources(deps: OwnSourceDeps): OwnSources {
         // The filter was a third statement of a bound that has now moved; a no-op restatement of a governing
         // predicate is exactly what a reader mistakes for the predicate itself.
         tier: terrainTier(rows),
-      };
+      }
     },
 
     relate: (unit): RelationSet => {
-      const rows = allRows(store); // ONE live read: the scoped half and the whole-store index off the same pass
-      const byContentHash = new Map<string, Row>(rows.map((r) => [r.node.contentHash, r] as const));
-      const model = buildRetrievalModel(axes, store); // the SAME feed `atlas query --by dependency` serves from
-      return relationSetFor(unit.id, underScopeRows(rows, unit.id), model.blastRadius, byContentHash);
+      const rows = allRows(store) // ONE live read: the scoped half and the whole-store index off the same pass
+      const byContentHash = new Map<string, Row>(rows.map((r) => [r.node.contentHash, r] as const))
+      const model = buildRetrievalModel(axes, store) // the SAME feed `atlas query --by dependency` serves from
+      return relationSetFor(unit.id, underScopeRows(rows, unit.id), model.blastRadius, byContentHash)
     },
 
     gotchas: (unit): readonly SizedGotcha[] => governingGotchas(scopeRows(unit)),
@@ -318,34 +322,34 @@ export function buildOwnSources(deps: OwnSourceDeps): OwnSources {
     memory: () => null,
 
     finer: (unit): readonly OwnUnit[] => {
-      const node = findByKey(axes.spatial, unit.id);
+      const node = findByKey(axes.spatial, unit.id)
       return (node?.children ?? [])
-        .map((c) => ({ level: 'module' as const, id: c.key, grounding: String(c.subtreeHash) }))
-        .sort((a, b) => (a.id < b.id ? -1 : 1));
+        .map((c) => ({ level: "module" as const, id: c.key, grounding: String(c.subtreeHash) }))
+        .sort((a, b) => (a.id < b.id ? -1 : 1))
     },
 
     manifest: (unit): readonly ManifestCandidate[] => {
       // D1: pointers + how-to-pull, NEVER content. Each finer scope-unit becomes one `own_<leaf>` pointer
       // whose `digest` is the INDEX-SUPPLIED `subtreeHash` of that unit — a real content identity, so no
       // `sim:` flag is needed (own.ts reserves that prefix for a locally synthesized one).
-      const node = findByKey(axes.spatial, unit.id);
+      const node = findByKey(axes.spatial, unit.id)
       return (node?.children ?? [])
         .map((c) => {
-          const name = ownToolName({ level: 'module', id: c.key, grounding: undefined });
+          const name = ownToolName({ level: "module", id: c.key, grounding: undefined })
           return {
             pointer: {
-              kind: 'pack' as const,
+              kind: "pack" as const,
               name,
               digest: String(c.subtreeHash),
               pull: `atlas own ${c.key}`,
               hits: 0, // no frecency ledger has a production writer — see the header.
             },
             cost: name.length,
-          };
+          }
         })
-        .sort((a, b) => (a.pointer.name < b.pointer.name ? -1 : 1));
+        .sort((a, b) => (a.pointer.name < b.pointer.name ? -1 : 1))
     },
-  };
+  }
 }
 
 /**
@@ -358,9 +362,9 @@ export function buildOwnSources(deps: OwnSourceDeps): OwnSources {
  * `grounding` handle (typed `unknown` in the frozen model, deliberately) is that node's `subtreeHash`.
  */
 export function createOwnLeg(deps: OwnSourceDeps): OwnLeg {
-  const facet: OwnFacet = createOwn(buildOwnSources(deps));
+  const facet: OwnFacet = createOwn(buildOwnSources(deps))
   return (scope: string): OwnDispatch => {
-    const node = findByKey(deps.axes.spatial, scope);
-    return facet.dispatch({ level: 'module', id: scope, grounding: node?.subtreeHash });
-  };
+    const node = findByKey(deps.axes.spatial, scope)
+    return facet.dispatch({ level: "module", id: scope, grounding: node?.subtreeHash })
+  }
 }

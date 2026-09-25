@@ -14,8 +14,8 @@
 // grounding entry's `subtreeHash`, RE-RUN through `scanTestVacuity` at HEAD by reverify — Wave 1a). DIRECTED is
 // n/a (a pair, not an ordered triple). See docs/design/95-test-vacuity-design.md and ADR-0015 D5.
 
-import { asNodeKey, canonicalForm, defaultEncoder } from '@atlas/kernel';
-import type { NodeKey } from '@atlas/contracts';
+import { asNodeKey, canonicalForm, defaultEncoder } from "@atlas/kernel"
+import type { NodeKey } from "@atlas/contracts"
 
 /**
  * THE REFUSAL a malformed test-vacuity fact earns — the 2-legged analogue of `MalformedRelationError`/
@@ -25,15 +25,15 @@ import type { NodeKey } from '@atlas/contracts';
  * from an internal fault, exactly as the intrinsic/relation/negation/transition doors do.
  */
 export const MALFORMED_TEST_VACUITY_REASON =
-  'malformed test-vacuity: a test-vacuity identity is the pair (unitKey, testName), and one of the two is ' +
-  'not well-formed. unitKey must be a non-empty location-free unit key (a qualifiedPath), and testName must ' +
-  'be a non-empty test name string. Re-state the test-vacuity fact naming the unit lineage and the test it ' +
-  'is about';
+  "malformed test-vacuity: a test-vacuity identity is the pair (unitKey, testName), and one of the two is " +
+  "not well-formed. unitKey must be a non-empty location-free unit key (a qualifiedPath), and testName must " +
+  "be a non-empty test name string. Re-state the test-vacuity fact naming the unit lineage and the test it " +
+  "is about"
 
 export class MalformedTestVacuityError extends Error {
   constructor() {
-    super(MALFORMED_TEST_VACUITY_REASON);
-    this.name = 'MalformedTestVacuityError';
+    super(MALFORMED_TEST_VACUITY_REASON)
+    this.name = "MalformedTestVacuityError"
   }
 }
 
@@ -47,7 +47,7 @@ export class MalformedTestVacuityError extends Error {
  * never a raw `TypeError`. No LLM/clock/seq.
  */
 export function testVacuityKey(unitKey: unknown, testName: unknown): NodeKey {
-  if (typeof unitKey !== 'string' || unitKey.length === 0) throw new MalformedTestVacuityError();
-  if (typeof testName !== 'string' || testName.length === 0) throw new MalformedTestVacuityError();
-  return asNodeKey(defaultEncoder.hash(canonicalForm({ tv: unitKey, t: testName })));
+  if (typeof unitKey !== "string" || unitKey.length === 0) throw new MalformedTestVacuityError()
+  if (typeof testName !== "string" || testName.length === 0) throw new MalformedTestVacuityError()
+  return asNodeKey(defaultEncoder.hash(canonicalForm({ tv: unitKey, t: testName })))
 }

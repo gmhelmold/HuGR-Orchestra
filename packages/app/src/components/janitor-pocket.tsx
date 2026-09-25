@@ -38,30 +38,38 @@ export function JanitorPocketChat(props: {
         )
       }}
     >
-    <ServerSDKProvider>
-      <ServerSyncProvider>
-        <LayoutProvider>
-          <ModelsProvider directory={props.directory}>
-            <SDKProvider directory={props.directory}>
-              <DirectoryDataProvider directory={props.directory} server={props.server}>
-                <FileProvider>
-                  <PromptProvider>
-                    <CommentsProvider>
-                      <PocketComposer directory={props.directory} report={props.report} onSessionID={props.onSessionID} />
-                    </CommentsProvider>
-                  </PromptProvider>
-                </FileProvider>
-              </DirectoryDataProvider>
-            </SDKProvider>
-          </ModelsProvider>
-        </LayoutProvider>
-      </ServerSyncProvider>
-    </ServerSDKProvider>
+      <ServerSDKProvider>
+        <ServerSyncProvider>
+          <LayoutProvider>
+            <ModelsProvider directory={props.directory}>
+              <SDKProvider directory={props.directory}>
+                <DirectoryDataProvider directory={props.directory} server={props.server}>
+                  <FileProvider>
+                    <PromptProvider>
+                      <CommentsProvider>
+                        <PocketComposer
+                          directory={props.directory}
+                          report={props.report}
+                          onSessionID={props.onSessionID}
+                        />
+                      </CommentsProvider>
+                    </PromptProvider>
+                  </FileProvider>
+                </DirectoryDataProvider>
+              </SDKProvider>
+            </ModelsProvider>
+          </LayoutProvider>
+        </ServerSyncProvider>
+      </ServerSDKProvider>
     </ErrorBoundary>
   )
 }
 
-function PocketComposer(props: { directory: () => string; report: JanitorReport; onSessionID?: (sessionID: string) => void }) {
+function PocketComposer(props: {
+  directory: () => string
+  report: JanitorReport
+  onSessionID?: (sessionID: string) => void
+}) {
   const language = useLanguage()
   const prompt = usePrompt()
   const sdk = useSDK()
@@ -76,12 +84,11 @@ function PocketComposer(props: { directory: () => string; report: JanitorReport;
   const [failedKey, setFailedKey] = createSignal<string>()
   const [retryNonce, setRetryNonce] = createSignal(0)
   let generation = 0
-  const storageKey = createMemo(() => `opencode.janitor.session.${serverSDK().scope}.${base64Encode(props.directory())}`)
+  const storageKey = createMemo(
+    () => `opencode.janitor.session.${serverSDK().scope}.${base64Encode(props.directory())}`,
+  )
   const sessionKey = createMemo(() =>
-    SessionStateKey.from(
-      serverSDK().scope,
-      SessionRouteKey.fromRoute(base64Encode(props.directory()), sessionID()),
-    ),
+    SessionStateKey.from(serverSDK().scope, SessionRouteKey.fromRoute(base64Encode(props.directory()), sessionID())),
   )
   const adoptSession = (id: string) => {
     setSessionID(id)
@@ -100,10 +107,7 @@ function PocketComposer(props: { directory: () => string; report: JanitorReport;
     setCreating(true)
     setAttemptedKey(key)
     const isCurrent = () =>
-      runID === generation &&
-      storageKey() === key &&
-      props.directory() === directory &&
-      serverSDK().scope === scope
+      runID === generation && storageKey() === key && props.directory() === directory && serverSDK().scope === scope
     void (async () => {
       let stored: string | null = null
       try {
@@ -209,7 +213,7 @@ function PocketTimeline(props: { sessionID: () => string | undefined }) {
   const sync = useServerSync()
   const messages = createMemo(() => {
     const id = props.sessionID()
-    return id ? sync().session.data.message[id] ?? [] : []
+    return id ? (sync().session.data.message[id] ?? []) : []
   })
 
   return (

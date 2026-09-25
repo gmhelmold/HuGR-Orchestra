@@ -12,8 +12,8 @@ description: >
 
 ## The one failure mode that matters
 
-A gate that finds **zero** items, checks zero of them, and prints OK. *"Everything is documented"* and
-*"the extraction broke"* then look identical, forever, in green.
+A gate that finds **zero** items, checks zero of them, and prints OK. _"Everything is documented"_ and
+_"the extraction broke"_ then look identical, forever, in green.
 
 So: **every way of not getting a list is an explicit, named FAILURE.** Not a skip, not a zero, not a
 default. Enumerate them in the code: the file missing, the declaration missing, an initializer that is not
@@ -22,9 +22,11 @@ EMPTY**. An empty list is not "vacuously satisfied"; it is the extraction breaki
 
 ```js
 if (names.length === 0) {
-  return { broken: `${ORACLE} extracted EMPTY. Either the surface really is empty, or this gate's reading
+  return {
+    broken: `${ORACLE} extracted EMPTY. Either the surface really is empty, or this gate's reading
     of the file broke — and a gate that checks zero items would print OK for a completely unguarded
-    product. Failing instead.` };
+    product. Failing instead.`,
+  }
 }
 ```
 
@@ -39,6 +41,7 @@ The scope is then a fact, not a heuristic.
 ## Parse, do not pattern-match
 
 A regex over source counts occurrences in comments and strings. Two real cases:
+
 - `@atlas/memory` appears in prose comments across the tree; a pattern-based reachability check would have
   scored a dead package **alive**.
 - A regex for `key: 'value'` matched bare identifiers only, so hyphenated keys (`'test-vacuities':`) were
@@ -58,6 +61,7 @@ the arrays beside it already said 6/3/10.
 ## Check both directions
 
 One direction is half a gate. Every correspondence check needs both legs:
+
 - a shipped thing with no documentation, **and** a document naming a thing that does not ship;
 - an unreached module the ledger omits, **and** a ledger row for something that is actually called.
 
@@ -67,7 +71,7 @@ trusts is ignored in both directions.
 ## Teeth: plant every defect class the gate claims to catch
 
 Its own `*.test.mjs` builds a throwaway fixture tree, plants each defect, and asserts the gate exits
-non-zero **and names the thing**. The name is the entire product — *"some page is missing"* sends nobody
+non-zero **and names the thing**. The name is the entire product — _"some page is missing"_ sends nobody
 anywhere.
 
 Also assert the **clean tree passes**, so the gate cannot be satisfied by firing on everything.
@@ -81,7 +85,7 @@ When something legitimately cannot satisfy the gate, the answer is a **ledger en
 the ledger is shrink-only and self-reporting: a stale entry FAILS the gate. Never widen the gate to fit the
 exception.
 
-The judgment line: adding *one* justified entry is hygiene. Adding **65** because your input was shaped
+The judgment line: adding _one_ justified entry is hygiene. Adding **65** because your input was shaped
 wrong is bulk-declaring a divergence you could simply not have had — fix the input instead. (Real: 62
 requirement lifts paraphrased their invariant; rewriting the invariant to BE the join of its clauses took
 one edit and added zero ledger entries.)
@@ -101,7 +105,7 @@ State the category in the commit message. A reviewer should never have to derive
 
 ## Do not grade prose
 
-Check existence and correspondence, not quality. *"Must have an example"* turns the gate into an editor,
+Check existence and correspondence, not quality. _"Must have an example"_ turns the gate into an editor,
 and an editor nobody elected gets worked around rather than satisfied. Whether a page is any good is a
 human job — say so in the gate's own output.
 

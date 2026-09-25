@@ -23,20 +23,34 @@
 // with real fact ids — the store-durable truth. Revert `seededCount`'s ledger-first reading (i.e. go back to
 // `r.seeded.length` alone) and every assertion below fails.
 
-import { describe, expect, it } from 'vitest';
-import { asSubtreeHash } from '@atlas/kernel';
-import type { GenesisReport } from '@atlas/genesis';
-import type { StructRef } from '@atlas/contracts';
-import { foldVerdict, ledgerSeededIds, mineOutcome, mineWhyEmpty, seededCount } from '../src/mine-render.js';
-import type { MinePass } from '../src/mine-render.js';
+import { describe, expect, it } from "vitest"
+import { asSubtreeHash } from "@atlas/kernel"
+import type { GenesisReport } from "@atlas/genesis"
+import type { StructRef } from "@atlas/contracts"
+import { foldVerdict, ledgerSeededIds, mineOutcome, mineWhyEmpty, seededCount } from "../src/mine-render.js"
+import type { MinePass } from "../src/mine-render.js"
 
-const site = (n: number): StructRef => ({ kind: 'file', qualifiedPath: `src/f${n}.ts`, subtreeHash: asSubtreeHash(`f${n}`) });
+const site = (n: number): StructRef => ({
+  kind: "file",
+  qualifiedPath: `src/f${n}.ts`,
+  subtreeHash: asSubtreeHash(`f${n}`),
+})
 
 /** A five-facet all-UN-SEEDED Awareness — the honest seed of any run that ratified nothing (GEN-9c). */
 const emptyAwareness = () => {
-  const facet = (name: string) => ({ content: `UN-SEEDED: ${name} — source absent, no self-model line fabricated`, grounding: [], state: 'UN-SEEDED' as const });
-  return { mission: facet('mission'), constitution: facet('constitution'), terrain: facet('terrain'), ontology: facet('ontology'), taste: facet('taste') };
-};
+  const facet = (name: string) => ({
+    content: `UN-SEEDED: ${name} — source absent, no self-model line fabricated`,
+    grounding: [],
+    state: "UN-SEEDED" as const,
+  })
+  return {
+    mission: facet("mission"),
+    constitution: facet("constitution"),
+    terrain: facet("terrain"),
+    ontology: facet("ontology"),
+    taste: facet("taste"),
+  }
+}
 
 /** THE MEASURED SHAPE: a pass whose write-dedup minted nothing NEW (`seeded: []`) but whose ledger records
  *  every one of N sites as `'seeded'` with a real fact id — i.e. every site WAS admitted, the store already
@@ -49,55 +63,55 @@ function alreadyStagedReport(n: number): GenesisReport {
     llmCalls: n,
     budgetSpent: n,
     coverage: {
-      frontier: 'planned',
+      frontier: "planned",
       planned: n,
       sites: Array.from({ length: n }, (_, i) => ({
-        outcome: 'seeded' as const,
+        outcome: "seeded" as const,
         rank: i + 1,
         site: site(i),
         facts: [`fact-${i}`], // the durable id the store actually holds
       })),
     },
-  };
+  }
 }
 
-describe('#237 — the single-arm mine summary reads the coverage LEDGER, agreeing with the store', () => {
-  it('ledgerSeededIds collects every seeded site\'s fact ids from the coverage ledger', () => {
-    const ids = ledgerSeededIds(alreadyStagedReport(3));
-    expect(ids).toEqual(new Set(['fact-0', 'fact-1', 'fact-2']));
-  });
+describe("#237 — the single-arm mine summary reads the coverage LEDGER, agreeing with the store", () => {
+  it("ledgerSeededIds collects every seeded site's fact ids from the coverage ledger", () => {
+    const ids = ledgerSeededIds(alreadyStagedReport(3))
+    expect(ids).toEqual(new Set(["fact-0", "fact-1", "fact-2"]))
+  })
 
-  it('ledgerSeededIds is undefined for a pre-ledger report (no coverage) — the honest absent-tolerant reading', () => {
-    const r: GenesisReport = { seeded: [], ratified: [], open: [], llmCalls: 0, budgetSpent: 0 };
-    expect(ledgerSeededIds(r)).toBeUndefined();
-  });
+  it("ledgerSeededIds is undefined for a pre-ledger report (no coverage) — the honest absent-tolerant reading", () => {
+    const r: GenesisReport = { seeded: [], ratified: [], open: [], llmCalls: 0, budgetSpent: 0 }
+    expect(ledgerSeededIds(r)).toBeUndefined()
+  })
 
-  it('seededCount reads the LEDGER over the empty write-dedup set — the #237 fix, byte-for-byte', () => {
-    const r = alreadyStagedReport(5);
-    expect(r.seeded.length).toBe(0); // the write-dedup view (what a REVERT would read)
-    expect(seededCount(r)).toBe(5); // the ledger view (what the store actually holds)
-  });
+  it("seededCount reads the LEDGER over the empty write-dedup set — the #237 fix, byte-for-byte", () => {
+    const r = alreadyStagedReport(5)
+    expect(r.seeded.length).toBe(0) // the write-dedup view (what a REVERT would read)
+    expect(seededCount(r)).toBe(5) // the ledger view (what the store actually holds)
+  })
 
-  it('seededCount falls back to r.seeded.length when there is no ledger (byte-identical to before #237)', () => {
-    const r: GenesisReport = { seeded: [{ id: 'x' } as never], ratified: [], open: [], llmCalls: 1, budgetSpent: 1 };
-    expect(seededCount(r)).toBe(1);
-  });
+  it("seededCount falls back to r.seeded.length when there is no ledger (byte-identical to before #237)", () => {
+    const r: GenesisReport = { seeded: [{ id: "x" } as never], ratified: [], open: [], llmCalls: 1, budgetSpent: 1 }
+    expect(seededCount(r)).toBe(1)
+  })
 
   it('mineOutcome.facts and mineWhyEmpty agree with the ledger — no more false "every one abstained"', () => {
-    const o = mineOutcome(alreadyStagedReport(4), true);
-    expect(o.facts).toBe(4);
-    expect(mineWhyEmpty(o)).toBeNull(); // facts > 0 ⇒ nothing to explain — the run DID produce
-  });
+    const o = mineOutcome(alreadyStagedReport(4), true)
+    expect(o.facts).toBe(4)
+    expect(mineWhyEmpty(o)).toBeNull() // facts > 0 ⇒ nothing to explain — the run DID produce
+  })
 
-  it('foldVerdict\'s printed header matches the ledger, not the write-dedup\'s empty set (REVERT ⇒ RED)', () => {
-    const pass: MinePass = { report: alreadyStagedReport(5), seed: emptyAwareness(), modelWired: true, seedsDropped: 0 };
-    const v = foldVerdict(pass);
+  it("foldVerdict's printed header matches the ledger, not the write-dedup's empty set (REVERT ⇒ RED)", () => {
+    const pass: MinePass = { report: alreadyStagedReport(5), seed: emptyAwareness(), modelWired: true, seedsDropped: 0 }
+    const v = foldVerdict(pass)
     // THE MEASURED DEFECT, pinned as a NEGATIVE assertion: a revert to `r.seeded.length` alone reproduces
     // exactly this pair of lines against `alreadyStagedReport`.
-    expect(v.stdout).not.toContain('genesis: seeded 0 candidate fact(s)');
-    expect(v.stdout).not.toContain('every one abstained');
-    expect(v.stdout).toContain('genesis: seeded 5 candidate fact(s); ratified 0');
+    expect(v.stdout).not.toContain("genesis: seeded 0 candidate fact(s)")
+    expect(v.stdout).not.toContain("every one abstained")
+    expect(v.stdout).toContain("genesis: seeded 5 candidate fact(s); ratified 0")
     // the ledger rows the header must agree with are printed right below it
-    expect(v.stdout).toContain('"outcome":"seeded"');
-  });
-});
+    expect(v.stdout).toContain('"outcome":"seeded"')
+  })
+})

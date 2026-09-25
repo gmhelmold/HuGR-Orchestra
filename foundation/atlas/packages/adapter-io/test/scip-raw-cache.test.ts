@@ -13,11 +13,11 @@
 // here as a local re-implementation — see the note at the bottom for why, and the recorded result of
 // actually performing it).
 
-import { describe, it, expect, afterEach } from 'vitest';
-import { mkdtempSync, writeFileSync, rmSync } from 'node:fs';
-import { tmpdir } from 'node:os';
-import { join } from 'node:path';
-import { create } from '@bufbuild/protobuf';
+import { describe, it, expect, afterEach } from "vitest"
+import { mkdtempSync, writeFileSync, rmSync } from "node:fs"
+import { tmpdir } from "node:os"
+import { join } from "node:path"
+import { create } from "@bufbuild/protobuf"
 import {
   serializeSCIP,
   IndexSchema,
@@ -26,8 +26,8 @@ import {
   DocumentSchema,
   OccurrenceSchema,
   SymbolRole,
-} from '@c4312/scip';
-import { readScip, readScipIndexerName } from '../src/scip.js';
+} from "@c4312/scip"
+import { readScip, readScipIndexerName } from "../src/scip.js"
 
 /** Serialize a minimal, real, decodable SCIP index naming `tool` and one definition-occurrence document
  *  at `relativePath` for `symbol` — deliberately a DIFFERENT byte length per distinct `symbol`/`tool`/
@@ -36,8 +36,8 @@ import { readScip, readScipIndexerName } from '../src/scip.js';
 function encodeScip(tool: string, relativePath: string, symbol: string): Uint8Array {
   const index = create(IndexSchema, {
     metadata: create(MetadataSchema, {
-      projectRoot: 'file:///cache-teeth-fixture',
-      toolInfo: create(ToolInfoSchema, { name: tool, version: '0' }),
+      projectRoot: "file:///cache-teeth-fixture",
+      toolInfo: create(ToolInfoSchema, { name: tool, version: "0" }),
     }),
     documents: [
       create(DocumentSchema, {
@@ -45,61 +45,61 @@ function encodeScip(tool: string, relativePath: string, symbol: string): Uint8Ar
         occurrences: [create(OccurrenceSchema, { symbol, symbolRoles: SymbolRole.Definition })],
       }),
     ],
-  });
-  return serializeSCIP(index);
+  })
+  return serializeSCIP(index)
 }
 
-let dir: string | undefined;
+let dir: string | undefined
 afterEach(() => {
-  if (dir !== undefined) rmSync(dir, { recursive: true, force: true });
-  dir = undefined;
-});
+  if (dir !== undefined) rmSync(dir, { recursive: true, force: true })
+  dir = undefined
+})
 
-describe('the raw SCIP decode memo — a rewrite at the SAME path is NEVER served stale (DEDUP-COMPOSITION #241)', () => {
-  it('SCN-CACHE-TEETH-1 — readScip picks up a REWRITE of the SAME path, not the first decode', () => {
-    dir = mkdtempSync(join(tmpdir(), 'atlas-scip-cache-teeth-'));
-    const scipPath = join(dir, 'index.scip');
+describe("the raw SCIP decode memo — a rewrite at the SAME path is NEVER served stale (DEDUP-COMPOSITION #241)", () => {
+  it("SCN-CACHE-TEETH-1 — readScip picks up a REWRITE of the SAME path, not the first decode", () => {
+    dir = mkdtempSync(join(tmpdir(), "atlas-scip-cache-teeth-"))
+    const scipPath = join(dir, "index.scip")
 
-    const bytesA = encodeScip('scip-typescript', 'src/a.ts', 'pkg/symA().');
-    const bytesB = encodeScip('scip-typescript', 'src/completely-different-longer-path/b.ts', 'pkg/symB-longer-name().');
+    const bytesA = encodeScip("scip-typescript", "src/a.ts", "pkg/symA().")
+    const bytesB = encodeScip("scip-typescript", "src/completely-different-longer-path/b.ts", "pkg/symB-longer-name().")
     // NON-VACUITY: the rewrite genuinely changes `size` — the second half of the memo key — so this case
     // cannot pass by accident even on a filesystem whose mtime resolution is too coarse to move on its own.
-    expect(bytesA.length).not.toBe(bytesB.length);
+    expect(bytesA.length).not.toBe(bytesB.length)
 
-    writeFileSync(scipPath, bytesA);
-    const first = readScip(scipPath);
-    expect(first.documents).toHaveLength(1);
-    expect(first.documents[0]?.relativePath).toBe('src/a.ts');
-    expect(first.documents[0]?.occurrences[0]?.symbol).toBe('pkg/symA().');
+    writeFileSync(scipPath, bytesA)
+    const first = readScip(scipPath)
+    expect(first.documents).toHaveLength(1)
+    expect(first.documents[0]?.relativePath).toBe("src/a.ts")
+    expect(first.documents[0]?.occurrences[0]?.symbol).toBe("pkg/symA().")
 
     // Overwrite the SAME path with DIFFERENT content — the exact shape a concurrent indexer run produces.
-    writeFileSync(scipPath, bytesB);
-    const second = readScip(scipPath);
+    writeFileSync(scipPath, bytesB)
+    const second = readScip(scipPath)
     // The load-bearing assertion: a cache keyed on path alone would return `first`'s (now stale) bytes here.
-    expect(second.documents).toHaveLength(1);
-    expect(second.documents[0]?.relativePath).toBe('src/completely-different-longer-path/b.ts');
-    expect(second.documents[0]?.occurrences[0]?.symbol).toBe('pkg/symB-longer-name().');
-  });
+    expect(second.documents).toHaveLength(1)
+    expect(second.documents[0]?.relativePath).toBe("src/completely-different-longer-path/b.ts")
+    expect(second.documents[0]?.occurrences[0]?.symbol).toBe("pkg/symB-longer-name().")
+  })
 
-  it('SCN-CACHE-TEETH-2 — readScipIndexerName picks up a REWRITE too (shares the SAME memo as readScip)', () => {
-    dir = mkdtempSync(join(tmpdir(), 'atlas-scip-cache-teeth-'));
-    const scipPath = join(dir, 'index.scip');
+  it("SCN-CACHE-TEETH-2 — readScipIndexerName picks up a REWRITE too (shares the SAME memo as readScip)", () => {
+    dir = mkdtempSync(join(tmpdir(), "atlas-scip-cache-teeth-"))
+    const scipPath = join(dir, "index.scip")
 
-    const bytesA = encodeScip('atlas-fixture-A', 'src/a.ts', 'pkg/symA().');
-    const bytesB = encodeScip('atlas-fixture-B-longer-tool-name', 'src/b.ts', 'pkg/symB().');
-    expect(bytesA.length).not.toBe(bytesB.length);
+    const bytesA = encodeScip("atlas-fixture-A", "src/a.ts", "pkg/symA().")
+    const bytesB = encodeScip("atlas-fixture-B-longer-tool-name", "src/b.ts", "pkg/symB().")
+    expect(bytesA.length).not.toBe(bytesB.length)
 
-    writeFileSync(scipPath, bytesA);
-    expect(readScipIndexerName(scipPath)).toBe('atlas-fixture-A');
+    writeFileSync(scipPath, bytesA)
+    expect(readScipIndexerName(scipPath)).toBe("atlas-fixture-A")
     // `readScip` ALSO reads this same path first — proving the shared memo does not let one reader's
     // earlier decode leak stale bytes into a DIFFERENT reader after a rewrite.
-    expect(readScip(scipPath).documents[0]?.relativePath).toBe('src/a.ts');
+    expect(readScip(scipPath).documents[0]?.relativePath).toBe("src/a.ts")
 
-    writeFileSync(scipPath, bytesB);
-    expect(readScipIndexerName(scipPath)).toBe('atlas-fixture-B-longer-tool-name');
-    expect(readScip(scipPath).documents[0]?.relativePath).toBe('src/b.ts');
-  });
-});
+    writeFileSync(scipPath, bytesB)
+    expect(readScipIndexerName(scipPath)).toBe("atlas-fixture-B-longer-tool-name")
+    expect(readScip(scipPath).documents[0]?.relativePath).toBe("src/b.ts")
+  })
+})
 
 // ── the MUTATION actually performed, recorded rather than embedded ────────────────────────────────────────
 //

@@ -1,13 +1,13 @@
 # `atlas test-vacuity`
 
 Produce **grounded test-vacuity facts** for a repository's **HEAD test files**. A test-vacuity fact (ADR-0015
-**D5** / #95) is a **single-anchor `proven`** record — *named test `testName` in unit `unitKey` holds one shape of the
-closed, additive-only `TestVacuityShape` vocabulary* (normative list:
+**D5** / #95) is a **single-anchor `proven`** record — _named test `testName` in unit `unitKey` holds one shape of the
+closed, additive-only `TestVacuityShape` vocabulary_ (normative list:
 [`reference/atlas-knowledge.md`](../atlas-knowledge.md)):
 
 - **`assertion-only-in-catch`** — every assertion-shaped call sits inside a `catch` clause and there is no
   assertion-count guard. Such a test **passes with no assertion executed** whenever the guarded call does not throw.
-- **`no-assertion-in-test`** — the body contains no check at all (call *or* getter chain), carries no
+- **`no-assertion-in-test`** — the body contains no check at all (call _or_ getter chain), carries no
   assertion guard, discards at least one expression that is not dead code, and neither throws, `fail()`s,
   returns a value nor holds a `catch`. Such a test **executes work and can never fail on a wrong result**.
 
@@ -59,7 +59,7 @@ seal**. The count in `admitted N` is the number of proven facts the governed doo
 must OWN the unit. An **unauthorized** actor is **REFUSED** (exit 2, `unauthorized`) and **nothing lands** —
 there is no gate-less write path into the governed knowledge projection. Unlike `atlas transition`, this door
 **runs the HEAD truth gate**: a test-vacuity grounds on the **current** test file, so a stale grounding is
-refused `ungrounded`. It is **produced-only** — an *authored* `atlas emit {kind:'test-vacuity'}` carries a
+refused `ungrounded`. It is **produced-only** — an _authored_ `atlas emit {kind:'test-vacuity'}` carries a
 witness the door cannot re-derive and is refused outright (the forge guard).
 
 ## Honest limits (flagged, not silent)
@@ -67,5 +67,5 @@ witness the door cannot re-derive and is refused outright (the forge guard).
 - **Reverify replay** (re-running `scanTestVacuity` against a stored fact's witness through `atlas verify-store`)
   and its `MINED_TIER` tier-check are **deferred** (a separate wave); the producer + read surface are what this
   command ships.
-- **Reachability, not execution.** The oracle proves the fragile *shape* syntactically — it does **not** assert
+- **Reachability, not execution.** The oracle proves the fragile _shape_ syntactically — it does **not** assert
   the vacuous branch is reachable at runtime. The claim is deliberately conservative.

@@ -5,23 +5,23 @@
 
 ## Current Inventory
 
-| class | cards |
-| --- | ---: |
-| campaign WPs | 113 |
-| remediation WPs | 24 |
-| total WP IDs | 137 |
+| class           | cards |
+| --------------- | ----: |
+| campaign WPs    |   113 |
+| remediation WPs |    24 |
+| total WP IDs    |   137 |
 
 ## First Audit
 
-| status | cards | meaning |
-| --- | ---: | --- |
-| `EXPLICIT-BUILT` | 22 | Card file explicitly closes its campaign as built. |
-| `ACCEPTANCE-EVIDENCE` | 97 | Every SCN named by card appears in current test corpus. |
-| `TEST-EVIDENCE` | 6 | Partial acceptance or direct WP test reference found. |
-| `REVIEWED-BUILT` | 11 | Manual focused review and targeted tests closed this evidence gap. |
-| `DELEGATED-ORCHESTRA` | 1 | Contract belongs to Orchestra integration, not Atlas core production code. |
-| `OPEN` | 0 | Manual review found an unimplemented or unproven contract. |
-| `REVIEW` | 0 | No evidence classification remains. |
+| status                | cards | meaning                                                                    |
+| --------------------- | ----: | -------------------------------------------------------------------------- |
+| `EXPLICIT-BUILT`      |    22 | Card file explicitly closes its campaign as built.                         |
+| `ACCEPTANCE-EVIDENCE` |    97 | Every SCN named by card appears in current test corpus.                    |
+| `TEST-EVIDENCE`       |     6 | Partial acceptance or direct WP test reference found.                      |
+| `REVIEWED-BUILT`      |    11 | Manual focused review and targeted tests closed this evidence gap.         |
+| `DELEGATED-ORCHESTRA` |     1 | Contract belongs to Orchestra integration, not Atlas core production code. |
+| `OPEN`                |     0 | Manual review found an unimplemented or unproven contract.                 |
+| `REVIEW`              |     0 | No evidence classification remains.                                        |
 
 Statuses are exclusive. Current audit has **136 Atlas cards with implementation/test evidence**, **1 delegated
 integration card**, and **0 OPEN cards**. Evidence-positive is not automatically BUILT; card-level cold closure

@@ -23,21 +23,21 @@
 //   0  the briefing was composed — INCLUDING the honest empty one (a scope with nothing filed under it)
 //   1  the runtime is not composed (handled in cli.ts, never here)
 
-import type { OwnDispatch } from '@atlas/adapter-io';
-import type { GroundedFact } from '@atlas/knowledge';
-import type { CliVerdict } from './render.js';
+import type { OwnDispatch } from "@atlas/adapter-io"
+import type { GroundedFact } from "@atlas/knowledge"
+import type { CliVerdict } from "./render.js"
 
 /** The invariant line every `own` outcome carries — the one property a reader should check the bytes against.
  *  It names the TWO BANDS (REQ-RETR-12m) because the difference between a ratified row and a machine
  *  proposal is the one thing an operator must not have to infer from a tier column. */
 const INVARIANT =
-  'RETR-12: `own_<scope>` is composed by INDEX READS ALONE — 0 LLM, 0 free prose, byte-identical for equal input — two bands (governing tier>=T1 + separately capped advisory T2), and it is bounded: what did not fit is listed as pull-reachable, never silently dropped';
+  "RETR-12: `own_<scope>` is composed by INDEX READS ALONE — 0 LLM, 0 free prose, byte-identical for equal input — two bands (governing tier>=T1 + separately capped advisory T2), and it is bounded: what did not fit is listed as pull-reachable, never silently dropped"
 
 /** The advisory claim body of a fact. An `AdvisoryNode` carries `claimNorm`; a `PredicateNode` carries a
  *  `check` and no claim body, so it renders EMPTY rather than a stringified record. (`GroundedFact.claims`
  *  is a kernel `ClaimEntry[]`, not a string list — joining it would print `[object Object]`.) */
 function claimOf(fact: GroundedFact): string {
-  return fact.kind === 'advisory' ? fact.claimNorm : '';
+  return fact.kind === "advisory" ? fact.claimNorm : ""
 }
 
 /**
@@ -50,9 +50,9 @@ function claimOf(fact: GroundedFact): string {
  * shape `promote` established. No new renderer, no JSON mode, no second way to print a fact.
  */
 export function ownVerdict(out: OwnDispatch): CliVerdict {
-  const { tool, pack } = out;
+  const { tool, pack } = out
   const lines = [
-    'status: ok',
+    "status: ok",
     `next: ${nextLine(out)}`,
     `invariant: ${INVARIANT}`,
     // The header states the BUDGET, not just the content: a briefing is a bounded artifact and its size
@@ -82,8 +82,8 @@ export function ownVerdict(out: OwnDispatch): CliVerdict {
     ...pack.pullReachable.map((k) => `  pull-reachable ${k}`),
     `  refresh: ${pack.drill.refresh.pull}`,
     `  complement: ${pack.drill.complement.pull}`,
-  ];
-  return { exitCode: 0, stdout: `${lines.join('\n')}\n` };
+  ]
+  return { exitCode: 0, stdout: `${lines.join("\n")}\n` }
 }
 
 /**
@@ -102,24 +102,27 @@ export function ownVerdict(out: OwnDispatch): CliVerdict {
  * row is, and the band is rendered under its own verb.
  */
 function nextLine(out: OwnDispatch): string {
-  const { pack } = out;
-  const facts = pack.invariants.length + pack.gotchas.length + pack.advisory.length;
+  const { pack } = out
+  const facts = pack.invariants.length + pack.gotchas.length + pack.advisory.length
   /** Appended whenever an advisory row is on screen — the same warning `atlas query`'s guidance carries. */
-  const caveat = pack.advisory.length === 0 ? '' : '; an advisory row is a machine proposal no ratifier saw — check its per-row freshness';
+  const caveat =
+    pack.advisory.length === 0
+      ? ""
+      : "; an advisory row is a machine proposal no ratifier saw — check its per-row freshness"
   if (facts === 0 && pack.shape.contents.length === 0) {
-    return 'this path names no unit in the code index and serves nothing — check the spelling (`own` is TOTAL: an unknown scope answers with an empty briefing, never an error), or point it at a directory/file that exists at HEAD';
+    return "this path names no unit in the code index and serves nothing — check the spelling (`own` is TOTAL: an unknown scope answers with an empty briefing, never an error), or point it at a directory/file that exists at HEAD"
   }
   if (facts === 0) {
-    return 'the scope is a real code unit but NO fact is filed under it yet — the terrain, the finer units and the availability rows below are structural (from the index); `atlas emit` is what puts knowledge here';
+    return "the scope is a real code unit but NO fact is filed under it yet — the terrain, the finer units and the availability rows below are structural (from the index); `atlas emit` is what puts knowledge here"
   }
   if (out.pack.pullReachable.length > 0) {
     // THE IDENTIFIER CLASS IS NAMED, because pointing a caller at the wrong door is how guidance lies. Every
     // row this command prints — `inv`, `gotcha`, `dependent`, `pull-reachable` — carries a **nodeKey**, the
     // same identifier `atlas query`'s `inv` lines carry. `atlas node` takes a CONTENT ADDRESS and would miss
     // on every one of them, so it is deliberately not the verb suggested here.
-    return `${out.pack.invariants.length} invariant(s) and ${out.pack.advisory.length} advisory row(s) fit the budget; ${out.pack.pullReachable.length} more are pull-reachable, named below by nodeKey — narrow the scope to one of the \`finer\` units to fit them into a briefing, or inspect one with \`atlas doctor why <nodeKey>\`${caveat}`;
+    return `${out.pack.invariants.length} invariant(s) and ${out.pack.advisory.length} advisory row(s) fit the budget; ${out.pack.pullReachable.length} more are pull-reachable, named below by nodeKey — narrow the scope to one of the \`finer\` units to fit them into a briefing, or inspect one with \`atlas doctor why <nodeKey>\`${caveat}`
   }
-  return `the whole of what is filed under this scope fits the briefing — drill with \`atlas own <finer>\`, widen with \`atlas query ${out.pack.drill.complement.pull.replace(/^relate:/, '')}\`${caveat}`;
+  return `the whole of what is filed under this scope fits the briefing — drill with \`atlas own <finer>\`, widen with \`atlas query ${out.pack.drill.complement.pull.replace(/^relate:/, "")}\`${caveat}`
 }
 
 /**
@@ -128,5 +131,5 @@ function nextLine(out: OwnDispatch): string {
  * stand up a second runtime, or the store it briefs from stops being the store `atlas query` reads.
  */
 export function runOwn(own: (scope: string) => OwnDispatch, scope: string): CliVerdict {
-  return ownVerdict(own(scope));
+  return ownVerdict(own(scope))
 }

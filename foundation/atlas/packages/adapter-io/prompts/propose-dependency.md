@@ -31,6 +31,7 @@ Every clause is traceable. HTML comments are stripped before the text reaches th
     list, OR the token `NO-FACT`. A `<name>` not in the list, or any other shape, is treated as unparseable and
     abstains (never a fabricated fact). COUPLED to `parseDependencyClaim` (llm.ts); pinned by test.
 -->
+
 You are shown ONE anchored unit from a real codebase, and a CLOSED LIST of the symbols it actually depends on
 (resolved from the code index — every name below is a real cross-unit dependency of this unit).
 

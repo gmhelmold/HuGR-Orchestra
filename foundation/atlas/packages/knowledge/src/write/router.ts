@@ -28,12 +28,12 @@
 //  • REJECT (the admission bar — grounding by KNOW-2, harm by GROUND-7) is emit.ts's facet — the upsert route never
 //    returns REJECT.
 
-import { asNodeKey, canonicalForm, defaultEncoder, id } from '@atlas/kernel';
-import type { NodeKey } from '@atlas/contracts';
-import type { Candidate, Check, PredicateSlot } from '../types.js';
+import { asNodeKey, canonicalForm, defaultEncoder, id } from "@atlas/kernel"
+import type { NodeKey } from "@atlas/contracts"
+import type { Candidate, Check, PredicateSlot } from "../types.js"
 // The projection type the frozen `RouterApi.writeDecision` / `writeDecision` read — defined in the reducer
 // module this file re-exports below (type-only import; the runtime cycle is the re-export, see there).
-import type { StoreProjection } from './upsert.js';
+import type { StoreProjection } from "./upsert.js"
 
 // ── frozen RouterApi surface, co-located here (was ref/router.ts) ─────────────────────────────────────
 
@@ -52,7 +52,7 @@ import type { StoreProjection } from './upsert.js';
  *                   KNOW-2 is NOT amended — it is a grounding invariant and always was. Separately: nothing is
  *                   rejected for being obvious; obviousness is a stored score (ADR-0012).
  */
-export type WriteDecision = 'DEDUP' | 'CREATE' | 'UPDATE' | 'SUPERSEDE' | 'REJECT';
+export type WriteDecision = "DEDUP" | "CREATE" | "UPDATE" | "SUPERSEDE" | "REJECT"
 
 /** The frozen write-decision API (KNOW-4/15) — its impl is the pure functions below (no separate
  *  anchor.ts: the identity legs live HERE per the LEAD-RATIFIED decision). */
@@ -77,13 +77,13 @@ export interface RouterApi {
    *  [WIDENED — owner-RATIFIED un-park] the composed store is passed as DATA (`StoreProjection`), matching
    *  the `upsert(store, req)` idiom + the caller-side/session-internal projection documented in the facet
    *  header — NOT an invented frozen `StoreApi` field. See the `writeDecision` impl below. */
-  writeDecision(candidate: Candidate, store: StoreProjection): WriteDecision;
+  writeDecision(candidate: Candidate, store: StoreProjection): WriteDecision
 
   /** The node identity leg. `nodeKey(advisory) = hash(primaryAnchorId ‖ predicateSlot)`;
    *  `nodeKey(predicate) = hash(primaryAnchorId ‖ predicateSlot ‖ normalize(check))` — so a distinct
    *  `check` is a distinct node, never a sibling-supersede (atlas-knowledge:123-124, 144-146). Pure +
    *  total, no LLM. Routed on `Candidate` (identity needs its `slot`/`check`). */
-  nodeKey(node: Candidate): NodeKey;
+  nodeKey(node: Candidate): NodeKey
 
   /** The COMPUTED primary anchor — the tightest structural unit (smallest AST subtree) containing every
    *  symbol the claim references (atlas-knowledge:114-119). NEVER an LLM-chosen anchor. ONLY the primary
@@ -92,7 +92,7 @@ export interface RouterApi {
    *
    *  [FLAG — return leg] the reference frames `primaryAnchorId` as an ANCHOR id fed into `nodeKey`
    *  (atlas-knowledge:123-124), not itself a `nodeKey`; transcribed to the `NodeKey` return, flagged. */
-  primaryAnchorId(node: Candidate): NodeKey;
+  primaryAnchorId(node: Candidate): NodeKey
 }
 
 /** The content kinds of the Atlas (atlas-knowledge:19): advisory ⇒ UPDATE/union · predicate ⇒ SUPERSEDE.
@@ -108,7 +108,7 @@ export interface RouterApi {
  *  carries NO `check` (its oracle is tree-sitter, not SCIP), so it joins advisory/relation/negation/transition
  *  on the `family !== 'predicate'` UPDATE branch: re-evidencing the SAME `testVacuityKey` is an in-place UPDATE
  *  (append claim/provenance), NEVER a SUPERSEDE-by-routing. */
-export type NodeFamily = 'advisory' | 'predicate' | 'relation' | 'negation' | 'transition' | 'test-vacuity';
+export type NodeFamily = "advisory" | "predicate" | "relation" | "negation" | "transition" | "test-vacuity"
 
 /**
  * The enumerated routing product — the four orthogonal, already-RESOLVED oracle inputs the
@@ -117,10 +117,10 @@ export type NodeFamily = 'advisory' | 'predicate' | 'relation' | 'negation' | 't
  * (a predicate `nodeKey` encodes `normalize(check)`, so a hit ⟺ the same check re-evidenced).
  */
 export interface RouteInputs {
-  readonly contentHashHit: boolean; // WHAT  — dedup leg (contentHash already in CAS)
-  readonly nodeKeyHit: boolean; // WHICH — create/update leg (nodeKey present in the territory)
-  readonly family: NodeFamily; // advisory ⇒ set-union · predicate ⇒ supersede-with-lineage
-  readonly checkSame: boolean; // predicate: same `check` re-evidenced (else it is a different nodeKey)
+  readonly contentHashHit: boolean // WHAT  — dedup leg (contentHash already in CAS)
+  readonly nodeKeyHit: boolean // WHICH — create/update leg (nodeKey present in the territory)
+  readonly family: NodeFamily // advisory ⇒ set-union · predicate ⇒ supersede-with-lineage
+  readonly checkSame: boolean // predicate: same `check` re-evidenced (else it is a different nodeKey)
 }
 
 /**
@@ -131,8 +131,8 @@ export interface RouteInputs {
  * (UPDATE, 4c/4d), predicate same-check re-evidence supersedes with lineage (SUPERSEDE, 4e).
  */
 export function routeWrite(inputs: RouteInputs): WriteDecision {
-  if (inputs.contentHashHit) return 'DEDUP'; // 4b — byte-identical fact, idempotent no-op
-  if (!inputs.nodeKeyHit) return 'CREATE'; // 4f — new (anchor, slot[, check]) OR a different check
+  if (inputs.contentHashHit) return "DEDUP" // 4b — byte-identical fact, idempotent no-op
+  if (!inputs.nodeKeyHit) return "CREATE" // 4f — new (anchor, slot[, check]) OR a different check
   // 4c/4d — claim set-union, edited in place. A `relation` (ADR-0015 D2), a `negation` (ADR-0015 D3) AND a
   // `transition` (ADR-0015 D4) each have NO `check`, so re-evidencing an existing relationKey/negationKey/
   // transitionKey is an UPDATE (append the claim/provenance), never a SUPERSEDE — all three join advisory on
@@ -143,16 +143,15 @@ export function routeWrite(inputs: RouteInputs): WriteDecision {
   // DERIVE-ON-READ verdict (read/transitions.ts), never a write-time mutation of the incumbent. A
   // `test-vacuity` (ADR-0015 D5) likewise carries NO `check`, so re-evidencing an existing testVacuityKey is
   // an UPDATE on this same `family !== 'predicate'` branch, never a SUPERSEDE-by-routing.
-  if (inputs.family !== 'predicate') return 'UPDATE';
-  return inputs.checkSame ? 'SUPERSEDE' : 'CREATE'; // 4e — same-check re-evidence supersedes
+  if (inputs.family !== "predicate") return "UPDATE"
+  return inputs.checkSame ? "SUPERSEDE" : "CREATE" // 4e — same-check re-evidence supersedes
 }
 
 // ── the upsert REDUCER (projection types + `upsert`/`currentNodes`) now lives in `upsert.ts` ──────────
 // Split out at the 400-LOC godfile ceiling along the section boundary this file already drew (see that
 // module's header). RE-EXPORTED here so the package surface — and every existing `write/router.js` import —
 // is byte-identical to the pre-split form; the identity legs below did NOT move (LEAD-RATIFIED placement).
-export * from './upsert.js';
-
+export * from "./upsert.js"
 
 // ═════════════════════════════════════════════════════════════════════════════════════════════
 // WP-5.13-b.KNOW · EPIC-13-b — THE ANCHOR-IDENTITY FACET (additive; 5.13-a's routeWrite/upsert above
@@ -181,21 +180,21 @@ export * from './upsert.js';
  *  edits exactly one runtime list. This one is where it belongs: `nodeKey` — the identity the closedness
  *  exists to protect — is computed in THIS file. */
 export const PREDICATE_SLOTS: readonly PredicateSlot[] = [
-  'invariant',
-  'contract',
-  'precondition',
-  'postcondition',
-  'sideeffect',
-  'ownership',
-  'perf-bound',
-  'security-property',
-  'gotcha',
-  'rationale',
-  'dependency',
-  'count',
-  'definition',
-];
-const SLOT_SET: ReadonlySet<string> = new Set(PREDICATE_SLOTS);
+  "invariant",
+  "contract",
+  "precondition",
+  "postcondition",
+  "sideeffect",
+  "ownership",
+  "perf-bound",
+  "security-property",
+  "gotcha",
+  "rationale",
+  "dependency",
+  "count",
+  "definition",
+]
+const SLOT_SET: ReadonlySet<string> = new Set(PREDICATE_SLOTS)
 
 /** Closed-vocabulary membership guard (KNOW-15i / KNOW-10). A slot outside the 13 enumerated members is
  *  rejected — a free-text slot never collides, so `nodeKey` never forces UPDATE and the store would
@@ -204,35 +203,35 @@ const SLOT_SET: ReadonlySet<string> = new Set(PREDICATE_SLOTS);
  *  `PredicateSlot` type stops helping. ENFORCED at `upsert` (upsert.ts) — until #152 this guard had zero
  *  production callers and an out-of-vocabulary slot was ACCEPTED by the shipped `atlas emit`. */
 export function isKnownSlot(slot: unknown): boolean {
-  return typeof slot === 'string' && SLOT_SET.has(slot);
+  return typeof slot === "string" && SLOT_SET.has(slot)
 }
 
 /** Canonical `normalize(check)` — the predicate identity ingredient (KNOW-15c). Deterministic + total:
  *  the tagged-union kind + the NFC-normalized, trimmed body. Folded into the predicate `nodeKey` so a
  *  DISTINCT check is a DISTINCT node (never a sibling-supersede). No LLM/clock. */
 export function normalizeCheck(check: Check): string {
-  const body = check.kind === 'index-query' ? check.query : check.expr;
-  return `${check.kind}${body.normalize('NFC').trim()}`;
+  const body = check.kind === "index-query" ? check.query : check.expr
+  return `${check.kind}${body.normalize("NFC").trim()}`
 }
 
 /** Split a `qualifiedPath` on its structural-unit boundary (`::`) into ancestor segments. */
 function segments(qualifiedPath: string): readonly string[] {
-  return qualifiedPath.split('::');
+  return qualifiedPath.split("::")
 }
 
 /** The deepest common structural ancestor of a set of anchor paths — the smallest AST subtree that
  *  contains every one of them (segment-wise longest common prefix). This is the mechanical
  *  "tightest structural unit containing every referenced symbol" (KNOW-15d). Total + deterministic. */
 function deepestCommonUnit(paths: readonly string[]): string {
-  if (paths.length === 0) return '';
-  let common: readonly string[] = segments(paths[0]!);
+  if (paths.length === 0) return ""
+  let common: readonly string[] = segments(paths[0]!)
   for (const p of paths.slice(1)) {
-    const segs = segments(p);
-    let i = 0;
-    while (i < common.length && i < segs.length && common[i] === segs[i]) i++;
-    common = common.slice(0, i);
+    const segs = segments(p)
+    let i = 0
+    while (i < common.length && i < segs.length && common[i] === segs[i]) i++
+    common = common.slice(0, i)
   }
-  return common.join('::');
+  return common.join("::")
 }
 
 /**
@@ -270,15 +269,15 @@ function deepestCommonUnit(paths: readonly string[]): string {
  * vocabulary exists to prevent (atlas-knowledge:150). Refusal keeps identity meaning what it says.
  */
 export const DEGENERATE_ANCHOR_REASON =
-  'degenerate anchor: this grounding does not name ONE structural unit, so there is no address to write it ' +
-  'to. The primary anchor is the deepest unit CONTAINING every cited site, computed as the common prefix of ' +
-  'the `::` structural chain; when the cited sites live in different files that common prefix is EMPTY, and ' +
-  'an empty anchor is not an identity but a WILDCARD — `nodeKey` would collapse every such fact in the ' +
-  'repository onto ONE address per predicate slot, where the advisory set-union would merge unrelated ' +
+  "degenerate anchor: this grounding does not name ONE structural unit, so there is no address to write it " +
+  "to. The primary anchor is the deepest unit CONTAINING every cited site, computed as the common prefix of " +
+  "the `::` structural chain; when the cited sites live in different files that common prefix is EMPTY, and " +
+  "an empty anchor is not an identity but a WILDCARD — `nodeKey` would collapse every such fact in the " +
+  "repository onto ONE address per predicate slot, where the advisory set-union would merge unrelated " +
   "claims into whichever fact got there first. The same refusal covers a cited anchor whose `qualifiedPath` " +
-  'is absent or not a non-empty string, which computes the identical empty prefix by a different route. ' +
-  'Re-ground the claim at the single unit that genuinely contains every site it cites, or emit one fact per ' +
-  'site and let the derived `subsumes` relation relate them';
+  "is absent or not a non-empty string, which computes the identical empty prefix by a different route. " +
+  "Re-ground the claim at the single unit that genuinely contains every site it cites, or emit one fact per " +
+  "site and let the derived `subsumes` relation relate them"
 
 /** The refusal, as a THROWN value the composed doors already convert into a structured rejection (the tools
  *  handler turns a leg throw into a fail-closed `Verdict`, persisting nothing). A named class — never a bare
@@ -286,8 +285,8 @@ export const DEGENERATE_ANCHOR_REASON =
  *  caller can discriminate this refusal from an internal fault. */
 export class DegenerateAnchorError extends Error {
   constructor() {
-    super(DEGENERATE_ANCHOR_REASON);
-    this.name = 'DegenerateAnchorError';
+    super(DEGENERATE_ANCHOR_REASON)
+    this.name = "DegenerateAnchorError"
   }
 }
 
@@ -295,7 +294,7 @@ export class DegenerateAnchorError extends Error {
  *  a bare `object` schema (MCP), so `qualifiedPath` is TYPE-ONLY at this seam exactly as `Tier`/`Scope` are:
  *  refused here or nowhere. Total over `unknown`, fail-CLOSED. */
 function isAnchorPath(v: unknown): v is string {
-  return typeof v === 'string' && v.length > 0;
+  return typeof v === "string" && v.length > 0
 }
 
 /**
@@ -307,14 +306,14 @@ function isAnchorPath(v: unknown): v is string {
  * throws a raw `TypeError` out of a door and it never silently contributes a coerced path to the prefix.
  */
 function identityAnchorPaths(node: Candidate): readonly string[] {
-  const entries: unknown = (node as { grounding?: { entries?: unknown } } | null | undefined)?.grounding?.entries;
-  if (!Array.isArray(entries)) return [];
+  const entries: unknown = (node as { grounding?: { entries?: unknown } } | null | undefined)?.grounding?.entries
+  if (!Array.isArray(entries)) return []
   const anchorOf = (e: unknown): { kind?: unknown; qualifiedPath?: unknown } | undefined =>
-    (e as { anchor?: { kind?: unknown; qualifiedPath?: unknown } } | null | undefined)?.anchor;
-  const symbolAnchors = entries.filter((e) => anchorOf(e)?.kind === 'symbol');
-  const source = symbolAnchors.length > 0 ? symbolAnchors : entries.slice(0, 1);
-  const paths = source.map((e) => anchorOf(e)?.qualifiedPath);
-  return paths.every(isAnchorPath) ? paths : []; // one bad path poisons the prefix ⇒ refuse the whole set
+    (e as { anchor?: { kind?: unknown; qualifiedPath?: unknown } } | null | undefined)?.anchor
+  const symbolAnchors = entries.filter((e) => anchorOf(e)?.kind === "symbol")
+  const source = symbolAnchors.length > 0 ? symbolAnchors : entries.slice(0, 1)
+  const paths = source.map((e) => anchorOf(e)?.qualifiedPath)
+  return paths.every(isAnchorPath) ? paths : [] // one bad path poisons the prefix ⇒ refuse the whole set
 }
 
 /**
@@ -338,11 +337,11 @@ function identityAnchorPaths(node: Candidate): readonly string[] {
  * not, which left an anchor that passed one gate and failed the other forever.
  */
 export function primaryAnchorId(node: Candidate): NodeKey {
-  const paths = identityAnchorPaths(node);
-  const common = paths.length > 0 ? deepestCommonUnit(paths) : '';
+  const paths = identityAnchorPaths(node)
+  const common = paths.length > 0 ? deepestCommonUnit(paths) : ""
   // The whole defect in one line: an empty common unit is a wildcard, so it is REFUSED, never minted.
-  if (common === '') throw new DegenerateAnchorError();
-  return asNodeKey(common);
+  if (common === "") throw new DegenerateAnchorError()
+  return asNodeKey(common)
 }
 
 /**
@@ -354,32 +353,30 @@ export function primaryAnchorId(node: Candidate): NodeKey {
  * `defaultEncoder` and branded `asNodeKey` — the sole sanctioned nodeKey mint (no raw hashing).
  */
 export function nodeKey(node: Candidate): NodeKey {
-  const anchor = primaryAnchorId(node) as string;
+  const anchor = primaryAnchorId(node) as string
   const preimage = node.check
     ? { a: anchor, c: normalizeCheck(node.check), s: node.slot } // predicate: folds in normalize(check)
-    : { a: anchor, s: node.slot }; // advisory: anchor ‖ slot only
-  return asNodeKey(defaultEncoder.hash(canonicalForm(preimage)));
+    : { a: anchor, s: node.slot } // advisory: anchor ‖ slot only
+  return asNodeKey(defaultEncoder.hash(canonicalForm(preimage)))
 }
-
 
 // RELATION IDENTITY (ADR-0015 D2 · #99a) — the 2-ended fact's identity leg lives in its own module at the
 // 400-LOC ceiling, cohesively (mirrors `closed-slot.ts`). Re-exported below so the package surface is unchanged.
-export * from './relation-key.js';
+export * from "./relation-key.js"
 
 // NEGATION IDENTITY (ADR-0015 D3 · #99b) — the scoped-negative's identity leg, the 3-legged sibling of
 // `relation-key.js` (reuses its closed `RelationKind` vocabulary). Re-exported here beside it, same pattern.
-export * from './negation-key.js';
+export * from "./negation-key.js"
 
 // TRANSITION IDENTITY (ADR-0015 D4 · #234) — the 2-rev historical record's identity leg, the directed 3-legged
 // sibling of `negation-key.js`/`relation-key.js` (the (unitKey, shaBefore, shaAfter) triple). Re-exported here
 // beside them, same pattern — so the package surface is unchanged.
-export * from './transition-key.js';
+export * from "./transition-key.js"
 
 // TEST-VACUITY IDENTITY (ADR-0015 D5 · #95) — the single-anchor PROVEN AST-shape fact's identity leg, the
 // 2-legged sibling of `negation-key.js`/`transition-key.js` (the (unitKey, testName) pair). Re-exported here
 // beside them, same pattern — so the package surface is unchanged.
-export * from './test-vacuity-key.js';
-
+export * from "./test-vacuity-key.js"
 
 /**
  * THE composed write-decision FRONT DOOR (KNOW-4/15) — owner-RATIFIED un-park of the s05 PARK. COMPOSED
@@ -405,11 +402,11 @@ export * from './test-vacuity-key.js';
  * outside this file's own former signature. See the interface doc above and the #242 PR body.
  */
 export function writeDecision(candidate: Candidate, store: StoreProjection): WriteDecision {
-  const contentHashHit = store.cas.has(id(candidate) as string); // leg 1 — WHAT (sealed seam)
-  if (contentHashHit) return 'DEDUP'; // dedup precedence: identical bytes short-circuit (KNOW-4b)
+  const contentHashHit = store.cas.has(id(candidate) as string) // leg 1 — WHAT (sealed seam)
+  if (contentHashHit) return "DEDUP" // dedup precedence: identical bytes short-circuit (KNOW-4b)
 
-  const nodeKeyHit = store.current.has(nodeKey(candidate) as string); // leg 2 — WHICH
-  const family: NodeFamily = candidate.check ? 'predicate' : 'advisory';
-  const checkSame = family === 'predicate' && nodeKeyHit; // mirror upsert: predicate hit ⟺ same check
-  return routeWrite({ contentHashHit: false, nodeKeyHit, family, checkSame });
+  const nodeKeyHit = store.current.has(nodeKey(candidate) as string) // leg 2 — WHICH
+  const family: NodeFamily = candidate.check ? "predicate" : "advisory"
+  const checkSame = family === "predicate" && nodeKeyHit // mirror upsert: predicate hit ⟺ same check
+  return routeWrite({ contentHashHit: false, nodeKeyHit, family, checkSame })
 }

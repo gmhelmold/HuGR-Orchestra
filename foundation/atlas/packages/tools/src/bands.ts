@@ -20,8 +20,8 @@
 // An unrecognized class is not `≥T1` and it is not `T2` either — it is not a class at all, and it belongs to
 // NEITHER band. `isTier` is the ONE lattice guard; neither predicate here compares tier strings by hand.
 
-import { isTier } from '@atlas/knowledge';
-import type { PackInvariant } from '@atlas/contracts';
+import { isTier } from "@atlas/knowledge"
+import type { PackInvariant } from "@atlas/contracts"
 
 /**
  * The ADVISORY band's token cap — 2000, RATIFIED BY THE OWNER on 2026-08-03.
@@ -33,19 +33,19 @@ import type { PackInvariant } from '@atlas/contracts';
  * (`@atlas/retrieval` src/pack.ts). It caps the ADVISORY band ONLY — the governing band's budget is
  * RESERVED and no advisory row may displace a governing one.
  */
-export const ADVISORY_CAP = 2000;
+export const ADVISORY_CAP = 2000
 
 /**
  * The GOVERNING band predicate (TOOLS-6): `tier≥T1` (T0 or T1). MEMBERSHIP, never `!== 'T2'` — see header.
  */
-export const atLeastT1 = (inv: PackInvariant): boolean => isTier(inv.tier) && inv.tier !== 'T2';
+export const atLeastT1 = (inv: PackInvariant): boolean => isTier(inv.tier) && inv.tier !== "T2"
 
 /**
  * The ADVISORY band predicate (ADR-0013): `T2` exactly. MEMBERSHIP, never `!atLeastT1` — see header. The two
  * predicates are deliberately NOT complements: their union is the tier LATTICE, not the set of all strings,
  * so an off-lattice row satisfies neither and lands in neither band.
  */
-export const isAdvisory = (inv: PackInvariant): boolean => isTier(inv.tier) && inv.tier === 'T2';
+export const isAdvisory = (inv: PackInvariant): boolean => isTier(inv.tier) && inv.tier === "T2"
 
 /**
  * The ONE advisory size estimate — a deterministic char-count proxy over the claims. It is the estimator the
@@ -54,17 +54,17 @@ export const isAdvisory = (inv: PackInvariant): boolean => isTier(inv.tier) && i
  * (method-tags-tls:158).
  */
 export const packTokens = (invariants: readonly PackInvariant[]): number =>
-  invariants.reduce((n, inv) => n + inv.claim.length, 0);
+  invariants.reduce((n, inv) => n + inv.claim.length, 0)
 
 /** The two bands of one raw invariant list, plus the advisory truncation ledger. */
 export interface Bands {
   /** `tier≥T1`, in input order. NOT capped by `ADVISORY_CAP` — its budget is reserved. */
-  readonly governing: readonly PackInvariant[];
+  readonly governing: readonly PackInvariant[]
   /** `T2`, in input order, truncated at `ADVISORY_CAP`. */
-  readonly advisory: readonly PackInvariant[];
+  readonly advisory: readonly PackInvariant[]
   /** How many `T2` rows the cap dropped. Rides out beside the data — a truncated bounded set that does not
    *  say so reads as "we covered everything" (#130). */
-  readonly advisoryDropped: number;
+  readonly advisoryDropped: number
 }
 
 /**
@@ -83,25 +83,25 @@ export interface Bands {
  * caller supplies the order (both shipped paths sort by `nodeId` before calling), so truncation is stable.
  */
 export function splitBands(invariants: readonly PackInvariant[]): Bands {
-  const governing: PackInvariant[] = [];
-  const advisory: PackInvariant[] = [];
-  let dropped = 0;
-  let used = 0;
-  let capped = false;
+  const governing: PackInvariant[] = []
+  const advisory: PackInvariant[] = []
+  let dropped = 0
+  let used = 0
+  let capped = false
   for (const inv of invariants) {
     if (atLeastT1(inv)) {
-      governing.push(inv);
-      continue;
+      governing.push(inv)
+      continue
     }
-    if (!isAdvisory(inv)) continue; // off-lattice ⇒ NEITHER band, and NOT a truncation (see above)
-    const cost = inv.claim.length;
+    if (!isAdvisory(inv)) continue // off-lattice ⇒ NEITHER band, and NOT a truncation (see above)
+    const cost = inv.claim.length
     if (!capped && used + cost <= ADVISORY_CAP) {
-      advisory.push(inv);
-      used += cost;
+      advisory.push(inv)
+      used += cost
     } else {
-      capped = true;
-      dropped++;
+      capped = true
+      dropped++
     }
   }
-  return { governing, advisory, advisoryDropped: dropped };
+  return { governing, advisory, advisoryDropped: dropped }
 }

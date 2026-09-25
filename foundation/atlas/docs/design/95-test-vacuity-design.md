@@ -1,6 +1,6 @@
 # #95 — the TEST-VACUITY fact shape (ADR-0015 D5)
 
-The sixth greenfield fact family, grounded in **ADR-0015 D5** (`docs/adr/ADR-0015-grounding-tokens-are-typed-by-fact-shape.md`). A test-vacuity fact is a **SINGLE-ANCHOR PROVEN** record — *"named test `testName` in unit `unitKey` has all its assertion-shaped calls inside `catch` clauses and no assertion-count guard"* — a **SYNTACTIC** property that is a pure function of the unit's AST. Unlike a transition (which has **no** mechanical HEAD oracle and is sealed `justified`), a test-vacuity fact **HAS** a mechanical HEAD oracle (`scanTestVacuity`, `adapter-io/src/test-vacuity.ts`), so it is **sealed `proven`** — the single-anchor AST-substrate analogue of a proven `depends-on` relation.
+The sixth greenfield fact family, grounded in **ADR-0015 D5** (`docs/adr/ADR-0015-grounding-tokens-are-typed-by-fact-shape.md`). A test-vacuity fact is a **SINGLE-ANCHOR PROVEN** record — _"named test `testName` in unit `unitKey` has all its assertion-shaped calls inside `catch` clauses and no assertion-count guard"_ — a **SYNTACTIC** property that is a pure function of the unit's AST. Unlike a transition (which has **no** mechanical HEAD oracle and is sealed `justified`), a test-vacuity fact **HAS** a mechanical HEAD oracle (`scanTestVacuity`, `adapter-io/src/test-vacuity.ts`), so it is **sealed `proven`** — the single-anchor AST-substrate analogue of a proven `depends-on` relation.
 
 ## The design (the sub-decisions)
 
@@ -13,14 +13,14 @@ The sixth greenfield fact family, grounded in **ADR-0015 D5** (`docs/adr/ADR-001
 
 The scaffolding (type, key, union/family widening, router/upsert/projection carriers, barrels, ADR) mirrors the **transition** family landing (`transition-types.ts`, `transition-key.ts`, the `GroundedFact`/`NodeFamily` widening, the row carriers). The **`proven` seal + witness** mirrors the **relation** family (`RelationWitness`; a proven fact carries its re-runnable derivation) — NOT the transition seal, which is `justified` with no oracle.
 
-| concern | transition (#234) | test-vacuity (#95) |
-|---|---|---|
-| node type | `transition-types.ts` `TransitionNode` | `test-vacuity-types.ts` `TestVacuityNode` (re-exported byte-identically from `types.ts`) |
-| `GroundedFact` / `NodeFamily` | `'transition'` (fifth) | `'test-vacuity'` (sixth) |
-| identity leg | `transitionKey(unitKey,shaBefore,shaAfter)` — directed triple | `testVacuityKey(unitKey,testName)` — a PAIR (directed n/a); `MalformedTestVacuityError` on empty leg |
-| seal | `justified`, NO oracle (D-T1) | **`proven`**, tree-sitter oracle + `TestVacuityWitness` (D-TV1) |
-| grounding | 2-rev pair, never re-checked | SINGLE unit anchor, re-run at HEAD by reverify |
-| routing | check-less ⇒ UPDATE | check-less ⇒ UPDATE (same `family !== 'predicate'` branch) |
+| concern                       | transition (#234)                                             | test-vacuity (#95)                                                                                   |
+| ----------------------------- | ------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| node type                     | `transition-types.ts` `TransitionNode`                        | `test-vacuity-types.ts` `TestVacuityNode` (re-exported byte-identically from `types.ts`)             |
+| `GroundedFact` / `NodeFamily` | `'transition'` (fifth)                                        | `'test-vacuity'` (sixth)                                                                             |
+| identity leg                  | `transitionKey(unitKey,shaBefore,shaAfter)` — directed triple | `testVacuityKey(unitKey,testName)` — a PAIR (directed n/a); `MalformedTestVacuityError` on empty leg |
+| seal                          | `justified`, NO oracle (D-T1)                                 | **`proven`**, tree-sitter oracle + `TestVacuityWitness` (D-TV1)                                      |
+| grounding                     | 2-rev pair, never re-checked                                  | SINGLE unit anchor, re-run at HEAD by reverify                                                       |
+| routing                       | check-less ⇒ UPDATE                                           | check-less ⇒ UPDATE (same `family !== 'predicate'` branch)                                           |
 
 ## Scope (this WP = L1 only)
 

@@ -8,7 +8,7 @@
 > **no** `formal` cluster — the whole Atlas's one machine-checked model is `FSPEC-merge` in the KRN block. The
 > write-decision "infallible" core (**KNOW-4 / 10 / 15**, the S0 `PBT-exhaustive` triad) resolves here to
 > **`exhaustive`** — a finite hash-state routing space enumerated for existence + uniqueness + mutual-exclusion
-> (structural/routing shape, **not** formal). KNOW-15 *consumes* the KRN OR-Set set-union reducer for its
+> (structural/routing shape, **not** formal). KNOW-15 _consumes_ the KRN OR-Set set-union reducer for its
 > UPDATE/union leg but is **not** the formal model — the `formal` footprint stays **1** (KRN). Everything else
 > is `reference-model` per the ratified baseline — a feature, not a compromise. All 18 KNW invariants are
 > `behavioural` (register), so none carries `n/a`.
@@ -16,6 +16,7 @@
 ---
 
 ### INV-KNOW-1
+
 method-tag: reference-model
 fspec: —
 up-property: "no self-declaration of truth: served status is a recomputed side-index (KNOW-3 structural drift + the KNOW-16 evaluator), never a value the fact asserts about itself — a candidate-declared `HOLDS` is ignored"
@@ -23,6 +24,7 @@ down-model: "reference status resolver recomputes `Status` from {grounding, drif
 anti-rot: `knowledge/ref/status.ts` (the side-index recomputer) is the mock in the gate unit tests; a code path that trusts a node-declared status diverges and breaks the build.
 
 ### INV-KNOW-2
+
 method-tag: reference-model
 fspec: —
 up-property: "fail-closed admission: a fact with no resolvable grounding (0 entries, or any empty `subtreeHash`) is rejected — `emitted:false`, 0 persisted; admission is total (a structured rejection, never a throw)"
@@ -30,6 +32,7 @@ down-model: "reference `admit(node) = isGrounded(node) ? persist : {emitted:fals
 anti-rot: `knowledge/ref/emit.ts` (the fail-closed admitter) is the mock in atlas-emit unit tests; an admit path that lets an ungrounded node through fails against it.
 
 ### INV-KNOW-3
+
 method-tag: reference-model
 fspec: —
 up-property: "structural drift oracle: freshness is a function of the BLAKE3 `subtreeHash` of the cited unit alone — an import, or a BLANK-LINE-SEPARATED license/file header, added ABOVE the unit, and an unrelated rename elsewhere, stay `FRESH`; a real change `DRIFT`s, and so do a reformat OF the cited unit, a rename OF the cited symbol, and an edit to a comment CONTIGUOUS with the cited declaration (its bound doc-comment, ADR-0014); line numbers never enter identity or freshness"
@@ -40,7 +43,7 @@ anti-rot: shares the grounding subtreeHash oracle (`grounding/ref/subtree.ts`) a
 > … stays `FRESH`", and the down-model invoked `normalize(anchoredUnit)`. **There is no `normalize` step**
 > (see the INV-GROUND-5 amendment in `method-tags-grd.md` — the reference normalizer was never built), and
 > two of the three FRESH legs are not delivered. Measured through the real `foldAstUnits → build →
-> driftDetect` chain: import-above `FRESH`; **reformat of the cited unit `DRIFTED`**; **rename of the cited
+driftDetect` chain: import-above `FRESH`; **reformat of the cited unit `DRIFTED`**; **rename of the cited
 > symbol `DRIFTED`, with the anchor key GONE** — the name is part of the key
 > (`<parent>::<kind>:<ordinal>[:<name>]`), so a rename retires the anchor and the fact fails closed rather
 > than re-binding. KNOW-3's rename leg is a strictly stronger claim than GROUND-5b's "unrelated rename
@@ -54,6 +57,7 @@ anti-rot: shares the grounding subtreeHash oracle (`grounding/ref/subtree.ts`) a
 > `adapter-io` goldens G-GAP2-1..8 verify.
 
 ### INV-KNOW-4
+
 method-tag: exhaustive
 fspec: —
 up-property: "upsert-routing is total, deterministic, mutually-exclusive: every write resolves to exactly one of {DEDUP (identical ⇒ no-op), UPDATE (advisory claim **set-union** in place), SUPERSEDE (predicate same-`check` re-evidenced), CREATE (new node)}; a territory query returns exactly one current node per `(anchor, slot[, check])` — 0 duplicates"
@@ -61,6 +65,7 @@ down-model: "enumerate the finite routing product {contentHash∈(hit,miss) × f
 anti-rot: the reference upsert router (`knowledge/ref/router.ts`, shared with KNOW-15) is the mock in the emit unit tests; an append-instead-of-upsert or a duplicate-minting path diverges from the enumerated table.
 
 ### INV-KNOW-5
+
 method-tag: reference-model
 fspec: —
 up-property: "drift bisection: the `DRIFTED` subset partitions exactly into **mechanical** (claim re-derives at the new `@sha` ⇒ auto-re-ground, no human, no block) and **semantic** (no longer re-derives ⇒ `BROKEN`, exit 2); human re-author count == `|semantic|`, never `|DRIFTED|`, never `N`"
@@ -68,6 +73,7 @@ down-model: "reference `reconcile(drifted[])` partitions by `reDerives(claim,new
 anti-rot: `knowledge/ref/reconcile.ts` (the partitioner) is the mock in atlas-reconcile unit tests (shared with TOOLS-8); a path that blocks on mechanical drift or miscounts re-authors fails against it.
 
 ### INV-KNOW-6
+
 method-tag: reference-model
 fspec: —
 up-property: "empty genesis: `atlas-init` output carries 0 invariants; 100% of territories ship the `T2/advisory` default by construction — nothing authored, nothing promoted"
@@ -75,13 +81,15 @@ down-model: "reference `init(tree)` emits territories with `tier=T2, family=advi
 anti-rot: `knowledge/ref/init.ts` is the mock in atlas-init unit tests; an init that seeds any invariant or a non-T2 default fails the empty-genesis assertion.
 
 ### INV-KNOW-7
+
 method-tag: reference-model
 fspec: —
-up-property: "no auto-promotion: a `T0`-keyword match yields `t0Candidate:true` **and** `tier=='T2'` (0 auto-promotes); heuristics may only *flag* a candidate, never assign the tier"
+up-property: "no auto-promotion: a `T0`-keyword match yields `t0Candidate:true` **and** `tier=='T2'` (0 auto-promotes); heuristics may only _flag_ a candidate, never assign the tier"
 down-model: "reference `classify(territory)` sets `t0Candidate` by keyword but always emits `tier='T2'`; a unit asserts `t0Candidate ⇒ tier=='T2'` over the keyword corpus"
 anti-rot: `knowledge/ref/tier.ts` is the mock; a heuristic that writes `tier=T0` diverges and fails the no-auto-promote assertion.
 
 ### INV-KNOW-8
+
 method-tag: reference-model
 fspec: —
 up-property: "propose/ratify separation: 0 explorer writes reach the committed store except through a reconcile-side ratifier (human for `T0` / contested / predicate; deterministic fast-path for grounded low-risk `T2` advisory); the explorer never self-commits, and `T0` requires billy"
@@ -90,13 +98,15 @@ down-model: "reference commit path routes `candidate → staging → ratifier`; 
 anti-rot: `knowledge/ref/ratify.ts` (the staging / ratifier gate) is the mock; an explorer path that writes straight to the store fails the no-self-commit assertion.
 
 ### INV-KNOW-9
+
 method-tag: reference-model
 fspec: —
 up-property: "advisory-standalone operability: with no evaluator wired the store is fully operable on advisory nodes alone (emit / query / reconcile all succeed); the predicate family is present day-one, not deferred"
 down-model: "reference store parametrized by `evaluator?=none`; a unit runs the full emit→query→reconcile cycle on advisory nodes with a null evaluator and asserts 100% success"
-anti-rot: `knowledge/ref/store.ts` is the mock; a code path that hard-requires an evaluator to operate on advisory fails the standalone cycle. *(register flags "weak homing — confirm/exempt"; the row's `behavioural` column stands, so it carries a tag — flag surfaced for cold review, not force-exempted here.)*
+anti-rot: `knowledge/ref/store.ts` is the mock; a code path that hard-requires an evaluator to operate on advisory fails the standalone cycle. _(register flags "weak homing — confirm/exempt"; the row's `behavioural` column stands, so it carries a tag — flag surfaced for cold review, not force-exempted here.)_
 
 ### INV-KNOW-10
+
 method-tag: exhaustive
 fspec: —
 up-property: "template-validation routing is total + mutually-exclusive: a fact missing a required template field, over its cap, or with a `predicateSlot` outside the closed 13-slot vocabulary is **REJECTED**; a well-formed fact is **PERSISTED**; 0 free-prose facts persist"
@@ -104,6 +114,7 @@ down-model: "enumerate the finite validity product {required-field∈(present,mi
 anti-rot: `knowledge/ref/template.ts` (the per-kind template + closed-slot validator) is the mock in the emit unit tests; a free-text-slot or missing-field path that persists diverges from the enumerated table.
 
 ### INV-KNOW-11 ⚠️ **AMENDED 2026-08-03 (owner-ratified)** — reverses the `owner` fence added by #178/PR#105; see req-knw.md#REQ-KNOW-11a for the measurement.
+
 method-tag: reference-model
 fspec: —
 up-property: "scope-owned write, universal read: every fact carries `scope`; a write outside the actor's scope is rejected; a read of any scope succeeds for any caller (100%). Producer identity is carried by `ClaimProvenance.source` (KNOW-14), not by a separate `owner` field — `owner` is not part of this up-property and was never a gate input."
@@ -111,6 +122,7 @@ down-model: "reference `authz(op,actor,fact) = op==read ? allow : inScope(actor,
 anti-rot: `knowledge/ref/authz.ts` is the mock; a write path that skips the scope check fails the out-of-scope rejection.
 
 ### INV-KNOW-12
+
 method-tag: reference-model
 fspec: —
 up-property: "no history loss: supersede ⇒ prior version present in CAS and re-spawnable; 0 delete paths; prior versions are their own content-addressed CAS objects (deduped, never byte-copied); advisory edit keeps **no** lineage pointer (git is the archive), a predicate supersede adds **only** a `supersededBy` pointer"
@@ -118,6 +130,7 @@ down-model: "reference store where supersede mints a new CAS object + `supersede
 anti-rot: `knowledge/ref/archive.ts` (CAS retention + `supersededBy` pointer, reusing the KERNEL CAS ref) is the mock; a delete or byte-copy path fails the re-spawnable + dedup assertions.
 
 ### INV-KNOW-13
+
 method-tag: reference-model
 fspec: —
 up-property: "born-from-work: facts are produced only at the three moments (init skeleton / enrich-by-blast-radius / wave-close write), never a repo-wide sweep; a sealing wave that neither fed the Atlas nor emitted a grounded why-not records a violation"
@@ -125,6 +138,7 @@ down-model: "reference producer accepts a production event only if tagged one of
 anti-rot: `knowledge/ref/produce.ts` (the moment-gated producer + seal probe) is the mock; a sweep path or an unrecorded bare-seal fails the probe.
 
 ### INV-KNOW-14
+
 method-tag: reference-model
 fspec: —
 up-property: "provenance receipt: every persisted claim carries a `Provenance`; an untrusted-sourced claim is marked advisory **and** excluded from the gate (0 toward `HOLDS`)"
@@ -132,14 +146,16 @@ down-model: "reference `persist(claim)` requires `claim.provenance`; a unit asse
 anti-rot: `knowledge/ref/provenance.ts` is the mock in the gate unit tests; a claim persisted without a receipt, or an untrusted claim reaching the gate, fails against it.
 
 ### INV-KNOW-15
+
 method-tag: exhaustive
 fspec: —
 up-property: "write-routing is a total, deterministic, mutually-exclusive **pure function of three orthogonal hashes** {contentHash, nodeKey, subtreeHash}: identical ⇒ DEDUP · nodeKey-miss ⇒ CREATE · advisory-hit ⇒ UPDATE/union · predicate-same-`check` ⇒ SUPERSEDE · predicate-different-`check` ⇒ CREATE (never sibling-retire); the anchor is **computed** (never LLM-chosen), the slot from the closed vocabulary, and **0 LLM calls** enter the decision"
 down-model: "enumerate the finite hash-state product {contentHash∈(in-CAS,new) × nodeKey∈(miss, hit-advisory, hit-predicate-same-check, hit-predicate-diff-check) × subtreeHash∈(equal,changed)}; assert **existence + uniqueness + mutual-exclusion** of the route per cell, and that the drift leg (subtreeHash) never changes the create/update leg. The three hashes are taken as **oracle inputs**."
 anti-rot: the reference write-decision router (`knowledge/ref/router.ts`, shared with KNOW-4) is the mock in the atlas-emit unit tests; a `seq`- / clock- / LLM-influenced route, or one that conflates the drift leg into create/update, diverges from the enumerated table and breaks the build.
-note: the **move-aware `primaryAnchorId` matcher** (rename/move ⇒ same nodeKey) is an **OPEN DEFINE dependency** (register: "move-aware needs a similarity matcher"; S0 carry-forward reconciliation — subtreeHash equality catches move/rename but not move+edit). It lives **upstream** of the enumerated inputs — it fixes the *value* of the `nodeKey` inputs, not the routing over them — so the `exhaustive` route-enumeration is **feasible now**. Verifying the matcher's precision is a **separate** reference-model/PBT obligation that **cannot be tagged until DEFINE pins the threshold θ**; no verification is invented for an unpinned threshold here. *(The old near-dup probe's `claimNorm`-collision threshold τ is RESOLVED, not DEFINE-open: per the frozen dedup/identity model — `docs/design/dedup-identity.md` — a collision is **reported** under exact NFC+trim equality (no fuzzy τ) and **never merges** at write time; structural near-dup is the derived-on-read `subsumes` relation.)*
+note: the **move-aware `primaryAnchorId` matcher** (rename/move ⇒ same nodeKey) is an **OPEN DEFINE dependency** (register: "move-aware needs a similarity matcher"; S0 carry-forward reconciliation — subtreeHash equality catches move/rename but not move+edit). It lives **upstream** of the enumerated inputs — it fixes the _value_ of the `nodeKey` inputs, not the routing over them — so the `exhaustive` route-enumeration is **feasible now**. Verifying the matcher's precision is a **separate** reference-model/PBT obligation that **cannot be tagged until DEFINE pins the threshold θ**; no verification is invented for an unpinned threshold here. _(The old near-dup probe's `claimNorm`-collision threshold τ is RESOLVED, not DEFINE-open: per the frozen dedup/identity model — `docs/design/dedup-identity.md` — a collision is **reported** under exact NFC+trim equality (no fuzzy τ) and **never merges** at write time; structural near-dup is the derived-on-read `subsumes` relation.)_
 
 ### INV-KNOW-16
+
 method-tag: reference-model
 fspec: —
 up-property: "pure deterministic evaluator: a `PredicateNode.check` evaluates to `HOLDS/BROKEN/NA` from Atlas-index state **alone** (same index ⇒ same verdict; no clock / IO; no code-exec; no sandbox); a check needing runtime/behavioral execution is refused and the fact stays advisory; the verdict feeds `atlas-reconcile`"
@@ -147,6 +163,7 @@ down-model: "the synthesized check evaluator — a pure index-query interpreter 
 anti-rot: `knowledge/ref/evaluator.ts` (the pure index-query interpreter) is the mock; an evaluator path that shells out, reads a clock, or admits a runtime check diverges from the pure oracle and breaks the build.
 
 ### INV-KNOW-17
+
 method-tag: reference-model
 fspec: —
 up-property: "usefulness-by-consumption: a served fact governing a decision accrues a logged `hit` (node-id cited); a served fact with 0 hits across the decay window **decays** out of the served/pack set (archived to CAS, never deleted — KNOW-12) and MAY re-enter on a later hit; door-2's threshold is a function of observed hits, never the proposer's self-score"
@@ -154,6 +171,7 @@ down-model: "reference hit-ledger + decay: decays a fact iff `hits-in-window==0`
 anti-rot: `knowledge/ref/hits.ts` (the hit-ledger + decay) is the mock (spans the KNOW-17 ↔ MEM-7 substrate seam, DP-9); a delete-on-decay or a self-score threshold diverges from it.
 
 ### INV-KNOW-18
+
 method-tag: reference-model
 fspec: —
 up-property: "risk-bounded ratification: a candidate that is grounded ∧ low-risk ∧ `T2` advisory **auto-accepts** (fast-path, no human); a `T0`, **contested** (reviewer veto / conflicting node), or **any predicate** candidate routes to full human ratification; fast-path over-admission is backstopped by KNOW-17 decay"
@@ -166,7 +184,7 @@ anti-rot: `knowledge/ref/fastpath.ts` (the routing predicate) is the mock (share
 
 - **performance / OR-Set + pack growth, decay footprint**: bounded by decay (KNOW-17); covered by load tests, no correctness oracle to model.
 - **the code itself**: conformance-tested (sampled) against the reference models — "success = we could not find a bug"; a verified design is not a verified impl. Confidence is bought with scale + coverage, not a proof claim.
-- **the KNOW-15 move-aware similarity matcher precision (threshold θ)**: an **OPEN DEFINE reconciliation** (unpinned threshold; subtreeHash equality misses move+edit). We verify the routing over the three hashes as oracle inputs, **not** the upstream matcher that computes the nodeKey inputs — no verification is invented for an unpinned threshold. *(The old near-dup `claimNorm` threshold τ is no longer a residue: per `docs/design/dedup-identity.md` a collision is reported under exact NFC+trim equality — no fuzzy τ — and never merges at write time; structural near-dup is the derived-on-read `subsumes` relation.)*
+- **the KNOW-15 move-aware similarity matcher precision (threshold θ)**: an **OPEN DEFINE reconciliation** (unpinned threshold; subtreeHash equality misses move+edit). We verify the routing over the three hashes as oracle inputs, **not** the upstream matcher that computes the nodeKey inputs — no verification is invented for an unpinned threshold. _(The old near-dup `claimNorm` threshold τ is no longer a residue: per `docs/design/dedup-identity.md` a collision is reported under exact NFC+trim equality — no fuzzy τ — and never merges at write time; structural near-dup is the derived-on-read `subsumes` relation.)_
 - **the LLM's claim-body proposal quality**: the LLM proposes only the claim body (+ slot, + check?); its semantic merit is out of scope — the write-decision is verified to be **LLM-free** (KNOW-15j), the LLM's output is not judged.
 - **git as the advisory archive (KNOW-4/12)**: advisory prior-version recovery is delegated to git history — a black box we do not model; we model only CAS retention + the `supersededBy` pointer for the predicate side.
 - **BLAKE3 collision-resistance**: the `subtreeHash` / `contentHash` primitive is a trusted, assumed primitive (inherited from KERNEL-1) — not modeled.

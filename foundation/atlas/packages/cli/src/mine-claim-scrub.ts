@@ -39,23 +39,23 @@
 // shape — two predicates whose checks scrub-equal really are the same public predicate, so collapsing them is
 // correct (`mine-predicate-check-scrub.test.ts` pins that two DISTINCT non-secret checks still diverge).
 
-import { scrub } from '@atlas/persist';
-import type { Check } from '@atlas/knowledge';
+import { scrub } from "@atlas/persist"
+import type { Check } from "@atlas/knowledge"
 // `FactGrounding = AdvisoryNode['grounding']` — the SAME `Grounding` type, re-exported by @atlas/genesis (an
 // already-declared @atlas/cli edge). Imported from here rather than @atlas/grounding directly so this leg adds
 // no new architecture edge (ARCH-1): mine-gate.ts uses the identical alias for exactly this reason.
-import type { FactGrounding } from '@atlas/genesis';
+import type { FactGrounding } from "@atlas/genesis"
 
 /** The one whole-buffer scrub both legs share — `@atlas/persist` `scrub` (the same `mine-answer.ts` uses for
  *  the answer), which redacts credential SHAPES to an ASCII placeholder and preserves valid UTF-8, so the
  *  result round-trips losslessly through the CAS object `mine-decide.ts` hashes. */
-const scrubUtf8 = (s: string): string => Buffer.from(scrub(Buffer.from(s, 'utf8'))).toString('utf8');
+const scrubUtf8 = (s: string): string => Buffer.from(scrub(Buffer.from(s, "utf8"))).toString("utf8")
 
 /**
  * Scrub a mined ADVISORY claim's body — applied BEFORE the claim becomes part of any hashed/stored bytes.
  */
 export function scrubClaimNorm(claimNorm: string): string {
-  return scrubUtf8(claimNorm);
+  return scrubUtf8(claimNorm)
 }
 
 /**
@@ -67,9 +67,9 @@ export function scrubClaimNorm(claimNorm: string): string {
  * the single source of the check bytes rather than a CAS-only redaction.
  */
 export function scrubCheck(check: Check): Check {
-  return check.kind === 'index-query'
-    ? { kind: 'index-query', query: scrubUtf8(check.query) }
-    : { kind: 'assertion', expr: scrubUtf8(check.expr) };
+  return check.kind === "index-query"
+    ? { kind: "index-query", query: scrubUtf8(check.query) }
+    : { kind: "assertion", expr: scrubUtf8(check.expr) }
 }
 
 /**
@@ -91,7 +91,7 @@ export function scrubCheck(check: Check): Check {
  * different addresses). A secret-shaped endpoint/target/scope scrubs to `[REDACTED]` on ALL of them at once.
  */
 export function scrubUnit(s: string): string {
-  return scrubUtf8(s);
+  return scrubUtf8(s)
 }
 
 /**
@@ -117,5 +117,5 @@ export function scrubGrounding(g: FactGrounding): FactGrounding {
       anchor: { ...e.anchor, qualifiedPath: scrubUtf8(e.anchor.qualifiedPath) },
       path: scrubUtf8(e.path),
     })),
-  };
+  }
 }

@@ -9,60 +9,60 @@
 // import of `RelationKind` is). Nothing here changed in the move EXCEPT the two ADDITIVE/OPTIONAL
 // answer-provenance carrier (`answerRef`, #195 b) added to both shapes below.
 
-import type { Tier } from '@atlas/contracts';
-import type { ClaimProvenance, PredicateSlot, Seal } from '../types.js';
-import type { NodeFamily } from './router.js';
+import type { Tier } from "@atlas/contracts"
+import type { ClaimProvenance, PredicateSlot, Seal } from "../types.js"
+import type { NodeFamily } from "./router.js"
 
 /** One write, its identity VALUES supplied by the upstream identity facet (5.13-b) + the emitter. */
 export interface WriteRequest {
-  readonly nodeKey: string; // WHICH — opaque identity (value computed upstream)
-  readonly contentHash: string; // WHAT  — opaque CAS id (value computed upstream)
-  readonly family: NodeFamily;
-  readonly claimNorm: string; // the advisory claim body — the set-union element (KNOW-4c)
+  readonly nodeKey: string // WHICH — opaque identity (value computed upstream)
+  readonly contentHash: string // WHAT  — opaque CAS id (value computed upstream)
+  readonly family: NodeFamily
+  readonly claimNorm: string // the advisory claim body — the set-union element (KNOW-4c)
   // ── CLAIM-PROVENANCE carrier (ADDITIVE, OPTIONAL — KNOW-14) — receipt keyed by claimNorm. The map keeps
   //    CurrentNode.claims compatible with legacy string arrays while making each durable claim auditable.
-  readonly provenanceByClaim?: Readonly<Record<string, ClaimProvenance>>;
+  readonly provenanceByClaim?: Readonly<Record<string, ClaimProvenance>>
   // ── ADJACENCY carrier (ADDITIVE, OPTIONAL) — anchor+slot for WP-B's sibling-adjacency scan; NOT routed.
-  readonly primaryAnchor?: string; // the computed primaryAnchorId VALUE (qualifiedPath-prefix), string form
-  readonly slot?: PredicateSlot; //  the closed-vocabulary predicate slot the node lives at (R3-optional)
+  readonly primaryAnchor?: string // the computed primaryAnchorId VALUE (qualifiedPath-prefix), string form
+  readonly slot?: PredicateSlot //  the closed-vocabulary predicate slot the node lives at (R3-optional)
   // ── GOVERNANCE carrier (ADDITIVE, OPTIONAL — ADR-0007) — the `(scope, tier)` pair this write DECLARES,
   //    forwarded so `upsert` can stamp it onto the ROW. NOT ROUTED: neither field enters `RouteInputs`, and
   //    a governance value never changes which cell of the KNOW-4 table a write lands in. Supplied by a
   //    GOVERNED door only, and only AFTER that door has validated both halves (`isTier`/`isScope`) and
   //    refused any relocation or downgrade — so what is stamped here is already monotone.
-  readonly scope?: string;
-  readonly tier?: Tier;
+  readonly scope?: string
+  readonly tier?: Tier
   // ── RELATION carrier (ADDITIVE, OPTIONAL — ADR-0015 D2 / #99a) — the two endpoint unitKeys + the kind of a
   //    2-ended fact, forwarded so `upsert` stamps them on the ROW and the read-side `relationsOf` fold can
   //    index a relation by BOTH endpoints without an O(repo) scan. NOT ROUTED: none enters `RouteInputs`; a
   //    relation's identity is `relationKey` (router.ts), computed upstream into `nodeKey` here. Present only on
   //    a `family:'relation'` write; absent for advisory/predicate. Direction is preserved (A=subject, B=object).
-  readonly endpointA?: string;
-  readonly endpointB?: string;
-  readonly relationKind?: string; // the closed-vocabulary RelationKind VALUE (string form at this seam)
+  readonly endpointA?: string
+  readonly endpointB?: string
+  readonly relationKind?: string // the closed-vocabulary RelationKind VALUE (string form at this seam)
   // ── TRANSITION carrier (ADDITIVE, OPTIONAL — ADR-0015 D4 / #234) — the unit lineage + the rev-pair of a
   //    2-rev historical record, forwarded so `upsert` stamps them on the ROW and the read-side `transitionsOf`
   //    fold can index a transition by its `unitKey` LINEAGE (and chain shaBefore→shaAfter for the derive-on-read
   //    supersession verdict) without re-reading CAS. NOT ROUTED: none enters `RouteInputs`; a transition's
   //    identity is `transitionKey` (transition-key.ts), computed upstream into `nodeKey` here. Present only on a
   //    `family:'transition'` write; absent for the other families. Direction preserved (before→after).
-  readonly unitKey?: string;
-  readonly shaBefore?: string;
-  readonly shaAfter?: string;
+  readonly unitKey?: string
+  readonly shaBefore?: string
+  readonly shaAfter?: string
   // ── TEST-VACUITY carrier (ADDITIVE, OPTIONAL — ADR-0015 D5 / #95) — the test name + proven shape of a
   //    single-anchor test-vacuity fact, forwarded so `upsert` stamps them on the ROW and a future read-side
   //    fold (Wave 1b) can index a vacuous test by its `unitKey` lineage (shared with the transition carrier
   //    above) WITHOUT a CAS re-read. NOT ROUTED: none enters `RouteInputs`; a test-vacuity fact's identity is
   //    `testVacuityKey` (test-vacuity-key.ts), computed upstream into `nodeKey` here. Present only on a
   //    `family:'test-vacuity'` write; absent for the other families.
-  readonly testName?: string;
-  readonly shape?: string; // the closed-vocabulary TestVacuityShape VALUE (string form at this seam)
+  readonly testName?: string
+  readonly shape?: string // the closed-vocabulary TestVacuityShape VALUE (string form at this seam)
   // ── SEAL carrier (ADDITIVE, OPTIONAL — ADR-0017 two-seal provenance) — the seal (`proven`) the admit path
   //    decided for this fact's TYPE, forwarded so `upsert` stamps it on the ROW and the durable store carries
   //    it. PROVENANCE ONLY: it records HOW the fact's type was decided, is NOT an authority/governance leg,
   //    never enters `nodeKey`/`RouteInputs`, and no gate reads it. Absent for advisory-prose facts. Mirrors
   //    `slot`'s carrier discipline exactly (ADDITIVE, OPTIONAL, exactOptionalPropertyTypes-honest).
-  readonly seal?: Seal;
+  readonly seal?: Seal
   // ── ANSWER-PROVENANCE carrier (ADDITIVE, OPTIONAL — #195 b) — binds a MINED fact to the exact bytes the model
   //    returned. `answerRef` is the CAS id of the answer bytes actually stored (scrubbed before `put`, KNOW-11).
   //    In a content-addressed store the CAS id IS the digest of the stored content, so `answerRef` is its OWN
@@ -71,27 +71,27 @@ export interface WriteRequest {
   //    companion ref). Supplied ONLY by the mine door (a model produced the claim); absent for human
   //    `atlas emit`/`atlas link`. Does NOT enter `nodeKey` (a provenance receipt is not an identity). NOT
   //    ROUTED. See docs/design/195-answer-provenance-contract.md.
-  readonly answerRef?: string;
+  readonly answerRef?: string
 }
 
 /** A current node in the territory projection. Exactly one lives per `nodeKey` (KNOW-4g). */
 export interface CurrentNode {
-  readonly nodeKey: string;
-  readonly family: NodeFamily;
-  readonly contentHash: string;
-  readonly claims: readonly string[]; // claimNorms — the advisory set-union set (dedup by claimNorm)
+  readonly nodeKey: string
+  readonly family: NodeFamily
+  readonly contentHash: string
+  readonly claims: readonly string[] // claimNorms — the advisory set-union set (dedup by claimNorm)
   // ── CLAIM-PROVENANCE carrier (ADDITIVE, OPTIONAL — KNOW-14) — keyed by claimNorm; absent on legacy rows.
-  readonly provenanceByClaim?: Readonly<Record<string, ClaimProvenance>>;
-  readonly supersededBy?: string; // predicate lineage pointer into CAS (KNOW-4e); absent for advisory
+  readonly provenanceByClaim?: Readonly<Record<string, ClaimProvenance>>
+  readonly supersededBy?: string // predicate lineage pointer into CAS (KNOW-4e); absent for advisory
   // ── ADJACENCY carrier (ADDITIVE, OPTIONAL) — carried from the req for WP-B; store.ts WireProjection round-trips them free. NOT read here.
-  readonly primaryAnchor?: string; // the primaryAnchorId VALUE (qualifiedPath-prefix), string form
-  readonly slot?: PredicateSlot; //  the closed-vocabulary predicate slot the node lives at (R3-optional)
+  readonly primaryAnchor?: string // the primaryAnchorId VALUE (qualifiedPath-prefix), string form
+  readonly slot?: PredicateSlot //  the closed-vocabulary predicate slot the node lives at (R3-optional)
   // ── sameAs carrier (ADDITIVE, OPTIONAL — WP-SAMEAS) — the SORTED, de-duped nodeKeys a HUMAN asserted name
   //    the SAME fact at an unrelated code site (H1). Stored SYMMETRICALLY on both endpoints, so the read-side
   //    union-find fold (`deriveSameAs`) is local from either end; absent ⇒ no asserted equivalence. It round-
   //    trips inside the CurrentNode entry (store.ts WireProjection serializes the whole node — no change there).
   //    ADDITIVE/OPTIONAL, back-compat: a node minted before this WP simply has no `sameAs` and is a singleton.
-  readonly sameAs?: readonly string[];
+  readonly sameAs?: readonly string[]
   // ── sameAs RETRACTION carrier (ADDITIVE, OPTIONAL — A-D3, task #83) — the SORTED, de-duped peers whose
   //    asserted equivalence with this node has since been RETRACTED through `atlas-link --retract`, the
   //    retraction MODE of the existing governed link door (no sixth tool, no new medium: INV-TOOLS-1's
@@ -109,7 +109,7 @@ export interface CurrentNode {
   //    an edge whose retraction is recorded on EITHER endpoint, so a half-written retraction still splits
   //    (splitting is the safe direction — see that fold's header). ADDITIVE/OPTIONAL, back-compat: a row
   //    minted before this field simply has none, which reads as "nothing retracted".
-  readonly sameAsRetracted?: readonly string[];
+  readonly sameAsRetracted?: readonly string[]
   // ── GOVERNANCE carrier (ADDITIVE, OPTIONAL — ADR-0007) — the `(scope, tier)` the node ITSELF lives under.
   //
   //    THIS IS THE HALF ADR-0007 SHIPPED WITHOUT. That ADR decided authority is derived from the RESOURCE,
@@ -129,8 +129,8 @@ export interface CurrentNode {
   //    NEITHER FIELD ENTERS `nodeKey`. Identity stays `hash(primaryAnchorId ‖ slot[‖ check])`; folding a
   //    governance value into it would silently re-address every stored fact and split a node from its own
   //    history the first time its class was raised.
-  readonly scope?: string;
-  readonly tier?: Tier;
+  readonly scope?: string
+  readonly tier?: Tier
   // ── FRESHNESS WATERMARK carrier (ADDITIVE, OPTIONAL — N11, per-ROW) — the git HEAD sha at which THIS row's
   //    stored per-fact freshness was last produced.
   //
@@ -154,7 +154,7 @@ export interface CurrentNode {
   //
   //    IT DOES NOT ENTER `nodeKey`, for the same reason `scope`/`tier` do not: a date is not an identity, and
   //    folding one in would re-address a fact every time it was re-verified.
-  readonly derivedAt?: string;
+  readonly derivedAt?: string
   // ── RELATION carrier (ADDITIVE, OPTIONAL — ADR-0015 D2 / #99a) — the two endpoint unitKeys + kind of a
   //    2-ended fact, stamped on the row so the read-side `relationsOf` fold indexes a relation by BOTH
   //    endpoints (direction preserved: A=subject, B=object) without an O(repo) scan. Present only on a
@@ -162,9 +162,9 @@ export interface CurrentNode {
   //    already the row's `nodeKey`). ADDITIVE/OPTIONAL, back-compat, the `sameAs`/`scope` discipline: a row
   //    minted before this WP simply has none, old sidecars round-trip unrewritten (the wire serializes the
   //    whole CurrentNode). Carried forward by `upsert` with the rest of the row.
-  readonly endpointA?: string;
-  readonly endpointB?: string;
-  readonly relationKind?: string;
+  readonly endpointA?: string
+  readonly endpointB?: string
+  readonly relationKind?: string
   // ── TRANSITION carrier (ADDITIVE, OPTIONAL — ADR-0015 D4 / #234) — the unit lineage + rev-pair of a 2-rev
   //    historical record, stamped on the row so the read-side `transitionsOf` fold indexes a transition by its
   //    `unitKey` lineage and chains shaBefore→shaAfter for the derive-on-read supersession verdict (D-T3),
@@ -172,9 +172,9 @@ export interface CurrentNode {
   //    NONE enters `nodeKey` (identity is `transitionKey`, already the row's `nodeKey`). ADDITIVE/OPTIONAL,
   //    back-compat, the `endpointA`/`scope` discipline: a row minted before this WP has none, old sidecars
   //    round-trip unrewritten (the wire serializes the whole CurrentNode). Carried forward by `upsert`.
-  readonly unitKey?: string;
-  readonly shaBefore?: string;
-  readonly shaAfter?: string;
+  readonly unitKey?: string
+  readonly shaBefore?: string
+  readonly shaAfter?: string
   // ── TEST-VACUITY carrier (ADDITIVE, OPTIONAL — ADR-0015 D5 / #95) — the test name + proven shape of a
   //    single-anchor test-vacuity fact, stamped on the row so a future read-side fold (Wave 1b) indexes a
   //    vacuous test by its `unitKey` lineage (shared with the transition carrier above) without a CAS re-read.
@@ -182,15 +182,15 @@ export interface CurrentNode {
   //    `testVacuityKey`, already the row's `nodeKey`). ADDITIVE/OPTIONAL, back-compat, the `endpointA`/`scope`
   //    discipline: a row minted before this WP has none, old sidecars round-trip unrewritten. Carried forward
   //    by `upsert`.
-  readonly testName?: string;
-  readonly shape?: string;
+  readonly testName?: string
+  readonly shape?: string
   // ── SEAL carrier (ADDITIVE, OPTIONAL — ADR-0017 two-seal provenance) — the seal (`proven`) stamped on the
   //    ROW so the durable store carries HOW this fact's type was decided. PROVENANCE ONLY: NOT an
   //    authority/governance leg, never enters `nodeKey`, no gate reads it; absent for advisory-prose facts.
   //    ADDITIVE/OPTIONAL, back-compat, the `slot`/`answerRef` discipline: a row minted before this WP simply
   //    has none (reads as "seal UNKNOWN", never "proven"), old sidecars round-trip unrewritten (the wire
   //    serializes the whole CurrentNode — no format edit). Carried forward by `upsert` with the rest of the row.
-  readonly seal?: Seal;
+  readonly seal?: Seal
   // ── ANSWER-PROVENANCE carrier (ADDITIVE, OPTIONAL — #195 b) — the mined fact's receipt for the exact bytes the
   //    model returned: `answerRef` = CAS id of the stored (scrubbed) answer. The CAS id is its own tamper-evidence
   //    (store.ts `get()` re-hashes on read), so no separate digest is kept. Present only on a MINED row (a model
@@ -200,5 +200,5 @@ export interface CurrentNode {
   //    "answer provenance UNKNOWN" (never "verified"). #209 consumes it: the run report digests the admitted rows'
   //    `answerRef`s so the issued-vs-stored CARDINALITY is visible in the artifact, plus per-answer traceability.
   //    See docs/design/195-answer-provenance-contract.md.
-  readonly answerRef?: string;
+  readonly answerRef?: string
 }

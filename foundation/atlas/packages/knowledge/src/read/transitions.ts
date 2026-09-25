@@ -27,8 +27,8 @@
 // (`unitKey === unit`). Exact-match, not a prefix — a transition's identity is one unit lineage, and D-T4 keeps
 // rename/move OUT of scope, so there is no cross-unit lineage to widen into.
 
-import type { StoreProjection } from '../write/router.js';
-import type { KnowledgeFreshness } from '../types.js';
+import type { StoreProjection } from "../write/router.js"
+import type { KnowledgeFreshness } from "../types.js"
 
 /** One grounded TRANSITION the door admitted, with its DERIVE-ON-READ lineage verdict (D-T3). `nodeKey` is the
  *  transition's identity (`transitionKey`, the row's key); `unitKey`/`shaBefore`/`shaAfter` are the identity
@@ -37,17 +37,17 @@ import type { KnowledgeFreshness } from '../types.js';
  *  is always `'TRANSITIONED'`). `freshness` is the STAMPED-at-emit verdict read straight off the fact (never
  *  re-checked, D-T2). */
 export interface GroundedTransition {
-  readonly nodeKey: string;
-  readonly unitKey: string;
-  readonly shaBefore: string;
-  readonly shaAfter: string;
-  readonly authoring: 'TRANSITIONED' | 'SUPERSEDED'; // DERIVE-ON-READ head/predecessor verdict (D-T3)
-  readonly freshness: KnowledgeFreshness; // stamped at emit, read straight off the row's fact (D-T2)
+  readonly nodeKey: string
+  readonly unitKey: string
+  readonly shaBefore: string
+  readonly shaAfter: string
+  readonly authoring: "TRANSITIONED" | "SUPERSEDED" // DERIVE-ON-READ head/predecessor verdict (D-T3)
+  readonly freshness: KnowledgeFreshness // stamped at emit, read straight off the row's fact (D-T2)
 }
 
 /** Lexicographic string comparator — total, no locale (the one the sibling read folds sort by). */
 function cmp(x: string, y: string): number {
-  return x < y ? -1 : x > y ? 1 : 0;
+  return x < y ? -1 : x > y ? 1 : 0
 }
 
 /**
@@ -64,43 +64,58 @@ function cmp(x: string, y: string): number {
  * successor is SUPERSEDED and any tip(s) read `TRANSITIONED` — never a throw, never a silent drop.
  */
 export function transitionsOf(projection: StoreProjection, unit?: string): readonly GroundedTransition[] {
-  const filter = typeof unit === 'string' && unit.length > 0 ? unit : undefined;
+  const filter = typeof unit === "string" && unit.length > 0 ? unit : undefined
 
   // First pass — collect the well-formed transition rows (identity legs + FRESH-by-construction, see freshnessOf).
-  type Row = { nodeKey: string; unitKey: string; shaBefore: string; shaAfter: string; freshness: KnowledgeFreshness };
-  const rows: Row[] = [];
+  type Row = { nodeKey: string; unitKey: string; shaBefore: string; shaAfter: string; freshness: KnowledgeFreshness }
+  const rows: Row[] = []
   for (const node of projection.current.values()) {
-    if (node.family !== 'transition') continue;
-    const u = node.unitKey, b = node.shaBefore, a = node.shaAfter;
-    if (typeof u !== 'string' || typeof b !== 'string' || typeof a !== 'string') continue; // malformed ⇒ skip
-    if (filter !== undefined && u !== filter) continue;
-    rows.push({ nodeKey: node.nodeKey, unitKey: u, shaBefore: b, shaAfter: a, freshness: freshnessOf(projection, node.nodeKey) });
+    if (node.family !== "transition") continue
+    const u = node.unitKey,
+      b = node.shaBefore,
+      a = node.shaAfter
+    if (typeof u !== "string" || typeof b !== "string" || typeof a !== "string") continue // malformed ⇒ skip
+    if (filter !== undefined && u !== filter) continue
+    rows.push({
+      nodeKey: node.nodeKey,
+      unitKey: u,
+      shaBefore: b,
+      shaAfter: a,
+      freshness: freshnessOf(projection, node.nodeKey),
+    })
   }
 
   // Per-lineage "has-a-successor" set: the `shaBefore` values seen on each unit. A transition whose OWN
   // `shaAfter` is some sibling's `shaBefore` has been continued ⇒ SUPERSEDED (D-T3).
-  const successorStarts = new Map<string, Set<string>>(); // unitKey → set of shaBefore on that unit
+  const successorStarts = new Map<string, Set<string>>() // unitKey → set of shaBefore on that unit
   for (const r of rows) {
-    let s = successorStarts.get(r.unitKey);
-    if (s === undefined) { s = new Set(); successorStarts.set(r.unitKey, s); }
-    s.add(r.shaBefore);
+    let s = successorStarts.get(r.unitKey)
+    if (s === undefined) {
+      s = new Set()
+      successorStarts.set(r.unitKey, s)
+    }
+    s.add(r.shaBefore)
   }
 
   const out: GroundedTransition[] = rows.map((r) => {
-    const superseded = successorStarts.get(r.unitKey)?.has(r.shaAfter) === true;
+    const superseded = successorStarts.get(r.unitKey)?.has(r.shaAfter) === true
     return {
       nodeKey: r.nodeKey,
       unitKey: r.unitKey,
       shaBefore: r.shaBefore,
       shaAfter: r.shaAfter,
-      authoring: superseded ? 'SUPERSEDED' : 'TRANSITIONED',
+      authoring: superseded ? "SUPERSEDED" : "TRANSITIONED",
       freshness: r.freshness,
-    };
-  });
+    }
+  })
 
   return out.sort(
-    (x, y) => cmp(x.unitKey, y.unitKey) || cmp(x.shaBefore, y.shaBefore) || cmp(x.shaAfter, y.shaAfter) || cmp(x.nodeKey, y.nodeKey),
-  );
+    (x, y) =>
+      cmp(x.unitKey, y.unitKey) ||
+      cmp(x.shaBefore, y.shaBefore) ||
+      cmp(x.shaAfter, y.shaAfter) ||
+      cmp(x.nodeKey, y.nodeKey),
+  )
 }
 
 /** `'FRESH'` BY CONSTRUCTION (D-T2), NOT a stored value read back. A transition is an immutable historical
@@ -111,5 +126,5 @@ export function transitionsOf(projection: StoreProjection, unit?: string): reado
  *  returned by D-T2. The `projection`/`nodeKey` params are kept for signature parity with the sibling folds'
  *  `freshnessOf` seam, so an adapter that ever needs the CAS-stamped value can override this at its own leg. */
 function freshnessOf(_projection: StoreProjection, _nodeKey: string): KnowledgeFreshness {
-  return 'FRESH'; // by construction (D-T2) — see the doc above; a transition is never re-checked, so never non-FRESH
+  return "FRESH" // by construction (D-T2) — see the doc above; a transition is never re-checked, so never non-FRESH
 }

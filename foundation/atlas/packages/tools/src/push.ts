@@ -21,47 +21,47 @@
 //
 // Declared in the ledger at `harness/gates/reference-model-guard.mjs`.
 
-import type { Pack, Territory } from '@atlas/contracts';
-import type { OwnApi, OwnPack, OwnUnit, PackApi } from '@atlas/retrieval';
+import type { Pack, Territory } from "@atlas/contracts"
+import type { OwnApi, OwnPack, OwnUnit, PackApi } from "@atlas/retrieval"
 
 /** The TOOLS-11 tier a boundary injection is delivered on — a `push`, so it holds with no tool grant. */
-export const AUTOINJECT_TIER = 'push' as const;
+export const AUTOINJECT_TIER = "push" as const
 
 /** A phase in the governed lifecycle (the boundary the hook fires on). Kept open — the hook is agnostic to
  *  the concrete phase vocabulary; it fires on ANY transition (atlas-tools:98 "every phase transition"). */
-export type Phase = string;
+export type Phase = string
 
 /** One phase boundary crossing — `from → to`. Every crossing is a fresh-pack push point. */
 export interface PhaseTransition {
-  readonly from: Phase;
-  readonly to: Phase;
+  readonly from: Phase
+  readonly to: Phase
 }
 
 /** A seat receiving the push. `grants` is its tool-grant set (e.g. `{Read}`); the boundary push needs NONE
  *  of it — a grantless / Read-only seat still receives the fresh pack (TOOLS-14b). */
 export interface Seat {
-  readonly id: string;
-  readonly grants: readonly string[];
+  readonly id: string
+  readonly grants: readonly string[]
 }
 
 /** The running harness. `nativePull` reports whether native MCP pull is reachable — the hook is INDIFFERENT
  *  to it: the boundary grounds by push regardless, so a `unavailable` harness never leaves a seat ungrounded
  *  (TOOLS-14c, independent of TOOLS-11a). */
 export interface Harness {
-  readonly id: string;
-  readonly nativePull: 'available' | 'unavailable';
+  readonly id: string
+  readonly nativePull: "available" | "unavailable"
 }
 
 /** How a seat is grounded — the fresh pack is either its curated `own_<unit>` (RETR-12) or an `atlas-query`
  *  covering pack over a territory (RETR-2). Both are materialized fresh at the boundary from the RETR port. */
 export type SeatGrounding =
-  | { readonly via: 'own'; readonly unit: OwnUnit }
-  | { readonly via: 'query'; readonly territory: Territory };
+  | { readonly via: "own"; readonly unit: OwnUnit }
+  | { readonly via: "query"; readonly territory: Territory }
 
 /** The fresh pack actually injected at the boundary — a discriminated `own_<unit>` / `atlas-query` pack. */
 export type FreshInjection =
-  | { readonly via: 'own'; readonly pack: OwnPack }
-  | { readonly via: 'query'; readonly pack: Pack };
+  | { readonly via: "own"; readonly pack: OwnPack }
+  | { readonly via: "query"; readonly pack: Pack }
 
 /**
  * The RETR fresh-pack contract, CONSUMED FROZEN as an injected port (never redefined here). `own` is the
@@ -70,39 +70,39 @@ export type FreshInjection =
  * boundary to obtain a FRESH materialization. `own` ⊇ `OwnApi.own`, `pack` ⊇ `PackApi.pack` (see BIND).
  */
 export interface FreshPackSource {
-  own(unit: OwnUnit): OwnPack;
-  pack(territory: Territory): Pack;
+  own(unit: OwnUnit): OwnPack
+  pack(territory: Territory): Pack
 }
 
 /** The optional mid-task PULL optimization port. It is NEVER called by `onTransition` — a boundary grounds by
  *  push alone. Present only so the non-load-bearing optimization can be modeled explicitly (TOOLS-14c). */
-export type PullPort = (grounding: SeatGrounding) => FreshInjection;
+export type PullPort = (grounding: SeatGrounding) => FreshInjection
 
 /** The receipt of a boundary push — the fresh pack delivered, the tier, and the grant/pull evidence. */
 export interface PushReceipt {
-  readonly seatId: string;
-  readonly transition: PhaseTransition;
-  readonly tier: typeof AUTOINJECT_TIER; // TOOLS-11 push tier — holds with no tool grant
-  readonly grantsRequired: 0; // TOOLS-14b — the push needs NO tool grant
-  readonly injected: FreshInjection; // the FRESH pack materialized at the boundary (TOOLS-14a)
-  readonly pulled: false; // TOOLS-14c — pull is never the mechanism that grounds a boundary
+  readonly seatId: string
+  readonly transition: PhaseTransition
+  readonly tier: typeof AUTOINJECT_TIER // TOOLS-11 push tier — holds with no tool grant
+  readonly grantsRequired: 0 // TOOLS-14b — the push needs NO tool grant
+  readonly injected: FreshInjection // the FRESH pack materialized at the boundary (TOOLS-14a)
+  readonly pulled: false // TOOLS-14c — pull is never the mechanism that grounds a boundary
 }
 
 /** The phase-transition auto-inject hook surface. */
 export interface PhaseHook {
   /** Fire on a phase boundary: auto-inject a FRESH `own_<unit>`/`atlas-query` pack into the seat by PUSH,
    *  grant-free, without ever invoking pull — correct even where native pull is `unavailable`. */
-  onTransition(seat: Seat, grounding: SeatGrounding, transition: PhaseTransition, harness: Harness): PushReceipt;
+  onTransition(seat: Seat, grounding: SeatGrounding, transition: PhaseTransition, harness: Harness): PushReceipt
   /** The OPTIONAL mid-task pull optimization: use native pull when the harness offers it, else fall back to
    *  the same push materialization. Grounding never DEPENDS on this (it always yields a fresh pack). */
-  pullOptimize(grounding: SeatGrounding, harness: Harness): FreshInjection;
+  pullOptimize(grounding: SeatGrounding, harness: Harness): FreshInjection
 }
 
 /** Materialize a FRESH injection from the RETR fresh-pack contract for the seat's grounding (push path). */
 function materialize(source: FreshPackSource, grounding: SeatGrounding): FreshInjection {
-  return grounding.via === 'own'
-    ? { via: 'own', pack: source.own(grounding.unit) } // RETR-12 own_<unit>, freshly composed
-    : { via: 'query', pack: source.pack(grounding.territory) }; // RETR-2 atlas-query, freshly composed
+  return grounding.via === "own"
+    ? { via: "own", pack: source.own(grounding.unit) } // RETR-12 own_<unit>, freshly composed
+    : { via: "query", pack: source.pack(grounding.territory) } // RETR-2 atlas-query, freshly composed
 }
 
 /**
@@ -123,18 +123,18 @@ export function createPhaseHook(source: FreshPackSource, opts: { readonly pull?:
     grantsRequired: 0, // push obligation — no tool grant (TOOLS-14b); `_harness`/`opts.pull` untouched here
     injected: materialize(source, grounding), // FRESH at the boundary (TOOLS-14a)
     pulled: false, // pull is NEVER load-bearing at a boundary (TOOLS-14c)
-  });
+  })
 
   const pullOptimize = (grounding: SeatGrounding, harness: Harness): FreshInjection =>
-    harness.nativePull === 'available' && opts.pull !== undefined
+    harness.nativePull === "available" && opts.pull !== undefined
       ? opts.pull(grounding) // optimization: native pull when the harness offers it
-      : materialize(source, grounding); // ALWAYS a safe fall-back — pull is never load-bearing
+      : materialize(source, grounding) // ALWAYS a safe fall-back — pull is never load-bearing
 
-  return { onTransition, pullOptimize };
+  return { onTransition, pullOptimize }
 }
 
 // ── frozen-interface BIND (compile-time only) ─────────────────────────────────────────────────────
 // The injected `FreshPackSource` CONSUMES the frozen RETR ports — a value carrying `OwnApi.own` +
 // `PackApi.pack` satisfies it (own_<unit> RETR-12 + atlas-query RETR-2), never a redefinition of them.
-const _consumesRetr = (retr: OwnApi & PackApi): FreshPackSource => retr;
-void _consumesRetr;
+const _consumesRetr = (retr: OwnApi & PackApi): FreshPackSource => retr
+void _consumesRetr

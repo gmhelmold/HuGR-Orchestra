@@ -1,25 +1,25 @@
 # adjudicate — the TRUTH adjudication instrument (bench axes A1 precision, A4 recall)
 
 A1 (precision) and A4 (recall) both need one thing the shipped path does not have: a way to decide, for a
-`(mined-fact, code)` pair, whether the fact is **grounded+true** or **hallucinated** — with *measured*
+`(mined-fact, code)` pair, whether the fact is **grounded+true** or **hallucinated** — with _measured_
 reliability, not a claim. Grounding is aboutness; the #95 baseline shipped 9 false facts that were all
-correctly *about* their anchored code. This instrument scores TRUTH, and it measures how much its own judges
+correctly _about_ their anchored code. This instrument scores TRUTH, and it measures how much its own judges
 agree before any number it emits is trusted.
 
 It used to exist only in a scratchpad (a Fleiss-κ panel). This is the committed, re-runnable version.
 
 ## What is here
 
-| file | role |
-| --- | --- |
-| `fleiss.mjs` | the pure, model-free MATH: Fleiss' κ, majority vote, catch-rate, false-alarm. No I/O. |
-| `fixtures.mjs` | 10 known-true + 10 planted-false `(fact, code)` pairs — the calibration ground-truth. Each false names its `falseKind`. Plus `renderPrompt`. |
-| `adjudicate.mjs` | the DRIVER: runs a judge command N passes over the fixtures, parses verdicts, scores. Makes no model call itself. |
-| `judge.mjs` | the DEFAULT judge command (`claude --model $JUDGE_MODEL`). One interchangeable judge, not THE judge. |
-| `fake-judge.mjs` | a zero-cost stand-in judge for smoke/tests. Answers from the label — a PIPELINE proof, never a real calibration. |
-| `run-calibration.mjs` | the re-runnable command that writes the DERIVED report. |
-| `adjudicate.test.mjs` | proves the math on SYNTHETIC verdicts (canonical Fleiss 1971 example + hand-computed boundary cases). Runs under `npm test`. |
-| `calibration-report.smoke-noisy.{md,json}` | committed DERIVED report — a fake-judge PIPELINE SMOKE. Live-judge calibration is PENDING a metered run. |
+| file                                       | role                                                                                                                                         |
+| ------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| `fleiss.mjs`                               | the pure, model-free MATH: Fleiss' κ, majority vote, catch-rate, false-alarm. No I/O.                                                        |
+| `fixtures.mjs`                             | 10 known-true + 10 planted-false `(fact, code)` pairs — the calibration ground-truth. Each false names its `falseKind`. Plus `renderPrompt`. |
+| `adjudicate.mjs`                           | the DRIVER: runs a judge command N passes over the fixtures, parses verdicts, scores. Makes no model call itself.                            |
+| `judge.mjs`                                | the DEFAULT judge command (`claude --model $JUDGE_MODEL`). One interchangeable judge, not THE judge.                                         |
+| `fake-judge.mjs`                           | a zero-cost stand-in judge for smoke/tests. Answers from the label — a PIPELINE proof, never a real calibration.                             |
+| `run-calibration.mjs`                      | the re-runnable command that writes the DERIVED report.                                                                                      |
+| `adjudicate.test.mjs`                      | proves the math on SYNTHETIC verdicts (canonical Fleiss 1971 example + hand-computed boundary cases). Runs under `npm test`.                 |
+| `calibration-report.smoke-noisy.{md,json}` | committed DERIVED report — a fake-judge PIPELINE SMOKE. Live-judge calibration is PENDING a metered run.                                     |
 
 ## The judge model is a PARAMETER
 

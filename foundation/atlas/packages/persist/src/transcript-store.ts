@@ -20,37 +20,37 @@
 // The residual gap this leaves is recorded on `put`: one logical transcript split across SEPARATE `put`
 // calls has no shared seam state, so a credential straddling that split is not joined.
 
-import type { Hash } from '@atlas/contracts';
-import { id } from '@atlas/kernel';
-import { scrub } from './scrub.js';
-import type { TranscriptRef } from './types.js';
+import type { Hash } from "@atlas/contracts"
+import { id } from "@atlas/kernel"
+import { scrub } from "./scrub.js"
+import type { TranscriptRef } from "./types.js"
 
 /** The full, lossless transcript body — byte-identity `fetch(put(body)) ≡ body` forces raw bytes. */
-export type Transcript = Uint8Array;
+export type Transcript = Uint8Array
 
 /** The content-addressed large-object transcript store (PERSIST-10): `put(body) → hash` stores the full
  *  lossless body; `fetch(ref)` returns the EXACT bytes on demand (0 truncation). (atlas-persist:107) */
 export interface TranscriptStoreApi {
-  put(body: Uint8Array): Hash;
-  fetch(ref: TranscriptRef): Transcript;
+  put(body: Uint8Array): Hash
+  fetch(ref: TranscriptRef): Transcript
 }
 
 /** The large-object store kind for the CAS-backed transcript pointer (atlas-persist:122-124). */
-const STORE_KIND: TranscriptRef['store'] = 'cas';
+const STORE_KIND: TranscriptRef["store"] = "cas"
 
 /** Content-address the raw byte body over the SEALED kernel `id` seam (never a hand-rolled digest). The
  *  body is tagged so an equal body always maps to the same hash and no arbitrary array collides with it. */
 function contentHash(body: Uint8Array): Hash {
-  return id({ kind: 'Transcript', bytes: Array.from(body) });
+  return id({ kind: "Transcript", bytes: Array.from(body) })
 }
 
 /** The git-side POINTER to a stored large object — only `{sha, store}`, never the body (PERSIST-10-c). */
 export function toGitPointer(sha: Hash): TranscriptRef {
-  return { sha, store: STORE_KIND };
+  return { sha, store: STORE_KIND }
 }
 
 /** The frozen `TranscriptStoreApi` surface (`put`/`fetch`) — content-addressed, immutable, fetch-on-demand. */
-export type TranscriptStore = TranscriptStoreApi;
+export type TranscriptStore = TranscriptStoreApi
 
 /**
  * A content-addressed large-object transcript store (PERSIST-10). `put` is idempotent on equal bodies and
@@ -59,7 +59,7 @@ export type TranscriptStore = TranscriptStoreApi;
  * abridges the body — and for a body that DOES carry one, the difference is exactly the redaction.
  */
 export function createTranscriptStore(): TranscriptStore {
-  const objects = new Map<Hash, Uint8Array>();
+  const objects = new Map<Hash, Uint8Array>()
   return {
     /**
      * Admit a body and return its content hash. The body is REDACTED AT SOURCE first (PERSIST-10a): the raw
@@ -77,24 +77,24 @@ export function createTranscriptStore(): TranscriptStore {
      * `admitToBuffer` before putting it, which this call is idempotent with respect to.
      */
     put(body: Uint8Array): Hash {
-      const admitted = scrub(body);
-      const h = contentHash(admitted);
+      const admitted = scrub(body)
+      const h = contentHash(admitted)
       // immutable + idempotent: store the full redacted body once; equal bytes re-use the same object.
-      if (!objects.has(h)) objects.set(h, Uint8Array.from(admitted));
-      return h;
+      if (!objects.has(h)) objects.set(h, Uint8Array.from(admitted))
+      return h
     },
     fetch(ref: TranscriptRef): Transcript {
       if (ref.store !== STORE_KIND) {
-        throw new Error(`transcript pointer uses unsupported store ${String(ref.store)}`);
+        throw new Error(`transcript pointer uses unsupported store ${String(ref.store)}`)
       }
-      const body = objects.get(ref.sha);
+      const body = objects.get(ref.sha)
       if (body === undefined) {
-        throw new Error(`transcript large-object not found for pointer ${String(ref.sha)}`);
+        throw new Error(`transcript large-object not found for pointer ${String(ref.sha)}`)
       }
       // the EXACT bytes — a defensive copy so a caller cannot mutate the immutable object in place.
-      return Uint8Array.from(body);
+      return Uint8Array.from(body)
     },
-  };
+  }
 }
 
 // ── size mitigation — lossless + reversible (PERSIST-10-d) ──────────────────────────────────────────────
@@ -106,10 +106,10 @@ export function createTranscriptStore(): TranscriptStore {
 
 /** Apply the (currently lossless, identity) size-mitigation transform to a transcript body. */
 export function mitigate(body: Uint8Array): Uint8Array {
-  return Uint8Array.from(body);
+  return Uint8Array.from(body)
 }
 
 /** Invert the size-mitigation transform — `reverse(mitigate(T)) ≡ T` byte-identical (lossless). */
 export function reverse(mitigated: Uint8Array): Uint8Array {
-  return Uint8Array.from(mitigated);
+  return Uint8Array.from(mitigated)
 }

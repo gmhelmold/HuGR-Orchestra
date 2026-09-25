@@ -14,9 +14,9 @@
 // caller-supplied `status` could therefore FORGE another node's state root). JSON escaping makes the
 // encoding injective, so no field content can ever be mistaken for a field boundary.
 
-import { asSubtreeHash, id } from '@atlas/kernel';
-import type { SubtreeHash } from '@atlas/contracts';
-import type { Axis, IndexNode, Rollup } from './types.js';
+import { asSubtreeHash, id } from "@atlas/kernel"
+import type { SubtreeHash } from "@atlas/contracts"
+import type { Axis, IndexNode, Rollup } from "./types.js"
 
 /** The Merkle rollup core (INDEX-2): a node's subtreeHash is the injective digest of its OWN content plus
  *  its NAMED, sorted child hashes (order-independent) + a node's dual root via `rollup` (`rId`=structure,
@@ -24,28 +24,28 @@ import type { Axis, IndexNode, Rollup } from './types.js';
 export interface RollupApi {
   /** This node's dual Merkle rollup (INDEX-12): `rId` (structure) + `rState` (state). Total.
    *  (atlas-index:211) */
-  rollup(axis: Axis, key: string): Rollup;
+  rollup(axis: Axis, key: string): Rollup
   /** BLAKE3 over the node's own content + its sorted, NAMED child hashes — the drift oracle root (branded
    *  `SubtreeHash`, from contracts). Order-independent given the sort (INDEX-2).
    *  (atlas-index:40, 62; method-tags-idx:31) */
-  subtreeHash(node: IndexNode): SubtreeHash;
+  subtreeHash(node: IndexNode): SubtreeHash
 }
 
 /** Domain tag in the fold preimage: no other `id()` call site can collide with a node rollup preimage.
  *  Bumping it is a deliberate, repo-wide re-key of every subtreeHash. */
-const FOLD_DOMAIN = 'atlas.index.node.v2';
+const FOLD_DOMAIN = "atlas.index.node.v2"
 /** Domain tag for the STATE root — keeps `rState` preimages disjoint from `rId` preimages. */
-const STATE_DOMAIN = 'atlas.index.state.v2';
+const STATE_DOMAIN = "atlas.index.state.v2"
 
 /** The state side-index a node's `rState` folds (KERNEL-8 status+freshness) — the STATE root input. */
 export interface NodeState {
-  readonly status: string;
-  readonly freshness: number;
+  readonly status: string
+  readonly freshness: number
 }
 /** The result of an incremental re-hash: the new tree + the SET of node keys whose hash was recomputed. */
 export interface RehashResult {
-  readonly root: IndexNode;
-  readonly touched: readonly string[];
+  readonly root: IndexNode
+  readonly touched: readonly string[]
 }
 
 /** The material a node's hash is folded from. `key` is the node's own key (used ONLY to derive its
@@ -53,9 +53,9 @@ export interface RehashResult {
  *  has none — a directory. That absent-vs-empty distinction is load-bearing: it is what stops an empty FILE
  *  and an empty REPO ROOT from sharing one identity. */
 export interface NodeMaterial {
-  readonly key: string;
-  readonly content?: string | undefined;
-  readonly children: readonly { readonly key: string; readonly subtreeHash: SubtreeHash }[];
+  readonly key: string
+  readonly content?: string | undefined
+  readonly children: readonly { readonly key: string; readonly subtreeHash: SubtreeHash }[]
 }
 
 /** A child's name RELATIVE to its parent — the git-tree model: a tree entry records a basename, not a full
@@ -63,7 +63,7 @@ export interface NodeMaterial {
  *  drift while keeping a whole-subtree MOVE content-addressable, so `resolveBySubtreeAt` can still relocate
  *  a moved unit by content. Keys that do not sit under the parent fall back to the full key. */
 function childName(parentKey: string, childKey: string): string {
-  return childKey.startsWith(parentKey) ? childKey.slice(parentKey.length) : childKey;
+  return childKey.startsWith(parentKey) ? childKey.slice(parentKey.length) : childKey
 }
 
 /**
@@ -83,9 +83,9 @@ function childName(parentKey: string, childKey: string): string {
 export function foldNodeHash(material: NodeMaterial): SubtreeHash {
   const entries = material.children
     .map((c) => ({ name: childName(material.key, c.key), hash: String(c.subtreeHash) }))
-    .sort((a, b) => (a.name < b.name ? -1 : a.name > b.name ? 1 : a.hash < b.hash ? -1 : a.hash > b.hash ? 1 : 0));
+    .sort((a, b) => (a.name < b.name ? -1 : a.name > b.name ? 1 : a.hash < b.hash ? -1 : a.hash > b.hash ? 1 : 0))
   // `content: undefined` is DROPPED by canonicalForm, which is exactly the absent-vs-empty distinction.
-  return asSubtreeHash(id({ v: FOLD_DOMAIN, children: entries, content: material.content }));
+  return asSubtreeHash(id({ v: FOLD_DOMAIN, children: entries, content: material.content }))
 }
 
 /**
@@ -103,9 +103,9 @@ export function subtreeHash(
   node: IndexNode,
   contentOf: (key: string) => string | undefined = () => undefined,
 ): SubtreeHash {
-  if (node.children.length === 0) return node.subtreeHash;
-  const children = node.children.map((c) => ({ key: c.key, subtreeHash: subtreeHash(c, contentOf) }));
-  return foldNodeHash({ key: node.key, content: contentOf(node.key), children });
+  if (node.children.length === 0) return node.subtreeHash
+  const children = node.children.map((c) => ({ key: c.key, subtreeHash: subtreeHash(c, contentOf) }))
+  return foldNodeHash({ key: node.key, content: contentOf(node.key), children })
 }
 
 /** State root: the injective digest of (structure root ‖ status ‖ freshness), distinct from `rId` by its
@@ -118,31 +118,25 @@ export function subtreeHash(
  *  roots quietly merged into one. Routing through `id` is also what rejects a non-integer `freshness`
  *  (`0.1+0.2`): the kernel float guard THROWS instead of letting `"0.30000000000000004"` reach the digest. */
 function stateRoot(rId: SubtreeHash, s: NodeState): string {
-  return id({ v: STATE_DOMAIN, rId: String(rId), stateStatus: s.status, stateFreshness: s.freshness });
+  return id({ v: STATE_DOMAIN, rId: String(rId), stateStatus: s.status, stateFreshness: s.freshness })
 }
 
 /** A node's dual Merkle rollup: `rId` (structure) + `rState` (state). Two distinct roots (INDEX-12a).
  *  `contentOf` is forwarded to `subtreeHash` — see its note on the lossy `IndexNode` projection. */
-export function nodeRollup(
-  node: IndexNode,
-  state: NodeState,
-  contentOf?: (key: string) => string | undefined,
-): Rollup {
-  const rId = subtreeHash(node, contentOf);
-  return { axis: node.axis, bucket: node.key, rId, rState: stateRoot(rId, state) };
+export function nodeRollup(node: IndexNode, state: NodeState, contentOf?: (key: string) => string | undefined): Rollup {
+  const rId = subtreeHash(node, contentOf)
+  return { axis: node.axis, bucket: node.key, rId, rState: stateRoot(rId, state) }
 }
 
 /** The frozen `RollupApi` over a resolver (axis+key → node+state) — proves the interface is satisfiable. */
-export function createRollup(
-  resolve: (axis: Axis, key: string) => { node: IndexNode; state: NodeState },
-): RollupApi {
+export function createRollup(resolve: (axis: Axis, key: string) => { node: IndexNode; state: NodeState }): RollupApi {
   return {
     rollup(axis, key) {
-      const { node, state } = resolve(axis, key);
-      return nodeRollup(node, state);
+      const { node, state } = resolve(axis, key)
+      return nodeRollup(node, state)
     },
     subtreeHash,
-  };
+  }
 }
 
 /** Re-hash exactly the leaf→root path (`pathKeys`, root→leaf), setting the edited leaf's new hash. Every
@@ -159,20 +153,20 @@ export function rehashPath(
   newLeafHash: SubtreeHash,
   contentOf: (key: string) => string | undefined = () => undefined,
 ): RehashResult {
-  const touched: string[] = [];
+  const touched: string[] = []
   const recurse = (node: IndexNode, depth: number): IndexNode => {
     if (depth === pathKeys.length - 1) {
-      touched.push(node.key);
-      return { ...node, subtreeHash: newLeafHash };
+      touched.push(node.key)
+      return { ...node, subtreeHash: newLeafHash }
     }
-    const nextKey = pathKeys[depth + 1];
-    const children = node.children.map((c) => (c.key === nextKey ? recurse(c, depth + 1) : c));
-    touched.push(node.key);
+    const nextKey = pathKeys[depth + 1]
+    const children = node.children.map((c) => (c.key === nextKey ? recurse(c, depth + 1) : c))
+    touched.push(node.key)
     return {
       ...node,
       children,
       subtreeHash: foldNodeHash({ key: node.key, content: contentOf(node.key), children }),
-    };
-  };
-  return { root: recurse(root, 0), touched };
+    }
+  }
+  return { root: recurse(root, 0), touched }
 }

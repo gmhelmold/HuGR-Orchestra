@@ -46,10 +46,10 @@ is never auto-injected […]`.
 
 ## Exit codes
 
-| code | meaning |
-| --- | --- |
-| `0` | the query ran. `next:` distinguishes an unqualified query from a qualified-but-empty one, and reports the matched count either way |
-| `1` | an uncomposed runtime — the composition root failed to stand up, never a throw |
+| code | meaning                                                                                                                            |
+| ---- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| `0`  | the query ran. `next:` distinguishes an unqualified query from a qualified-but-empty one, and reports the matched count either way |
+| `1`  | an uncomposed runtime — the composition root failed to stand up, never a throw                                                     |
 
 There is no `2` (rejected) outcome: this door opens no governed token and persists nothing; `recall` itself
 never throws (an unrecognised query narrows to `{}` and matches nothing, MEM-4b).

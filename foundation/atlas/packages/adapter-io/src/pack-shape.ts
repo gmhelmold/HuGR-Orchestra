@@ -28,15 +28,15 @@
 // above uses. The duplicate is left in place because both copies are pinned by tests and de-duplicating a
 // live governance predicate is not this WP's change; it is recorded here rather than quietly inherited.
 
-import { isTier } from '@atlas/knowledge';
-import type { Freshness, Hash, NodeKey, Pack, PackInvariant } from '@atlas/contracts';
-import type { CurrentNode, GroundedFact } from '@atlas/knowledge';
+import { isTier } from "@atlas/knowledge"
+import type { Freshness, Hash, NodeKey, Pack, PackInvariant } from "@atlas/contracts"
+import type { CurrentNode, GroundedFact } from "@atlas/knowledge"
 // The ADVISORY band is imported, NOT re-stated. `atLeastT1` below is the surviving second copy of the
 // governing predicate and its comment explains why it was written twice; the advisory band gets exactly one
 // definition from birth (`@atlas/tools` src/bands.ts) precisely so it can never repeat that history. The
 // edge is legal: the layer DAG allows `adapter-io → tools` (this package already imports `createHandler`)
 // and forbids only `tools → adapter-io`.
-import { splitBands } from '@atlas/tools';
+import { splitBands } from "@atlas/tools"
 
 /**
  * The PER-FACT freshness oracle a pack producer must supply — the GROUND-1 verdict for one stored fact.
@@ -50,7 +50,7 @@ import { splitBands } from '@atlas/tools';
  * It returns the CANONICAL `Freshness` — the exact type `driftDetect` declares — so a producer that ever
  * has a `STALE` (GROUND-13 advisory drift) verdict carries it through instead of collapsing it.
  */
-export type FreshnessOracle = (fact: GroundedFact) => Freshness;
+export type FreshnessOracle = (fact: GroundedFact) => Freshness
 
 /**
  * Resolve one row's freshness through an oracle that MAY be absent, FAIL-CLOSED.
@@ -76,11 +76,11 @@ export type FreshnessOracle = (fact: GroundedFact) => Freshness;
  * throw becomes the same fail-closed `DRIFTED` an unresolvable anchor already produces (GROUND-3).
  */
 export function resolveFreshness(oracle: FreshnessOracle | undefined, fact: GroundedFact): Freshness {
-  if (oracle === undefined) return 'DRIFTED';
+  if (oracle === undefined) return "DRIFTED"
   try {
-    return oracle(fact);
+    return oracle(fact)
   } catch {
-    return 'DRIFTED'; // fail-closed: a fact this oracle cannot judge is never reported as verified
+    return "DRIFTED" // fail-closed: a fact this oracle cannot judge is never reported as verified
   }
 }
 
@@ -94,7 +94,7 @@ export function resolveFreshness(oracle: FreshnessOracle | undefined, fact: Grou
  *  graph 199/199 rows read `FRESH` no matter what the tree did. A row shaped from that field would carry a
  *  freshness field that is structurally incapable of ever saying `DRIFTED`. */
 export function factToInvariant(node: CurrentNode, fact: GroundedFact, freshness: Freshness): PackInvariant {
-  return { nodeId: node.nodeKey as NodeKey, tier: fact.tier, claim: node.claims.join('; '), freshness };
+  return { nodeId: node.nodeKey as NodeKey, tier: fact.tier, claim: node.claims.join("; "), freshness }
 }
 
 /**
@@ -109,14 +109,14 @@ export function factToInvariant(node: CurrentNode, fact: GroundedFact, freshness
  * it is not a class, and it is bounded out. Byte-exact via the ONE lattice guard (`isTier`), never a local
  * string comparison.
  */
-export const atLeastT1 = (inv: PackInvariant): boolean => isTier(inv.tier) && inv.tier !== 'T2';
+export const atLeastT1 = (inv: PackInvariant): boolean => isTier(inv.tier) && inv.tier !== "T2"
 
 /** The pack envelope fields the caller owns — everything about a `Pack` that is NOT its invariant set. */
 export interface PackFrame {
-  readonly territory: string;
-  readonly axisHash: Hash;
+  readonly territory: string
+  readonly axisHash: Hash
   /** `true` MUST mean re-ground before trusting (TOOLS-6c) — never silently downgraded here. */
-  readonly stale: boolean;
+  readonly stale: boolean
 }
 
 /**
@@ -134,20 +134,20 @@ export function mintPack(
   pairs: Iterable<readonly [CurrentNode, GroundedFact]>,
   freshness: FreshnessOracle,
 ): Pack {
-  const rows: PackInvariant[] = [];
+  const rows: PackInvariant[] = []
   // Through `resolveFreshness`, never a bare `freshness(fact)`: that is the one TOTAL entry point, and a
   // read door that throws on a fact it was asked to read is a denial of service (see above).
-  for (const [node, fact] of pairs) rows.push(factToInvariant(node, fact, resolveFreshness(freshness, fact)));
-  rows.sort((a, b) => (a.nodeId < b.nodeId ? -1 : a.nodeId > b.nodeId ? 1 : 0));
-  const bands = splitBands(rows); // TOOLS-6 + ADR-0013 — applied at the MINT, so no mode can forget it
+  for (const [node, fact] of pairs) rows.push(factToInvariant(node, fact, resolveFreshness(freshness, fact)))
+  rows.sort((a, b) => (a.nodeId < b.nodeId ? -1 : a.nodeId > b.nodeId ? 1 : 0))
+  const bands = splitBands(rows) // TOOLS-6 + ADR-0013 — applied at the MINT, so no mode can forget it
   return {
     territory: frame.territory,
     axisHash: frame.axisHash,
     invariants: bands.governing,
     advisory: bands.advisory,
     advisoryDropped: bands.advisoryDropped,
-    tokenEstimate: bands.governing.reduce((s, i) => s + i.claim.length, 0)
-      + bands.advisory.reduce((s, i) => s + i.claim.length, 0),
+    tokenEstimate:
+      bands.governing.reduce((s, i) => s + i.claim.length, 0) + bands.advisory.reduce((s, i) => s + i.claim.length, 0),
     stale: frame.stale,
-  };
+  }
 }

@@ -18,9 +18,9 @@
 // The `ground(node)` verb is DEFINE-parked (its `node` type is unpinned) and CARVED to a successor WP —
 // `isGrounded` (its co-verb in `GroundApi`) is co-located here with `driftDetect`, which depends on it.
 
-import type { Freshness, SubtreeHash } from '@atlas/contracts';
-import type { Axes, IndexNode } from '@atlas/index';
-import type { Grounding, DriftApi, GroundApi } from './types.js';
+import type { Freshness, SubtreeHash } from "@atlas/contracts"
+import type { Axes, IndexNode } from "@atlas/index"
+import type { Grounding, DriftApi, GroundApi } from "./types.js"
 
 /** Resolve a structural unit's CURRENT subtreeHash in `node`'s subtree by its qualified key (the anchor's
  *  `qualifiedPath`). Total: an absent unit returns `undefined` (unresolvable), never a throw.
@@ -30,12 +30,12 @@ import type { Grounding, DriftApi, GroundApi } from './types.js';
  *  never witness drift. Reading one as the oracle is not a weak check, it is NO check; refusing it is
  *  fail-closed (the anchor reads DRIFTED, never FRESH). */
 function findByKey(node: IndexNode, key: string): SubtreeHash | undefined {
-  if (node.key === key) return String(node.subtreeHash) === node.key ? undefined : node.subtreeHash;
+  if (node.key === key) return String(node.subtreeHash) === node.key ? undefined : node.subtreeHash
   for (const child of node.children) {
-    const hit = findByKey(child, key);
-    if (hit !== undefined) return hit;
+    const hit = findByKey(child, key)
+    if (hit !== undefined) return hit
   }
-  return undefined;
+  return undefined
 }
 
 /**
@@ -59,10 +59,10 @@ function findByKey(node: IndexNode, key: string): SubtreeHash | undefined {
  */
 export function resolveCurrent(src: Axes, qualifiedPath: string): SubtreeHash | undefined {
   for (const root of [src.spatial, src.territory]) {
-    const hit = findByKey(root, qualifiedPath);
-    if (hit !== undefined) return hit;
+    const hit = findByKey(root, qualifiedPath)
+    if (hit !== undefined) return hit
   }
-  return undefined;
+  return undefined
 }
 
 /**
@@ -79,8 +79,9 @@ export function resolveCurrent(src: Axes, qualifiedPath: string): SubtreeHash | 
  * fail-CLOSED on everything else. This body is BYTE-IDENTICAL to `knowledge`'s door-side copy
  * (`ratify/fastpath.ts`) — the two are kept from diverging by `test/fastpath-isgrounded-parity.test.ts`.
  */
-export const isGrounded: GroundApi['isGrounded'] = (g: Grounding): boolean =>
-  g.entries.length >= 1 && g.entries.every((e) => typeof e.anchor.subtreeHash === 'string' && e.anchor.subtreeHash.length > 0);
+export const isGrounded: GroundApi["isGrounded"] = (g: Grounding): boolean =>
+  g.entries.length >= 1 &&
+  g.entries.every((e) => typeof e.anchor.subtreeHash === "string" && e.anchor.subtreeHash.length > 0)
 
 /**
  * GROUND-1/2/3/5 local freshness verdict against the built-index snapshot `src`. Conforms to the frozen
@@ -104,11 +105,11 @@ export const isGrounded: GroundApi['isGrounded'] = (g: Grounding): boolean =>
  * The one normalization that IS applied is the kernel's: `canonicalForm` NFC-normalizes strings, so a pure
  * Unicode NFD→NFC rewrite of a unit's bytes does NOT drift (KERNEL-1, owned by @atlas/kernel).
  */
-export const driftDetect: DriftApi['driftDetect'] = (grounding: Grounding, src: Axes): Freshness => {
-  if (!isGrounded(grounding)) return 'DRIFTED';
+export const driftDetect: DriftApi["driftDetect"] = (grounding: Grounding, src: Axes): Freshness => {
+  if (!isGrounded(grounding)) return "DRIFTED"
   for (const e of grounding.entries) {
-    const current = resolveCurrent(src, e.anchor.qualifiedPath);
-    if (current === undefined || current !== e.anchor.subtreeHash) return 'DRIFTED';
+    const current = resolveCurrent(src, e.anchor.qualifiedPath)
+    if (current === undefined || current !== e.anchor.subtreeHash) return "DRIFTED"
   }
-  return 'FRESH';
-};
+  return "FRESH"
+}

@@ -59,6 +59,7 @@ justification travels with the prompt without being sent to it.
     qualitative form and requires a count to be actually counted+rechecked in the bytes, closing the one
     sub-mode the code-derived clause opened without re-introducing #201.
 -->
+
 You are shown ONE anchored unit from a real codebase, and nothing else.
 
 <unit path="{{PATH}}" name="{{UNIT}}">
@@ -70,6 +71,7 @@ signature, and that would change what they do. Work in two steps.
 
 STEP 1 — REASON FREELY (scratch, never stored). Read the bytes closely. Draft a candidate fact, then actively
 try to REFUTE it against the source:
+
 - Is it derivable from THESE bytes, or are you leaning on what you know about a library, framework or
   convention that is not visible here — or on a stale/past-tense COMMENT the current code may contradict?
 - Does the fact's truth rest on a COMMENT'S CLAIM about something NOT in these bytes — another file or
@@ -86,7 +88,7 @@ try to REFUTE it against the source:
   you have verified it against the bytes.
 - Is it more than a restatement of the name, the signature or the types, or a summary of what the code
   plainly does?
-Discard any candidate that does not survive. This reasoning is scratch: it is parsed away and never persisted.
+  Discard any candidate that does not survive. This reasoning is scratch: it is parsed away and never persisted.
 
 STEP 2 — EMIT THE RESULT. If a fact survived, emit it as EXACTLY ONE fenced block tagged `atlas-fact`, holding
 a JSON object with a single `claim` field — one sentence of plain prose, derivable from the CODE bytes above

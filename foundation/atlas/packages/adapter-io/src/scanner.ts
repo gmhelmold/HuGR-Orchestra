@@ -32,24 +32,24 @@
 //     is the intended shape until the owner installs a scanner; it is a loud, attributable refusal (the
 //     adapter own name says so -- see `NO_SCANNER_NAME` below) rather than a silent pass.
 
-import { execFileSync } from "node:child_process";
-import type { MemoryRecord, NamedScanner } from "@atlas/memory";
+import { execFileSync } from "node:child_process"
+import type { MemoryRecord, NamedScanner } from "@atlas/memory"
 
 /** The three-value scan outcome. `scan()` on the `NamedScanner` seam is boolean (block/pass) by contract
  *  (`writeWithScanner`) -- this richer value is what this module computes BEFORE it is collapsed to that
  *  boolean, and it is exported so a caller that wants to log/observe WHY a write blocked can. */
-export type ScanVerdict = "clean" | "hit" | "could-not-run";
+export type ScanVerdict = "clean" | "hit" | "could-not-run"
 
 /** One known scanner binary invocation contract. `cleanExitCodes` / `hitExitCodes` are the DOCUMENTED
  *  exit codes for that binary "no secrets" / "secrets found" outcomes; ANY other exit (a crash, an
  *  unrecognised flag, a version that changed its codes) is `could-not-run` -- never silently read as clean.
  *  Record content is piped over STDIN (`input`), never interpolated into `args` or a shell string. */
 export interface ScannerBinarySpec {
-  readonly name: "gitleaks" | "trufflehog";
-  readonly command: string;
-  readonly args: readonly string[];
-  readonly cleanExitCodes: readonly number[];
-  readonly hitExitCodes: readonly number[];
+  readonly name: "gitleaks" | "trufflehog"
+  readonly command: string
+  readonly args: readonly string[]
+  readonly cleanExitCodes: readonly number[]
+  readonly hitExitCodes: readonly number[]
 }
 
 // ── ARGV IS CALIBRATED AGAINST A LIVE BINARY, AND THE FIRST VERSION WAS NOT ───────────────────────────
@@ -91,24 +91,24 @@ const KNOWN_SCANNERS: readonly ScannerBinarySpec[] = [
     cleanExitCodes: [0],
     hitExitCodes: [183],
   },
-];
+]
 
 /** The name a `NamedScanner` carries when NO real binary was found on PATH -- attributable, never blank,
  *  never a name that could be confused with a real scanner. */
-export const NO_SCANNER_NAME = "no-scanner-on-path";
+export const NO_SCANNER_NAME = "no-scanner-on-path"
 
-const DEFAULT_TIMEOUT_MS = 5_000;
+const DEFAULT_TIMEOUT_MS = 5_000
 
 /** Is `command` runnable from PATH? Probed with `--version` (never mutates anything). An `ENOENT` from the
  *  spawn means the binary is genuinely absent; ANY other outcome (including a non-zero exit -- some tools
  *  reject `--version`) means the binary exists and is spawnable, which is all this predicate claims. */
 function isOnPath(command: string): boolean {
   try {
-    execFileSync(command, ["--version"], { stdio: "ignore", timeout: DEFAULT_TIMEOUT_MS });
-    return true;
+    execFileSync(command, ["--version"], { stdio: "ignore", timeout: DEFAULT_TIMEOUT_MS })
+    return true
   } catch (err) {
-    const code = (err as { code?: unknown } | null)?.code;
-    return code !== "ENOENT";
+    const code = (err as { code?: unknown } | null)?.code
+    return code !== "ENOENT"
   }
 }
 
@@ -118,19 +118,19 @@ export function detectAvailableScanner(
   scanners: readonly ScannerBinarySpec[] = KNOWN_SCANNERS,
 ): ScannerBinarySpec | null {
   for (const spec of scanners) {
-    if (isOnPath(spec.command)) return spec;
+    if (isOnPath(spec.command)) return spec
   }
-  return null;
+  return null
 }
 
 /** Read a caught `execFileSync` error exit code. `status` is set on a plain non-zero exit; a TIMEOUT or a
  *  kill sets `signal` (and `status` is `null`) -- that path returns `null` here so it falls through to
  *  `could-not-run` rather than being misread as some numbered exit. */
 function exitCodeOf(err: unknown): number | null {
-  if (err === null || typeof err !== "object") return null;
-  const e = err as { status?: unknown; signal?: unknown };
-  if (typeof e.status === "number") return e.status;
-  return null; // ENOENT, timeout/signal-killed, or any other spawn failure.
+  if (err === null || typeof err !== "object") return null
+  const e = err as { status?: unknown; signal?: unknown }
+  if (typeof e.status === "number") return e.status
+  return null // ENOENT, timeout/signal-killed, or any other spawn failure.
 }
 
 /**
@@ -145,22 +145,22 @@ export function runScanner(
   record: MemoryRecord,
   timeoutMs: number = DEFAULT_TIMEOUT_MS,
 ): ScanVerdict {
-  const input = JSON.stringify(record);
+  const input = JSON.stringify(record)
   try {
     execFileSync(spec.command, spec.args as string[], {
       input,
       timeout: timeoutMs,
       stdio: ["pipe", "pipe", "pipe"],
       encoding: "utf8",
-    });
+    })
     // No throw => exit 0. Only a verdict if 0 is a DOCUMENTED clean code for this spec.
-    return spec.cleanExitCodes.includes(0) ? "clean" : "could-not-run";
+    return spec.cleanExitCodes.includes(0) ? "clean" : "could-not-run"
   } catch (err) {
-    const code = exitCodeOf(err);
-    if (code !== null && spec.hitExitCodes.includes(code)) return "hit";
-    if (code !== null && spec.cleanExitCodes.includes(code)) return "clean";
+    const code = exitCodeOf(err)
+    if (code !== null && spec.hitExitCodes.includes(code)) return "hit"
+    if (code !== null && spec.cleanExitCodes.includes(code)) return "clean"
     // Timeout, spawn failure, or an exit code neither spec documents -- fail closed, never clean.
-    return "could-not-run";
+    return "could-not-run"
   }
 }
 
@@ -174,22 +174,22 @@ export function runScanner(
 export function makeScannerAdapter(
   opts: { readonly timeoutMs?: number; readonly scanners?: readonly ScannerBinarySpec[] } = {},
 ): NamedScanner {
-  const spec = detectAvailableScanner(opts.scanners);
+  const spec = detectAvailableScanner(opts.scanners)
   if (spec === null) {
     return {
       name: NO_SCANNER_NAME,
       scan(): boolean {
         // No binary at all: "could not check" must never read as "no secret" (file header). Every write
         // refuses until the owner installs a named scanner.
-        return true;
+        return true
       },
-    };
+    }
   }
-  const timeoutMs = opts.timeoutMs ?? DEFAULT_TIMEOUT_MS;
+  const timeoutMs = opts.timeoutMs ?? DEFAULT_TIMEOUT_MS
   return {
     name: spec.name,
     scan(record: MemoryRecord): boolean {
-      return runScanner(spec, record, timeoutMs) !== "clean";
+      return runScanner(spec, record, timeoutMs) !== "clean"
     },
-  };
+  }
 }

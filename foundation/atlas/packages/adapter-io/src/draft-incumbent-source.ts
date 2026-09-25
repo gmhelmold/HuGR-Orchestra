@@ -9,11 +9,11 @@
 // Per ARCH-2 the port lives in `@atlas/tools` (the innermost layer); this file is the adapter-io CONSUMER
 // of that freeze, exactly the same split `check-source.ts` uses for `GateChainRunner`.
 
-import type { NodeKey, Tier } from '@atlas/contracts';
-import type { CurrentNode, RatifyContext } from '@atlas/knowledge';
-import type { IncumbentPort } from '@atlas/tools';
-import { ratifyCtxFor } from './governed-emit-route.js';
-import type { DiskStore } from './store.js';
+import type { NodeKey, Tier } from "@atlas/contracts"
+import type { CurrentNode, RatifyContext } from "@atlas/knowledge"
+import type { IncumbentPort } from "@atlas/tools"
+import { ratifyCtxFor } from "./governed-emit-route.js"
+import type { DiskStore } from "./store.js"
 
 /**
  * Build the `@atlas/tools` `IncumbentPort` over `store` — the SAME store the durable governed emit door
@@ -27,7 +27,7 @@ import type { DiskStore } from './store.js';
 export function buildDraftIncumbentPort(store: DiskStore): IncumbentPort {
   return {
     incumbentAt(key: NodeKey): CurrentNode | undefined {
-      return store.loadProjection()?.current.get(key as unknown as string);
+      return store.loadProjection()?.current.get(key as unknown as string)
     },
     ratifyContextFor(derivedTier: Tier | undefined): RatifyContext {
       // `origin` absent ⇒ authored (a draft is never a promotion out of staging). A DRAFT IS A PREVIEW: it
@@ -35,7 +35,7 @@ export function buildDraftIncumbentPort(store: DiskStore): IncumbentPort {
       // fast-path verdicts are the preview's optimistic read — `lowRisk` for a grounded T2 advisory draft,
       // `contested:false` (a preview never contends). This is NOT the governed door: the door derives both
       // from real state (INV-AUTH-15); the port here is the drafting surface, which the INV does not bind.
-      return ratifyCtxFor(derivedTier, { lowRisk: true, contested: false });
+      return ratifyCtxFor(derivedTier, { lowRisk: true, contested: false })
     },
-  };
+  }
 }

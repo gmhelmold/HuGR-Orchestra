@@ -16,110 +16,136 @@
 // — the truest possible double — and spy on it to prove the ungrounded path writes zero bytes. The gate's
 // grounded/FRESH oracles are the concrete `isGrounded`/`driftDetect` exports, not fakes, so the teeth are real.
 
-import { describe, it, expect } from 'vitest';
-import { asSubtreeHash, asNodeKey, createStore, id } from '@atlas/kernel';
-import { bindGate, isGrounded, driftDetect } from '@atlas/grounding';
-import type { Grounding } from '@atlas/grounding';
-import { bindEmit } from '@atlas/knowledge';
-import type { GroundedFact } from '@atlas/knowledge';
-import type { Axes, Axis, IndexNode } from '@atlas/index';
+import { describe, it, expect } from "vitest"
+import { asSubtreeHash, asNodeKey, createStore, id } from "@atlas/kernel"
+import { bindGate, isGrounded, driftDetect } from "@atlas/grounding"
+import type { Grounding } from "@atlas/grounding"
+import { bindEmit } from "@atlas/knowledge"
+import type { GroundedFact } from "@atlas/knowledge"
+import type { Axes, Axis, IndexNode } from "@atlas/index"
 
 // ── the cited unit + built-index snapshots ──────────────────────────────────────────────────────────
-const ANCHOR = 'billing.ts#computeArr';
+const ANCHOR = "billing.ts#computeArr"
 const leaf = (key: string, sh: string): IndexNode => ({
-  axis: 'spatial',
-  level: 'item',
+  axis: "spatial",
+  level: "item",
   key,
   subtreeHash: asSubtreeHash(sh),
   children: [],
   objects: [],
-});
-const emptyAxis = (axis: Axis): IndexNode => ({ axis, level: 'root', key: axis, subtreeHash: asSubtreeHash('empty'), children: [], objects: [] });
+})
+const emptyAxis = (axis: Axis): IndexNode => ({
+  axis,
+  level: "root",
+  key: axis,
+  subtreeHash: asSubtreeHash("empty"),
+  children: [],
+  objects: [],
+})
 /** A built-index snapshot in which ANCHOR currently hashes to `sh`. */
 const srcWhereAnchorIs = (sh: string): Axes => ({
-  spatial: { axis: 'spatial', level: 'repo', key: 'repo', subtreeHash: asSubtreeHash('root'), children: [leaf(ANCHOR, sh)], objects: [] },
-  territory: emptyAxis('territory'),
-  dependency: emptyAxis('dependency'),
+  spatial: {
+    axis: "spatial",
+    level: "repo",
+    key: "repo",
+    subtreeHash: asSubtreeHash("root"),
+    children: [leaf(ANCHOR, sh)],
+    objects: [],
+  },
+  territory: emptyAxis("territory"),
+  dependency: emptyAxis("dependency"),
   edges: [],
-});
+})
 
 // ── groundings ──────────────────────────────────────────────────────────────────────────────────────
 const groundingAt = (sh: string): Grounding => ({
-  entries: [{ anchor: { kind: 'symbol', qualifiedPath: ANCHOR, subtreeHash: asSubtreeHash(sh) }, path: 'billing.ts' }],
-});
-const UNGROUNDED: Grounding = { entries: [] }; // 0 entries — GROUND-2 says this is never grounded
+  entries: [{ anchor: { kind: "symbol", qualifiedPath: ANCHOR, subtreeHash: asSubtreeHash(sh) }, path: "billing.ts" }],
+})
+const UNGROUNDED: Grounding = { entries: [] } // 0 entries — GROUND-2 says this is never grounded
 
 const advisory = (grounding: Grounding): GroundedFact => ({
-  kind: 'advisory',
-  id: asNodeKey('fact:billing.computeArr'),
-  tier: 'T2',
-  claimNorm: 'computeArr is a pure function of its inputs',
+  kind: "advisory",
+  id: asNodeKey("fact:billing.computeArr"),
+  tier: "T2",
+  claimNorm: "computeArr is a pure function of its inputs",
   grounding,
-  freshness: 'FRESH',
+  freshness: "FRESH",
   claims: [],
-  authoring: 'ADVISORY',
-});
+  authoring: "ADVISORY",
+})
 
-describe('S3 · truth-gate — grounded ∧ FRESH or nothing (fail-closed)', () => {
-  const gate = bindGate({ isGrounded, driftDetect }); // the REAL oracles, composed across the seam
-  const FRESH_SRC = srcWhereAnchorIs('sh-1');
-  const grounded = groundingAt('sh-1'); // anchor recorded at sh-1, matches FRESH_SRC
+describe("S3 · truth-gate — grounded ∧ FRESH or nothing (fail-closed)", () => {
+  const gate = bindGate({ isGrounded, driftDetect }) // the REAL oracles, composed across the seam
+  const FRESH_SRC = srcWhereAnchorIs("sh-1")
+  const grounded = groundingAt("sh-1") // anchor recorded at sh-1, matches FRESH_SRC
 
-  it('serves HOLDS for a grounded claim whose cited code is unchanged (FRESH)', () => {
-    expect(driftDetect(grounded, FRESH_SRC)).toBe('FRESH');
+  it("serves HOLDS for a grounded claim whose cited code is unchanged (FRESH)", () => {
+    expect(driftDetect(grounded, FRESH_SRC)).toBe("FRESH")
     // teeth (breaks-on "the gate refuses a genuinely grounded+fresh claim — false-negative truth"):
-    expect(gate.gateHolds('HOLDS', grounded, FRESH_SRC)).toBe('HOLDS');
-  });
+    expect(gate.gateHolds("HOLDS", grounded, FRESH_SRC)).toBe("HOLDS")
+  })
 
-  it('downgrades a claim to NA once the cited code changes underneath it — never served stale', () => {
+  it("downgrades a claim to NA once the cited code changes underneath it — never served stale", () => {
     // the code at ANCHOR moved from sh-1 → sh-2; the grounding still records sh-1 ⇒ DRIFTED.
-    const driftedSrc = srcWhereAnchorIs('sh-2');
-    expect(driftDetect(grounded, driftedSrc)).toBe('DRIFTED');
+    const driftedSrc = srcWhereAnchorIs("sh-2")
+    expect(driftDetect(grounded, driftedSrc)).toBe("DRIFTED")
     // teeth (breaks-on "a drifted (stale) claim is still served as HOLDS"):
-    expect(gate.gateHolds('HOLDS', grounded, driftedSrc)).toBe('NA');
-  });
+    expect(gate.gateHolds("HOLDS", grounded, driftedSrc)).toBe("NA")
+  })
 
-  it('downgrades an UNGROUNDED claim to NA even when it arrives asserting HOLDS', () => {
-    expect(isGrounded(UNGROUNDED)).toBe(false);
+  it("downgrades an UNGROUNDED claim to NA even when it arrives asserting HOLDS", () => {
+    expect(isGrounded(UNGROUNDED)).toBe(false)
     // teeth (breaks-on "an ungrounded claim can assert itself into HOLDS"):
-    expect(gate.gateHolds('HOLDS', UNGROUNDED, FRESH_SRC)).toBe('NA');
-  });
+    expect(gate.gateHolds("HOLDS", UNGROUNDED, FRESH_SRC)).toBe("NA")
+  })
 
-  it('never lets a non-Status value launder into HOLDS, and never upgrades a lesser verdict', () => {
+  it("never lets a non-Status value launder into HOLDS, and never upgrades a lesser verdict", () => {
     // a non-Status candidate is coerced fail-closed to NA (cannot fabricate HOLDS).
-    expect(gate.gateHolds({ pretending: 'HOLDS' } as unknown, grounded, FRESH_SRC)).toBe('NA');
+    expect(gate.gateHolds({ pretending: "HOLDS" } as unknown, grounded, FRESH_SRC)).toBe("NA")
     // downgrade-only: a non-HOLDS verdict passes through unchanged (the gate never upgrades to HOLDS).
-    expect(gate.gateHolds('advisory', grounded, FRESH_SRC)).toBe('advisory');
-    expect(gate.gateHolds('BROKEN', grounded, FRESH_SRC)).toBe('BROKEN');
-  });
+    expect(gate.gateHolds("advisory", grounded, FRESH_SRC)).toBe("advisory")
+    expect(gate.gateHolds("BROKEN", grounded, FRESH_SRC)).toBe("BROKEN")
+  })
 
-  describe('atlas-emit — the fail-closed store admission (ungrounded writes zero bytes)', () => {
-    it('REFUSES an ungrounded node and persists NOTHING (the security keystone)', () => {
-      const store = createStore();
-      let writes = 0;
-      const emit = bindEmit({ isGrounded, persist: (n) => { writes += 1; return store.put(n); } });
+  describe("atlas-emit — the fail-closed store admission (ungrounded writes zero bytes)", () => {
+    it("REFUSES an ungrounded node and persists NOTHING (the security keystone)", () => {
+      const store = createStore()
+      let writes = 0
+      const emit = bindEmit({
+        isGrounded,
+        persist: (n) => {
+          writes += 1
+          return store.put(n)
+        },
+      })
 
-      const verdict = emit.admit(advisory(UNGROUNDED));
+      const verdict = emit.admit(advisory(UNGROUNDED))
 
       // teeth (breaks-on "an ungrounded fact enters the store — the trust boundary is bypassed"):
-      expect(verdict.emitted).toBe(false);
-      expect(verdict.id).toBeUndefined();
-      expect(writes).toBe(0); // the CAS sink was NEVER called — nothing written
-    });
+      expect(verdict.emitted).toBe(false)
+      expect(verdict.id).toBeUndefined()
+      expect(writes).toBe(0) // the CAS sink was NEVER called — nothing written
+    })
 
-    it('admits a grounded node exactly once, with the receipt carrying the real sealed CAS id', () => {
-      const store = createStore();
-      let writes = 0;
-      const emit = bindEmit({ isGrounded, persist: (n) => { writes += 1; return store.put(n); } });
+    it("admits a grounded node exactly once, with the receipt carrying the real sealed CAS id", () => {
+      const store = createStore()
+      let writes = 0
+      const emit = bindEmit({
+        isGrounded,
+        persist: (n) => {
+          writes += 1
+          return store.put(n)
+        },
+      })
 
-      const node = advisory(grounded);
-      const verdict = emit.admit(node);
+      const node = advisory(grounded)
+      const verdict = emit.admit(node)
 
-      expect(verdict.emitted).toBe(true);
-      expect(writes).toBe(1); // persisted exactly once
+      expect(verdict.emitted).toBe(true)
+      expect(writes).toBe(1) // persisted exactly once
       // the receipt id is the sealed kernel content-address of the node — re-derived, not fabricated.
-      expect(verdict.id).toBe(id(node));
-      expect(store.get(verdict.id!)).toEqual(node); // and it is genuinely retrievable from the CAS
-    });
-  });
-});
+      expect(verdict.id).toBe(id(node))
+      expect(store.get(verdict.id!)).toEqual(node) // and it is genuinely retrievable from the CAS
+    })
+  })
+})

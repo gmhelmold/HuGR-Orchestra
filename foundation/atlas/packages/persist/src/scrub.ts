@@ -59,44 +59,44 @@
 // construction. The families deliberately left out — and the specific thing each one breaks — are recorded
 // in scrub-shapes.ts.
 
-import { MAX_SEAM_CARRY } from './scrub-shapes.js';
-import { canonicalise, renderPrefix, scanMatches, scrubString, seamCut } from './scrub-scan.js';
+import { MAX_SEAM_CARRY } from "./scrub-shapes.js"
+import { canonicalise, renderPrefix, scanMatches, scrubString, seamCut } from "./scrub-scan.js"
 
-export { MAX_SEAM_CARRY };
+export { MAX_SEAM_CARRY }
 
 /** Redact-at-source surface (PERSIST-10a): `scrub(buffer)` drops known credential shapes BEFORE the body
  *  is stored; every non-secret byte preserved (no over-redaction). (method-tags-pst:91-92) */
 export interface ScrubApi {
-  scrub(buffer: Uint8Array): Uint8Array;
+  scrub(buffer: Uint8Array): Uint8Array
 }
 
 // Byte-preserving latin1 view: each byte <-> exactly one char (1:1, reversible). Scanning/replacing on this
 // view leaves every NON-matching byte byte-identical — no UTF-8 normalization, no over-redaction of the
 // bytes adjacent to a secret.
 function toLatin1(bytes: Uint8Array): string {
-  let s = '';
+  let s = ""
   // Batched so a multi-megabyte stream does not pay quadratic string building; each byte still maps to
   // exactly one char, so the result is identical to a byte-at-a-time build.
   for (let i = 0; i < bytes.length; i += 4096) {
-    s += String.fromCharCode(...bytes.subarray(i, i + 4096));
+    s += String.fromCharCode(...bytes.subarray(i, i + 4096))
   }
-  return s;
+  return s
 }
 
 function fromLatin1(s: string): Uint8Array {
-  const out = new Uint8Array(s.length);
-  for (let i = 0; i < s.length; i++) out[i] = s.charCodeAt(i) & 0xff;
-  return out;
+  const out = new Uint8Array(s.length)
+  for (let i = 0; i < s.length; i++) out[i] = s.charCodeAt(i) & 0xff
+  return out
 }
 
 /** TOTAL input coercion. An input whose bytes cannot be read is WITHHELD (treated as empty) rather than
  *  passed through unscrubbed — a scrubber that throws, or that forwards what it could not inspect, is a
  *  scrubber that fails open. Nothing in this module throws on any input. */
 function asBytes(v: unknown): Uint8Array {
-  if (v instanceof Uint8Array) return v;
-  if (ArrayBuffer.isView(v)) return new Uint8Array(v.buffer, v.byteOffset, v.byteLength);
-  if (v instanceof ArrayBuffer) return new Uint8Array(v);
-  return new Uint8Array(0);
+  if (v instanceof Uint8Array) return v
+  if (ArrayBuffer.isView(v)) return new Uint8Array(v.buffer, v.byteOffset, v.byteLength)
+  if (v instanceof ArrayBuffer) return new Uint8Array(v)
+  return new Uint8Array(0)
 }
 
 /**
@@ -105,7 +105,7 @@ function asBytes(v: unknown): Uint8Array {
  * replaced by the redaction placeholder; bytes outside a match are preserved byte-for-byte.
  */
 export function scrub(buffer: Uint8Array): Uint8Array {
-  return fromLatin1(scrubString(toLatin1(asBytes(buffer))));
+  return fromLatin1(scrubString(toLatin1(asBytes(buffer))))
 }
 
 // ── the seam machinery ──────────────────────────────────────────────────────────────────────────────
@@ -122,22 +122,22 @@ export function scrub(buffer: Uint8Array): Uint8Array {
  *            as a placeholder, never as a raw credential — and they are what the next admit rewrites.
  */
 interface SeamState {
-  readonly back: number;
-  readonly carry: string;
+  readonly back: number
+  readonly carry: string
 }
 
-const FRESH: SeamState = { back: 0, carry: '' };
+const FRESH: SeamState = { back: 0, carry: "" }
 
 // State is keyed on the IDENTITY of the buffer this module returned, so the published `admitToBuffer`
 // signature is unchanged and the ordinary `buffer = admitToBuffer(buffer, chunk)` fold carries it for free.
 // A buffer we did not produce (a caller-built `new Uint8Array(0)`, a fetched body) starts a FRESH stream —
 // the conservative reading, since we cannot know what preceded it. WeakMap so nothing is retained.
-const SEAM = new WeakMap<Uint8Array, SeamState>();
+const SEAM = new WeakMap<Uint8Array, SeamState>()
 
 /** How many trailing bytes of `buffer` are still provisional — always <= {@link MAX_SEAM_CARRY}. Those
  *  bytes are never a raw credential: they are `scrub` of the bytes they stand for. */
 export function seamCarryOf(buffer: Uint8Array): number {
-  return (SEAM.get(asBytes(buffer)) ?? FRESH).back;
+  return (SEAM.get(asBytes(buffer)) ?? FRESH).back
 }
 
 /**
@@ -162,15 +162,15 @@ export function seamCarryOf(buffer: Uint8Array): number {
  * produced a witness. Removing it is correct on the reachability argument alone; do not cite the leak.
  */
 function advance(carry: string, input: string): { emit: string; state: SeamState } {
-  const s = carry + input;
-  const matches = scanMatches(s);
-  const cut = seamCut(s, matches);
+  const s = carry + input
+  const matches = scanMatches(s)
+  const cut = seamCut(s, matches)
   // The head is decided from the matches of the WHOLE `s`, never by re-scrubbing `s.slice(0, cut)` — a
   // right-truncated string can lose the lookahead that blocked a body and gain a match that is not there.
   // See `renderPrefix`. The carry is left-truncated, which is safe.
-  const tail = canonicalise(s.slice(cut));
-  const provisional = scrubString(tail);
-  return { emit: renderPrefix(s, matches, cut) + provisional, state: { back: provisional.length, carry: tail } };
+  const tail = canonicalise(s.slice(cut))
+  const provisional = scrubString(tail)
+  return { emit: renderPrefix(s, matches, cut) + provisional, state: { back: provisional.length, carry: tail } }
 }
 
 /**
@@ -180,30 +180,30 @@ function advance(carry: string, input: string): { emit: string; state: SeamState
  * — or written immediately after another one — is caught. Total: never throws, for any input.
  */
 export function admitToBuffer(existing: Uint8Array, chunk: Uint8Array): Uint8Array {
-  const prev = asBytes(existing);
-  const known = SEAM.get(prev);
+  const prev = asBytes(existing)
+  const known = SEAM.get(prev)
   // For a buffer we did not produce (resumed from a fetched body, rebuilt by a caller) there is no state to
   // read, so re-examine the widest window a split credential could occupy rather than assuming the seam is
   // clean. For our own buffers this is exactly the provisional region recorded when it was written.
-  const back = Math.min(known === undefined ? MAX_SEAM_CARRY : known.back, prev.length);
-  const keep = prev.length - back;
-  const carry = known === undefined ? toLatin1(prev.subarray(keep)) : known.carry;
-  const { emit, state } = advance(carry, toLatin1(asBytes(chunk)));
+  const back = Math.min(known === undefined ? MAX_SEAM_CARRY : known.back, prev.length)
+  const keep = prev.length - back
+  const carry = known === undefined ? toLatin1(prev.subarray(keep)) : known.carry
+  const { emit, state } = advance(carry, toLatin1(asBytes(chunk)))
 
-  const emitted = fromLatin1(emit);
-  const out = new Uint8Array(keep + emitted.length);
-  out.set(prev.subarray(0, keep), 0);
-  out.set(emitted, keep);
-  SEAM.set(out, state);
-  return out;
+  const emitted = fromLatin1(emit)
+  const out = new Uint8Array(keep + emitted.length)
+  out.set(prev.subarray(0, keep), 0)
+  out.set(emitted, keep)
+  SEAM.set(out, state)
+  return out
 }
 
 /** The RAW undecided suffix a buffer is holding — the memory bound the seam actually pays, as opposed to
  *  the emitted `seamCarryOf`. Exported so the bound can be MEASURED rather than asserted. */
 export function seamRawCarryOf(buffer: Uint8Array): number {
-  return (SEAM.get(asBytes(buffer)) ?? FRESH).carry.length;
+  return (SEAM.get(asBytes(buffer)) ?? FRESH).carry.length
 }
 
 // differential-vs-oracle (compile-time): `scrub` conforms to the co-located frozen ScrubApi.
-const _api: ScrubApi = { scrub };
-void _api;
+const _api: ScrubApi = { scrub }
+void _api

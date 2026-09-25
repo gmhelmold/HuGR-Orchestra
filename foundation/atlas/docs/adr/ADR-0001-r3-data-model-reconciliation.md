@@ -25,11 +25,11 @@ sixth (persist `VersionDeltaEntry.provenance`). Main is green; **~17 merged `Gro
    computes the candidate-intrinsic conjuncts (grounded/T2/advisory) itself and stays pure + total.
 3. **Do NOT add `provenance` to the kernel `Event`.** (Refuted: not ref-FLAGged, not in R3, would
    reintroduce the `actor`/`at` fields fspec-merge deliberately dropped, and inverts layering — the kernel
-   must not know about WPs.) The PERSIST-14-c *membership* contract is already met by
+   must not know about WPs.) The PERSIST-14-c _membership_ contract is already met by
    `VersionDeltaEntry.provenance: unknown` (opaque-by-design). Any typing is a **persist-local** `WP-7.32`
    decision at its seal, sourced by the event→commit→PERSIST-3-trailer join.
 4. **Leave the door-2 `lowRisk` threshold as OPEN-DEFINE** (`ref/hits.ts` `DecayConfig.threshold`) — a
-   genuine DEFINE residue; the boolean *verdict* is a `RatifyContext` input, the *threshold value* is not
+   genuine DEFINE residue; the boolean _verdict_ is a `RatifyContext` input, the _threshold value_ is not
    invented here.
 
 ## Consequences

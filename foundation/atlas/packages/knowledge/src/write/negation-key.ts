@@ -11,12 +11,12 @@
 // #99a placement. Freshness lives elsewhere (the ONE grounding entry at the scope directory + `driftDetect`'s
 // insertion-sensitive scope Merkle, §3). See docs/design/99b-negation-fact-contract.md.
 
-import { asNodeKey, canonicalForm, defaultEncoder } from '@atlas/kernel';
-import type { NodeKey } from '@atlas/contracts';
+import { asNodeKey, canonicalForm, defaultEncoder } from "@atlas/kernel"
+import type { NodeKey } from "@atlas/contracts"
 // The closed relation vocabulary + its total-over-unknown guard are OWNED by relation-key.ts (the #99a
 // leg): a negation NEGATES a relation, so it shares the exact same closed `RelationKind` set. Imported, not
 // restated — THE ONE runtime copy (#152 discipline).
-import { isKnownRelationKind } from './relation-key.js';
+import { isKnownRelationKind } from "./relation-key.js"
 
 /**
  * THE REFUSAL a malformed negation earns — the 3-legged analogue of `MalformedRelationError`. A negation
@@ -30,16 +30,16 @@ import { isKnownRelationKind } from './relation-key.js';
  * A target that happens to string-equal a scope is not a degenerate negation, just an unusual one.
  */
 export const MALFORMED_NEGATION_REASON =
-  'malformed negation: a negation identity is the triple (relationKind, target, scope), and one of the ' +
-  'three is not well-formed. target must be a non-empty GLOBAL symbol key (the location-free X the ' +
-  'negative is about), scope must be a non-empty DIRECTORY key (the closed scope S the witness ranges ' +
-  'over), and relationKind must be one of the closed vocabulary members. Re-state the negation naming the ' +
-  'symbol it is about and the scope it was proven closed over with a supported kind';
+  "malformed negation: a negation identity is the triple (relationKind, target, scope), and one of the " +
+  "three is not well-formed. target must be a non-empty GLOBAL symbol key (the location-free X the " +
+  "negative is about), scope must be a non-empty DIRECTORY key (the closed scope S the witness ranges " +
+  "over), and relationKind must be one of the closed vocabulary members. Re-state the negation naming the " +
+  "symbol it is about and the scope it was proven closed over with a supported kind"
 
 export class MalformedNegationError extends Error {
   constructor() {
-    super(MALFORMED_NEGATION_REASON);
-    this.name = 'MalformedNegationError';
+    super(MALFORMED_NEGATION_REASON)
+    this.name = "MalformedNegationError"
   }
 }
 
@@ -56,8 +56,8 @@ export class MalformedNegationError extends Error {
  * SUPERSEDES the abstention (the honest lifecycle: "couldn't decide" → later "decided false").
  */
 export function negationKey(kind: unknown, target: unknown, scope: unknown): NodeKey {
-  if (typeof target !== 'string' || target.length === 0) throw new MalformedNegationError();
-  if (typeof scope !== 'string' || scope.length === 0) throw new MalformedNegationError();
-  if (!isKnownRelationKind(kind)) throw new MalformedNegationError();
-  return asNodeKey(defaultEncoder.hash(canonicalForm({ neg: kind, t: target, s: scope })));
+  if (typeof target !== "string" || target.length === 0) throw new MalformedNegationError()
+  if (typeof scope !== "string" || scope.length === 0) throw new MalformedNegationError()
+  if (!isKnownRelationKind(kind)) throw new MalformedNegationError()
+  return asNodeKey(defaultEncoder.hash(canonicalForm({ neg: kind, t: target, s: scope })))
 }

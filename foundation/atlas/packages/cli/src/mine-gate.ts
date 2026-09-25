@@ -22,7 +22,7 @@
 //            "no admission seam wired (mine default)".
 //   after  — same frontier, same proposer, the gate's own verdict at every site.
 
-import { admit } from '@atlas/genesis';
+import { admit } from "@atlas/genesis"
 import type {
   AdmitDeps,
   AdvisoryProposal,
@@ -37,16 +37,16 @@ import type {
   RelationProposal,
   SeedProposal,
   SkeletonSource,
-} from '@atlas/genesis';
-import { buildMineAdmission, readScipOrEmpty } from '@atlas/adapter-io';
-import type { Reground } from '@atlas/adapter-io';
-import { asNodeKey } from '@atlas/kernel';
-import { join } from "node:path";
+} from "@atlas/genesis"
+import { buildMineAdmission, readScipOrEmpty } from "@atlas/adapter-io"
+import type { Reground } from "@atlas/adapter-io"
+import { asNodeKey } from "@atlas/kernel"
+import { join } from "node:path"
 
 /** The abstention an UNSUPPLIED gate serves. Exported because it is the fingerprint of the defect above:
  *  a golden that cannot name this string cannot tell a working gate from an absent one, and that
  *  indistinguishability IS what let the product ship mining nothing (SCN-CLI-4d-2). */
-export const UNWIRED_GATE_REASON = 'no admission seam wired (mine default)';
+export const UNWIRED_GATE_REASON = "no admission seam wired (mine default)"
 
 /**
  * The gate a pass gets when NOTHING supplies admission: every site abstains, honestly, naming the wiring
@@ -58,7 +58,7 @@ export const UNWIRED_GATE_REASON = 'no admission seam wired (mine default)';
  * removed, and without that control the positive golden cannot attribute its admissions to the gate.
  */
 export function unwiredGate(): EmitGate {
-  return { emit: (_seed, cand) => ({ emitted: false, whyNot: { site: cand.site, reason: UNWIRED_GATE_REASON } }) };
+  return { emit: (_seed, cand) => ({ emitted: false, whyNot: { site: cand.site, reason: UNWIRED_GATE_REASON } }) }
 }
 
 /**
@@ -82,42 +82,64 @@ export function unwiredGate(): EmitGate {
  * `nodeKey`/`tier` mirror the pre-widening advisory construction so advisory + predicate stay byte-identical.
  */
 function buildProposal(seed: SeedProposal, cand: Candidate, groundingFor: (c: Candidate) => FactGrounding): Proposal {
-  const nodeKey = asNodeKey(cand.site.qualifiedPath);
+  const nodeKey = asNodeKey(cand.site.qualifiedPath)
   switch (seed.kind) {
-    case 'predicate': {
+    case "predicate": {
       // ADR-0017 dependency slot / #196c count slot: FORWARD the `target`/`scope` identity legs (SEAM2) and the
       // count `atLeast` leg so the sound oracle leg (`admitPredicate`) can PROVE the fact. Absent for non-oracle
       // slots (exactOptionalPropertyTypes ⇒ conditional spread, never `{ x: undefined }`).
       const p: PredicateProposal = {
-        kind: 'predicate',
+        kind: "predicate",
         site: cand,
         slot: seed.slot,
         nodeKey,
         claimNorm: seed.claim,
         grounding: groundingFor(cand),
-        tier: 'T2',
+        tier: "T2",
         ...(seed.target !== undefined ? { target: seed.target } : {}),
         ...(seed.scope !== undefined ? { scope: seed.scope } : {}),
         ...(seed.atLeast !== undefined ? { atLeast: seed.atLeast } : {}),
         ...(seed.derivation !== undefined ? { derivation: seed.derivation } : {}), // 196b — forward the justified-slot grounds onto the proposal
-      };
-      return p;
+      }
+      return p
     }
-    case 'relation': {
+    case "relation": {
       // No relationKey — identity is minted DOWNSTREAM; grounding re-derives off the site (WP-96-R fills admit).
-      const p: RelationProposal = { kind: 'relation', site: cand, relationKind: seed.relationKind, endpointA: seed.endpointA, endpointB: seed.endpointB, grounding: groundingFor(cand), tier: 'T2' };
-      return p;
+      const p: RelationProposal = {
+        kind: "relation",
+        site: cand,
+        relationKind: seed.relationKind,
+        endpointA: seed.endpointA,
+        endpointB: seed.endpointB,
+        grounding: groundingFor(cand),
+        tier: "T2",
+      }
+      return p
     }
-    case 'negation': {
+    case "negation": {
       // NO grounding — the governed door constructs the scope-directory Merkle at admit (WP-96-N).
-      const p: NegationProposal = { kind: 'negation', site: cand, relationKind: seed.relationKind, target: seed.target, scope: seed.scope, tier: 'T2' };
-      return p;
+      const p: NegationProposal = {
+        kind: "negation",
+        site: cand,
+        relationKind: seed.relationKind,
+        target: seed.target,
+        scope: seed.scope,
+        tier: "T2",
+      }
+      return p
     }
     default: {
       // advisory — `kind` 'advisory' OR omitted (every existing producer/fixture). BYTE-IDENTICAL to the
       // pre-widening construction, so every advisory back-compat test still passes.
-      const p: AdvisoryProposal = { kind: 'advisory', site: cand, nodeKey, claimNorm: seed.claim, grounding: groundingFor(cand), tier: 'T2' };
-      return p;
+      const p: AdvisoryProposal = {
+        kind: "advisory",
+        site: cand,
+        nodeKey,
+        claimNorm: seed.claim,
+        grounding: groundingFor(cand),
+        tier: "T2",
+      }
+      return p
     }
   }
 }
@@ -130,7 +152,7 @@ export function makeAdmitGate(deps: AdmitDeps, reground?: Reground): EmitGate {
   const groundingFor = (cand: Candidate): FactGrounding =>
     (reground !== undefined
       ? reground(cand.site)
-      : { entries: [{ anchor: cand.site, path: cand.site.qualifiedPath }] }) as FactGrounding;
+      : { entries: [{ anchor: cand.site, path: cand.site.qualifiedPath }] }) as FactGrounding
 
   return {
     emit(seed: SeedProposal, cand: Candidate): EmitVerdict {
@@ -138,9 +160,9 @@ export function makeAdmitGate(deps: AdmitDeps, reground?: Reground): EmitGate {
       // admit-proposals.ts, then hand it to the frozen `admit` — which routes advisory→admitAdvisory,
       // predicate→admitPredicate (real), relation/negation→their WP-96-R/N stubs. Advisory is byte-identical
       // to the pre-widening construction; a `kind`-less seed (every existing producer/fixture) IS advisory.
-      const proposal: Proposal = buildProposal(seed, cand, groundingFor);
-      const verdict = admit(proposal, deps);
-      if (verdict.outcome === 'admitted') {
+      const proposal: Proposal = buildProposal(seed, cand, groundingFor)
+      const verdict = admit(proposal, deps)
+      if (verdict.outcome === "admitted") {
         // [#195 b] Carry the VALIDATED answer bytes THROUGH the admitted fact so the mine emit path
         // (`mine-decide.ts`) can scrub-and-put them to CAS and stamp `answerRef` (the CAS id) on the ROW.
         // It rides as a NON-IDENTITY transport field only: `mine-decide.ts` STRIPS `rawAnswer` before any
@@ -148,13 +170,13 @@ export function makeAdmitGate(deps: AdmitDeps, reground?: Reground): EmitGate {
         const fact: Fact =
           seed.rawAnswer !== undefined
             ? ({ ...verdict.fact, rawAnswer: seed.rawAnswer } as unknown as Fact)
-            : verdict.fact;
-        return { emitted: true, fact };
+            : verdict.fact
+        return { emitted: true, fact }
       }
-      const reason = verdict.outcome === 'dropped' ? verdict.reason : verdict.whyNot.reason;
-      return { emitted: false, whyNot: { site: cand.site, reason } };
+      const reason = verdict.outcome === "dropped" ? verdict.reason : verdict.whyNot.reason
+      return { emitted: false, whyNot: { site: cand.site, reason } }
     },
-  };
+  }
 }
 
 /**
@@ -171,11 +193,11 @@ export function makeAdmitGate(deps: AdmitDeps, reground?: Reground): EmitGate {
  * Memoized on first `emit` — the skeleton is deterministic, so the memo is behaviour-preserving.
  */
 export function composedGate(skeleton: SkeletonSource, repoPath: string, rev: string): EmitGate {
-  let gate: EmitGate | undefined;
+  let gate: EmitGate | undefined
   const resolve = (): EmitGate => {
-    const sk = skeleton.skeleton(repoPath, rev);
-    const { deps, reground } = buildMineAdmission(sk.axes, readScipOrEmpty(join(repoPath, ".atlas", "index.scip")));
-    return makeAdmitGate(deps, reground);
-  };
-  return { emit: (seed, cand) => (gate ??= resolve()).emit(seed, cand) };
+    const sk = skeleton.skeleton(repoPath, rev)
+    const { deps, reground } = buildMineAdmission(sk.axes, readScipOrEmpty(join(repoPath, ".atlas", "index.scip")))
+    return makeAdmitGate(deps, reground)
+  }
+  return { emit: (seed, cand) => (gate ??= resolve()).emit(seed, cand) }
 }

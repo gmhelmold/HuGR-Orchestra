@@ -5,7 +5,7 @@
 
 /** Grounding freshness — the CANONICAL 3-state. STALE = advisory drift: non-blocking,
  *  served-with-flag (GROUND-13). (atlas-grounding line 48) */
-export type Freshness = 'FRESH' | 'DRIFTED' | 'STALE';
+export type Freshness = "FRESH" | "DRIFTED" | "STALE"
 
 /** An invariant's verdict. (atlas-grounding line 49) */
-export type Status = 'HOLDS' | 'BROKEN' | 'NA' | 'advisory';
+export type Status = "HOLDS" | "BROKEN" | "NA" | "advisory"

@@ -5,20 +5,20 @@
 // composes the facet interfaces (INV-INDEX-1). Shared identity types (`Hash`, `SubtreeHash`, `Territory`)
 // come from @atlas/contracts — NEVER redefined here.
 
-import type { Hash, SubtreeHash, Territory } from '@atlas/contracts';
-import type { CasIndexApi } from './cas.js';
-import type { FoldApi } from './fold.js';
-import type { ResolveApi } from './resolve.js';
-import type { RetrievalApi } from './retrieval.js';
-import type { RollupApi } from './rollup.js';
+import type { Hash, SubtreeHash, Territory } from "@atlas/contracts"
+import type { CasIndexApi } from "./cas.js"
+import type { FoldApi } from "./fold.js"
+import type { ResolveApi } from "./resolve.js"
+import type { RetrievalApi } from "./retrieval.js"
+import type { RollupApi } from "./rollup.js"
 
 /** The multiple hierarchies over the one CAS — each a Merkle rollup, each its own job (drift +
  *  discovery). `functional`/flows is the NEXT axis, NOT built here (atlas-index:127). (atlas-index:36) */
-export type Axis = 'spatial' | 'territory' | 'dependency';
+export type Axis = "spatial" | "territory" | "dependency"
 
 /** The three (and only three) deterministic relevance paths — no embeddings, no free-text `search()`
  *  (INDEX-6). (atlas-index:47) */
-export type RetrievalMode = 'scope' | 'dependency' | 'trigger';
+export type RetrievalMode = "scope" | "dependency" | "trigger"
 
 /**
  * One node in an axis hierarchy. Transcribed EXACTLY from atlas-index:38:
@@ -38,12 +38,12 @@ export type RetrievalMode = 'scope' | 'dependency' | 'trigger';
  * reference that scopes it to this record is supplied.
  */
 export interface IndexNode {
-  readonly axis: Axis;
-  readonly level: string;
-  readonly key: string;
-  readonly subtreeHash: SubtreeHash;
-  readonly children: readonly IndexNode[];
-  readonly objects: readonly Hash[];
+  readonly axis: Axis
+  readonly level: string
+  readonly key: string
+  readonly subtreeHash: SubtreeHash
+  readonly children: readonly IndexNode[]
+  readonly objects: readonly Hash[]
 }
 
 /**
@@ -64,10 +64,10 @@ export interface IndexNode {
  * references to reconcile whether `ratio` is a stored Rollup field.
  */
 export interface Rollup {
-  readonly axis: Axis;
-  readonly bucket: string;
-  readonly rId: string;
-  readonly rState: string;
+  readonly axis: Axis
+  readonly bucket: string
+  readonly rId: string
+  readonly rState: string
 }
 
 /**
@@ -76,9 +76,9 @@ export interface Rollup {
  *   `Delta = { idChanged: boolean, stateChanged: boolean, changedBuckets: string[] }`.
  */
 export interface Delta {
-  readonly idChanged: boolean;
-  readonly stateChanged: boolean;
-  readonly changedBuckets: readonly string[];
+  readonly idChanged: boolean
+  readonly stateChanged: boolean
+  readonly changedBuckets: readonly string[]
 }
 
 /**
@@ -87,20 +87,20 @@ export interface Delta {
  * `Territory` is the CANONICAL contracts type (`@atlas/contracts`), imported — NOT redefined.
  */
 export interface Manifest {
-  readonly territories: readonly Territory[];
+  readonly territories: readonly Territory[]
 }
 
 /** An edge's resolution class. `unresolved`/`dynamic` are declared, never guessed (INDEX-13).
  *  Defined here (the base type module) and re-exported from `depgraph.ts` for its consumers.
  *  (atlas-index:185-188; method-tags-idx:108) */
-export type EdgeKind = 'resolved' | 'unresolved' | 'dynamic';
+export type EdgeKind = "resolved" | "unresolved" | "dynamic"
 
 /** A depends-on edge in the dependency axis. `to` is `null` iff the target is unresolved/dynamic —
  *  no target is ever invented (SCN-INDEX-3e-1; INDEX-13c). (atlas-index:105, 185-188) */
 export interface DepEdge {
-  readonly from: Hash;
-  readonly to: Hash | null;
-  readonly kind: EdgeKind;
+  readonly from: Hash
+  readonly to: Hash | null
+  readonly kind: EdgeKind
 }
 
 /**
@@ -112,10 +112,10 @@ export interface DepEdge {
  * (an EPIC-7 facet), so `edges` is the only load-bearing addition beyond the three rooted hierarchies.
  */
 export interface Axes {
-  readonly spatial: IndexNode;
-  readonly territory: IndexNode;
-  readonly dependency: IndexNode;
-  readonly edges: readonly DepEdge[];
+  readonly spatial: IndexNode
+  readonly territory: IndexNode
+  readonly dependency: IndexNode
+  readonly edges: readonly DepEdge[]
 }
 
 /**
@@ -124,9 +124,9 @@ export interface Axes {
  * Owner DEFINE 2026-07-18 (minimal — no derived `level` field; `IndexNode.level` already carries it).
  */
 export interface FileTree {
-  readonly path: string;
-  readonly children: readonly FileTree[];
-  readonly content?: string;
+  readonly path: string
+  readonly children: readonly FileTree[]
+  readonly content?: string
 }
 
 /**
@@ -136,17 +136,17 @@ export interface FileTree {
  * cross-language/FFI target — SCN-INDEX-3e-1). Owner DEFINE 2026-07-18: occurrences subset, not the
  * full SCIP schema.
  */
-export type ScipSymbolRole = 'definition' | 'reference';
+export type ScipSymbolRole = "definition" | "reference"
 export interface ScipOccurrence {
-  readonly symbol: string;
-  readonly role: ScipSymbolRole;
+  readonly symbol: string
+  readonly role: ScipSymbolRole
 }
 export interface ScipDocument {
-  readonly relativePath: string;
-  readonly occurrences: readonly ScipOccurrence[];
+  readonly relativePath: string
+  readonly occurrences: readonly ScipOccurrence[]
 }
 export interface ScipOutput {
-  readonly documents: readonly ScipDocument[];
+  readonly documents: readonly ScipDocument[]
 }
 
 /**
@@ -160,8 +160,8 @@ export interface ScipOutput {
 export interface IndexApi extends ResolveApi, RollupApi, CasIndexApi, RetrievalApi {
   /** The axes this single index cross-indexes on — ≥3 (`spatial`, `territory`, `dependency`),
    *  each object stored once (INDEX-10). (atlas-index:174-175) */
-  readonly axes: readonly Axis[];
+  readonly axes: readonly Axis[]
   /** Which axis buckets changed, structure vs state (INDEX-12). Reused verbatim from `FoldApi`.
    *  (atlas-index:212) */
-  delta: FoldApi['delta'];
+  delta: FoldApi["delta"]
 }

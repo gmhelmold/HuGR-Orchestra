@@ -31,10 +31,10 @@ invariant: RETR-8: atlas-budget renders the per-kind hits/hitRate calibration le
 
 ## Exit codes
 
-| code | meaning |
-| --- | --- |
-| `0` | the calibration ledger was assembled (the honest-zero feed renders fine — never a throw) |
-| `1` | an uncomposed runtime — the composition root failed to stand up, never a throw |
+| code | meaning                                                                                  |
+| ---- | ---------------------------------------------------------------------------------------- |
+| `0`  | the calibration ledger was assembled (the honest-zero feed renders fine — never a throw) |
+| `1`  | an uncomposed runtime — the composition root failed to stand up, never a throw           |
 
 There is no `2` (rejected) outcome: this door opens no governed token and persists nothing.
 

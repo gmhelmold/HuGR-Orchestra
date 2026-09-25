@@ -42,7 +42,7 @@ invariant: TOOLS-8: reviewable drift, block on any semantic flip
 
 That is the whole CLI output. **The exit code is the entire signal on this transport** — the CLI renders no
 `data:` block for reconcile, so the drifted set, the mechanical/semantic split and the counts are not shown.
-To find out *what* drifted, use [`atlas doctor why <nodeKey>`](./doctor.md), or call the `atlas-reconcile`
+To find out _what_ drifted, use [`atlas doctor why <nodeKey>`](./doctor.md), or call the `atlas-reconcile`
 tool over MCP, which returns the full `ReconcileOut` as JSON:
 
 ```json
@@ -55,11 +55,11 @@ object with the hashes elided.)
 
 ## Exit codes
 
-| code | meaning |
-| --- | --- |
-| `0` | no semantic flip — the merge is not blocked |
-| `1` | usage error — missing `<mergeBase>`, or the runtime is not composed |
-| `2` | at least one semantic flip. Re-author before merging |
+| code | meaning                                                             |
+| ---- | ------------------------------------------------------------------- |
+| `0`  | no semantic flip — the merge is not blocked                         |
+| `1`  | usage error — missing `<mergeBase>`, or the runtime is not composed |
+| `2`  | at least one semantic flip. Re-author before merging                |
 
 Note the shape of the `2`: reconcile's refusal is carried on the verdict `data` as a non-zero `exitCode`,
 which `deriveStatus` (`packages/cli/src/map.ts`) maps to `rejected`. That is why the block prints
@@ -75,7 +75,7 @@ which `deriveStatus` (`packages/cli/src/map.ts`) maps to `rejected`. That is why
 ## Things worth knowing before you rely on it
 
 - **It does not validate `<mergeBase>`.** Measured: `atlas reconcile deadbeef`, `atlas reconcile
-  not-a-sha-at-all` and `atlas reconcile ""` all exit `0` with `status: ok` in a repository that has real
+not-a-sha-at-all` and `atlas reconcile ""` all exit `0` with `status: ok` in a repository that has real
   drift against its actual base. An unresolvable rev yields an empty drift set, and an empty drift set is
   indistinguishable from a clean one. If you wire this into CI, resolve the merge base yourself first.
 - **`--accept-reground` is unobservable from the CLI.** It is parsed, marshalled and passed to the door,
@@ -93,7 +93,7 @@ The MCP tool takes the option in an `options` bag — the same shape the CLI's `
 into, and the same shape the frozen leg signature `reconcile(mergeBase, options?)` names:
 
 ```json
-{"mergeBase":"20ff947…","options":{"acceptReground":true}}
+{ "mergeBase": "20ff947…", "options": { "acceptReground": true } }
 ```
 
 `{"mergeBase":…,"acceptReground":true}` — the option at the TOP level — is **refused** as `malformed-args`.

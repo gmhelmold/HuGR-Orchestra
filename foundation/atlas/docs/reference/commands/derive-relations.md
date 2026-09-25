@@ -2,14 +2,14 @@
 
 Derive **proven `depends-on` relations** from the code index and persist them into governed knowledge. It is
 the shipped entrypoint for the #99 sound-relation MECHANICAL PROJECTION (ADR-0018): for every resolved
-cross-unit reference the index witnesses — a source file under unit `A` referencing a symbol *defined* in a
+cross-unit reference the index witnesses — a source file under unit `A` referencing a symbol _defined_ in a
 different file `B` — it emits a directed `A --depends-on--> B` relation, **sealed `proven`**, carrying a
-re-runnable witness. No model is ever consulted: the derivation *is* the proof, so the pass is 0-false by
+re-runnable witness. No model is ever consulted: the derivation _is_ the proof, so the pass is 0-false by
 construction and model-independent (the generator and the verifier are the one deterministic index).
 
 This page describes the **CLI** command `atlas derive-relations`. There is **no `atlas-derive-relations` MCP
 tool**, and there is no new write door: `WRITE_PATHS` is still `{atlas-emit, atlas-link}` and the governance
-surface is still five tools. A derive pass is an *ordinary use* of `atlas-emit` (ADR-0008), exactly as
+surface is still five tools. A derive pass is an _ordinary use_ of `atlas-emit` (ADR-0008), exactly as
 [`promote`](./promote.md) is — so it persists through the same governed door, under every gate that door
 applies, and an MCP client cannot run it.
 
@@ -33,7 +33,7 @@ atlas derive-relations
    `definition` occurrence, and each caller document that references it from a **different** file. Same-file
    references (intra-unit) and external / `node_modules` targets are excluded; N references `A→B` collapse to
    one edge (`relation-derive.ts`).
-2. **Prove + seal** each edge through the sound relation oracle: it binds *both* endpoint files to the
+2. **Prove + seal** each edge through the sound relation oracle: it binds _both_ endpoint files to the
    witnessed edge (endpoint `A` a real referrer of the target, endpoint `B` its definer) and admits a
    `proven`-sealed relation with its `RelationWitness`. Only `depends-on` is provable — a `calls` relation can
    never obtain a proven seal (SCIP carries no call-role occurrence).
@@ -63,13 +63,13 @@ rather than rounding to a success.
 
 ## Exit codes
 
-| code | meaning |
-| --- | --- |
-| `0` | every proven relation the projection derived was made durable — including the honest empty case (an index with no resolved cross-unit edges derives nothing, persists nothing) |
-| `1` | the runtime is not composed. Not reachable from the shipped binary; it is the injected-handler seam tests use |
-| `2` | a **governed refusal**: at least one proven relation a gate declined, **or** the over-budget fail-loud (the resolved-edge count exceeded the ceiling, so nothing was derived) |
+| code | meaning                                                                                                                                                                        |
+| ---- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `0`  | every proven relation the projection derived was made durable — including the honest empty case (an index with no resolved cross-unit edges derives nothing, persists nothing) |
+| `1`  | the runtime is not composed. Not reachable from the shipped binary; it is the injected-handler seam tests use                                                                  |
+| `2`  | a **governed refusal**: at least one proven relation a gate declined, **or** the over-budget fail-loud (the resolved-edge count exceeded the ceiling, so nothing was derived)  |
 
-`2` is the code that matters: the invocation was well-formed and a *gate* said no. Every `2` names the row and
+`2` is the code that matters: the invocation was well-formed and a _gate_ said no. Every `2` names the row and
 the reason, or (for the budget breach) the count that tripped the ceiling.
 
 ## The exhaustive budget — fail-loud, never truncated

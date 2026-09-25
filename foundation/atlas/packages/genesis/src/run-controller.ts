@@ -12,8 +12,8 @@
 // budget and writes the ledger. It is also where concurrency (task #158) is contained — which is why nothing
 // below mentions it beyond re-exporting the vocabulary.
 
-import type { Delta } from '@atlas/index';
-import { defaultEncoder } from '@atlas/kernel';
+import type { Delta } from "@atlas/index"
+import { defaultEncoder } from "@atlas/kernel"
 import type {
   Candidate,
   Fact,
@@ -23,15 +23,15 @@ import type {
   RunCoverage,
   SiteOutcome,
   Skeleton,
-} from './types.js';
-import { NO_FRONTIER } from './coverage.js';
-import { drive, type DrivePorts, type DriveResult } from './drive.js';
+} from "./types.js"
+import { NO_FRONTIER } from "./coverage.js"
+import { drive, type DrivePorts, type DriveResult } from "./drive.js"
 
 /** [#210] The unwired-model sentinel. Kept IN SYNC BY VALUE with `NO_MODEL_IDENTITY` (`mine-proposer.ts`,
  *  the cli layer) — NOT imported: the cli sits ABOVE genesis in the ARCH layering (this file's own header:
  *  "imports DOWNWARD only"), so importing it here would invert the direction the constitution enforces.
  *  Drift between the two literals is a cross-package test's job to catch, never a runtime dependency's. */
-export const NO_MODEL_IDENTITY = 'unwired:no-model-configured' as const;
+export const NO_MODEL_IDENTITY = "unwired:no-model-configured" as const
 
 /**
  * [#209] Fold this run's answer-provenance receipts (`answerRef`s of the admitted facts that carry one,
@@ -45,15 +45,18 @@ export const NO_MODEL_IDENTITY = 'unwired:no-model-configured' as const;
  * never "this run is exempt from being asked".
  */
 function answersWitness(receipts: readonly string[] | undefined): { answersStored: number; answersDigest: string } {
-  const sorted = [...(receipts ?? [])].sort();
-  return { answersStored: sorted.length, answersDigest: String(defaultEncoder.hash(new TextEncoder().encode(sorted.join('\n')))) };
+  const sorted = [...(receipts ?? [])].sort()
+  return {
+    answersStored: sorted.length,
+    answersDigest: String(defaultEncoder.hash(new TextEncoder().encode(sorted.join("\n")))),
+  }
 }
 
 // The batching vocabulary, re-exported so the package surface is unchanged by the file split (the barrel
 // re-exports this module). `POOL_WIDTH` has a production consumer outside this package: the `mine` driver
 // sizes its worker pool from it, so the batch width and the pool width cannot drift apart.
-export { POOL_WIDTH } from './drive.js';
-export type { VisitAttempt, DrivePorts, DriveResult } from './drive.js';
+export { POOL_WIDTH } from "./drive.js"
+export type { VisitAttempt, DrivePorts, DriveResult } from "./drive.js"
 
 export interface GenesisApi {
   /** The TOTAL composition-root entry (GEN-8): `atlas-genesis <repo> --at <rev> [--budget N]
@@ -65,46 +68,46 @@ export interface GenesisApi {
    *  [FLAG — arg carriers] the surface line (atlas-genesis:184) types none of the args; `repo`/`rev`
    *  transcribed as `string` (mirroring `scan`/`mine`; `rev` deliberately a malformable raw string, not a
    *  branded `Hash`), `budget?` as the `GenesisBudget` policy, `scope?` as a subtree path `string`. */
-  genesis(repo: string, rev: string, budget?: GenesisBudget, scope?: string): GenesisReport;
+  genesis(repo: string, rev: string, budget?: GenesisBudget, scope?: string): GenesisReport
 
   /** Resume an interrupted run from the last completed ranked site (GEN-8). Consumes the `resumeToken`
    *  from a prior partial report and continues the deterministic rank-ordered spend. TOTAL — never throws. */
-  resume(token: ResumeToken): GenesisReport;
+  resume(token: ResumeToken): GenesisReport
 }
 
 export interface HandoffApi {
   /** S4 one-time handoff (GEN-7). Ends the one-time seeding and hands control to born-from-work (KNOW-13).
    *  NOT a standing sweeper. Total — never throws. */
-  handoff(): void;
+  handoff(): void
 
   /** The bounded change set since a `prior` skeleton (INDEX-12 / GEN-7). Re-indexes ONLY the changed
    *  buckets, never `N` — the `Delta` (`{idChanged, stateChanged, changedBuckets}`) reused verbatim from
    *  @atlas/index. Bounds the incremental re-run below. */
-  changed(prior: Skeleton, rev: string): Delta;
+  changed(prior: Skeleton, rev: string): Delta
 
   /** INCREMENTAL idempotent re-run (GEN-7). Re-indexes only the changed files (via `changed`) and UPSERTS
    *  already-grounded facts by id (0 duplicates, KNOW-15); a second run over an unchanged rev is a no-op
    *  on the grounded set. Total — a malformed rev ⇒ a partial report, never a throw (GEN-8). */
-  rerun(repo: string, rev: string, prior: Skeleton): GenesisReport;
+  rerun(repo: string, rev: string, prior: Skeleton): GenesisReport
 }
 
 /** The GEN-2 hard-ceiling cap: default budget is `min(frontier_size, 200)` sites/run (atlas-genesis:198). */
-export const CEILING_CAP = 200 as const;
+export const CEILING_CAP = 200 as const
 
 /** All-off deepening (GEN-13/14 single-pass baseline) — this facet never opens a deepening loop (EPIC-31). */
-const LOOPS_OFF = { enabled: false, maxDepth: 0, epsilon: 0 } as const;
+const LOOPS_OFF = { enabled: false, maxDepth: 0, epsilon: 0 } as const
 
 /** A cost policy at a CALLER-CHOSEN site ceiling, single-pass (all deepening loops off — the GEN-13/14
  *  baseline). The SAME shape `defaultBudget` returns; only the ceiling is the caller's, which is why it is
  *  the ONE source of that shape (`defaultBudget` is `cappedBudget(min(frontier, CEILING_CAP))`). The knob a
  *  metered `atlas mine` run reaches through `ATLAS_MINE_BUDGET` to cap real spend below the 200 default. */
 export function cappedBudget(ceiling: number): GenesisBudget {
-  return { ceiling, deepening: { review: LOOPS_OFF, enrich: LOOPS_OFF, expand: LOOPS_OFF } };
+  return { ceiling, deepening: { review: LOOPS_OFF, enrich: LOOPS_OFF, expand: LOOPS_OFF } }
 }
 
 /** The GEN-2 default cost policy when the caller passes no `--budget`: `min(frontier_size, 200)`, loops off. */
 export function defaultBudget(frontierSize: number): GenesisBudget {
-  return cappedBudget(Math.min(frontierSize, CEILING_CAP));
+  return cappedBudget(Math.min(frontierSize, CEILING_CAP))
 }
 
 /**
@@ -113,9 +116,9 @@ export function defaultBudget(frontierSize: number): GenesisBudget {
  * empty), `skeleton` the partial substrate. Never throws by contract (GEN-8); the controller guards it too.
  */
 export interface Plan {
-  readonly malformed: boolean;
-  readonly skeleton?: Skeleton;
-  readonly sites: readonly Candidate[]; // deterministic GEN-2/11 rank order (may be [] / partial on malformed)
+  readonly malformed: boolean
+  readonly skeleton?: Skeleton
+  readonly sites: readonly Candidate[] // deterministic GEN-2/11 rank order (may be [] / partial on malformed)
 }
 
 /**
@@ -134,15 +137,15 @@ export interface Plan {
  * before the pass, never per worker" holds because nothing in the loop is ABLE to violate it.
  */
 export interface ControllerDeps extends DrivePorts {
-  plan(repo: string, rev: string, scope?: string): Plan;
-  changed(prior: Skeleton, rev: string): Delta;
-  handoffTo(): void;
+  plan(repo: string, rev: string, scope?: string): Plan
+  changed(prior: Skeleton, rev: string): Delta
+  handoffTo(): void
   /** [#210] The model identity that produced this run's answers (`captureModelIdentity`, mine-proposer.ts,
    *  ADR-0011) — THREADED, never re-derived here: resolving it (a `--version` probe against a configured
    *  model command) is a caller-side concern this facet only reports. ABSENT (an older/injected caller that
    *  has not wired it) ⇒ the controller stamps its own copy of the unwired sentinel (`NO_MODEL_IDENTITY`
    *  above) — never a fabricated identity for a run that may in fact have had a real model wired. */
-  readonly modelIdentity?: string;
+  readonly modelIdentity?: string
   /** [#209] OPTIONAL: the answer-provenance receipts (`answerRef`s, #195 leg b) of every fact ADMITTED SO
    *  FAR in this run — cumulative across a `resume`/`rerun` leg the same way `upsert`'s own grounded set is
    *  (KNOW-15 idempotent merge), so one call after a drive leg reports the WHOLE run's stored receipts, not
@@ -150,28 +153,28 @@ export interface ControllerDeps extends DrivePorts {
    *  this returns — fail-closed, never fabricated. ABSENT PORT ⇒ the report honestly witnesses zero
    *  receipts (`answersStored: 0`, the empty-set digest) — "this run recorded no receipts", never "this run
    *  stored no answers". See `answersWitness` above and `docs/design/195-answer-provenance-contract.md §3`. */
-  answerReceipts?(): readonly string[];
+  answerReceipts?(): readonly string[]
 }
 
 /** The site's axis bucket (its file) — the unit the INDEX-12 `changedBuckets` delta names (GEN-7c). */
 export function bucketOf(cand: Candidate): string {
-  const parts = cand.site.qualifiedPath.split('::');
-  return parts[0] ?? cand.site.qualifiedPath;
+  const parts = cand.site.qualifiedPath.split("::")
+  return parts[0] ?? cand.site.qualifiedPath
 }
 
 interface PendingRun {
-  readonly sites: readonly Candidate[];
-  readonly seeded: readonly Fact[];
-  readonly llmCalls: number;
-  readonly budgetSpent: number;
+  readonly sites: readonly Candidate[]
+  readonly seeded: readonly Fact[]
+  readonly llmCalls: number
+  readonly budgetSpent: number
   /** Carried for the same reason `llmCalls` is: a resumed run's report describes the WHOLE run, and spend
    *  that stopped being counted at the interruption would understate what the operator was billed. */
-  readonly modelCalls: number;
-  readonly budget: GenesisBudget;
+  readonly modelCalls: number
+  readonly budget: GenesisBudget
   /** The ledger SO FAR. Carried across `resume` for the same reason `seeded` is: a resumed run's report
    *  describes the WHOLE run, so its coverage must account for the sites the first leg already drove —
    *  otherwise the site set would appear to shrink at exactly the moment the run was interrupted. */
-  readonly outcomes: readonly SiteOutcome[];
+  readonly outcomes: readonly SiteOutcome[]
 }
 
 /** An honest empty/partial report — the total degrade shape (GEN-8b/8c). The ledger says `unavailable`:
@@ -188,7 +191,7 @@ function emptyReport(token: ResumeToken | undefined, modelIdentity: string): Gen
     ...answersWitness(undefined), // the same reason #210/#209's fields are stamped on a total-degrade report too.
     coverage: NO_FRONTIER,
     ...(token ? { resumeToken: token } : {}),
-  };
+  }
 }
 
 /**
@@ -208,8 +211,8 @@ function toReport(
   modelIdentity: string,
   answerReceipts: readonly string[] | undefined,
 ): GenesisReport {
-  const partial = res.interrupted || malformed;
-  const coverage: RunCoverage = { frontier: 'planned', planned, sites: [...prior, ...res.outcomes] };
+  const partial = res.interrupted || malformed
+  const coverage: RunCoverage = { frontier: "planned", planned, sites: [...prior, ...res.outcomes] }
   return {
     seeded: res.seeded,
     ratified: [],
@@ -221,7 +224,7 @@ function toReport(
     ...answersWitness(answerReceipts), // [#209] answersStored + answersDigest — the "issued vs stored" witness
     coverage,
     ...(partial ? { resumeToken: { lastCompletedRank: res.lastCompletedRank } } : {}),
-  };
+  }
 }
 
 /**
@@ -231,13 +234,13 @@ function toReport(
  * exclusions), never a change to the frozen contract.
  */
 export function makeRunController(deps: ControllerDeps): GenesisApi & HandoffApi {
-  let pending: PendingRun | null = null;
+  let pending: PendingRun | null = null
   // [#210] Read once per call, not cached across the controller's lifetime: `deps.modelIdentity` may be a
   // getter over a config the caller re-resolves (e.g. a probe result), and this facet only reports it.
-  const identity = (): string => deps.modelIdentity ?? NO_MODEL_IDENTITY;
+  const identity = (): string => deps.modelIdentity ?? NO_MODEL_IDENTITY
 
   const runFresh = (plan: Plan, budget: GenesisBudget): GenesisReport => {
-    const res = drive(plan.sites, budget, -1, 0, 0, 0, [], deps);
+    const res = drive(plan.sites, budget, -1, 0, 0, 0, [], deps)
     pending = {
       sites: plan.sites,
       seeded: res.seeded,
@@ -252,31 +255,31 @@ export function makeRunController(deps: ControllerDeps): GenesisApi & HandoffApi
       // actually reached genuinely skips the sites in between, and dropping their stale rows here is what
       // makes that resumed run's ledger refuse to close instead of closing over sites nobody visited.
       outcomes: res.outcomes.filter((o) => o.rank <= res.lastCompletedRank),
-    };
-    const report = toReport(res, plan.malformed, plan.sites.length, [], identity(), deps.answerReceipts?.());
+    }
+    const report = toReport(res, plan.malformed, plan.sites.length, [], identity(), deps.answerReceipts?.())
     // S4 hand-off (GEN-7a) only on a COMPLETE run — a partial/interrupted or malformed run is not done.
-    if (!res.interrupted && !plan.malformed) deps.handoffTo();
-    return report;
-  };
+    if (!res.interrupted && !plan.malformed) deps.handoffTo()
+    return report
+  }
 
   const genesis = (repo: string, rev: string, budget?: GenesisBudget, scope?: string): GenesisReport => {
     try {
-      const plan = deps.plan(repo, rev, scope);
-      const b = budget ?? defaultBudget(plan.sites.length);
-      return runFresh(plan, b);
+      const plan = deps.plan(repo, rev, scope)
+      const b = budget ?? defaultBudget(plan.sites.length)
+      return runFresh(plan, b)
     } catch {
       // GEN-8c: a malformed repo/rev never throws — honest empty skeleton + resume cursor.
-      pending = null;
-      return emptyReport({ lastCompletedRank: -1 }, identity());
+      pending = null
+      return emptyReport({ lastCompletedRank: -1 }, identity())
     }
-  };
+  }
 
   const resume = (token: ResumeToken): GenesisReport => {
     try {
       // No persisted run for this cursor — an honest empty partial, never a throw (GEN-8c).
-      if (!pending) return emptyReport(token, identity());
+      if (!pending) return emptyReport(token, identity())
       // GEN-8a: continue past the last completed site — the done sites are NOT re-visited.
-      const remaining = pending.sites.filter((s) => s.rank > token.lastCompletedRank);
+      const remaining = pending.sites.filter((s) => s.rank > token.lastCompletedRank)
       const res = drive(
         remaining,
         pending.budget,
@@ -286,12 +289,12 @@ export function makeRunController(deps: ControllerDeps): GenesisApi & HandoffApi
         pending.modelCalls,
         pending.seeded,
         deps,
-      );
-      const planned = pending.sites.length;
+      )
+      const planned = pending.sites.length
       // The carried rows are cut to the SAME cursor `remaining` was cut to. Read off the TOKEN, not off
       // `pending`: resuming twice from one token re-drives the same sites, and a carried row for a site
       // about to be re-driven would land in the ledger twice.
-      const prior = pending.outcomes.filter((o) => o.rank <= token.lastCompletedRank);
+      const prior = pending.outcomes.filter((o) => o.rank <= token.lastCompletedRank)
       pending = {
         ...pending,
         seeded: res.seeded,
@@ -299,50 +302,50 @@ export function makeRunController(deps: ControllerDeps): GenesisApi & HandoffApi
         budgetSpent: res.budgetSpent,
         modelCalls: res.modelCalls,
         outcomes: [...prior, ...res.outcomes.filter((o) => o.rank <= res.lastCompletedRank)],
-      };
+      }
       // The resumed report's ledger is the WHOLE run's: the rows the first leg completed, plus this leg's.
       // `planned` stays the size of the original frontier, so the set the reconciliation closes over is the
       // one the run was actually handed — not the remainder it happened to be restarted with.
-      const report = toReport(res, false, planned, prior, identity(), deps.answerReceipts?.());
-      if (!res.interrupted) deps.handoffTo(); // the resumed run completed ⇒ hand off (GEN-7a)
-      return report;
+      const report = toReport(res, false, planned, prior, identity(), deps.answerReceipts?.())
+      if (!res.interrupted) deps.handoffTo() // the resumed run completed ⇒ hand off (GEN-7a)
+      return report
     } catch {
-      return emptyReport(token, identity());
+      return emptyReport(token, identity())
     }
-  };
+  }
 
   // ── HandoffApi ─────────────────────────────────────────────────────────────────────────────────────
   const handoff = (): void => {
     // S4 one-time hand-off to born-from-work (GEN-7a). NOT a standing sweeper — one call, then return.
-    deps.handoffTo();
-  };
+    deps.handoffTo()
+  }
 
-  const changed = (prior: Skeleton, rev: string): Delta => deps.changed(prior, rev);
+  const changed = (prior: Skeleton, rev: string): Delta => deps.changed(prior, rev)
 
   const rerun = (repo: string, rev: string, prior: Skeleton): GenesisReport => {
     try {
-      const plan = deps.plan(repo, rev);
-      if (plan.malformed) return emptyReport({ lastCompletedRank: -1 }, identity()); // total (GEN-8c)
+      const plan = deps.plan(repo, rev)
+      if (plan.malformed) return emptyReport({ lastCompletedRank: -1 }, identity()) // total (GEN-8c)
       // GEN-7c INCREMENTAL: bound the re-index to ONLY the buckets the INDEX-12 delta names.
-      const delta = deps.changed(prior, rev);
-      const buckets = new Set(delta.changedBuckets);
-      const incremental = plan.sites.filter((s) => buckets.has(bucketOf(s)));
-      const res = drive(incremental, defaultBudget(incremental.length), -1, 0, 0, 0, [], deps);
+      const delta = deps.changed(prior, rev)
+      const buckets = new Set(delta.changedBuckets)
+      const incremental = plan.sites.filter((s) => buckets.has(bucketOf(s)))
+      const res = drive(incremental, defaultBudget(incremental.length), -1, 0, 0, 0, [], deps)
       // `planned` is the INCREMENTAL set, not `plan.sites`: an incremental re-run is scoped to the buckets
       // the INDEX-12 delta names, and the sites outside it were not dropped — they were never in scope.
       // Charging them to this run's coverage would report a gap that does not exist.
-      const report = toReport(res, false, incremental.length, [], identity(), deps.answerReceipts?.());
+      const report = toReport(res, false, incremental.length, [], identity(), deps.answerReceipts?.())
       // Control returns to born-from-work after the incremental pass (GEN-7a); writes were idempotent (7b).
-      if (!res.interrupted) deps.handoffTo();
-      return report;
+      if (!res.interrupted) deps.handoffTo()
+      return report
     } catch {
-      return emptyReport({ lastCompletedRank: -1 }, identity());
+      return emptyReport({ lastCompletedRank: -1 }, identity())
     }
-  };
+  }
 
-  return { genesis, resume, handoff, changed, rerun };
+  return { genesis, resume, handoff, changed, rerun }
 }
 
 // differential-vs-oracle (compile-time): the controller conforms to the frozen GenesisApi + HandoffApi.
-const _controller: (deps: ControllerDeps) => GenesisApi & HandoffApi = makeRunController;
-void _controller;
+const _controller: (deps: ControllerDeps) => GenesisApi & HandoffApi = makeRunController
+void _controller

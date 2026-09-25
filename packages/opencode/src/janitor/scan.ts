@@ -5,17 +5,7 @@ import { AppProcess } from "@opencode-ai/core/process"
 import { Thresholds, type Severity } from "./thresholds"
 
 // Read-only allowlist. No rm/kill/prune here. Actions happen only via explicit UI click.
-const Allowlist = new Set([
-  "ps",
-  "df",
-  "du",
-  "lsof",
-  "docker",
-  "git",
-  "vm_stat",
-  "memory_pressure",
-  "powershell.exe",
-])
+const Allowlist = new Set(["ps", "df", "du", "lsof", "docker", "git", "vm_stat", "memory_pressure", "powershell.exe"])
 const ScannerTimeout = Duration.seconds(5)
 const ScannerOutputBytes = 256 * 1024
 const WindowsDiskScript =
@@ -231,16 +221,14 @@ const readDf = Effect.fn("Janitor.readDf")(function* () {
         {
           kind: "disk",
           severity,
-           summary: `Disco ${parsed.mount} acima do limite`,
+          summary: `Disco ${parsed.mount} acima do limite`,
           evidence: `${parsed.mount} ${Math.round(parsed.use * 100)}%`,
           suggestion: "Verificar volumes e caches grandes.",
         } satisfies Finding,
       ]
     })
   }
-  const text = yield* runAllowed("df", ["-k", "-P"]).pipe(
-    Effect.catch(() => Effect.succeed(null)),
-  )
+  const text = yield* runAllowed("df", ["-k", "-P"]).pipe(Effect.catch(() => Effect.succeed(null)))
   if (text === null) return [scannerUnavailable("df")]
   const rows = text
     .split("\n")
@@ -251,18 +239,18 @@ const readDf = Effect.fn("Janitor.readDf")(function* () {
     })
   if (rows.length === 0) return [scannerUnavailable("df output")]
   return rows.flatMap(({ line, parsed }) => {
-      const severity = diskSeverity(parsed.use)
-      if (severity === "ok" || !isUsefulMount(parsed.mount)) return []
-      return [
-        {
-          kind: "disk",
-          severity,
-           summary: `Disco ${parsed.mount} acima do limite`,
-          evidence: line.trim(),
-          suggestion: "Ver culpados: docker volumes, target/, node_modules órfão, cache.",
-        } satisfies Finding,
-      ]
-    })
+    const severity = diskSeverity(parsed.use)
+    if (severity === "ok" || !isUsefulMount(parsed.mount)) return []
+    return [
+      {
+        kind: "disk",
+        severity,
+        summary: `Disco ${parsed.mount} acima do limite`,
+        evidence: line.trim(),
+        suggestion: "Ver culpados: docker volumes, target/, node_modules órfão, cache.",
+      } satisfies Finding,
+    ]
+  })
 })
 
 const readProcesses = Effect.fn("Janitor.readProcesses")(function* () {
@@ -280,7 +268,7 @@ const readProcesses = Effect.fn("Janitor.readProcesses")(function* () {
           {
             kind: "process",
             severity: hot ? ("urgent" as const) : ("attention" as const),
-             summary: `${parsed.comm.split("/").at(-1) ?? parsed.comm} pid ${parsed.pid}`,
+            summary: `${parsed.comm.split("/").at(-1) ?? parsed.comm} pid ${parsed.pid}`,
             evidence: parsed.evidence,
             suggestion: "Investigar loop/leak antes de matar.",
           } satisfies Finding,
@@ -292,12 +280,10 @@ const readProcesses = Effect.fn("Janitor.readProcesses")(function* () {
     Effect.catch(() => Effect.succeed(null)),
   )
   if (text === null) return [scannerUnavailable("ps")]
-  const rows = text
-    .split("\n")
-    .flatMap((line) => {
-      const parsed = parsePsLine(line)
-      return parsed ? [{ line, parsed }] : []
-    })
+  const rows = text.split("\n").flatMap((line) => {
+    const parsed = parsePsLine(line)
+    return parsed ? [{ line, parsed }] : []
+  })
   if (rows.length === 0) return [scannerUnavailable("ps output")]
   return rows
     .flatMap(({ line, parsed }) => {
@@ -330,7 +316,7 @@ const readPorts = Effect.fn("Janitor.readPorts")(function* () {
       {
         kind: "port",
         severity: "attention" as const,
-         summary: "Dev server preso em porta conhecida",
+        summary: "Dev server preso em porta conhecida",
         evidence: dev.map((row) => row.evidence).join("\n"),
         suggestion: "Liberar porta após confirmar dono.",
       } satisfies Finding,
@@ -340,7 +326,10 @@ const readPorts = Effect.fn("Janitor.readPorts")(function* () {
     Effect.catch(() => Effect.succeed(null)),
   )
   if (text === null) return [scannerUnavailable("lsof")]
-  const lines = text.split("\n").slice(1).filter((line) => line.trim())
+  const lines = text
+    .split("\n")
+    .slice(1)
+    .filter((line) => line.trim())
   if (lines.length === 0) return []
   const dev = lines.filter((line) => /:(3000|5173|8000|8080|4000)\b/.test(line)).slice(0, 10)
   if (dev.length === 0) return []
@@ -348,7 +337,7 @@ const readPorts = Effect.fn("Janitor.readPorts")(function* () {
     {
       kind: "port",
       severity: "attention" as const,
-       summary: "Dev server preso em porta conhecida",
+      summary: "Dev server preso em porta conhecida",
       evidence: dev.join("\n"),
       suggestion: "Liberar porta após confirmar dono.",
     } satisfies Finding,

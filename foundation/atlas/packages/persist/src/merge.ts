@@ -15,20 +15,20 @@
 // semantics and computes NO hash outside the kernel seam (card exclusion: the fold/head rule is owned by
 // WP-1.3-b.KERNEL). No clock/network/LLM/mutable-cache is read in the merge path.
 
-import { lineMerge, merge, parseJsonl, toJsonl } from '@atlas/kernel';
-import type { Event, EventLog } from '@atlas/kernel';
+import { lineMerge, merge, parseJsonl, toJsonl } from "@atlas/kernel"
+import type { Event, EventLog } from "@atlas/kernel"
 
 /** The tracked atlas-log path the driver is attached to via `.gitattributes` (PERSIST-11-a/f). */
-export const ATLAS_LOG_PATH = '.atlas/log.jsonl';
+export const ATLAS_LOG_PATH = ".atlas/log.jsonl"
 /** The git merge-driver name registered in `.git/config` and referenced from `.gitattributes`. */
-export const MERGE_DRIVER_NAME = 'orchestra-atlas';
+export const MERGE_DRIVER_NAME = "orchestra-atlas"
 
 /** Lift a flat event stream into a content-keyed set (`EventLog`), first-write-wins on a shared id. The
  *  set-union algebra itself is the kernel's — this is only the array→set adapter at the persist/git seam. */
 function asLog(events: Iterable<Event>): EventLog {
-  const out = new Map<Event['id'], Event>();
-  for (const e of events) if (!out.has(e.id)) out.set(e.id, e);
-  return out;
+  const out = new Map<Event["id"], Event>()
+  for (const e of events) if (!out.has(e.id)) out.set(e.id, e)
+  return out
 }
 
 /**
@@ -42,8 +42,8 @@ function asLog(events: Iterable<Event>): EventLog {
  * commutative on the keyset, so `mergeAtlas(a,b)` and `mergeAtlas(b,a)` fold to byte-identical AtlasState.
  */
 export function mergeAtlas(ours: EventLog, theirs: EventLog, base?: EventLog): EventLog {
-  const unioned = merge(ours, theirs);
-  return base === undefined ? unioned : merge(unioned, base);
+  const unioned = merge(ours, theirs)
+  return base === undefined ? unioned : merge(unioned, base)
 }
 
 /**
@@ -57,8 +57,8 @@ export function mergeDriver(ours: string, theirs: string, base?: string): string
     asLog(parseJsonl(ours)),
     asLog(parseJsonl(theirs)),
     base === undefined ? undefined : asLog(parseJsonl(base)),
-  );
-  return toJsonl(merged);
+  )
+  return toJsonl(merged)
 }
 
 /**
@@ -68,32 +68,32 @@ export function mergeDriver(ours: string, theirs: string, base?: string): string
  * `mergeAtlas` fold — worst case a harmless duplicate line the fold dedups by id, 0 events lost or corrupted.
  */
 export function degradeMerge(ours: string, theirs: string): EventLog {
-  return asLog(lineMerge(ours, theirs));
+  return asLog(lineMerge(ours, theirs))
 }
 
 /** The `.gitattributes` entry that attaches the driver to the atlas-log path (`<atlas-log> merge=<name>`). */
 export function gitattributesEntry(): string {
-  return `${ATLAS_LOG_PATH} merge=${MERGE_DRIVER_NAME}`;
+  return `${ATLAS_LOG_PATH} merge=${MERGE_DRIVER_NAME}`
 }
 
 /** The `.git/config` merge-driver registration — the `merge.<name>.driver` key and its invocation. `%O`/`%A`/
  *  `%B` are git's base/ours/theirs placeholders the driver body consumes. */
 export interface DriverRegistration {
-  readonly key: string;
-  readonly value: string;
+  readonly key: string
+  readonly value: string
 }
 export function mergeDriverRegistration(): DriverRegistration {
   return {
     key: `merge.${MERGE_DRIVER_NAME}.driver`,
     value: `${MERGE_DRIVER_NAME}-merge %O %A %B`,
-  };
+  }
 }
 
 /** The self-install result: the `.gitattributes` entry + the `.git/config` driver registration a setup hook
  *  applies on init/clone (the driver lives in `.git/config`, which does not clone — REQ-PERSIST-11-f). */
 export interface SetupResult {
-  readonly gitattributes: string;
-  readonly config: DriverRegistration;
+  readonly gitattributes: string
+  readonly config: DriverRegistration
 }
 
 /**
@@ -103,5 +103,5 @@ export interface SetupResult {
  * caller's; this returns exactly what must be registered.
  */
 export function setupHook(): SetupResult {
-  return { gitattributes: gitattributesEntry(), config: mergeDriverRegistration() };
+  return { gitattributes: gitattributesEntry(), config: mergeDriverRegistration() }
 }

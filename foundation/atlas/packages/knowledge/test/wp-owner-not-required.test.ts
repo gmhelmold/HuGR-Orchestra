@@ -27,41 +27,41 @@
 //   1. The coercion table for `isScope` — the surviving runtime SHAPE guard, re-run and printed.
 //   2. A REGRESSION FENCE against #186 coming back: the package must NOT re-export a second authz decision.
 
-import { describe, it, expect } from 'vitest';
-import * as knowledge from '@atlas/knowledge';
-import { isScope } from '../src/write/authz.js';
+import { describe, it, expect } from "vitest"
+import * as knowledge from "@atlas/knowledge"
+import { isScope } from "../src/write/authz.js"
 
-describe('#187 — KNOW-11a scope fence: isScope coercion surface (re-pinned, unchanged by the amendment)', () => {
+describe("#187 — KNOW-11a scope fence: isScope coercion surface (re-pinned, unchanged by the amendment)", () => {
   // The coercion table — printed so a reviewer can read the whole validity product at a glance. Only a
   // non-empty string may pass; every coercion-hazard shape (property-key coercion, `toString`/`valueOf`
   // objects, falsy-but-typed values) must fail CLOSED. `isScope` itself is untouched by #187 and by #186 —
   // this table is a RE-RUN, not a new claim, so the surviving guard is pinned as tightly as `isOwner` was.
   const cases: ReadonlyArray<readonly [string, unknown, boolean]> = [
-    ['undefined', undefined, false],
-    ['null', null, false],
-    ["''", '', false],
-    ['0', 0, false],
-    ['false', false, false],
-    ['{}', {}, false],
-    ['[]', [], false],
-    ["['core']", ['core'], false], // array coercion hazard — reads as the string via property-key coercion elsewhere, must NOT pass isScope
-    ["{toString:() => 'core'}", { toString: () => 'core' }, false], // valueOf/toString coercion hazard
-    ["'core'", 'core', true], // the one legal shape
-  ];
+    ["undefined", undefined, false],
+    ["null", null, false],
+    ["''", "", false],
+    ["0", 0, false],
+    ["false", false, false],
+    ["{}", {}, false],
+    ["[]", [], false],
+    ["['core']", ["core"], false], // array coercion hazard — reads as the string via property-key coercion elsewhere, must NOT pass isScope
+    ["{toString:() => 'core'}", { toString: () => "core" }, false], // valueOf/toString coercion hazard
+    ["'core'", "core", true], // the one legal shape
+  ]
 
-  it.each(cases)('isScope(%s) → %s', (_label, value, expected) => {
-    expect(isScope(value)).toBe(expected);
-  });
+  it.each(cases)("isScope(%s) → %s", (_label, value, expected) => {
+    expect(isScope(value)).toBe(expected)
+  })
 
-  it('prints the full coercion table (for the review record)', () => {
-    const table = cases.map(([label, value, expected]) => ({ input: label, isScope: isScope(value), expected }));
+  it("prints the full coercion table (for the review record)", () => {
+    const table = cases.map(([label, value, expected]) => ({ input: label, isScope: isScope(value), expected }))
     // eslint-disable-next-line no-console
-    console.log(table);
-    for (const row of table) expect(row.isScope).toBe(row.expected);
-  });
-});
+    console.log(table)
+    for (const row of table) expect(row.isScope).toBe(row.expected)
+  })
+})
 
-describe('#186 — ONE authz implementation: the knowledge package publishes the SHAPE, never the DECISION', () => {
+describe("#186 — ONE authz implementation: the knowledge package publishes the SHAPE, never the DECISION", () => {
   // The regression this pins is not hypothetical — it is the state the tree was in until #186. A second,
   // nominal `authz()` sat in the barrel, fully tested, called by nothing, describing a fence the product did
   // not have. Re-adding any of these names to `@atlas/knowledge` re-creates two answers to one question, and
@@ -75,21 +75,25 @@ describe('#186 — ONE authz implementation: the knowledge package publishes the
   // consequence, recorded because it bit the mutation run: a mutant re-adding `inScope` to `src/write/authz.ts`
   // SURVIVES until `tsc -b` runs. It was re-run with the rebuild and KILLED (suite exit 1). A mutant that
   // never reached the code under test is not a survivor, it is a mutant that did not apply.
-  const FORBIDDEN = ['authz', 'authzApi', 'inScope'] as const;
+  const FORBIDDEN = ["authz", "authzApi", "inScope"] as const
 
-  it('the barrel exports isScope and NONE of the deleted decision surface', () => {
-    const surface = Object.keys(knowledge as Record<string, unknown>).sort();
-    const present = FORBIDDEN.filter((n) => n in (knowledge as Record<string, unknown>));
+  it("the barrel exports isScope and NONE of the deleted decision surface", () => {
+    const surface = Object.keys(knowledge as Record<string, unknown>).sort()
+    const present = FORBIDDEN.filter((n) => n in (knowledge as Record<string, unknown>))
     // eslint-disable-next-line no-console
-    console.log({ forbiddenNamesFound: present, isScopeExported: 'isScope' in (knowledge as Record<string, unknown>), surfaceSize: surface.length });
-    expect(present).toStrictEqual([]); // NAMES printed, never a bare count
-    expect('isScope' in (knowledge as Record<string, unknown>)).toBe(true);
-  });
+    console.log({
+      forbiddenNamesFound: present,
+      isScopeExported: "isScope" in (knowledge as Record<string, unknown>),
+      surfaceSize: surface.length,
+    })
+    expect(present).toStrictEqual([]) // NAMES printed, never a bare count
+    expect("isScope" in (knowledge as Record<string, unknown>)).toBe(true)
+  })
 
-  it('isScope answers a SHAPE question only — it says nothing about who may write', () => {
+  it("isScope answers a SHAPE question only — it says nothing about who may write", () => {
     // The whole reason `isScope` is not an authz decision: it passes any non-empty string, including a scope
     // no policy has ever declared. Authorization is `actorInScope(policy, actor, scope)` in adapter-io.
-    expect(isScope('a-scope-no-policy-declares')).toBe(true);
-    expect(isScope('core')).toBe(true);
-  });
-});
+    expect(isScope("a-scope-no-policy-declares")).toBe(true)
+    expect(isScope("core")).toBe(true)
+  })
+})

@@ -28,10 +28,10 @@
 //     still appears in the oracle's output (else `broken`) — the freshness leg is the unit anchor's
 //     `subtreeHash`, exactly the positive-intrinsic oracle.
 
-import type { Tier, NodeKey } from '@atlas/contracts';
-import type { ClaimEntry } from '@atlas/kernel';
-import type { Grounding } from '@atlas/grounding';
-import type { KnowledgeFreshness, ObviousnessScore, Seal } from './types.js';
+import type { Tier, NodeKey } from "@atlas/contracts"
+import type { ClaimEntry } from "@atlas/kernel"
+import type { Grounding } from "@atlas/grounding"
+import type { KnowledgeFreshness, ObviousnessScore, Seal } from "./types.js"
 
 /**
  * The proven SHAPE a test-vacuity fact names. A CLOSED, ADDITIVE-ONLY union (adding a member is a spec
@@ -44,9 +44,9 @@ import type { KnowledgeFreshness, ObviousnessScore, Seal } from './types.js';
  * 0-false-admit by construction.
  */
 export type TestVacuityShape =
-  | 'assertion-only-in-catch' // every assertion sits inside a `catch`; the success path asserts nothing
-  | 'no-assertion-in-test' // the body discards work and contains no assertion-shaped call at all
-  | 'assertion-never-invoked'; // a matcher is REFERENCED but never CALLED, so the assertion never runs
+  | "assertion-only-in-catch" // every assertion sits inside a `catch`; the success path asserts nothing
+  | "no-assertion-in-test" // the body discards work and contains no assertion-shaped call at all
+  | "assertion-never-invoked" // a matcher is REFERENCED but never CALLED, so the assertion never runs
 
 /**
  * A single-anchor PROVEN `test-vacuity` fact (#95, ADR-0015 D5): "named test `testName` in unit
@@ -59,20 +59,20 @@ export type TestVacuityShape =
  * unit at HEAD and re-proves iff a fact with this `testName`+`shape` still exists (else `broken`).
  */
 export interface TestVacuityNode {
-  readonly kind: 'test-vacuity';
-  readonly id: NodeKey; // = testVacuityKey(unitKey, testName) (test-vacuity-key.ts); MINTED, never trusted from the payload
-  readonly tier: Tier;
-  readonly unitKey: string; // the LOCATION-FREE unit lineage (qualifiedPath) holding the test — identity leg
-  readonly testName: string; // the test's name string — identity leg (a unit may hold many named tests)
-  readonly shape: TestVacuityShape; // WHICH proven syntactic property this fact names (identity leg with unitKey+testName)
-  readonly grounding: Grounding; // EXACTLY one entry: anchors the unit (its subtreeHash the freshness leg)
-  readonly freshness: KnowledgeFreshness;
-  readonly claims: readonly ClaimEntry[];
-  readonly authoring: 'PROVEN' | 'SUPERSEDED'; // minted 'PROVEN'; supersession is derive-on-read if ever needed
-  readonly seal?: Seal; // ADR-0017 — ALWAYS 'proven' on a minted test-vacuity node; additive/absent-tolerant
-  readonly witness?: TestVacuityWitness; // SEAL-CARRIES-ITS-WITNESS — see below. ADDITIVE + absent-tolerant.
-  readonly scope?: string; // KNOW-11a — the write/authz scope; additive/absent-tolerant (see AdvisoryNode)
-  readonly obviousness?: ObviousnessScore; // ADR-0012 — additive, absent-tolerant (see AdvisoryNode)
+  readonly kind: "test-vacuity"
+  readonly id: NodeKey // = testVacuityKey(unitKey, testName) (test-vacuity-key.ts); MINTED, never trusted from the payload
+  readonly tier: Tier
+  readonly unitKey: string // the LOCATION-FREE unit lineage (qualifiedPath) holding the test — identity leg
+  readonly testName: string // the test's name string — identity leg (a unit may hold many named tests)
+  readonly shape: TestVacuityShape // WHICH proven syntactic property this fact names (identity leg with unitKey+testName)
+  readonly grounding: Grounding // EXACTLY one entry: anchors the unit (its subtreeHash the freshness leg)
+  readonly freshness: KnowledgeFreshness
+  readonly claims: readonly ClaimEntry[]
+  readonly authoring: "PROVEN" | "SUPERSEDED" // minted 'PROVEN'; supersession is derive-on-read if ever needed
+  readonly seal?: Seal // ADR-0017 — ALWAYS 'proven' on a minted test-vacuity node; additive/absent-tolerant
+  readonly witness?: TestVacuityWitness // SEAL-CARRIES-ITS-WITNESS — see below. ADDITIVE + absent-tolerant.
+  readonly scope?: string // KNOW-11a — the write/authz scope; additive/absent-tolerant (see AdvisoryNode)
+  readonly obviousness?: ObviousnessScore // ADR-0012 — additive, absent-tolerant (see AdvisoryNode)
 }
 
 /**
@@ -85,6 +85,6 @@ export interface TestVacuityNode {
  * ADDITIVE + absent-tolerant, same discipline as `PredicateWitness`/`RelationWitness`.
  */
 export interface TestVacuityWitness {
-  readonly shape: TestVacuityShape; // the proven SHAPE the oracle re-derives
-  readonly testName: string; // the test name the re-run must still find with this shape
+  readonly shape: TestVacuityShape // the proven SHAPE the oracle re-derives
+  readonly testName: string // the test name the re-run must still find with this shape
 }

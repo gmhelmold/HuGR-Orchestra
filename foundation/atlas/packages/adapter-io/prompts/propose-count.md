@@ -33,6 +33,7 @@ Every clause is traceable. HTML comments are stripped before the text reaches th
     `NO-FACT`. A `<name>` not in the list, any number, or any other shape is unparseable and abstains (never a
     fabricated fact). COUPLED to `makeCountClaimParser` (llm.ts); pinned by test.
 -->
+
 You are shown ONE anchored unit from a real codebase, and a CLOSED LIST of the symbols THIS unit exports that are
 referenced by OTHER units (resolved from the code index — every name below is a real, externally-called export of
 this unit).

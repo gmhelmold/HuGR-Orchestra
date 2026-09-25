@@ -26,7 +26,7 @@ computed (AUTHOR-6d/6f), never a positional or a flag this door reads. The one f
 mode:
 
 - `--json` — on a successful draft, print the WHOLE `DraftOut` envelope (`{ fact, rev, operation, route,
-  requires? }`) as a single machine-readable JSON object to stdout, INSTEAD of the human `data:` render. This
+requires? }`) as a single machine-readable JSON object to stdout, INSTEAD of the human `data:` render. This
   is what lets an author capture the envelope and feed it straight to `atlas emit` (see the round trip below).
   On a failed draft it is ignored and the same human error render is printed.
 

@@ -8,9 +8,9 @@ label or scoring path. This is the AST (tree-sitter) analogue of that report's S
 
 ## The two co-primaries (never blended)
 
-| shape | falseAdmit (soundness — MUST be 0) | recallTrue (coverage) | idioms | n |
-| --- | --- | --- | --- | --- |
-| test-vacuity, `assertion-only-in-catch` | **0/10 = 0.00%** | **10/10 = 100.00%** | 10 real idioms (4 frameworks) | 20 |
+| shape                                   | falseAdmit (soundness — MUST be 0) | recallTrue (coverage) | idioms                        | n   |
+| --------------------------------------- | ---------------------------------- | --------------------- | ----------------------------- | --- |
+| test-vacuity, `assertion-only-in-catch` | **0/10 = 0.00%**                   | **10/10 = 100.00%**   | 10 real idioms (4 frameworks) | 20  |
 
 - **falseAdmit = |admitted ∧ FALSE| / |FALSE| = 0/10.** Every one of the 10 vacuity-flipped mutants was
   ABSTAINED (not proved). The oracle admitted no false. Had any flip been admitted, the shape test
@@ -37,30 +37,30 @@ PRECISION, not measure RECALL across idioms (the circularity the brief names). I
 vocabularies real test suites use — the same family Atlas's own #114 audit found five times
 (`assertion-only-in-catch`, per `test-vacuity.ts:14` and `ADR-0012:174`):
 
-| id | framework / idiom | TRUE (base) | FALSE flip kind |
-| --- | --- | --- | --- |
-| jest-await | jest / async `await…parseAsync()…catch` | `expect(...).toEqual` in catch | add-assertions-guard |
-| jest-multi | jest / MULTIPLE try-catch blocks | two catches, `expect` in each | add-success-assertion |
-| jest-sync | jest / sync try-catch | `expect(e).toBeInstanceOf` | add-trailing-throw |
-| jest-template | jest / template-string test name | `expect(...).toHaveLength` | add-assertions-guard |
-| node-strictEqual | node:assert / `assert.strictEqual` (member) | `assert.strictEqual` in catch | add-success-assertion |
-| node-ok-bare | node:assert / bare `ok` (destructured) | `ok(...)` in catch | add-trailing-throw |
-| node-deep | node:assert / bare `deepStrictEqual` | `deepStrictEqual` in catch | move-catch-to-finally |
-| chai-expect | chai / `expect(...).to` | `expect(err).to.be.an.instanceof` | add-success-assertion |
-| chai-should | chai / `.should` chain | `err.should.have.property` | move-catch-to-finally |
-| ava-t-is | ava / `t.is` | `t.is` in catch | add-trailing-throw |
+| id               | framework / idiom                           | TRUE (base)                       | FALSE flip kind       |
+| ---------------- | ------------------------------------------- | --------------------------------- | --------------------- |
+| jest-await       | jest / async `await…parseAsync()…catch`     | `expect(...).toEqual` in catch    | add-assertions-guard  |
+| jest-multi       | jest / MULTIPLE try-catch blocks            | two catches, `expect` in each     | add-success-assertion |
+| jest-sync        | jest / sync try-catch                       | `expect(e).toBeInstanceOf`        | add-trailing-throw    |
+| jest-template    | jest / template-string test name            | `expect(...).toHaveLength`        | add-assertions-guard  |
+| node-strictEqual | node:assert / `assert.strictEqual` (member) | `assert.strictEqual` in catch     | add-success-assertion |
+| node-ok-bare     | node:assert / bare `ok` (destructured)      | `ok(...)` in catch                | add-trailing-throw    |
+| node-deep        | node:assert / bare `deepStrictEqual`        | `deepStrictEqual` in catch        | move-catch-to-finally |
+| chai-expect      | chai / `expect(...).to`                     | `expect(err).to.be.an.instanceof` | add-success-assertion |
+| chai-should      | chai / `.should` chain                      | `err.should.have.property`        | move-catch-to-finally |
+| ava-t-is         | ava / `t.is`                                | `t.is` in catch                   | add-trailing-throw    |
 
 The four flip kinds are exactly the oracle's four documented soundness rails (`test-vacuity.ts:24-42`), so a
 correct flip forces ABSTAIN by construction:
 
-- **add-success-assertion** — an assertion on the success path (top-level or try body) ⇒ rail *"any
-  assertion-shaped call OUTSIDE a catch ⇒ ABSTAIN"*.
-- **add-assertions-guard** — `expect.assertions(n)` / `expect.hasAssertions()` ⇒ rail *"an assertion guard ⇒
-  ABSTAIN"*.
-- **add-trailing-throw** — a trailing `throw` / `fail()`-shaped call inside the try ⇒ rail *"a try that guards
-  its own success path ⇒ ABSTAIN"*.
+- **add-success-assertion** — an assertion on the success path (top-level or try body) ⇒ rail _"any
+  assertion-shaped call OUTSIDE a catch ⇒ ABSTAIN"_.
+- **add-assertions-guard** — `expect.assertions(n)` / `expect.hasAssertions()` ⇒ rail _"an assertion guard ⇒
+  ABSTAIN"_.
+- **add-trailing-throw** — a trailing `throw` / `fail()`-shaped call inside the try ⇒ rail _"a try that guards
+  its own success path ⇒ ABSTAIN"_.
 - **move-catch-to-finally** — the catch assertion relocated into a `finally` (runs on the success path) ⇒ rail
-  *"a finally is NOT catch-only"*.
+  _"a finally is NOT catch-only"_.
 
 ## Anti-circularity (the AC-6 analogue)
 
@@ -108,7 +108,7 @@ WP's scope.
 ## What the framing got wrong
 
 The brief framed the corpus as needing "the 5 real vacuous tests atlas's #114 audit found" as ground-truth
-TRUEs. Reading the sources, #114 is the *task id* for the recurring "a generator/test whose axis no longer
+TRUEs. Reading the sources, #114 is the _task id_ for the recurring "a generator/test whose axis no longer
 discriminates anything is vacuous" audit (`ADR-0012:174`, `properties-gen.md:59`, `wp-fix-query-guidance.md:19`)
 — the "five times" is a COUNT of that class across the repo, not five verbatim `assertion-only-in-catch` test
 sources sitting in a doc to copy. The honest move was therefore to plant the SAME shape (`assertion-only-in-catch`,

@@ -5,6 +5,6 @@
 // opaqueRefSources, so `helper`'s own negation over this scope stays PROVEN (the fix must not degrade into
 // approach-2, where every local ref would be treated as opaque).
 export function helper(): number {
-  const n = 41;
-  return n + 1;
+  const n = 41
+  return n + 1
 }

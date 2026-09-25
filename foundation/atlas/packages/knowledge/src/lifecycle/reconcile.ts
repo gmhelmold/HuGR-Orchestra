@@ -17,8 +17,8 @@
 // (EPIC-12-b). This surfaces the partition + the block/exit + the bounded re-author count; the write and
 // the tool surface consume it downstream.
 
-import type { Hash } from '@atlas/contracts';
-import type { GroundedFact } from '../types.js';
+import type { Hash } from "@atlas/contracts"
+import type { GroundedFact } from "../types.js"
 
 // ── frozen ReconcileApi surface, co-located here (was ref/reconcile.ts) ───────────────────────────────
 
@@ -28,8 +28,8 @@ import type { GroundedFact } from '../types.js';
  * consumes — no invented fields beyond the fact + its new-sha re-derivation anchor.
  */
 export interface DriftedFact {
-  readonly fact: GroundedFact;
-  readonly newSha: Hash;
+  readonly fact: GroundedFact
+  readonly newSha: Hash
 }
 
 export interface ReconcileApi {
@@ -40,11 +40,11 @@ export interface ReconcileApi {
    *   - `reauthorCount`— MUST equal `|semantic|` (never `|DRIFTED|`, never `N`) — method-tags-knw:50.
    *   - `exitCode`     — 0 when `semantic` is empty; 2 to block on ANY semantic flip. Only exits {0, 2}. */
   reconcile(drifted: readonly DriftedFact[]): {
-    readonly mechanical: readonly GroundedFact[];
-    readonly semantic: readonly GroundedFact[];
-    readonly reauthorCount: number;
-    readonly exitCode: number; // reference names only {0, 2}
-  };
+    readonly mechanical: readonly GroundedFact[]
+    readonly semantic: readonly GroundedFact[]
+    readonly reauthorCount: number
+    readonly exitCode: number // reference names only {0, 2}
+  }
 }
 
 /**
@@ -53,10 +53,10 @@ export interface ReconcileApi {
  * grounding `subtreeHash`)? `true` ⇒ mechanical (auto-re-ground); `false` ⇒ semantic (BROKEN). The re-hash
  * itself is grounding-owned (SEAM: consume-only) — never computed in this module.
  */
-export type ReDerives = (fact: GroundedFact, newSha: Hash) => boolean;
+export type ReDerives = (fact: GroundedFact, newSha: Hash) => boolean
 
 /** The bound reconcile split — implements the FROZEN `ReconcileApi.reconcile`. */
-export type Reconcile = ReconcileApi['reconcile'];
+export type Reconcile = ReconcileApi["reconcile"]
 
 /**
  * Bind the reconcile split to the injected `reDerives` oracle.
@@ -72,17 +72,17 @@ export type Reconcile = ReconcileApi['reconcile'];
  */
 export function bindReconcile(reDerives: ReDerives): Reconcile {
   return (drifted: readonly DriftedFact[]) => {
-    const mechanical: GroundedFact[] = [];
-    const semantic: GroundedFact[] = [];
+    const mechanical: GroundedFact[] = []
+    const semantic: GroundedFact[] = []
     for (const d of drifted) {
-      if (reDerives(d.fact, d.newSha)) mechanical.push(d.fact);
-      else semantic.push(d.fact);
+      if (reDerives(d.fact, d.newSha)) mechanical.push(d.fact)
+      else semantic.push(d.fact)
     }
     return {
       mechanical,
       semantic,
       reauthorCount: semantic.length, // == |semantic| (KNOW-5d); never |DRIFTED|, never N
       exitCode: semantic.length > 0 ? 2 : 0, // block iff any semantic flip (KNOW-5c); else exit 0 (KNOW-5b)
-    };
-  };
+    }
+  }
 }

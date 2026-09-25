@@ -12,11 +12,11 @@
 // interpolated — the `run-git.ts:25` seam's shape). Consequently this module DOES now reach a process
 // primitive; it still reaches no network and no clock of its own, and it still names no model.
 
-import { execFileSync } from 'node:child_process';
+import { execFileSync } from "node:child_process"
 
-import { isSemanticSlot } from '@atlas/knowledge';
-import type { StructRef } from '@atlas/contracts';
-import type { Candidate, SeedProposal, SiteProposer } from '@atlas/genesis';
+import { isSemanticSlot } from "@atlas/knowledge"
+import type { StructRef } from "@atlas/contracts"
+import type { Candidate, SeedProposal, SiteProposer } from "@atlas/genesis"
 
 /**
  * [#201/#202] The explicit abstention token. Measured: with a real model, "output NOTHING to abstain"
@@ -40,20 +40,20 @@ import type { Candidate, SeedProposal, SiteProposer } from '@atlas/genesis';
  * COUPLING: both shipped prompt templates MUST instruct this exact token; `llm.test.ts` and `prompt.test.ts`
  * pin that (the prompt says the word, the gate reads the word — change one, a test goes red).
  */
-export const ABSTAIN_SENTINEL = 'NO-FACT';
+export const ABSTAIN_SENTINEL = "NO-FACT"
 
 /** True iff the whole answer is the abstain sentinel, ignoring case and surrounding formatting/punctuation
  *  (see `ABSTAIN_SENTINEL`). Interior words survive the end-strip, so only a bare (optionally wrapped) token
  *  abstains — never an answer that merely mentions it. */
 export function isAbstainToken(answer: string): boolean {
-  const stripped = answer.trim().replace(/^[\s`'"*.[\](){}]+|[\s`'"*.[\](){}]+$/g, '');
-  return stripped.toUpperCase() === ABSTAIN_SENTINEL;
+  const stripped = answer.trim().replace(/^[\s`'"*.[\](){}]+|[\s`'"*.[\](){}]+$/g, "")
+  return stripped.toUpperCase() === ABSTAIN_SENTINEL
 }
 
 /** The bounded spend envelope for the one call — a hard cost cap + a wall-clock timeout (ADAPT-LLM-1). */
 export interface LlmBudget {
-  readonly costCap: number;
-  readonly timeoutMs: number;
+  readonly costCap: number
+  readonly timeoutMs: number
 }
 
 /**
@@ -71,16 +71,16 @@ export interface LlmBudget {
  *     the model declining to answer, not a corruption of one.
  */
 export interface CompletionResult {
-  readonly claim: string | null; //          null ⇒ the model abstained at this site
-  readonly rawAnswer?: string; //             the validated answer bytes as a string; present iff claim !== null
-  readonly abstainReason?: string; //         a malformed-answer sub-reason; undefined for a plain GEN-12 abstain
+  readonly claim: string | null //          null ⇒ the model abstained at this site
+  readonly rawAnswer?: string //             the validated answer bytes as a string; present iff claim !== null
+  readonly abstainReason?: string //         a malformed-answer sub-reason; undefined for a plain GEN-12 abstain
 }
 
 /** The single, synchronous model seam — one bounded completion per prompt (matches the frozen sync
  *  `SiteProposer.propose`; the concrete async binding is D5/wire's concern). Referenced by ONE src module
  *  (this one) — the sole model entry point in the whole system (ADAPT-LLM-1, golden 11a). */
 export interface ModelClient {
-  complete(prompt: string, budget: LlmBudget): CompletionResult;
+  complete(prompt: string, budget: LlmBudget): CompletionResult
 }
 
 /**
@@ -90,7 +90,11 @@ export interface ModelClient {
  * seed; the dependency arm parses the closed `DEPENDS-ON:` grammar into a typed dependency `PredicateSeed`
  * and abstains on anything else. The parser NEVER admits — admission is the gate's alone (GEN-4/12).
  */
-export type ClaimParser = (claim: string, cand: Candidate, rawAnswer?: string) => SeedProposal | { readonly abstain: string };
+export type ClaimParser = (
+  claim: string,
+  cand: Candidate,
+  rawAnswer?: string,
+) => SeedProposal | { readonly abstain: string }
 
 /** The DEFAULT arm: every non-abstaining claim is an ADVISORY seed (the ORIGINAL, byte-identical shape). The
  *  `rawAnswer` provenance rides through unchanged (#195c). This is what `createSiteProposer` uses when no
@@ -99,7 +103,7 @@ export const advisoryClaimParser: ClaimParser = (claim, cand, rawAnswer) => ({
   cand,
   claim,
   ...(rawAnswer !== undefined ? { rawAnswer } : {}),
-});
+})
 
 /**
  * The DEPENDENCY grammar (ADR-0017 dependency slot, #196a candidate-grounded). One line: `DEPENDS-ON: <name>`
@@ -108,13 +112,13 @@ export const advisoryClaimParser: ClaimParser = (claim, cand, rawAnswer) => ({
  * COUPLED to `prompts/propose-dependency.md`, which writes exactly this grammar; `llm-dependency-parser.test.ts`
  * pins the pair.
  */
-const DEPENDS_ON_RE = /^DEPENDS-ON:\s*(\S+)\s*$/i;
+const DEPENDS_ON_RE = /^DEPENDS-ON:\s*(\S+)\s*$/i
 
 /** The reason a dependency-arm answer that is not the abstain token AND does not match the `DEPENDS-ON:`
  *  grammar abstains under — a MALFORMED proposal, fail-closed to a grounded abstention rather than a
  *  fabricated advisory (a prose line in a dependency mine is the model failing to follow the grammar, not a
  *  fact about a different family). Greppable, mirroring `llm.ts`'s `answer-malformed:*` reasons. */
-export const DEP_UNPARSEABLE_REASON = 'dependency-answer-unparseable';
+export const DEP_UNPARSEABLE_REASON = "dependency-answer-unparseable"
 
 /** The DIRECTORY of a mined unit — the scope its dependency witness ranges over. The unit's `qualifiedPath` is
  *  `<file>` or `<file>::<symbol>` (struct.ts); take the file, then its parent directory (forward-slash paths,
@@ -122,17 +126,17 @@ export const DEP_UNPARSEABLE_REASON = 'dependency-answer-unparseable';
  *  (`underScope` splits `''` to `['']`, never length 0) — so a rootless unit's dependency ALWAYS abstains. That
  *  is fail-closed, not a hole: an over-wide "whole repo" scope is exactly what we must not grant. */
 export function unitScopeOf(qualifiedPath: string): string {
-  const at = qualifiedPath.indexOf('::');
-  const file = at === -1 ? qualifiedPath : qualifiedPath.slice(0, at);
-  const slash = file.lastIndexOf('/');
-  return slash === -1 ? '' : file.slice(0, slash);
+  const at = qualifiedPath.indexOf("::")
+  const file = at === -1 ? qualifiedPath : qualifiedPath.slice(0, at)
+  const slash = file.lastIndexOf("/")
+  return slash === -1 ? "" : file.slice(0, slash)
 }
 
 /** Resolve a picked dependency NAME to THIS unit's OWN cross-unit dependency symbol — or `null` when the name
  *  is not a real cross-unit dependency of the unit (an off-candidate-list guess / builtin / typo). Injected
  *  because the name→symbol binding is the INDEX's business (`UnitDepsApi.resolveDepFor`) and must be per-unit:
  *  an index-wide name lookup let an off-list name ride an unrelated file's same-named symbol (lucy BLOCKER). */
-export type DepResolver = (name: string, site: StructRef) => string | null;
+export type DepResolver = (name: string, site: StructRef) => string | null
 
 /**
  * The DEPENDENCY arm parser FACTORY (ADR-0017, #196a candidate-grounded). A claim matching `DEPENDS-ON: <name>`
@@ -145,22 +149,22 @@ export type DepResolver = (name: string, site: StructRef) => string | null;
  */
 export function makeDependencyClaimParser(resolveDep: DepResolver): ClaimParser {
   return (claim, cand, rawAnswer) => {
-    const m = DEPENDS_ON_RE.exec(claim.trim());
-    if (m === null) return { abstain: DEP_UNPARSEABLE_REASON };
-    const name = (m[1] ?? '').trim();
-    if (name === '') return { abstain: DEP_UNPARSEABLE_REASON };
-    const symbol = resolveDep(name, cand.site);
-    if (symbol === null) return { abstain: DEP_UNPARSEABLE_REASON }; // not a cross-unit dep of THIS unit
+    const m = DEPENDS_ON_RE.exec(claim.trim())
+    if (m === null) return { abstain: DEP_UNPARSEABLE_REASON }
+    const name = (m[1] ?? "").trim()
+    if (name === "") return { abstain: DEP_UNPARSEABLE_REASON }
+    const symbol = resolveDep(name, cand.site)
+    if (symbol === null) return { abstain: DEP_UNPARSEABLE_REASON } // not a cross-unit dep of THIS unit
     return {
-      kind: 'predicate',
-      slot: 'dependency',
+      kind: "predicate",
+      slot: "dependency",
       target: symbol, // the RESOLVED symbol — the fact's identity is bound to the unit's specific dependency
       scope: unitScopeOf(cand.site.qualifiedPath),
       cand,
       claim,
       ...(rawAnswer !== undefined ? { rawAnswer } : {}),
-    };
-  };
+    }
+  }
 }
 
 /**
@@ -170,12 +174,12 @@ export function makeDependencyClaimParser(resolveDep: DepResolver): ClaimParser 
  * the mined unit's own path, exactly as the dependency arm derives it. COUPLED to `prompts/propose-definition.md`,
  * which writes exactly this grammar; `llm-definition-parser.test.ts` pins the pair.
  */
-const DEFINES_RE = /^DEFINES:\s*(\S+)\s*$/i;
+const DEFINES_RE = /^DEFINES:\s*(\S+)\s*$/i
 
 /** The reason a definition-arm answer that is not the abstain token AND does not match the `DEFINES:` grammar
  *  abstains under — a MALFORMED proposal, fail-closed to a grounded abstention rather than a fabricated advisory,
  *  exactly as `DEP_UNPARSEABLE_REASON`. */
-export const DEF_UNPARSEABLE_REASON = 'definition-answer-unparseable';
+export const DEF_UNPARSEABLE_REASON = "definition-answer-unparseable"
 
 /**
  * The DEFINITION arm parser FACTORY (#196d candidate-grounded). A claim matching `DEFINES: <name>` whose
@@ -189,22 +193,22 @@ export const DEF_UNPARSEABLE_REASON = 'definition-answer-unparseable';
  */
 export function makeDefinitionClaimParser(resolveDef: DepResolver): ClaimParser {
   return (claim, cand, rawAnswer) => {
-    const m = DEFINES_RE.exec(claim.trim());
-    if (m === null) return { abstain: DEF_UNPARSEABLE_REASON };
-    const name = (m[1] ?? '').trim();
-    if (name === '') return { abstain: DEF_UNPARSEABLE_REASON };
-    const symbol = resolveDef(name, cand.site);
-    if (symbol === null) return { abstain: DEF_UNPARSEABLE_REASON }; // not a symbol defined in THIS unit
+    const m = DEFINES_RE.exec(claim.trim())
+    if (m === null) return { abstain: DEF_UNPARSEABLE_REASON }
+    const name = (m[1] ?? "").trim()
+    if (name === "") return { abstain: DEF_UNPARSEABLE_REASON }
+    const symbol = resolveDef(name, cand.site)
+    if (symbol === null) return { abstain: DEF_UNPARSEABLE_REASON } // not a symbol defined in THIS unit
     return {
-      kind: 'predicate',
-      slot: 'definition',
+      kind: "predicate",
+      slot: "definition",
       target: symbol, // the RESOLVED symbol — the fact's identity is bound to the unit's specific definition
       scope: unitScopeOf(cand.site.qualifiedPath),
       cand,
       claim,
       ...(rawAnswer !== undefined ? { rawAnswer } : {}),
-    };
-  };
+    }
+  }
 }
 
 /**
@@ -213,11 +217,11 @@ export function makeDefinitionClaimParser(resolveDef: DepResolver): ClaimParser 
  * unit's externally-called exports. The model NEVER emits the number: a stray digit or `@` breaks the `\S+`-
  * then-end match and abstains. COUPLED to `prompts/propose-count.md`; `llm-count-parser.test.ts` pins the pair.
  */
-const COUNT_RE = /^COUNT:\s*(\S+)\s*$/i;
+const COUNT_RE = /^COUNT:\s*(\S+)\s*$/i
 
 /** The reason a count-arm answer that is neither the abstain token nor a `COUNT: <name>` line abstains under —
  *  fail-closed to a grounded abstention rather than a fabricated advisory, exactly as `DEP_UNPARSEABLE_REASON`. */
-export const COUNT_UNPARSEABLE_REASON = 'count-answer-unparseable';
+export const COUNT_UNPARSEABLE_REASON = "count-answer-unparseable"
 
 /** Resolve a picked count NAME to THIS unit's OWN externally-called export — the SYMBOL plus the harness-derived
  *  witnessed lower bound (`atLeast`, distinct caller units) and the `scope` that bound ranges over — or `null`
@@ -228,7 +232,7 @@ export const COUNT_UNPARSEABLE_REASON = 'count-answer-unparseable';
 export type CountResolver = (
   name: string,
   site: StructRef,
-) => { readonly symbol: string; readonly atLeast: number; readonly scope: string } | null;
+) => { readonly symbol: string; readonly atLeast: number; readonly scope: string } | null
 
 /**
  * The COUNT arm parser FACTORY (#196c candidate-grounded). A claim matching `COUNT: <name>` whose `<name>`
@@ -242,23 +246,23 @@ export type CountResolver = (
  */
 export function makeCountClaimParser(resolveCount: CountResolver): ClaimParser {
   return (claim, cand, rawAnswer) => {
-    const m = COUNT_RE.exec(claim.trim());
-    if (m === null) return { abstain: COUNT_UNPARSEABLE_REASON };
-    const name = (m[1] ?? '').trim();
-    if (name === '') return { abstain: COUNT_UNPARSEABLE_REASON };
-    const r = resolveCount(name, cand.site);
-    if (r === null) return { abstain: COUNT_UNPARSEABLE_REASON }; // not an externally-called export of THIS unit
+    const m = COUNT_RE.exec(claim.trim())
+    if (m === null) return { abstain: COUNT_UNPARSEABLE_REASON }
+    const name = (m[1] ?? "").trim()
+    if (name === "") return { abstain: COUNT_UNPARSEABLE_REASON }
+    const r = resolveCount(name, cand.site)
+    if (r === null) return { abstain: COUNT_UNPARSEABLE_REASON } // not an externally-called export of THIS unit
     return {
-      kind: 'predicate',
-      slot: 'count',
+      kind: "predicate",
+      slot: "count",
       target: r.symbol, // the RESOLVED symbol — the fact's identity is bound to the unit's specific export
       scope: r.scope, //  the callers' common segment-prefix the witnessed bound ranges over (harness-derived)
       atLeast: r.atLeast, // the WITNESSED distinct caller-unit count — the sound lower bound, NEVER the model's
       cand,
       claim,
       ...(rawAnswer !== undefined ? { rawAnswer } : {}),
-    };
-  };
+    }
+  }
 }
 
 /** The reason a semantic-arm answer whose one `atlas-fact` block carries no non-empty `derivation` abstains
@@ -266,14 +270,14 @@ export function makeCountClaimParser(resolveCount: CountResolver): ClaimParser {
  *  `*-unparseable` reasons. A `justified` fact whose grounds do not travel is malformed: the derivation IS
  *  the seal's witness-analog (196b), persisted onto `node.derivation`, so its absence is not a fact about a
  *  different family — it is a botched semantic fact, and admitting it as a bare advisory would drop the grounds. */
-export const SEMANTIC_NO_DERIVATION_REASON = 'semantic-answer-no-derivation';
+export const SEMANTIC_NO_DERIVATION_REASON = "semantic-answer-no-derivation"
 
 /** The reason a semantic-arm answer whose block declares a `slot` OUTSIDE the eight-member `SemanticSlot`
  *  vocabulary (196c) abstains under — the SAME fail-closed discipline as the missing-derivation abstain. The
  *  model CLASSIFIES the fact into one of the eight justified-eligible slots; a slot the harness cannot honestly
  *  seal `justified` (an oracle/structural slot like `dependency`/`count`/`definition`, or free text) is a
  *  grounded refusal, never a fact minted at a slot outside the justified vocabulary. */
-export const SEMANTIC_SLOT_UNKNOWN_REASON = 'semantic-answer-slot-not-in-vocabulary';
+export const SEMANTIC_SLOT_UNKNOWN_REASON = "semantic-answer-slot-not-in-vocabulary"
 
 /** Lift the `slot` and `derivation` fields from the single `atlas-fact` block in a validated `'block'`-format
  *  envelope (`rawAnswer`). The block gate (`admitFactBlock`) already parsed the block and validated its `claim`;
@@ -282,17 +286,17 @@ export const SEMANTIC_SLOT_UNKNOWN_REASON = 'semantic-answer-slot-not-in-vocabul
  *  block or no parseable JSON — the parser turns each malformed shape into a grounded abstention with the right
  *  reason (missing derivation vs slot-out-of-vocabulary). */
 function semanticBlockFields(rawAnswer: string): { slot: unknown; derivation: unknown } | undefined {
-  const blocks = factBlocks(rawAnswer);
-  if (blocks.length !== 1) return undefined; // exactly one block reached admission; ≠1 ⇒ not a well-formed fact
-  let parsed: unknown;
+  const blocks = factBlocks(rawAnswer)
+  if (blocks.length !== 1) return undefined // exactly one block reached admission; ≠1 ⇒ not a well-formed fact
+  let parsed: unknown
   try {
-    parsed = JSON.parse(blocks[0]!);
+    parsed = JSON.parse(blocks[0]!)
   } catch {
-    return undefined;
+    return undefined
   }
-  const obj = parsed as { slot?: unknown; derivation?: unknown } | null;
-  if (obj === null) return undefined;
-  return { slot: obj.slot, derivation: obj.derivation };
+  const obj = parsed as { slot?: unknown; derivation?: unknown } | null
+  if (obj === null) return undefined
+  return { slot: obj.slot, derivation: obj.derivation }
 }
 
 /**
@@ -315,21 +319,21 @@ function semanticBlockFields(rawAnswer: string): { slot: unknown; derivation: un
  * never `proven`).
  */
 export const semanticClaimParser: ClaimParser = (claim, cand, rawAnswer) => {
-  const fields = rawAnswer === undefined ? undefined : semanticBlockFields(rawAnswer);
-  const rawDeriv = fields?.derivation;
-  const derivation = typeof rawDeriv === 'string' && rawDeriv.trim() !== '' ? rawDeriv.trim() : undefined;
-  if (derivation === undefined) return { abstain: SEMANTIC_NO_DERIVATION_REASON };
-  const slot = fields?.slot;
-  if (!isSemanticSlot(slot)) return { abstain: SEMANTIC_SLOT_UNKNOWN_REASON }; // classified outside the eight ⇒ grounded refusal
+  const fields = rawAnswer === undefined ? undefined : semanticBlockFields(rawAnswer)
+  const rawDeriv = fields?.derivation
+  const derivation = typeof rawDeriv === "string" && rawDeriv.trim() !== "" ? rawDeriv.trim() : undefined
+  if (derivation === undefined) return { abstain: SEMANTIC_NO_DERIVATION_REASON }
+  const slot = fields?.slot
+  if (!isSemanticSlot(slot)) return { abstain: SEMANTIC_SLOT_UNKNOWN_REASON } // classified outside the eight ⇒ grounded refusal
   return {
-    kind: 'predicate',
+    kind: "predicate",
     slot, // the model's classification, VALIDATED against the eight-member justified vocabulary
     derivation, // the persisted, contestable grounds — the justified seal's witness-analog (never the scratch)
     cand,
     claim,
     ...(rawAnswer !== undefined ? { rawAnswer } : {}),
-  };
-};
+  }
+}
 
 /** Construct the S2 `SiteProposer` — ONE bounded model call per site, abstention allowed (ADAPT-LLM-1).
  *  The `SiteProposer` return type is frozen; the model client, budget, and prompt-builder are INJECTED so
@@ -339,29 +343,29 @@ export const semanticClaimParser: ClaimParser = (claim, cand, rawAnswer) => {
  *  `parseClaim` (ADR-0017) turns the raw claim into the arm's typed seed — DEFAULT `advisoryClaimParser`,
  *  so the shipped advisory mine is byte-identical; the dependency arm injects `dependencyClaimParser`. */
 export function createSiteProposer(deps: {
-  client: ModelClient;
-  budget: LlmBudget;
-  buildPrompt: (cand: Candidate) => string;
-  parseClaim?: ClaimParser;
+  client: ModelClient
+  budget: LlmBudget
+  buildPrompt: (cand: Candidate) => string
+  parseClaim?: ClaimParser
 }): SiteProposer {
-  const parseClaim = deps.parseClaim ?? advisoryClaimParser;
+  const parseClaim = deps.parseClaim ?? advisoryClaimParser
   return {
     propose(cand: Candidate) {
-      const prompt = deps.buildPrompt(cand);
-      const r = deps.client.complete(prompt, deps.budget); // EXACTLY ONE bounded call — no retry/loop
+      const prompt = deps.buildPrompt(cand)
+      const r = deps.client.complete(prompt, deps.budget) // EXACTLY ONE bounded call — no retry/loop
       if (r.claim === null) {
         // [#195c] Split the abstention so the MALFORMED case is OBSERVABLE. A tagged `abstainReason` (the
         // sanity gate's `answer-malformed:*`) returns a DISTINCT `{ abstain }` the driver builds a greppable
         // grounded WhyNot from; an UNTAGGED null (empty / model-declined) stays the plain GEN-12 abstention.
-        return r.abstainReason !== undefined ? { abstain: r.abstainReason } : null;
+        return r.abstainReason !== undefined ? { abstain: r.abstainReason } : null
       }
       // [ADR-0017] The arm's parser shapes the typed seed (advisory by default; dependency when injected). It
       // forwards the VALIDATED answer bytes on `SeedProposal.rawAnswer` (#195c) so W-MINE scrubs-and-puts them
       // to CAS as the fact's `answerRef`; this seam does not scrub and never touches CAS. A parser may itself
       // abstain (e.g. a dependency answer that does not match the grammar) — routed like any GEN-12 abstention.
-      return parseClaim(r.claim, cand, r.rawAnswer);
+      return parseClaim(r.claim, cand, r.rawAnswer)
     },
-  };
+  }
 }
 
 // ── the one concrete ModelClient: an operator-supplied command (ADR-0011 Decision 1) ───────────────────
@@ -369,7 +373,7 @@ export function createSiteProposer(deps: {
 /** Why a model invocation FAILED — never conflated with an abstention (ADR-0011 D1). `not-found` is split
  *  out because a mistyped/absent command is the most common misconfiguration, and reporting it as a generic
  *  failure is what makes a broken setup read like a repo with nothing to say. */
-export type ModelFailure = 'not-found' | 'timeout' | 'nonzero-exit';
+export type ModelFailure = "not-found" | "timeout" | "nonzero-exit"
 
 /** A model invocation that FAILED. Thrown, never returned: `CompletionResult.claim === null` means the model
  *  ABSTAINED (a valid GEN-12 outcome), so a failure must not be expressible as one. */
@@ -378,8 +382,8 @@ export class ModelCommandError extends Error {
     readonly reason: ModelFailure,
     message: string,
   ) {
-    super(message);
-    this.name = 'ModelCommandError';
+    super(message)
+    this.name = "ModelCommandError"
   }
 }
 
@@ -388,8 +392,8 @@ export class ModelCommandError extends Error {
  *  NEVER from the repo — a command read out of a committed file would make `atlas mine` on a cloned
  *  repository an arbitrary-code-execution path. */
 export interface ModelCommand {
-  readonly cmd: string;
-  readonly args: readonly string[];
+  readonly cmd: string
+  readonly args: readonly string[]
 }
 
 /**
@@ -409,26 +413,26 @@ export interface ModelCommand {
  * and is deliberately not pretended: a subprocess reports no price. Spend is bounded upstream by the GEN-2
  * site ceiling and the marginal-value stop, which is where the real budget lives.
  */
-export function createCommandClient(command: ModelCommand, format: AnswerFormat = 'line'): ModelClient {
+export function createCommandClient(command: ModelCommand, format: AnswerFormat = "line"): ModelClient {
   return {
     complete(prompt: string, budget: LlmBudget): CompletionResult {
-      let out: Buffer;
+      let out: Buffer
       try {
         out = execFileSync(command.cmd, command.args as string[], {
           input: prompt, // the prompt is piped, never placed on the command line
           // NO `encoding`: stdout is read as a RAW Buffer. With `encoding:'utf8'` Node silently maps invalid
           // bytes to U+FFFD, masking exactly the corruption the #195c sanity gate exists to reject.
           timeout: budget.timeoutMs,
-          stdio: ['pipe', 'pipe', 'pipe'], // stderr CAPTURED — never inherited (the fleet-wide F7 property)
-        });
+          stdio: ["pipe", "pipe", "pipe"], // stderr CAPTURED — never inherited (the fleet-wide F7 property)
+        })
       } catch (e) {
-        const completed = salvageEarlyExit(e); // the child finished; only OUR stdin write lost the race
-        if (completed === null) throw new ModelCommandError(classifyModelFailure(e), describeModelFailure(command, e));
-        out = completed;
+        const completed = salvageEarlyExit(e) // the child finished; only OUR stdin write lost the race
+        if (completed === null) throw new ModelCommandError(classifyModelFailure(e), describeModelFailure(command, e))
+        out = completed
       }
-      return admitModelAnswer(out, format); // #195c: the admission sanity gate — fail-closed to a tagged abstention
+      return admitModelAnswer(out, format) // #195c: the admission sanity gate — fail-closed to a tagged abstention
     },
-  };
+  }
 }
 
 /**
@@ -450,21 +454,21 @@ export function createCommandClient(command: ModelCommand, format: AnswerFormat 
  * On success the VALIDATED (untrimmed) text rides back as `rawAnswer`; `claim` is its trimmed projection.
  */
 function admitModelAnswer(buf: Buffer, format: AnswerFormat): CompletionResult {
-  const text = buf.toString('utf8');
-  if (!Buffer.from(text, 'utf8').equals(buf)) return { claim: null, abstainReason: 'answer-malformed:not-utf8' };
-  const whole = text.trim();
-  if (whole === '') return { claim: null }; //                    empty ⇒ GEN-12 model-abstained, untagged
-  if (isAbstainToken(whole)) return { claim: null }; //           [#201/#202] explicit abstain token ⇒ GEN-12, untagged
+  const text = buf.toString("utf8")
+  if (!Buffer.from(text, "utf8").equals(buf)) return { claim: null, abstainReason: "answer-malformed:not-utf8" }
+  const whole = text.trim()
+  if (whole === "") return { claim: null } //                    empty ⇒ GEN-12 model-abstained, untagged
+  if (isAbstainToken(whole)) return { claim: null } //           [#201/#202] explicit abstain token ⇒ GEN-12, untagged
   // The C0-control interleave seam is corruption in EITHER format — a spliced pipe injects stray control bytes
   // regardless of whether the answer is a line or a fenced block. Checked first, before the format-specific leg.
-  if (hasControlByteSplice(text)) return { claim: null, abstainReason: 'answer-malformed:multi-response' };
-  if (format === 'block') return admitFactBlock(text);
+  if (hasControlByteSplice(text)) return { claim: null, abstainReason: "answer-malformed:multi-response" }
+  if (format === "block") return admitFactBlock(text)
   //                          [ADR-0020] the SOUND-GATED slots (dependency/count/negation) keep the ONE-LINE
   // contract: their prompts forbid reasoning, so a well-formed answer is a single content line and >1 non-empty
   // line is the splice class. The advisory/semantic reason-freely slots use `'block'` instead (multi-line by
   // construction), where the line-count heuristic would reject every conforming answer — see `admitFactBlock`.
-  if (isSplicedAnswer(text)) return { claim: null, abstainReason: 'answer-malformed:multi-response' };
-  return { claim: whole, rawAnswer: text }; //                    rawAnswer = the exact validated answer bytes
+  if (isSplicedAnswer(text)) return { claim: null, abstainReason: "answer-malformed:multi-response" }
+  return { claim: whole, rawAnswer: text } //                    rawAnswer = the exact validated answer bytes
 }
 
 /** [ADR-0020] The `'block'` admission: the model REASONS FREELY (scratch, discarded here) and emits exactly ONE
@@ -473,31 +477,33 @@ function admitModelAnswer(buf: Buffer, format: AnswerFormat): CompletionResult {
  *  ≥2 blocks ⇒ the splice class (structural replacement for the line-count heuristic, which cannot apply to a
  *  deliberately multi-line answer); an unparseable/oversized block ⇒ tagged malformed. Fail-closed throughout. */
 function admitFactBlock(text: string): CompletionResult {
-  const blocks = factBlocks(text);
-  if (blocks.length === 0) return { claim: null }; //             reasoned-then-declined / botched format ⇒ untagged abstain
-  if (blocks.length > 1) return { claim: null, abstainReason: 'answer-malformed:multi-response' }; // ≥2 = splice
-  const body = blocks[0]!;
-  if (Buffer.byteLength(body, 'utf8') > MAX_FACT_BLOCK_BYTES) return { claim: null, abstainReason: 'answer-malformed:unparseable' };
-  let parsed: unknown;
+  const blocks = factBlocks(text)
+  if (blocks.length === 0) return { claim: null } //             reasoned-then-declined / botched format ⇒ untagged abstain
+  if (blocks.length > 1) return { claim: null, abstainReason: "answer-malformed:multi-response" } // ≥2 = splice
+  const body = blocks[0]!
+  if (Buffer.byteLength(body, "utf8") > MAX_FACT_BLOCK_BYTES)
+    return { claim: null, abstainReason: "answer-malformed:unparseable" }
+  let parsed: unknown
   try {
-    parsed = JSON.parse(body);
+    parsed = JSON.parse(body)
   } catch {
-    return { claim: null, abstainReason: 'answer-malformed:unparseable' };
+    return { claim: null, abstainReason: "answer-malformed:unparseable" }
   }
-  const field = (parsed as { claim?: unknown } | null)?.claim;
-  if (typeof field !== 'string' || field.trim() === '') return { claim: null, abstainReason: 'answer-malformed:unparseable' };
-  return { claim: field.trim(), rawAnswer: text }; //             rawAnswer = the whole validated envelope
+  const field = (parsed as { claim?: unknown } | null)?.claim
+  if (typeof field !== "string" || field.trim() === "")
+    return { claim: null, abstainReason: "answer-malformed:unparseable" }
+  return { claim: field.trim(), rawAnswer: text } //             rawAnswer = the whole validated envelope
 }
 
 /** Every fenced ```atlas-fact block body in the raw stdout (the reason-freely envelope, ADR-0020). */
 function factBlocks(text: string): string[] {
-  const fence = /```atlas-fact[^\n]*\n([\s\S]*?)\n```/g;
-  const bodies: string[] = [];
-  for (const m of text.matchAll(fence)) bodies.push(m[1]!);
-  return bodies;
+  const fence = /```atlas-fact[^\n]*\n([\s\S]*?)\n```/g
+  const bodies: string[] = []
+  for (const m of text.matchAll(fence)) bodies.push(m[1]!)
+  return bodies
 }
 
-const MAX_FACT_BLOCK_BYTES = 8 * 1024;
+const MAX_FACT_BLOCK_BYTES = 8 * 1024
 
 /**
  * The SINGLE-RESPONSE predicate (#195 §4 — specified at build time from the 2026-08-04 incident, not perfect
@@ -511,21 +517,21 @@ const MAX_FACT_BLOCK_BYTES = 8 * 1024;
  *       answers, where a conforming single answer is one line of prose.
  */
 function isSplicedAnswer(text: string): boolean {
-  if (hasControlByteSplice(text)) return true; //                          (a) C0 control byte = interleave seam
-  return text.split('\n').filter((line) => line.trim() !== '').length > 1; // (b) >1 response envelope (LINE mode only)
+  if (hasControlByteSplice(text)) return true //                          (a) C0 control byte = interleave seam
+  return text.split("\n").filter((line) => line.trim() !== "").length > 1 // (b) >1 response envelope (LINE mode only)
 }
 
 /** (a) The INTERLEAVE fingerprint alone — a C0 control byte a single answer never carries (below U+0020 except
  *  TAB/LF/CR). Concurrent writers racing one pipe inject stray control/NUL bytes at the splice seam. Applies in
  *  BOTH answer formats; the line-count leg (b) is LINE-mode-only (see admitModelAnswer). */
 function hasControlByteSplice(text: string): boolean {
-  return /[\u0000-\u0008\u000B\u000C\u000E-\u001F]/.test(text);
+  return /[\u0000-\u0008\u000B\u000C\u000E-\u001F]/.test(text)
 }
 
 /** The model-output admission contract for a proposer (ADR-0020). `line` = the one-line prose/abstain contract
  *  of the SOUND-GATED slots (dependency/count/negation). `block` = the reason-freely fenced-`atlas-fact` block
  *  contract of the advisory/semantic slots, where free reasoning is scratch and only the block's `claim` survives. */
-export type AnswerFormat = 'line' | 'block';
+export type AnswerFormat = "line" | "block"
 
 /**
  * A child that FINISHED CLEANLY but stopped reading stdin before we finished writing the prompt (`EPIPE`
@@ -551,25 +557,25 @@ export type AnswerFormat = 'line' | 'block';
  * salvaged bytes pass through the same #195c sanity gate as the happy path.
  */
 function salvageEarlyExit(e: unknown): Buffer | null {
-  const err = e as { code?: unknown; status?: unknown; stdout?: unknown } | null;
-  if (err?.code !== 'EPIPE' || err.status !== 0) return null;
-  return Buffer.isBuffer(err.stdout) ? err.stdout : Buffer.alloc(0);
+  const err = e as { code?: unknown; status?: unknown; stdout?: unknown } | null
+  if (err?.code !== "EPIPE" || err.status !== 0) return null
+  return Buffer.isBuffer(err.stdout) ? err.stdout : Buffer.alloc(0)
 }
 
 /** Classify a thrown `execFileSync` error. `ENOENT` is the absent command; `ETIMEDOUT`/`SIGTERM` is the
  *  budget's wall-clock; anything else reaching here is a non-zero exit. */
 function classifyModelFailure(e: unknown): ModelFailure {
-  const code = (e as { code?: unknown } | null)?.code;
-  if (code === 'ENOENT') return 'not-found';
-  if (code === 'ETIMEDOUT' || (e as { signal?: unknown } | null)?.signal === 'SIGTERM') return 'timeout';
-  return 'nonzero-exit';
+  const code = (e as { code?: unknown } | null)?.code
+  if (code === "ENOENT") return "not-found"
+  if (code === "ETIMEDOUT" || (e as { signal?: unknown } | null)?.signal === "SIGTERM") return "timeout"
+  return "nonzero-exit"
 }
 
 /** An actionable message: name the command that was actually run, and carry the child's captured stderr —
  *  without it a failure is only diagnosable by re-running by hand. */
 function describeModelFailure(command: ModelCommand, e: unknown): string {
-  const shown = [command.cmd, ...command.args].join(' ');
-  const stderr = (e as { stderr?: unknown } | null)?.stderr;
-  const detail = typeof stderr === 'string' && stderr.trim() !== '' ? stderr.trim() : String((e as Error)?.message ?? e);
-  return `the configured model command failed — \`${shown}\`: ${detail}`;
+  const shown = [command.cmd, ...command.args].join(" ")
+  const stderr = (e as { stderr?: unknown } | null)?.stderr
+  const detail = typeof stderr === "string" && stderr.trim() !== "" ? stderr.trim() : String((e as Error)?.message ?? e)
+  return `the configured model command failed — \`${shown}\`: ${detail}`
 }

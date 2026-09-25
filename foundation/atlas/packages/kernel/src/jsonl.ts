@@ -4,9 +4,9 @@
 // duplicate whole lines, never splice two events. INVARIANT: `lineMerge` degrades to a lossless
 // dedup-by-id union whose re-fold equals `RefLog.merge` (KERNEL-12b); identity via `eventId`, never re-rolled.
 
-import type { Hash } from '@atlas/contracts';
-import type { Event, EventLog } from './types.js';
-import { eventId } from './log.js';
+import type { Hash } from "@atlas/contracts"
+import type { Event, EventLog } from "./types.js"
+import { eventId } from "./log.js"
 
 /**
  * Serialize an event log to the append-only JSONL form: one JSON event per line, in append order. Because
@@ -14,18 +14,18 @@ import { eventId } from './log.js';
  * events together (KERNEL-12c).
  */
 export function toJsonl(log: EventLog): string {
-  return [...log.values()].map((e) => JSON.stringify(e)).join('\n');
+  return [...log.values()].map((e) => JSON.stringify(e)).join("\n")
 }
 
 /** Parse the JSONL log form back to events (blank lines skipped) — one event per non-empty line. Total. */
 export function parseJsonl(text: string): Event[] {
-  const out: Event[] = [];
-  for (const line of text.split('\n')) {
-    const trimmed = line.trim();
-    if (trimmed.length === 0) continue;
-    out.push(JSON.parse(trimmed) as Event);
+  const out: Event[] = []
+  for (const line of text.split("\n")) {
+    const trimmed = line.trim()
+    if (trimmed.length === 0) continue
+    out.push(JSON.parse(trimmed) as Event)
   }
-  return out;
+  return out
 }
 
 /**
@@ -34,7 +34,7 @@ export function parseJsonl(text: string): Event[] {
  * by an appended counter / `seq` instead of content fails this.
  */
 export function isContentKeyed(e: Event): boolean {
-  return eventId(e) === e.id;
+  return eventId(e) === e.id
 }
 
 /**
@@ -44,9 +44,9 @@ export function isContentKeyed(e: Event): boolean {
  * `re-fold(lineMerge(a,b)) ≡ fold(RefLog.merge(a,b))` with 0 events lost.
  */
 export function lineMerge(ours: string, theirs: string): Event[] {
-  const byId = new Map<Hash, Event>();
+  const byId = new Map<Hash, Event>()
   for (const e of [...parseJsonl(ours), ...parseJsonl(theirs)]) {
-    if (!byId.has(e.id)) byId.set(e.id, e);
+    if (!byId.has(e.id)) byId.set(e.id, e)
   }
-  return [...byId.values()];
+  return [...byId.values()]
 }

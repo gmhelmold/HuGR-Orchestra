@@ -15,10 +15,10 @@
 //    each a non-empty `subtreeHash`; no raw hashing, the branded value is read), `T2` (the proposed tier),
 //    and `advisory` (a candidate carries a `check` iff predicate — so advisory ⟺ no `check`).
 
-import type { Tier } from '@atlas/contracts';
-import type { Candidate } from '../types.js';
-import type { Grounding } from '@atlas/grounding';
-import { strictestTier } from './tier.js';
+import type { Tier } from "@atlas/contracts"
+import type { Candidate } from "../types.js"
+import type { Grounding } from "@atlas/grounding"
+import { strictestTier } from "./tier.js"
 
 // ── frozen FastpathApi surface, co-located here (was ref/fastpath.ts) ─────────────────────────────────
 
@@ -29,11 +29,11 @@ import { strictestTier } from './tier.js';
  * time; `lowRisk` (KNOW-18a/17b) is the door-2 threshold verdict whose THRESHOLD VALUE stays OPEN-DEFINE in
  * hits.ts (not invented here).
  */
-export type WriteOrigin = 'authored' | 'promoted';
+export type WriteOrigin = "authored" | "promoted"
 
 export interface RatifyContext {
-  readonly contested: boolean; // KNOW-18b — reviewer veto / conflicting node (store-state verdict)
-  readonly lowRisk: boolean; // KNOW-18a/17b — door-2 threshold verdict (threshold value = OPEN-DEFINE, hits.ts)
+  readonly contested: boolean // KNOW-18b — reviewer veto / conflicting node (store-state verdict)
+  readonly lowRisk: boolean // KNOW-18a/17b — door-2 threshold verdict (threshold value = OPEN-DEFINE, hits.ts)
 
   /**
    * [KNOW-8 · the promotion door] WHERE this write came from, as the DOOR knows it — `authored` (a seat
@@ -63,7 +63,7 @@ export interface RatifyContext {
    * staging; the payload has no way to say so and no way to say otherwise. A fact cannot declare itself
    * `authored` to buy a softer gate — the field is not on the fact.
    */
-  readonly origin?: WriteOrigin;
+  readonly origin?: WriteOrigin
 
   /**
    * [ARCH-9 · ADR-0010] The governance class the DOOR DERIVED for this write's target — the class the author
@@ -91,7 +91,7 @@ export interface RatifyContext {
    * required field would have forced every existing caller to invent a value, and an invented derivation
    * ("a constant that pins the gate open") is the one thing ARCH-9 names as NOT satisfying the clause.
    */
-  readonly derivedTier?: Tier;
+  readonly derivedTier?: Tier
 }
 
 export interface FastpathApi {
@@ -100,10 +100,10 @@ export interface FastpathApi {
    *  (method-tags-knw:142). `route` computes the candidate-intrinsic conjuncts (grounded/T2/advisory)
    *  itself; `ctx` supplies the store/threshold-derived `contested` + `lowRisk` verdicts and the two
    *  door-derived fields (`derivedTier`, `origin`). Pure + total over (candidate, ctx). */
-  route(candidate: Candidate, ctx: RatifyContext): 'auto-accept' | 'full-ratify';
+  route(candidate: Candidate, ctx: RatifyContext): "auto-accept" | "full-ratify"
 }
 
-export type FastpathRoute = 'auto-accept' | 'full-ratify';
+export type FastpathRoute = "auto-accept" | "full-ratify"
 
 /**
  * GROUND-2 real grounding: ≥1 entry, each carrying a non-empty `subtreeHash`. Fail-closed.
@@ -122,14 +122,14 @@ export type FastpathRoute = 'auto-accept' | 'full-ratify';
 export function isGrounded(grounding: Grounding): boolean {
   return (
     grounding.entries.length > 0 &&
-    grounding.entries.every((e) => typeof e.anchor.subtreeHash === 'string' && e.anchor.subtreeHash.length > 0)
-  );
+    grounding.entries.every((e) => typeof e.anchor.subtreeHash === "string" && e.anchor.subtreeHash.length > 0)
+  )
 }
 
 /** A candidate is advisory iff it carries NO `check` — the predicate family is the checkable one. */
 export function isAdvisory(candidate: Candidate): boolean {
   // An explicitly untrusted claim cannot retain predicate authority. Missing provenance stays legacy-compatible.
-  return candidate.check === undefined || (candidate.provenance !== undefined && candidate.provenance.trusted !== true);
+  return candidate.check === undefined || (candidate.provenance !== undefined && candidate.provenance.trusted !== true)
 }
 
 /**
@@ -137,22 +137,22 @@ export function isAdvisory(candidate: Candidate): boolean {
  * contested / door-derived `promoted` ALL route to `full-ratify`. Pure + total over (candidate, ctx).
  */
 export function route(candidate: Candidate, ctx: RatifyContext): FastpathRoute {
-  const grounded = isGrounded(candidate.grounding);
+  const grounded = isGrounded(candidate.grounding)
   // ARCH-9 — the gate-selecting class. A door-DERIVED class overrides the payload's self-declaration; the
   // lattice JOIN makes that override one-way (harder only) and fail-closed on anything off-lattice. Absent
   // ⇒ the declared class stands, the ARCH-D3b hole, documented on `RatifyContext.derivedTier`.
-  const governingTier = ctx.derivedTier === undefined ? candidate.tier : strictestTier(ctx.derivedTier, candidate.tier);
-  const t2 = governingTier === 'T2';
-  const advisory = isAdvisory(candidate);
+  const governingTier = ctx.derivedTier === undefined ? candidate.tier : strictestTier(ctx.derivedTier, candidate.tier)
+  const t2 = governingTier === "T2"
+  const advisory = isAdvisory(candidate)
   // Explicitly present malformed/untrusted receipts fail closed; absent receipt is legacy data.
-  const trusted = candidate.provenance === undefined || candidate.provenance.trusted === true;
+  const trusted = candidate.provenance === undefined || candidate.provenance.trusted === true
   // KNOW-8 — the PROMOTION conjunct. A write the door lifted out of staging is machine-proposed and unread
   // by any human, so the rubber-stamp premise the fast path rests on does not hold for it, whatever its
   // intrinsic conjuncts say. ONE-WAY: this can only remove a fast path, never grant one. Absent ⇒ authored.
-  const promoted = ctx.origin === 'promoted';
-  const fastPath = grounded && ctx.lowRisk && t2 && advisory && trusted && !ctx.contested && !promoted;
-  return fastPath ? 'auto-accept' : 'full-ratify';
+  const promoted = ctx.origin === "promoted"
+  const fastPath = grounded && ctx.lowRisk && t2 && advisory && trusted && !ctx.contested && !promoted
+  return fastPath ? "auto-accept" : "full-ratify"
 }
 
 /** The frozen-`FastpathApi` binding (conformance handle). */
-export const fastpath: FastpathApi = { route };
+export const fastpath: FastpathApi = { route }

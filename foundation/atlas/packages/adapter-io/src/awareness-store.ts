@@ -40,67 +40,67 @@
 // hash moving does move it — but it is coarser than the AST-unit oracle `@atlas/grounding` computes at
 // emit time, and that gap is stated rather than hidden.
 
-import { existsSync, readFileSync } from 'node:fs';
-import { join } from 'node:path';
-import { asSubtreeHash, id } from '@atlas/kernel';
-import type { Node } from '@atlas/kernel';
-import type { StructRef } from '@atlas/contracts';
-import type { CurrentNode } from '@atlas/knowledge';
-import { atlasRoot, rollup, awarenessBytes, makeAwarenessMemo } from '@atlas/memory';
-import type { Awareness, AwarenessMemo, FacetInput, FacetName, MemberId, RootFacets, WaveAssembly } from '@atlas/memory';
-import { createDiskStore } from './store.js';
-import { gitSidecarTrust } from './store-provenance.js';
-import { headSha } from './run-git.js';
+import { existsSync, readFileSync } from "node:fs"
+import { join } from "node:path"
+import { asSubtreeHash, id } from "@atlas/kernel"
+import type { Node } from "@atlas/kernel"
+import type { StructRef } from "@atlas/contracts"
+import type { CurrentNode } from "@atlas/knowledge"
+import { atlasRoot, rollup, awarenessBytes, makeAwarenessMemo } from "@atlas/memory"
+import type { Awareness, AwarenessMemo, FacetInput, FacetName, MemberId, RootFacets, WaveAssembly } from "@atlas/memory"
+import { createDiskStore } from "./store.js"
+import { gitSidecarTrust } from "./store-provenance.js"
+import { headSha } from "./run-git.js"
 
-const CONVENTIONS_REL = 'CONVENTIONS.md';
-const CAS_REL = join('.atlas', 'cas');
+const CONVENTIONS_REL = "CONVENTIONS.md"
+const CAS_REL = join(".atlas", "cas")
 
 /** Real `taste` source: `CONVENTIONS.md@sha` in the repo, content-hashed off the ACTUAL bytes on disk.
  *  Absent file ⇒ `undefined` (the caller omits the facet, `rollup` renders `UN-SEEDED`). */
 function tasteInput(repoPath: string): FacetInput | undefined {
-  const path = join(repoPath, CONVENTIONS_REL);
-  if (!existsSync(path)) return undefined;
-  const text = readFileSync(path, 'utf8');
+  const path = join(repoPath, CONVENTIONS_REL)
+  if (!existsSync(path)) return undefined
+  const text = readFileSync(path, "utf8")
   const anchor: StructRef = {
-    kind: 'file',
+    kind: "file",
     qualifiedPath: CONVENTIONS_REL,
     subtreeHash: asSubtreeHash(id(text)),
-  };
-  return { grounding: [anchor], tiers: [`taste: ${CONVENTIONS_REL}@sha`] };
+  }
+  return { grounding: [anchor], tiers: [`taste: ${CONVENTIONS_REL}@sha`] }
 }
 
 /** The coarser `StructRef` a persisted `CurrentNode` row can support (see the header's honest bound). */
 function structRefOf(node: CurrentNode): StructRef {
   return {
-    kind: 'symbol',
+    kind: "symbol",
     qualifiedPath: node.primaryAnchor ?? node.nodeKey,
     subtreeHash: asSubtreeHash(node.contentHash),
-  };
+  }
 }
 
 /** Sort key so two independent reads of the same on-disk projection fold to the SAME order — `Map`
  *  iteration order is insertion order, not a promise this file wants to depend on for A13b. */
 function byNodeKey(a: CurrentNode, b: CurrentNode): number {
-  return a.nodeKey < b.nodeKey ? -1 : a.nodeKey > b.nodeKey ? 1 : 0;
+  return a.nodeKey < b.nodeKey ? -1 : a.nodeKey > b.nodeKey ? 1 : 0
 }
 
 /** Real `constitution` source: the T0-tier rows of the PERSISTED knowledge projection. No persisted
  *  projection, or none tiered `T0`, ⇒ `undefined` (never fabricated). */
 function constitutionInput(repoPath: string): FacetInput | undefined {
-  const store = createDiskStore(join(repoPath, CAS_REL), () => headSha(repoPath), gitSidecarTrust(repoPath));
-  const projection = store.loadProjection();
-  if (projection === undefined) return undefined;
-  const t0 = [...projection.current.values()].filter((n) => n.tier === 'T0').sort(byNodeKey);
-  if (t0.length === 0) return undefined;
-  const grounding = t0.map(structRefOf);
-  const tiers = [`constitution: ${t0.length} ratified T0 invariant(s)`, ...t0.flatMap((n) => n.claims)];
-  return { grounding, tiers };
+  const store = createDiskStore(join(repoPath, CAS_REL), () => headSha(repoPath), gitSidecarTrust(repoPath))
+  const projection = store.loadProjection()
+  if (projection === undefined) return undefined
+  const t0 = [...projection.current.values()].filter((n) => n.tier === "T0").sort(byNodeKey)
+  if (t0.length === 0) return undefined
+  const grounding = t0.map(structRefOf)
+  const tiers = [`constitution: ${t0.length} ratified T0 invariant(s)`, ...t0.flatMap((n) => n.claims)]
+  return { grounding, tiers }
 }
 
 /** One optional facet, spread-safe under `exactOptionalPropertyTypes` — an absent input contributes NO
  *  key at all (never an explicit `undefined` value), which is what makes it a legal `RootFacets` write. */
 function facetOr(name: FacetName, input: FacetInput | undefined): Partial<RootFacets> {
-  return input === undefined ? {} : { [name]: input };
+  return input === undefined ? {} : { [name]: input }
 }
 
 /**
@@ -111,10 +111,10 @@ function facetOr(name: FacetName, input: FacetInput | undefined): Partial<RootFa
  */
 export function realAtlasRoot(repoPath: string, opts?: { readonly bump?: string }): Node {
   const facets: RootFacets = {
-    ...facetOr('constitution', constitutionInput(repoPath)),
-    ...facetOr('taste', tasteInput(repoPath)),
-  };
-  return atlasRoot(facets, opts);
+    ...facetOr("constitution", constitutionInput(repoPath)),
+    ...facetOr("taste", tasteInput(repoPath)),
+  }
+  return atlasRoot(facets, opts)
 }
 
 /** The store's surface: read the composed slab, its byte-identical injection form, and the memoized
@@ -122,24 +122,24 @@ export function realAtlasRoot(repoPath: string, opts?: { readonly bump?: string 
 export interface AwarenessStore {
   /** Assemble Awareness fresh from the real root (MEM-11) — pure per call: two independent callers over
    *  the same repo state get byte-identical values without sharing any cache. */
-  read(): Awareness;
+  read(): Awareness
   /** The byte-identical injection form (MEM-11g) of a fresh `read()`. */
-  bytes(): Uint8Array;
+  bytes(): Uint8Array
   /** The shared, memoized per-wave assembly (MEM-12) — instrumented `AssemblyReceipt`, never timing. */
-  assembleForWave(seats: readonly MemberId[]): WaveAssembly;
+  assembleForWave(seats: readonly MemberId[]): WaveAssembly
 }
 
 export function createAwarenessStore(repoPath: string): AwarenessStore {
-  const memo: AwarenessMemo = makeAwarenessMemo();
+  const memo: AwarenessMemo = makeAwarenessMemo()
   return {
     read(): Awareness {
-      return rollup(realAtlasRoot(repoPath));
+      return rollup(realAtlasRoot(repoPath))
     },
     bytes(): Uint8Array {
-      return awarenessBytes(rollup(realAtlasRoot(repoPath)));
+      return awarenessBytes(rollup(realAtlasRoot(repoPath)))
     },
     assembleForWave(seats: readonly MemberId[]): WaveAssembly {
-      return memo.assembleForWave(seats, realAtlasRoot(repoPath));
+      return memo.assembleForWave(seats, realAtlasRoot(repoPath))
     },
-  };
+  }
 }

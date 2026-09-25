@@ -14,7 +14,7 @@
 > Every invariant on this surface fails the **second** conjunct: the state space is a fixture repository, a
 > finite door set, a closed 13-member slot union, and a four-gate decision table. There is no unbounded
 > interleaving and no concurrency — planners are pure reads, and the one durable transition (`atlas-emit`)
-> is already governed and already modelled downstream. What this surface *does* have is an unusually high
+> is already governed and already modelled downstream. What this surface _does_ have is an unusually high
 > density of **agreement** properties (planner ≡ gate, check ≡ door, CLI ≡ MCP), which is why the `PBT`
 > share here (5/18) is higher than in any other block: an agreement law is exactly what a `∀` quantifier is
 > for, and exactly what a witness pair cannot close.
@@ -24,6 +24,7 @@
 ---
 
 ### INV-AUTH-1
+
 method-tag: PBT
 fspec: —
 up-property: "single-seam agreement: ∀ anchor a reachable at rev R, the hash the planner derives for a EQUALS the hash the emit truth-gate re-derives for a at R — for every language, every anchor kind (file/dir/symbol), and with the caller performing zero set-up of its own"
@@ -32,6 +33,7 @@ anti-rot: the gate seam is the mock — the planner is wired to the identical ex
 teeth: breaks-on "a planner that folds without the AST grammars warm (silently file-level) — the file-anchor witness passes and only a symbol anchor at a cold call site diverges"
 
 ### INV-AUTH-2
+
 method-tag: exhaustive
 fspec: —
 up-property: "zero write authority, totally: for EVERY member of the authoring door set × every argument class (valid, malformed, empty), bytes written to CAS == 0 ∧ bytes written to the projection sidecar == 0 ∧ cache entries created == 0 ∧ the door ∉ WRITE_PATHS ∧ the door ∉ GOVERNANCE_SURFACE"
@@ -40,6 +42,7 @@ anti-rot: the write-spy store is the mock; any door that acquires a store write 
 teeth: breaks-on "a door that memoizes its index build to disk 'just as a cache' — a read-only assertion on the CAS alone misses it; the spy covers cache writes too"
 
 ### INV-AUTH-3
+
 method-tag: reference-model
 fspec: —
 up-property: "anchor faithfulness: for the fixture repo, anchors(path) equals the built index's unit set under path (qualifiedPath · kind · current subtreeHash), is byte-identical across two runs, reports the rev, and contains exactly the index's units — 0 phantom, 0 missing; a non-git / unreadable / untracked path yields units == [] with a reason and 0 exceptions"
@@ -48,6 +51,7 @@ anti-rot: the fixture repo + its reference unit set are the mock; a lister that 
 teeth: breaks-on "a lister that sorts by insertion order rather than the index's order — content-equality passes, sequence-equality does not"
 
 ### INV-AUTH-4
+
 method-tag: reference-model
 fspec: —
 up-property: "declared-hole honesty: for a fixture spanning a grammar-configured language and a grammar-less one, the grammar-less files appear at FILE level AND a holes[] entry names their extension, count, and reason; the grammar-configured files appear at symbol level with no hole entry"
@@ -56,6 +60,7 @@ anti-rot: the mixed-language fixture is the mock; a lister that degrades silentl
 teeth: breaks-on "a lister that emits a hole entry with fileCount 0 or a hard-coded extension list — the count is asserted against the fixture's real file census, not a constant"
 
 ### INV-AUTH-5
+
 method-tag: exhaustive
 fspec: —
 up-property: "closed-vocabulary totality: slots() == the closed PredicateSlot union, exactly — every member present, no non-member present — and the set is obtained BY DERIVATION from the union such that adding a member to the union surfaces it at the door with no door edit"
@@ -64,6 +69,7 @@ anti-rot: the union itself is the mock — the door's mapping is total over the 
 teeth: breaks-on "a hand-transcribed 13-element array that silently goes stale when a 14th slot is added — set-equality passes today and fails the day the union grows, which is exactly when nobody re-reads the door"
 
 ### INV-AUTH-6
+
 method-tag: reference-model
 fspec: —
 up-property: "draft completeness: for a drafted fact, the set of fields the governed emit door reads ⊆ the set of fields present and well-formed on the fact; identity == nodeKey(candidateView(fact)); grounding.subtreeHash == the computer's current value for the anchor; and the author-supplied input set == {anchor, slot, claim}"
@@ -72,6 +78,7 @@ anti-rot: the emit door is the mock; a field the door starts reading and the dra
 teeth: breaks-on "a drafter that emits an `id` it invents rather than mints — the fact still emits (the door re-mints identity anyway), so only asserting against the formula catches it"
 
 ### INV-AUTH-7
+
 method-tag: reference-model
 fspec: —
 up-property: "rev legibility: a draft carries the rev it was computed at; emitting that draft at a different rev yields a refusal whose reason names the rev mismatch and does NOT name the claim"
@@ -80,6 +87,7 @@ anti-rot: the two-commit fixture is the mock; a drafter that omits the rev makes
 teeth: breaks-on "a refusal that names the drift generically ('grounding does not re-derive') when the true cause is a rev mismatch the product itself could have detected"
 
 ### INV-AUTH-8
+
 method-tag: PBT
 fspec: —
 up-property: "round-trip acceptance: ∀ (anchor a, slot s, claim c) with a reachable at rev R, emit(draft(a,s,c,R), R) on an unchanged repository is ACCEPTED by the truth door — no exceptions across anchor kinds, languages, tiers, or claim contents"
@@ -88,6 +96,7 @@ anti-rot: the emit door is the mock; this property is the ACCEPTANCE CRITERION o
 teeth: breaks-on "a drafter correct for file anchors and wrong for symbol anchors (the `::` unit path) — the natural hand-written witness is a file anchor, so only the ∀ over the real unit set reaches the symbol case"
 
 ### INV-AUTH-9
+
 method-tag: exhaustive
 fspec: —
 up-property: "route disclosure totality: for EVERY point in the route decision space (tier × node kind × contested × lowRisk), the draft's declared route equals the route the governed door will take, and a full-ratify route names its authorizing channel"
@@ -96,6 +105,7 @@ anti-rot: the route function is the mock — the drafter calls it rather than re
 teeth: breaks-on "a drafter that hard-codes 'T0 ⇒ full-ratify' and misses the predicate-kind and contested routes — the T0 witness passes while a T2 predicate silently reports auto-accept and then fails at the door"
 
 ### INV-AUTH-10
+
 method-tag: exhaustive
 fspec: —
 up-property: "operation disclosure totality: over the finite {identity occupied, identity free} × {advisory, predicate} space, draft reports UPDATE exactly when a current node exists at the drafted (anchor, slot) identity and CREATE otherwise — never absent, never inverted"
@@ -104,6 +114,7 @@ anti-rot: the projection reader is the mock; the drafter queries the same rehydr
 teeth: breaks-on "an occupancy check keyed on the CAS contentHash instead of the nodeKey — a REWORDED claim at the same (anchor, slot) then reports CREATE, which is precisely the case the invariant exists for"
 
 ### INV-AUTH-11
+
 method-tag: PBT
 fspec: —
 up-property: "dry-run fidelity: ∀ fact f, rev r, actor α, token τ. check(f,r,α,τ).wouldEmit == emit(f,r,α,τ).emitted — over a corpus spanning every gate outcome (shape · truth · authz · ratify) and every combination of them"
@@ -112,6 +123,7 @@ anti-rot: the door is the mock; `check` composes the door's own gate functions r
 teeth: breaks-on "a `check` that evaluates authz before truth — every single-failure input still agrees; only an input that fails BOTH truth and authz reveals the order divergence, and only the ∀ generates it"
 
 ### INV-AUTH-12
+
 method-tag: PBT
 fspec: —
 up-property: "refusal legibility: ∀ input i in the malformed/adversarial space, the refusal reason NAMES a gate from the closed GateName set ∧ carries a non-empty remedy ∧ matches no runtime-error shape (no 'Cannot read propert', no 'is not a function', no stack frame, no 'undefined')"
@@ -120,6 +132,7 @@ anti-rot: the reason grammar is the mock; a raw thrown error cannot satisfy it.
 teeth: breaks-on "a validator that structures the reasons it anticipates and lets an unanticipated shape fall through to the catch-all — which is exactly the observed `Cannot read properties of undefined (reading 'length')` failure; only the fuzz reaches the unanticipated shape"
 
 ### INV-AUTH-13
+
 method-tag: exhaustive
 fspec: —
 up-property: "retire-without-a-door: the write-path set equals {atlas-emit, atlas-link} exactly (no retire, no delete member) ∧ a retire draft persists only through atlas-emit ∧ every gate a grounded-fact emit passes is also passed by the retire"
@@ -128,6 +141,7 @@ anti-rot: the emit door's gate chain is the mock; a retire path that skips a gat
 teeth: breaks-on "a retire that skips the truth gate on the reasoning that a superseded fact 'need not re-ground' — the persistence assertion passes and only the gate-invocation spy catches it"
 
 ### INV-AUTH-14
+
 method-tag: reference-model
 fspec: —
 up-property: "receipt closure: the identity a successful emit returns resolves through the per-node read door and is accepted by the link door, with no intervening query"
@@ -136,6 +150,7 @@ anti-rot: the read door is the mock; a receipt carrying only an address the read
 teeth: breaks-on "a receipt that carries the nodeKey but drops the CAS id, breaking the drift/doctor read-back that consumes the CAS address — the read-door arm passes; the assertion is that the receipt covers BOTH consumers"
 
 ### INV-AUTH-15
+
 method-tag: exhaustive
 fspec: —
 up-property: "fast-path verdict derivability: the write door supplies `contested` and `lowRisk` DERIVED from observed state (commit-retry contention; the cleared truth gate + the advisory T2 class), never from a module-level constant; a contended write is `full-ratify`, an ungrounded or predicate T2 is never `lowRisk`"
@@ -144,6 +159,7 @@ anti-rot: the `route` API is the mock, driven with contexts built from real deri
 teeth: breaks-on "a door that hardcodes `{ contested: false, lowRisk: true }` at module scope — the shape/truth/authz gates all pass, only the derivation assertion catches it"
 
 ### INV-AUTH-16
+
 method-tag: exhaustive
 fspec: —
 up-property: "use-or-seal growth totality: an advisory node rises by ONE of two sufficient evidences — USE (a per-node served-counter reaching the fixed `USE_THRESHOLD` plain integer) or SEAL (a human ratify token endorsement) — and NEVER by default; a node earning neither stays advisory and decays (KNOW-17)"
@@ -152,6 +168,7 @@ anti-rot: the counter + seal are the mock; a rise gated on anything other than t
 teeth: breaks-on "a default rise (a node climbing at zero counter), or a rise that requires BOTH threshold and seal — either violates 'neither mandatory' and the fixed-threshold design"
 
 ### INV-CLI-5
+
 method-tag: exhaustive
 fspec: —
 up-property: "help coverage totality: the set of commands help names ⊇ the parser's command list (which is finite and closed), each with its arity and flags; and the set of write-governing environment channels help names ⊇ the set the composition root reads"
@@ -160,6 +177,7 @@ anti-rot: the parser's command map is the mock; help derives from it rather than
 teeth: breaks-on "help hand-listing the commands — correct on the day it is written and stale the first time a command is added, which is when nobody re-reads help"
 
 ### INV-CLI-6
+
 method-tag: exhaustive
 fspec: —
 up-property: "render coverage totality: for EVERY leg (a finite set), the key set of the rendered output ⊇ the field set of that leg's result record — 0 silently dropped fields"
@@ -168,14 +186,16 @@ anti-rot: the result records are the mock; a field added to a record and not to 
 teeth: breaks-on "a render that returns early after the first recognised field shape — exactly the `render.ts` init-leg behaviour, where two of three fields never reach the user"
 
 ### INV-MCP-3
+
 method-tag: exhaustive
 fspec: —
-up-property: "advertised-surface totality: advertised == GOVERNANCE_SURFACE ∪ READ_SURFACE ∧ READ_SURFACE ∩ GOVERNANCE_SURFACE == ∅ ∧ READ_SURFACE ∩ WRITE_PATHS == ∅ ∧ |GOVERNANCE_SURFACE| == 6 ∧ |WRITE_PATHS| == 3 ∧ ∀ t ∈ READ_SURFACE. bytesWritten(t) == 0  (ADR-0005; ADR-0006 Decision 2 superseded the fixed count)"
+up-property: "advertised-surface totality: advertised == GOVERNANCE_SURFACE ∪ READ_SURFACE ∧ READ_SURFACE ∩ GOVERNANCE_SURFACE == ∅ ∧ READ_SURFACE ∩ WRITE_PATHS == ∅ ∧ |GOVERNANCE_SURFACE| == 6 ∧ |WRITE_PATHS| == 3 ∧ ∀ t ∈ READ_SURFACE. bytesWritten(t) == 0 (ADR-0005; ADR-0006 Decision 2 superseded the fixed count)"
 down-model: "all three sets are FINITE and closed — enumerate them; assert the union, the two disjointness predicates, and the two cardinalities (==6 / ==3) by deep-equal against the frozen expectations; then invoke every READ_SURFACE member under the write-spy store"
 anti-rot: the three frozen constants are the mock, pinned by the spec-conformance guard's CODE-SURFACE PIN — which gains the two disjointness checks in the same change.
 teeth: breaks-on "a read door added to READ_SURFACE that internally delegates to the emit leg for convenience — the cardinality and disjointness assertions all pass; only the write-spy arm catches the routing"
 
 ### INV-MCP-4
+
 method-tag: PBT
 fspec: —
 up-property: "cross-transport equivalence, extended: ∀ door d ∈ the authoring surface, ∀ input x. cli(d,x) ≡ mcp(d,x) — byte-identical Verdict, valid ∨ malformed x, with no divergence in coercion, defaulting, error shape, or field set"
@@ -187,12 +207,12 @@ teeth: breaks-on "an MCP-side JSON round-trip that drops an `undefined`-valued o
 
 ## Completeness (S2 predicates)
 
-| predicate | verdict |
-|---|---|
-| every INV carries exactly one `method-tag` | ✅ 20/20 |
-| no untagged INV | ✅ |
-| every `formal` tag justified by all three conjuncts | ✅ vacuous — **0** `formal` tags; the refusal is argued above, not asserted |
-| any `FSPEC` maps to its cluster's INVs | ✅ vacuous — no `FSPEC` authored here; `FSPEC-merge` is consumed through frozen seams and is unchanged |
-| the tool matches the problem *shape*, not the domain | ⚠️ judgment — **COLD-REVIEW pending** |
+| predicate                                            | verdict                                                                                                |
+| ---------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
+| every INV carries exactly one `method-tag`           | ✅ 20/20                                                                                               |
+| no untagged INV                                      | ✅                                                                                                     |
+| every `formal` tag justified by all three conjuncts  | ✅ vacuous — **0** `formal` tags; the refusal is argued above, not asserted                            |
+| any `FSPEC` maps to its cluster's INVs               | ✅ vacuous — no `FSPEC` authored here; `FSPEC-merge` is consumed through frozen seams and is unchanged |
+| the tool matches the problem _shape_, not the domain | ⚠️ judgment — **COLD-REVIEW pending**                                                                  |
 
 **DoD: NOT MET** — GATE pending, COLD-REVIEW pending.

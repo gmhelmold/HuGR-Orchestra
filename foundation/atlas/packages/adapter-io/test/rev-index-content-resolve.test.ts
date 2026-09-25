@@ -22,109 +22,113 @@
 // EVERY file matches at least twice across axes. Ambiguity is therefore counted in DISTINCT qualifiedPaths,
 // not raw node hits — counting hits would refuse every file and disable the mechanical arm entirely.
 
-import { execFileSync } from 'node:child_process';
-import { mkdtempSync, writeFileSync, mkdirSync, rmSync } from 'node:fs';
-import { tmpdir } from 'node:os';
-import { join } from 'node:path';
-import { describe, it, expect, afterEach } from 'vitest';
-import { build } from '@atlas/index';
-import { createRevIndex } from '../src/rev-index.js';
+import { execFileSync } from "node:child_process"
+import { mkdtempSync, writeFileSync, mkdirSync, rmSync } from "node:fs"
+import { tmpdir } from "node:os"
+import { join } from "node:path"
+import { describe, it, expect, afterEach } from "vitest"
+import { build } from "@atlas/index"
+import { createRevIndex } from "../src/rev-index.js"
 
-const BAD_REV = 'no-such-rev-deadbeef';
-const DUP = 'VERSION = "1.0"\n'; // authored at TWO paths — byte-identical, so one subtreeHash, two homes
-const UNIQ = 'only-here\n';
+const BAD_REV = "no-such-rev-deadbeef"
+const DUP = 'VERSION = "1.0"\n' // authored at TWO paths — byte-identical, so one subtreeHash, two homes
+const UNIQ = "only-here\n"
 
 /** The empty-tree root hash — the value `EMPTY_AXES.spatial.subtreeHash` carries (rev-index.ts). Derived
  *  from the frozen `build`, never pinned as a literal, so a legitimate re-key of the fold cannot rot it. */
-const EMPTY_ROOT = String(build({ path: '.', children: [] }, { documents: [] }).spatial.subtreeHash);
+const EMPTY_ROOT = String(build({ path: ".", children: [] }, { documents: [] }).spatial.subtreeHash)
 
 const g = (repo: string, args: readonly string[]): string =>
-  execFileSync('git', args as string[], { cwd: repo, encoding: 'utf8' }).trim();
+  execFileSync("git", args as string[], { cwd: repo, encoding: "utf8" }).trim()
 
 interface Sandbox {
-  readonly repoPath: string;
-  readonly A: string;
-  cleanup(): void;
+  readonly repoPath: string
+  readonly A: string
+  cleanup(): void
 }
 
 /** A repo whose commit A holds two byte-identical files at different paths, plus one unique file. */
 function makeDupRepo(): Sandbox {
-  const repoPath = mkdtempSync(join(tmpdir(), 'revidx-dup-'));
-  g(repoPath, ['init', '-q']);
-  g(repoPath, ['config', 'user.email', 't@t.t']);
-  g(repoPath, ['config', 'user.name', 'T']);
-  g(repoPath, ['config', 'commit.gpgsign', 'false']);
-  mkdirSync(join(repoPath, 'pkg_a'), { recursive: true });
-  mkdirSync(join(repoPath, 'pkg_b'), { recursive: true });
-  writeFileSync(join(repoPath, 'pkg_a/__init__.py'), DUP);
-  writeFileSync(join(repoPath, 'pkg_b/__init__.py'), DUP);
-  writeFileSync(join(repoPath, 'unique.txt'), UNIQ);
-  g(repoPath, ['add', '-A']);
-  g(repoPath, ['commit', '-q', '-m', 'A']);
-  return { repoPath, A: g(repoPath, ['rev-parse', 'HEAD']), cleanup: () => rmSync(repoPath, { recursive: true, force: true }) };
+  const repoPath = mkdtempSync(join(tmpdir(), "revidx-dup-"))
+  g(repoPath, ["init", "-q"])
+  g(repoPath, ["config", "user.email", "t@t.t"])
+  g(repoPath, ["config", "user.name", "T"])
+  g(repoPath, ["config", "commit.gpgsign", "false"])
+  mkdirSync(join(repoPath, "pkg_a"), { recursive: true })
+  mkdirSync(join(repoPath, "pkg_b"), { recursive: true })
+  writeFileSync(join(repoPath, "pkg_a/__init__.py"), DUP)
+  writeFileSync(join(repoPath, "pkg_b/__init__.py"), DUP)
+  writeFileSync(join(repoPath, "unique.txt"), UNIQ)
+  g(repoPath, ["add", "-A"])
+  g(repoPath, ["commit", "-q", "-m", "A"])
+  return {
+    repoPath,
+    A: g(repoPath, ["rev-parse", "HEAD"]),
+    cleanup: () => rmSync(repoPath, { recursive: true, force: true }),
+  }
 }
 
-let sbx: Sandbox | undefined;
+let sbx: Sandbox | undefined
 afterEach(() => {
-  sbx?.cleanup();
-  sbx = undefined;
-});
+  sbx?.cleanup()
+  sbx = undefined
+})
 
-describe('rev-index — a failed checkout must not ANSWER (the EMPTY sentinel fails open)', () => {
-  it('resolveBySubtreeAt on a bad rev refuses the empty-root hash [teeth: answer from EMPTY_AXES ⇒ RED]', () => {
-    sbx = makeDupRepo();
-    const rev = createRevIndex(sbx.repoPath);
+describe("rev-index — a failed checkout must not ANSWER (the EMPTY sentinel fails open)", () => {
+  it("resolveBySubtreeAt on a bad rev refuses the empty-root hash [teeth: answer from EMPTY_AXES ⇒ RED]", () => {
+    sbx = makeDupRepo()
+    const rev = createRevIndex(sbx.repoPath)
     // The rev does not exist, so NOTHING re-derives in it — least of all the repo ROOT.
-    expect(rev.resolveBySubtreeAt(BAD_REV, EMPTY_ROOT)).toBeUndefined();
-  });
+    expect(rev.resolveBySubtreeAt(BAD_REV, EMPTY_ROOT)).toBeUndefined()
+  })
 
-  it('resolveAnchorAt on a bad rev refuses the repo root [teeth: answer from EMPTY_AXES ⇒ RED]', () => {
-    sbx = makeDupRepo();
-    const rev = createRevIndex(sbx.repoPath);
+  it("resolveAnchorAt on a bad rev refuses the repo root [teeth: answer from EMPTY_AXES ⇒ RED]", () => {
+    sbx = makeDupRepo()
+    const rev = createRevIndex(sbx.repoPath)
     // Same masquerade in the PATH reader: '.' is a key that exists in the empty sentinel.
-    expect(rev.resolveAnchorAt(BAD_REV, '.')).toBeUndefined();
-  });
+    expect(rev.resolveAnchorAt(BAD_REV, ".")).toBeUndefined()
+  })
 
-  it('a rev that is GENUINELY empty still resolves — the guard keys on provenance, not on the hash', () => {
-    const repoPath = mkdtempSync(join(tmpdir(), 'revidx-empty-'));
-    sbx = { repoPath, A: '', cleanup: () => rmSync(repoPath, { recursive: true, force: true }) };
-    g(repoPath, ['init', '-q']);
-    g(repoPath, ['config', 'user.email', 't@t.t']);
-    g(repoPath, ['config', 'user.name', 'T']);
-    g(repoPath, ['config', 'commit.gpgsign', 'false']);
-    g(repoPath, ['commit', '-q', '--allow-empty', '-m', 'empty tree']);
-    const emptyRev = g(repoPath, ['rev-parse', 'HEAD']);
+  it("a rev that is GENUINELY empty still resolves — the guard keys on provenance, not on the hash", () => {
+    const repoPath = mkdtempSync(join(tmpdir(), "revidx-empty-"))
+    sbx = { repoPath, A: "", cleanup: () => rmSync(repoPath, { recursive: true, force: true }) }
+    g(repoPath, ["init", "-q"])
+    g(repoPath, ["config", "user.email", "t@t.t"])
+    g(repoPath, ["config", "user.name", "T"])
+    g(repoPath, ["config", "commit.gpgsign", "false"])
+    g(repoPath, ["commit", "-q", "--allow-empty", "-m", "empty tree"])
+    const emptyRev = g(repoPath, ["rev-parse", "HEAD"])
 
-    const rev = createRevIndex(repoPath);
+    const rev = createRevIndex(repoPath)
     // The checkout SUCCEEDS, so the empty snapshot is the rev's HONEST content and must still answer.
-    const root = rev.resolveAnchorAt(emptyRev, '.');
-    expect(root).toBeDefined();
-    expect(root!.kind).toBe('repo');
+    const root = rev.resolveAnchorAt(emptyRev, ".")
+    expect(root).toBeDefined()
+    expect(root!.kind).toBe("repo")
     // MUTANT: a guard that blocked the empty-root HASH (rather than the failed REV) would flip this.
-  });
-});
+  })
+})
 
-describe('rev-index — a genuine multi-match is refused, never guessed', () => {
-  it('two byte-identical files ⇒ resolveBySubtreeAt refuses [teeth: return first preorder hit ⇒ RED]', () => {
-    sbx = makeDupRepo();
-    const rev = createRevIndex(sbx.repoPath);
+describe("rev-index — a genuine multi-match is refused, never guessed", () => {
+  it("two byte-identical files ⇒ resolveBySubtreeAt refuses [teeth: return first preorder hit ⇒ RED]", () => {
+    sbx = makeDupRepo()
+    const rev = createRevIndex(sbx.repoPath)
 
-    const a = rev.resolveAnchorAt(sbx.A, 'pkg_a/__init__.py');
-    const b = rev.resolveAnchorAt(sbx.A, 'pkg_b/__init__.py');
-    expect(String(a!.subtreeHash)).toBe(String(b!.subtreeHash)); // one content, two homes
+    const a = rev.resolveAnchorAt(sbx.A, "pkg_a/__init__.py")
+    const b = rev.resolveAnchorAt(sbx.A, "pkg_b/__init__.py")
+    expect(String(a!.subtreeHash)).toBe(String(b!.subtreeHash)) // one content, two homes
 
     // There is no unique correct re-ground target, so the honest answer is "I cannot resolve this".
-    expect(rev.resolveBySubtreeAt(sbx.A, String(a!.subtreeHash))).toBeUndefined();
-  });
+    expect(rev.resolveBySubtreeAt(sbx.A, String(a!.subtreeHash))).toBeUndefined()
+  })
 
-  it('a UNIQUE content still resolves, despite matching in both the spatial and territory axes', () => {
-    sbx = makeDupRepo();
-    const rev = createRevIndex(sbx.repoPath);
+  it("a UNIQUE content still resolves, despite matching in both the spatial and territory axes", () => {
+    sbx = makeDupRepo()
+    const rev = createRevIndex(sbx.repoPath)
 
-    const u = rev.resolveAnchorAt(sbx.A, 'unique.txt');
-    const hit = rev.resolveBySubtreeAt(sbx.A, String(u!.subtreeHash));
-    expect(hit).toBeDefined();
-    expect(hit!.qualifiedPath).toBe('unique.txt');
+    const u = rev.resolveAnchorAt(sbx.A, "unique.txt")
+    const hit = rev.resolveBySubtreeAt(sbx.A, String(u!.subtreeHash))
+    expect(hit).toBeDefined()
+    expect(hit!.qualifiedPath).toBe("unique.txt")
     // MUTANT: counting RAW axis hits instead of DISTINCT qualifiedPaths refuses this too → flips.
-  });
-});
+  })
+})

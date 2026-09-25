@@ -1,8 +1,8 @@
 # `atlas test-vacuities`
 
 Read the **grounded test-vacuity facts** on a unit. A test-vacuity fact (ADR-0015 **D5** / #95) is a
-**single-anchor `proven`** record — *named test `testName` in unit `unitKey` has every assertion-shaped call
-inside a `catch` clause and no assertion-count guard* (one shape of the closed `TestVacuityShape` vocabulary). This is the
+**single-anchor `proven`** record — _named test `testName` in unit `unitKey` has every assertion-shaped call
+inside a `catch` clause and no assertion-count guard_ (one shape of the closed `TestVacuityShape` vocabulary). This is the
 **read-only** door: it folds the `family:'test-vacuity'` rows off the **same durable projection** `atlas query`
 reads back, so a fact produced by [`atlas test-vacuity`](./test-vacuity.md) is visible to the very next call.
 

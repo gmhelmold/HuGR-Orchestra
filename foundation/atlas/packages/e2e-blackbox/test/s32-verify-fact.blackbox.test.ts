@@ -17,70 +17,70 @@
 //   - dependency PHANTOM              ⇒ ABSTAIN (unresolvable target, #220 — an honest non-answer, exit 0)
 //   - a missing --scope               ⇒ a structured error + non-zero exit (malformed, never a throw)
 
-import { afterAll, describe, expect, it } from 'vitest';
-import { makeFixtureRepo, runAtlas } from '../src/harness.js';
-import type { FixtureRepo } from '../src/harness.js';
+import { afterAll, describe, expect, it } from "vitest"
+import { makeFixtureRepo, runAtlas } from "../src/harness.js"
+import type { FixtureRepo } from "../src/harness.js"
 
 // GLOBAL SCIP symbols (NOT `local ` — the groundable case), in the same descriptor form s31 uses.
-const GREET = 'scip . . `greet`#';
-const PHANTOM = 'scip . . `phantom`#';
+const GREET = "scip . . `greet`#"
+const PHANTOM = "scip . . `phantom`#"
 
 const FILES = {
-  'src/lib/def.ts': 'export function greet() { return 1; }\n',
-  'src/app/use.ts': 'export function use() { return 2; }\n',
-};
+  "src/lib/def.ts": "export function greet() { return 1; }\n",
+  "src/app/use.ts": "export function use() { return 2; }\n",
+}
 
 // The real SCIP the product reads: def.ts DEFINES greet (⇒ it RESOLVES), app/use.ts REFERENCES it (⇒ a caller
 // under src/app). Nothing defines PHANTOM ⇒ it is unresolvable.
 const INDEX = [
-  { path: 'src/lib/def.ts', defines: [GREET] },
-  { path: 'src/app/use.ts', references: [GREET] },
-];
+  { path: "src/lib/def.ts", defines: [GREET] },
+  { path: "src/app/use.ts", references: [GREET] },
+]
 
-let repo: FixtureRepo | undefined;
+let repo: FixtureRepo | undefined
 function indexedRepo(): FixtureRepo {
-  repo ??= makeFixtureRepo({ files: FILES, index: INDEX });
-  return repo;
+  repo ??= makeFixtureRepo({ files: FILES, index: INDEX })
+  return repo
 }
-afterAll(() => repo?.cleanup());
+afterAll(() => repo?.cleanup())
 
-describe('S32 — atlas verify-fact PROVES/REFUTES/ABSTAINS over the shipped binary (the sound gate is reached)', () => {
-  it('dependency: a witnessed caller under scope ⇒ PROVEN, exit 0', () => {
+describe("S32 — atlas verify-fact PROVES/REFUTES/ABSTAINS over the shipped binary (the sound gate is reached)", () => {
+  it("dependency: a witnessed caller under scope ⇒ PROVEN, exit 0", () => {
     // teeth (breaks-on "verifyFact leg is not wired"): without the compose→bin→cli seam this reads the
     // "runtime is not composed yet" error + exit 1, the exact reference-model state this story ends.
-    const run = runAtlas(indexedRepo().repoPath, ['verify-fact', 'dependency', GREET, '--scope', 'src/app']);
-    expect(run.exitCode).toBe(0);
-    expect(run.stdout).toContain('PROVEN');
-    expect(run.stdout).not.toContain('runtime is not composed');
-  });
+    const run = runAtlas(indexedRepo().repoPath, ["verify-fact", "dependency", GREET, "--scope", "src/app"])
+    expect(run.exitCode).toBe(0)
+    expect(run.stdout).toContain("PROVEN")
+    expect(run.stdout).not.toContain("runtime is not composed")
+  })
 
-  it('count: ≥1 caller under scope ⇒ PROVEN, exit 0', () => {
-    const run = runAtlas(indexedRepo().repoPath, ['verify-fact', 'count', GREET, '--scope', 'src', '--min', '1']);
-    expect(run.exitCode).toBe(0);
-    expect(run.stdout).toContain('PROVEN');
-  });
+  it("count: ≥1 caller under scope ⇒ PROVEN, exit 0", () => {
+    const run = runAtlas(indexedRepo().repoPath, ["verify-fact", "count", GREET, "--scope", "src", "--min", "1"])
+    expect(run.exitCode).toBe(0)
+    expect(run.stdout).toContain("PROVEN")
+  })
 
-  it('negation: a witnessed caller under scope ⇒ REFUTED (only negation refutes), exit 0', () => {
-    const run = runAtlas(indexedRepo().repoPath, ['verify-fact', 'negation', GREET, '--scope', 'src/app']);
-    expect(run.exitCode).toBe(0);
-    expect(run.stdout).toContain('REFUTED');
-  });
+  it("negation: a witnessed caller under scope ⇒ REFUTED (only negation refutes), exit 0", () => {
+    const run = runAtlas(indexedRepo().repoPath, ["verify-fact", "negation", GREET, "--scope", "src/app"])
+    expect(run.exitCode).toBe(0)
+    expect(run.stdout).toContain("REFUTED")
+  })
 
-  it('negation: a closed scope with no caller ⇒ PROVEN (a grounded negative), exit 0', () => {
-    const run = runAtlas(indexedRepo().repoPath, ['verify-fact', 'negation', GREET, '--scope', 'src/lib']);
-    expect(run.exitCode).toBe(0);
-    expect(run.stdout).toContain('PROVEN');
-  });
+  it("negation: a closed scope with no caller ⇒ PROVEN (a grounded negative), exit 0", () => {
+    const run = runAtlas(indexedRepo().repoPath, ["verify-fact", "negation", GREET, "--scope", "src/lib"])
+    expect(run.exitCode).toBe(0)
+    expect(run.stdout).toContain("PROVEN")
+  })
 
-  it('an unresolvable target ⇒ ABSTAIN (an honest non-answer), exit 0 — not an error', () => {
-    const run = runAtlas(indexedRepo().repoPath, ['verify-fact', 'dependency', PHANTOM, '--scope', 'src']);
-    expect(run.exitCode).toBe(0);
-    expect(run.stdout).toContain('ABSTAIN');
-  });
+  it("an unresolvable target ⇒ ABSTAIN (an honest non-answer), exit 0 — not an error", () => {
+    const run = runAtlas(indexedRepo().repoPath, ["verify-fact", "dependency", PHANTOM, "--scope", "src"])
+    expect(run.exitCode).toBe(0)
+    expect(run.stdout).toContain("ABSTAIN")
+  })
 
-  it('a missing --scope ⇒ a structured error + non-zero exit, never a throw', () => {
-    const run = runAtlas(indexedRepo().repoPath, ['verify-fact', 'dependency', GREET]);
-    expect(run.exitCode).not.toBe(0);
-    expect(run.stdout + run.stderr).toContain('--scope');
-  });
-});
+  it("a missing --scope ⇒ a structured error + non-zero exit, never a throw", () => {
+    const run = runAtlas(indexedRepo().repoPath, ["verify-fact", "dependency", GREET])
+    expect(run.exitCode).not.toBe(0)
+    expect(run.stdout + run.stderr).toContain("--scope")
+  })
+})

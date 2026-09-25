@@ -20,16 +20,23 @@
 // grammar before the (sync) composition root ran; its precondition (warm grammars in the axes it is handed)
 // is the composition root's, not the caller's.
 
-import { build } from '@atlas/index';
-import type { Axes, FileTree, IndexNode, ScipOutput } from '@atlas/index';
-import { bindGate, isGrounded, driftDetect, resolveCurrent } from '@atlas/grounding';
-import type { Hash, StructRef } from '@atlas/contracts';
-import type { GroundedFact } from '@atlas/knowledge';
-import type { AnchorsOut, AnchorUnit, GroundingCandidate, GroundingComputer, LanguageHole, TruthGate } from '@atlas/tools';
-import { foldAstUnits, initAst, isTsPath } from './ast.js';
-import { walkFileTree } from './fs.js';
-import { readScipOrEmpty } from './scip.js';
-import { headSha } from './run-git.js';
+import { build } from "@atlas/index"
+import type { Axes, FileTree, IndexNode, ScipOutput } from "@atlas/index"
+import { bindGate, isGrounded, driftDetect, resolveCurrent } from "@atlas/grounding"
+import type { Hash, StructRef } from "@atlas/contracts"
+import type { GroundedFact } from "@atlas/knowledge"
+import type {
+  AnchorsOut,
+  AnchorUnit,
+  GroundingCandidate,
+  GroundingComputer,
+  LanguageHole,
+  TruthGate,
+} from "@atlas/tools"
+import { foldAstUnits, initAst, isTsPath } from "./ast.js"
+import { walkFileTree } from "./fs.js"
+import { readScipOrEmpty } from "./scip.js"
+import { headSha } from "./run-git.js"
 
 /**
  * THE ONE GROUNDING DERIVATION (AUTHOR-1). Fold sub-file AST item/block units into the walked `FileTree`,
@@ -43,46 +50,49 @@ import { headSha } from './run-git.js';
  * so a caller that has NOT warmed the grammar gets the same file/dir-only fold the runtime gives an un-warmed
  * process. {@link warmGroundingComputer} owns that warm-up on the planner's behalf.
  */
-export function deriveGroundingAxes(rawTree: FileTree, scipOutput: ScipOutput): { readonly axes: Axes; readonly fileTree: FileTree } {
-  const fileTree = foldAstUnits(rawTree);
-  return { axes: build(fileTree, scipOutput), fileTree };
+export function deriveGroundingAxes(
+  rawTree: FileTree,
+  scipOutput: ScipOutput,
+): { readonly axes: Axes; readonly fileTree: FileTree } {
+  const fileTree = foldAstUnits(rawTree)
+  return { axes: build(fileTree, scipOutput), fileTree }
 }
 
 /** What the sync computer is composed over: the ONE built `Axes` (from {@link deriveGroundingAxes}), the RAW
  *  (un-folded) `FileTree` the axes were built from — the faithful file/dir census the hole declaration needs —
  *  and the `rev` the set was computed at (AUTHOR-3, reported on every `AnchorsOut`). */
 export interface GroundingComputerConfig {
-  readonly axes: Axes;
-  readonly rawTree: FileTree;
-  readonly rev: string;
+  readonly axes: Axes
+  readonly rawTree: FileTree
+  readonly rev: string
 }
 
 /** The POSIX path separator the index keys directories/files on (walkFileTree emits repo-relative POSIX). */
-const SEP = '/';
+const SEP = "/"
 /** The `::` refinement join a folded sub-file unit key carries (`file::item::block`, ast.ts `unitPath`). */
-const UNIT_SEP = '::';
+const UNIT_SEP = "::"
 
 /** Normalize a query `path` to an index key: drop a leading `./`, a trailing `/`, and treat `''`/`.` as the
  *  repo root. Total — a bare string in, a key string out; no FS access, so it never throws. */
 function normalizeQueryPath(path: string): string {
-  let p = path.trim();
-  if (p.startsWith('./')) p = p.slice(2);
-  while (p.length > 1 && p.endsWith(SEP)) p = p.slice(0, -1);
-  return p === '' ? '.' : p;
+  let p = path.trim()
+  if (p.startsWith("./")) p = p.slice(2)
+  while (p.length > 1 && p.endsWith(SEP)) p = p.slice(0, -1)
+  return p === "" ? "." : p
 }
 
 /** The file the unit lives in: the prefix up to the first `::` (a symbol/block anchor), else the key itself
  *  (a file/dir unit). Mirrors `StructRef.qualifiedPath`'s "FILE portion is the prefix up to the first `::`". */
 function filePathOf(key: string): string {
-  const i = key.indexOf(UNIT_SEP);
-  return i < 0 ? key : key.slice(0, i);
+  const i = key.indexOf(UNIT_SEP)
+  return i < 0 ? key : key.slice(0, i)
 }
 
 /** The lowercased dotted extension of a path (`core/engine.rs` → `.rs`), or `''` when there is none. */
 function extOf(path: string): string {
-  const base = path.slice(path.lastIndexOf(SEP) + 1);
-  const dot = base.lastIndexOf('.');
-  return dot <= 0 ? '' : base.slice(dot).toLowerCase();
+  const base = path.slice(path.lastIndexOf(SEP) + 1)
+  const dot = base.lastIndexOf(".")
+  return dot <= 0 ? "" : base.slice(dot).toLowerCase()
 }
 
 /**
@@ -97,67 +107,67 @@ function extOf(path: string): string {
  * fixture and the Atlas dogfood repo (185 `.rs` files, design/authoring.md §AUTH-4) exercise.
  */
 const GRAMMARLESS_SOURCE: Readonly<Record<string, string>> = {
-  '.rs': 'Rust',
-  '.py': 'Python',
-  '.go': 'Go',
-  '.java': 'Java',
-  '.rb': 'Ruby',
-  '.c': 'C',
-  '.h': 'C',
-  '.cc': 'C++',
-  '.cpp': 'C++',
-  '.hpp': 'C++',
-  '.cs': 'C#',
-  '.kt': 'Kotlin',
-  '.swift': 'Swift',
-  '.scala': 'Scala',
-  '.php': 'PHP',
-};
+  ".rs": "Rust",
+  ".py": "Python",
+  ".go": "Go",
+  ".java": "Java",
+  ".rb": "Ruby",
+  ".c": "C",
+  ".h": "C",
+  ".cc": "C++",
+  ".cpp": "C++",
+  ".hpp": "C++",
+  ".cs": "C#",
+  ".kt": "Kotlin",
+  ".swift": "Swift",
+  ".scala": "Scala",
+  ".php": "PHP",
+}
 
 /** Classify an index key into the coarse `AnchorUnit.kind` grain (AUTHOR-3). A `::` key is a folded sub-file
  *  unit (`symbol`); otherwise the RAW file/dir census decides — a leaf-with-content is a `file`, a directory is
  *  a `dir`. Defaults to `file` for a key the census does not carry (never throws). */
-function anchorKindOf(key: string, kinds: ReadonlyMap<string, 'file' | 'dir'>): AnchorUnit['kind'] {
-  if (key.includes(UNIT_SEP)) return 'symbol';
-  return kinds.get(key) ?? 'file';
+function anchorKindOf(key: string, kinds: ReadonlyMap<string, "file" | "dir">): AnchorUnit["kind"] {
+  if (key.includes(UNIT_SEP)) return "symbol"
+  return kinds.get(key) ?? "file"
 }
 
 /** Classify an index key into the richer `StructRef.kind` (grounding anchor, 6-way). A `::` key is a `symbol`;
  *  a directory is `directory`; everything else is a `file`. Descriptive metadata only — the drift oracle is
  *  `subtreeHash` alone (GROUND-1), never this. */
-function structKindOf(key: string, kinds: ReadonlyMap<string, 'file' | 'dir'>): StructRef['kind'] {
-  if (key.includes(UNIT_SEP)) return 'symbol';
-  return kinds.get(key) === 'dir' ? 'directory' : 'file';
+function structKindOf(key: string, kinds: ReadonlyMap<string, "file" | "dir">): StructRef["kind"] {
+  if (key.includes(UNIT_SEP)) return "symbol"
+  return kinds.get(key) === "dir" ? "directory" : "file"
 }
 
 /** The RAW file/dir census keyed by index path (built from the UN-folded tree, so it carries no `::` unit and
  *  cannot mis-key a symbol as a file). The repo root (`.`) is omitted — it is never a groundable anchor. */
-function censusOf(rawTree: FileTree): Map<string, 'file' | 'dir'> {
-  const kinds = new Map<string, 'file' | 'dir'>();
+function censusOf(rawTree: FileTree): Map<string, "file" | "dir"> {
+  const kinds = new Map<string, "file" | "dir">()
   const walk = (n: FileTree): void => {
-    if (n.path !== '.') kinds.set(n.path, n.content !== undefined ? 'file' : 'dir');
-    for (const c of n.children) walk(c);
-  };
-  walk(rawTree);
-  return kinds;
+    if (n.path !== ".") kinds.set(n.path, n.content !== undefined ? "file" : "dir")
+    for (const c of n.children) walk(c)
+  }
+  walk(rawTree)
+  return kinds
 }
 
 /** Find the index node whose `key` equals `key`, preorder over `root`'s subtree. Total: `undefined` if absent. */
 function findByKey(root: IndexNode, key: string): IndexNode | undefined {
-  if (root.key === key) return root;
+  if (root.key === key) return root
   for (const child of root.children) {
-    const hit = findByKey(child, key);
-    if (hit !== undefined) return hit;
+    const hit = findByKey(child, key)
+    if (hit !== undefined) return hit
   }
-  return undefined;
+  return undefined
 }
 
 /** Collect every PROPER descendant of `node`, preorder (the deterministic ASCII-sorted sibling order `build`
  *  imposes — so the listing is order-stable across runs, SCN-AUTH-3f, and never reorders, SCN-AUTH-3b). */
 function collectDescendants(node: IndexNode, into: IndexNode[]): void {
   for (const child of node.children) {
-    into.push(child);
-    collectDescendants(child, into);
+    into.push(child)
+    collectDescendants(child, into)
   }
 }
 
@@ -176,39 +186,39 @@ function collectDescendants(node: IndexNode, into: IndexNode[]): void {
  * Precondition: the axes were built with warmed grammars (the composition root's obligation; see the header).
  */
 export function buildGroundingComputer(cfg: GroundingComputerConfig): GroundingComputer {
-  const { axes, rawTree, rev } = cfg;
-  const kinds = censusOf(rawTree);
+  const { axes, rawTree, rev } = cfg
+  const kinds = censusOf(rawTree)
 
   const anchorsUnder = (path: string): AnchorsOut => {
-    const key = normalizeQueryPath(path);
-    const node = findByKey(axes.spatial, key);
+    const key = normalizeQueryPath(path)
+    const node = findByKey(axes.spatial, key)
     if (node === undefined) {
       // Untracked / outside the built set / unreadable: the honest empty listing. The `anchors` leg attaches
       // the AUTHOR-3 reason; the computer names none (it cannot distinguish the causes from the built index
       // alone, and a wrong specific reason would be worse than the leg's honest floor).
-      return { rev, units: [], holes: [] };
+      return { rev, units: [], holes: [] }
     }
-    const descendants: IndexNode[] = [];
-    collectDescendants(node, descendants);
+    const descendants: IndexNode[] = []
+    collectDescendants(node, descendants)
     const units: AnchorUnit[] = descendants.map((d) => ({
       qualifiedPath: d.key,
       kind: anchorKindOf(d.key, kinds),
       subtreeHash: String(d.subtreeHash),
       path: filePathOf(d.key),
-    }));
-    return { rev, units, holes: declaredHoles(units) };
-  };
+    }))
+    return { rev, units, holes: declaredHoles(units) }
+  }
 
   const groundingFor = (candidate: GroundingCandidate): StructRef => {
-    const subtreeHash = resolveCurrent(axes, candidate.anchor);
+    const subtreeHash = resolveCurrent(axes, candidate.anchor)
     return {
       kind: structKindOf(candidate.anchor, kinds),
       qualifiedPath: candidate.anchor,
-      subtreeHash: subtreeHash ?? ('' as StructRef['subtreeHash']),
-    };
-  };
+      subtreeHash: subtreeHash ?? ("" as StructRef["subtreeHash"]),
+    }
+  }
 
-  return { anchorsUnder, groundingFor };
+  return { anchorsUnder, groundingFor }
 }
 
 /**
@@ -223,11 +233,11 @@ export function buildGroundingComputer(cfg: GroundingComputerConfig): GroundingC
  * Downgrade-only + fail-closed: an ungrounded/DRIFTED node collapses to `NA`, never `HOLDS`.
  */
 export function buildGate(axes: Axes): TruthGate {
-  const real = bindGate({ isGrounded, driftDetect });
+  const real = bindGate({ isGrounded, driftDetect })
   return {
     gateHolds: (node: GroundedFact, _at: Hash) =>
-      real.gateHolds(node.kind === 'predicate' ? node.status : 'HOLDS', node.grounding, axes),
-  };
+      real.gateHolds(node.kind === "predicate" ? node.status : "HOLDS", node.grounding, axes),
+  }
 }
 
 /**
@@ -238,13 +248,13 @@ export function buildGate(axes: Axes): TruthGate {
  * NO hole. Deterministically sorted by extension so two runs are byte-identical (SCN-AUTH-3f).
  */
 function declaredHoles(units: readonly AnchorUnit[]): LanguageHole[] {
-  const counts = new Map<string, number>();
+  const counts = new Map<string, number>()
   for (const u of units) {
-    if (u.kind !== 'file') continue;
-    if (isTsPath(u.qualifiedPath)) continue; // a configured grammar exists — not a language hole
-    const ext = extOf(u.qualifiedPath);
-    if (GRAMMARLESS_SOURCE[ext] === undefined) continue; // not a structured source language — no overclaim
-    counts.set(ext, (counts.get(ext) ?? 0) + 1);
+    if (u.kind !== "file") continue
+    if (isTsPath(u.qualifiedPath)) continue // a configured grammar exists — not a language hole
+    const ext = extOf(u.qualifiedPath)
+    if (GRAMMARLESS_SOURCE[ext] === undefined) continue // not a structured source language — no overclaim
+    counts.set(ext, (counts.get(ext) ?? 0) + 1)
   }
   return [...counts.entries()]
     .sort((a, b) => (a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0))
@@ -252,20 +262,20 @@ function declaredHoles(units: readonly AnchorUnit[]): LanguageHole[] {
       ext,
       fileCount,
       reason: `no configured ${GRAMMARLESS_SOURCE[ext]} grammar — symbol-level anchoring unavailable for '${ext}' files; the file-level anchor is returned (A-D5, AUTHOR-4)`,
-    }));
+    }))
 }
 
 /** The warmed, repo-scoped grounding computer bundle — the port PLUS the axes/fileTree/rev the composition
  *  root threads onward, so a caller of {@link warmGroundingComputer} needs no second walk/build. */
 export interface WarmGroundingComputer {
-  readonly computer: GroundingComputer;
-  readonly axes: Axes;
-  readonly fileTree: FileTree;
-  readonly rev: string;
+  readonly computer: GroundingComputer
+  readonly axes: Axes
+  readonly fileTree: FileTree
+  readonly rev: string
 }
 
 /** Where `composeRuntime` looks for the optional SCIP dump under a repo (mirrors `compose.ts` `SCIP_REL`). */
-const SCIP_REL = '.atlas/index.scip';
+const SCIP_REL = ".atlas/index.scip"
 
 /**
  * The SELF-WARMING seam entry (AUTHOR-1, last clause). Awaits `initAst()` — owning the grammar warm-up so no
@@ -276,10 +286,10 @@ const SCIP_REL = '.atlas/index.scip';
  * TOTAL over its inputs: `walkFileTree`/`readScipOrEmpty`/`headSha` are each fail-closed (never throw).
  */
 export async function warmGroundingComputer(repoPath: string): Promise<WarmGroundingComputer> {
-  await initAst(); // the seam owns the warm-up — a caller performs none (retires the author.ts:24-31 smell)
-  const rawTree = walkFileTree(repoPath);
-  const scipOutput = readScipOrEmpty(`${repoPath}/${SCIP_REL}`);
-  const { axes, fileTree } = deriveGroundingAxes(rawTree, scipOutput);
-  const rev = headSha(repoPath) ?? '';
-  return { computer: buildGroundingComputer({ axes, rawTree, rev }), axes, fileTree, rev };
+  await initAst() // the seam owns the warm-up — a caller performs none (retires the author.ts:24-31 smell)
+  const rawTree = walkFileTree(repoPath)
+  const scipOutput = readScipOrEmpty(`${repoPath}/${SCIP_REL}`)
+  const { axes, fileTree } = deriveGroundingAxes(rawTree, scipOutput)
+  const rev = headSha(repoPath) ?? ""
+  return { computer: buildGroundingComputer({ axes, rawTree, rev }), axes, fileTree, rev }
 }

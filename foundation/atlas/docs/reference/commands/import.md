@@ -75,11 +75,11 @@ The integrity discipline on the way in, all fail-closed, in order:
 
 ## Exit codes
 
-| code | meaning |
-| --- | --- |
-| `0` | every bundle object replayed and the fresh store verified byte-identical |
-| `1` | a missing `<bundle>`, a malformed bundle (fail-closed, nothing written), a `targetDir` that already hosts a store, or an unwritable target |
-| `2` | a governance gate refused at the entrypoint (the committed-store tripwire on the repository the command was invoked in) |
+| code | meaning                                                                                                                                    |
+| ---- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| `0`  | every bundle object replayed and the fresh store verified byte-identical                                                                   |
+| `1`  | a missing `<bundle>`, a malformed bundle (fail-closed, nothing written), a `targetDir` that already hosts a store, or an unwritable target |
+| `2`  | a governance gate refused at the entrypoint (the committed-store tripwire on the repository the command was invoked in)                    |
 
 The refusal of a non-fresh target is exit **1** — a usage error: the invocation named a target the command's
 contract excludes. It is not exit 2 (a well-formed invocation a gate declined); there is no gate here, there

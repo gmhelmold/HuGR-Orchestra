@@ -10,8 +10,8 @@
 > **⚠ This is a SPECIFICATION, not a running system.** Orchestra is design-first — no code exists yet. Every
 > "mechanical" gate named here (the reconciler, the coverage matrix, teeth/mutation, banned-token lint) is the
 > **contract the tooling will enforce once built**; until the code lands, each is run as **disciplined judgment
-> against this spec**. Where the text reads "recomputes / blocks / execution is transcription," that is *the
-> specified behaviour of the built system* — the honest present state is judgment-following-this-spec. **This
+> against this spec**. Where the text reads "recomputes / blocks / execution is transcription," that is _the
+> specified behaviour of the built system_ — the honest present state is judgment-following-this-spec. **This
 > document is the design of a future Orchestra harness subsystem:** the reconciler, the gates, the state machine
 > and the prompts **become harness tooling**, at which point "mechanical" is mechanical for real. Not a one-off —
 > the method is how Orchestra builds (the Atlas is its first application; dogfood).
@@ -19,12 +19,12 @@
 ## Thesis (why this is rigorous, not a bag of parts)
 
 1. **Single-source, not triplication.** The **invariant is the one authored fact**; the requirement, the
-   formal property, and the goldens are **derived views** (projected / rendered / *generated*), each carrying
+   formal property, and the goldens are **derived views** (projected / rendered / _generated_), each carrying
    the invariant's id. (OpenSpec co-locates requirement+scenario; TLA+→test generates traces — Modelator/Apalache.)
-2. **The gate is a computed invariant** *(specified — see the note above)*. Traceability is not a
+2. **The gate is a computed invariant** _(specified — see the note above)_. Traceability is not a
    hand-maintained table; the read-only reconciler recomputes the coverage matrix at every freeze and blocks on
    any uncovered invariant — **once the tooling lands**; until then, run as judgment against this spec.
-3. **Warp × weft.** Invariants are the *warp* (the spine); the *weft* is the unit of work. We do **not** ship
+3. **Warp × weft.** Invariants are the _warp_ (the spine); the _weft_ is the unit of work. We do **not** ship
    132 micro-WPs.
 
 ## The state machine
@@ -46,20 +46,21 @@ becomes an **axiom** of state N+1. The machine's execution is itself gated on **
      DESIGN DEFECT and routes it back to the ratification owner (the DEFINE seat, TEAM.md).
      Never invented, never asked of the end-user.
 ```
+
 The **spec** pipeline (S0→S3) runs once over the design; the **portfolio** pipeline (C→S4) cuts the roadmap +
 buildable leaves once; the **execution** machine (BIND→SEAL) runs once **per WP** — its own governed loop,
 spec'd in the sibling [`EXECUTION-PROTOCOL.md`](./EXECUTION-PROTOCOL.md) (six states, SOTA-grounded, one
-prompt each under `method/prompts/exec/`). C (state "Roadmap") is the *warp* (capability, cross-module); S4 is
-the *weft* (module, within epic).
+prompt each under `method/prompts/exec/`). C (state "Roadmap") is the _warp_ (capability, cross-module); S4 is
+the _weft_ (module, within epic).
 
-| state | is | consumes | produces | key instrument |
-|---|---|---|---|---|
-| **S0** Invariant Register *(S0 **is** the design-freeze / the design rubric's Ratify phase)* | the frozen design = the "constitution" | the ratified design docs (`reference/` + `spec/`) | 132 `INV-<MODULE>-<n>`: final normative text · anchor · `behavioural` flag · `clauses[]` · `unwanted[]` · S2 method-tag slot | the design-freeze DoD |
-| **S1** Requirements | **lift-and-tag** (not fresh authoring) | S0 | one Singular `REQ` per behavioural *clause* | `ears`, `atom-gate` |
-| **S2** Formal Spec | surgical formalization | S1 | an `FSPEC` for the one cluster that earns it; a **method-tag** ∈ {formal, exhaustive, PBT, reference-model} for every **behavioural** INV (exempt → `n/a`) | the decision rule (below) |
-| **S3** Goldens | **lift-and-tag** + generate | S1,S2 | `SCN` per happy-path + per unwanted-behaviour guard, co-located with its REQ | generate-from-model · PBT · contract-as-test |
-| **C** Roadmap | grouping + ordering (the *warp*) | S1,S3 + functional-surface | vertical `EPIC`s (right-sized) grouped into dependency-ordered `CAMPAIGN`s (Now/Next/Later) | story-map · impact-map · carpaccio · SPIDR/INVEST · Now/Next/Later |
-| **S4** Work Packages | slicing (the *weft*, within each epic) | C, S1–S3 | `WP` = one module-slice of one epic + its seam-obligations + acceptance; the driftless WP-card | `techlead` (contract-freeze) · `wp-template.md` |
+| state                                                                                        | is                                     | consumes                                          | produces                                                                                                                                                   | key instrument                                                     |
+| -------------------------------------------------------------------------------------------- | -------------------------------------- | ------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------ |
+| **S0** Invariant Register _(S0 **is** the design-freeze / the design rubric's Ratify phase)_ | the frozen design = the "constitution" | the ratified design docs (`reference/` + `spec/`) | 132 `INV-<MODULE>-<n>`: final normative text · anchor · `behavioural` flag · `clauses[]` · `unwanted[]` · S2 method-tag slot                               | the design-freeze DoD                                              |
+| **S1** Requirements                                                                          | **lift-and-tag** (not fresh authoring) | S0                                                | one Singular `REQ` per behavioural _clause_                                                                                                                | `ears`, `atom-gate`                                                |
+| **S2** Formal Spec                                                                           | surgical formalization                 | S1                                                | an `FSPEC` for the one cluster that earns it; a **method-tag** ∈ {formal, exhaustive, PBT, reference-model} for every **behavioural** INV (exempt → `n/a`) | the decision rule (below)                                          |
+| **S3** Goldens                                                                               | **lift-and-tag** + generate            | S1,S2                                             | `SCN` per happy-path + per unwanted-behaviour guard, co-located with its REQ                                                                               | generate-from-model · PBT · contract-as-test                       |
+| **C** Roadmap                                                                                | grouping + ordering (the _warp_)       | S1,S3 + functional-surface                        | vertical `EPIC`s (right-sized) grouped into dependency-ordered `CAMPAIGN`s (Now/Next/Later)                                                                | story-map · impact-map · carpaccio · SPIDR/INVEST · Now/Next/Later |
+| **S4** Work Packages                                                                         | slicing (the _weft_, within each epic) | C, S1–S3                                          | `WP` = one module-slice of one epic + its seam-obligations + acceptance; the driftless WP-card                                                             | `techlead` (contract-freeze) · `wp-template.md`                    |
 
 **S1 and S3 are lift-and-tag, not authoring.** The frozen design already carries, per invariant, a normative
 `MUST`/`SHALL` clause (⇒ the requirement) and an Acceptance section (⇒ the goldens; e.g. `spec/atlas.md` §8's
@@ -69,11 +70,11 @@ content the design already contains.
 
 ## Definitions (load-bearing terms — defined once, used everywhere)
 
-- **behavioural invariant** — an invariant that constrains *observable* system behaviour (an input→output, a
+- **behavioural invariant** — an invariant that constrains _observable_ system behaviour (an input→output, a
   state, a guard). Set as an explicit boolean field `behavioural` on each `INV` **in S0** (not inferred later).
   A non-behavioural invariant (a pure definition, a naming convention) is dispositioned in S0 as
   `exempt: <reason>` and is **out of** the requirement-coverage denominator.
-- **unwanted-behaviour clause** — a way the invariant can be *violated*; marked on the `INV` in S0. Each one
+- **unwanted-behaviour clause** — a way the invariant can be _violated_; marked on the `INV` in S0. Each one
   obliges exactly one `If-then` guard-REQ (S1) and one guard-golden (S3). An INV may have zero.
 - **module-slice (the weft)** — a Work-Package unit scoped to **one Atlas module** (`kernel`, `grounding`, …;
   the 9 ID families are disjoint). A cross-module obligation (e.g. `KERNEL-11 ↔ PERSIST-11`) is handled by a
@@ -82,7 +83,7 @@ content the design already contains.
 - **the core** — the single cluster that earns a machine-checked formal model: the **CRDT OR-Set merge +
   supersedes** cluster (`KERNEL-9/10/11`, `PERSIST-11`); its model is **`FSPEC-merge`**, keyed by the cluster,
   not a module (it spans KERNEL+PERSIST). It is the **only** cluster with a standing `FSPEC` in the ratified
-  baseline. The grounding gate may escalate to a **P** model *contingently* (S2 decides, iff it proves
+  baseline. The grounding gate may escalate to a **P** model _contingently_ (S2 decides, iff it proves
   genuinely async) — a contingency, not a baseline `FSPEC`.
 - **anchor** — a stable pointer `reference/<file>.md#<invariant-slug>` to the normative clause. The slug is
   the lowercased invariant id (`kernel-10`).
@@ -98,10 +99,11 @@ INV-x   (ratified clause — the ONE authored fact; lives in S0, immutable)
   └─► SCN-x.*    goldens         — GENERATED: { core: PBT laws, or FSPEC-merge traces if S2 escalated } ∪ { PBT cases from INV-x }
                                     ∪ { exhaustive-enumeration cases } ∪ { contract-as-test } ∪ { hand-written residue }
 ```
+
 Every downstream artifact is tagged `source: INV-x`. Where derivation is impossible, **exactly one layer is
-authoritative and the others are marked derived**; drift between a *machine* artifact and its reference model
-is caught mechanically (the anti-rot mock, below); drift between an *English* artifact and its clause is
-caught by cold review (it is not a mechanical predicate — see the guard split). *Residue* = the hand-written
+authoritative and the others are marked derived**; drift between a _machine_ artifact and its reference model
+is caught mechanically (the anti-rot mock, below); drift between an _English_ artifact and its clause is
+caught by cold review (it is not a mechanical predicate — see the guard split). _Residue_ = the hand-written
 goldens for the tail where no generator (model, PBT, contract) applies.
 
 ## The transition guard — GATE (mechanical) + COLD-REVIEW (judgment)
@@ -109,6 +111,7 @@ goldens for the tail where no generator (model, PBT, contract) applies.
 The v1 error was claiming the whole guard is mechanical. It is not. The guard is two distinct mechanisms:
 
 **GATE — purely mechanical (operates on ids + structural predicates + counts):**
+
 - referential existence: every `REQ` cites an extant `INV`; every `SCN` cites an extant `REQ`; every `FSPEC`
   maps to an `INV` (no orphans, either direction).
 - coverage counts: every **behavioural** `INV` has ≥1 `REQ`; coverage = **100%** over the behavioural set;
@@ -118,6 +121,7 @@ The v1 error was claiming the whole guard is mechanical. It is not. The guard is
 - `CRITICAL` (blocks the freeze) = any uncovered behavioural `INV`, any orphan, or any un-dispositioned `INV`.
 
 **COLD-REVIEW — judgment (independent reviewer, never the author):**
+
 - clause fidelity: does the EARS `REQ` faithfully project its clause (no spec-echo)?
 - design⇄spec divergence and EARS↔FSPEC agreement (semantic, cross-language — not a structural predicate).
 - compound-ness a lint can't catch; mis-tiering; over/under-split.
@@ -127,20 +131,20 @@ The GATE is reproducible and CI-runnable; the COLD-REVIEW is the judgment the ga
 **Completeness** across both halves is governed by the [`completeness`](.claude/skills/completeness/SKILL.md)
 protocol: its mechanical gates (coverage · register-closure · tabular enumeration · golden teeth) run in the
 GATE; its judgment layers (design-element register construction · prose per-INV enumeration · perspective
-reading) run in the COLD-REVIEW. A freeze may claim *complete* — not merely *traced* — only when it passes.
+reading) run in the COLD-REVIEW. A freeze may claim _complete_ — not merely _traced_ — only when it passes.
 
 ## Atomization — warp × weft
 
-An invariant is a *property* (always-true), verified only by exercising what violates it. **The atom is the
+An invariant is a _property_ (always-true), verified only by exercising what violates it. **The atom is the
 `(INV, clause)` pair**: a multi-clause invariant fans out to **N Singular requirements** sharing `source:
 INV-x`, suffixed `-a/-b`. (Falsified in v1: `KERNEL-10` alone carries ≥4 obligations — a single Singular EARS
 sentence cannot hold them, and the gate's own one-`SHALL` rule forbids compounding.)
 
-| tier | atom | unit | basis |
-|---|---|---|---|
-| **spine** | one **(INV, clause)** → one Singular constraint `REQ` (quotes the clause) | `INV-x → REQ-x[-c]` | 29148-Singular; EARS |
-| **acceptance** | one golden per happy-path + per unwanted-behaviour guard | `SCN-x.*` | Use-Case 2.0 ("≥1 test/slice"); EARS If-then |
-| **work** | one **module-slice** + the cross-module seam-obligations it owns | `WP-n = {module} + {seam-freezes}` | techlead contract-freeze |
+| tier           | atom                                                                      | unit                               | basis                                        |
+| -------------- | ------------------------------------------------------------------------- | ---------------------------------- | -------------------------------------------- |
+| **spine**      | one **(INV, clause)** → one Singular constraint `REQ` (quotes the clause) | `INV-x → REQ-x[-c]`                | 29148-Singular; EARS                         |
+| **acceptance** | one golden per happy-path + per unwanted-behaviour guard                  | `SCN-x.*`                          | Use-Case 2.0 ("≥1 test/slice"); EARS If-then |
+| **work**       | one **module-slice** + the cross-module seam-obligations it owns          | `WP-n = {module} + {seam-freezes}` | techlead contract-freeze                     |
 
 ## Formal Spec (S2) — the decision rule, honestly
 
@@ -149,13 +153,13 @@ SOSP'21): (1) failure is high-consequence and hard to recover; (2) correctness d
 human review + example tests cannot cover; (3) the spec is cheap to keep alive. **Most invariants fail (2).**
 S2 assigns a **method-tag to every INV**; only **the core** gets a standing `FSPEC`.
 
-| cluster | method-tag | how |
-|---|---|---|
-| **the core** — CRDT OR-Set merge + supersedes | `formal` | PBT on the join-semilattice laws (commut/assoc/idemp) + partial-order axioms **first**; escalate to TLA+/TLC only if supersede+remove is subtle; Apalache for an unbounded inductive invariant; Isabelle only if audited |
-| write-decision "infallible" | `exhaustive` | enumerate the finite input space; assert existence + uniqueness of the route. No FM tool |
-| grounding truth-gate | `PBT` baseline; **contingent** P (S2 decides) | reference automaton + exhaustive PBT; P is an S2 escalation iff it proves genuinely async — not a baseline `FSPEC` |
-| retrieval drop-order | `PBT` | executable reference policy as oracle |
-| the other ~128 | `reference-model` | executable reference model (≈1% of code) + PBT |
+| cluster                                       | method-tag                                    | how                                                                                                                                                                                                                      |
+| --------------------------------------------- | --------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **the core** — CRDT OR-Set merge + supersedes | `formal`                                      | PBT on the join-semilattice laws (commut/assoc/idemp) + partial-order axioms **first**; escalate to TLA+/TLC only if supersede+remove is subtle; Apalache for an unbounded inductive invariant; Isabelle only if audited |
+| write-decision "infallible"                   | `exhaustive`                                  | enumerate the finite input space; assert existence + uniqueness of the route. No FM tool                                                                                                                                 |
+| grounding truth-gate                          | `PBT` baseline; **contingent** P (S2 decides) | reference automaton + exhaustive PBT; P is an S2 escalation iff it proves genuinely async — not a baseline `FSPEC`                                                                                                       |
+| retrieval drop-order                          | `PBT`                                         | executable reference policy as oracle                                                                                                                                                                                    |
+| the other ~128                                | `reference-model`                             | executable reference model (≈1% of code) + PBT                                                                                                                                                                           |
 
 **Anti-rot (unconditional, ShardStore):** reference models are written **in the build language** and **reused
 as the mock** in unit tests — the build breaks when the spec drifts. This is the one mechanically-real drift
@@ -165,19 +169,19 @@ fence between code and its model.
 
 Seven facets, distinct by role. Non-circular by construction:
 
-| facet | role | checked by |
-|---|---|---|
-| **axioms** | premises **inherited** from the prior state's DoD | (given) |
-| **rules** | the operational **procedure** — how output is produced | (followed) |
-| **invariants** | **per-item** structural properties, mechanically checkable | GATE |
-| **completeness criteria** | **set-level** closure (coverage), mechanically checkable | GATE |
-| **quality standard** | the **per-unit** bar; the judgment part (fidelity, non-ambiguity) | COLD-REVIEW (+ lint in GATE) |
-| **DoD** | the exit condition = **GATE green ∧ COLD-REVIEW APPROVE** | (transition) |
-| **template** | the exact **artifact shape** the state emits | (output) |
+| facet                     | role                                                              | checked by                   |
+| ------------------------- | ----------------------------------------------------------------- | ---------------------------- |
+| **axioms**                | premises **inherited** from the prior state's DoD                 | (given)                      |
+| **rules**                 | the operational **procedure** — how output is produced            | (followed)                   |
+| **invariants**            | **per-item** structural properties, mechanically checkable        | GATE                         |
+| **completeness criteria** | **set-level** closure (coverage), mechanically checkable          | GATE                         |
+| **quality standard**      | the **per-unit** bar; the judgment part (fidelity, non-ambiguity) | COLD-REVIEW (+ lint in GATE) |
+| **DoD**                   | the exit condition = **GATE green ∧ COLD-REVIEW APPROVE**         | (transition)                 |
+| **template**              | the exact **artifact shape** the state emits                      | (output)                     |
 
 `invariants` (per-item) and `completeness` (set-level) do not overlap; `quality` is the judgment residue the
-gate cannot decide. `DoD` names the two *mechanisms* (gate, review) — it does not re-list the facets, so it is
-not circular: the facets say *what must hold*; the gate+review are *how it is checked*; DoD = both pass.
+gate cannot decide. `DoD` names the two _mechanisms_ (gate, review) — it does not re-list the facets, so it is
+not circular: the facets say _what must hold_; the gate+review are _how it is checked_; DoD = both pass.
 
 ## S0 — Invariant Register (the foundation; authored first)
 
@@ -226,7 +230,7 @@ The machine cannot fire until S0 is frozen. S0 **is** the Phase-1 design freeze.
 - **invariants** (per-item) — every `INV` carries exactly one `method-tag`; any `FSPEC` maps to its cluster's `INV`s.
 - **completeness criteria** (set-level) — no untagged `INV`; the core cluster has its `FSPEC`.
 - **quality standard** — every `formal` tag is justified by **all three** conjuncts; the tool matches the
-  problem *shape*, not the domain.
+  problem _shape_, not the domain.
 - **DoD** — GATE green ∧ COLD-REVIEW APPROVE → freeze.
 - **template** — Register row extended: `INV-x | method-tag | FSPEC? | up-property | down-reference-model`.
 
@@ -247,7 +251,7 @@ The machine cannot fire until S0 is frozen. S0 **is** the Phase-1 design freeze.
 
 ## C — Roadmap
 
-> The portfolio layer; the *warp* axis. After S3, one state, two passes over one artifact (`roadmap.md`): **cut** the frozen requirements+goldens into
+> The portfolio layer; the _warp_ axis. After S3, one state, two passes over one artifact (`roadmap.md`): **cut** the frozen requirements+goldens into
 > **vertical epics** (capabilities across modules), **right-size** them, and group into **dependency-ordered
 > campaigns** (milestones). This is the **warp** (capability), orthogonal to S4's **weft** (module). Grounding:
 > Story Mapping (Patton — backbone × release-slice) · Impact Mapping (Adzic — Why→How→What goal-trace, Who elided
@@ -276,7 +280,7 @@ The machine cannot fire until S0 is frozen. S0 **is** the Phase-1 design freeze.
 
 ## S4 — Work Packages
 
-> The *weft* axis; within each epic; protocol: `techlead`.
+> The _weft_ axis; within each epic; protocol: `techlead`.
 
 - **axioms** — S1/S2/S3 frozen **and** the roadmap (state C) frozen: each epic is a right-sized vertical capability.
 - **rules** — apply the tech-lead slicing doctrine (origin = the global `techlead` skill, not an Orchestra-local

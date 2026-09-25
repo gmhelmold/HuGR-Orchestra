@@ -65,20 +65,20 @@ methods receive proposal ID and exact catalog version, not model text.
 
 ## Skills
 
-| Skill | Stage | Output | Stop condition |
-|---|---|---|---|
+| Skill         | Stage                        | Output                                 | Stop condition                                             |
+| ------------- | ---------------------------- | -------------------------------------- | ---------------------------------------------------------- |
 | `frame-scope` | select bounded catalog names | `ScopeProposal` or `ClarificationNeed` | every name exists, or one decision blocks honest selection |
 
 ## Tools and Guards
 
-| Capability | Purpose | Boundary |
-|---|---|---|
-| `scope-subject-read` | read PlanIntent or prior revision/change record | Maestro durable evidence read |
-| `atlas-territory-catalog-read` | frozen current-Atlas territory catalog adapter | Atlas read only |
-| `scope-proposal-write` | persist immutable proposal | Maestro durable evidence write |
-| `scope-input-guard` | require project/catalog identity/version | before reasoning |
-| `scope-proposal-guard` | reject unknown, empty, intersecting, or invented names | before persistence |
-| `no-governed-task-before-approval` | deny Task/child Session without approved revision identity | Session/Task boundary |
+| Capability                         | Purpose                                                    | Boundary                       |
+| ---------------------------------- | ---------------------------------------------------------- | ------------------------------ |
+| `scope-subject-read`               | read PlanIntent or prior revision/change record            | Maestro durable evidence read  |
+| `atlas-territory-catalog-read`     | frozen current-Atlas territory catalog adapter             | Atlas read only                |
+| `scope-proposal-write`             | persist immutable proposal                                 | Maestro durable evidence write |
+| `scope-input-guard`                | require project/catalog identity/version                   | before reasoning               |
+| `scope-proposal-guard`             | reject unknown, empty, intersecting, or invented names     | before persistence             |
+| `no-governed-task-before-approval` | deny Task/child Session without approved revision identity | Session/Task boundary          |
 
 No Pack read, Atlas write, shell, product edit, member tool, Task, plan, approval, or dispatch capability exists.
 
@@ -96,12 +96,12 @@ or intent produces linked new proposal, never mutation.
 
 ## Refusal and Recovery
 
-| Condition | Result |
-|---|---|
-| Adapter/catalog unratified, missing, empty, stale, or cross-project | `HOLD`; no guessed scope |
-| Unknown/invented name or inclusion/exclusion collision | `HOLD`; preserve named violation |
-| Multiple compatible territory choices | `CLARIFY`; ask one scope-boundary question |
-| Duplicate trigger | return stored proposal/question |
+| Condition                                                           | Result                                     |
+| ------------------------------------------------------------------- | ------------------------------------------ |
+| Adapter/catalog unratified, missing, empty, stale, or cross-project | `HOLD`; no guessed scope                   |
+| Unknown/invented name or inclusion/exclusion collision              | `HOLD`; preserve named violation           |
+| Multiple compatible territory choices                               | `CLARIFY`; ask one scope-boundary question |
+| Duplicate trigger                                                   | return stored proposal/question            |
 
 ## Acceptance After Ratification
 

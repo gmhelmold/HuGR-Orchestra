@@ -17,12 +17,12 @@ the trust, not the byte's origin.
 Every `seal:'proven'` fact lands in EXACTLY one bucket. They never merge, and none but `re-proven` is
 rendered as a pass:
 
-| bucket | meaning |
-|---|---|
-| `re-proven` | the witness replayed through the live oracle and came back `proven` |
-| `broken` | replayed and did NOT come back `proven` — the store has drifted from what it claims (a deleted caller, a moved symbol, a rewritten index) |
-| `unverifiable` | `seal:'proven'` with NO witness, or an incomplete one — there is nothing to replay. A witness-less `proven` seal is precisely the trust-me-it-was-proved shape this door exists to eliminate |
-| `dangling` | `seal:'proven'` and its `contentHash` resolves to nothing in the CAS. The bytes ARE the fact, so there is nothing left to re-prove — the store is referentially broken, which is a storage fault rather than a proof-strength one. `atlas doctor cas` is the store-wide audit of that layer (ADR-0022) |
+| bucket         | meaning                                                                                                                                                                                                                                                                                                |
+| -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `re-proven`    | the witness replayed through the live oracle and came back `proven`                                                                                                                                                                                                                                    |
+| `broken`       | replayed and did NOT come back `proven` — the store has drifted from what it claims (a deleted caller, a moved symbol, a rewritten index)                                                                                                                                                              |
+| `unverifiable` | `seal:'proven'` with NO witness, or an incomplete one — there is nothing to replay. A witness-less `proven` seal is precisely the trust-me-it-was-proved shape this door exists to eliminate                                                                                                           |
+| `dangling`     | `seal:'proven'` and its `contentHash` resolves to nothing in the CAS. The bytes ARE the fact, so there is nothing left to re-prove — the store is referentially broken, which is a storage fault rather than a proof-strength one. `atlas doctor cas` is the store-wide audit of that layer (ADR-0022) |
 
 A fact carrying no `seal` at all is out of scope for this pass — it is simply not counted.
 
@@ -36,7 +36,7 @@ rows carry `seal:'proven'`, every one of their objects is missing, and this comm
 verify-store: 0 sealed-proven fact(s) — 0 re-proven, 0 broken, 0 unverifiable
 ```
 
-and exited **0**, under guidance reading *"an honest zero, not a skip"*. It was exactly a skip, and the
+and exited **0**, under guidance reading _"an honest zero, not a skip"_. It was exactly a skip, and the
 sentence denying it is what made it dangerous: the gate whose whole job is to catch a proven fact that
 stopped being true reported a clean, empty, healthy store — for the one fault it could not see by looking at
 facts, because the facts are what went missing. The seal lives on the projection row, not in the bytes, so

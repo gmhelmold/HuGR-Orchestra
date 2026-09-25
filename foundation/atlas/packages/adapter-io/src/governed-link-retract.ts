@@ -22,9 +22,9 @@
 // blind the way it has been on this surface before.
 
 /** The DISCRIMINANTS — exported so a test compares a value for equality instead of matching prose. */
-export const RETRACT_NOT_LINKED = 'not-linked';
-export const RETRACT_ALREADY_RETRACTED = 'already-retracted';
-export const RETRACT_RETRACTED_PAIR = 'retracted-pair';
+export const RETRACT_NOT_LINKED = "not-linked"
+export const RETRACT_ALREADY_RETRACTED = "already-retracted"
+export const RETRACT_RETRACTED_PAIR = "retracted-pair"
 
 /**
  * Retracting a pair that was NEVER asserted.
@@ -38,9 +38,9 @@ export const RETRACT_RETRACTED_PAIR = 'retracted-pair';
  */
 export const NOT_LINKED_REASON =
   `${RETRACT_NOT_LINKED}: there is no asserted sameAs equivalence between these two nodes to withdraw. A ` +
-  'retraction is APPENDED to the stored relation, so accepting one here would record the withdrawal of an ' +
-  'assertion that was never made — and would pre-emptively latch a pair that a later governed link could ' +
-  'then no longer merge. Link the pair first if you meant to assert it.';
+  "retraction is APPENDED to the stored relation, so accepting one here would record the withdrawal of an " +
+  "assertion that was never made — and would pre-emptively latch a pair that a later governed link could " +
+  "then no longer merge. Link the pair first if you meant to assert it."
 
 /**
  * Retracting a pair that is ALREADY retracted. REFUSED.
@@ -65,7 +65,7 @@ export const NOT_LINKED_REASON =
  */
 export const ALREADY_RETRACTED_REASON =
   `${RETRACT_ALREADY_RETRACTED}: this sameAs equivalence has already been withdrawn; the retraction is ` +
-  'recorded on both endpoints and the read fold already refuses to merge across it. Nothing to do.';
+  "recorded on both endpoints and the read fold already refuses to merge across it. Nothing to do."
 
 /**
  * ASSERTING a pair that is currently retracted. REFUSED.
@@ -91,6 +91,6 @@ export const ALREADY_RETRACTED_REASON =
  */
 export const RETRACTED_PAIR_REASON =
   `${RETRACT_RETRACTED_PAIR}: this sameAs equivalence was asserted and then RETRACTED, and a retraction is ` +
-  'monotone — re-asserting it would require deleting the retraction record, which is the evidence that the ' +
-  'withdrawal happened. Both the original assertion and its withdrawal stay on the rows. If the two nodes ' +
-  'really do name the same fact, that is a new claim and needs a new pair of keys, not a silent un-erase.';
+  "monotone — re-asserting it would require deleting the retraction record, which is the evidence that the " +
+  "withdrawal happened. Both the original assertion and its withdrawal stay on the rows. If the two nodes " +
+  "really do name the same fact, that is a new claim and needs a new pair of keys, not a silent un-erase."

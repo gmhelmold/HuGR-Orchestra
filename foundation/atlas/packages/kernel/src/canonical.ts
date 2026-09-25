@@ -15,9 +15,9 @@
 // the obvious one) and costs the ability to address the two presentations apart. Changing it is a spec
 // amendment (REQ-KERNEL-1a + a held-out gate), NOT a local code decision.
 
-import type { Hash } from '@atlas/contracts';
-import type { CasObject } from './types.js';
-import { defaultEncoder } from './encoder.js';
+import type { Hash } from "@atlas/contracts"
+import type { CasObject } from "./types.js"
+import { defaultEncoder } from "./encoder.js"
 
 /**
  * The canonical-form contract (frozen): the §3.2 RFC-8785/JCS-subset preimage every encoder reproduces
@@ -26,38 +26,38 @@ import { defaultEncoder } from './encoder.js';
 export interface CanonicalApi {
   /** The RFC-8785/JCS-subset canonical preimage bytes (sorted keys, NFC, no floats). The bytes handed
    *  to the encoder seam; MUST exclude mutable side-indexes (KERNEL-8). (atlas-kernel:39-41) */
-  canonicalForm(obj: CasObject): Uint8Array;
+  canonicalForm(obj: CasObject): Uint8Array
   /** `Encoder.hash(canonicalForm(obj))` — content-addressed identity; MUST NOT be hand-rolled
    *  (KERNEL-1). (atlas-kernel:39-41, 98) */
-  id(obj: CasObject): Hash;
+  id(obj: CasObject): Hash
 }
 
 /** Mutable side-indexes excluded from the canonical preimage (KERNEL-8) — recomputed, never a key. */
-const SIDE_INDEX: ReadonlySet<string> = new Set(['grounding', 'status', 'freshness']);
+const SIDE_INDEX: ReadonlySet<string> = new Set(["grounding", "status", "freshness"])
 
-const UTF8 = new TextEncoder();
+const UTF8 = new TextEncoder()
 
 /** Serialize one JSON value into its canonical string form. Recursive; total over JSON except that a
  *  non-integer / non-finite number is a canonical-form violation and throws (floats forbidden). */
 function serialize(v: unknown): string {
-  if (v === null || v === undefined) return 'null';
+  if (v === null || v === undefined) return "null"
   switch (typeof v) {
-    case 'boolean':
-      return v ? 'true' : 'false';
-    case 'number':
+    case "boolean":
+      return v ? "true" : "false"
+    case "number":
       if (!Number.isFinite(v) || !Number.isInteger(v)) {
-        throw new Error('canonical-form violation: floats forbidden (non-integer/non-finite number)');
+        throw new Error("canonical-form violation: floats forbidden (non-integer/non-finite number)")
       }
-      return String(v);
-    case 'string':
+      return String(v)
+    case "string":
       // NFC + one fixed escape policy (JSON string escaping).
-      return JSON.stringify(v.normalize('NFC'));
-    case 'object': {
-      if (Array.isArray(v)) return `[${v.map(serialize).join(',')}]`;
-      const o = v as Record<string, unknown>;
+      return JSON.stringify(v.normalize("NFC"))
+    case "object": {
+      if (Array.isArray(v)) return `[${v.map(serialize).join(",")}]`
+      const o = v as Record<string, unknown>
       // Side-indexes (KERNEL-8) and `undefined`-valued keys are dropped FIRST: a key that never reaches the
       // preimage cannot collide in it, so the guard below prices only keys that are actually serialized.
-      const present = Object.keys(o).filter((k) => !SIDE_INDEX.has(k) && o[k] !== undefined);
+      const present = Object.keys(o).filter((k) => !SIDE_INDEX.has(k) && o[k] !== undefined)
       // FAIL-CLOSED on an NFC key collision (KERNEL-1; functional-surface.md "a fact's canonical preimage
       // has a … key-order … divergence ⇒ fail-closed reject … never emit two CAS objects for one fact").
       //
@@ -73,27 +73,27 @@ function serialize(v: unknown): string {
       // Rejecting (rather than picking a winner) is the spec's mandated disposition and the only sound one:
       // the two keys are genuinely different data, so any tie-break would SILENTLY DISCARD one field.
       // Throwing makes the order-dependent preimage UNREACHABLE rather than merely unlikely.
-      const seen = new Set<string>();
-      const entries: (readonly [string, unknown])[] = [];
+      const seen = new Set<string>()
+      const entries: (readonly [string, unknown])[] = []
       for (const k of present) {
-        const nk = k.normalize('NFC');
+        const nk = k.normalize("NFC")
         if (seen.has(nk)) {
           throw new Error(
             `canonical-form violation: NFC key collision on ${JSON.stringify(nk)} — two distinct keys ` +
-              'normalize to one, so the preimage would depend on insertion order',
-          );
+              "normalize to one, so the preimage would depend on insertion order",
+          )
         }
-        seen.add(nk);
-        entries.push([nk, o[k]] as const);
+        seen.add(nk)
+        entries.push([nk, o[k]] as const)
       }
       // Every key is now distinct, so the comparator never returns 0 and the order is total — the sorted
       // preimage is a function of the key SET alone, independent of `Object.keys` enumeration order.
-      entries.sort((a, b) => (a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0));
-      return `{${entries.map(([k, val]) => `${JSON.stringify(k)}:${serialize(val)}`).join(',')}}`;
+      entries.sort((a, b) => (a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0))
+      return `{${entries.map(([k, val]) => `${JSON.stringify(k)}:${serialize(val)}`).join(",")}}`
     }
     default:
       // bigint / symbol / function are not JSON — a canonical-form violation.
-      throw new Error(`canonical-form violation: unsupported value type ${typeof v}`);
+      throw new Error(`canonical-form violation: unsupported value type ${typeof v}`)
   }
 }
 
@@ -102,7 +102,7 @@ function serialize(v: unknown): string {
  * with the mutable side-indexes excluded (KERNEL-8). These are the exact bytes handed to the encoder seam.
  */
 export function canonicalForm(obj: CasObject): Uint8Array {
-  return UTF8.encode(serialize(obj));
+  return UTF8.encode(serialize(obj))
 }
 
 /**
@@ -111,5 +111,5 @@ export function canonicalForm(obj: CasObject): Uint8Array {
  * identity.
  */
 export function id(obj: CasObject): Hash {
-  return defaultEncoder.hash(canonicalForm(obj));
+  return defaultEncoder.hash(canonicalForm(obj))
 }

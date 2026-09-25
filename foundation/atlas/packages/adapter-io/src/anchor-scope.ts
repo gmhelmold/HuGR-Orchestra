@@ -16,10 +16,10 @@
  * segments) trivially covers every anchor; an anchorless node is filtered by the caller before this runs.
  */
 export function underScope(anchor: string, scope: string): boolean {
-  const filePath = anchor.split('::')[0] ?? anchor; // the file-path portion — ancestry after the first `::`
-  const anchorSegs = filePath.split('/');
-  const scopeSegs = scope.split('/');
-  if (scopeSegs.length > anchorSegs.length) return false;
-  for (let i = 0; i < scopeSegs.length; i++) if (scopeSegs[i] !== anchorSegs[i]) return false;
-  return true;
+  const filePath = anchor.split("::")[0] ?? anchor // the file-path portion — ancestry after the first `::`
+  const anchorSegs = filePath.split("/")
+  const scopeSegs = scope.split("/")
+  if (scopeSegs.length > anchorSegs.length) return false
+  for (let i = 0; i < scopeSegs.length; i++) if (scopeSegs[i] !== anchorSegs[i]) return false
+  return true
 }

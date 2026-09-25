@@ -1,3 +1,3 @@
 export function shout(msg: string): string {
-  return msg.toUpperCase() + '!';
+  return msg.toUpperCase() + "!"
 }

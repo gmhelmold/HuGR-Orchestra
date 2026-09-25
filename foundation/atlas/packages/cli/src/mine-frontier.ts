@@ -5,8 +5,8 @@
 // everything here answers one question, "which candidate pool does this pass rank?". `mine.ts` keeps the
 // run composition; this file keeps the arm resolution.
 
-import type { FrontierOptions, SkeletonSource, UnitPriorSource } from '@atlas/genesis';
-import type { ProductionSkeletonSource } from '@atlas/adapter-io';
+import type { FrontierOptions, SkeletonSource, UnitPriorSource } from "@atlas/genesis"
+import type { ProductionSkeletonSource } from "@atlas/adapter-io"
 
 /**
  * THE A/B ARM SELECTOR (#182 S4) — read from the THREADED `env` every other operator input on this path is
@@ -30,8 +30,8 @@ import type { ProductionSkeletonSource } from '@atlas/adapter-io';
  * than from a variable nobody recorded. Flipping the default later is a one-token edit HERE and nowhere
  * else — every layer under this one already takes the arm as data.
  */
-export const FRONTIER_ENV = 'ATLAS_FRONTIER';
-export const ARM_SYMBOL = 'symbol';
+export const FRONTIER_ENV = "ATLAS_FRONTIER"
+export const ARM_SYMBOL = "symbol"
 
 /**
  * The #182 unit-prior seam of a skeleton source, or `undefined` when this pass's source has none.
@@ -44,8 +44,8 @@ export const ARM_SYMBOL = 'symbol';
  * zero that reads like a measurement.
  */
 export function unitPriorOf(skeleton: SkeletonSource): UnitPriorSource | undefined {
-  const maybe = (skeleton as Partial<ProductionSkeletonSource>).unitPrior;
-  return typeof maybe === 'function' ? maybe : undefined;
+  const maybe = (skeleton as Partial<ProductionSkeletonSource>).unitPrior
+  return typeof maybe === "function" ? maybe : undefined
 }
 
 /**
@@ -58,9 +58,9 @@ export function unitPriorOf(skeleton: SkeletonSource): UnitPriorSource | undefin
  * first parse already had.
  */
 export function resolveFrontier(env: NodeJS.ProcessEnv, skeleton: SkeletonSource): FrontierOptions {
-  const prior = unitPriorOf(skeleton);
+  const prior = unitPriorOf(skeleton)
   return {
     subFile: env[FRONTIER_ENV] === ARM_SYMBOL,
     ...(prior !== undefined ? { prior } : {}),
-  };
+  }
 }

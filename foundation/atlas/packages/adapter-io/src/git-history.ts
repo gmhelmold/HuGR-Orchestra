@@ -21,42 +21,42 @@
 //     by the mine driver with NO try/catch, so a throw here aborts genesis. Every git read is therefore
 //     absorbed and fails CLOSED toward the `thin` verdict (⇒ structural centrality), never upward.
 
-import type { StructRef } from '@atlas/contracts';
-import type { HistorySource, MinedSignals } from '@atlas/genesis';
-import { nodeHashOfPath } from '@atlas/index';
-import { asSubtreeHash } from '@atlas/kernel';
-import { runGit } from './run-git.js';
+import type { StructRef } from "@atlas/contracts"
+import type { HistorySource, MinedSignals } from "@atlas/genesis"
+import { nodeHashOfPath } from "@atlas/index"
+import { asSubtreeHash } from "@atlas/kernel"
+import { runGit } from "./run-git.js"
 
 /** All git I/O flows through the ONE shared no-shell seam (#74), absorbed so this module is TOTAL: a bad
  *  rev, a repo with no commits (`rev-list HEAD` is a hard failure there), a non-git dir or an absent git
  *  binary yields `fallback`, never a throw. The happy path is byte-identical to an unguarded call. */
-const git = (repo: string, args: readonly string[], fallback = ''): string => {
+const git = (repo: string, args: readonly string[], fallback = ""): string => {
   try {
-    return runGit(repo, args);
+    return runGit(repo, args)
   } catch {
-    return fallback;
+    return fallback
   }
-};
+}
 
 /** Non-empty output lines (git pads a trailing newline; `--format=` emits blank separators). */
-const nonEmpty = (out: string): string[] => out.split('\n').filter((l) => l.length > 0);
+const nonEmpty = (out: string): string[] => out.split("\n").filter((l) => l.length > 0)
 
 /** Non-empty NUL-delimited records — the RAW-pathname reader. Every pathname-emitting git read uses `-z`
  *  and this splitter, so no path is ever C-quoted (see the IDENTITY note above) and a path containing a
  *  newline survives intact. */
-const nulPaths = (out: string): string[] => out.split('\0').filter((p) => p.length > 0);
+const nulPaths = (out: string): string[] => out.split("\0").filter((p) => p.length > 0)
 
 /** The single canonical string order used for every emitted list (determinism / SCN-8b). */
-const byPath = (a: string, b: string): number => (a < b ? -1 : a > b ? 1 : 0);
+const byPath = (a: string, b: string): number => (a < b ? -1 : a > b ? 1 : 0)
 
 /** Message-based SZZ: a bug-fixing commit subject (Śliwerski–Zimmermann–Zeller). The ONE definition,
  *  consumed by `signals().szzBugCommits` — the frontier no longer has an SZZ leg (see below). */
-const FIX_SUBJECT = /^fix/i;
+const FIX_SUBJECT = /^fix/i
 
 /** Hotspot bar: a file must have been CHANGED after introduction (≥2 touching commits). A file added once
  *  and never touched again has change-frequency 0 — it is un-churned code, which REQ-GEN-3b forbids from
  *  raising spend (`frontierBudget` IS the ranked-site count, genesis/rank.ts:370). */
-const HOTSPOT_MIN_CHURN = 2;
+const HOTSPOT_MIN_CHURN = 2
 
 /**
  * NO SZZ LEG HERE — deleted (#181 fixup), not merely retuned. The single-pass walk below bumps `churn`
@@ -85,7 +85,7 @@ const HOTSPOT_MIN_CHURN = 2;
 /** Coupling bar: association-rule MINIMUM SUPPORT over commit baskets — a file must co-change with at
  *  least one other file in ≥2 distinct commits. A one-shot import that happens to land beside other files
  *  has support 1 and is NOT a logical dependency. */
-const COUPLING_MIN_SUPPORT = 2;
+const COUPLING_MIN_SUPPORT = 2
 
 /**
  * A `file` StructRef for a tracked path. The `subtreeHash` is minted by `@atlas/index`'s OWN path→node
@@ -96,19 +96,19 @@ const COUPLING_MIN_SUPPORT = 2;
  * `qualifiedPath` must therefore be the RAW repo-relative path (see the `-z` note in the header).
  */
 const fileRef = (qualifiedPath: string): StructRef => ({
-  kind: 'file',
+  kind: "file",
   qualifiedPath,
   subtreeHash: asSubtreeHash(nodeHashOfPath(qualifiedPath)),
-});
+})
 
 /** One commit's mining record: its subject (SZZ) and the RAW paths it touched (churn + coupling basket). */
 interface CommitBasket {
-  readonly subject: string;
-  readonly files: readonly string[];
+  readonly subject: string
+  readonly files: readonly string[]
 }
 
 /** `<40-hex>\x1f<subject>` — the record header of the single-pass log walk below. */
-const BASKET_HEADER = /^([0-9a-f]{40})\x1f([\s\S]*)$/;
+const BASKET_HEADER = /^([0-9a-f]{40})\x1f([\s\S]*)$/
 
 /**
  * ONE `git log` pass yielding every reachable commit's subject + touched paths, RAW. `-z` NUL-terminates
@@ -119,16 +119,16 @@ const BASKET_HEADER = /^([0-9a-f]{40})\x1f([\s\S]*)$/;
  * the next record. Deterministic at a fixed rev; total (a bad rev ⇒ no commits).
  */
 function commitBaskets(repo: string, rev: string): CommitBasket[] {
-  const out = git(repo, ['log', '--format=%H%x1f%s', '--name-only', '-z', rev]);
-  const commits: Array<{ subject: string; files: string[] }> = [];
-  for (const raw of out.split('\0')) {
-    const rec = raw.replace(/^\n+/, '');
-    if (rec.length === 0) continue;
-    const header = BASKET_HEADER.exec(rec);
-    if (header !== null) commits.push({ subject: header[2] ?? '', files: [] });
-    else commits[commits.length - 1]?.files.push(rec);
+  const out = git(repo, ["log", "--format=%H%x1f%s", "--name-only", "-z", rev])
+  const commits: Array<{ subject: string; files: string[] }> = []
+  for (const raw of out.split("\0")) {
+    const rec = raw.replace(/^\n+/, "")
+    if (rec.length === 0) continue
+    const header = BASKET_HEADER.exec(rec)
+    if (header !== null) commits.push({ subject: header[2] ?? "", files: [] })
+    else commits[commits.length - 1]?.files.push(rec)
   }
-  return commits;
+  return commits
 }
 
 /** A trivial per-key memo — `fn` runs at most once per distinct `key`, cached for the LIFETIME of the
@@ -141,14 +141,14 @@ function commitBaskets(repo: string, rev: string): CommitBasket[] {
  *  alone — so a caller that ever passed a different `(repo, rev)` through the SAME instance would miss the
  *  cache rather than read a stale answer for the wrong rev. */
 function memo<K, V>(fn: (k: K) => V): (k: K) => V {
-  const cache = new Map<K, V>();
+  const cache = new Map<K, V>()
   return (k: K): V => {
-    const hit = cache.get(k);
-    if (hit !== undefined) return hit;
-    const v = fn(k);
-    cache.set(k, v);
-    return v;
-  };
+    const hit = cache.get(k)
+    if (hit !== undefined) return hit
+    const v = fn(k)
+    cache.set(k, v)
+    return v
+  }
 }
 
 /**
@@ -166,108 +166,109 @@ function memo<K, V>(fn: (k: K) => V): (k: K) => V {
  */
 export function createHistorySource(repoPath: string, rev: string): HistorySource {
   /** SHAs of commits touching `qp` at `rev`, reverse-chronological (git-log order). */
-  const commitsTouching = (qp: string): string[] =>
-    nonEmpty(git(repoPath, ['log', '--format=%H', rev, '--', qp]));
+  const commitsTouching = (qp: string): string[] => nonEmpty(git(repoPath, ["log", "--format=%H", rev, "--", qp]))
 
   /** The RAW tracked path set at a rev — the identity domain every emitted site is drawn from. */
   const trackedAt = (repo: string, r: string): string[] =>
-    nulPaths(git(repo, ['ls-tree', '-r', '--name-only', '-z', r]));
+    nulPaths(git(repo, ["ls-tree", "-r", "--name-only", "-z", r]))
 
   // Keyed on the ACTUAL call args (`repo\0rev`), not the closed-over `repoPath`/`rev` — see the `memo` note.
-  const rk = (repo: string, r: string): string => `${repo}\0${r}`;
+  const rk = (repo: string, r: string): string => `${repo}\0${r}`
 
   const commitCountMemo = memo((k: string): number => {
-    const [repo, r] = k.split('\0') as [string, string];
-    const n = Number(git(repo, ['rev-list', '--count', r]).trim());
-    return Number.isFinite(n) ? n : 0;
-  });
-  const shallowMemo = memo((repo: string): boolean => git(repo, ['rev-parse', '--is-shallow-repository'], 'true').trim() === 'true');
+    const [repo, r] = k.split("\0") as [string, string]
+    const n = Number(git(repo, ["rev-list", "--count", r]).trim())
+    return Number.isFinite(n) ? n : 0
+  })
+  const shallowMemo = memo(
+    (repo: string): boolean => git(repo, ["rev-parse", "--is-shallow-repository"], "true").trim() === "true",
+  )
   const blameMemo = memo((k: string): number => {
-    const [repo, r] = k.split('\0') as [string, string];
-    const files = trackedAt(repo, r);
-    const perCommit = new Map<string, number>();
-    let total = 0;
-    const header = /^([0-9a-f]{40}) \d+ \d+/; // porcelain line-block header = <sha> <orig> <final> [n]
+    const [repo, r] = k.split("\0") as [string, string]
+    const files = trackedAt(repo, r)
+    const perCommit = new Map<string, number>()
+    let total = 0
+    const header = /^([0-9a-f]{40}) \d+ \d+/ // porcelain line-block header = <sha> <orig> <final> [n]
     for (const f of files) {
-      const blame = git(repo, ['blame', '--line-porcelain', r, '--', f]);
-      for (const line of blame.split('\n')) {
-        const sha = header.exec(line)?.[1];
+      const blame = git(repo, ["blame", "--line-porcelain", r, "--", f])
+      for (const line of blame.split("\n")) {
+        const sha = header.exec(line)?.[1]
         if (sha !== undefined) {
-          perCommit.set(sha, (perCommit.get(sha) ?? 0) + 1);
-          total += 1;
+          perCommit.set(sha, (perCommit.get(sha) ?? 0) + 1)
+          total += 1
         }
       }
     }
-    if (total === 0) return 0;
-    const top = Math.max(...perCommit.values());
-    return top / total;
-  });
+    if (total === 0) return 0
+    const top = Math.max(...perCommit.values())
+    return top / total
+  })
   const frontierMemo = memo((k: string): readonly StructRef[] => {
-    const [repo, r] = k.split('\0') as [string, string];
-    const tracked = new Set(trackedAt(repo, r));
-    if (tracked.size === 0) return [];
-    const churn = new Map<string, number>();
-    const coupling = new Map<string, number>();
+    const [repo, r] = k.split("\0") as [string, string]
+    const tracked = new Set(trackedAt(repo, r))
+    if (tracked.size === 0) return []
+    const churn = new Map<string, number>()
+    const coupling = new Map<string, number>()
     const bump = (m: Map<string, number>, f: string): void => {
-      m.set(f, (m.get(f) ?? 0) + 1);
-    };
+      m.set(f, (m.get(f) ?? 0) + 1)
+    }
     for (const commit of commitBaskets(repo, r)) {
-      const basket = commit.files.filter((f) => tracked.has(f));
+      const basket = commit.files.filter((f) => tracked.has(f))
       for (const f of basket) {
-        bump(churn, f);
-        if (basket.length >= 2) bump(coupling, f);
+        bump(churn, f)
+        if (basket.length >= 2) bump(coupling, f)
       }
     }
     const inFrontier = (f: string): boolean =>
-      (churn.get(f) ?? 0) >= HOTSPOT_MIN_CHURN || (coupling.get(f) ?? 0) >= COUPLING_MIN_SUPPORT;
+      (churn.get(f) ?? 0) >= HOTSPOT_MIN_CHURN || (coupling.get(f) ?? 0) >= COUPLING_MIN_SUPPORT
     return [...tracked]
       .filter(inFrontier)
       .sort((a, b) => (churn.get(b) ?? 0) - (churn.get(a) ?? 0) || byPath(a, b))
-      .map(fileRef);
-  });
+      .map(fileRef)
+  })
   const signalsMemo = memo((qp: string): MinedSignals => {
     // messages — commit subjects touching qp, in git-log order (deterministic at a fixed rev; NOT sorted).
-    const messages = nonEmpty(git(repoPath, ['log', '--format=%s', rev, '--', qp]));
+    const messages = nonEmpty(git(repoPath, ["log", "--format=%s", rev, "--", qp]))
 
     // szzBugCommits — message-based SZZ: subjects matching /^fix/i (deterministic).
-    const szzBugCommits = messages.filter((s) => FIX_SUBJECT.test(s)).length;
+    const szzBugCommits = messages.filter((s) => FIX_SUBJECT.test(s)).length
 
     // hotspot — change-frequency (churn count, complexity factor deferred to v0), --follow across renames.
-    const hotspot = nonEmpty(git(repoPath, ['log', '--format=%H', '--follow', rev, '--', qp])).length;
+    const hotspot = nonEmpty(git(repoPath, ["log", "--format=%H", "--follow", rev, "--", qp])).length
 
     // owners — distinct authors of commits touching qp, sorted.
-    const owners = [...new Set(nonEmpty(git(repoPath, ['log', '--format=%an', rev, '--', qp])))].sort(byPath);
+    const owners = [...new Set(nonEmpty(git(repoPath, ["log", "--format=%an", rev, "--", qp])))].sort(byPath)
 
     // coChanged — distinct OTHER files that appeared in the same commits as qp, sorted by path.
-    const co = new Set<string>();
+    const co = new Set<string>()
     for (const sha of commitsTouching(qp)) {
-      for (const f of nulPaths(git(repoPath, ['show', '--format=', '--name-only', '-z', sha]))) {
-        if (f !== qp) co.add(f);
+      for (const f of nulPaths(git(repoPath, ["show", "--format=", "--name-only", "-z", sha]))) {
+        if (f !== qp) co.add(f)
       }
     }
-    const coChanged = [...co].sort(byPath).map(fileRef);
+    const coChanged = [...co].sort(byPath).map(fileRef)
 
-    return { hotspot, szzBugCommits, coChanged, owners, messages };
-  });
+    return { hotspot, szzBugCommits, coChanged, owners, messages }
+  })
 
   return {
     // rev-list count of commits reachable from rev. TOTAL: an unreadable/absent history counts 0, which
     // trips GEN-15's `low-commit-count` ⇒ thin ⇒ structural centrality (the honest fail-closed verdict).
     commitCount(repo, r) {
-      return commitCountMemo(rk(repo, r));
+      return commitCountMemo(rk(repo, r))
     },
 
     // shallow-clone probe (repository-wide; rev unused — the frozen (repo,rev) shape is honoured).
     // TOTAL: an unreadable repo falls back to `true` — the CONSERVATIVE verdict (assume degenerate).
     shallow(repo, _r) {
-      void _r;
-      return shallowMemo(repo);
+      void _r
+      return shallowMemo(repo)
     },
 
     // Over ALL tracked files at rev, aggregate per-commit blame attributions; return the single
     // most-attributed commit's share of total lines (0 when there are no lines). Deterministic.
     blameConcentration(repo, r) {
-      return blameMemo(rk(repo, r));
+      return blameMemo(rk(repo, r))
     },
 
     // The GEN-11 personalization vector: the UNION of the hotspot / coupling frontiers (no SZZ leg — see
@@ -277,12 +278,12 @@ export function createHistorySource(repoPath: string, rev: string): HistorySourc
     // raise LLM spend"), since `frontierBudget` is the ranked-site count. Ordered churn-desc then
     // path-asc; both legs are computed from ONE log pass so a fixed rev is byte-identical.
     frontier(repo, r) {
-      return frontierMemo(rk(repo, r));
+      return frontierMemo(rk(repo, r))
     },
 
     // The mined ranking heuristics for a site (GEN-6), scoped to the closed-over rev.
     signals(site): MinedSignals {
-      return signalsMemo(site.qualifiedPath);
+      return signalsMemo(site.qualifiedPath)
     },
-  };
+  }
 }

@@ -29,23 +29,23 @@ Then `ORACLE` and `PROPOSER` are write-disjoint (different files) → parallel. 
 
 ## Acceptance items (RED now — each maps 1:1 to a real test)
 
-| # | item | kind | owner WP |
-|---|---|---|---|
-| A1 | the mine proposer can emit a `predicate` seed with `slot:'dependency'` (not advisory-only) | testable | PROPOSER |
-| A2 | a dependency candidate whose `verifyDependency` returns `proven` is ADMITTED carrying `predicateSlot:'dependency'` + `seal:'proven'` | testable | ORACLE |
-| A3 | a dependency candidate whose oracle ABSTAINS is DROPPED — never admitted as a typed fact (**the 0-false-proven core**) | testable | ORACLE |
-| A4 | the emitted proven fact stores `seal:'proven'`; the field is additive + absent-tolerant (a pre-existing seal-less fact reads `seal:undefined`, no crash) | testable | SEAL |
-| A5 | nodeKey folds the slot — a proven `dependency` fact and an advisory at the same anchor get DISTINCT identities and coexist | testable | SEAL (pin; leg exists) |
-| A6 | benchmark on real mined Atlas facts: **0 false-proven** on the dependency slot (every `proven` fact's dep claim holds vs the oracle), per-slot precision reported | testable | BENCH |
-| A7 | the seal is surfaced in the pack/query so a reader sees HOW the slot was decided | **judged** | SEAL |
-| A8 | a NON-`dependency` typed seed reaching admit is handled deterministically (advisory-fallback, seal-less) and never sealed `proven` | testable | ORACLE |
-| A9 | two `dependency`-slotted facts at the same anchor map to ONE nodeKey and the second UPDATES the first (collision half of the design) | testable | ORACLE (SEAL pins nodeKey) |
-| A10 | mining that yields no `dependency` proof still emits advisories exactly as before — regression over the current advisory-only suite | testable | PROPOSER |
-| A11 | an abstained/dropped candidate carries NO `seal:'proven'` (seal absent) in any surviving form | testable | ORACLE |
-| A12 | the admitted `dependency` fact's anchor is (re)grounded and the oracle proof is tied to that SAME grounded anchor | testable | ORACLE |
-| A13 | a malformed/unresolvable dependency TARGET yields `abstain` (dropped) — never `proven`, never a thrown error | testable | ORACLE |
-| A14 | landing a proven `dependency` fact leaves a pre-existing advisory at the anchor byte-for-byte unchanged | testable | ORACLE |
-| A15 | an admitted proven fact records its oracle-provenance (oracle identity + verdict) in the mine ledger, not just the `seal` label | testable | LEDGER |
+| #   | item                                                                                                                                                              | kind       | owner WP                   |
+| --- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- | -------------------------- |
+| A1  | the mine proposer can emit a `predicate` seed with `slot:'dependency'` (not advisory-only)                                                                        | testable   | PROPOSER                   |
+| A2  | a dependency candidate whose `verifyDependency` returns `proven` is ADMITTED carrying `predicateSlot:'dependency'` + `seal:'proven'`                              | testable   | ORACLE                     |
+| A3  | a dependency candidate whose oracle ABSTAINS is DROPPED — never admitted as a typed fact (**the 0-false-proven core**)                                            | testable   | ORACLE                     |
+| A4  | the emitted proven fact stores `seal:'proven'`; the field is additive + absent-tolerant (a pre-existing seal-less fact reads `seal:undefined`, no crash)          | testable   | SEAL                       |
+| A5  | nodeKey folds the slot — a proven `dependency` fact and an advisory at the same anchor get DISTINCT identities and coexist                                        | testable   | SEAL (pin; leg exists)     |
+| A6  | benchmark on real mined Atlas facts: **0 false-proven** on the dependency slot (every `proven` fact's dep claim holds vs the oracle), per-slot precision reported | testable   | BENCH                      |
+| A7  | the seal is surfaced in the pack/query so a reader sees HOW the slot was decided                                                                                  | **judged** | SEAL                       |
+| A8  | a NON-`dependency` typed seed reaching admit is handled deterministically (advisory-fallback, seal-less) and never sealed `proven`                                | testable   | ORACLE                     |
+| A9  | two `dependency`-slotted facts at the same anchor map to ONE nodeKey and the second UPDATES the first (collision half of the design)                              | testable   | ORACLE (SEAL pins nodeKey) |
+| A10 | mining that yields no `dependency` proof still emits advisories exactly as before — regression over the current advisory-only suite                               | testable   | PROPOSER                   |
+| A11 | an abstained/dropped candidate carries NO `seal:'proven'` (seal absent) in any surviving form                                                                     | testable   | ORACLE                     |
+| A12 | the admitted `dependency` fact's anchor is (re)grounded and the oracle proof is tied to that SAME grounded anchor                                                 | testable   | ORACLE                     |
+| A13 | a malformed/unresolvable dependency TARGET yields `abstain` (dropped) — never `proven`, never a thrown error                                                      | testable   | ORACLE                     |
+| A14 | landing a proven `dependency` fact leaves a pre-existing advisory at the anchor byte-for-byte unchanged                                                           | testable   | ORACLE                     |
+| A15 | an admitted proven fact records its oracle-provenance (oracle identity + verdict) in the mine ledger, not just the `seal` label                                   | testable   | LEDGER                     |
 
 | A16 | re-mining a previously-proven dependency fact whose target NO LONGER verifies REVOKES the stored `seal:'proven'` (→ advisory/seal-less) — no stale-proven survives a code change | testable | ORACLE (reuse drift/freshness) |
 | A17 | a proven dependency fact stays under the SAME T2 tier gating as an advisory at the site — the `proven` seal neither promotes tier nor bypasses tier gating | testable | SEAL (contract) + ORACLE (assert) |
@@ -60,13 +60,13 @@ Then `ORACLE` and `PROPOSER` are write-disjoint (different files) → parallel. 
 
 ## WP table
 
-| WP | owns | files (write-disjoint) | model | dep-on |
-|---|---|---|---|---|
-| **196a.SEAL** | A4, A5, A7 | `knowledge/src/types.ts`, `adapter-io/src/governed-emit.ts` (store leg), query/pack surface | sonnet | — (FIRST) |
-| **196a.ORACLE** | A2, A3, A8, A9, A11, A12, A13, A14 | `adapter-io/src/compose-mine-admission.ts` (+ a small verify-fact→typeOracle adapter module) | sonnet | SEAL@contract |
-| **196a.PROPOSER** | A1, A10 | `adapter-io/src/prompt.ts`, `cli/src/mine-decide.ts` | sonnet | SEAL@contract |
-| **196a.LEDGER** | A15 | mine ledger / provenance sidecar writer | sonnet | ORACLE |
-| **196a.BENCH** | A6 | `packages/e2e/test/` (new bench) | sonnet | SEAL, ORACLE, PROPOSER, LEDGER |
+| WP                | owns                               | files (write-disjoint)                                                                       | model  | dep-on                         |
+| ----------------- | ---------------------------------- | -------------------------------------------------------------------------------------------- | ------ | ------------------------------ |
+| **196a.SEAL**     | A4, A5, A7                         | `knowledge/src/types.ts`, `adapter-io/src/governed-emit.ts` (store leg), query/pack surface  | sonnet | — (FIRST)                      |
+| **196a.ORACLE**   | A2, A3, A8, A9, A11, A12, A13, A14 | `adapter-io/src/compose-mine-admission.ts` (+ a small verify-fact→typeOracle adapter module) | sonnet | SEAL@contract                  |
+| **196a.PROPOSER** | A1, A10                            | `adapter-io/src/prompt.ts`, `cli/src/mine-decide.ts`                                         | sonnet | SEAL@contract                  |
+| **196a.LEDGER**   | A15                                | mine ledger / provenance sidecar writer                                                      | sonnet | ORACLE                         |
+| **196a.BENCH**    | A6                                 | `packages/e2e/test/` (new bench)                                                             | sonnet | SEAL, ORACLE, PROPOSER, LEDGER |
 
 > ORACLE owns 8 items — above the ≤4 sweet spot — but they are ONE cohesive owner (the single admit-path
 > file `compose-mine-admission.ts` + its tests) and the architecture is pre-decided (the type-expressible-slot

@@ -53,7 +53,7 @@ next: the candidate would be REFUSED at gate 'truth' — re-derive the citation 
 [`atlas anchors`](./anchors.md), pick a slot with [`atlas slots`](./slots.md), compose a fact with
 [`atlas draft`](./draft.md), **check whether the door would accept it here**, then publish it through the
 governed [`atlas emit`](./emit.md) door. The one thing a dry run cannot rule out is a store mutation
-*between* the read-only snapshot it reads and a later real `emit` — the emit door's own header states the
+_between_ the read-only snapshot it reads and a later real `emit` — the emit door's own header states the
 identical caveat.
 
 ## Authority

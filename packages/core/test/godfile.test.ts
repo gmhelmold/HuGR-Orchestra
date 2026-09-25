@@ -86,7 +86,15 @@ describe("godfile", () => {
 
     expect(runGodfileGate({ cwd, baseRef: "HEAD" }).errors).toEqual([])
     expect(runGodfileGate({ cwd, baseRef: "HEAD" }).warnings).toEqual(
-      expect.arrayContaining([{ file: "legacy.ts", lines: HARD_LIMIT_LOC + 2, baseLines: HARD_LIMIT_LOC + 1, kind: "waiver", reason: "Human-authorized legacy exception" }]),
+      expect.arrayContaining([
+        {
+          file: "legacy.ts",
+          lines: HARD_LIMIT_LOC + 2,
+          baseLines: HARD_LIMIT_LOC + 1,
+          kind: "waiver",
+          reason: "Human-authorized legacy exception",
+        },
+      ]),
     )
 
     writeFileSync(join(cwd, "legacy.ts"), lines(HARD_LIMIT_LOC + 3))

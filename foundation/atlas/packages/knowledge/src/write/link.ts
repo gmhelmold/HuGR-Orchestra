@@ -9,18 +9,18 @@
 // reducers, decides REJECTION). Each node's peer lists are kept SORTED + de-duped (the same lexicographic
 // order the read fold + subsumes use). `cas`/`builtAt`/other nodes are untouched. No clock, no random, no LLM.
 
-import type { CurrentNode, StoreProjection } from './router.js';
+import type { CurrentNode, StoreProjection } from "./router.js"
 
 /** The lexicographic order both carriers are kept in (the one the read folds and `subsumes` already use). */
-const cmp = (x: string, y: string): number => (x < y ? -1 : x > y ? 1 : 0);
+const cmp = (x: string, y: string): number => (x < y ? -1 : x > y ? 1 : 0)
 
 /** Add `peer` to `node.sameAs`, kept SORTED + de-duped — idempotent (already-present peer ⇒ node unchanged).
  *  Spread preserves every other field (family/contentHash/claims/anchor/slot/…). */
 function withPeer(node: CurrentNode, peer: string): CurrentNode {
-  const existing = node.sameAs ?? [];
-  if (existing.includes(peer)) return node; // already asserted — no-op (idempotent)
-  const sameAs = [...existing, peer].sort(cmp);
-  return { ...node, sameAs };
+  const existing = node.sameAs ?? []
+  if (existing.includes(peer)) return node // already asserted — no-op (idempotent)
+  const sameAs = [...existing, peer].sort(cmp)
+  return { ...node, sameAs }
 }
 
 /**
@@ -32,10 +32,10 @@ function withPeer(node: CurrentNode, peer: string): CurrentNode {
  * by spread, `sameAs` included.
  */
 function withRetraction(node: CurrentNode, peer: string): CurrentNode {
-  const existing = node.sameAsRetracted ?? [];
-  if (existing.includes(peer)) return node; // already retracted — no-op (idempotent)
-  const sameAsRetracted = [...existing, peer].sort(cmp);
-  return { ...node, sameAsRetracted };
+  const existing = node.sameAsRetracted ?? []
+  if (existing.includes(peer)) return node // already retracted — no-op (idempotent)
+  const sameAsRetracted = [...existing, peer].sort(cmp)
+  return { ...node, sameAsRetracted }
 }
 
 /**
@@ -46,14 +46,14 @@ function withRetraction(node: CurrentNode, peer: string): CurrentNode {
  * freshness `builtAt` watermark, every other node — is preserved verbatim.
  */
 export function linkSameAs(projection: StoreProjection, a: string, b: string): StoreProjection {
-  if (a === b) return projection; // no self-equivalence — total no-op
-  const nodeA = projection.current.get(a);
-  const nodeB = projection.current.get(b);
-  if (nodeA === undefined || nodeB === undefined) return projection; // absent endpoint — total no-op
-  const current = new Map(projection.current);
-  current.set(a, withPeer(nodeA, b));
-  current.set(b, withPeer(nodeB, a));
-  return { ...projection, current }; // preserve cas + builtAt (only `current` changes)
+  if (a === b) return projection // no self-equivalence — total no-op
+  const nodeA = projection.current.get(a)
+  const nodeB = projection.current.get(b)
+  if (nodeA === undefined || nodeB === undefined) return projection // absent endpoint — total no-op
+  const current = new Map(projection.current)
+  current.set(a, withPeer(nodeA, b))
+  current.set(b, withPeer(nodeB, a))
+  return { ...projection, current } // preserve cas + builtAt (only `current` changes)
 }
 
 /**
@@ -71,12 +71,12 @@ export function linkSameAs(projection: StoreProjection, a: string, b: string): S
  * earned it.
  */
 export function unlinkSameAs(projection: StoreProjection, a: string, b: string): StoreProjection {
-  if (a === b) return projection; // no self-equivalence ever existed — total no-op
-  const nodeA = projection.current.get(a);
-  const nodeB = projection.current.get(b);
-  if (nodeA === undefined || nodeB === undefined) return projection; // absent endpoint — total no-op
-  const current = new Map(projection.current);
-  current.set(a, withRetraction(nodeA, b));
-  current.set(b, withRetraction(nodeB, a));
-  return { ...projection, current }; // preserve cas + builtAt (only `current` changes)
+  if (a === b) return projection // no self-equivalence ever existed — total no-op
+  const nodeA = projection.current.get(a)
+  const nodeB = projection.current.get(b)
+  if (nodeA === undefined || nodeB === undefined) return projection // absent endpoint — total no-op
+  const current = new Map(projection.current)
+  current.set(a, withRetraction(nodeA, b))
+  current.set(b, withRetraction(nodeB, a))
+  return { ...projection, current } // preserve cas + builtAt (only `current` changes)
 }

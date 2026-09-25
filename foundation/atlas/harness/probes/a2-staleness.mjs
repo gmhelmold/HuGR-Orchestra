@@ -28,26 +28,26 @@
 // An anchor that fails to resolve at the BASE rev is a corpus bug, not a drift finding — it is reported
 // separately (`unresolved`), never silently folded into the confusion matrix.
 
-import { execFileSync } from 'node:child_process';
-import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
-import { tmpdir } from 'node:os';
-import { dirname, join } from 'node:path';
-import { fileURLToPath, pathToFileURL } from 'node:url';
-import { CORPUS } from './a2-corpus/index.mjs';
+import { execFileSync } from "node:child_process"
+import { mkdtempSync, rmSync, writeFileSync } from "node:fs"
+import { tmpdir } from "node:os"
+import { dirname, join } from "node:path"
+import { fileURLToPath, pathToFileURL } from "node:url"
+import { CORPUS } from "./a2-corpus/index.mjs"
 
-const HERE = dirname(fileURLToPath(import.meta.url));
-const REPO_ROOT = join(HERE, '..', '..');
+const HERE = dirname(fileURLToPath(import.meta.url))
+const REPO_ROOT = join(HERE, "..", "..")
 // The built entrypoint of @atlas/adapter-io. Its dist/ is produced by `npm run build`/`typecheck` (`tsc
 // -b`), which CI runs before `npm test` (ci.yml) — the same build-order dependency `rev-index.test.ts`'s
 // OWN cross-package `@atlas/index` import already relies on. Computed as a path string only — this line
 // resolves no module and links nothing into THIS process.
-const ADAPTER_IO_ENTRY = pathToFileURL(join(REPO_ROOT, 'packages', 'adapter-io', 'dist', 'src', 'index.js')).href;
+const ADAPTER_IO_ENTRY = pathToFileURL(join(REPO_ROOT, "packages", "adapter-io", "dist", "src", "index.js")).href
 
 /** Every node key in `node`'s subtree, preorder. Pure, no product import. */
 function collectKeys(node, out = []) {
-  out.push(node.key);
-  for (const child of node.children) collectKeys(child, out);
-  return out;
+  out.push(node.key)
+  for (const child of node.children) collectKeys(child, out)
+  return out
 }
 
 /** Resolve `entry.anchor` to a qualifiedPath in `axes` (the built index at rev A): the file's own path for
@@ -56,11 +56,11 @@ function collectKeys(node, out = []) {
  *  never has to hardcode the exact ordinal-bearing key `unitPath` (ast.ts) mints. `undefined` if not found
  *  or ambiguous (≥2 candidates) — a badly-specified corpus entry is reported, never guessed. Pure. */
 function resolveQualifiedPath(axes, entry) {
-  if (entry.anchor.file === true) return entry.file;
-  const needle = entry.anchor.needle;
-  const keys = [...collectKeys(axes.spatial), ...collectKeys(axes.territory)];
-  const candidates = [...new Set(keys.filter((k) => k.includes('::') && k.endsWith(`:${needle}`)))];
-  return candidates.length === 1 ? candidates[0] : undefined;
+  if (entry.anchor.file === true) return entry.file
+  const needle = entry.anchor.needle
+  const keys = [...collectKeys(axes.spatial), ...collectKeys(axes.territory)]
+  const candidates = [...new Set(keys.filter((k) => k.includes("::") && k.endsWith(`:${needle}`)))]
+  return candidates.length === 1 ? candidates[0] : undefined
 }
 
 /** The child-process runner's full source, generated fresh each call (so `ADAPTER_IO_ENTRY` and the two
@@ -133,7 +133,7 @@ async function main() {
 }
 
 main();
-`;
+`
 }
 
 /** Run `corpus` (a plain-data array, JSON-serializable) through the real oracle in a spawned child process.
@@ -141,23 +141,23 @@ main();
  *  DOES throw if the child process itself cannot be spawned or produces no parseable output — that is an
  *  infrastructure failure (e.g. dist/ not built), not a drift finding, and must not be swallowed. */
 function runCorpusInSubprocess(corpus) {
-  const dir = mkdtempSync(join(tmpdir(), 'a2-runner-'));
+  const dir = mkdtempSync(join(tmpdir(), "a2-runner-"))
   try {
-    const corpusPath = join(dir, 'corpus.json');
-    const runnerPath = join(dir, 'runner.mjs');
-    writeFileSync(corpusPath, JSON.stringify(corpus));
-    writeFileSync(runnerPath, runnerSource());
-    const out = execFileSync('node', [runnerPath, corpusPath], { encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 });
-    return JSON.parse(out);
+    const corpusPath = join(dir, "corpus.json")
+    const runnerPath = join(dir, "runner.mjs")
+    writeFileSync(corpusPath, JSON.stringify(corpus))
+    writeFileSync(runnerPath, runnerSource())
+    const out = execFileSync("node", [runnerPath, corpusPath], { encoding: "utf8", maxBuffer: 64 * 1024 * 1024 })
+    return JSON.parse(out)
   } finally {
-    rmSync(dir, { recursive: true, force: true });
+    rmSync(dir, { recursive: true, force: true })
   }
 }
 
 /** Score a single corpus entry (convenience for a one-entry unit test — still a real subprocess run). */
 export function scoreEntry(entry) {
-  const [row] = runCorpusInSubprocess([entry]);
-  return row;
+  const [row] = runCorpusInSubprocess([entry])
+  return row
 }
 
 /**
@@ -170,60 +170,69 @@ export function scoreEntry(entry) {
  *     matrix, reported alongside it so a bad fixture can never masquerade as a passing score.
  */
 export function scoreCorpus(corpus = CORPUS) {
-  const rows = runCorpusInSubprocess(corpus);
-  const matrix = { true_stale_caught: 0, true_stale_missed: 0, false_stale: 0, correct_fresh: 0 };
-  const unresolved = [];
-  const errored = [];
+  const rows = runCorpusInSubprocess(corpus)
+  const matrix = { true_stale_caught: 0, true_stale_missed: 0, false_stale: 0, correct_fresh: 0 }
+  const unresolved = []
+  const errored = []
   for (const row of rows) {
     if (row.error !== undefined) {
-      errored.push(row);
-      continue;
+      errored.push(row)
+      continue
     }
     if (row.unresolved) {
-      unresolved.push(row);
-      continue;
+      unresolved.push(row)
+      continue
     }
-    if (row.class === 'invalidating') {
-      if (row.actual === row.expected) matrix.true_stale_caught += 1;
-      else matrix.true_stale_missed += 1;
+    if (row.class === "invalidating") {
+      if (row.actual === row.expected) matrix.true_stale_caught += 1
+      else matrix.true_stale_missed += 1
     } else {
-      if (row.actual === row.expected) matrix.correct_fresh += 1;
-      else matrix.false_stale += 1;
+      if (row.actual === row.expected) matrix.correct_fresh += 1
+      else matrix.false_stale += 1
     }
   }
-  return { rows, matrix, unresolved, errored };
+  return { rows, matrix, unresolved, errored }
 }
 
 function formatReport({ rows, matrix, unresolved, errored }) {
-  const lines = [];
-  lines.push('A2 staleness — perturb→detect confusion matrix (reDerives, rev-index.ts)');
-  lines.push('');
+  const lines = []
+  lines.push("A2 staleness — perturb→detect confusion matrix (reDerives, rev-index.ts)")
+  lines.push("")
   for (const row of rows) {
     const status =
       row.error !== undefined
         ? `ERROR: ${row.error}`
         : row.unresolved
-          ? 'UNRESOLVED'
-          : `expected=${row.expected} actual=${row.actual} ${row.actual === row.expected ? 'OK' : 'MISMATCH'}`;
-    lines.push(`  [${row.class}] ${row.id}: ${status}`);
+          ? "UNRESOLVED"
+          : `expected=${row.expected} actual=${row.actual} ${row.actual === row.expected ? "OK" : "MISMATCH"}`
+    lines.push(`  [${row.class}] ${row.id}: ${status}`)
   }
-  lines.push('');
-  const invalidatingTotal = matrix.true_stale_caught + matrix.true_stale_missed;
-  const preservingTotal = matrix.correct_fresh + matrix.false_stale;
-  lines.push(`true_stale_caught=${matrix.true_stale_caught}/${invalidatingTotal}  true_stale_missed=${matrix.true_stale_missed}/${invalidatingTotal}`);
-  lines.push(`correct_fresh=${matrix.correct_fresh}/${preservingTotal}  false_stale=${matrix.false_stale}/${preservingTotal}`);
-  if (unresolved.length > 0) lines.push(`UNRESOLVED (excluded from matrix, corpus bug): ${unresolved.map((r) => r.id).join(', ')}`);
-  if (errored.length > 0) lines.push(`ERRORED (excluded from matrix): ${errored.map((r) => r.id).join(', ')}`);
-  return lines.join('\n');
+  lines.push("")
+  const invalidatingTotal = matrix.true_stale_caught + matrix.true_stale_missed
+  const preservingTotal = matrix.correct_fresh + matrix.false_stale
+  lines.push(
+    `true_stale_caught=${matrix.true_stale_caught}/${invalidatingTotal}  true_stale_missed=${matrix.true_stale_missed}/${invalidatingTotal}`,
+  )
+  lines.push(
+    `correct_fresh=${matrix.correct_fresh}/${preservingTotal}  false_stale=${matrix.false_stale}/${preservingTotal}`,
+  )
+  if (unresolved.length > 0)
+    lines.push(`UNRESOLVED (excluded from matrix, corpus bug): ${unresolved.map((r) => r.id).join(", ")}`)
+  if (errored.length > 0) lines.push(`ERRORED (excluded from matrix): ${errored.map((r) => r.id).join(", ")}`)
+  return lines.join("\n")
 }
 
 // ── CLI entrypoint ──────────────────────────────────────────────────────────────────────────────────────
-const isMain = process.argv[1] !== undefined && fileURLToPath(import.meta.url) === process.argv[1];
+const isMain = process.argv[1] !== undefined && fileURLToPath(import.meta.url) === process.argv[1]
 if (isMain) {
-  const result = scoreCorpus(CORPUS);
-  console.log(formatReport(result));
-  const clean = result.matrix.true_stale_missed === 0 && result.matrix.false_stale === 0 && result.unresolved.length === 0 && result.errored.length === 0;
-  process.exit(clean ? 0 : 1);
+  const result = scoreCorpus(CORPUS)
+  console.log(formatReport(result))
+  const clean =
+    result.matrix.true_stale_missed === 0 &&
+    result.matrix.false_stale === 0 &&
+    result.unresolved.length === 0 &&
+    result.errored.length === 0
+  process.exit(clean ? 0 : 1)
 }
 
-export { resolveQualifiedPath, formatReport };
+export { resolveQualifiedPath, formatReport }

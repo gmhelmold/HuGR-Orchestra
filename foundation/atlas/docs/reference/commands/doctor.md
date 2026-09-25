@@ -6,7 +6,7 @@ all. Read-only and advisory — the five knowledge legs are built over a port wi
 reads the file tree and runs nothing, so `doctor` **cannot** persist anything, including its own repair plans.
 
 This page describes the **CLI** command `atlas doctor`. There **is** an `atlas-doctor` MCP tool, carrying
-every leg except `index` — see *Transport differences*.
+every leg except `index` — see _Transport differences_.
 
 ## Invocation
 
@@ -35,14 +35,14 @@ needs no store, which is why it works on a repository that has never had a fact 
 `cas` is the only leg that reads the store's **bytes** rather than its facts. A content-addressed object's
 filename is the hash of its content, so corruption is decidable locally with no index and no network:
 
-| bucket | meaning |
-| --- | --- |
-| `objects` / `referenced` | value files on disk / distinct hashes the projection points at |
-| `corrupt` | the bytes do **not** hash to the address they are filed under |
-| `unreadable` | the bytes do not parse as a CAS object at all (a torn write, not a tampered one) |
-| `missing` | a referenced hash with no value file — a dangling pointer into the store |
-| `orphan` | a value file nothing references. **Counted, never a fault**: the CAS is append-only and
-  content-keyed, so a superseded object outliving its sidecar is ordinary. `orphan` does not feed `sound`. |
+| bucket                                                                                                   | meaning                                                                                 |
+| -------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
+| `objects` / `referenced`                                                                                 | value files on disk / distinct hashes the projection points at                          |
+| `corrupt`                                                                                                | the bytes do **not** hash to the address they are filed under                           |
+| `unreadable`                                                                                             | the bytes do not parse as a CAS object at all (a torn write, not a tampered one)        |
+| `missing`                                                                                                | a referenced hash with no value file — a dangling pointer into the store                |
+| `orphan`                                                                                                 | a value file nothing references. **Counted, never a fault**: the CAS is append-only and |
+| content-keyed, so a superseded object outliving its sidecar is ordinary. `orphan` does not feed `sound`. |
 
 `sound` is `corrupt ∪ unreadable ∪ missing` being empty. Exit code stays **0** either way — `doctor` is
 advisory on every leg; `verify-store` is the command whose exit code is a governance signal.
@@ -202,11 +202,11 @@ scip: UNREADABLE at .atlas/index.scip — illegal tag: field no 12 wire type 7; 
 
 ## Exit codes
 
-| code | meaning |
-| --- | --- |
-| `0` | the diagnostic ran (including `none` results) |
-| `1` | usage error — no subcommand, an unknown subcommand, a missing or non-numeric argument, or no wired diagnostic source |
-| `2` | a governance gate refused the invocation (the committed-store tripwire) |
+| code | meaning                                                                                                              |
+| ---- | -------------------------------------------------------------------------------------------------------------------- |
+| `0`  | the diagnostic ran (including `none` results)                                                                        |
+| `1`  | usage error — no subcommand, an unknown subcommand, a missing or non-numeric argument, or no wired diagnostic source |
+| `2`  | a governance gate refused the invocation (the committed-store tripwire)                                              |
 
 ## What it refuses, and why
 

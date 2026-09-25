@@ -52,64 +52,58 @@ import {
   ORCH_TOK_CAP,
   LOGBOOK_AUTHOR,
   validate,
-} from '@atlas/memory';
-import type {
-  MemberId,
-  MemoryEntry,
-  MemoryRecord,
-  NamedScanner,
-  ProjectMemoryEntry,
-} from '@atlas/memory';
-import type { DurableMemory } from './memory-store.js';
-import { NO_SCANNER_NAME } from './scanner.js';
+} from "@atlas/memory"
+import type { MemberId, MemoryEntry, MemoryRecord, NamedScanner, ProjectMemoryEntry } from "@atlas/memory"
+import type { DurableMemory } from "./memory-store.js"
+import { NO_SCANNER_NAME } from "./scanner.js"
 
 /** The named refusals. A caller distinguishes them; none is a generic failure. */
 export type MemoryRefusal =
-  | 'undetermined-kind'
-  | 'template-invalid'
-  | 'kind-conflation'
-  | 'unowned'
-  | 'logbook-duplicate'
-  | 'logbook-unauthorized'
-  | 'over-cap'
-  | 'scanner-blocked'
-  | 'scanner-unavailable';
+  | "undetermined-kind"
+  | "template-invalid"
+  | "kind-conflation"
+  | "unowned"
+  | "logbook-duplicate"
+  | "logbook-unauthorized"
+  | "over-cap"
+  | "scanner-blocked"
+  | "scanner-unavailable"
 
 /** A refused write: the gate that declined, why, and the receipt that gate owes the caller. */
 export interface MemoryRejected {
-  readonly ok: false;
-  readonly refusal: MemoryRefusal;
-  readonly reason: string;
+  readonly ok: false
+  readonly refusal: MemoryRefusal
+  readonly reason: string
   /** `over-cap` only — the honest tokens-vs-cap receipt MEM-3 requires instead of a silent truncation. */
-  readonly tokens?: number;
-  readonly cap?: number;
+  readonly tokens?: number
+  readonly cap?: number
   /** `scanner-blocked` / `scanner-unavailable` only — the block is attributable to a NAMED stage. */
-  readonly scanner?: string;
+  readonly scanner?: string
 }
 
 /** An admitted write: the record that reached disk. */
 export interface MemoryAdmitted {
-  readonly ok: true;
-  readonly record: MemoryRecord;
+  readonly ok: true
+  readonly record: MemoryRecord
 }
 
-export type MemoryVerdict = MemoryAdmitted | MemoryRejected;
+export type MemoryVerdict = MemoryAdmitted | MemoryRejected
 
 export interface MemoryEmitDeps {
-  readonly store: DurableMemory;
+  readonly store: DurableMemory
   /** The owner (D1): the composition root's resolved `actor`. This door does not resolve or interpret it. */
-  readonly actor: MemberId;
+  readonly actor: MemberId
   /**
    * The pre-write named scanner (MEM-9). ABSENT is not "no secrets" — it is "not checked", and the door
    * refuses, because those two must never be the same value. That is the failure shape this repository has
    * spent a campaign removing, and a door that passed an unscanned write would reintroduce it at the one
    * place a secret becomes durable.
    */
-  readonly scanner?: NamedScanner;
+  readonly scanner?: NamedScanner
 }
 
 export interface MemoryEmit {
-  emit(entry: MemoryEntry): MemoryVerdict;
+  emit(entry: MemoryEntry): MemoryVerdict
 }
 
 const reject = (refusal: MemoryRefusal, reason: string, extra: Partial<MemoryRejected> = {}): MemoryRejected => ({
@@ -117,24 +111,24 @@ const reject = (refusal: MemoryRefusal, reason: string, extra: Partial<MemoryRej
   refusal,
   reason,
   ...extra,
-});
+})
 
 export function createMemoryEmit(deps: MemoryEmitDeps): MemoryEmit {
   function emit(entry: MemoryEntry): MemoryVerdict {
     // 1 — the kind is DERIVED. `memoryKindOf` throws on no match and on a TIE; both are the same refusal
     // to a caller, because both mean "this entry does not name exactly one template".
-    let kind;
+    let kind
     try {
-      kind = memoryKindOf(entry);
+      kind = memoryKindOf(entry)
     } catch (e) {
-      if (!(e instanceof UndeterminedKindError)) throw e;
-      return reject('undetermined-kind', e.message);
+      if (!(e instanceof UndeterminedKindError)) throw e
+      return reject("undetermined-kind", e.message)
     }
 
     // 2 — the template that the DERIVED kind selected, never one the payload asked for.
-    const verdict = validate(kind, entry);
+    const verdict = validate(kind, entry)
     if (!verdict.valid) {
-      return reject('template-invalid', `MEM-5 template: ${verdict.reasons.join('; ')}`);
+      return reject("template-invalid", `MEM-5 template: ${verdict.reasons.join("; ")}`)
     }
 
     // 3 — partition + owner. `put` mints the record and is the only thing here that does.
@@ -151,53 +145,53 @@ export function createMemoryEmit(deps: MemoryEmitDeps): MemoryEmit {
     // user may receive, which was the same shape of defect as `template-invalid` (a refusal advertised to
     // users that no input could produce). The M2 assertions turn RED the moment it becomes reachable again,
     // which is what keeps the guidance and the code from drifting back apart.
-    let record: MemoryRecord;
+    let record: MemoryRecord
     try {
-      record = put('memory', entry, deps.actor);
+      record = put("memory", entry, deps.actor)
     } catch (e) {
-      if (e instanceof KindConflationError) return reject('kind-conflation', e.message);
-      if (e instanceof UnownedWriteError) return reject('unowned', e.message);
-      if (e instanceof UndeterminedKindError) return reject('undetermined-kind', e.message);
-      throw e;
+      if (e instanceof KindConflationError) return reject("kind-conflation", e.message)
+      if (e instanceof UnownedWriteError) return reject("unowned", e.message)
+      if (e instanceof UndeterminedKindError) return reject("undetermined-kind", e.message)
+      throw e
     }
 
-    const durable = deps.store.read();
+    const durable = deps.store.read()
 
     // 4 — MEM-8, logbook only. Read from the DURABLE log so the guard survives a restart.
-    if (kind === 'logbook') {
+    if (kind === "logbook") {
       if (deps.actor !== LOGBOOK_AUTHOR) {
         return reject(
-          'logbook-unauthorized',
+          "logbook-unauthorized",
           `MEM-8 logbook: only '${LOGBOOK_AUTHOR}' may append; '${deps.actor}' may not`,
-        );
+        )
       }
-      const prId = (entry as { readonly prId: string }).prId;
+      const prId = (entry as { readonly prId: string }).prId
       const extant = durable.store.some(
-        (r) => r.kind === 'logbook' && (r.entry as { readonly prId?: string }).prId === prId,
-      );
+        (r) => r.kind === "logbook" && (r.entry as { readonly prId?: string }).prId === prId,
+      )
       if (extant) {
         return reject(
-          'logbook-duplicate',
+          "logbook-duplicate",
           `MEM-8 logbook: an entry for PR '${prId}' already exists; a correction appends a supersede ` +
-            'pointer and never rewrites the extant entry',
-        );
+            "pointer and never rewrites the extant entry",
+        )
       }
     }
 
     // 5 — MEM-3, project only. Over the OWNER'S set plus the candidate: a per-member cap computed over the
     // candidate alone would never bind, and one computed over EVERY member's records would refuse a write
     // because somebody else is verbose.
-    if (kind === 'project') {
-      const cap = deps.actor === LOGBOOK_AUTHOR ? ORCH_TOK_CAP : MEMBER_TOK_CAP;
+    if (kind === "project") {
+      const cap = deps.actor === LOGBOOK_AUTHOR ? ORCH_TOK_CAP : MEMBER_TOK_CAP
       const mine = durable.store
-        .filter((r) => r.owner === deps.actor && r.kind === 'project')
-        .map((r) => r.entry as ProjectMemoryEntry);
-      const gate = capGate([...mine, entry as ProjectMemoryEntry], cap);
+        .filter((r) => r.owner === deps.actor && r.kind === "project")
+        .map((r) => r.entry as ProjectMemoryEntry)
+      const gate = capGate([...mine, entry as ProjectMemoryEntry], cap)
       if (!gate.accepted) {
-        return reject('over-cap', 'MEM-3 cap: the injected project set would exceed its bound', {
+        return reject("over-cap", "MEM-3 cap: the injected project set would exceed its bound", {
           tokens: gate.tokens,
           cap: gate.cap,
-        });
+        })
       }
     }
 
@@ -210,36 +204,36 @@ export function createMemoryEmit(deps: MemoryEmitDeps): MemoryEmit {
     // would have told a user "a secret was detected in your write" when the truth is "nothing looked". A
     // refusal that misnames its own reason is a worse failure than the one it reports, because the user
     // acts on the reason: they would go hunting a secret that is not there instead of installing gitleaks.
-    if (deps.scanner === undefined || deps.scanner.name === '' || deps.scanner.name === NO_SCANNER_NAME) {
+    if (deps.scanner === undefined || deps.scanner.name === "" || deps.scanner.name === NO_SCANNER_NAME) {
       return reject(
-        'scanner-unavailable',
-        'MEM-9 pre-write scan: no NAMED scanner is configured, so this write was not checked for secrets. ' +
+        "scanner-unavailable",
+        "MEM-9 pre-write scan: no NAMED scanner is configured, so this write was not checked for secrets. " +
           '"Not checked" and "no secret" are refused as the same value — and so are "not checked" and ' +
           '"a secret was found".',
-        { scanner: deps.scanner?.name ?? '' },
-      );
+        { scanner: deps.scanner?.name ?? "" },
+      )
     }
     try {
       if (deps.scanner.scan(record)) {
-        return reject('scanner-blocked', new ScannerBlockedError(deps.scanner.name).message, {
+        return reject("scanner-blocked", new ScannerBlockedError(deps.scanner.name).message, {
           scanner: deps.scanner.name,
-        });
+        })
       }
     } catch (e) {
       // A scanner that THREW did not return "clean". Fail-closed: an unavailable check is refused, never
       // treated as a pass, which is the same rule as an absent one.
       return reject(
-        'scanner-unavailable',
+        "scanner-unavailable",
         `MEM-9 pre-write scan: scanner '${deps.scanner.name}' could not complete ` +
           `(${e instanceof Error ? e.message : String(e)}) — refused, never passed`,
         { scanner: deps.scanner.name },
-      );
+      )
     }
 
     // 7 — one append. Append-only, so a refusal above left nothing to unwind.
-    deps.store.append(record);
-    return { ok: true, record };
+    deps.store.append(record)
+    return { ok: true, record }
   }
 
-  return { emit };
+  return { emit }
 }

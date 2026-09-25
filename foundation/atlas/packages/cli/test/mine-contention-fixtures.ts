@@ -9,27 +9,27 @@
 // reasoning `packages/adapter-io/test/sidecar.test.ts` states for its 8-process leg-1 case, whose shape this
 // harness deliberately copies.
 
-import { spawn } from 'node:child_process';
-import { dirname, join } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { spawn } from "node:child_process"
+import { dirname, join } from "node:path"
+import { fileURLToPath } from "node:url"
 
 /** The SUT compiled to dist — a child process cannot import the .ts source. */
-const HERE = dirname(fileURLToPath(import.meta.url));
-export const MINE_DIST = join(HERE, '..', 'dist', 'src', 'mine.js');
-export const STORE_DIST = join(HERE, '..', '..', 'adapter-io', 'dist', 'src', 'store.js');
+const HERE = dirname(fileURLToPath(import.meta.url))
+export const MINE_DIST = join(HERE, "..", "dist", "src", "mine.js")
+export const STORE_DIST = join(HERE, "..", "..", "adapter-io", "dist", "src", "store.js")
 
 /** What one child mine pass reports back — read off the run's OWN `GenesisReport`, never off disk. This is
  *  the pass's CLAIM about what it wrote; the suite's job is to hold that claim against the durable file. */
 export interface PassReport {
-  readonly seeded: string[]; //   the anchor qualifiedPaths the report's grounded set carries
-  readonly complete: boolean; //  no resumeToken ⇒ the pass ran to its end (GEN-8)
-  readonly crashed?: string; //   an escaped throw — the controller's totality contract broken, or a spawn fault
+  readonly seeded: string[] //   the anchor qualifiedPaths the report's grounded set carries
+  readonly complete: boolean //  no resumeToken ⇒ the pass ran to its end (GEN-8)
+  readonly crashed?: string //   an escaped throw — the controller's totality contract broken, or a spawn fault
 }
 
 /** The anchor qualifiedPaths writer `i` mines. These are what `primaryAnchorId` reduces to, so they are also
  *  the values every staged row of writer `i` must carry in `primaryAnchor`. */
 export function anchorsOf(i: number, sites: number): string[] {
-  return Array.from({ length: sites }, (_, j) => `pkg/w${i}-s${j}.ts::w${i}-s${j}`);
+  return Array.from({ length: sites }, (_, j) => `pkg/w${i}-s${j}.ts::w${i}-s${j}`)
 }
 
 /**
@@ -42,7 +42,7 @@ export function anchorsOf(i: number, sites: number): string[] {
  * per-writer anchors, every one of the `W × K` rows is a distinct key that either survives or does not.
  */
 function childSource(casPath: string, i: number, sites: number): string {
-  const anchors = Array.from({ length: sites }, (_, j) => `w${i}-s${j}`);
+  const anchors = Array.from({ length: sites }, (_, j) => `w${i}-s${j}`)
   return `
     import { driveMine } from ${JSON.stringify(MINE_DIST)};
     import { createDiskStore } from ${JSON.stringify(STORE_DIST)};
@@ -85,30 +85,30 @@ function childSource(casPath: string, i: number, sites: number): string {
       out = { seeded: [], complete: false, crashed: String((e && e.message) || e) };
     }
     console.log('@@' + JSON.stringify(out) + '@@');
-  `;
+  `
 }
 
 /** Spawn ONE child mine pass. NEVER rejects: a child that dies is REPORTED, not thrown, so a spawn fault in
  *  one writer cannot be silently mistaken for the lost update this suite exists to catch. */
 export function minePass(casPath: string, i: number, sites: number): Promise<PassReport> {
-  const src = childSource(casPath, i, sites);
+  const src = childSource(casPath, i, sites)
   return new Promise((resolve) => {
-    let out = '';
-    let err = '';
-    const child = spawn(process.execPath, ['--input-type=module', '-e', src], { stdio: ['ignore', 'pipe', 'pipe'] });
-    child.stdout.on('data', (d) => {
-      out += String(d);
-    });
-    child.stderr.on('data', (d) => {
-      err += String(d);
-    });
-    child.on('close', () => {
-      const m = /@@(.*)@@/s.exec(out);
+    let out = ""
+    let err = ""
+    const child = spawn(process.execPath, ["--input-type=module", "-e", src], { stdio: ["ignore", "pipe", "pipe"] })
+    child.stdout.on("data", (d) => {
+      out += String(d)
+    })
+    child.stderr.on("data", (d) => {
+      err += String(d)
+    })
+    child.on("close", () => {
+      const m = /@@(.*)@@/s.exec(out)
       if (m === null) {
-        resolve({ seeded: [], complete: false, crashed: (err || out).slice(0, 800) || 'child produced no report' });
-        return;
+        resolve({ seeded: [], complete: false, crashed: (err || out).slice(0, 800) || "child produced no report" })
+        return
       }
-      resolve(JSON.parse(m[1]!) as PassReport);
-    });
-  });
+      resolve(JSON.parse(m[1]!) as PassReport)
+    })
+  })
 }

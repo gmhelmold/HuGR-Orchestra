@@ -58,12 +58,7 @@ describe("janitor scheduler", () => {
     expect(first.event?.report.findings).toEqual(report.findings)
     expect(first.event?.notify).toBe(true)
 
-    const cleared = processReport(
-      { createdAt: "later", findings: [] },
-      first.state,
-      2_000,
-      24 * 3_600_000,
-    )
+    const cleared = processReport({ createdAt: "later", findings: [] }, first.state, 2_000, 24 * 3_600_000)
     expect(cleared.event?.report.findings).toEqual([])
     expect(cleared.event?.notify).toBe(false)
   })

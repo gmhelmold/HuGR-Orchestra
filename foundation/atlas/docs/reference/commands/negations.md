@@ -1,8 +1,8 @@
 # `atlas negations`
 
 List the **grounded negatives** and the **honest abstentions** under a scope. A grounded negation
-(ADR-0015 D3 / #99b — "the honesty core") is a `family:'negation'` fact the truth door admitted: *within a
-CLOSED scope S under edge-model E, no `relationKind`-edge targets X was found* — a `¬∃` that carries its own
+(ADR-0015 D3 / #99b — "the honesty core") is a `family:'negation'` fact the truth door admitted: _within a
+CLOSED scope S under edge-model E, no `relationKind`-edge targets X was found_ — a `¬∃` that carries its own
 completeness proof. An **abstention** is the door **declining to decide** such a negative because the scope
 was not closed (an unresolved/dynamic edge left it OPEN); it asserts nothing about the world, it records that
 the question was ASKED and could not be soundly answered, and **why**. Read-only — it opens no write path.
@@ -71,11 +71,11 @@ data:
 
 ## Exit codes
 
-| code | meaning |
-| --- | --- |
-| `0` | the negatives and abstentions were read (**including** the honest empty result) |
-| `1` | a missing scope, or a runtime that is not composed |
-| `2` | a governance gate refused the read (the committed-store tripwire) |
+| code | meaning                                                                         |
+| ---- | ------------------------------------------------------------------------------- |
+| `0`  | the negatives and abstentions were read (**including** the honest empty result) |
+| `1`  | a missing scope, or a runtime that is not composed                              |
+| `2`  | a governance gate refused the read (the committed-store tripwire)               |
 
 ## What it refuses, and why
 
@@ -86,8 +86,8 @@ builder additionally enforces `required:['scope']`, so a bare MCP `{}` call fail
 **A committed durable store.** Like every read door, `negations` is refused at the entrypoint when `.atlas/`
 arrived by commit rather than through a governed door (exit 2). See [`query`](./query.md) for the text.
 
-**Writing.** `negations` reads through a leg with no store-mutating method. A negation is *filed* — and an
-abstention *recorded* — through the governed emit door; there is no write path here.
+**Writing.** `negations` reads through a leg with no store-mutating method. A negation is _filed_ — and an
+abstention _recorded_ — through the governed emit door; there is no write path here.
 
 ## Transport differences
 

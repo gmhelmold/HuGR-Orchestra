@@ -26,50 +26,50 @@
 // output to what it got before. Both predicates are IMPORTED from `@atlas/tools` src/bands.ts, the one
 // place they are stated; the layer DAG allows `adapter-io → tools` and forbids only the reverse.
 
-import { atLeastT1, isAdvisory } from '@atlas/tools';
-import type { SizedGotcha, SizedInvariant } from '@atlas/retrieval';
-import type { CurrentNode, GroundedFact, PredicateSlot } from '@atlas/knowledge';
-import type { Freshness } from '@atlas/contracts';
-import { factToInvariant } from './pack-shape.js';
+import { atLeastT1, isAdvisory } from "@atlas/tools"
+import type { SizedGotcha, SizedInvariant } from "@atlas/retrieval"
+import type { CurrentNode, GroundedFact, PredicateSlot } from "@atlas/knowledge"
+import type { Freshness } from "@atlas/contracts"
+import { factToInvariant } from "./pack-shape.js"
 
 /** One fact as the projection + CAS see it: the trusted `CurrentNode` and the whole fact behind it. */
 export interface Row {
-  readonly node: CurrentNode;
-  readonly fact: GroundedFact;
+  readonly node: CurrentNode
+  readonly fact: GroundedFact
 }
 
 /** The per-fact GROUND-1 verdict for one stored fact — the caller's already-bound oracle, never a second one. */
-export type RowFreshness = (fact: GroundedFact) => Freshness;
+export type RowFreshness = (fact: GroundedFact) => Freshness
 
 /** The two slots the reference calls "the non-obvious ones" (atlas-retrieval:28) — routed to `gotchas`
  *  rather than `invariants` so the briefing's two sections mean different things. */
-const GOTCHA_SLOTS = new Set<PredicateSlot>(['gotcha', 'rationale']);
+const GOTCHA_SLOTS = new Set<PredicateSlot>(["gotcha", "rationale"])
 
 /** The slot a row lives at — the projection's carrier first (it is the trusted, recomputed copy), the fact's
  *  own optional field as the fallback for a row minted before the carrier existed. */
 function slotOf(row: Row): PredicateSlot | undefined {
   // A RelationNode (ADR-0015 D2) and a NegationNode (ADR-0015 D3) carry no `predicateSlot`; narrow it away
   // (neither is a slotted fact).
-  const factSlot = row.fact.kind === 'advisory' || row.fact.kind === 'predicate' ? row.fact.predicateSlot : undefined;
-  return row.node.slot ?? factSlot;
+  const factSlot = row.fact.kind === "advisory" || row.fact.kind === "predicate" ? row.fact.predicateSlot : undefined
+  return row.node.slot ?? factSlot
 }
 
 /** Is this row one of the "non-obvious" slots the briefing keeps in its own section? */
-const isGotchaSlot = (row: Row): boolean => GOTCHA_SLOTS.has(slotOf(row) as PredicateSlot);
+const isGotchaSlot = (row: Row): boolean => GOTCHA_SLOTS.has(slotOf(row) as PredicateSlot)
 
 /**
  * The GOVERNING invariants: `tier≥T1`, not in a gotcha/rationale slot. Unchanged by the amendment — same
  * predicate, same shaping, same per-row freshness oracle.
  */
 export function governingInvariants(rows: readonly Row[], freshnessOf: RowFreshness): readonly SizedInvariant[] {
-  const out: SizedInvariant[] = [];
+  const out: SizedInvariant[] = []
   for (const row of rows) {
-    if (isGotchaSlot(row)) continue; // routed to `gotchas` instead
-    const inv = factToInvariant(row.node, row.fact, freshnessOf(row.fact));
-    if (!atLeastT1(inv)) continue; // TOOLS-6 — the GOVERNING band, exactly as `splitBands` states it
-    out.push({ inv, ppr: 0, hits: 0, cost: inv.claim.length });
+    if (isGotchaSlot(row)) continue // routed to `gotchas` instead
+    const inv = factToInvariant(row.node, row.fact, freshnessOf(row.fact))
+    if (!atLeastT1(inv)) continue // TOOLS-6 — the GOVERNING band, exactly as `splitBands` states it
+    out.push({ inv, ppr: 0, hits: 0, cost: inv.claim.length })
   }
-  return out;
+  return out
 }
 
 /**
@@ -81,8 +81,8 @@ export function governingInvariants(rows: readonly Row[], freshnessOf: RowFreshn
 export function governingGotchas(rows: readonly Row[]): readonly SizedGotcha[] {
   return rows
     .filter(isGotchaSlot)
-    .filter((r) => atLeastT1(factToInvariant(r.node, r.fact, 'FRESH')))
-    .map((r) => ({ fact: r.fact, cost: r.node.claims.join('; ').length }));
+    .filter((r) => atLeastT1(factToInvariant(r.node, r.fact, "FRESH")))
+    .map((r) => ({ fact: r.fact, cost: r.node.claims.join("; ").length }))
 }
 
 /**
@@ -103,11 +103,11 @@ export function governingGotchas(rows: readonly Row[]): readonly SizedGotcha[] {
  * full, exactly as it does for the governing band.
  */
 export function advisoryBand(rows: readonly Row[], freshnessOf: RowFreshness): readonly SizedInvariant[] {
-  const out: SizedInvariant[] = [];
+  const out: SizedInvariant[] = []
   for (const row of rows) {
-    const inv = factToInvariant(row.node, row.fact, freshnessOf(row.fact));
-    if (!isAdvisory(inv)) continue; // MEMBERSHIP — an off-lattice tier is in NEITHER band
-    out.push({ inv, ppr: 0, hits: 0, cost: inv.claim.length });
+    const inv = factToInvariant(row.node, row.fact, freshnessOf(row.fact))
+    if (!isAdvisory(inv)) continue // MEMBERSHIP — an off-lattice tier is in NEITHER band
+    out.push({ inv, ppr: 0, hits: 0, cost: inv.claim.length })
   }
-  return out;
+  return out
 }

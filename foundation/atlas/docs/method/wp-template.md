@@ -5,9 +5,9 @@
 > bind to the **same content digests**, so the executed unit and the audited unit are provably the same object.
 >
 > **Grounding (nothing invented):** PMBOK work-package + WBS-dictionary (the card skeleton: id · scope · exclusions ·
-> acceptance · owner · deps) · ISO/IEC/IEEE 29148 (typed bidirectional trace: *satisfies* + *verifies* links) ·
+> acceptance · owner · deps) · ISO/IEC/IEEE 29148 (typed bidirectional trace: _satisfies_ + _verifies_ links) ·
 > Gherkin/Given-When-Then (acceptance = the goldens, as the DoD oracle) · SWE-agent ACI (arXiv 2405.15793): code-
-> skeleton / interface grounding reduces agent error, which *motivates* the `anchor` + `interface_contract` fields ·
+> skeleton / interface grounding reduces agent error, which _motivates_ the `anchor` + `interface_contract` fields ·
 > in-toto/SLSA provenance (slsa.dev): the signed per-step attestation = the `provenance` slot **and** the model for
 > the `trace_ref` evidence graph · Diátaxis (the render modes).
 
@@ -25,7 +25,7 @@ The **locally-authored `value` fields** (they exist nowhere upstream, so there i
 · exit_predicate · owner`; plus the **`exec` fields** filled at execution time: `outputs · provenance · trace_ref`.
 **`intent` is the one carve-out from "no prose":** it may paraphrase upstream, but it is **non-authoritative,
 executor-invisible, and digest-free by design** — a human handle only; nothing is ever reasoned or verified against
-it, so its drift is harmless. Everything *substantive* (`source_reqs · interface_contract · inputs · acceptance ·
+it, so its drift is harmless. Everything _substantive_ (`source_reqs · interface_contract · inputs · acceptance ·
 deps · context_refs · rationale`) is a `ptr+digest`.
 
 ## The field-set
@@ -34,34 +34,34 @@ deps · context_refs · rationale`) is a `ptr+digest`.
 `source:` pointer carrying the upstream content hash (driftless). `value` = authored here. `exec` = filled at
 execution time (starts empty at S4-freeze).
 
-| field | purpose | kind | audience |
-|---|---|---|---|
-| `id` | hierarchical address `campaign.epic.module` (PMBOK WBS id) | value | X · HA · LA |
-| `content_hash` | frozen identity of this card (enables replay-by-construction) | value | X · LA |
-| `title` | one-line human handle | value | HA |
-| `intent` | the *what/why*, prose, **non-authoritative + executor-invisible + digest-free** (the one carve-out) | value | HA |
-| `source_reqs[]` | the REQ(s) this WP realizes — 29148 *satisfies* link | ptr+digest → REQ | X · HA · LA |
-| `anchor` | file path + exact target site / insertion marker / signature | value | X |
-| `interface_contract` | the exact signatures/types/API the code must satisfy | ptr+digest → seam/FSPEC (or value if local) | X |
-| `exclusions` | explicit out-of-scope boundary (PMBOK — kills scope drift) | value | X · HA |
-| `inputs[]` (materials) | resolved artifacts the work consumes, each hashed (in-toto `materials`) | ptr+digest | X · LA |
-| `action` | the zero-decision recipe / entrypoint (Diátaxis How-to; in-toto `recipe.entryPoint`) | value | X |
-| `action_surface` | whitelisted tools/commands the executor may use | value | X |
-| `guardrails` | path restrictions · edit-lint policy · forbidden zones | value | X |
-| `repair_budget` | N + early-stop signatures (repeated-failure / no-change / semantic-dup) | value | X |
-| `acceptance[]` (DoD) | the Given-When-Then **goldens** that both gate done **and** *are* the 29148 *verifies* link — the authoritative spec (in this method acceptance ≡ verification, so no separate `verified_by`) | ptr+digest → SCN | X · HA · LA |
-| `deps[]` / `parallel_group` | predecessor WP ids + `[P]` safe-parallel marker (Spec Kit) | ptr → WP | X · HA |
-| `exit_predicate` | machine-checkable done condition: all `acceptance` green ∧ all gates pass | value | X · LA |
-| `context_refs[]` | the **closed** list of allowed references — no open-ended discovery | ptr | X |
-| `owner` / `builder_id` | responsible seat/agent (PMBOK owner ≡ in-toto `builder.id`) | value | HA · LA |
-| `outputs[]` (subjects) | artifacts the WP must produce, hashed after run (in-toto `subject`) | exec | X · LA |
-| `provenance[]` | per-E-state signed attestation {subject+digest, materials+digests, action, builder, timestamps, completeness} | exec | LA · HA |
-| `trace_ref` | pointer to the append-only typed **evidence graph** of the run | exec ptr | LA · HA |
-| `rationale` | the Explanation slot — *why* this WP/invariant exists (Diátaxis Explanation) | ptr → INV rationale | HA |
+| field                       | purpose                                                                                                                                                                                       | kind                                        | audience    |
+| --------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------- | ----------- |
+| `id`                        | hierarchical address `campaign.epic.module` (PMBOK WBS id)                                                                                                                                    | value                                       | X · HA · LA |
+| `content_hash`              | frozen identity of this card (enables replay-by-construction)                                                                                                                                 | value                                       | X · LA      |
+| `title`                     | one-line human handle                                                                                                                                                                         | value                                       | HA          |
+| `intent`                    | the _what/why_, prose, **non-authoritative + executor-invisible + digest-free** (the one carve-out)                                                                                           | value                                       | HA          |
+| `source_reqs[]`             | the REQ(s) this WP realizes — 29148 _satisfies_ link                                                                                                                                          | ptr+digest → REQ                            | X · HA · LA |
+| `anchor`                    | file path + exact target site / insertion marker / signature                                                                                                                                  | value                                       | X           |
+| `interface_contract`        | the exact signatures/types/API the code must satisfy                                                                                                                                          | ptr+digest → seam/FSPEC (or value if local) | X           |
+| `exclusions`                | explicit out-of-scope boundary (PMBOK — kills scope drift)                                                                                                                                    | value                                       | X · HA      |
+| `inputs[]` (materials)      | resolved artifacts the work consumes, each hashed (in-toto `materials`)                                                                                                                       | ptr+digest                                  | X · LA      |
+| `action`                    | the zero-decision recipe / entrypoint (Diátaxis How-to; in-toto `recipe.entryPoint`)                                                                                                          | value                                       | X           |
+| `action_surface`            | whitelisted tools/commands the executor may use                                                                                                                                               | value                                       | X           |
+| `guardrails`                | path restrictions · edit-lint policy · forbidden zones                                                                                                                                        | value                                       | X           |
+| `repair_budget`             | N + early-stop signatures (repeated-failure / no-change / semantic-dup)                                                                                                                       | value                                       | X           |
+| `acceptance[]` (DoD)        | the Given-When-Then **goldens** that both gate done **and** _are_ the 29148 _verifies_ link — the authoritative spec (in this method acceptance ≡ verification, so no separate `verified_by`) | ptr+digest → SCN                            | X · HA · LA |
+| `deps[]` / `parallel_group` | predecessor WP ids + `[P]` safe-parallel marker (Spec Kit)                                                                                                                                    | ptr → WP                                    | X · HA      |
+| `exit_predicate`            | machine-checkable done condition: all `acceptance` green ∧ all gates pass                                                                                                                     | value                                       | X · LA      |
+| `context_refs[]`            | the **closed** list of allowed references — no open-ended discovery                                                                                                                           | ptr                                         | X           |
+| `owner` / `builder_id`      | responsible seat/agent (PMBOK owner ≡ in-toto `builder.id`)                                                                                                                                   | value                                       | HA · LA     |
+| `outputs[]` (subjects)      | artifacts the WP must produce, hashed after run (in-toto `subject`)                                                                                                                           | exec                                        | X · LA      |
+| `provenance[]`              | per-E-state signed attestation {subject+digest, materials+digests, action, builder, timestamps, completeness}                                                                                 | exec                                        | LA · HA     |
+| `trace_ref`                 | pointer to the append-only typed **evidence graph** of the run                                                                                                                                | exec ptr                                    | LA · HA     |
+| `rationale`                 | the Explanation slot — _why_ this WP/invariant exists (Diátaxis Explanation)                                                                                                                  | ptr → INV rationale                         | HA          |
 
 ## Canonical rendering (the one concrete syntax — no per-card dialect)
 
-The field-set above fixes *what* a card holds; this fixes *how* it is written, so every card parses under one
+The field-set above fixes _what_ a card holds; this fixes _how_ it is written, so every card parses under one
 grammar and every `source:` pointer resolves. A card that diverges in syntax is `STALE` by construction (the
 resolver keys on an exact pointer form). Rules:
 
@@ -112,7 +112,7 @@ rationale:                                          # ptr
 
 ## Two renders, one object (Diátaxis: keep the modes distinct)
 
-- **Executor render (How-to + Reference only).** The executor sees `action` + the *resolved* pointers
+- **Executor render (How-to + Reference only).** The executor sees `action` + the _resolved_ pointers
   (`source_reqs`, `interface_contract`, `inputs`, `acceptance`, `anchor`, `guardrails`, `exit_predicate`) as a
   zero-decision recipe. **No `intent`/`rationale` prose is reasoned against** — the "why" is withheld so the model
   transcribes rather than re-designs.
@@ -123,10 +123,10 @@ rationale:                                          # ptr
   2. **Reference view** — WP with pointers inlined as read-only facts; the bidirectional 29148 trace
      `REQ → WP → golden → verification` as a table.
   3. **Provenance view** — the ordered signed per-E-state attestations (who produced what, from which pinned
-     inputs, when) — verifiable by tooling *and* legible to a human.
+     inputs, when) — verifiable by tooling _and_ legible to a human.
   4. **Evidence-graph view** — the typed trajectory linking each E-state to the input material that justified it
      and the golden it satisfied, captured from an **append-only channel the executor cannot rewrite**.
-  5. **Explanation slot** — a thin `why` pane pointing at the invariant's rationale, kept *separate* from the
+  5. **Explanation slot** — a thin `why` pane pointing at the invariant's rationale, kept _separate_ from the
      executable card.
 
 ## Self-check (a WP card is well-formed iff)
@@ -145,6 +145,6 @@ rationale:                                          # ptr
 ## Honest limitation (encoded, not hidden)
 
 The card makes execution **auditable and driftless** — it does not make it **correct**. The goldens are the
-correctness oracle (sampled, not proven); in-toto proves *who produced what from which inputs*, not *validity*;
+correctness oracle (sampled, not proven); in-toto proves _who produced what from which inputs_, not _validity_;
 the evidence graph is only as trustworthy as the append-only channel it is sealed from. The green means
 "verified against the frozen goldens," never "proven right." (See the SEAL state for the false-green defenses.)

@@ -7,6 +7,7 @@
 > layer down and is unchanged, consumed via frozen seams) · **owner:** charlie (FORGE).
 >
 > **Derivation (generated from the method-tag, NOT hand-authored where a generator exists):**
+>
 > - **15 `reference-model` INVs** (ADAPTER-1..6, 8..12, WIRE-1, CLI-3, CLI-4, MCP-2) → **`gen: conformance`**:
 >   each SCN is a differential/conformance witness against the named oracle in the S2 down-model — the
 >   committed fixture repo + its reference `FileTree`, the recorded `.scip` corpus, the kernel `StoreApi`
@@ -35,15 +36,15 @@
 
 ### `fix-repo` — a committed multi-language repo (the walker/SCIP/index/genesis oracle)
 
-| path | lang | tracked | role |
-|---|---|---|---|
-| `.gitignore` | — | yes | contains `dist/` and `*.log` |
-| `src/app.ts` | ts | yes | imports `greet` from `./util` (→ resolvable ref) **and** references `missingHelper` (→ dangling, no in-index def) |
-| `src/util.ts` | ts | yes | **defines** `greet()` (SCIP symbol `scip-ts . . util/greet().`) |
-| `api/service.py` | py | yes | **defines** `compute()` (SCIP symbol via `scip-python`) |
-| `legacy/report.rb` | rb | yes | **no configured indexer** → honest structural hole (files-only) |
-| `dist/bundle.js` | — | **no** (gitignored) | must be ABSENT from the `FileTree` |
-| `debug.log` | — | **no** (gitignored) | must be ABSENT from the `FileTree` |
+| path               | lang | tracked             | role                                                                                                              |
+| ------------------ | ---- | ------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| `.gitignore`       | —    | yes                 | contains `dist/` and `*.log`                                                                                      |
+| `src/app.ts`       | ts   | yes                 | imports `greet` from `./util` (→ resolvable ref) **and** references `missingHelper` (→ dangling, no in-index def) |
+| `src/util.ts`      | ts   | yes                 | **defines** `greet()` (SCIP symbol `scip-ts . . util/greet().`)                                                   |
+| `api/service.py`   | py   | yes                 | **defines** `compute()` (SCIP symbol via `scip-python`)                                                           |
+| `legacy/report.rb` | rb   | yes                 | **no configured indexer** → honest structural hole (files-only)                                                   |
+| `dist/bundle.js`   | —    | **no** (gitignored) | must be ABSENT from the `FileTree`                                                                                |
+| `debug.log`        | —    | **no** (gitignored) | must be ABSENT from the `FileTree`                                                                                |
 
 Reference tree `T_ref` = the deterministic sorted walk of the 5 tracked paths with leaf `content`; `dist/` and
 `*.log` excluded by `.gitignore`. `LangId → IndexerPlan` dispatch: `ts → scip-typescript`, `py → scip-python`,
@@ -54,15 +55,15 @@ Reference tree `T_ref` = the deterministic sorted walk of the 5 tracked paths wi
 A SECOND fixture, deliberately not folded into `fix-repo`: `fix-repo` and its `T_ref` are the symlink-FREE
 oracle, and they are what proves the tracked-symlink rule moves no hash on a repo that has no symlinks.
 
-| path | git mode | tracked | role |
-|---|---|---|---|
-| `src/real.ts` | 100644 | yes | an ordinary TS file — the CONTROL that the walk and the AST fold really ran |
-| `secrets/token.txt` | 100644 | yes | the target of the link below; its bytes must appear only under THIS path |
-| `src/config.ts` | **120000** | yes | link text `../secrets/token.txt` (and, in the `/etc/passwd` witness, the absolute path of a file outside the repo) |
-| `src/leak.ts` | **120000** | yes | link text `const leaked = 1` — a target name that is legal TypeScript |
-| `src/gone.ts` | **120000** | yes | link text `./nowhere.ts` — a BROKEN link (target absent) |
-| `src/dirlink` | **120000** | yes | link text `../sub` — a link to a DIRECTORY |
-| `sub/keep.ts` | 100644 | yes | the file inside the linked directory (must appear once, under its real path) |
+| path                | git mode   | tracked | role                                                                                                               |
+| ------------------- | ---------- | ------- | ------------------------------------------------------------------------------------------------------------------ |
+| `src/real.ts`       | 100644     | yes     | an ordinary TS file — the CONTROL that the walk and the AST fold really ran                                        |
+| `secrets/token.txt` | 100644     | yes     | the target of the link below; its bytes must appear only under THIS path                                           |
+| `src/config.ts`     | **120000** | yes     | link text `../secrets/token.txt` (and, in the `/etc/passwd` witness, the absolute path of a file outside the repo) |
+| `src/leak.ts`       | **120000** | yes     | link text `const leaked = 1` — a target name that is legal TypeScript                                              |
+| `src/gone.ts`       | **120000** | yes     | link text `./nowhere.ts` — a BROKEN link (target absent)                                                           |
+| `src/dirlink`       | **120000** | yes     | link text `../sub` — a link to a DIRECTORY                                                                         |
+| `sub/keep.ts`       | 100644     | yes     | the file inside the linked directory (must appear once, under its real path)                                       |
 
 Mode is read from `git ls-files -s`, i.e. what the REPO DECLARES; the link text is the entry's index blob.
 
@@ -88,7 +89,7 @@ Mode is read from `git ls-files -s`, i.e. what the REPO DECLARES; the link text 
 - `CasObject O` with `H = id(O)`; a **tampered** on-disk copy at `.atlas/cas/<H[0:2]>/<H>` whose bytes give
   `id(value) !== H`.
 - fact `F` = `{ nodeKey: 'claim:fix-cov', content: c1 }`; superseder `F'` = `{ nodeKey: 'claim:fix-cov',
-  content: c2, supersedes: [id(F)] }`.
+content: c2, supersedes: [id(F)] }`.
 
 ### entrypoint fixtures (CLI / MCP / wire)
 
@@ -105,7 +106,8 @@ Mode is read from `git ls-files -s`, i.e. what the REPO DECLARES; the link text 
 
 ## REQ-ADAPTER-1 — faithful file tree
 
-### SCN-ADAPTER-1a-1 — the walk equals the reference tree, .gitignore honored   (happy)
+### SCN-ADAPTER-1a-1 — the walk equals the reference tree, .gitignore honored (happy)
+
 source: REQ-ADAPTER-1a
 Given `fix-repo` committed with reference tree `T_ref` (the 5 tracked paths in deterministic sorted order with leaf `content`), and `.gitignore` listing `dist/` and `*.log`
 When `walk(fix-repo)` runs
@@ -113,7 +115,8 @@ Then `deepEqual(walk(fix-repo), T_ref)` — exact paths·nesting·leaf `content`
 teeth: breaks-on "a walker that invents a path — it ignores `.gitignore` and includes `dist/bundle.js`, so a phantom path enters the `FileTree` ≠ `T_ref`"
 gen: conformance
 
-### SCN-ADAPTER-1b-1 — a tracked file with no indexer is still in the tree   (guard)
+### SCN-ADAPTER-1b-1 — a tracked file with no indexer is still in the tree (guard)
+
 source: REQ-ADAPTER-1b
 Given `legacy/report.rb` is git-tracked (a `rb` file with no configured indexer)
 When `walk(fix-repo)` runs
@@ -121,7 +124,8 @@ Then the `FileTree` includes `legacy/report.rb` with its leaf `content` — the 
 teeth: breaks-on "a walker that drops a tracked file — it applies an extension allowlist and omits `legacy/report.rb`, so a tracked file is missing from the `FileTree`"
 gen: conformance
 
-### SCN-ADAPTER-1c-1 — no fabricated path is emitted   (guard)
+### SCN-ADAPTER-1c-1 — no fabricated path is emitted (guard)
+
 source: REQ-ADAPTER-1c
 Given `dist/bundle.js` is absent from the tracked set (gitignored) and no file `src/generated.ts` exists on disk
 When `walk(fix-repo)` runs
@@ -129,7 +133,8 @@ Then the `FileTree` contains neither `dist/bundle.js` nor `src/generated.ts` —
 teeth: breaks-on "a walker that invents a path — it emits a stale `src/generated.ts` entry cached from a prior walk that no longer exists on disk, fabricating a file"
 gen: conformance
 
-### SCN-ADAPTER-1d-1 — two walks of the same tree are byte-identical   (happy)
+### SCN-ADAPTER-1d-1 — two walks of the same tree are byte-identical (happy)
+
 source: REQ-ADAPTER-1d
 Given `fix-repo` unchanged between two invocations
 When `walk(fix-repo)` runs twice → `w1`, `w2`
@@ -139,9 +144,10 @@ gen: conformance
 
 ---
 
-## REQ-ADAPTER-1e — a tracked symlink contributes its stored link text   (amended 2026-08-02, the containment family)
+## REQ-ADAPTER-1e — a tracked symlink contributes its stored link text (amended 2026-08-02, the containment family)
 
-### SCN-ADAPTER-1e-1 — a tracked symlink's leaf carries the LINK TEXT, and the target is never read   (guard)
+### SCN-ADAPTER-1e-1 — a tracked symlink's leaf carries the LINK TEXT, and the target is never read (guard)
+
 source: REQ-ADAPTER-1e
 Given `link-repo` where `src/config.ts` is tracked at mode 120000 with link text `../secrets/token.txt`, and the target file holds bytes that appear nowhere else
 When `walk(link-repo)` runs
@@ -149,7 +155,8 @@ Then the `FileTree` INCLUDES `src/config.ts` (REQ-ADAPTER-1b, no new exception) 
 teeth: breaks-on "a walker that reads the path again (`readFileSync`, which FOLLOWS a symlink) instead of the entry's index blob — the target's bytes become the leaf `content`, which is how `/etc/passwd` reached the skeleton"
 gen: conformance
 
-### SCN-ADAPTER-1e-2 — a mode-120000 leaf mints NO sub-file unit key   (guard)
+### SCN-ADAPTER-1e-2 — a mode-120000 leaf mints NO sub-file unit key (guard)
+
 source: REQ-ADAPTER-1e
 Given `link-repo` where `src/leak.ts` is tracked at mode 120000 with link text `const leaked = 1` (legal TypeScript), alongside the ordinary `src/real.ts` defining `realFn()`
 When `foldAstUnits(walk(link-repo))` runs and the index is built
@@ -157,7 +164,8 @@ Then `src/real.ts::function_declaration:0:realFn` is minted (the CONTROL — the
 teeth: breaks-on "the fold exclusion is dropped — the link text is parsed as source and `src/leak.ts::lexical_declaration:0:leaked` becomes a first-class node key, i.e. retrieval hands out a key minted from a file name"
 gen: conformance
 
-### SCN-ADAPTER-1e-3 — a broken link and a directory link are INCLUDED as link-text leaves   (guard, the behaviour that changed)
+### SCN-ADAPTER-1e-3 — a broken link and a directory link are INCLUDED as link-text leaves (guard, the behaviour that changed)
+
 source: REQ-ADAPTER-1e
 Given `link-repo` where `src/gone.ts` is tracked at mode 120000 with link text `./nowhere.ts` (target absent) and `src/dirlink` at mode 120000 with link text `../sub` (a directory), and `sub/keep.ts` is tracked
 When `walk(link-repo)` runs
@@ -169,7 +177,8 @@ gen: conformance
 
 ## REQ-ADAPTER-2 — SCIP is read into ScipOutput
 
-### SCN-ADAPTER-2a-1 — the reader yields exactly the fixture's occurrences   (happy)
+### SCN-ADAPTER-2a-1 — the reader yields exactly the fixture's occurrences (happy)
+
 source: REQ-ADAPTER-2a
 Given `fix.scip` with document `src/util.ts` (one definition of `util/greet().`) and `src/app.ts` (a reference to `util/greet().` and a reference to `util/missingHelper().`)
 When `read(fix.scip)` runs
@@ -177,7 +186,8 @@ Then `ScipOutput` == the fixture's per-document `definition`/`reference` occurre
 teeth: breaks-on "the reader synthesizes a document-level `imports` occurrence the `.scip` does not contain — `ScipOutput` carries an occurrence absent from the fixture corpus"
 gen: conformance
 
-### SCN-ADAPTER-2b-1 — a dangling reference resolves to null   (guard)
+### SCN-ADAPTER-2b-1 — a dangling reference resolves to null (guard)
+
 source: REQ-ADAPTER-2b
 Given `fix.scip`'s `src/app.ts` reference to `util/missingHelper().` has **no** definition occurrence anywhere in the index
 When the ring resolves the `ScipOutput`
@@ -185,7 +195,8 @@ Then that reference stays unresolved — downstream `to: null` (INDEX-13)
 teeth: breaks-on "the reader resolves the dangling `util/missingHelper()` ref to the nearest same-named symbol — it invents a target so `to !== null`"
 gen: conformance
 
-### SCN-ADAPTER-2c-1 — no symbol or edge is synthesized   (guard)
+### SCN-ADAPTER-2c-1 — no symbol or edge is synthesized (guard)
+
 source: REQ-ADAPTER-2c
 Given `fix.scip` contains the resolvable `app.ts → util/greet().` edge but **no** edge `app.ts → api/service.py:compute`
 When `read(fix.scip)` runs
@@ -197,7 +208,8 @@ gen: conformance
 
 ## REQ-ADAPTER-3 — per-language indexer dispatch and merge
 
-### SCN-ADAPTER-3a-1 — each language runs its indexer and the outputs merge   (happy)
+### SCN-ADAPTER-3a-1 — each language runs its indexer and the outputs merge (happy)
+
 source: REQ-ADAPTER-3a
 Given `fix-repo` spans `ts` and `py` with the total dispatch table `ts → scip-typescript`, `py → scip-python`, `rb → honest-hole`
 When the ring runs each configured indexer by `LangId` and merges the `.scip` outputs
@@ -205,7 +217,8 @@ Then the dispatch table is total (every repo `LangId` routes to exactly one of {
 teeth: breaks-on "a `LangId` with no dispatch entry (`rb`) falls through to the `ts` indexer instead of the honest-hole — the totality/dispatch assertion fails (a language routed to the wrong indexer)"
 gen: conformance
 
-### SCN-ADAPTER-3b-1 — the un-indexed language is files-only   (guard)
+### SCN-ADAPTER-3b-1 — the un-indexed language is files-only (guard)
+
 source: REQ-ADAPTER-3b
 Given `legacy/report.rb` (`rb`, no configured indexer)
 When the ring builds the index over `fix-repo`
@@ -213,7 +226,8 @@ Then `report.rb` appears in the `FileTree` with its `content` but contributes **
 teeth: breaks-on "the ring drops `report.rb` entirely because `rb` has no indexer — a tracked file vanishes instead of becoming a files-only hole"
 gen: conformance
 
-### SCN-ADAPTER-3c-1 — the un-indexed language corrupts no other language   (guard)
+### SCN-ADAPTER-3c-1 — the un-indexed language corrupts no other language (guard)
+
 source: REQ-ADAPTER-3c
 Given `rb` has no indexer while `ts`/`py` do, with the `ts` edge `app.ts → util/greet()` adjacent to the `rb` hole
 When the merge runs
@@ -225,7 +239,8 @@ gen: conformance
 
 ## REQ-ADAPTER-4 — deterministic sub-file units
 
-### SCN-ADAPTER-4a-1 — same bytes fold to the reference unit set every run   (happy)
+### SCN-ADAPTER-4a-1 — same bytes fold to the reference unit set every run (happy)
+
 source: REQ-ADAPTER-4a
 Given `src/util.ts` bytes with the `web-tree-sitter` layer **enabled** and reference unit set `U_ref` (item: the `greet` fn; block: its body)
 When the layer folds the bytes twice → `u1`, `u2`
@@ -233,7 +248,8 @@ Then `u1 == u2 == U_ref` — identical sub-file units folded into the `FileTree`
 teeth: breaks-on "a non-deterministic fold — the layer tags each unit with a monotonic/wall-clock id, so `u1` and `u2` carry different unit ids for the same bytes (same bytes ⇏ same units)"
 gen: conformance
 
-### SCN-ADAPTER-4b-1 — the file-level index is valid without the AST layer   (happy)
+### SCN-ADAPTER-4b-1 — the file-level index is valid without the AST layer (happy)
+
 source: REQ-ADAPTER-4b
 Given the `web-tree-sitter` layer **disabled**
 When the index is built over `fix-repo`
@@ -241,7 +257,8 @@ Then the index is valid at file level (the `FileTree` is present and `resolve`/`
 teeth: breaks-on "disabling the AST layer leaves the index half-built — `resolve` throws because it assumes sub-file units exist, so the file-level index is no longer valid without the additive layer"
 gen: conformance
 
-### SCN-ADAPTER-4c-1 — repeated folds of identical bytes are identical   (guard)
+### SCN-ADAPTER-4c-1 — repeated folds of identical bytes are identical (guard)
+
 source: REQ-ADAPTER-4c
 Given the identical byte sequence of `src/util.ts` folded three times with the layer enabled
 When the three unit sets are compared
@@ -253,7 +270,8 @@ gen: conformance
 
 ## REQ-ADAPTER-5 — index adapter drives @atlas/index
 
-### SCN-ADAPTER-5a-1 — adapter outputs equal @atlas/index over the same inputs   (happy)
+### SCN-ADAPTER-5a-1 — adapter outputs equal @atlas/index over the same inputs (happy)
+
 source: REQ-ADAPTER-5a
 Given the walker + SCIP outputs over `fix-repo` fed to both the index-backing adapter and `@atlas/index` directly
 When `MoveInIndex`/`QueryIndex` run through the adapter and `@atlas/index` `build`/`resolve`/`coverage` run over the same inputs
@@ -261,7 +279,8 @@ Then `deepEqual(adapterOutput, atlasIndexOutput)` — the adapter is pure delega
 teeth: breaks-on "the adapter serves a stale cached `resolve` result instead of calling `@atlas/index` — its output diverges from the `@atlas/index` oracle"
 gen: conformance
 
-### SCN-ADAPTER-5b-1 — every resolution originates in @atlas/index, not the adapter   (guard)
+### SCN-ADAPTER-5b-1 — every resolution originates in @atlas/index, not the adapter (guard)
+
 source: REQ-ADAPTER-5b
 Given a call-spy on `@atlas/index.resolve`
 When `QueryIndex` resolves the `app.ts → util/greet()` edge
@@ -273,7 +292,8 @@ gen: conformance
 
 ## REQ-ADAPTER-6 — durable content-addressed store
 
-### SCN-ADAPTER-6a-1 — put/get round-trips under the content hash   (happy)
+### SCN-ADAPTER-6a-1 — put/get round-trips under the content hash (happy)
+
 source: REQ-ADAPTER-6a
 Given the disk store at `.atlas/cas/` and `CasObject O` with `H = id(O)`
 When `put(O)` then `get(H)` run
@@ -281,7 +301,8 @@ Then `get(H)` returns `O` byte-identical, and `O` is stored at `.atlas/cas/<H[0:
 teeth: breaks-on "`put` stores `O` under a random uuid filename instead of `id(O)` — `get(H)` misses (the content-addressing contract is violated)"
 gen: conformance
 
-### SCN-ADAPTER-6b-1 — an object put in process A is get-retrievable in a fresh process B   (happy)
+### SCN-ADAPTER-6b-1 — an object put in process A is get-retrievable in a fresh process B (happy)
+
 source: REQ-ADAPTER-6b
 Given process A calls `put(O) → H` and flushes to `.atlas/cas/`
 When a fresh process B (a new `StoreApi` instance over the same dir) calls `get(H)`
@@ -289,7 +310,8 @@ Then B returns `O` byte-identical — durability across processes
 teeth: breaks-on "`put` keeps `O` only in an in-memory `Map` and never flushes to disk — process B's `get(H)` returns `undefined` (no durability; a same-process golden passes)"
 gen: conformance
 
-### SCN-ADAPTER-6c-1 — a tampered on-disk value reads as absent   (guard)
+### SCN-ADAPTER-6c-1 — a tampered on-disk value reads as absent (guard)
+
 source: REQ-ADAPTER-6c
 Given `.atlas/cas/<H[0:2]>/<H>` whose on-disk bytes were mutated so `id(value) !== H`
 When `get(H)` runs
@@ -301,7 +323,8 @@ gen: conformance
 
 ## REQ-ADAPTER-7 — governed persistent write binding
 
-### SCN-ADAPTER-7a-1 — the binding composes nodeKey→probe→routeWrite→upsert→flush   (happy)
+### SCN-ADAPTER-7a-1 — the binding composes nodeKey→probe→routeWrite→upsert→flush (happy)
+
 source: REQ-ADAPTER-7a
 Given candidate fact `F` (`nodeKey claim:fix-cov`, content `c1`) and the durable store
 When `writeDecision(F, cfg)` runs
@@ -309,7 +332,8 @@ Then it computes `nodeKey(F)`, probes the **durable** store for the contentHash 
 teeth: breaks-on "the binding skips the flush step — `routeWrite`/`upsert` land in memory but the durable store never sees `F`, so the next write's durable probe misses the prior (a memory-only golden passes)"
 gen: PBT
 
-### SCN-ADAPTER-7b-1 — a governed write of the same fact twice lands once   (happy)
+### SCN-ADAPTER-7b-1 — a governed write of the same fact twice lands once (happy)
+
 source: REQ-ADAPTER-7b
 Given fact `F` (`nodeKey claim:fix-cov`, content `c1`) over the DURABLE store
 When `writeDecision(F)` runs, then `writeDecision(F)` runs a second time
@@ -317,7 +341,8 @@ Then `F` lands exactly once — the second call is a no-op once the probe sees t
 teeth: breaks-on "the probe reads only the in-memory projection, not the flushed durable store — a flush-ordering bug lets the second write land a duplicate (`write∘write ≠ write`); the anti-rot's exact case a single-fact golden silently passes"
 gen: PBT
 
-### SCN-ADAPTER-7b-2 — a supersede lands one head in either delivery order   (happy)
+### SCN-ADAPTER-7b-2 — a supersede lands one head in either delivery order (happy)
+
 source: REQ-ADAPTER-7b
 Given fact `F` (content `c1`) and its superseder `F'` (content `c2`, `supersedes: [id(F)]`) over the durable store
 When they are delivered in order `[F, F']` and, separately, in order `[F', F]`
@@ -325,7 +350,8 @@ Then both orders yield an identical single head `F'` with the supersedes-pointer
 teeth: breaks-on "supersede resolution reads arrival order — delivering `[F', F]` leaves `F` as head, so the two delivery orders disagree on the head (order-dependent)"
 gen: PBT
 
-### SCN-ADAPTER-7c-1 — the bound decision equals routeWrite's on the same inputs   (guard)
+### SCN-ADAPTER-7c-1 — the bound decision equals routeWrite's on the same inputs (guard)
+
 source: REQ-ADAPTER-7c
 Given the existing `routeWrite`/`upsert` as the equality oracle and a near-duplicate of `F` that `routeWrite` would route to supersede
 When `writeDecision` makes its routing decision on the same inputs
@@ -337,7 +363,8 @@ gen: PBT
 
 ## REQ-ADAPTER-8 — history is backed by real git
 
-### SCN-ADAPTER-8a-1 — HistorySource yields real git signals   (happy)
+### SCN-ADAPTER-8a-1 — HistorySource yields real git signals (happy)
+
 source: REQ-ADAPTER-8a
 Given `git-sbx` pinned at rev `r0 = a1b2c3d` where `git blame` attributes `util/greet()` to commit `c_greet`
 When `HistorySource` yields `log`/`blame`/`coupling` for `src/util.ts`
@@ -345,7 +372,8 @@ Then the signals equal the real git output at `r0` — `blame` attributes `greet
 teeth: breaks-on "`HistorySource` returns a hardcoded stub signal instead of shelling to real git — `blame` attributes `greet()` to the wrong commit ≠ `git blame` at `r0`"
 gen: conformance
 
-### SCN-ADAPTER-8b-1 — the signals are byte-identical across runs at a fixed rev   (happy)
+### SCN-ADAPTER-8b-1 — the signals are byte-identical across runs at a fixed rev (happy)
+
 source: REQ-ADAPTER-8b
 Given `git-sbx` at the fixed rev `r0`
 When `HistorySource` runs twice
@@ -353,7 +381,8 @@ Then the two signal sets are byte-identical (deterministic for a fixed rev)
 teeth: breaks-on "`coupling` ranks by a `Map` iteration seeded from the wall-clock — the two runs at the same `r0` produce different coupling orders (non-deterministic at a fixed rev)"
 gen: conformance
 
-### SCN-ADAPTER-8c-1 — ranking mints no fact   (guard)
+### SCN-ADAPTER-8c-1 — ranking mints no fact (guard)
+
 source: REQ-ADAPTER-8c
 Given a write-spy on the fact store while `HistorySource` computes `log`/`blame`/`coupling` over `r0` to feed ranking
 When ranking runs
@@ -365,7 +394,8 @@ gen: conformance
 
 ## REQ-ADAPTER-9 — drift over merge-base
 
-### SCN-ADAPTER-9a-1 — DriftSource anchors equal the merge-base diff   (happy)
+### SCN-ADAPTER-9a-1 — DriftSource anchors equal the merge-base diff (happy)
+
 source: REQ-ADAPTER-9a
 Given `git-sbx` where `main` and `topic` share merge-base `mb = 9f8e7d6` and on `topic` the cited `src/util.ts` `greet()` anchor moved
 When `DriftSource` computes drifted anchors
@@ -373,7 +403,8 @@ Then the anchor set == the `mb → topic` diff (`greet()` flagged drifted), feed
 teeth: breaks-on "`DriftSource` diffs `merge-base → main` instead of `merge-base → topic` — the topic-only `greet()` drift is absent from `mb → main`, so the anchor set comes back empty and the real drift is missed (the two-tip mutant is caught by 9b-1's shared-`X` witness, not here)"
 gen: conformance
 
-### SCN-ADAPTER-9b-1 — drift is computed across the merge-base and nothing else   (guard)
+### SCN-ADAPTER-9b-1 — drift is computed across the merge-base and nothing else (guard)
+
 source: REQ-ADAPTER-9b
 Given a shared change `X` landed on **both** `main` and `topic` after `mb` (a two-tip diff would show nothing) plus the topic-only `greet()` change that predates it
 When `DriftSource` computes drift
@@ -381,7 +412,8 @@ Then only the topic-only `greet()` change vs `mb` is in the anchor set — the s
 teeth: breaks-on "drift is computed over a fixed window `HEAD~1..HEAD` instead of across the merge-base — it misses the topic-only `greet()` drift that predates the window"
 gen: conformance
 
-### SCN-ADAPTER-9c-1 — a secondary citation's drift is classified from that citation   (happy, added 2026-08-03)
+### SCN-ADAPTER-9c-1 — a secondary citation's drift is classified from that citation (happy, added 2026-08-03)
+
 source: REQ-ADAPTER-9c
 Given a grounded fact citing TWO anchors — `src/a-primary.ts`, which still re-derives at HEAD, and `src/b-secondary.ts`, whose content was renamed to `src/z-secondary-moved.ts`
 When the doctor classifies the fact's drift
@@ -389,7 +421,8 @@ Then the item is `mechanical` keyed on the citation that drifted (`anchorWas = s
 teeth: breaks-on "classification reads `entries[0]` alone — the primary still resolves at HEAD, so the item comes back `anchorWas = anchorNow = src/a-primary.ts`, a 'move' from a path to itself, and the citation that actually drifted is never named (MEASURED pre-fix)"
 gen: conformance
 
-### SCN-ADAPTER-9d-1 — the repair re-anchors the drifted citation and earns its freshness   (happy, added 2026-08-03)
+### SCN-ADAPTER-9d-1 — the repair re-anchors the drifted citation and earns its freshness (happy, added 2026-08-03)
+
 source: REQ-ADAPTER-9d
 Given the same two-citation fact, classified `mechanical`
 When the doctor emits the re-ground plan
@@ -397,7 +430,8 @@ Then entry 1 is re-anchored to `src/z-secondary-moved.ts`, entry 0 is passed thr
 teeth: breaks-on "the template rewrites `entries[0]` and stamps `freshness: 'FRESH'` unconditionally — the stale entry 1 survives into the candidate, which the truth door then refuses (`NA`, MEASURED pre-fix): a repair plan that cannot land, wearing a FRESH stamp it never earned"
 gen: conformance
 
-### SCN-ADAPTER-9e-1 — a rotted non-primary citation blocks the merge gate   (happy, added 2026-08-03)
+### SCN-ADAPTER-9e-1 — a rotted non-primary citation blocks the merge gate (happy, added 2026-08-03)
+
 source: REQ-ADAPTER-9e
 Given a durable knowledge base holding a fact whose grounding cites TWO anchors — a primary renamed with a byte-identical body (mechanically re-groundable) and a secondary whose content was REWRITTEN at HEAD — driven end-to-end through the real `composeRuntime` handler at `mergeBase = A`
 When `atlas-reconcile` classifies the run
@@ -405,7 +439,8 @@ Then that fact is `semantic`, `reauthorCount == 1` and `exitCode == 2` — the m
 teeth: breaks-on "the composition root inlines its own classifier over `entries[0]` — the renamed primary re-derives by content at HEAD, the fact reads `mechanical`, and the gate reports `semantic: [], exitCode: 0` over a knowledge base holding a dead citation (MEASURED pre-fix through the shipped path)"
 gen: conformance
 
-### SCN-ADAPTER-9e-2 — a knowledge base with no rotted citation still merges   (guard, added 2026-08-03)
+### SCN-ADAPTER-9e-2 — a knowledge base with no rotted citation still merges (guard, added 2026-08-03)
+
 source: REQ-ADAPTER-9e
 Given the SAME repository and the SAME merge base, with the rotted-secondary fact absent from the durable projection
 When `atlas-reconcile` classifies the run
@@ -413,7 +448,8 @@ Then the primary-only mechanical drift is `mechanical`, `semantic` is empty, `re
 teeth: breaks-on "the shared classifier answers `semantic` when NO entry drifted, or keys semantic on anything other than a citation that re-derives nowhere — either turns the merge gate into a blanket block on drifted-but-alive facts"
 gen: conformance
 
-### SCN-ADAPTER-9f-1 — a secondary-only drift is surfaced end-to-end, through the real merge gate   (happy, added 2026-08-03)
+### SCN-ADAPTER-9f-1 — a secondary-only drift is surfaced end-to-end, through the real merge gate (happy, added 2026-08-03)
+
 source: REQ-ADAPTER-9f
 Given a durable knowledge base holding four facts driven through the real `composeRuntime` handler at `mergeBase = A`: `sec-mech` (primary fresh, secondary renamed with a byte-identical body), `sec-rot` (primary fresh, secondary rewritten away), `lead-mech` (primary renamed, secondary fresh) and `mixed` (primary renamed AND secondary rewritten away)
 When `atlas-reconcile` classifies the run
@@ -421,7 +457,8 @@ Then all FOUR facts are surfaced (not just `lead-mech` and `mixed`): `mechanical
 teeth: breaks-on "`driftAt` reads `f.grounding.entries[0]` alone — `sec-mech` and `sec-rot`'s primaries are intact, so neither ever reaches the classifier: `mechanical == ['lead-mech']`, `semantic == ['mixed']`, `reauthorCount == 1` (MEASURED pre-fix through the shipped path)"
 gen: conformance
 
-### SCN-ADAPTER-9f-2 — single-entry facts and a rot-free base are unaffected   (guard, added 2026-08-03)
+### SCN-ADAPTER-9f-2 — single-entry facts and a rot-free base are unaffected (guard, added 2026-08-03)
+
 source: REQ-ADAPTER-9f
 Given (a) every pre-existing single-entry `DriftSource`/`atlas-reconcile` fixture, unchanged, and (b) the SAME four-fact repository above with `sec-rot` and `mixed` — the two rotted-secondary facts — absent from the durable projection
 When `DriftSource.driftAt`/`atlas-reconcile` runs
@@ -433,7 +470,8 @@ gen: conformance
 
 ## REQ-ADAPTER-10 — forge carries the atlas
 
-### SCN-ADAPTER-10a-1 — the forge writes trailer + orchestra note + PR projection   (happy)
+### SCN-ADAPTER-10a-1 — the forge writes trailer + orchestra note + PR projection (happy)
+
 source: REQ-ADAPTER-10a
 Given the `git-sbx` host and commit `c1`
 When the `Forge` writes the atlas for `c1`
@@ -441,27 +479,30 @@ Then a provenance trailer is appended to `c1`'s message, a note is attached to `
 teeth: breaks-on "the `Forge` writes the note to `refs/notes/commits` (the default namespace) instead of `refs/notes/orchestra` — the orchestra note is absent from the expected ref"
 gen: conformance
 
-### SCN-ADAPTER-10b-1 — a rewrite keeps the trailer and orphans the note data   (guard)
+### SCN-ADAPTER-10b-1 — a rewrite keeps the trailer and orphans the note data (guard)
+
 source: REQ-ADAPTER-10b
 Given the atlas written to `c1` (trailer in the message + note on `c1`'s sha)
 When history is rewritten by a rebase (`c1 → c1'`, new sha)
-Then the trailer data survives in the rewritten message and the note-carried data is orphaned exactly as PERSIST-* specifies (the note still points at the old `c1` sha, not silently discarded)
-teeth: breaks-on "the rewrite drops the trailer from the rewritten message (trailer treated as ephemeral) — trailer data is lost, diverging from the PERSIST-* expected outcome"
+Then the trailer data survives in the rewritten message and the note-carried data is orphaned exactly as PERSIST-_ specifies (the note still points at the old `c1` sha, not silently discarded)
+teeth: breaks-on "the rewrite drops the trailer from the rewritten message (trailer treated as ephemeral) — trailer data is lost, diverging from the PERSIST-_ expected outcome"
 gen: conformance
 
-### SCN-ADAPTER-10c-1 — the forge executes PERSIST-* semantics unchanged   (guard)
+### SCN-ADAPTER-10c-1 — the forge executes PERSIST-\* semantics unchanged (guard)
+
 source: REQ-ADAPTER-10c
-Given PERSIST-* specifies the exact trailer/note/orphan semantics as the oracle
+Given PERSIST-_ specifies the exact trailer/note/orphan semantics as the oracle
 When the `Forge` acts on `git-sbx` across the write + rewrite path
-Then the observed outcome == PERSIST-*'s expected outcome at every step — the adapter changed 0 of that semantics, only executed it
-teeth: breaks-on "the `Forge` 'improves' orphan handling by re-pointing the orphaned note to the rewritten `c1'` sha — it alters PERSIST-* orphan semantics, so the outcome diverges from the PERSIST oracle"
+Then the observed outcome == PERSIST-_'s expected outcome at every step — the adapter changed 0 of that semantics, only executed it
+teeth: breaks-on "the `Forge` 'improves' orphan handling by re-pointing the orphaned note to the rewritten `c1'` sha — it alters PERSIST-\* orphan semantics, so the outcome diverges from the PERSIST oracle"
 gen: conformance
 
 ---
 
 ## REQ-ADAPTER-11 — the single model entry
 
-### SCN-ADAPTER-11a-1 — a model is invoked only via SiteProposer.propose   (guard)
+### SCN-ADAPTER-11a-1 — a model is invoked only via SiteProposer.propose (guard)
+
 source: REQ-ADAPTER-11a
 Given `spyProposer` wrapping the only model seam and a module-graph audit for any other model call site, with genesis extraction run over `fix-repo`
 When extraction invokes the model
@@ -469,7 +510,8 @@ Then every model invocation went through `SiteProposer.propose` — 0 out-of-ban
 teeth: breaks-on "a second module calls the model client directly, bypassing `SiteProposer.propose` — the graph audit finds a 2nd model entry point"
 gen: conformance
 
-### SCN-ADAPTER-11b-1 — exactly one bounded call per site   (happy)
+### SCN-ADAPTER-11b-1 — exactly one bounded call per site (happy)
+
 source: REQ-ADAPTER-11b
 Given a call-counter on `spyProposer` and a budget stub (cost cap + timeout `t`)
 When `propose` runs for site `S_greet`
@@ -477,7 +519,8 @@ Then exactly one bounded call is made for `S_greet`, honoring the cost/timeout b
 teeth: breaks-on "`propose` retries the model 3× on a low-confidence result — the call-counter records 3 calls for `S_greet` (>1 call/site, budget ignored)"
 gen: conformance
 
-### SCN-ADAPTER-11c-1 — the proposal enters as a gated candidate   (guard)
+### SCN-ADAPTER-11c-1 — the proposal enters as a gated candidate (guard)
+
 source: REQ-ADAPTER-11c
 Given `spyProposer` returns proposal `P0` for `S_greet`
 When `P0` enters the pipeline
@@ -489,7 +532,8 @@ gen: conformance
 
 ## REQ-ADAPTER-12 — rehydrate the session projection
 
-### SCN-ADAPTER-12a-1 — a fresh process rehydrates the flushed fact byte-identically   (happy)
+### SCN-ADAPTER-12a-1 — a fresh process rehydrates the flushed fact byte-identically (happy)
+
 source: REQ-ADAPTER-12a
 Given run A writes + flushes fact `F` (`nodeKey claim:fix-cov`) to `.atlas/cas/`
 When a fresh process (run B) reconstructs the `StoreProjection` current-node map from the durable store
@@ -497,7 +541,8 @@ Then `F` is present byte-identical in the reconstructed current-node map (`head(
 teeth: breaks-on "rehydrate reconstructs from an in-memory snapshot run B doesn't have (it never reads the durable CAS) — `F` is missing from the rehydrated projection"
 gen: conformance
 
-### SCN-ADAPTER-12b-1 — rehydrate reconstructs state only, minting nothing   (guard)
+### SCN-ADAPTER-12b-1 — rehydrate reconstructs state only, minting nothing (guard)
+
 source: REQ-ADAPTER-12b
 Given a write-spy on the fact store while run B rehydrates the projection from run A's flushed CAS
 When rehydration runs
@@ -509,7 +554,8 @@ gen: conformance
 
 ## REQ-WIRE-1 — one shared handler assembly
 
-### SCN-WIRE-1a-1 — the wire module assembles one five-leg handler   (happy)
+### SCN-WIRE-1a-1 — the wire module assembles one five-leg handler (happy)
+
 source: REQ-WIRE-1a
 Given the shared `wire` module and the adapters
 When `createHandler(adapters)` is called
@@ -517,7 +563,8 @@ Then a single `WiredHandler` exposes exactly the five legs (`atlas-init`/`query`
 teeth: breaks-on "the `wire` module assembles two separate handlers (one per entrypoint) instead of one shared assembly — two `WiredHandler` instances exist"
 gen: conformance
 
-### SCN-WIRE-1b-1 — both entrypoints return byte-identical verdicts   (guard)
+### SCN-WIRE-1b-1 — both entrypoints return byte-identical verdicts (guard)
+
 source: REQ-WIRE-1b
 Given the fixture set of tool calls `{init fix-repo, query greet, emit F, reconcile git-sbx}`
 When each is driven through the CLI entrypoint and the MCP entrypoint
@@ -529,7 +576,8 @@ gen: conformance
 
 ## REQ-CLI-1 — total command surface
 
-### SCN-CLI-1a-1 — every command maps to exactly one leg   (happy)
+### SCN-CLI-1a-1 — every command maps to exactly one leg (happy)
+
 source: REQ-CLI-1a
 Given the finite command set `{ init, query, emit, reconcile, doctor, mine }`
 When the `command → wired-leg` map is enumerated
@@ -537,7 +585,8 @@ Then it is total and mutually exclusive: `init→atlas-init`, `query→atlas-que
 teeth: breaks-on "a new command `export` is added with no leg binding — the enumeration finds a command mapping to zero legs (totality fails), or `query` is bound to two legs (uniqueness fails)"
 gen: exhaustive
 
-### SCN-CLI-1b-1 — a malformed invocation yields a structured error   (guard)
+### SCN-CLI-1b-1 — a malformed invocation yields a structured error (guard)
+
 source: REQ-CLI-1b
 Given the malformed invocation `atlas query --depth=notanumber`
 When the CLI parses it
@@ -545,7 +594,8 @@ Then it yields a structured error `{ exitCode: non-zero, guidance }` — not a s
 teeth: breaks-on "the parser passes `--depth=NaN` through and the tool throws deep inside — no structured error is produced and guidance is absent (a non-zero-with-guidance contract violated)"
 gen: PBT
 
-### SCN-CLI-1c-1 — no malformed input crashes the parser   (guard)
+### SCN-CLI-1c-1 — no malformed input crashes the parser (guard)
+
 source: REQ-CLI-1c
 Given a PBT-fuzz stream of malformed `argv` (empty, unknown flags, binary garbage, missing positional args)
 When each input is fed to the CLI parser
@@ -557,7 +607,8 @@ gen: PBT
 
 ## REQ-CLI-2 — the CLI is the floor
 
-### SCN-CLI-2a-1 — reads resolve directly over the CLI   (happy)
+### SCN-CLI-2a-1 — reads resolve directly over the CLI (happy)
+
 source: REQ-CLI-2a
 Given the read commands `{ query, reconcile, doctor }`
 When the `command × authority` matrix is enumerated
@@ -565,7 +616,8 @@ Then each resolves over the CLI directly (a read path), classified as a read
 teeth: breaks-on "`reconcile` is routed through the `atlas-emit` write-door instead of resolving as a direct read — a read is misclassified in the matrix"
 gen: exhaustive
 
-### SCN-CLI-2b-1 — every write funnels through a governed door   (guard)
+### SCN-CLI-2b-1 — every write funnels through a governed door (guard)
+
 source: REQ-CLI-2b
 Given the write commands `emit` and `link`
 When the `command × authority` matrix is enumerated
@@ -573,7 +625,8 @@ Then every write funnels through a governed door — `atlas-emit` (grounded fact
 teeth: breaks-on "`init` is granted a direct write path to the store bypassing the governed doors — an ungoverned write path appears in the matrix (the governed-door partition breaks)"
 gen: exhaustive
 
-### SCN-CLI-2c-1 — a read carries no write authority   (guard)
+### SCN-CLI-2c-1 — a read carries no write authority (guard)
+
 source: REQ-CLI-2c
 Given the read command `query`
 When its authority cell is asserted in the matrix
@@ -585,7 +638,8 @@ gen: exhaustive
 
 ## REQ-CLI-3 — deterministic render
 
-### SCN-CLI-3a-1 — the render matches the reference renderer byte-for-byte   (happy)
+### SCN-CLI-3a-1 — the render matches the reference renderer byte-for-byte (happy)
+
 source: REQ-CLI-3a
 Given `V_ok` and the reference `Verdict` renderer
 When the CLI renders `V_ok` to stdout
@@ -593,7 +647,8 @@ Then the output matches the reference renderer's output byte-for-byte
 teeth: breaks-on "the renderer interpolates a timestamp/duration into stdout — the render diverges from the reference renderer (non-deterministic bytes)"
 gen: conformance
 
-### SCN-CLI-3b-1 — the exit code is a function of the verdict status   (happy)
+### SCN-CLI-3b-1 — the exit code is a function of the verdict status (happy)
+
 source: REQ-CLI-3b
 Given the fixture set `{ V_ok, V_rej, V_err }`
 When each is rendered
@@ -601,7 +656,8 @@ Then `exitCode == f(status)` — `0` for `ok`, non-zero for `rejected` (`2`) and
 teeth: breaks-on "the CLI hardcodes `exit 0` after rendering — a `rejected` verdict exits `0` (the exit code ignores the verdict)"
 gen: conformance
 
-### SCN-CLI-3c-1 — the same verdict renders identically twice   (happy)
+### SCN-CLI-3c-1 — the same verdict renders identically twice (happy)
+
 source: REQ-CLI-3c
 Given `V_rej`
 When it is rendered twice
@@ -609,7 +665,8 @@ Then the two stdout strings are byte-identical
 teeth: breaks-on "the renderer stamps a per-render value (a wall-clock timestamp / fresh nonce) into stdout instead of deriving the output purely from the verdict — so the two renders of `V_rej` differ (a `Set`-iteration reorder would not: identical input iterates identically)"
 gen: conformance
 
-### SCN-CLI-3d-1 — the render carries the tool's guidance   (happy)
+### SCN-CLI-3d-1 — the render carries the tool's guidance (happy)
+
 source: REQ-CLI-3d
 Given `V_err` with guidance `"malformed input: expected a repo path"`
 When it is rendered
@@ -621,7 +678,8 @@ gen: conformance
 
 ## REQ-CLI-4 — mine drives the frozen run-controller
 
-### SCN-CLI-4a-1 — mine's write-set equals the frozen run-controller's   (happy)
+### SCN-CLI-4a-1 — mine's write-set equals the frozen run-controller's (happy)
+
 source: REQ-CLI-4a
 Given `fix-repo` and a recorded proposer, with the frozen `genesis` run-controller as the oracle
 When `atlas mine fix-repo` runs a single governed pass
@@ -629,7 +687,8 @@ Then the produced write-set equals the run-controller's output over the same inp
 teeth: breaks-on "the `mine` driver re-orders the `scan→rank→extract→admit→align→seed` stages (runs `extract` before `rank`) — its write-set diverges from the frozen run-controller's"
 gen: conformance
 
-### SCN-CLI-4b-1 — every mined write is candidate-only   (guard)
+### SCN-CLI-4b-1 — every mined write is candidate-only (guard)
+
 source: REQ-CLI-4b
 Given `atlas mine fix-repo` produces facts from proposal `P0`
 When each written fact's status is inspected
@@ -637,7 +696,8 @@ Then every write is candidate-only (status `candidate`), never ratified
 teeth: breaks-on "the `mine` driver stamps a high-confidence proposal as `ratified` — a mined fact lands ratified (the never-ratified invariant is broken)"
 gen: conformance
 
-### SCN-CLI-4c-1 — mine adds no admission of its own   (guard)
+### SCN-CLI-4c-1 — mine adds no admission of its own (guard)
+
 source: REQ-CLI-4c
 Given the frozen run-controller owns the admission logic and a candidate the driver could pre-filter
 When `atlas mine fix-repo` runs
@@ -645,7 +705,8 @@ Then the driver adds 0 admission of its own — the admitted set == the run-cont
 teeth: breaks-on "the `mine` driver adds a local pre-filter that admits/rejects a candidate before the run-controller — the admitted set diverges from the frozen run-controller's (admission invented)"
 gen: conformance
 
-### SCN-CLI-4d-1 — a non-empty frontier reaches the gate's verdict   (happy)
+### SCN-CLI-4d-1 — a non-empty frontier reaches the gate's verdict (happy)
+
 source: REQ-CLI-4d
 Given a real git repository carrying a real SCIP index, whose structural frontier is NON-EMPTY (asserted before anything is concluded from the run), and a spy proposer that returns a candidate at every site, with NO gate injected
 When `atlas mine` runs over it on production defaults
@@ -653,7 +714,8 @@ Then every visited site reaches the verdict of the gate the composition root sup
 teeth: breaks-on "the composition root supplies no gate (or supplies one built over a receipt taken verbatim from the seed, whose `subtreeHash` is the dependency-axis node identity the freshness oracle refuses by construction) — the frontier is unchanged, the model is still called at every site, and 0 candidates are staged"
 gen: conformance
 
-### SCN-CLI-4d-2 — with the gate absent the run still abstains, and says so   (guard)
+### SCN-CLI-4d-2 — with the gate absent the run still abstains, and says so (guard)
+
 source: REQ-CLI-4d
 Given the SAME repository, the SAME frontier and the SAME spy proposer as SCN-CLI-4d-1, with the admission supply deliberately REMOVED
 When `atlas mine` runs
@@ -665,7 +727,8 @@ gen: conformance
 
 ## REQ-CLI-7 — promote curates through the existing write door
 
-### SCN-CLI-7a-1 — a promoted candidate is published by the emit door, and the surface does not move   (happy)
+### SCN-CLI-7a-1 — a promoted candidate is published by the emit door, and the surface does not move (happy)
+
 source: REQ-CLI-7a
 Given a repo whose staging sidecar holds one grounded candidate and whose admin policy appoints a curator over the mined scope
 When `atlas promote` runs under that curator with a ratifier named
@@ -673,7 +736,8 @@ Then the candidate is durable in the governed projection, `GOVERNANCE_SURFACE` i
 teeth: breaks-on "promotion is given its own governed tool (`atlas-promote`) or its own write medium — the frozen `WRITE_PATHS` no longer equals the set of legs the write commands funnel into"
 gen: conformance
 
-### SCN-CLI-7b-1 — a staged candidate does not auto-accept   (guard)
+### SCN-CLI-7b-1 — a staged candidate does not auto-accept (guard)
+
 source: REQ-CLI-7b
 Given a staged candidate that is grounded, `T2` and advisory — the exact shape the confidence fast path auto-accepts — and no ratifier named
 When `atlas promote` runs
@@ -681,7 +745,8 @@ Then the candidate is refused `unratified`, nothing is persisted, and the SAME c
 teeth: breaks-on "the promotion path uses the write door's DEFAULT ratify context — the candidate fast-paths to auto-accept, `ratify` is never called, and the row lands with no ratifier consulted"
 gen: conformance
 
-### SCN-CLI-7c-1 — the fast-path derivation forges no store state   (guard)
+### SCN-CLI-7c-1 — the fast-path derivation forges no store state (guard)
+
 source: REQ-CLI-7c
 Given the ratification context the promotion door builds for a staged candidate
 When that context is inspected field by field
@@ -689,7 +754,8 @@ Then it reports the candidate as neither contested nor high-risk, and states the
 teeth: breaks-on "the promotion route is obtained by setting `contested: true` (or `lowRisk: false`) — the route is correct and the record now asserts a reviewer veto / threshold verdict that nobody computed"
 gen: conformance
 
-### SCN-CLI-7d-1 — one unpromotable row does not end the pass   (guard)
+### SCN-CLI-7d-1 — one unpromotable row does not end the pass (guard)
+
 source: REQ-CLI-7d
 Given a staging sidecar holding one row whose CAS bytes are absent, one row whose grounding names no single containing unit, and one healthy candidate
 When `atlas promote` runs
@@ -697,7 +763,8 @@ Then each bad row is refused by its own named reason, the healthy candidate is p
 teeth: breaks-on "an unrehydratable row is skipped (it vanishes from the report and the candidate count under-counts) or throws (the pass dies and the healthy candidate is lost)"
 gen: conformance
 
-### SCN-CLI-7e-1 — the count is what settled   (guard)
+### SCN-CLI-7e-1 — the count is what settled (guard)
+
 source: REQ-CLI-7e
 Given a staging sidecar holding several candidates of which exactly one can clear the gates
 When `atlas promote` runs
@@ -705,7 +772,8 @@ Then the reported promoted count is one, it equals the number of rows the govern
 teeth: breaks-on "the pass reports the number of rows it ATTEMPTED — the measured shape of 40 candidates reported committed against 5 durable"
 gen: conformance
 
-### SCN-CLI-7f-1 — a refused staging read is reported as a refusal   (guard)
+### SCN-CLI-7f-1 — a refused staging read is reported as a refusal (guard)
+
 source: REQ-CLI-7f
 Given a staging sidecar whose read refuses (unreadable, untrusted or contended) while candidates are still on disk
 When `atlas promote` runs
@@ -715,9 +783,10 @@ gen: conformance
 
 ---
 
-## REQ-MCP-1 — the published set is the closed tool union   (amended ADR-0006)
+## REQ-MCP-1 — the published set is the closed tool union (amended ADR-0006)
 
-### SCN-MCP-1a-1 — the published set is exactly the closed `Tool` union, with schemas   (happy, amended ADR-0006)
+### SCN-MCP-1a-1 — the published set is exactly the closed `Tool` union, with schemas (happy, amended ADR-0006)
+
 source: REQ-MCP-1a
 Given the MCP stdio server
 When the published tool set is enumerated
@@ -725,7 +794,8 @@ Then it equals exactly the closed `Tool` union — `GOVERNANCE_SURFACE ∪ READ_
 teeth: breaks-on "the server publishes `atlas-init` without its input schema — the enumerated set does not match the union-with-schemas oracle"
 gen: exhaustive
 
-### SCN-MCP-1b-1 — no tool outside the closed union is published   (guard, amended ADR-0006)
+### SCN-MCP-1b-1 — no tool outside the closed union is published (guard, amended ADR-0006)
+
 source: REQ-MCP-1b
 Given the published tool set
 When a set-equality assertion runs against the closed `Tool` union
@@ -733,7 +803,8 @@ Then every published tool is a member of the union and no non-member is register
 teeth: breaks-on "a debug tool `atlas-dump` is registered — it is in neither GOVERNANCE_SURFACE nor READ_SURFACE, so it is outside the closed union"
 gen: exhaustive
 
-### SCN-MCP-1d-1 — advertised equals invocable   (happy, added ADR-0006)
+### SCN-MCP-1d-1 — advertised equals invocable (happy, added ADR-0006)
+
 source: REQ-MCP-1d
 Given the advertised tool list and the set of tokens the handler will actually dispatch
 When the two are compared as sets
@@ -741,7 +812,8 @@ Then they are equal, and both equal the closed `Tool` union
 teeth: breaks-on "a leg bound at the composition root for a token absent from the advertised list — it is invocable over MCP, unadvertised, and invisible to every surface pin (the pre-ADR-0006 state, where callTool dispatched on legs[tool] with no membership check)"
 gen: exhaustive
 
-### SCN-MCP-1e-1 — advertised and invocable are both traced to the ONE source, never computed separately   (guard, added ADR-0006)
+### SCN-MCP-1e-1 — advertised and invocable are both traced to the ONE source, never computed separately (guard, added ADR-0006)
+
 source: REQ-MCP-1e
 Given the advertised tool set (`advertisedTools`, derived from `GOVERNANCE_SURFACE`) and the dispatch path (`callTool`, which forwards every non-read-tool name to `handler.handle` unfiltered)
 When both are probed against the SAME production `GOVERNANCE_SURFACE` — the advertised names for exact (ordered) equality, and the dispatch path for whether an off-surface name still reaches `handler.handle` unfiltered by any independent list inside `callTool`
@@ -749,7 +821,8 @@ Then the advertised set equals `GOVERNANCE_SURFACE` byte-for-byte and `callTool`
 teeth: breaks-on "advertisedTools reads from a second hardcoded literal array instead of GOVERNANCE_SURFACE.map(...), OR callTool grows its own allowlist/blocklist before forwarding to handler.handle — either is the advertised and invocable sets being COMPUTED SEPARATELY, which is exactly what REQ-MCP-1e forbids"
 gen: conformance
 
-### SCN-MCP-1c-1 — every MCP call routes through the shared handler and matches the CLI verdict   (happy)
+### SCN-MCP-1c-1 — every MCP call routes through the shared handler and matches the CLI verdict (happy)
+
 source: REQ-MCP-1c
 Given the tool call `query greet` over both transports
 When it is routed over MCP and over the CLI
@@ -761,7 +834,8 @@ gen: exhaustive
 
 ## REQ-MCP-2 — fail-closed transport
 
-### SCN-MCP-2a-1 — a tool error surfaces as a rejected verdict   (guard)
+### SCN-MCP-2a-1 — a tool error surfaces as a rejected verdict (guard)
+
 source: REQ-MCP-2a
 Given a tool stub for `atlas-emit` that throws mid-call
 When it is called over MCP
@@ -769,7 +843,8 @@ Then the MCP result carries a structured rejected `Verdict` (`isError` set, stat
 teeth: breaks-on "the thrown error is swallowed and the server returns an empty `ok` result — no rejected `Verdict` in the MCP result"
 gen: conformance
 
-### SCN-MCP-2b-1 — the server does not crash on a tool error   (guard)
+### SCN-MCP-2b-1 — the server does not crash on a tool error (guard)
+
 source: REQ-MCP-2b
 Given the throwing `atlas-emit` stub
 When it throws
@@ -777,7 +852,8 @@ Then the MCP stdio server stays up and continues serving the next request
 teeth: breaks-on "the uncaught tool exception propagates to the stdio loop and the server process exits (a transport crash)"
 gen: conformance
 
-### SCN-MCP-2c-1 — the fail-closed verdict is never dropped   (guard)
+### SCN-MCP-2c-1 — the fail-closed verdict is never dropped (guard)
+
 source: REQ-MCP-2c
 Given the throwing `atlas-emit` stub
 When the error is handled
@@ -789,7 +865,7 @@ gen: conformance
 
 ## Coverage ledger (S3 completeness facet)
 
-- **REQ coverage:** 58/58 REQ have ≥1 SCN.   <!-- AMENDED 2026-08-12: SCN-MCP-1e-1 closes REQ-MCP-1e -->
+- **REQ coverage:** 58/58 REQ have ≥1 SCN. <!-- AMENDED 2026-08-12: SCN-MCP-1e-1 closes REQ-MCP-1e -->
   <!-- COUNTED, not restated: this ledger read "55/55" while the two files already held 57 REQs and 57 SCNs
        before the amendment below — REQ-MCP-1d/1e and SCN-MCP-1d-1 landed with the governed-write-doors
        amendment (8cd1cb9) and the ledger was not recounted, leaving REQ-MCP-1e with no SCN here. It sat at
@@ -827,7 +903,8 @@ gen: conformance
 > Generated from the method-tag, as S3 requires. Every SCN names the SHIPPED test that witnesses it —
 > these are not to-be-written goldens, they are the acceptance already green on `master`.
 
-### SCN-MEMRING-1a-1 — append-only and content-keyed, one record per line   (happy)
+### SCN-MEMRING-1a-1 — append-only and content-keyed, one record per line (happy)
+
 source: REQ-MEMRING-1a
 Given the shipped memory ring over a real durable store
 When the door for INV-MEMRING-1 is exercised
@@ -836,7 +913,8 @@ teeth: breaks-on "the reader's content-key check is the mock; removing it folds 
 witness: packages/adapter-io/test/memory-store.test.ts
 gen: conformance
 
-### SCN-MEMRING-1b-1 — a record appended in one process is readable byte-identical in a later process   (happy)
+### SCN-MEMRING-1b-1 — a record appended in one process is readable byte-identical in a later process (happy)
+
 source: REQ-MEMRING-1b
 Given the shipped memory ring over a real durable store
 When the door for INV-MEMRING-1 is exercised
@@ -845,7 +923,8 @@ teeth: breaks-on "the reader's content-key check is the mock; removing it folds 
 witness: packages/adapter-io/test/memory-store.test.ts
 gen: conformance
 
-### SCN-MEMRING-1c-1 — NEVER rewrite, truncate or reorder an existing line   (happy)
+### SCN-MEMRING-1c-1 — NEVER rewrite, truncate or reorder an existing line (happy)
+
 source: REQ-MEMRING-1c
 Given the shipped memory ring over a real durable store
 When the door for INV-MEMRING-1 is exercised
@@ -854,7 +933,8 @@ teeth: breaks-on "the reader's content-key check is the mock; removing it folds 
 witness: packages/adapter-io/test/memory-store.test.ts
 gen: conformance
 
-### SCN-MEMRING-1d-1 — a line whose id is not its own content hash is refused on read AND counted   (happy)
+### SCN-MEMRING-1d-1 — a line whose id is not its own content hash is refused on read AND counted (happy)
+
 source: REQ-MEMRING-1d
 Given the shipped memory ring over a real durable store
 When the door for INV-MEMRING-1 is exercised
@@ -863,7 +943,8 @@ teeth: breaks-on "the reader's content-key check is the mock; removing it folds 
 witness: packages/adapter-io/test/memory-store.test.ts
 gen: conformance
 
-### SCN-MEMRING-1e-1 — a torn or hand-edited line is folded in as a record   (guard)
+### SCN-MEMRING-1e-1 — a torn or hand-edited line is folded in as a record (guard)
+
 source: REQ-MEMRING-1e
 Given the shipped memory ring over a real durable store
 When the door for INV-MEMRING-1 is exercised
@@ -872,7 +953,8 @@ teeth: breaks-on "the reader's content-key check is the mock; removing it folds 
 witness: packages/adapter-io/test/memory-store.test.ts
 gen: conformance
 
-### SCN-MEMRING-1f-1 — an unreadable log is reported as an empty store   (guard)
+### SCN-MEMRING-1f-1 — an unreadable log is reported as an empty store (guard)
+
 source: REQ-MEMRING-1f
 Given the shipped memory ring over a real durable store
 When the door for INV-MEMRING-1 is exercised
@@ -881,7 +963,8 @@ teeth: breaks-on "the reader's content-key check is the mock; removing it folds 
 witness: packages/adapter-io/test/memory-store.test.ts
 gen: conformance
 
-### SCN-MEMRING-2a-1 — two processes appending concurrently both land   (happy)
+### SCN-MEMRING-2a-1 — two processes appending concurrently both land (happy)
+
 source: REQ-MEMRING-2a
 Given the shipped memory ring over a real durable store
 When the door for INV-MEMRING-2 is exercised
@@ -890,7 +973,8 @@ teeth: breaks-on "the O_APPEND write is the mock; replacing it with a read-modif
 witness: packages/adapter-io/test/memory-store.test.ts
 gen: conformance
 
-### SCN-MEMRING-2b-1 — the fold contains every record either writer wrote   (happy)
+### SCN-MEMRING-2b-1 — the fold contains every record either writer wrote (happy)
+
 source: REQ-MEMRING-2b
 Given the shipped memory ring over a real durable store
 When the door for INV-MEMRING-2 is exercised
@@ -899,7 +983,8 @@ teeth: breaks-on "the O_APPEND write is the mock; replacing it with a read-modif
 witness: packages/adapter-io/test/memory-store.test.ts
 gen: conformance
 
-### SCN-MEMRING-2c-1 — a concurrent append silently overwrites another writer's record   (guard)
+### SCN-MEMRING-2c-1 — a concurrent append silently overwrites another writer's record (guard)
+
 source: REQ-MEMRING-2c
 Given the shipped memory ring over a real durable store
 When the door for INV-MEMRING-2 is exercised
@@ -908,7 +993,8 @@ teeth: breaks-on "the O_APPEND write is the mock; replacing it with a read-modif
 witness: packages/adapter-io/test/memory-store.test.ts
 gen: conformance
 
-### SCN-MEMRING-3a-1 — admitted to git (the log travels)   (happy)
+### SCN-MEMRING-3a-1 — admitted to git (the log travels) (happy)
+
 source: REQ-MEMRING-3a
 Given the shipped memory ring over a real durable store
 When the door for INV-MEMRING-3 is exercised
@@ -917,7 +1003,8 @@ teeth: breaks-on "the JSONL one-record-per-line form is the mock; a multi-line r
 witness: packages/adapter-io/test/memory-store.test.ts
 gen: conformance
 
-### SCN-MEMRING-3b-1 — survives a plain text merge with 0 records lost and 0 spliced   (happy)
+### SCN-MEMRING-3b-1 — survives a plain text merge with 0 records lost and 0 spliced (happy)
+
 source: REQ-MEMRING-3b
 Given the shipped memory ring over a real durable store
 When the door for INV-MEMRING-3 is exercised
@@ -926,7 +1013,8 @@ teeth: breaks-on "the JSONL one-record-per-line form is the mock; a multi-line r
 witness: packages/adapter-io/test/memory-store.test.ts
 gen: conformance
 
-### SCN-MEMRING-3c-1 — a duplicated line dedups by content id on the fold   (happy)
+### SCN-MEMRING-3c-1 — a duplicated line dedups by content id on the fold (happy)
+
 source: REQ-MEMRING-3c
 Given the shipped memory ring over a real durable store
 When the door for INV-MEMRING-3 is exercised
@@ -935,7 +1023,8 @@ teeth: breaks-on "the JSONL one-record-per-line form is the mock; a multi-line r
 witness: packages/adapter-io/test/memory-store.test.ts
 gen: conformance
 
-### SCN-MEMRING-3d-1 — a branch merge loses a record   (guard)
+### SCN-MEMRING-3d-1 — a branch merge loses a record (guard)
+
 source: REQ-MEMRING-3d
 Given the shipped memory ring over a real durable store
 When the door for INV-MEMRING-3 is exercised
@@ -944,7 +1033,8 @@ teeth: breaks-on "the JSONL one-record-per-line form is the mock; a multi-line r
 witness: packages/adapter-io/test/memory-store.test.ts
 gen: conformance
 
-### SCN-MEMRING-3e-1 — a merge splices two records into one   (guard)
+### SCN-MEMRING-3e-1 — a merge splices two records into one (guard)
+
 source: REQ-MEMRING-3e
 Given the shipped memory ring over a real durable store
 When the door for INV-MEMRING-3 is exercised
@@ -953,7 +1043,8 @@ teeth: breaks-on "the JSONL one-record-per-line form is the mock; a multi-line r
 witness: packages/adapter-io/test/memory-store.test.ts
 gen: conformance
 
-### SCN-MEMRING-4a-1 — the gates run in the stated ORDER   (happy)
+### SCN-MEMRING-4a-1 — the gates run in the stated ORDER (happy)
+
 source: REQ-MEMRING-4a
 Given the shipped memory ring over a real durable store
 When the door for INV-MEMRING-4 is exercised
@@ -962,7 +1053,8 @@ teeth: breaks-on "the ordered composition is the mock; reordering derivation aft
 witness: packages/adapter-io/test/memory-emit.test.ts
 gen: exhaustive
 
-### SCN-MEMRING-4b-1 — each refusal is a structured verdict NAMING the gate   (happy)
+### SCN-MEMRING-4b-1 — each refusal is a structured verdict NAMING the gate (happy)
+
 source: REQ-MEMRING-4b
 Given the shipped memory ring over a real durable store
 When the door for INV-MEMRING-4 is exercised
@@ -971,7 +1063,8 @@ teeth: breaks-on "the ordered composition is the mock; reordering derivation aft
 witness: packages/adapter-io/test/memory-emit.test.ts
 gen: exhaustive
 
-### SCN-MEMRING-4c-1 — the door authors no policy of its own   (happy)
+### SCN-MEMRING-4c-1 — the door authors no policy of its own (happy)
+
 source: REQ-MEMRING-4c
 Given the shipped memory ring over a real durable store
 When the door for INV-MEMRING-4 is exercised
@@ -980,7 +1073,8 @@ teeth: breaks-on "the ordered composition is the mock; reordering derivation aft
 witness: packages/adapter-io/test/memory-emit.test.ts
 gen: exhaustive
 
-### SCN-MEMRING-4d-1 — a record reaches disk having skipped a gate   (guard)
+### SCN-MEMRING-4d-1 — a record reaches disk having skipped a gate (guard)
+
 source: REQ-MEMRING-4d
 Given the shipped memory ring over a real durable store
 When the door for INV-MEMRING-4 is exercised
@@ -989,7 +1083,8 @@ teeth: breaks-on "the ordered composition is the mock; reordering derivation aft
 witness: packages/adapter-io/test/memory-emit.test.ts
 gen: exhaustive
 
-### SCN-MEMRING-4e-1 — a refusal escapes as a thrown exception a caller can swallow   (guard)
+### SCN-MEMRING-4e-1 — a refusal escapes as a thrown exception a caller can swallow (guard)
+
 source: REQ-MEMRING-4e
 Given the shipped memory ring over a real durable store
 When the door for INV-MEMRING-4 is exercised
@@ -998,7 +1093,8 @@ teeth: breaks-on "the ordered composition is the mock; reordering derivation aft
 witness: packages/adapter-io/test/memory-emit.test.ts
 gen: exhaustive
 
-### SCN-MEMRING-5a-1 — the template is selected from the entry's SHAPE   (happy)
+### SCN-MEMRING-5a-1 — the template is selected from the entry's SHAPE (happy)
+
 source: REQ-MEMRING-5a
 Given the shipped memory ring over a real durable store
 When the door for INV-MEMRING-5 is exercised
@@ -1007,7 +1103,8 @@ teeth: breaks-on "the multi-match refusal is the mock; a first-match-wins fold f
 witness: packages/memory/test/mem-kind-derivation.test.ts
 gen: conformance
 
-### SCN-MEMRING-5b-1 — no caller-supplied argument selects it   (happy)
+### SCN-MEMRING-5b-1 — no caller-supplied argument selects it (happy)
+
 source: REQ-MEMRING-5b
 Given the shipped memory ring over a real durable store
 When the door for INV-MEMRING-5 is exercised
@@ -1016,7 +1113,8 @@ teeth: breaks-on "the multi-match refusal is the mock; a first-match-wins fold f
 witness: packages/memory/test/mem-kind-derivation.test.ts
 gen: conformance
 
-### SCN-MEMRING-5c-1 — no-match and multi-match are BOTH refused, never guessed   (happy)
+### SCN-MEMRING-5c-1 — no-match and multi-match are BOTH refused, never guessed (happy)
+
 source: REQ-MEMRING-5c
 Given the shipped memory ring over a real durable store
 When the door for INV-MEMRING-5 is exercised
@@ -1025,7 +1123,8 @@ teeth: breaks-on "the multi-match refusal is the mock; a first-match-wins fold f
 witness: packages/memory/test/mem-kind-derivation.test.ts
 gen: conformance
 
-### SCN-MEMRING-5d-1 — a caller files a payload under a template that judges it more leniently   (guard)
+### SCN-MEMRING-5d-1 — a caller files a payload under a template that judges it more leniently (guard)
+
 source: REQ-MEMRING-5d
 Given the shipped memory ring over a real durable store
 When the door for INV-MEMRING-5 is exercised
@@ -1034,7 +1133,8 @@ teeth: breaks-on "the multi-match refusal is the mock; a first-match-wins fold f
 witness: packages/memory/test/mem-kind-derivation.test.ts
 gen: conformance
 
-### SCN-MEMRING-5e-1 — an ambiguous shape is filed under the first matching template   (guard)
+### SCN-MEMRING-5e-1 — an ambiguous shape is filed under the first matching template (guard)
+
 source: REQ-MEMRING-5e
 Given the shipped memory ring over a real durable store
 When the door for INV-MEMRING-5 is exercised
@@ -1043,7 +1143,8 @@ teeth: breaks-on "the multi-match refusal is the mock; a first-match-wins fold f
 witness: packages/memory/test/mem-kind-derivation.test.ts
 gen: conformance
 
-### SCN-MEMRING-6a-1 — owner = the composition root's resolved actor   (happy)
+### SCN-MEMRING-6a-1 — owner = the composition root's resolved actor (happy)
+
 source: REQ-MEMRING-6a
 Given the shipped memory ring over a real durable store
 When the door for INV-MEMRING-6 is exercised
@@ -1052,7 +1153,8 @@ teeth: breaks-on "the empty-owner refusal is the mock; removing it mints a recor
 witness: packages/memory/test/mem-kind-derivation.test.ts
 gen: conformance
 
-### SCN-MEMRING-6b-1 — no transport flag sets it   (happy)
+### SCN-MEMRING-6b-1 — no transport flag sets it (happy)
+
 source: REQ-MEMRING-6b
 Given the shipped memory ring over a real durable store
 When the door for INV-MEMRING-6 is exercised
@@ -1061,7 +1163,8 @@ teeth: breaks-on "the empty-owner refusal is the mock; removing it mints a recor
 witness: packages/memory/test/mem-kind-derivation.test.ts
 gen: conformance
 
-### SCN-MEMRING-6c-1 — an empty owner is refused fail-closed   (happy)
+### SCN-MEMRING-6c-1 — an empty owner is refused fail-closed (happy)
+
 source: REQ-MEMRING-6c
 Given the shipped memory ring over a real durable store
 When the door for INV-MEMRING-6 is exercised
@@ -1070,7 +1173,8 @@ teeth: breaks-on "the empty-owner refusal is the mock; removing it mints a recor
 witness: packages/memory/test/mem-kind-derivation.test.ts
 gen: conformance
 
-### SCN-MEMRING-6d-1 — a caller sets the owner of a record they write   (guard)
+### SCN-MEMRING-6d-1 — a caller sets the owner of a record they write (guard)
+
 source: REQ-MEMRING-6d
 Given the shipped memory ring over a real durable store
 When the door for INV-MEMRING-6 is exercised
@@ -1079,7 +1183,8 @@ teeth: breaks-on "the empty-owner refusal is the mock; removing it mints a recor
 witness: packages/memory/test/mem-kind-derivation.test.ts
 gen: conformance
 
-### SCN-MEMRING-6e-1 — an unowned record is written and then injected to every empty-actor caller   (guard)
+### SCN-MEMRING-6e-1 — an unowned record is written and then injected to every empty-actor caller (guard)
+
 source: REQ-MEMRING-6e
 Given the shipped memory ring over a real durable store
 When the door for INV-MEMRING-6 is exercised
@@ -1088,7 +1193,8 @@ teeth: breaks-on "the empty-owner refusal is the mock; removing it mints a recor
 witness: packages/memory/test/mem-kind-derivation.test.ts
 gen: conformance
 
-### SCN-MEMRING-7a-1 — binds a NAMED binary actually present on PATH   (happy)
+### SCN-MEMRING-7a-1 — binds a NAMED binary actually present on PATH (happy)
+
 source: REQ-MEMRING-7a
 Given the shipped memory ring over a real durable store
 When the door for INV-MEMRING-7 is exercised
@@ -1097,7 +1203,8 @@ teeth: breaks-on "the argv is the mock; the shipped `detect --source -` exits 1 
 witness: packages/adapter-io/test/scanner-conformance.test.ts
 gen: conformance
 
-### SCN-MEMRING-7b-1 — no scanner available means the write is REFUSED   (happy)
+### SCN-MEMRING-7b-1 — no scanner available means the write is REFUSED (happy)
+
 source: REQ-MEMRING-7b
 Given the shipped memory ring over a real durable store
 When the door for INV-MEMRING-7 is exercised
@@ -1106,7 +1213,8 @@ teeth: breaks-on "the argv is the mock; the shipped `detect --source -` exits 1 
 witness: packages/adapter-io/test/scanner-conformance.test.ts
 gen: conformance
 
-### SCN-MEMRING-7c-1 — never redacted-and-continued   (happy)
+### SCN-MEMRING-7c-1 — never redacted-and-continued (happy)
+
 source: REQ-MEMRING-7c
 Given the shipped memory ring over a real durable store
 When the door for INV-MEMRING-7 is exercised
@@ -1115,7 +1223,8 @@ teeth: breaks-on "the argv is the mock; the shipped `detect --source -` exits 1 
 witness: packages/adapter-io/test/scanner-conformance.test.ts
 gen: conformance
 
-### SCN-MEMRING-7d-1 — a write lands with no scanner having run   (guard)
+### SCN-MEMRING-7d-1 — a write lands with no scanner having run (guard)
+
 source: REQ-MEMRING-7d
 Given the shipped memory ring over a real durable store
 When the door for INV-MEMRING-7 is exercised
@@ -1124,7 +1233,8 @@ teeth: breaks-on "the argv is the mock; the shipped `detect --source -` exits 1 
 witness: packages/adapter-io/test/scanner-conformance.test.ts
 gen: conformance
 
-### SCN-MEMRING-7e-1 — a clean record is refused because the invocation is wrong   (guard)
+### SCN-MEMRING-7e-1 — a clean record is refused because the invocation is wrong (guard)
+
 source: REQ-MEMRING-7e
 Given the shipped memory ring over a real durable store
 When the door for INV-MEMRING-7 is exercised
@@ -1133,7 +1243,8 @@ teeth: breaks-on "the argv is the mock; the shipped `detect --source -` exits 1 
 witness: packages/adapter-io/test/scanner-conformance.test.ts
 gen: conformance
 
-### SCN-MEMRING-7f-1 — a secret-carrying record is admitted because the invocation always exits clean   (guard)
+### SCN-MEMRING-7f-1 — a secret-carrying record is admitted because the invocation always exits clean (guard)
+
 source: REQ-MEMRING-7f
 Given the shipped memory ring over a real durable store
 When the door for INV-MEMRING-7 is exercised
@@ -1142,7 +1253,8 @@ teeth: breaks-on "the argv is the mock; the shipped `detect --source -` exits 1 
 witness: packages/adapter-io/test/scanner-conformance.test.ts
 gen: conformance
 
-### SCN-MEMRING-8a-1 — only the calling actor's own records — zero cross-seat   (happy)
+### SCN-MEMRING-8a-1 — only the calling actor's own records — zero cross-seat (happy)
+
 source: REQ-MEMRING-8a
 Given the shipped memory ring over a real durable store
 When the door for INV-MEMRING-8 is exercised
@@ -1151,7 +1263,8 @@ teeth: breaks-on "the `injectFor` owner filter is the mock; removing it leaks th
 witness: packages/adapter-io/test/memory-read.test.ts
 gen: conformance
 
-### SCN-MEMRING-8b-1 — task, pr and logbook NEVER ride the header   (happy)
+### SCN-MEMRING-8b-1 — task, pr and logbook NEVER ride the header (happy)
+
 source: REQ-MEMRING-8b
 Given the shipped memory ring over a real durable store
 When the door for INV-MEMRING-8 is exercised
@@ -1160,7 +1273,8 @@ teeth: breaks-on "the `injectFor` owner filter is the mock; removing it leaks th
 witness: packages/adapter-io/test/memory-read.test.ts
 gen: conformance
 
-### SCN-MEMRING-8c-1 — they return ONLY via an explicit recall   (happy)
+### SCN-MEMRING-8c-1 — they return ONLY via an explicit recall (happy)
+
 source: REQ-MEMRING-8c
 Given the shipped memory ring over a real durable store
 When the door for INV-MEMRING-8 is exercised
@@ -1169,7 +1283,8 @@ teeth: breaks-on "the `injectFor` owner filter is the mock; removing it leaks th
 witness: packages/adapter-io/test/memory-read.test.ts
 gen: conformance
 
-### SCN-MEMRING-8d-1 — another seat's record appears in a header   (guard)
+### SCN-MEMRING-8d-1 — another seat's record appears in a header (guard)
+
 source: REQ-MEMRING-8d
 Given the shipped memory ring over a real durable store
 When the door for INV-MEMRING-8 is exercised
@@ -1178,7 +1293,8 @@ teeth: breaks-on "the `injectFor` owner filter is the mock; removing it leaks th
 witness: packages/adapter-io/test/memory-read.test.ts
 gen: conformance
 
-### SCN-MEMRING-8e-1 — a consultable kind auto-injects on a running turn   (guard)
+### SCN-MEMRING-8e-1 — a consultable kind auto-injects on a running turn (guard)
+
 source: REQ-MEMRING-8e
 Given the shipped memory ring over a real durable store
 When the door for INV-MEMRING-8 is exercised
@@ -1187,7 +1303,8 @@ teeth: breaks-on "the `injectFor` owner filter is the mock; removing it leaks th
 witness: packages/adapter-io/test/memory-read.test.ts
 gen: conformance
 
-### SCN-MEMRING-8f-1 — an unqualified read returns a general dump   (guard)
+### SCN-MEMRING-8f-1 — an unqualified read returns a general dump (guard)
+
 source: REQ-MEMRING-8f
 Given the shipped memory ring over a real durable store
 When the door for INV-MEMRING-8 is exercised
@@ -1196,7 +1313,8 @@ teeth: breaks-on "the `injectFor` owner filter is the mock; removing it leaks th
 witness: packages/adapter-io/test/memory-read.test.ts
 gen: conformance
 
-### SCN-MEMRING-9a-1 — the injected set is the top-N by effective frecency, descending   (happy)
+### SCN-MEMRING-9a-1 — the injected set is the top-N by effective frecency, descending (happy)
+
 source: REQ-MEMRING-9a
 Given the shipped memory ring over a real durable store
 When the door for INV-MEMRING-9 is exercised
@@ -1205,7 +1323,8 @@ teeth: breaks-on "the decay term is the mock; returning the stored value unchang
 witness: packages/adapter-io/test/memory-read.test.ts
 gen: conformance
 
-### SCN-MEMRING-9b-1 — a decayed entry is evicted even when slots are free   (happy)
+### SCN-MEMRING-9b-1 — a decayed entry is evicted even when slots are free (happy)
+
 source: REQ-MEMRING-9b
 Given the shipped memory ring over a real durable store
 When the door for INV-MEMRING-9 is exercised
@@ -1214,7 +1333,8 @@ teeth: breaks-on "the decay term is the mock; returning the stored value unchang
 witness: packages/adapter-io/test/memory-read.test.ts
 gen: conformance
 
-### SCN-MEMRING-9c-1 — an evicted entry remains re-spawnable — nothing dies   (happy)
+### SCN-MEMRING-9c-1 — an evicted entry remains re-spawnable — nothing dies (happy)
+
 source: REQ-MEMRING-9c
 Given the shipped memory ring over a real durable store
 When the door for INV-MEMRING-9 is exercised
@@ -1223,7 +1343,8 @@ teeth: breaks-on "the decay term is the mock; returning the stored value unchang
 witness: packages/adapter-io/test/memory-read.test.ts
 gen: conformance
 
-### SCN-MEMRING-9d-1 — decay advances with the LOG's own head, never wall-clock   (happy)
+### SCN-MEMRING-9d-1 — decay advances with the LOG's own head, never wall-clock (happy)
+
 source: REQ-MEMRING-9d
 Given the shipped memory ring over a real durable store
 When the door for INV-MEMRING-9 is exercised
@@ -1232,7 +1353,8 @@ teeth: breaks-on "the decay term is the mock; returning the stored value unchang
 witness: packages/adapter-io/test/memory-read.test.ts
 gen: conformance
 
-### SCN-MEMRING-9e-1 — a system-clock jump changes the injected set with no new log entries   (guard)
+### SCN-MEMRING-9e-1 — a system-clock jump changes the injected set with no new log entries (guard)
+
 source: REQ-MEMRING-9e
 Given the shipped memory ring over a real durable store
 When the door for INV-MEMRING-9 is exercised
@@ -1241,7 +1363,8 @@ teeth: breaks-on "the decay term is the mock; returning the stored value unchang
 witness: packages/adapter-io/test/memory-read.test.ts
 gen: conformance
 
-### SCN-MEMRING-9f-1 — an evicted rule is unrecoverable   (guard)
+### SCN-MEMRING-9f-1 — an evicted rule is unrecoverable (guard)
+
 source: REQ-MEMRING-9f
 Given the shipped memory ring over a real durable store
 When the door for INV-MEMRING-9 is exercised
@@ -1250,7 +1373,8 @@ teeth: breaks-on "the decay term is the mock; returning the stored value unchang
 witness: packages/adapter-io/test/memory-read.test.ts
 gen: conformance
 
-### SCN-MEMRING-9g-1 — a low-frecency entry is injected because slots happened to be free   (guard)
+### SCN-MEMRING-9g-1 — a low-frecency entry is injected because slots happened to be free (guard)
+
 source: REQ-MEMRING-9g
 Given the shipped memory ring over a real durable store
 When the door for INV-MEMRING-9 is exercised
@@ -1259,7 +1383,8 @@ teeth: breaks-on "the decay term is the mock; returning the stored value unchang
 witness: packages/adapter-io/test/memory-read.test.ts
 gen: conformance
 
-### SCN-MEMRING-10a-1 — assembled from real sources   (happy)
+### SCN-MEMRING-10a-1 — assembled from real sources (happy)
+
 source: REQ-MEMRING-10a
 Given the shipped memory ring over a real durable store
 When the door for INV-MEMRING-10 is exercised
@@ -1268,7 +1393,8 @@ teeth: breaks-on "the sentinel is the mock; substituting a generic card makes an
 witness: packages/adapter-io/test/awareness-store.test.ts
 gen: conformance
 
-### SCN-MEMRING-10b-1 — an absent source renders the labeled UN-SEEDED sentinel   (happy)
+### SCN-MEMRING-10b-1 — an absent source renders the labeled UN-SEEDED sentinel (happy)
+
 source: REQ-MEMRING-10b
 Given the shipped memory ring over a real durable store
 When the door for INV-MEMRING-10 is exercised
@@ -1277,7 +1403,8 @@ teeth: breaks-on "the sentinel is the mock; substituting a generic card makes an
 witness: packages/adapter-io/test/awareness-store.test.ts
 gen: conformance
 
-### SCN-MEMRING-10c-1 — never filled with invented text   (happy)
+### SCN-MEMRING-10c-1 — never filled with invented text (happy)
+
 source: REQ-MEMRING-10c
 Given the shipped memory ring over a real durable store
 When the door for INV-MEMRING-10 is exercised
@@ -1286,7 +1413,8 @@ teeth: breaks-on "the sentinel is the mock; substituting a generic card makes an
 witness: packages/adapter-io/test/awareness-store.test.ts
 gen: conformance
 
-### SCN-MEMRING-10d-1 — an absent facet is rendered as plausible prose   (guard)
+### SCN-MEMRING-10d-1 — an absent facet is rendered as plausible prose (guard)
+
 source: REQ-MEMRING-10d
 Given the shipped memory ring over a real durable store
 When the door for INV-MEMRING-10 is exercised
@@ -1295,7 +1423,8 @@ teeth: breaks-on "the sentinel is the mock; substituting a generic card makes an
 witness: packages/adapter-io/test/awareness-store.test.ts
 gen: conformance
 
-### SCN-MEMRING-10e-1 — a slab is served without its grounding   (guard)
+### SCN-MEMRING-10e-1 — a slab is served without its grounding (guard)
+
 source: REQ-MEMRING-10e
 Given the shipped memory ring over a real durable store
 When the door for INV-MEMRING-10 is exercised
@@ -1304,7 +1433,8 @@ teeth: breaks-on "the sentinel is the mock; substituting a generic card makes an
 witness: packages/adapter-io/test/awareness-store.test.ts
 gen: conformance
 
-### SCN-MEMRING-11a-1 — an identical call yields a byte-identical Verdict on both transports   (happy)
+### SCN-MEMRING-11a-1 — an identical call yields a byte-identical Verdict on both transports (happy)
+
 source: REQ-MEMRING-11a
 Given the shipped memory ring over a real durable store
 When the door for INV-MEMRING-11 is exercised
@@ -1313,7 +1443,8 @@ teeth: breaks-on "the shared handler is the mock; a second, separately-composed 
 witness: packages/mcp-server/test/memory-emit-mcp.test.ts
 gen: conformance
 
-### SCN-MEMRING-11b-1 — a refusal carries the same named reason on both   (happy)
+### SCN-MEMRING-11b-1 — a refusal carries the same named reason on both (happy)
+
 source: REQ-MEMRING-11b
 Given the shipped memory ring over a real durable store
 When the door for INV-MEMRING-11 is exercised
@@ -1322,7 +1453,8 @@ teeth: breaks-on "the shared handler is the mock; a second, separately-composed 
 witness: packages/mcp-server/test/memory-emit-mcp.test.ts
 gen: conformance
 
-### SCN-MEMRING-11c-1 — the two transports disagree on an admission   (guard)
+### SCN-MEMRING-11c-1 — the two transports disagree on an admission (guard)
+
 source: REQ-MEMRING-11c
 Given the shipped memory ring over a real durable store
 When the door for INV-MEMRING-11 is exercised
@@ -1331,7 +1463,8 @@ teeth: breaks-on "the shared handler is the mock; a second, separately-composed 
 witness: packages/mcp-server/test/memory-emit-mcp.test.ts
 gen: conformance
 
-### SCN-MEMRING-11d-1 — a refusal reads differently over MCP than on the CLI   (guard)
+### SCN-MEMRING-11d-1 — a refusal reads differently over MCP than on the CLI (guard)
+
 source: REQ-MEMRING-11d
 Given the shipped memory ring over a real durable store
 When the door for INV-MEMRING-11 is exercised
@@ -1340,7 +1473,8 @@ teeth: breaks-on "the shared handler is the mock; a second, separately-composed 
 witness: packages/mcp-server/test/memory-emit-mcp.test.ts
 gen: conformance
 
-### SCN-MEMRING-12a-1 — every shipped memory command has a reference page   (happy)
+### SCN-MEMRING-12a-1 — every shipped memory command has a reference page (happy)
+
 source: REQ-MEMRING-12a
 Given the shipped memory ring over a real durable store
 When the door for INV-MEMRING-12 is exercised
@@ -1349,7 +1483,8 @@ teeth: breaks-on "the guard's README leg is the mock; removing it lets the table
 witness: harness/gates/command-doc-guard.mjs
 gen: exhaustive
 
-### SCN-MEMRING-12b-1 — every shipped memory command has a README table row   (happy)
+### SCN-MEMRING-12b-1 — every shipped memory command has a README table row (happy)
+
 source: REQ-MEMRING-12b
 Given the shipped memory ring over a real durable store
 When the door for INV-MEMRING-12 is exercised
@@ -1358,7 +1493,8 @@ teeth: breaks-on "the guard's README leg is the mock; removing it lets the table
 witness: harness/gates/command-doc-guard.mjs
 gen: exhaustive
 
-### SCN-MEMRING-12c-1 — neither names a command that does not ship   (happy)
+### SCN-MEMRING-12c-1 — neither names a command that does not ship (happy)
+
 source: REQ-MEMRING-12c
 Given the shipped memory ring over a real durable store
 When the door for INV-MEMRING-12 is exercised
@@ -1367,7 +1503,8 @@ teeth: breaks-on "the guard's README leg is the mock; removing it lets the table
 witness: harness/gates/command-doc-guard.mjs
 gen: exhaustive
 
-### SCN-MEMRING-12d-1 — a shipped command is absent from the README table   (guard)
+### SCN-MEMRING-12d-1 — a shipped command is absent from the README table (guard)
+
 source: REQ-MEMRING-12d
 Given the shipped memory ring over a real durable store
 When the door for INV-MEMRING-12 is exercised
@@ -1376,7 +1513,8 @@ teeth: breaks-on "the guard's README leg is the mock; removing it lets the table
 witness: harness/gates/command-doc-guard.mjs
 gen: exhaustive
 
-### SCN-MEMRING-12e-1 — the README table advertises a command that does not run   (guard)
+### SCN-MEMRING-12e-1 — the README table advertises a command that does not run (guard)
+
 source: REQ-MEMRING-12e
 Given the shipped memory ring over a real durable store
 When the door for INV-MEMRING-12 is exercised

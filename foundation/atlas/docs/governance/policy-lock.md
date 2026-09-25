@@ -2,7 +2,7 @@
 
 `.atlas/policy.json` externalizes Atlas's governance tunables (near-dup τ, the T0-candidate keyword set,
 and the KNOW-11 owner-scoped write map) as **data the engine reads**. Because these rules decide who may
-write what — and how facts merge — the file is **admin-owned by intent** and its edits are *meant* to be
+write what — and how facts merge — the file is **admin-owned by intent** and its edits are _meant_ to be
 locked. This mirrors Atlas's own T0 rule: a governance change is a **human-ratified** act, not an automatic
 one. **Both mechanisms are now built, and the lock still cannot bind the one actor it was written for** —
 for a reason that is about identity, not settings. See "What the lock actually binds" below.
@@ -15,7 +15,7 @@ for a reason that is about identity, not settings. See "What the lock actually b
    (step 3 below, landed 2026-08-02; the fifth path added 2026-08-03 with the directory it names).
    **The team now exists** — measured 2026-08-02:
    `gh api orgs/HuGR-Labs/teams` returns one team, `atlas-admins`, `privacy: closed` (visible, which is
-   required — GitHub will not resolve a *secret* team in CODEOWNERS), holding `role: write` on the repo,
+   required — GitHub will not resolve a _secret_ team in CODEOWNERS), holding `role: write` on the repo,
    with `gmhelmold` as its member. Consequently
    `gh api repos/HuGR-Labs/atlas/codeowners/errors --jq '.errors'` returns **`[]`** — every one of the
    rules resolving was measured on the four rules that existed then. This paragraph previously said the
@@ -26,15 +26,15 @@ for a reason that is about identity, not settings. See "What the lock actually b
 2. **Enforcement — branch protection. PARTIALLY IN FORCE, and the gap is deliberate.** A rule now exists on
    `master`. Measured 2026-08-02:
 
-   | field | value | verdict |
-   |---|---|---|
-   | pull request required | `true` | ✅ no direct pushes |
-   | `enforce_admins` | `true` | ✅ applies to admins — the load-bearing field |
-   | `allow_force_pushes` | `false` | ✅ |
-   | `allow_deletions` | `false` | ✅ |
-   | `dismiss_stale_reviews` | `true` | ✅ |
-   | `required_approving_review_count` | **`0`** | ⚠️ deliberate — see below |
-   | `require_code_owner_reviews` | **`false`** | ⚠️ deliberate — see below |
+   | field                             | value       | verdict                                       |
+   | --------------------------------- | ----------- | --------------------------------------------- |
+   | pull request required             | `true`      | ✅ no direct pushes                           |
+   | `enforce_admins`                  | `true`      | ✅ applies to admins — the load-bearing field |
+   | `allow_force_pushes`              | `false`     | ✅                                            |
+   | `allow_deletions`                 | `false`     | ✅                                            |
+   | `dismiss_stale_reviews`           | `true`      | ✅                                            |
+   | `required_approving_review_count` | **`0`**     | ⚠️ deliberate — see below                     |
+   | `require_code_owner_reviews`      | **`false`** | ⚠️ deliberate — see below                     |
 
    The two `⚠️` rows are not oversights and turning them on would not add safety today. **The agent and the
    owner are the same GitHub identity** (`gh api user` ⇒ `gmhelmold`, the sole member of `atlas-admins`).
@@ -49,7 +49,7 @@ for a reason that is about identity, not settings. See "What the lock actually b
   how the review fields are set. Their only route is a fork PR, which a human merges. That is the owner's
   stated requirement and it is met.
 - **Against the agent/owner identity: nothing binds, and no setting can change that** while one identity is
-  both the sole admin and the sole ratifier. The protection rule stops the *accident* (a stray force-push, a
+  both the sole admin and the sole ratifier. The protection rule stops the _accident_ (a stray force-push, a
   branch deletion, a direct commit to `master`) and it does apply to admins. It does not stop a deliberate
   act by the one account, because ratification requires a **second** identity to exist.
 - **So the remaining step is not a settings change — it is adding a second human to `atlas-admins`.** Once a
@@ -66,15 +66,15 @@ for a reason that is about identity, not settings. See "What the lock actually b
 - **Only admins ratify — INTENDED, still not enforced, and this bullet is itself a worked example.** The
   design is that a merge requires a `@HuGR-Labs/atlas-admins` review, the same shape as Atlas T0
   human-ratification. The ownership half is now real (the team resolves, `codeowners/errors` is `[]`) and
-  direct pushes to `master` are blocked for admins too. The review itself is *not* required, because the team
+  direct pushes to `master` are blocked for admins too. The review itself is _not_ required, because the team
   has exactly one member and that member authors the PRs — see "What the lock actually binds". The
   fail-closed loader plus write-access scarcity are the controls carrying the weight today.
 
-  *The worked example:* this bullet previously read "INTENDED, and enforceable only once a second human
+  _The worked example:_ this bullet previously read "INTENDED, and enforceable only once a second human
   exists", and `spec-conformance-guard` **failed the commit** — `DOC-DRIFT: policy-lock.md:61, stale
-  governance-count claim`. The rewrite had dropped the words "not enforced", which is what the ALLOW list
-  keys on, and the ALLOW list is deliberately built from *words that negate or hypothesise, never words that
-  assert*. That is not a false positive dodged by re-adding a magic phrase: "enforceable once X" reads as a
+governance-count claim`. The rewrite had dropped the words "not enforced", which is what the ALLOW list
+  keys on, and the ALLOW list is deliberately built from _words that negate or hypothesise, never words that
+  assert_. That is not a false positive dodged by re-adding a magic phrase: "enforceable once X" reads as a
   property the system has, and the system does not have it. The gate caught the author of this document
   drifting toward asserting a lock that is not in force — in the document about that lock. Recorded rather
   than quietly reworded, because it is the only evidence in here that any of this is mechanically checked.
@@ -90,10 +90,10 @@ every PR cannot ratify anything. That is the honest remaining blocker; everythin
    `gh api -X PATCH repos/HuGR-Labs/atlas -f visibility=public`). The org is on plan `free` and the repo
    was `private`, which is precisely why protection 403'd. Public makes branch protection **and** rulesets
    available at no cost, so this resolved without money. (The alternative was paying for a plan; nothing
-   else about the sequence changes.) *Precondition, met before publishing: the history had to be fit to
-   publish — a full secret scan over the tree and all 307 history commits came back clean.*
+   else about the sequence changes.) _Precondition, met before publishing: the history had to be fit to
+   publish — a full secret scan over the tree and all 307 history commits came back clean._
 2. **Create the `atlas-admins` team** in `HuGR-Labs` — **DONE 2026-08-02, owner-executed.** Measured:
-   `privacy: closed` (visible, as required — GitHub will not resolve a *secret* team in CODEOWNERS),
+   `privacy: closed` (visible, as required — GitHub will not resolve a _secret_ team in CODEOWNERS),
    `role: write` on `HuGR-Labs/atlas`, members `["gmhelmold"]`. `codeowners/errors` went from three
    `Unknown owner` entries to `[]`. **Note what this moves, rather than removes: the root of trust becomes
    "who may change team membership", i.e. the org owners.** The file never was the root.
@@ -120,7 +120,7 @@ every PR cannot ratify anything. That is the honest remaining blocker; everythin
    gate DOES: an author who rewrites `harness/gates/layer-guard.mjs` to `process.exit(0)` touches no owned
    path, and CI runs the neutered check and reports green. The workflow and the script it runs are one
    control and are owned together. The lesson generalizes: after adding an owned path, ask what the
-   *content* of that path delegates to, and own that too.
+   _content_ of that path delegates to, and own that too.
 
    The fifth line is that lesson applied one level further down, and it was added by the change that
    created the directory it names (`work-packages/wp-gates-that-cannot-fail.md`). `harness/lib/` holds
@@ -133,14 +133,14 @@ every PR cannot ratify anything. That is the honest remaining blocker; everythin
    refactor that relocates owned content is an ownership change even when it is a behaviour no-op.
 
 4. **Protect `master`** — **DONE 2026-08-02 except the two review fields, and the exception is deliberate.**
-   - *Require a pull request before merging* — ✅ **on**, no direct pushes.
-   - *Block force pushes* and *block deletions* — ✅ both **on**.
-   - *Dismiss stale approvals on new commits* — ✅ **on**, so an approved PR cannot be force-updated with
+   - _Require a pull request before merging_ — ✅ **on**, no direct pushes.
+   - _Block force pushes_ and _block deletions_ — ✅ both **on**.
+   - _Dismiss stale approvals on new commits_ — ✅ **on**, so an approved PR cannot be force-updated with
      different content after review.
    - **Do not allow bypassing — apply to administrators too** — ✅ `enforce_admins: true`. This is the
      load-bearing field; without it the whole sequence is decorative, because any repo admin pushes straight
      to `master`.
-   - *Require review from Code Owners* — ❌ **off**, and *Require approvals ≥ 1* — ❌ **`0`**.
+   - _Require review from Code Owners_ — ❌ **off**, and _Require approvals ≥ 1_ — ❌ **`0`**.
      **Not an oversight.** GitHub forbids self-approval, and the only member of `atlas-admins` is the account
      that authors every PR, so `1` **deadlocks the whole fleet** — measured, not predicted: it was set to `1`,
      every open PR became unmergeable, and it was lowered. These two flip to `true`/`1` the day a second human
@@ -150,7 +150,7 @@ every PR cannot ratify anything. That is the honest remaining blocker; everythin
      the team was created and the widened file reached the default branch — the endpoint reads the DEFAULT
      BRANCH, which is why it reported `Unknown owner` until both were true).
    - `gh api repos/HuGR-Labs/atlas/branches/master/protection` ⇒ **200**, with `enforce_admins.enabled ==
-     true`. The `403 — Upgrade to GitHub Pro…` → `404 — Branch not protected` → `200` progression is the
+true`. The `403 — Upgrade to GitHub Pro…` → `404 — Branch not protected` → `200` progression is the
      audit trail of steps 1 and 4.
    - `gh api orgs/HuGR-Labs/teams/atlas-admins/members --jq 'length'` ⇒ **1**. **This is the number that
      still says the lock does not ratify.** When it reads ≥ 2, re-run step 4's two review fields.
@@ -215,7 +215,7 @@ Two mechanisms, and they are not alternatives:
 
 **Note that content-verification would NOT have closed this**, which is worth recording because it is the
 intuitive fix. The store already re-hashes every CAS object on read, and the emit door already requires a
-row to corroborate its own bytes. Both pass for a committed store, *by construction*: the attacker who writes
+row to corroborate its own bytes. Both pass for a committed store, _by construction_: the attacker who writes
 the file computes the hashes with the product's own `id()`. Content-addressing authenticates **integrity**,
 never **provenance**. Only a keyed construction (a MAC/signature under a key the committer lacks) would, and
 this product has no key material and nowhere to put it that a committer could not also read.
@@ -226,12 +226,12 @@ this product has no key material and nowhere to put it that a committer could no
 it now reads `{ strict: false, contexts: ["gate"], checks: [{ context: "gate", app_id: 15368 }] }`.
 
 **What it was.** Nothing stopped a pull request with a **red** `ci` run from being merged. Every mechanical
-control this repo has — all seven gates, `tsc -b`, the whole 2100-test suite — runs *inside* that workflow, so
+control this repo has — all seven gates, `tsc -b`, the whole 2100-test suite — runs _inside_ that workflow, so
 a null `required_status_checks` meant none of them was a merge condition. They were advisory output a human
 was trusted to read. **A gate is only as binding as the thing that requires it.**
 
 Same shape as the CODEOWNERS gap that made this document necessary, one level further out: an enforcement
-body whose *schedule* is owned (`/.github/workflows/`) and whose *content* is owned (`/harness/gates/` +
+body whose _schedule_ is owned (`/.github/workflows/`) and whose _content_ is owned (`/harness/gates/` +
 `/harness/lib/`), but
 whose **verdict** was not consulted at the merge point. Owning all three is what closes it.
 

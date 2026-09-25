@@ -4,9 +4,9 @@
 // Knowledge partition (or vice versa) — 0 conflations (MEM-2). `partition(entry)` computes an entry's TRUE
 // `AtlasKind` (a STRUCTURAL discriminant, no hashing) and `put` rejects any write whose claimed kind disagrees.
 
-import type { InjectionKind } from '@atlas/contracts';
-import type { MemberId, MemoryEntry, MemoryRecord } from './types.js';
-import { memoryKindOf } from './template.js';
+import type { InjectionKind } from "@atlas/contracts"
+import type { MemberId, MemoryEntry, MemoryRecord } from "./types.js"
+import { memoryKindOf } from "./template.js"
 
 // ── frozen kind-partition surface, co-located here (was ref/kinds.ts) ──────────────────────────────────────
 
@@ -15,7 +15,7 @@ import { memoryKindOf } from './template.js';
  * axis from `MemoryKind` (task|pr|project|logbook): `AtlasKind` decides WHICH kind of the Atlas a write
  * belongs to; `MemoryKind` sub-types a Memory entry.
  */
-export type AtlasKind = 'memory' | 'knowledge';
+export type AtlasKind = "memory" | "knowledge"
 
 /**
  * The CLOSED vocabulary of INJECTED memory surfaces — the memory-owned subset of the contracts-owned
@@ -26,7 +26,7 @@ export type AtlasKind = 'memory' | 'knowledge';
  * `logbook` are deliberately ABSENT from `InjectionKind` (MEM-4/8: never auto-injected). They are memory
  * kinds with NO injection surface — flagged so no future edit adds them to the injected drop-order.
  */
-export type MemInjectionKind = Extract<InjectionKind, 'awareness' | 'orientation' | 'projectMem'>;
+export type MemInjectionKind = Extract<InjectionKind, "awareness" | "orientation" | "projectMem">
 
 /** The FROZEN kind-partition API (MEM-2) — implemented by the free functions below. */
 export interface KindsApi {
@@ -44,11 +44,11 @@ export interface KindsApi {
    *  `reference/atlas-memory.md` §Decisions D1: the owner is the composition root's already-resolved
    *  `actor`. This package does not resolve it and does not interpret it — it RECEIVES it, which is why
    *  the parameter is here and not an import. */
-  put(kind: AtlasKind, entry: MemoryEntry, owner: MemberId): MemoryRecord;
+  put(kind: AtlasKind, entry: MemoryEntry, owner: MemberId): MemoryRecord
 
   /** The partition an entry belongs to; the reference asserts `partition(entry) == entry.kind` for every
    *  write (0 conflation — MEM-2). (method-tags-mem:32) */
-  partition(entry: MemoryEntry): AtlasKind;
+  partition(entry: MemoryEntry): AtlasKind
 }
 
 /**
@@ -56,16 +56,16 @@ export interface KindsApi {
  * rejects it fail-closed (never stored on the wrong side of the Memory/Knowledge boundary).
  */
 export class KindConflationError extends Error {
-  readonly claimed: AtlasKind;
-  readonly actual: AtlasKind;
+  readonly claimed: AtlasKind
+  readonly actual: AtlasKind
   constructor(claimed: AtlasKind, actual: AtlasKind) {
     super(
       `MEM-2 kind conflation: write claimed AtlasKind '${claimed}' but the entry's true partition is ` +
         `'${actual}' — rejected (0 Memory↔Knowledge conflation)`,
-    );
-    this.name = 'KindConflationError';
-    this.claimed = claimed;
-    this.actual = actual;
+    )
+    this.name = "KindConflationError"
+    this.claimed = claimed
+    this.actual = actual
   }
 }
 
@@ -76,9 +76,9 @@ export class KindConflationError extends Error {
  * `MemoryRecord` envelope, not the entry). That asymmetry is the partition oracle — structural, not hashed.
  */
 export function partition(entry: MemoryEntry): AtlasKind {
-  const disc = (entry as { readonly kind?: unknown }).kind;
-  if (disc === 'advisory' || disc === 'predicate') return 'knowledge';
-  return 'memory';
+  const disc = (entry as { readonly kind?: unknown }).kind
+  if (disc === "advisory" || disc === "predicate") return "knowledge"
+  return "memory"
 }
 
 /**
@@ -100,24 +100,24 @@ export function partition(entry: MemoryEntry): AtlasKind {
 export class UnownedWriteError extends Error {
   constructor() {
     super(
-      'MEM-1 put: the write carries no owner (empty `MemberId`) — rejected. Memory is scoped BY owner, so ' +
-        'an unowned record would be injected to every caller resolving the same empty actor.',
-    );
-    this.name = 'UnownedWriteError';
+      "MEM-1 put: the write carries no owner (empty `MemberId`) — rejected. Memory is scoped BY owner, so " +
+        "an unowned record would be injected to every caller resolving the same empty actor.",
+    )
+    this.name = "UnownedWriteError"
   }
 }
 
 export function put(kind: AtlasKind, entry: MemoryEntry, owner: MemberId): MemoryRecord {
-  const actual = partition(entry);
-  if (actual !== kind) throw new KindConflationError(kind, actual);
+  const actual = partition(entry)
+  if (actual !== kind) throw new KindConflationError(kind, actual)
   // BOTH discriminants are DERIVED here and neither is announced by the payload: `partition` decides the
   // Memory-vs-Knowledge axis, `memoryKindOf` decides which of the four templates judges the write. It
   // throws `UndeterminedKindError` on no match or a tie — never a guessed type.
-  const memoryKind = memoryKindOf(entry);
-  if (owner === '') throw new UnownedWriteError();
-  return { owner, kind: memoryKind, entry };
+  const memoryKind = memoryKindOf(entry)
+  if (owner === "") throw new UnownedWriteError()
+  return { owner, kind: memoryKind, entry }
 }
 
 // differential-vs-oracle (compile-time): the free functions conform EXACTLY to the FROZEN `KindsApi`.
-const _kinds: KindsApi = { put, partition };
-void _kinds;
+const _kinds: KindsApi = { put, partition }
+void _kinds

@@ -109,41 +109,41 @@
 //
 // Run: `node harness/gates/adr-citation-guard.mjs` (reads markdown + TypeScript — no build, no git).
 
-import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
-import { join, dirname, relative } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { existsSync, readFileSync, readdirSync, statSync } from "node:fs"
+import { join, dirname, relative } from "node:path"
+import { fileURLToPath } from "node:url"
 
 // Repo root, OVERRIDABLE so the gate's own twin can point it at fixture trees. Without this the anti-vacuity
 // branches above could only ever be exercised by hand — which is the same "trust me" the gate exists to end.
-const ROOT = process.env.ADR_CITATION_GUARD_ROOT ?? join(dirname(fileURLToPath(import.meta.url)), '..', '..');
-const DOCS = join(ROOT, 'docs');
-const ADR_DIR = join(DOCS, 'adr');
-const PKGS = join(ROOT, 'packages');
+const ROOT = process.env.ADR_CITATION_GUARD_ROOT ?? join(dirname(fileURLToPath(import.meta.url)), "..", "..")
+const DOCS = join(ROOT, "docs")
+const ADR_DIR = join(DOCS, "adr")
+const PKGS = join(ROOT, "packages")
 
 /** The citation token, as prose writes it. Four digits, and `\b` on both sides so `ADR-00131` is not a hit. */
-const CITATION = /\bADR-(\d{4})\b/g;
+const CITATION = /\bADR-(\d{4})\b/g
 /** The filename convention `docs/adr/` is written in: the id, a hyphen, a slug, `.md`. */
-const ADR_FILE = /^ADR-(\d{4})-.+\.md$/;
+const ADR_FILE = /^ADR-(\d{4})-.+\.md$/
 
 /** THE fixture exclusion (A4), as a whole-SEGMENT path shape — see the header for why it is not a substring
  *  rule. Anchored at `packages/`; `<pkg>` is exactly one segment; `test` and `fixtures` are exact segments
  *  in that order. `packages/cli/test/mine-fixtures.ts` does NOT match (a filename is not a segment), and
  *  nothing under any `src/` can match at any depth. */
-const FIXTURE_PATH = /^packages\/[^/]+\/test\/fixtures\//;
+const FIXTURE_PATH = /^packages\/[^/]+\/test\/fixtures\//
 
 /** Directory NAMES never descended inside `packages/**` — generated output and vendored code. */
-const SKIP_DIRS = new Set(['dist', 'node_modules']);
+const SKIP_DIRS = new Set(["dist", "node_modules"])
 
-const rel = (p) => relative(ROOT, p).split('\\').join('/');
+const rel = (p) => relative(ROOT, p).split("\\").join("/")
 
 function refuse(code, message) {
-  console.error('adr-citation-guard: FAIL\n');
-  console.error(`  ✗ ${code} — ${message}\n`);
+  console.error("adr-citation-guard: FAIL\n")
+  console.error(`  ✗ ${code} — ${message}\n`)
   console.error(
-    'The gate refuses to report on a corpus it could not read. An empty sweep prints the same word as a ' +
-      'clean one, so it is not allowed to print it. Fix the corpus or the path, never this branch.',
-  );
-  process.exit(1);
+    "The gate refuses to report on a corpus it could not read. An empty sweep prints the same word as a " +
+      "clean one, so it is not allowed to print it. Fix the corpus or the path, never this branch.",
+  )
+  process.exit(1)
 }
 
 /**
@@ -153,31 +153,31 @@ function refuse(code, message) {
  */
 function walk(dir, keep, skip, out = []) {
   for (const e of readdirSync(dir, { withFileTypes: true }).sort((a, b) => a.name.localeCompare(b.name))) {
-    const p = join(dir, e.name);
+    const p = join(dir, e.name)
     if (e.isDirectory()) {
-      if (!skip.has(e.name)) walk(p, keep, skip, out);
-    } else if (keep(e.name)) out.push(p);
+      if (!skip.has(e.name)) walk(p, keep, skip, out)
+    } else if (keep(e.name)) out.push(p)
   }
-  return out;
+  return out
 }
 
-const IS_MD = (n) => n.endsWith('.md');
+const IS_MD = (n) => n.endsWith(".md")
 /** `.d.ts` is GENERATED and carries no authored prose — excluded, which is also why a descended `dist/`
  *  would contribute nothing even before `SKIP_DIRS` refuses to enter it. */
-const IS_TS = (n) => n.endsWith('.ts') && !n.endsWith('.d.ts');
+const IS_TS = (n) => n.endsWith(".ts") && !n.endsWith(".d.ts")
 
-const NO_SKIP = new Set();
+const NO_SKIP = new Set()
 
 // ── A-0 / A-2 — the two directories this gate stands on ──────────────────────────────────────────────
 if (!existsSync(DOCS) || !statSync(DOCS).isDirectory()) {
-  refuse('A-0 CORPUS MISSING', `${rel(DOCS)} does not exist (or is not a directory). There is nothing to scan.`);
+  refuse("A-0 CORPUS MISSING", `${rel(DOCS)} does not exist (or is not a directory). There is nothing to scan.`)
 }
 if (!existsSync(ADR_DIR) || !statSync(ADR_DIR).isDirectory()) {
   refuse(
-    'A-2 ADR DIRECTORY MISSING',
+    "A-2 ADR DIRECTORY MISSING",
     `${rel(ADR_DIR)} does not exist (or is not a directory). With no index, EVERY citation in the corpus is ` +
       'dangling — reporting "all resolve" here would be the defect this gate exists to catch, inverted.',
-  );
+  )
 }
 
 // ── A-1 — the walk ───────────────────────────────────────────────────────────────────────────────────
@@ -185,29 +185,29 @@ if (!existsSync(ADR_DIR) || !statSync(ADR_DIR).isDirectory()) {
 // `docs/`, so an empty walk implies an empty index — check the index first and A-1 becomes a branch nothing
 // can reach, i.e. a guard that is present and unreachable, the same lie one level in. Checked in this order
 // both refusals are reachable, and the gate's own twin exercises each with its own fixture.
-const docsCorpus = walk(DOCS, IS_MD, NO_SKIP);
+const docsCorpus = walk(DOCS, IS_MD, NO_SKIP)
 if (docsCorpus.length === 0) {
   refuse(
-    'A-1 EMPTY WALK',
+    "A-1 EMPTY WALK",
     `the \`${rel(DOCS)}/**/*.md\` walk resolved to ZERO files. Nothing scanned is not a clean scan — this is ` +
-      'the reading of the tree breaking, not a corpus with no prose in it.',
-  );
+      "the reading of the tree breaking, not a corpus with no prose in it.",
+  )
 }
 
 // ── A-3 — the index ──────────────────────────────────────────────────────────────────────────────────
 /** id → filename, for every `docs/adr/ADR-<NNNN>-*.md`. Flat: a nested file is not an ADR. */
-const index = new Map();
+const index = new Map()
 for (const e of readdirSync(ADR_DIR, { withFileTypes: true }).sort((a, b) => a.name.localeCompare(b.name))) {
-  if (!e.isFile()) continue;
-  const m = ADR_FILE.exec(e.name);
-  if (m !== null && !index.has(m[1])) index.set(m[1], e.name);
+  if (!e.isFile()) continue
+  const m = ADR_FILE.exec(e.name)
+  if (m !== null && !index.has(m[1])) index.set(m[1], e.name)
 }
 if (index.size === 0) {
   refuse(
-    'A-3 EMPTY ADR INDEX',
+    "A-3 EMPTY ADR INDEX",
     `${rel(ADR_DIR)} contains no file matching \`ADR-<NNNN>-<slug>.md\`. An empty index satisfies every ` +
-      'citation vacuously. A corpus that cites ADRs while owning none is not a state this repo reaches by accident.',
-  );
+      "citation vacuously. A corpus that cites ADRs while owning none is not a state this repo reaches by accident.",
+  )
 }
 
 // ── A-4 / A-5 — the SECOND corpus (#192) ─────────────────────────────────────────────────────────────
@@ -215,42 +215,42 @@ if (index.size === 0) {
 // them; a docs-shaped defect is still reported as a docs-shaped defect.
 if (!existsSync(PKGS) || !statSync(PKGS).isDirectory()) {
   refuse(
-    'A-4 CODE CORPUS MISSING',
+    "A-4 CODE CORPUS MISSING",
     `${rel(PKGS)} does not exist (or is not a directory). This gate's success line names \`packages/**\`, and ` +
-      'it is not allowed to name a directory it never opened.',
-  );
+      "it is not allowed to name a directory it never opened.",
+  )
 }
 
 /** The `packages/**` walk, BEFORE the fixture exclusion — kept so the exclusion can be reported honestly
  *  as a difference between two numbers rather than as an assertion about itself. */
-const pkgsWalked = walk(PKGS, IS_TS, SKIP_DIRS);
-const excluded = pkgsWalked.filter((p) => FIXTURE_PATH.test(rel(p)));
-const pkgsCorpus = pkgsWalked.filter((p) => !FIXTURE_PATH.test(rel(p)));
+const pkgsWalked = walk(PKGS, IS_TS, SKIP_DIRS)
+const excluded = pkgsWalked.filter((p) => FIXTURE_PATH.test(rel(p)))
+const pkgsCorpus = pkgsWalked.filter((p) => !FIXTURE_PATH.test(rel(p)))
 
 // A-5 is deliberately checked on the POST-exclusion list: if the exclusion ever grows until it swallows the
 // corpus, that is the vacuous pass this gate exists to refuse, and it must fail rather than print OK.
 if (pkgsCorpus.length === 0) {
   refuse(
-    'A-5 EMPTY CODE WALK',
+    "A-5 EMPTY CODE WALK",
     `the \`${rel(PKGS)}/**/*.ts\` walk resolved to ZERO files to scan (${pkgsWalked.length} found, ` +
       `${excluded.length} excluded as fixtures). A widened banner over a walk that found nothing reads exactly ` +
-      'like a widened sweep — which is the whole defect class this gate was extended to close.',
-  );
+      "like a widened sweep — which is the whole defect class this gate was extended to close.",
+  )
 }
 
 // ── the sweep ────────────────────────────────────────────────────────────────────────────────────────
-const corpus = [...docsCorpus, ...pkgsCorpus];
-const dangling = []; // every OCCURRENCE, not every id — one missing ADR usually strands many lines
-const citedIds = new Set();
-let nCitations = 0;
+const corpus = [...docsCorpus, ...pkgsCorpus]
+const dangling = [] // every OCCURRENCE, not every id — one missing ADR usually strands many lines
+const citedIds = new Set()
+let nCitations = 0
 
 for (const abs of corpus) {
-  const lines = readFileSync(abs, 'utf8').split('\n');
+  const lines = readFileSync(abs, "utf8").split("\n")
   for (let i = 0; i < lines.length; i++) {
     for (const m of lines[i].matchAll(CITATION)) {
-      nCitations++;
-      citedIds.add(m[1]);
-      if (!index.has(m[1])) dangling.push({ where: `${rel(abs)}:${i + 1}`, id: `ADR-${m[1]}` });
+      nCitations++
+      citedIds.add(m[1])
+      if (!index.has(m[1])) dangling.push({ where: `${rel(abs)}:${i + 1}`, id: `ADR-${m[1]}` })
     }
   }
 }
@@ -260,22 +260,25 @@ for (const abs of corpus) {
  *  and an exclusion that only shows itself when everything is fine is a hiding place with good manners. */
 const exclusionLine =
   `  fixture exclusion \`packages/<pkg>/test/fixtures/**\`: ${excluded.length} file(s) excluded` +
-  `${excluded.length > 0 ? ` — ${excluded.map(rel).join(', ')}` : ' (the reserved path is currently empty)'}.`;
+  `${excluded.length > 0 ? ` — ${excluded.map(rel).join(", ")}` : " (the reserved path is currently empty)"}.`
 
 if (dangling.length > 0) {
-  const missing = [...new Set(dangling.map((d) => d.id))].sort();
-  console.error('adr-citation-guard: FAIL\n');
-  for (const d of dangling) console.error(`  ✗ ${d.where} → ${d.id} — cited, and no file matches docs/adr/${d.id}-*.md`);
-  console.error(`\n${exclusionLine}`);
+  const missing = [...new Set(dangling.map((d) => d.id))].sort()
+  console.error("adr-citation-guard: FAIL\n")
+  for (const d of dangling) console.error(`  ✗ ${d.where} → ${d.id} — cited, and no file matches docs/adr/${d.id}-*.md`)
+  console.error(`\n${exclusionLine}`)
   console.error(
-    `\n${dangling.length} dangling citation(s) across ${new Set(dangling.map((d) => d.where.split(':')[0])).size} ` +
-      `file(s), naming ${missing.length} absent ADR(s): ${missing.join(', ')}.\n` +
-      `The index holds ${index.size}: ${[...index.keys()].sort().map((k) => `ADR-${k}`).join(', ')}.\n` +
-      'LAND THE DOCUMENT — do not delete the citations. A decision that is implemented, cited and ratified ' +
-      'but absent from the tree is the exact state this gate was written for; deleting the pointers would ' +
-      'clear the gate and leave the evidence base unpublished.',
-  );
-  process.exit(1);
+    `\n${dangling.length} dangling citation(s) across ${new Set(dangling.map((d) => d.where.split(":")[0])).size} ` +
+      `file(s), naming ${missing.length} absent ADR(s): ${missing.join(", ")}.\n` +
+      `The index holds ${index.size}: ${[...index.keys()]
+        .sort()
+        .map((k) => `ADR-${k}`)
+        .join(", ")}.\n` +
+      "LAND THE DOCUMENT — do not delete the citations. A decision that is implemented, cited and ratified " +
+      "but absent from the tree is the exact state this gate was written for; deleting the pointers would " +
+      "clear the gate and leave the evidence base unpublished.",
+  )
+  process.exit(1)
 }
 
 // The success line NAMES both corpora and their separate file counts. One merged number would let either
@@ -286,6 +289,6 @@ console.log(
     `(${docsCorpus.length} docs/**/*.md + ${pkgsCorpus.length} packages/**/*.ts), naming ${citedIds.size} ` +
     `distinct ADR(s); all resolve into an index of ${index.size} under ${rel(ADR_DIR)}.\n` +
     `${exclusionLine}\n` +
-    '  Existence and numbering only — whether a cited ADR SAYS what its citer claims is a human job and is ' +
-    'not claimed here, and the reverse leg (an ADR nobody cites) is declared uncovered, not checked.',
-);
+    "  Existence and numbering only — whether a cited ADR SAYS what its citer claims is a human job and is " +
+    "not claimed here, and the reverse leg (an ADR nobody cites) is declared uncovered, not checked.",
+)

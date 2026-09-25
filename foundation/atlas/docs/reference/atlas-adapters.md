@@ -19,7 +19,7 @@ behaviour**: every adapter clause is bounded by the port it realizes; the core s
   `@atlas/e2e`). The core packages are not modified — **except** the one pre-existing OWNER-DEFINE seam
   (`writeDecision`, §ADAPT-STORE-2), which is a core binding, sequenced and reviewed as such.
 - **Purity is preserved where it lives:** the core stays deterministic/clock-free/IO-free (this is why its 857
-  tests are deterministic). Adapters are the *only* place IO/network/clock enters, and are verified by
+  tests are deterministic). Adapters are the _only_ place IO/network/clock enters, and are verified by
   **integration + recorded-fixture** tests, not the core's pure-determinism method.
 - Identity stays sealed: every adapter that mints a hash does so through `@atlas/kernel` `id` — no adapter rolls
   its own digest (KERNEL-2/3 still hold across the ring).
@@ -89,8 +89,8 @@ WiredHandler = ReturnType<createHandler>                       // the ONE 5-leg 
   **stamp** `builtAt = headSha()` (the git HEAD the projection's stored per-fact freshness reflects) onto the
   wire projection; absent or resolving `undefined` (tests / non-git) ⇒ **no stamp** — `builtAt` stays absent
   and the reader treats the watermark as "unknown" (never a false `stale`). Both persist sites (governed emit
-  + the mine driver) stamp uniformly by construction — no change to their code. The JSON-dropped `undefined`
-  round-trips `deepEqual`-identically to a pre-N11 sidecar (additive, back-compat).
+  - the mine driver) stamp uniformly by construction — no change to their code. The JSON-dropped `undefined`
+    round-trips `deepEqual`-identically to a pre-N11 sidecar (additive, back-compat).
 - **ADAPT-LINK-1 The second governed write door (WP-SAMEAS).** `createGovernedLink`
   (`→ packages/adapter-io/src/governed-link.ts`) MUST be the **sibling** of `createGovernedEmit`
   (`governed-emit.ts` — the door realizing ADAPT-STORE-2): the composition-root door for `atlas-link`, which
@@ -113,7 +113,7 @@ WiredHandler = ReturnType<createHandler>                       // the ONE 5-leg 
   unchanged).
 - **ADAPT-GIT-3 Forge carries the atlas, honestly.** `Forge` (`→ persist/host-adapter.ts`) MUST write the
   provenance trailer + a `refs/notes/orchestra` note + the PR projection onto a real host; a history rewrite
-  MUST keep trailer data and orphan note-carried data exactly as PERSIST-* specifies — the adapter changes
+  MUST keep trailer data and orphan note-carried data exactly as PERSIST-\* specifies — the adapter changes
   none of that semantics, only executes it.
 - **ADAPT-GIT-4 One no-shell git seam (#74).** Every adapter git call MUST route through `run-git.ts`
   (`→ packages/adapter-io/src/run-git.ts`): `runGit(repo, args, opts)` — `execFileSync('git', …)`, **NO shell**
@@ -158,11 +158,11 @@ WiredHandler = ReturnType<createHandler>                       // the ONE 5-leg 
   verdicts (TOOLS-3, by construction). The advertised set and the invocable set MUST both be DERIVED from
   that one union and MUST be equal; neither may be assembled independently (ARCH-5). No tool outside the
   union may be published or invocable.
-  *(AMENDED — the original clause read "publishes exactly the five governed tools", with a "no sixth tool"
+  _(AMENDED — the original clause read "publishes exactly the five governed tools", with a "no sixth tool"
   guard. The five was the mechanism available when there were five legs, not the property: MCP-1's own stated
   purpose is CLI≡MCP contract identity via the one shared handler, which is preserved and, via ARCH-5,
   strengthened. Owner-ratified 2026-07-25 — see ADR-0006; the same surgery ADR-0003 performed on TOOLS-1's
-  own count claim. The static surface is bounded by a measured budget instead of a fixed count — ARCH-7.)*
+  own count claim. The static surface is bounded by a measured budget instead of a fixed count — ARCH-7.)_
 - **MCP-2 Fail-closed transport.** A tool error MUST surface as a structured rejected `Verdict` carried in the
   MCP result; the server MUST NOT crash or drop the fail-closed verdict (TOOLS-2 across the transport).
 - **CLI-7 The `promote` driver curates through the EXISTING write door.** <a id="cli-7"></a> `atlas promote`
@@ -184,7 +184,7 @@ WiredHandler = ReturnType<createHandler>                       // the ONE 5-leg 
 ## Acceptance (the ring's falsifiable checks — S3 lifts goldens from these)
 
 1. `atlas init <fixture-repo>` on a real multi-file, multi-language repo prints the true skeleton + blast-radius
-   + T0 candidates; re-run is byte-identical (ADAPT-FS-1/SCIP-1/2/INDEX-1, determinism).
+   - T0 candidates; re-run is byte-identical (ADAPT-FS-1/SCIP-1/2/INDEX-1, determinism).
 2. A `reference` to a symbol defined in another indexed file ⇒ a `resolved` edge; a reference with no in-index
    definition (or an un-indexed language) ⇒ `to: null` — never a fabricated target (ADAPT-SCIP-1/2).
 3. A fact `emit`ted in run A is `get`-retrievable, byte-identical, in run B; a tampered on-disk value reads as
@@ -230,18 +230,18 @@ WiredHandler = ReturnType<createHandler>                       // the ONE 5-leg 
 > **Brownfield lift, stated as such.** Every clause below states behaviour that is ALREADY on `master`
 > and measured by a named test. The ring for `@atlas/memory` was never cut with campaign 9 — that corpus
 > mentions memory zero times — so this section is written AFTER the code, which is the same discipline
-> `requirements-adapters.md` calls *brownfield lift-and-tag*. Nothing here is behaviour anyone wants; it is
+> `requirements-adapters.md` calls _brownfield lift-and-tag_. Nothing here is behaviour anyone wants; it is
 > behaviour that runs.
 
-- **ADAPT-MEM-1 The durable Memory log.** <a id="adapt-mem-1"></a> The memory ring MUST: append-only and content-keyed, one record per line; a record appended in one process is readable byte-identical in a later process; NEVER rewrite, truncate or reorder an existing line; a line whose id is not its own content hash is refused on read AND counted. It MUST NOT permit: a torn or hand-edited line is folded in as a record; an unreadable log is reported as an empty store.. *(measured: `packages/adapter-io/test/memory-store.test.ts`)*
-- **ADAPT-MEM-2 Concurrent appends do not lose records.** <a id="adapt-mem-2"></a> The memory ring MUST: two processes appending concurrently both land; the fold contains every record either writer wrote. It MUST NOT permit: a concurrent append silently overwrites another writer's record.. *(measured: `packages/adapter-io/test/memory-store.test.ts`)*
-- **ADAPT-MEM-3 Memory travels.** <a id="adapt-mem-3"></a> The memory ring MUST: admitted to git (the log travels); survives a plain text merge with 0 records lost and 0 spliced; a duplicated line dedups by content id on the fold. It MUST NOT permit: a branch merge loses a record; a merge splices two records into one.. *(measured: `packages/adapter-io/test/memory-store.test.ts`)*
-- **ADAPT-MEM-4 Every memory write crosses the whole gate chain.** <a id="adapt-mem-4"></a> The memory ring MUST: the gates run in the stated ORDER; each refusal is a structured verdict NAMING the gate; the door authors no policy of its own. It MUST NOT permit: a record reaches disk having skipped a gate; a refusal escapes as a thrown exception a caller can swallow.. *(measured: `packages/adapter-io/test/memory-emit.test.ts`)*
-- **ADAPT-MEM-5 The kind is derived, never declared.** <a id="adapt-mem-5"></a> The memory ring MUST: the template is selected from the entry's SHAPE; no caller-supplied argument selects it; no-match and multi-match are BOTH refused, never guessed. It MUST NOT permit: a caller files a payload under a template that judges it more leniently; an ambiguous shape is filed under the first matching template.. *(measured: `packages/memory/test/mem-kind-derivation.test.ts`)*
-- **ADAPT-MEM-6 The owner is derived from the root, and never empty.** <a id="adapt-mem-6"></a> The memory ring MUST: owner = the composition root's resolved actor; no transport flag sets it; an empty owner is refused fail-closed. It MUST NOT permit: a caller sets the owner of a record they write; an unowned record is written and then injected to every empty-actor caller.. *(measured: `packages/memory/test/mem-kind-derivation.test.ts`)*
-- **ADAPT-MEM-7 The scanner is real, and its absence fails closed.** <a id="adapt-mem-7"></a> The memory ring MUST: binds a NAMED binary actually present on PATH; no scanner available means the write is REFUSED; never redacted-and-continued. It MUST NOT permit: a write lands with no scanner having run; a clean record is refused because the invocation is wrong; a secret-carrying record is admitted because the invocation always exits clean.. *(measured: `packages/adapter-io/test/scanner-conformance.test.ts`)*
-- **ADAPT-MEM-8 Reads are owner-scoped, and consultables are explicit.** <a id="adapt-mem-8"></a> The memory ring MUST: only the calling actor's own records — zero cross-seat; task, pr and logbook NEVER ride the header; they return ONLY via an explicit recall. It MUST NOT permit: another seat's record appears in a header; a consultable kind auto-injects on a running turn; an unqualified read returns a general dump.. *(measured: `packages/adapter-io/test/memory-read.test.ts`)*
-- **ADAPT-MEM-9 The injected set is frecency-ranked over LOGGED positions.** <a id="adapt-mem-9"></a> The memory ring MUST: the injected set is the top-N by effective frecency, descending; a decayed entry is evicted even when slots are free; an evicted entry remains re-spawnable — nothing dies; decay advances with the LOG's own head, never wall-clock. It MUST NOT permit: a system-clock jump changes the injected set with no new log entries; an evicted rule is unrecoverable; a low-frecency entry is injected because slots happened to be free.. *(measured: `packages/adapter-io/test/memory-read.test.ts`)*
-- **ADAPT-MEM-10 The derived slabs never fabricate.** <a id="adapt-mem-10"></a> The memory ring MUST: assembled from real sources; an absent source renders the labeled UN-SEEDED sentinel; never filled with invented text. It MUST NOT permit: an absent facet is rendered as plausible prose; a slab is served without its grounding.. *(measured: `packages/adapter-io/test/awareness-store.test.ts`)*
-- **ADAPT-MEM-11 Both transports answer identically.** <a id="adapt-mem-11"></a> The memory ring MUST: an identical call yields a byte-identical Verdict on both transports; a refusal carries the same named reason on both. It MUST NOT permit: the two transports disagree on an admission; a refusal reads differently over MCP than on the CLI.. *(measured: `packages/mcp-server/test/memory-emit-mcp.test.ts`)*
-- **ADAPT-MEM-12 The memory surface is documented in every direction.** <a id="adapt-mem-12"></a> The memory ring MUST: every shipped memory command has a reference page; every shipped memory command has a README table row; neither names a command that does not ship. It MUST NOT permit: a shipped command is absent from the README table; the README table advertises a command that does not run.. *(measured: `harness/gates/command-doc-guard.mjs`)*
+- **ADAPT-MEM-1 The durable Memory log.** <a id="adapt-mem-1"></a> The memory ring MUST: append-only and content-keyed, one record per line; a record appended in one process is readable byte-identical in a later process; NEVER rewrite, truncate or reorder an existing line; a line whose id is not its own content hash is refused on read AND counted. It MUST NOT permit: a torn or hand-edited line is folded in as a record; an unreadable log is reported as an empty store.. _(measured: `packages/adapter-io/test/memory-store.test.ts`)_
+- **ADAPT-MEM-2 Concurrent appends do not lose records.** <a id="adapt-mem-2"></a> The memory ring MUST: two processes appending concurrently both land; the fold contains every record either writer wrote. It MUST NOT permit: a concurrent append silently overwrites another writer's record.. _(measured: `packages/adapter-io/test/memory-store.test.ts`)_
+- **ADAPT-MEM-3 Memory travels.** <a id="adapt-mem-3"></a> The memory ring MUST: admitted to git (the log travels); survives a plain text merge with 0 records lost and 0 spliced; a duplicated line dedups by content id on the fold. It MUST NOT permit: a branch merge loses a record; a merge splices two records into one.. _(measured: `packages/adapter-io/test/memory-store.test.ts`)_
+- **ADAPT-MEM-4 Every memory write crosses the whole gate chain.** <a id="adapt-mem-4"></a> The memory ring MUST: the gates run in the stated ORDER; each refusal is a structured verdict NAMING the gate; the door authors no policy of its own. It MUST NOT permit: a record reaches disk having skipped a gate; a refusal escapes as a thrown exception a caller can swallow.. _(measured: `packages/adapter-io/test/memory-emit.test.ts`)_
+- **ADAPT-MEM-5 The kind is derived, never declared.** <a id="adapt-mem-5"></a> The memory ring MUST: the template is selected from the entry's SHAPE; no caller-supplied argument selects it; no-match and multi-match are BOTH refused, never guessed. It MUST NOT permit: a caller files a payload under a template that judges it more leniently; an ambiguous shape is filed under the first matching template.. _(measured: `packages/memory/test/mem-kind-derivation.test.ts`)_
+- **ADAPT-MEM-6 The owner is derived from the root, and never empty.** <a id="adapt-mem-6"></a> The memory ring MUST: owner = the composition root's resolved actor; no transport flag sets it; an empty owner is refused fail-closed. It MUST NOT permit: a caller sets the owner of a record they write; an unowned record is written and then injected to every empty-actor caller.. _(measured: `packages/memory/test/mem-kind-derivation.test.ts`)_
+- **ADAPT-MEM-7 The scanner is real, and its absence fails closed.** <a id="adapt-mem-7"></a> The memory ring MUST: binds a NAMED binary actually present on PATH; no scanner available means the write is REFUSED; never redacted-and-continued. It MUST NOT permit: a write lands with no scanner having run; a clean record is refused because the invocation is wrong; a secret-carrying record is admitted because the invocation always exits clean.. _(measured: `packages/adapter-io/test/scanner-conformance.test.ts`)_
+- **ADAPT-MEM-8 Reads are owner-scoped, and consultables are explicit.** <a id="adapt-mem-8"></a> The memory ring MUST: only the calling actor's own records — zero cross-seat; task, pr and logbook NEVER ride the header; they return ONLY via an explicit recall. It MUST NOT permit: another seat's record appears in a header; a consultable kind auto-injects on a running turn; an unqualified read returns a general dump.. _(measured: `packages/adapter-io/test/memory-read.test.ts`)_
+- **ADAPT-MEM-9 The injected set is frecency-ranked over LOGGED positions.** <a id="adapt-mem-9"></a> The memory ring MUST: the injected set is the top-N by effective frecency, descending; a decayed entry is evicted even when slots are free; an evicted entry remains re-spawnable — nothing dies; decay advances with the LOG's own head, never wall-clock. It MUST NOT permit: a system-clock jump changes the injected set with no new log entries; an evicted rule is unrecoverable; a low-frecency entry is injected because slots happened to be free.. _(measured: `packages/adapter-io/test/memory-read.test.ts`)_
+- **ADAPT-MEM-10 The derived slabs never fabricate.** <a id="adapt-mem-10"></a> The memory ring MUST: assembled from real sources; an absent source renders the labeled UN-SEEDED sentinel; never filled with invented text. It MUST NOT permit: an absent facet is rendered as plausible prose; a slab is served without its grounding.. _(measured: `packages/adapter-io/test/awareness-store.test.ts`)_
+- **ADAPT-MEM-11 Both transports answer identically.** <a id="adapt-mem-11"></a> The memory ring MUST: an identical call yields a byte-identical Verdict on both transports; a refusal carries the same named reason on both. It MUST NOT permit: the two transports disagree on an admission; a refusal reads differently over MCP than on the CLI.. _(measured: `packages/mcp-server/test/memory-emit-mcp.test.ts`)_
+- **ADAPT-MEM-12 The memory surface is documented in every direction.** <a id="adapt-mem-12"></a> The memory ring MUST: every shipped memory command has a reference page; every shipped memory command has a README table row; neither names a command that does not ship. It MUST NOT permit: a shipped command is absent from the README table; the README table advertises a command that does not run.. _(measured: `harness/gates/command-doc-guard.mjs`)_

@@ -16,7 +16,7 @@ projection depends on); #240 (the read-side reverify trap this closes for relati
 `endpointB`) ships **advisory-only**: grounded (aboutness), never **proven**. A `depends-on` edge is
 exactly what the code index (SCIP) can prove mechanically, so shipping it as merely advisory leaves the
 one relation the index CAN prove unproven — and blocks the #95 benchmark (the owner ruled relation
-*primordial*).
+_primordial_).
 
 ## Decision
 
@@ -25,6 +25,7 @@ index mechanically witnesses a resolved cross-unit reference A→B — i.e. it i
 `DepEdge`. The **derivation is the proof**, re-runnable on read-back (drift = A2 staleness).
 
 Ratified forks:
+
 - **F1 — mechanical projection, no LLM.** The proven relation is derived from the index's resolved
   edges, not proposed by a model. 0-false by construction; model-independent.
 - **F2 — exhaustive** over resolved intra-repo edges (a dependency graph is only useful complete). Bounded
@@ -34,6 +35,7 @@ Ratified forks:
   advisory/justified LLM arm. Honest boundary, explicit + tested.
 
 Locked design decisions:
+
 - **D-a** proven `A→B` supersedes a pre-existing advisory `A→B` (same `relationKey` identity; proven
   strictly stronger; existing SUPERSEDE lineage). No silent duplicate, no downgrade.
 - **D-b** N resolved references A→B collapse to exactly one `depends-on A→B` relation (identity).
@@ -73,7 +75,7 @@ proven relation through the governed emit door. `atlas relations <unit>` reads t
   over-budget **fails loud** (AR-30), never a partial set labelled complete.
 - **Timing is NOT a claimed measurement.** A self-report of ~412ms was **not independently reproduced**; a
   cold run measured ~2.9s including the symbol-reverse index build. The cost is dominated by the one-time
-  index build and varies with it — treat any single figure as *unverified*. The soundness/exactness claims
+  index build and varies with it — treat any single figure as _unverified_. The soundness/exactness claims
   above stand on their own; timing does not gate them.
 - **Two-layer D-d (write-door strip + read-side re-derivation).** The governed write door strips a
   SHAPE-forged proven relation (witness missing / malformed / non-provable `calls` kind) at admission; a
@@ -96,7 +98,7 @@ The index cannot prove — so the projection abstains on (never a proven seal), 
 ledger (`docs/design/e2e-coverage-matrix.md`) and tested:
 
 - **`calls` is NOT provable.** The frozen `ScipSymbolRole` projection is `'definition' | 'reference'` — no
-  call-role. A "reference" (import / type position / use) is all SCIP gives; `calls` (A's body *invokes* B)
+  call-role. A "reference" (import / type position / use) is all SCIP gives; `calls` (A's body _invokes_ B)
   cannot be distinguished from it. `calls` ships advisory/justified via a later LLM arm, never `proven`.
 - **Dynamic dispatch / reflection / cross-language / FFI** resolve to `unresolved`/`dynamic` edges
   (`to: null`) — they abstain, never a proven relation.

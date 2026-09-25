@@ -5,13 +5,13 @@
 > `harness/probes/a2-staleness-teeth.mjs` + `harness/probes/a2-staleness-teeth.test.mjs` are the mutation
 > teeth behind §6's headline finding. Scope: axis **A2 (staleness)** of the #95 benchmark program only.
 > Companion to 95a (A4 recall methodology, sketch) and the owner-ratified adjudication rubric used for A1.
-> **Reporting rule (§6): A2 is TWO numbers, never one blended score — non-touching precision `4/4` (real)
+> \*\*Reporting rule (§6): A2 is TWO numbers, never one blended score — non-touching precision `4/4` (real)
 > and semantic cross-file staleness detection `NOT SUPPORTED` (named limitation). `true_stale_caught=6/6`
 > is a tautology about the corpus's own construction, not evidence the oracle "catches staleness" — see §6.1.
 
 ## 1. What A2 measures
 
-A1 (precision) asks: is a fact Atlas emits grounded and true of the bytes *right now*. A2 asks the question
+A1 (precision) asks: is a fact Atlas emits grounded and true of the bytes _right now_. A2 asks the question
 that only matters once the repo keeps moving: **when the code a fact is anchored to changes in a
 fact-INVALIDATING way, does Atlas's drift oracle mark it DRIFTED (a true-stale caught)? And when the code
 around it changes in a fact-PRESERVING way — one that does not touch what the fact actually claims — does
@@ -73,10 +73,10 @@ oracle call (whatever endpoint reads the edge-model version), not a retrofit ont
 Every corpus entry names ONE anchored unit in a single TS fixture file, a BASE state (committed as rev A)
 and a MUTATED state (committed as rev B), and belongs to exactly one class:
 
-| Class | Expected verdict | A wrong verdict here is called |
-|---|---|---|
-| **preserving** | FRESH | false-stale |
-| **invalidating** | DRIFTED | true-stale miss |
+| Class            | Expected verdict | A wrong verdict here is called |
+| ---------------- | ---------------- | ------------------------------ |
+| **preserving**   | FRESH            | false-stale                    |
+| **invalidating** | DRIFTED          | true-stale miss                |
 
 **Preserving** (the edit must not invalidate what the fact claims):
 
@@ -220,7 +220,7 @@ shape §3 excludes, described here so the exclusion is not left abstract):
 > — it never mentions `.sort()` itself; the sort happens because it delegates to a helper, e.g.
 > `namesOf(this.list)`, which currently does the sorting. If `namesOf`'s body drops its `.sort()` call, the
 > fact "returns sorted" is now FALSE — but `sortedNames()`'s own anchored bytes (`return
-> names.slice(this.list)`... whatever calls `namesOf`) never changed. `reDerives` re-hashes the SAME bytes,
+names.slice(this.list)`... whatever calls `namesOf`) never changed. `reDerives` re-hashes the SAME bytes,
 > gets the SAME hash, and reports FRESH. Running this case today would score the real oracle a
 > `true_stale_missed` — that is precisely why no such case is in this corpus (§3): including it would either
 > require a wired second oracle leg that does not exist in production, or would report a real defect as if

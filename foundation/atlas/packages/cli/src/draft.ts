@@ -7,4 +7,4 @@
 // composes a candidate `GroundedFact` from the three author-supplied fields and persists NOTHING; TOTAL — a
 // missing/empty positional or an out-of-vocabulary slot fails CLOSED, never a throw.
 
-export { draftVerdict } from '@atlas/adapter-io';
+export { draftVerdict } from "@atlas/adapter-io"

@@ -3,9 +3,7 @@ import { parseJanitorReport, usefulJanitorReport } from "./janitor-report"
 
 const payload = {
   createdAt: "2026-09-08T00:00:00.000Z",
-  findings: [
-    { kind: "disk", severity: "attention", summary: "disk", evidence: "e", suggestion: "s" },
-  ],
+  findings: [{ kind: "disk", severity: "attention", summary: "disk", evidence: "e", suggestion: "s" }],
 }
 const invalidPayload = {
   ...payload,

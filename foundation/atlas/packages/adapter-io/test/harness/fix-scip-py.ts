@@ -13,10 +13,10 @@
 // build derives the ts resolvable edge from the ts docs and leaves this py definition as a symbol with
 // no in-index reference (its own consumer edge is a downstream/e2e concern, not this WP).
 
-import { mkdtempSync, writeFileSync, rmSync } from 'node:fs';
-import { tmpdir } from 'node:os';
-import { join } from 'node:path';
-import { create } from '@bufbuild/protobuf';
+import { mkdtempSync, writeFileSync, rmSync } from "node:fs"
+import { tmpdir } from "node:os"
+import { join } from "node:path"
+import { create } from "@bufbuild/protobuf"
 import {
   serializeSCIP,
   IndexSchema,
@@ -25,11 +25,11 @@ import {
   DocumentSchema,
   OccurrenceSchema,
   SymbolRole,
-} from '@c4312/scip';
-import type { ScipOutput } from '@atlas/index';
+} from "@c4312/scip"
+import type { ScipOutput } from "@atlas/index"
 
 /** The one symbol in the py corpus (exported so SCN tests name it without magic strings). */
-export const SYM_COMPUTE = 'service.py/compute().';
+export const SYM_COMPUTE = "service.py/compute()."
 
 /**
  * The conformance oracle: the exact `ScipOutput` a faithful reader MUST project from the py `.scip` —
@@ -39,17 +39,17 @@ export const SYM_COMPUTE = 'service.py/compute().';
 export const expectedPyScipOutput: ScipOutput = {
   documents: [
     {
-      relativePath: 'api/service.py',
-      occurrences: [{ symbol: SYM_COMPUTE, role: 'definition' }],
+      relativePath: "api/service.py",
+      occurrences: [{ symbol: SYM_COMPUTE, role: "definition" }],
     },
   ],
-};
+}
 
 export interface FixScipPy {
   /** Absolute path to the serialized `.scip` protobuf on disk. */
-  readonly scipPath: string;
+  readonly scipPath: string
   /** Remove the temp file. Call in an `afterEach`/`finally`. */
-  cleanup(): void;
+  cleanup(): void
 }
 
 /**
@@ -60,18 +60,18 @@ export interface FixScipPy {
 export function makeFixScipPy(): FixScipPy {
   const index = create(IndexSchema, {
     metadata: create(MetadataSchema, {
-      projectRoot: 'file:///fix-repo',
-      toolInfo: create(ToolInfoSchema, { name: 'atlas-fixture-py', version: '0' }),
+      projectRoot: "file:///fix-repo",
+      toolInfo: create(ToolInfoSchema, { name: "atlas-fixture-py", version: "0" }),
     }),
     documents: [
       create(DocumentSchema, {
-        relativePath: 'api/service.py',
+        relativePath: "api/service.py",
         occurrences: [create(OccurrenceSchema, { symbol: SYM_COMPUTE, symbolRoles: SymbolRole.Definition })],
       }),
     ],
-  });
-  const dir = mkdtempSync(join(tmpdir(), 'atlas-fix-scip-py-'));
-  const scipPath = join(dir, 'index.scip');
-  writeFileSync(scipPath, serializeSCIP(index));
-  return { scipPath, cleanup: () => rmSync(dir, { recursive: true, force: true }) };
+  })
+  const dir = mkdtempSync(join(tmpdir(), "atlas-fix-scip-py-"))
+  const scipPath = join(dir, "index.scip")
+  writeFileSync(scipPath, serializeSCIP(index))
+  return { scipPath, cleanup: () => rmSync(dir, { recursive: true, force: true }) }
 }

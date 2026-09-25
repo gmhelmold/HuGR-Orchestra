@@ -38,9 +38,9 @@
 export const FIXTURES = [
   // ── 10 GROUNDED-TRUE ──────────────────────────────────────────────────────────────────────────────────
   {
-    id: 'T01',
-    label: 'true',
-    anchor: 'retryWithBackoff',
+    id: "T01",
+    label: "true",
+    anchor: "retryWithBackoff",
     code: `function retryWithBackoff(fn, attempts = 3) {
   let lastErr;
   for (let i = 0; i < attempts; i++) {
@@ -48,23 +48,23 @@ export const FIXTURES = [
   }
   throw lastErr;
 }`,
-    fact: 'retryWithBackoff retries up to 3 times by default, sleeping 2**i * 100 ms between attempts, and rethrows the last error when all attempts fail.',
+    fact: "retryWithBackoff retries up to 3 times by default, sleeping 2**i * 100 ms between attempts, and rethrows the last error when all attempts fail.",
   },
   {
-    id: 'T02',
-    label: 'true',
-    anchor: 'parsePort',
+    id: "T02",
+    label: "true",
+    anchor: "parsePort",
     code: `function parsePort(raw) {
   const n = Number(raw);
   if (!Number.isInteger(n) || n < 1 || n > 65535) throw new RangeError('bad port');
   return n;
 }`,
-    fact: 'parsePort throws a RangeError for any value that is not an integer in the inclusive range 1..65535.',
+    fact: "parsePort throws a RangeError for any value that is not an integer in the inclusive range 1..65535.",
   },
   {
-    id: 'T03',
-    label: 'true',
-    anchor: 'isAbstainToken',
+    id: "T03",
+    label: "true",
+    anchor: "isAbstainToken",
     code: `const ABSTAIN = 'NO-FACT';
 function isAbstainToken(s) {
   return s.trim().toUpperCase() === ABSTAIN;
@@ -72,73 +72,73 @@ function isAbstainToken(s) {
     fact: 'isAbstainToken treats the answer as an abstention when, after trimming and upper-casing, it equals the sentinel "NO-FACT".',
   },
   {
-    id: 'T04',
-    label: 'true',
-    anchor: 'clamp',
+    id: "T04",
+    label: "true",
+    anchor: "clamp",
     code: `const clamp = (x, lo, hi) => Math.min(Math.max(x, lo), hi);`,
-    fact: 'clamp returns x bounded to the [lo, hi] interval via Math.min(Math.max(x, lo), hi).',
+    fact: "clamp returns x bounded to the [lo, hi] interval via Math.min(Math.max(x, lo), hi).",
   },
   {
-    id: 'T05',
-    label: 'true',
-    anchor: 'CacheStore.get',
+    id: "T05",
+    label: "true",
+    anchor: "CacheStore.get",
     code: `class CacheStore {
   constructor() { this.map = new Map(); }
   get(key) { return this.map.has(key) ? this.map.get(key) : null; }
 }`,
-    fact: 'CacheStore.get returns null when the key is absent from the backing Map rather than undefined.',
+    fact: "CacheStore.get returns null when the key is absent from the backing Map rather than undefined.",
   },
   {
-    id: 'T06',
-    label: 'true',
-    anchor: 'openRecord',
+    id: "T06",
+    label: "true",
+    anchor: "openRecord",
     code: `function openRecord(dir, id) {
   return openSync(join(dir, id + '.jsonl'), 'wx');
 }`,
-    fact: 'openRecord opens the record file with the wx flag (O_CREAT|O_EXCL), so the create fails if the name already exists.',
+    fact: "openRecord opens the record file with the wx flag (O_CREAT|O_EXCL), so the create fails if the name already exists.",
   },
   {
-    id: 'T07',
-    label: 'true',
-    anchor: 'dedupe',
+    id: "T07",
+    label: "true",
+    anchor: "dedupe",
     code: `function dedupe(items) {
   return [...new Set(items)];
 }`,
-    fact: 'dedupe removes duplicate items by round-tripping the array through a Set, preserving first-seen order.',
+    fact: "dedupe removes duplicate items by round-tripping the array through a Set, preserving first-seen order.",
   },
   {
-    id: 'T08',
-    label: 'true',
-    anchor: 'httpGetJson',
+    id: "T08",
+    label: "true",
+    anchor: "httpGetJson",
     code: `async function httpGetJson(url) {
   const res = await fetch(url);
   if (!res.ok) throw new Error('HTTP ' + res.status);
   return res.json();
 }`,
-    fact: 'httpGetJson throws an Error containing the status code when the response is not ok, and otherwise parses the body as JSON.',
+    fact: "httpGetJson throws an Error containing the status code when the response is not ok, and otherwise parses the body as JSON.",
   },
   {
-    id: 'T09',
-    label: 'true',
-    anchor: 'toSlug',
+    id: "T09",
+    label: "true",
+    anchor: "toSlug",
     code: `const toSlug = (s) => s.toLowerCase().trim().replace(/\\s+/g, '-');`,
-    fact: 'toSlug lowercases and trims the input, then replaces each run of whitespace with a single hyphen.',
+    fact: "toSlug lowercases and trims the input, then replaces each run of whitespace with a single hyphen.",
   },
   {
-    id: 'T10',
-    label: 'true',
-    anchor: 'DEFAULT_TIMEOUT_MS',
+    id: "T10",
+    label: "true",
+    anchor: "DEFAULT_TIMEOUT_MS",
     code: `const DEFAULT_TIMEOUT_MS = 180_000;
 function withTimeout(fn, ms = DEFAULT_TIMEOUT_MS) { /* ... */ }`,
-    fact: 'withTimeout defaults its timeout to DEFAULT_TIMEOUT_MS, which is 180000 ms.',
+    fact: "withTimeout defaults its timeout to DEFAULT_TIMEOUT_MS, which is 180000 ms.",
   },
 
   // ── 10 PLANTED-FALSE ──────────────────────────────────────────────────────────────────────────────────
   {
-    id: 'F01',
-    label: 'false',
-    falseKind: 'wrong-constant',
-    anchor: 'retryWithBackoff',
+    id: "F01",
+    label: "false",
+    falseKind: "wrong-constant",
+    anchor: "retryWithBackoff",
     code: `function retryWithBackoff(fn, attempts = 3) {
   let lastErr;
   for (let i = 0; i < attempts; i++) {
@@ -146,25 +146,25 @@ function withTimeout(fn, ms = DEFAULT_TIMEOUT_MS) { /* ... */ }`,
   }
   throw lastErr;
 }`,
-    fact: 'retryWithBackoff retries up to 5 times by default before rethrowing.',
+    fact: "retryWithBackoff retries up to 5 times by default before rethrowing.",
   },
   {
-    id: 'F02',
-    label: 'false',
-    falseKind: 'negated-condition',
-    anchor: 'parsePort',
+    id: "F02",
+    label: "false",
+    falseKind: "negated-condition",
+    anchor: "parsePort",
     code: `function parsePort(raw) {
   const n = Number(raw);
   if (!Number.isInteger(n) || n < 1 || n > 65535) throw new RangeError('bad port');
   return n;
 }`,
-    fact: 'parsePort returns the number for values outside 1..65535 and throws only for values inside that range.',
+    fact: "parsePort returns the number for values outside 1..65535 and throws only for values inside that range.",
   },
   {
-    id: 'F03',
-    label: 'false',
-    falseKind: 'wrong-constant',
-    anchor: 'isAbstainToken',
+    id: "F03",
+    label: "false",
+    falseKind: "wrong-constant",
+    anchor: "isAbstainToken",
     code: `const ABSTAIN = 'NO-FACT';
 function isAbstainToken(s) {
   return s.trim().toUpperCase() === ABSTAIN;
@@ -172,29 +172,29 @@ function isAbstainToken(s) {
     fact: 'isAbstainToken treats the answer as an abstention when it equals the sentinel "ABSTAIN".',
   },
   {
-    id: 'F04',
-    label: 'false',
-    falseKind: 'wrong-callee',
-    anchor: 'clamp',
+    id: "F04",
+    label: "false",
+    falseKind: "wrong-callee",
+    anchor: "clamp",
     code: `const clamp = (x, lo, hi) => Math.min(Math.max(x, lo), hi);`,
-    fact: 'clamp bounds x to [lo, hi] using Math.round together with Math.abs.',
+    fact: "clamp bounds x to [lo, hi] using Math.round together with Math.abs.",
   },
   {
-    id: 'F05',
-    label: 'false',
-    falseKind: 'wrong-default',
-    anchor: 'CacheStore.get',
+    id: "F05",
+    label: "false",
+    falseKind: "wrong-default",
+    anchor: "CacheStore.get",
     code: `class CacheStore {
   constructor() { this.map = new Map(); }
   get(key) { return this.map.has(key) ? this.map.get(key) : null; }
 }`,
-    fact: 'CacheStore.get returns undefined when the key is absent from the backing Map.',
+    fact: "CacheStore.get returns undefined when the key is absent from the backing Map.",
   },
   {
-    id: 'F06',
-    label: 'false',
-    falseKind: 'past-comment-as-present',
-    anchor: 'openRecord',
+    id: "F06",
+    label: "false",
+    falseKind: "past-comment-as-present",
+    anchor: "openRecord",
     code: `function openRecord(dir, id) {
   // was: openSync(path, 'a') — appended to a per-second filename, which collided under concurrency
   return openSync(join(dir, id + '.jsonl'), 'wx');
@@ -202,45 +202,45 @@ function isAbstainToken(s) {
     fact: 'openRecord opens the record file with the append flag "a" and names it by the current epoch second.',
   },
   {
-    id: 'F07',
-    label: 'false',
-    falseKind: 'fabricated-behavior',
-    anchor: 'dedupe',
+    id: "F07",
+    label: "false",
+    falseKind: "fabricated-behavior",
+    anchor: "dedupe",
     code: `function dedupe(items) {
   return [...new Set(items)];
 }`,
-    fact: 'dedupe sorts the items and removes duplicates, returning them in ascending order.',
+    fact: "dedupe sorts the items and removes duplicates, returning them in ascending order.",
   },
   {
-    id: 'F08',
-    label: 'false',
-    falseKind: 'fabricated-behavior',
-    anchor: 'httpGetJson',
+    id: "F08",
+    label: "false",
+    falseKind: "fabricated-behavior",
+    anchor: "httpGetJson",
     code: `async function httpGetJson(url) {
   const res = await fetch(url);
   if (!res.ok) throw new Error('HTTP ' + res.status);
   return res.json();
 }`,
-    fact: 'httpGetJson retries the request up to three times on a non-ok response before throwing.',
+    fact: "httpGetJson retries the request up to three times on a non-ok response before throwing.",
   },
   {
-    id: 'F09',
-    label: 'false',
-    falseKind: 'wrong-callee',
-    anchor: 'toSlug',
+    id: "F09",
+    label: "false",
+    falseKind: "wrong-callee",
+    anchor: "toSlug",
     code: `const toSlug = (s) => s.toLowerCase().trim().replace(/\\s+/g, '-');`,
-    fact: 'toSlug uppercases the input and replaces whitespace with underscores.',
+    fact: "toSlug uppercases the input and replaces whitespace with underscores.",
   },
   {
-    id: 'F10',
-    label: 'false',
-    falseKind: 'wrong-constant',
-    anchor: 'DEFAULT_TIMEOUT_MS',
+    id: "F10",
+    label: "false",
+    falseKind: "wrong-constant",
+    anchor: "DEFAULT_TIMEOUT_MS",
     code: `const DEFAULT_TIMEOUT_MS = 180_000;
 function withTimeout(fn, ms = DEFAULT_TIMEOUT_MS) { /* ... */ }`,
-    fact: 'withTimeout defaults its timeout to DEFAULT_TIMEOUT_MS, which is 30000 ms.',
+    fact: "withTimeout defaults its timeout to DEFAULT_TIMEOUT_MS, which is 30000 ms.",
   },
-];
+]
 
 /**
  * Render the adjudication prompt for one fixture. Model-agnostic prose: it states the anchor, shows the
@@ -267,5 +267,5 @@ ${fx.fact}
 Think briefly, then output your verdict as the LAST line, exactly one of these tokens and nothing else on that line:
 GROUNDED_TRUE
 HALLUCINATED
-ABSTAIN`;
+ABSTAIN`
 }

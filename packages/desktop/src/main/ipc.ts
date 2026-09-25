@@ -116,10 +116,12 @@ const toCloneableAppDockEvent = (event: unknown): CloneableAppDockEvent => {
   const payload = appDockEventRecord(source.payload)
   if (!hasExactKeys(source, ["type", "payload"])) throw new Error("Invalid App Dock event")
   if (source.type === "state") {
-    if (!(
-      hasExactKeys(payload, ["tabID", "generation", "url", "title", "loading", "audible"]) ||
-      hasExactKeys(payload, ["tabID", "generation", "url", "title", "favicon", "loading", "audible"])
-    )) {
+    if (
+      !(
+        hasExactKeys(payload, ["tabID", "generation", "url", "title", "loading", "audible"]) ||
+        hasExactKeys(payload, ["tabID", "generation", "url", "title", "favicon", "loading", "audible"])
+      )
+    ) {
       throw new Error("Invalid App Dock event")
     }
     const identity = appDockEventIdentity(payload)

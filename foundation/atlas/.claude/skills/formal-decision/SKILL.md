@@ -31,7 +31,7 @@ point, not a compromise.
 1. **High-consequence & hard to recover** — a violation causes durable damage that other means can't cheaply
    undo. (ShardStore chose durability/consistency; dropped availability/perf — recoverable, other mitigations.)
 2. **Combinatorial state that human review + example tests cannot cover** — concurrency interleavings, crash/
-   fault orderings, or an exhaustive case-space. *The discriminator:* if a competent engineer + good tests
+   fault orderings, or an exhaustive case-space. _The discriminator:_ if a competent engineer + good tests
    would plausibly find the bug, a formal model is **overhead**. (AWS's decisive bug needed a 35-step trace.)
 3. **Cheap to keep alive** — the model won't rot; a non-expert can maintain it (the anti-rot mock, below).
 
@@ -46,13 +46,13 @@ what you refuse to model is part of the method, not a gap.
 
 ## Tool-per-shape (the state space + property decides the tool, not the domain)
 
-| problem shape | tag | tool | why / fallback |
-|---|---|---|---|
-| concurrent convergence / CRDT merge | `formal` | reduce to **join-semilattice laws** (Shapiro'11: commut/assoc/idemp) / **commutativity ⇒ convergence** (Gomes'17); check by **PBT**; escalate to **TLA+/TLC** for the interleaving model; **Apalache** for an unbounded inductive invariant; **Isabelle** only if audited | convergence is an algebraic property — PBT catches most; a model/proof buys the last mile |
-| structural-invariant / routing "infallibility" (totality · mutual-exclusion · no-gap) | `exhaustive` | **exhaustive enumeration** of the finite input space (or **Alloy** if relational) | brute-force decision table is airtight; no FM tool if the domain is finite+small |
-| state-machine / protocol, esp. async | `formal` (P) — contingent | **P** (executable, model-checked, drives impl testing) or **TLA+** | choose P if the spec should also test the impl |
-| ordering / deterministic sequential | `PBT` | **executable reference model + property-based testing** | not an FM problem; the oracle is the reference model — modeling is overhead |
-| standard behaviour (the bulk) | `reference-model` | **executable reference model (~1% of code) + PBT** | the ShardStore default |
+| problem shape                                                                         | tag                       | tool                                                                                                                                                                                                                                                                      | why / fallback                                                                            |
+| ------------------------------------------------------------------------------------- | ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| concurrent convergence / CRDT merge                                                   | `formal`                  | reduce to **join-semilattice laws** (Shapiro'11: commut/assoc/idemp) / **commutativity ⇒ convergence** (Gomes'17); check by **PBT**; escalate to **TLA+/TLC** for the interleaving model; **Apalache** for an unbounded inductive invariant; **Isabelle** only if audited | convergence is an algebraic property — PBT catches most; a model/proof buys the last mile |
+| structural-invariant / routing "infallibility" (totality · mutual-exclusion · no-gap) | `exhaustive`              | **exhaustive enumeration** of the finite input space (or **Alloy** if relational)                                                                                                                                                                                         | brute-force decision table is airtight; no FM tool if the domain is finite+small          |
+| state-machine / protocol, esp. async                                                  | `formal` (P) — contingent | **P** (executable, model-checked, drives impl testing) or **TLA+**                                                                                                                                                                                                        | choose P if the spec should also test the impl                                            |
+| ordering / deterministic sequential                                                   | `PBT`                     | **executable reference model + property-based testing**                                                                                                                                                                                                                   | not an FM problem; the oracle is the reference model — modeling is overhead               |
+| standard behaviour (the bulk)                                                         | `reference-model`         | **executable reference model (~1% of code) + PBT**                                                                                                                                                                                                                        | the ShardStore default                                                                    |
 
 ## Anti-rot (unconditional, ShardStore) — how a spec stays cheap to keep alive (conjunct #3)
 
@@ -76,13 +76,13 @@ confidence back with scale + coverage metrics, not with a claim of proof.
 
 Only **one** cluster earns a machine-checked formal model — the rest is a feature, not a compromise:
 
-| cluster | tag | note |
-|---|---|---|
-| CRDT OR-Set merge + supersedes (`FSPEC-merge`) | `formal` | PBT on the semilattice laws first; TLA+/Apalache only if supersede+remove is subtle |
-| write-decision "infallible" | `exhaustive` | enumerate the finite input space; existence + uniqueness of the route |
-| grounding truth-gate | `PBT`; **contingent** P | reference automaton + PBT; P only if S2 proves it genuinely async |
-| retrieval drop-order | `PBT` | deterministic sequential — formal modeling is overhead |
-| the other ~128 | `reference-model` | executable reference + PBT + mock |
+| cluster                                        | tag                     | note                                                                                |
+| ---------------------------------------------- | ----------------------- | ----------------------------------------------------------------------------------- |
+| CRDT OR-Set merge + supersedes (`FSPEC-merge`) | `formal`                | PBT on the semilattice laws first; TLA+/Apalache only if supersede+remove is subtle |
+| write-decision "infallible"                    | `exhaustive`            | enumerate the finite input space; existence + uniqueness of the route               |
+| grounding truth-gate                           | `PBT`; **contingent** P | reference automaton + PBT; P only if S2 proves it genuinely async                   |
+| retrieval drop-order                           | `PBT`                   | deterministic sequential — formal modeling is overhead                              |
+| the other ~128                                 | `reference-model`       | executable reference + PBT + mock                                                   |
 
 ## Self-check (before a cluster/INV is tagged)
 

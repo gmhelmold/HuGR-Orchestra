@@ -22,7 +22,10 @@ export type IntentAssessment = {
 export type AdmissionDecision =
   | { outcome: "ORIENT"; assessment: IntentAssessment }
   | { outcome: "READY_TO_DRAFT"; assessment: IntentAssessment }
-  | { outcome: "CLARIFY"; reason: "invalid-assessment" | "missing-usable-goal" | "material-blocker" | "active-work-conflict" }
+  | {
+      outcome: "CLARIFY"
+      reason: "invalid-assessment" | "missing-usable-goal" | "material-blocker" | "active-work-conflict"
+    }
 
 function text(value: unknown): value is string {
   return typeof value === "string" && value.trim().length > 0

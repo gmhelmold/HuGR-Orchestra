@@ -7,17 +7,26 @@
 // Semgrep-before-CodeQL, any query DB built ONCE (amortized). Reports cost PER STAGE under the ceiling.
 // Implements the frozen `BudgetApi` (types.ts); the cheap escalation signal is an INJECTED `SignalOracle`.
 
-import type { StructRef, Tier } from '@atlas/contracts';
-import { isWeakerTier } from '@atlas/knowledge';
-import type { BudgetApi, Candidate, CostReport, EscalationDecision, GenesisBudget, Mechanism, PipelineStage, StageCost } from './types.js';
+import type { StructRef, Tier } from "@atlas/contracts"
+import { isWeakerTier } from "@atlas/knowledge"
+import type {
+  BudgetApi,
+  Candidate,
+  CostReport,
+  EscalationDecision,
+  GenesisBudget,
+  Mechanism,
+  PipelineStage,
+  StageCost,
+} from "./types.js"
 
 // ── the frozen GEN-13 defaults ─────────────────────────────────────────────────────────────────────────
 
 /** One sample at base — NO self-consistency voting (GEN-13c). The default draw is a single proposal. */
-export const DEFAULT_SAMPLES = 1 as const;
+export const DEFAULT_SAMPLES = 1 as const
 
 /** CEGIS refinement is bounded at `K≤1` by default (GEN-13e) — at most one refine round before drop. */
-export const DEFAULT_CEGIS_K = 1 as const;
+export const DEFAULT_CEGIS_K = 1 as const
 
 // ── the cheap escalation signal (injected seam input) ──────────────────────────────────────────────────
 
@@ -32,15 +41,15 @@ export const DEFAULT_CEGIS_K = 1 as const;
  *   - `checkable` — the slot is mechanically checkable (drives advisory-vs-predicate, GEN-13d).
  */
 export interface CheapSignal {
-  readonly tier: Tier;
-  readonly highValue: boolean;
-  readonly uncertain: boolean;
-  readonly checkable: boolean;
+  readonly tier: Tier
+  readonly highValue: boolean
+  readonly uncertain: boolean
+  readonly checkable: boolean
 }
 
 /** The injected cheap-signal port: maps a ranked site to its escalation signal. CALLED, never defined here. */
 export interface SignalOracle {
-  signal(cand: Candidate): CheapSignal;
+  signal(cand: Candidate): CheapSignal
 }
 
 // ── the escalation predicate + mechanism decision (GEN-13a/b/f) ─────────────────────────────────────────
@@ -59,7 +68,7 @@ export interface SignalOracle {
  * degradation is safe; it is now stated rather than inherited from an arithmetic accident.
  */
 export function tierAtLeast(tier: unknown, floor: unknown): boolean {
-  return !isWeakerTier(tier, floor);
+  return !isWeakerTier(tier, floor)
 }
 
 /**
@@ -67,12 +76,12 @@ export function tierAtLeast(tier: unknown, floor: unknown): boolean {
  * required — a high-value ∧ certain site stays at the single-proposal base (never escalates on value alone).
  */
 export function shouldEscalate(sig: CheapSignal): boolean {
-  return sig.highValue && sig.uncertain;
+  return sig.highValue && sig.uncertain
 }
 
 /** GEN-13f — the small-model refuter fires for `T0`-candidates ONLY; every other tier skips it. */
 export function runsRefuter(tier: Tier): boolean {
-  return tier === 'T0';
+  return tier === "T0"
 }
 
 /**
@@ -83,17 +92,17 @@ export function runsRefuter(tier: Tier): boolean {
  * refuter for a `T0` site only (GEN-13f).
  */
 export function decideMechanisms(sig: CheapSignal): readonly Mechanism[] {
-  if (!shouldEscalate(sig)) return []; // base tier — one grounded proposal, all extras OFF
-  const mechanisms: Mechanism[] = ['self-consistency'];
-  if (sig.checkable && tierAtLeast(sig.tier, 'T1')) mechanisms.push('check-synthesis');
-  if (runsRefuter(sig.tier)) mechanisms.push('refuter');
-  return mechanisms;
+  if (!shouldEscalate(sig)) return [] // base tier — one grounded proposal, all extras OFF
+  const mechanisms: Mechanism[] = ["self-consistency"]
+  if (sig.checkable && tierAtLeast(sig.tier, "T1")) mechanisms.push("check-synthesis")
+  if (runsRefuter(sig.tier)) mechanisms.push("refuter")
+  return mechanisms
 }
 
 // ── advisory-vs-predicate default (GEN-13d) ────────────────────────────────────────────────────────────
 
 /** A candidate's default kind — an advisory claim or a mechanically-checked predicate. */
-export type CandidateKind = 'advisory' | 'predicate';
+export type CandidateKind = "advisory" | "predicate"
 
 /**
  * GEN-13d — a candidate defaults to ADVISORY unless it is mechanically checkable AND `tier≥T1`; only then is
@@ -101,28 +110,28 @@ export type CandidateKind = 'advisory' | 'predicate';
  * stays advisory.
  */
 export function defaultKind(sig: CheapSignal): CandidateKind {
-  return sig.checkable && tierAtLeast(sig.tier, 'T1') ? 'predicate' : 'advisory';
+  return sig.checkable && tierAtLeast(sig.tier, "T1") ? "predicate" : "advisory"
 }
 
 // ── analyzer choice: Semgrep before CodeQL (GEN-13g) ───────────────────────────────────────────────────
 
 /** The static-analysis engine a synthesized check runs on. Semgrep is the cheap one, CodeQL the expensive. */
-export type Analyzer = 'semgrep' | 'codeql';
+export type Analyzer = "semgrep" | "codeql"
 
 /**
  * GEN-13g — Semgrep (cheaper) is attempted FIRST; CodeQL is chosen only when Semgrep cannot express the
  * check. The expensive analyzer never runs before the cheap one.
  */
 export function chooseAnalyzer(semgrepExpressible: boolean): Analyzer {
-  return semgrepExpressible ? 'semgrep' : 'codeql';
+  return semgrepExpressible ? "semgrep" : "codeql"
 }
 
 // ── the query DB, built once (GEN-13h) ─────────────────────────────────────────────────────────────────
 
 /** An amortized query DB: built ONCE on first use, reused across every check (GEN-13h). */
 export interface QueryDb<T> {
-  get(): T;
-  builds(): number;
+  get(): T
+  builds(): number
 }
 
 /**
@@ -130,27 +139,27 @@ export interface QueryDb<T> {
  * never a per-check rebuild. The first `get()` builds and caches; every later `get()` returns the cache.
  */
 export function makeQueryDb<T>(build: () => T): QueryDb<T> {
-  let cached: { readonly db: T } | null = null;
-  let count = 0;
+  let cached: { readonly db: T } | null = null
+  let count = 0
   return {
     get(): T {
       if (cached === null) {
-        cached = { db: build() };
-        count += 1;
+        cached = { db: build() }
+        count += 1
       }
-      return cached.db;
+      return cached.db
     },
     builds(): number {
-      return count;
+      return count
     },
-  };
+  }
 }
 
 // ── scope: no whole-repo pass; scopable to a subtree (GEN-13i/j) ────────────────────────────────────────
 
 /** GEN-13j — a site is in scope when no `--scope` is set, or its `qualifiedPath` is under the scope prefix. */
 export function inScope(site: StructRef, scope?: string): boolean {
-  return scope === undefined || site.qualifiedPath.startsWith(scope);
+  return scope === undefined || site.qualifiedPath.startsWith(scope)
 }
 
 /**
@@ -159,15 +168,15 @@ export function inScope(site: StructRef, scope?: string): boolean {
  * born-from-work (GEN-13j).
  */
 export function plan(frontier: readonly Candidate[], scope?: string): readonly Candidate[] {
-  return frontier.filter((cand) => inScope(cand.site, scope));
+  return frontier.filter((cand) => inScope(cand.site, scope))
 }
 
 // ── per-stage cost (GEN-13k) ───────────────────────────────────────────────────────────────────────────
 
 /** Accumulates the per-stage LLM-call cost (GEN-13k). `report()` is the `GenesisReport` cost breakdown. */
 export interface CostRecorder {
-  record(stage: PipelineStage, llmCalls: number): void;
-  report(): CostReport;
+  record(stage: PipelineStage, llmCalls: number): void
+  report(): CostReport
 }
 
 /**
@@ -176,23 +185,23 @@ export interface CostRecorder {
  * count is the GEN-3 cost oracle (a function of the frontier, never of file/line count).
  */
 export function makeCostRecorder(): CostRecorder {
-  const byStage = new Map<PipelineStage, number>();
+  const byStage = new Map<PipelineStage, number>()
   return {
     record(stage: PipelineStage, llmCalls: number): void {
-      byStage.set(stage, (byStage.get(stage) ?? 0) + llmCalls);
+      byStage.set(stage, (byStage.get(stage) ?? 0) + llmCalls)
     },
     report(): CostReport {
-      return [...byStage.entries()].map(([stage, llmCalls]): StageCost => ({ stage, llmCalls }));
+      return [...byStage.entries()].map(([stage, llmCalls]): StageCost => ({ stage, llmCalls }))
     },
-  };
+  }
 }
 
 // ── the frozen BudgetApi binding ───────────────────────────────────────────────────────────────────────
 
 /** The controller's injected seams — the cheap-signal port + the per-stage cost recorder. */
 export interface BudgetDeps {
-  readonly signal: SignalOracle;
-  readonly cost: CostRecorder;
+  readonly signal: SignalOracle
+  readonly cost: CostRecorder
 }
 
 /**
@@ -204,15 +213,15 @@ export interface BudgetDeps {
 export function makeBudget(deps: BudgetDeps): BudgetApi {
   return {
     escalate(cand: Candidate, _budget: GenesisBudget): EscalationDecision {
-      const sig = deps.signal.signal(cand);
-      return { tier: sig.tier, mechanisms: decideMechanisms(sig) };
+      const sig = deps.signal.signal(cand)
+      return { tier: sig.tier, mechanisms: decideMechanisms(sig) }
     },
     report(): CostReport {
-      return deps.cost.report();
+      return deps.cost.report()
     },
-  };
+  }
 }
 
 // differential-vs-oracle (compile-time): `makeBudget` conforms to the frozen BudgetApi surface.
-const _budget: (deps: BudgetDeps) => BudgetApi = makeBudget;
-void _budget;
+const _budget: (deps: BudgetDeps) => BudgetApi = makeBudget
+void _budget

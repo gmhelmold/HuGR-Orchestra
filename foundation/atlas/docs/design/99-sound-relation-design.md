@@ -5,7 +5,7 @@ projection**, F2 = **exhaustive over resolved intra-repo edges**, F3 = **defer `
 (ship `depends-on`-proven only). Proposes an amendment to ADR-0015 D2 (relation family) — a new ADR
 (ADR-0021) carrying these decisions.
 
-Bench-prerequisite: the owner ruled relation is *primordial* — the #95 benchmark should measure a
+Bench-prerequisite: the owner ruled relation is _primordial_ — the #95 benchmark should measure a
 product that can ground a relation. This doc plans that capability, patiently and soundly (no
 gambiarra). Every "is" below is grounded in code (file:line); every "should" is a proposal.
 
@@ -13,8 +13,8 @@ gambiarra). Every "is" below is grounded in code (file:line); every "should" is 
 
 ## 1. Why this exists
 
-`#99` (task ledger): *"Atlas cannot ground a negative, a relation, or a transition — 5 seats hit
-the same wall."* The negation leg landed (#99b/#231/#232). This is the **relation** leg.
+`#99` (task ledger): _"Atlas cannot ground a negative, a relation, or a transition — 5 seats hit
+the same wall."_ The negation leg landed (#99b/#231/#232). This is the **relation** leg.
 
 Epistemic contract (ratified, `proven-vs-justified`): a fact may be **proven** (a re-runnable typed
 witness) or **justified** (grounded + a contestable derivation), else abstain. `proven` never
@@ -26,14 +26,15 @@ index can prove it, and is honest about where it cannot.
 ## 2. Ground truth (measured from the code, 4-seam investigation + direct verification)
 
 ### 2.1 The relation family today is advisory-class, end to end
+
 - **Identity** `packages/knowledge/src/write/relation-key.ts:65` — `relationKey(a, kind, b)` is
   **directed** (endpoints not sorted; `(A,depends-on,B) ≠ (B,depends-on,A)`), refuses self-relation,
   closed vocabulary `RELATION_KINDS = ['depends-on','calls']` (`relation-key.ts:21`).
 - **Node** `packages/knowledge/src/types.ts:109` — `RelationNode` carries `seal?: Seal`
   (`types.ts:122`) but **no `witness` and no `derivation` carrier** (those live only on
   `AdvisoryNode`, `types.ts:245/251`). A relation has **no `predicateSlot`**.
-- **Truth** `packages/genesis/src/admit-relation.ts:10-11` (header, verbatim): *"NO NEW TRUTH RULE
-  lives here: the relation reuses `deps.doors.grounded` (the advisory truth door)."* → relation is
+- **Truth** `packages/genesis/src/admit-relation.ts:10-11` (header, verbatim): _"NO NEW TRUTH RULE
+  lives here: the relation reuses `deps.doors.grounded` (the advisory truth door)."_ → relation is
   **grounded, never proven**.
 - **Write door drops the seal** `packages/adapter-io/src/governed-emit.ts:369` — the seal carrier is
   guarded `node.kind !== 'relation'`, so even a hand-set relation seal never reaches the durable row.
@@ -50,15 +51,17 @@ index can prove it, and is honest about where it cannot.
   via `atlas emit`/`atlas link` or the **test injector** `e2e-blackbox/test/author.ts:294`.
 
 ### 2.2 The proven-slot template (the machine to reuse), predicate-family only
+
 Seal `'proven'` is minted in **exactly one place** — `buildSound` at
 `packages/genesis/src/admit-harness.ts:448` — and only as an `AdvisoryNode`, reached only after a
 sound-oracle `proven` verdict. The oracle (`packages/genesis/src/verify-fact.ts`) proves
 `dependency`/`count`/`definition`; `FactVerdict` is **`proven | abstain`, never `refuted`**
-(`verify-fact.ts:60`) — a witnessed *existence* is sound under an incomplete index; an absence is
+(`verify-fact.ts:60`) — a witnessed _existence_ is sound under an incomplete index; an absence is
 abstained, never refuted. Read-back re-proves via `reverify-store.ts` (`WITNESSED_SLOTS` + `reqOf` +
 the same `VerifyFactLeg`).
 
 ### 2.3 The load-bearing constraint (verified directly, not second-hand)
+
 `packages/index/src/types.ts:139` — `ScipSymbolRole = 'definition' | 'reference'`. **There is no
 call-role in the frozen occurrence projection.** Therefore:
 
@@ -67,6 +70,7 @@ call-role in the frozen occurrence projection.** Therefore:
 > call-role occurrence data that `ScipOccurrence` does not carry.
 
 ### 2.4 The sound edge already exists, mechanically
+
 `packages/index/src/build.ts:212` `deriveEdges` produces `DepEdge{from, to, kind}` between
 **docHashes** (`types.ts:96`), with the **#189 soundness fix** on both loops:
 `isLocalSymbol(symbol) = symbol.startsWith('local ')` (`build.ts:154`) excludes document-scoped
@@ -86,6 +90,7 @@ repo.
 ## 3. Design
 
 ### 3.1 What we build: a **proven `depends-on` relation**, derived mechanically
+
 A `depends-on` relation `A → B` (both **unit** endpoints) is admitted **`proven`** iff the index
 witnesses a resolved reference from a source under A to a definition of a symbol under B — i.e. it is
 a `resolved` `DepEdge`, re-derivable on demand. No model proposes it; the **derivation is the
@@ -96,7 +101,9 @@ This is the sound-arm thesis at its limit: verifier = generator = the determinis
 0-false **by construction**, model-independent, and honest about its boundary (§3.3).
 
 ### 3.2 The proven-relation family machinery (built once, reused by any future relation producer)
+
 Six seams from §2.1 must gain a proven path (each is a WP candidate):
+
 1. **Witness carrier on `RelationNode`** (`types.ts`): a relation-shaped witness encoding the triple
    `(endpointA, relationKind, endpointB)` + the oracle leg — there is no slot to reuse.
 2. **A relation sound-admit + oracle** (`admit-relation.ts` / `verify-fact.ts`): a `verifyRelation`
@@ -113,6 +120,7 @@ Six seams from §2.1 must gain a proven path (each is a WP candidate):
 6. **Surface the seal** (`render.ts`: `atlas relations` + `atlas node`).
 
 ### 3.3 The honest boundary (documented non-behavior, not a silent gap)
+
 - **`calls` is NOT provable** from the frozen projection (§2.3). The proven path ships **`depends-on`
   only**. `calls` either stays unemitted or is emitted **advisory/justified** by a later LLM arm —
   never `proven`. This must be stated in the ADR + the honesty ledger, and a test must pin that a
@@ -125,6 +133,7 @@ Six seams from §2.1 must gain a proven path (each is a WP candidate):
 ---
 
 ### 3.4 Decisions locked by the cold suite-critic (2026-08-22)
+
 - **D-a — advisory→proven supersede**: a `proven depends-on A→B` supersedes any pre-existing advisory
   `A→B` (same `relationKey` identity; proven strictly stronger). Reuses the existing SUPERSEDE lineage —
   no silent duplicate, no downgrade.

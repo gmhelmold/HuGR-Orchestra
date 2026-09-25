@@ -30,19 +30,19 @@
 // (`packages/index/src/symbol-reverse.ts`), so that is a deliberate MINIMAL-but-COMPLETE restriction of
 // `indexPathsByHash`, not an approximation of it.
 
-import type { Hash } from '@atlas/contracts';
-import type { RelationKind } from '@atlas/knowledge';
-import type { SymbolReverseApi } from '@atlas/index';
-import { anyInScope, underScope } from './scope-predicate.js';
+import type { Hash } from "@atlas/contracts"
+import type { RelationKind } from "@atlas/knowledge"
+import type { SymbolReverseApi } from "@atlas/index"
+import { anyInScope, underScope } from "./scope-predicate.js"
 
 /** One "scope A depends on global symbol B" claim. `worldScope` is the directory the completeness check
  *  ranges over — retained as the `scope-open` diagnostic discriminant. (It formerly gated a REFUTE; that
  *  verdict is suppressed — see `FactVerdict` and step 4 below.) */
 export type DepClaim = {
-  readonly sourceScope: string;
-  readonly target: string;
-  readonly worldScope: string;
-};
+  readonly sourceScope: string
+  readonly target: string
+  readonly worldScope: string
+}
 
 /** The oracle's verdict — PROVE or ABSTAIN, never a throw, never a silent guess. `reason` is present on
  *  `abstain` (the durable-record discriminant, mirroring `AbstainedRecord['reason']`'s shape) and absent on
@@ -59,12 +59,12 @@ export type DepClaim = {
  *  completeness is established (dist↔src symbol canonicalisation, the #189 family). The SAME mechanism is a
  *  latent risk in the shipped negation door's closed-world ADMIT — flagged separately, not touched here. */
 export type FactVerdict = {
-  readonly verdict: 'proven' | 'abstain';
-  readonly reason?: string;
-  readonly oracle: 'symbol-reverse';
-};
+  readonly verdict: "proven" | "abstain"
+  readonly reason?: string
+  readonly oracle: "symbol-reverse"
+}
 
-const abstain = (reason: string): FactVerdict => ({ verdict: 'abstain', reason, oracle: 'symbol-reverse' });
+const abstain = (reason: string): FactVerdict => ({ verdict: "abstain", reason, oracle: "symbol-reverse" })
 
 /**
  * PROVE/REFUTE/ABSTAIN on `claim`, over the live `reverse` completeness feed (`SymbolReverseApi`,
@@ -89,17 +89,17 @@ export function verifyDependency(
   pathOfHash: (h: Hash) => string | undefined,
   isLocal: (sym: string) => boolean,
 ): FactVerdict {
-  const { sourceScope, target, worldScope } = claim;
-  if (target.length === 0 || sourceScope.length === 0 || worldScope.length === 0) return abstain('malformed');
-  if (isLocal(target)) return abstain('target-not-global');
-  if (!reverse.resolves(target)) return abstain('target-unresolvable');
+  const { sourceScope, target, worldScope } = claim
+  if (target.length === 0 || sourceScope.length === 0 || worldScope.length === 0) return abstain("malformed")
+  if (isLocal(target)) return abstain("target-not-global")
+  if (!reverse.resolves(target)) return abstain("target-unresolvable")
 
   if (anyInScope(reverse.reverseCallers(target), pathOfHash, sourceScope)) {
-    return { verdict: 'proven', oracle: 'symbol-reverse' };
+    return { verdict: "proven", oracle: "symbol-reverse" }
   }
   // No witnessed caller under sourceScope. NOT a refute (cross-package completeness is not guaranteed —
   // see FactVerdict): abstain either way, the reason is a diagnostic only.
-  return abstain(anyInScope(reverse.holeSources(), pathOfHash, worldScope) ? 'scope-open' : 'no-caller-in-scope');
+  return abstain(anyInScope(reverse.holeSources(), pathOfHash, worldScope) ? "scope-open" : "no-caller-in-scope")
 }
 
 /** One "global symbol B is DEFINED under scope A" claim (#196d). No `worldScope`: a definition is a POSITIVE
@@ -108,9 +108,9 @@ export function verifyDependency(
  *  `scope-open` diagnostic the dependency/count oracles carry `worldScope` for). Mirrors `DepClaim` minus that
  *  leg. */
 export type DefClaim = {
-  readonly sourceScope: string;
-  readonly target: string;
-};
+  readonly sourceScope: string
+  readonly target: string
+}
 
 /**
  * PROVE/ABSTAIN on `claim`, over the live `reverse` feed (`SymbolReverseApi`, @atlas/index) — the DEFINITION
@@ -135,19 +135,19 @@ export function verifyDefinition(
   pathOfHash: (h: Hash) => string | undefined,
   isLocal: (sym: string) => boolean,
 ): FactVerdict {
-  const { sourceScope, target } = claim;
-  if (target.length === 0 || sourceScope.length === 0) return abstain('malformed');
-  if (isLocal(target)) return abstain('target-not-global');
-  if (!reverse.resolves(target)) return abstain('target-unresolvable');
+  const { sourceScope, target } = claim
+  if (target.length === 0 || sourceScope.length === 0) return abstain("malformed")
+  if (isLocal(target)) return abstain("target-not-global")
+  if (!reverse.resolves(target)) return abstain("target-unresolvable")
 
-  const defHash = reverse.definesAt(target); // present by construction once `resolves` is true; kept total either way
-  const defPath = defHash === undefined ? undefined : pathOfHash(defHash);
+  const defHash = reverse.definesAt(target) // present by construction once `resolves` is true; kept total either way
+  const defPath = defHash === undefined ? undefined : pathOfHash(defHash)
   if (defPath !== undefined && underScope(defPath, sourceScope)) {
-    return { verdict: 'proven', oracle: 'symbol-reverse' };
+    return { verdict: "proven", oracle: "symbol-reverse" }
   }
   // Defined in the index, but not under this scope (or def-doc path unknown — fail-closed). A scoped
   // non-answer, NOT a refutation (the symbol is not proved undefined; it is proved defined ELSEWHERE).
-  return abstain('def-out-of-scope');
+  return abstain("def-out-of-scope")
 }
 
 /** One "unit A `relationKind` unit B" claim (#99 sound relation, ADR-0018). No `worldScope`: a proven relation
@@ -166,18 +166,18 @@ export function verifyDefinition(
  *  is the global SCIP symbol under endpointB. Only `'depends-on'` is mechanically provable (F3, §2.3 — SCIP has
  *  no call-role occurrence, so `calls` cannot be proven distinct from a reference). */
 export type RelationClaim = {
-  readonly relationKind: RelationKind;
-  readonly target: string;
-  readonly sourceScope: string;
-  readonly endpointA: string;
-  readonly endpointB: string;
-};
+  readonly relationKind: RelationKind
+  readonly target: string
+  readonly sourceScope: string
+  readonly endpointA: string
+  readonly endpointB: string
+}
 
 /** The FILE portion of a unit key — endpoints are qualifiedPaths and may carry a `::symbol` structural
  *  refinement (KNOW-15d's `::` join); `pathOfHash` yields the BARE doc path, so strip from the first `::` on so
  *  the two can be compared for equality. (A bare file path — the mechanical projection's own endpoint form,
  *  `relation-derive.ts` — passes through unchanged.) */
-const docOf = (x: string): string => x.split('::')[0] ?? x;
+const docOf = (x: string): string => x.split("::")[0] ?? x
 
 /**
  * PROVE/ABSTAIN on `claim`, over the live `reverse` feed (`SymbolReverseApi`, @atlas/index) — the RELATION class
@@ -209,27 +209,27 @@ export function verifyRelation(
   pathOfHash: (h: Hash) => string | undefined,
   isLocal: (sym: string) => boolean,
 ): FactVerdict {
-  const { relationKind, target, sourceScope, endpointA, endpointB } = claim;
+  const { relationKind, target, sourceScope, endpointA, endpointB } = claim
   if (target.length === 0 || sourceScope.length === 0 || endpointA.length === 0 || endpointB.length === 0) {
-    return abstain('malformed');
+    return abstain("malformed")
   }
-  if (relationKind !== 'depends-on') return abstain('relation-kind-not-provable'); // AR-5 — calls is not provable
-  if (isLocal(target)) return abstain('target-not-global');
-  if (!reverse.resolves(target)) return abstain('target-unresolvable'); // AR-3/AR-17 — phantom/dynamic/cross-language
+  if (relationKind !== "depends-on") return abstain("relation-kind-not-provable") // AR-5 — calls is not provable
+  if (isLocal(target)) return abstain("target-not-global")
+  if (!reverse.resolves(target)) return abstain("target-unresolvable") // AR-3/AR-17 — phantom/dynamic/cross-language
 
   // BINDING 1 — endpointA must be a REAL referrer of `target` at FILE granularity (not merely a file under
   // `sourceScope`; a DIFFERENT file in that directory referencing `target` is not THIS endpoint's edge).
-  const docA = docOf(endpointA);
+  const docA = docOf(endpointA)
   if (!reverse.reverseCallers(target).some((h) => pathOfHash(h) === docA)) {
-    return abstain('endpointA-not-a-referrer');
+    return abstain("endpointA-not-a-referrer")
   }
   // BINDING 2 — endpointB must be the DEFINER of `target` (an existing-but-wrong file is not this edge's object).
-  const defHash = reverse.definesAt(target);
-  const defPath = defHash === undefined ? undefined : pathOfHash(defHash);
+  const defHash = reverse.definesAt(target)
+  const defPath = defHash === undefined ? undefined : pathOfHash(defHash)
   if (defPath === undefined || defPath !== docOf(endpointB)) {
-    return abstain('endpointB-not-the-definer');
+    return abstain("endpointB-not-the-definer")
   }
   // BOTH endpoints bound to the witnessed edge — a proven cross-unit reference, SOUND IN ANY WORLD. NOT a refute
   // (cross-package completeness is not guaranteed — see FactVerdict). No worldScope leg (a positive needs none).
-  return { verdict: 'proven', oracle: 'symbol-reverse' };
+  return { verdict: "proven", oracle: "symbol-reverse" }
 }

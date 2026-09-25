@@ -8,7 +8,7 @@
 // the frozen `AlignApi`. It FEEDS the batch to the injected human `Ratifier`; ratification routing is not
 // defined here.
 
-import type { Fact, OpenQ, Ratified } from './types.js';
+import type { Fact, OpenQ, Ratified } from "./types.js"
 
 export interface AlignApi {
   /** S3 batched, ranked ratification (GEN-5). Consumes the OPEN questions (ranked by blast×tier) and
@@ -16,23 +16,23 @@ export interface AlignApi {
    *  fact passes THROUGH here — no auto-promote path exists; the batch is served together (size > 1),
    *  never one question at a time. Capped at the top 20 Q/session; the tail defers or defaults to
    *  `T0-strict deny`. */
-  interview(open: readonly OpenQ[]): readonly Ratified[];
+  interview(open: readonly OpenQ[]): readonly Ratified[]
 }
 
 /**
  * The genesis-domain write status (GEN-5). A genesis write is ALWAYS a `candidate`; `ratified` is reachable
  * ONLY through the human interview edge (never auto-promoted). NOT the @atlas/contracts invariant `Status`.
  */
-export type Candidacy = 'candidate' | 'ratified';
+export type Candidacy = "candidate" | "ratified"
 
 /** A written genesis object — the seeded fact plus its candidacy. Genesis writes only `candidate` (GEN-5a). */
 export interface Written {
-  readonly status: Candidacy;
-  readonly fact: Fact;
+  readonly status: Candidacy
+  readonly fact: Fact
 }
 
 /** The top-`20`-questions-per-session cap on the ratification interview (GEN-5, atlas-genesis §S3). */
-export const INTERVIEW_CAP = 20 as const;
+export const INTERVIEW_CAP = 20 as const
 
 /**
  * One batched, ranked ratification interview (GEN-5). Carries the questions TOGETHER (size > 1 when there is
@@ -40,14 +40,14 @@ export const INTERVIEW_CAP = 20 as const;
  * rank order; the batch is capped at `cap` per session.
  */
 export interface InterviewBatch {
-  readonly questions: readonly OpenQ[];
-  readonly cap: number;
+  readonly questions: readonly OpenQ[]
+  readonly cap: number
 }
 
 /** The assembled interview: the capped batch plus the deferred tail (next session / `T0`-strict deny). */
 export interface AssembledInterview {
-  readonly batch: InterviewBatch;
-  readonly deferred: readonly OpenQ[];
+  readonly batch: InterviewBatch
+  readonly deferred: readonly OpenQ[]
 }
 
 /**
@@ -55,22 +55,22 @@ export interface AssembledInterview {
  * Ratification routing / tiers are NOT defined here (card exclusions) — this WP only assembles + feeds.
  */
 export interface Ratifier {
-  ratify(batch: InterviewBatch): readonly Ratified[];
+  ratify(batch: InterviewBatch): readonly Ratified[]
 }
 
 /** The injected seams this facet calls. Nothing here is authored by this WP — it feeds the batch. */
 export interface AlignDeps {
-  readonly ratifier: Ratifier;
+  readonly ratifier: Ratifier
 }
 
 /** A ratify-router state (GEN-5c). A produced seed is `proposed`, written to `candidate`, ratified only via the interview. */
-export type RatifyState = 'proposed' | 'candidate' | 'ratified';
+export type RatifyState = "proposed" | "candidate" | "ratified"
 
 /** One router edge (GEN-5c). `via` is CLOSED to `write | interview` — no auto-promote transition is expressible. */
 export interface RouterEdge {
-  readonly from: RatifyState;
-  readonly to: RatifyState;
-  readonly via: 'write' | 'interview';
+  readonly from: RatifyState
+  readonly to: RatifyState
+  readonly via: "write" | "interview"
 }
 
 /**
@@ -79,16 +79,16 @@ export interface RouterEdge {
  * edge — a `T0` / contested candidate cannot reach `ratified` without the interview.
  */
 export const ROUTER_EDGES: readonly RouterEdge[] = [
-  { from: 'proposed', to: 'candidate', via: 'write' },
-  { from: 'candidate', to: 'ratified', via: 'interview' },
-];
+  { from: "proposed", to: "candidate", via: "write" },
+  { from: "candidate", to: "ratified", via: "interview" },
+]
 
 /**
  * GEN-5a — write every produced seed as a `candidate`. A high-confidence seed is STILL a candidate: no
  * self-declaration promotes a write to `ratified` (the only promotion edge is the human interview, GEN-5c).
  */
 export function writeCandidates(facts: readonly Fact[]): readonly Written[] {
-  return facts.map((fact) => ({ status: 'candidate' as const, fact }));
+  return facts.map((fact) => ({ status: "candidate" as const, fact }))
 }
 
 /**
@@ -97,19 +97,19 @@ export function writeCandidates(facts: readonly Fact[]): readonly Written[] {
  * a one-question-at-a-time drip — the batch is a single object.
  */
 export function assembleInterview(open: readonly OpenQ[]): AssembledInterview {
-  const questions = open.slice(0, INTERVIEW_CAP);
-  const deferred = open.slice(INTERVIEW_CAP);
-  return { batch: { questions, cap: INTERVIEW_CAP }, deferred };
+  const questions = open.slice(0, INTERVIEW_CAP)
+  const deferred = open.slice(INTERVIEW_CAP)
+  return { batch: { questions, cap: INTERVIEW_CAP }, deferred }
 }
 
 /** GEN-5c — the router edges that reach `ratified`. Exactly one, and it is `via:'interview'`. */
 export function edgesToRatified(): readonly RouterEdge[] {
-  return ROUTER_EDGES.filter((e) => e.to === 'ratified');
+  return ROUTER_EDGES.filter((e) => e.to === "ratified")
 }
 
 /** GEN-5c — no auto-promote path exists: a candidate never reaches `ratified` without the human interview. */
 export function canAutoPromote(): boolean {
-  return false;
+  return false
 }
 
 /**
@@ -121,12 +121,12 @@ export function canAutoPromote(): boolean {
 export function makeAlign(deps: AlignDeps): AlignApi {
   return {
     interview: (open: readonly OpenQ[]): readonly Ratified[] => {
-      const { batch } = assembleInterview(open);
-      return deps.ratifier.ratify(batch); // fed as ONE batch — never a per-question drip (GEN-5d)
+      const { batch } = assembleInterview(open)
+      return deps.ratifier.ratify(batch) // fed as ONE batch — never a per-question drip (GEN-5d)
     },
-  };
+  }
 }
 
 // differential-vs-oracle (compile-time): `makeAlign` conforms to the frozen AlignApi surface.
-const _align: (deps: AlignDeps) => AlignApi = makeAlign;
-void _align;
+const _align: (deps: AlignDeps) => AlignApi = makeAlign
+void _align

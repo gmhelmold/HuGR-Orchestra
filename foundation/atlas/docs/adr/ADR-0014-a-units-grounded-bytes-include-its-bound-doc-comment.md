@@ -1,7 +1,7 @@
 # ADR-0014 — a unit's grounded bytes include its bound leading doc-comment
 
-- **Status:** Proposed (2026-08-09), **revised after cold review** (§"Cold-review corrections"). The *finding*
-  (GAP-2) is measured on the shipped binary; the *unit-boundary redefinition* and the *golden amendment* it
+- **Status:** Proposed (2026-08-09), **revised after cold review** (§"Cold-review corrections"). The _finding_
+  (GAP-2) is measured on the shipped binary; the _unit-boundary redefinition_ and the _golden amendment_ it
   needs are **NOT yet ratified** — this ADR is written so the owner ratifies a measured scope, not a summary.
 - **Spec author:** lead, grounded against master `ce91a08`. Cold-reviewed by an independent seat 2026-08-09;
   the FIX-FIRST findings are folded in and the corrected claims are marked below.
@@ -15,13 +15,13 @@
 - **Amends (ratified surfaces) — all four that encode "header above ⇒ FRESH", named after cold review:**
   (1) the unit-boundary definition feeding `INV-GROUND-1`/`INV-GROUND-5` (what "the cited unit's OWN bytes"
   spans); (2) the GROUND-5 GOLDEN header clause (`docs/design/functional-surface.md:93`, `product-framing.md:
-  115`, `docs/reference/atlas-grounding.md:164`); (3) the NORMATIVE clause `REQ-GROUND-5b`
+115`, `docs/reference/atlas-grounding.md:164`); (3) the NORMATIVE clause `REQ-GROUND-5b`
   (`docs/requirements/req-grd.md:92-93`), whose parenthetical "import/**license header added above it** … MUST
   NOT drift" must gain the contiguity qualification; (4) the PROP-GROUND-5 ARBITRARY
   (`docs/requirements/properties-grd.md:75`), which lists "license header added above" in the NON-TOUCHING ⇒
   FRESH class — that instance moves to the TOUCHING class. **The PROP-GROUND-5 LAW is unchanged** (`FRESH ⟺
-  subtree(U) byte-identical`): this ADR changes what `subtree(U)` spans, so the law holds verbatim and only the
-  arbitrary's *classification* of a contiguous header is re-partitioned. Per the co-amendment rule (#198), all
+subtree(U) byte-identical`): this ADR changes what `subtree(U)` spans, so the law holds verbatim and only the
+  arbitrary's _classification_ of a contiguous header is re-partitioned. Per the co-amendment rule (#198), all
   four move in the same commit as the code.
 - **Does NOT force a `FOLD_DOMAIN` re-key** (corrected — see §Migration and §Cold-review corrections #2).
 - **Does NOT touch:** the span carrier (`grounding/src/span.ts`, additive, drift-invariant), or GROUND-2
@@ -37,8 +37,8 @@ content: src.slice(decl.node.startIndex, decl.node.endIndex),   // itemNode (:20
 content: src.slice(node.startIndex, node.endIndex),             // blockNode (:190)
 ```
 
-Tree-sitter's declaration/method node does not include the leading comment (a comment is a *preceding
-sibling*), so both slices exclude it. `packages/index/src/rollup.ts:83-88` folds a node's hash over its own
+Tree-sitter's declaration/method node does not include the leading comment (a comment is a _preceding
+sibling_), so both slices exclude it. `packages/index/src/rollup.ts:83-88` folds a node's hash over its own
 content plus its named child hashes; the drift oracle (`drift.ts:98-104`) compares the anchor's recorded
 `subtreeHash` against the node's current one. So a fact whose evidence lives in a declaration's (or a method's)
 leading doc-comment, anchored to that unit, is watched by bytes that **exclude the comment the fact came
@@ -90,7 +90,7 @@ The ratified golden (`docs/design/functional-surface.md:93`, `product-framing.md
 The cold review produced a counterexample that breaks this under any doc-association rule:
 
 ```ts
-import x from './x';
+import x from "./x"
 /** @license Copyright 2026 */
 export function foo() {}
 ```
@@ -106,8 +106,8 @@ position-free rule and an honest AMEND of the golden:
 > **GROUND-5 (amended header clause):** the FRESH-on-add classification is decided by **contiguity, not file
 > position**. A comment separated from the declaration by ≥1 blank line (the conventional file-top or
 > above-the-decl header), or an import/rename that is not a comment, stays **FRESH**. A comment **contiguous**
-> with a declaration (no blank line), *including a comment at the very start of a file directly above the first
-> declaration*, is that declaration's documentation and a change to it **DRIFTS** the unit. There is no
+> with a declaration (no blank line), _including a comment at the very start of a file directly above the first
+> declaration_, is that declaration's documentation and a change to it **DRIFTS** the unit. There is no
 > file-leading exception — a header meant to stay FRESH is, by universal convention, blank-line-separated from
 > the first declaration, and that is exactly the case that stays FRESH.
 
@@ -209,5 +209,5 @@ precedent (correct in the open, do not quietly overwrite):
 7. **The amend list was incomplete.** Only the golden was named; the normative `REQ-GROUND-5b`
    (`req-grd.md:92-93`) and the `PROP-GROUND-5` arbitrary (`properties-grd.md:75`) also encode "header above ⇒
    FRESH" and are now in the Amends list, with the note that the PROP LAW is unchanged and only the arbitrary's
-   partition of a *contiguous* header moves. The import-above witness `SCN-GROUND-5b` does NOT regress (an
+   partition of a _contiguous_ header moves. The import-above witness `SCN-GROUND-5b` does NOT regress (an
    import is not a `comment` node, so no run binds — confirmed).

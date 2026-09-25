@@ -40,6 +40,7 @@ calls it to order/prune ITS OWN canonical writes, where re-deriving `genPath` fr
 writer is re-deriving its own naming convention, not an external one.
 
 **Invariants preserved (checked against the file's own header, each with the test that pins it):**
+
 - a corrupt generation still occupies its name, so the next commit aims above it — `read.top` still reports
   the highest matched number even when that generation is unparseable (pinned:
   `sidecar-generation-filename.test.ts` NEGATIVE case, and the pre-existing `sidecar.test.ts` LEG 2 cases,
@@ -76,7 +77,7 @@ that was previously free to vary.
 reviewer's instruction:** a 6th case, `DETERMINISM: …`, writes `projection.7.json` and `projection.007.json`
 with distinguishable content across 20 freshly-created directories, alternating the write order between the
 two files, and asserts every one of the 20 reads returns the SAME winner. This case has no red/green proof: the
-defect it guards is an *unspecified* result, and an unspecified result can come out "right" by luck on any
+defect it guards is an _unspecified_ result, and an unspecified result can come out "right" by luck on any
 given filesystem/run — confirmed empirically during authoring, where the pre-tiebreak sort passed this exact
 case 5/5 times on the authoring machine despite being genuinely order-dependent. A single-directory,
 single-read assertion could therefore pass on the buggy code by accident; running it across 20 directories with

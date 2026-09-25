@@ -31,77 +31,81 @@
 // and it is left alone: retuning the measurement and widening the walk in one change would make it
 // impossible to say which one moved a file across the line.
 
-import { execFileSync } from 'node:child_process';
-import { readFileSync } from 'node:fs';
-import { join, dirname } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { execFileSync } from "node:child_process"
+import { readFileSync } from "node:fs"
+import { join, dirname } from "node:path"
+import { fileURLToPath } from "node:url"
 
 // Two-tier ceiling (owner-set 2026-08-12): TARGET is the bar we ASK for; HARD is the bar we ENFORCE.
 // A file in (TARGET, HARD] is WARNED — over the target, still allowed — so the 400-line discipline stays
 // visible without blocking work on a module that legitimately needs the slack. A file over HARD FAILS the
 // build. `> TARGET` / `> HARD` are both exclusive (a file measuring exactly the number is under it).
-const TARGET = 400; // the requested ceiling — exceeding it warns, never fails.
-const HARD = 600; // the enforced ceiling — exceeding it fails the build.
+const TARGET = 400 // the requested ceiling — exceeding it warns, never fails.
+const HARD = 600 // the enforced ceiling — exceeding it fails the build.
 
 // Repo root, OVERRIDABLE so the gate's own test can point it at a fixture repo. Without this the untracked
 // and harness legs could only be checked by hand against the live tree — precisely the "trust me" the gate
 // exists to abolish. It also makes the root independent of CWD, which the `git ls-files` form was not.
-const ROOT = process.env.GODFILE_GUARD_ROOT ?? join(dirname(fileURLToPath(import.meta.url)), '..', '..');
+const ROOT = process.env.GODFILE_GUARD_ROOT ?? join(dirname(fileURLToPath(import.meta.url)), "..", "..")
 
 /** Scope roots and what counts as a source file in each. */
 const SCOPES = [
-  { dir: 'packages', include: (p) => /\.ts$/.test(p) && !/\.d\.ts$/.test(p) },
-  { dir: 'harness', include: (p) => /\.mjs$/.test(p) },
-];
+  { dir: "packages", include: (p) => /\.ts$/.test(p) && !/\.d\.ts$/.test(p) },
+  { dir: "harness", include: (p) => /\.mjs$/.test(p) },
+]
 
-let listed;
+let listed
 try {
   // `--cached` (tracked) ∪ `--others --exclude-standard` (untracked, not ignored). `-z` so a newline in a
   // path cannot split one entry into two.
   listed = execFileSync(
-    'git',
-    ['ls-files', '-z', '--cached', '--others', '--exclude-standard', '--', ...SCOPES.map((s) => s.dir)],
-    { cwd: ROOT, encoding: 'utf8' },
+    "git",
+    ["ls-files", "-z", "--cached", "--others", "--exclude-standard", "--", ...SCOPES.map((s) => s.dir)],
+    { cwd: ROOT, encoding: "utf8" },
   )
-    .split('\0')
-    .filter((p) => p !== '');
+    .split("\0")
+    .filter((p) => p !== "")
 } catch (e) {
   // A gate that cannot build its file list has checked NOTHING, and must say so rather than exit 0.
-  console.error(`godfile-guard: FAIL\n\n  ✗ could not list files under ${ROOT}: ${e.message.split('\n')[0]}`);
-  process.exit(1);
+  console.error(`godfile-guard: FAIL\n\n  ✗ could not list files under ${ROOT}: ${e.message.split("\n")[0]}`)
+  process.exit(1)
 }
 
-const files = [...new Set(listed)].filter((p) => SCOPES.some((s) => p.startsWith(`${s.dir}/`) && s.include(p))).sort();
+const files = [...new Set(listed)].filter((p) => SCOPES.some((s) => p.startsWith(`${s.dir}/`) && s.include(p))).sort()
 
-const offenders = []; // over HARD — fail the build
-const warnings = []; // in (TARGET, HARD] — over the requested bar, allowed
+const offenders = [] // over HARD — fail the build
+const warnings = [] // in (TARGET, HARD] — over the requested bar, allowed
 for (const path of files) {
-  let lines;
+  let lines
   try {
-    lines = readFileSync(join(ROOT, path), 'utf8').split('\n').length;
+    lines = readFileSync(join(ROOT, path), "utf8").split("\n").length
   } catch {
-    continue; // deleted-but-staged edge; skip
+    continue // deleted-but-staged edge; skip
   }
-  if (lines > HARD) offenders.push({ path, lines });
-  else if (lines > TARGET) warnings.push({ path, lines });
+  if (lines > HARD) offenders.push({ path, lines })
+  else if (lines > TARGET) warnings.push({ path, lines })
 }
 
 // Warnings are printed on every run, pass or fail: the 400-line discipline stays visible even though
 // exceeding it no longer blocks. Printed BEFORE the fail branch so no path reports a result without them.
 if (warnings.length > 0) {
-  warnings.sort((a, b) => b.lines - a.lines);
-  console.log(`godfile-guard: ${warnings.length} file(s) over the ${TARGET}-LOC target (allowed, ≤${HARD}):`);
-  for (const { path, lines } of warnings) console.log(`  ${lines}\t${path}`);
-  console.log('');
+  warnings.sort((a, b) => b.lines - a.lines)
+  console.log(`godfile-guard: ${warnings.length} file(s) over the ${TARGET}-LOC target (allowed, ≤${HARD}):`)
+  for (const { path, lines } of warnings) console.log(`  ${lines}\t${path}`)
+  console.log("")
 }
 
 if (offenders.length > 0) {
-  offenders.sort((a, b) => b.lines - a.lines);
-  console.error(`godfile-guard: ${offenders.length} file(s) over the ${HARD}-LOC hard ceiling:`);
-  for (const { path, lines } of offenders) console.error(`  ${lines}\t${path}`);
-  console.error(`\nSplit each into cohesive units (target ≤${TARGET}, hard limit ${HARD}). No #[allow], no bypass — fix at the root.`);
-  process.exit(1);
+  offenders.sort((a, b) => b.lines - a.lines)
+  console.error(`godfile-guard: ${offenders.length} file(s) over the ${HARD}-LOC hard ceiling:`)
+  for (const { path, lines } of offenders) console.error(`  ${lines}\t${path}`)
+  console.error(
+    `\nSplit each into cohesive units (target ≤${TARGET}, hard limit ${HARD}). No #[allow], no bypass — fix at the root.`,
+  )
+  process.exit(1)
 }
 
-const per = SCOPES.map((s) => `${files.filter((p) => p.startsWith(`${s.dir}/`)).length} ${s.dir}`).join(' + ');
-console.log(`godfile-guard: OK — ${files.length} source file(s) (${per}), tracked AND untracked, all ≤${HARD} LOC (target ${TARGET}).`);
+const per = SCOPES.map((s) => `${files.filter((p) => p.startsWith(`${s.dir}/`)).length} ${s.dir}`).join(" + ")
+console.log(
+  `godfile-guard: OK — ${files.length} source file(s) (${per}), tracked AND untracked, all ≤${HARD} LOC (target ${TARGET}).`,
+)

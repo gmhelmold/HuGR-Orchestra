@@ -32,7 +32,7 @@ anchor path. That is the entire new mechanism. Everything else (freshness, gates
 `GroundedFact` becomes a THREE-variant union. The discriminant stays `kind`.
 
 ```ts
-export type GroundedFact = AdvisoryNode | PredicateNode | RelationNode;
+export type GroundedFact = AdvisoryNode | PredicateNode | RelationNode
 
 /** The closed relation vocabulary (NORMATIVE, additive-only — a new kind is a `cv` bump, exactly like
  *  PredicateSlot). Directed: `endpointA <kind> endpointB` reads left-to-right. Seeded minimal + honest —
@@ -41,22 +41,22 @@ export type GroundedFact = AdvisoryNode | PredicateNode | RelationNode;
  *  edge-RESOLUTION status, not relation SEMANTICS; ADR-0015's "reuse EdgeKind" is corrected here to "reuse
  *  the index dependency AXIS as the drift/witness source", not its status enum. */
 export type RelationKind =
-  | 'depends-on'   // A's unit references/imports B's unit (the dependency axis edge, grounded)
-  | 'calls';       // A's body calls B (a resolved call edge)
+  | "depends-on" // A's unit references/imports B's unit (the dependency axis edge, grounded)
+  | "calls" // A's body calls B (a resolved call edge)
 
 export interface RelationNode {
-  readonly kind: 'relation';
-  readonly id: NodeKey;               // = relationKey (see §2); minted, never trusted from payload
-  readonly tier: Tier;
-  readonly relationKind: RelationKind;
-  readonly endpointA: string;         // location-free unitKey — the qualifiedPath of A's anchor (identity leg)
-  readonly endpointB: string;         // location-free unitKey — the qualifiedPath of B's anchor (identity leg)
-  readonly grounding: Grounding;      // EXACTLY two entries: entry[0] anchors A, entry[1] anchors B (freshness)
-  readonly freshness: KnowledgeFreshness;
-  readonly claims: readonly ClaimEntry[];
-  readonly authoring: 'RELATED' | 'SUPERSEDED';   // mirrors advisory/predicate authoring literal
-  readonly scope?: string;            // KNOW-11a — the write scope (authz)
-  readonly obviousness?: ObviousnessScore;  // ADR-0012 — additive, absent-tolerant
+  readonly kind: "relation"
+  readonly id: NodeKey // = relationKey (see §2); minted, never trusted from payload
+  readonly tier: Tier
+  readonly relationKind: RelationKind
+  readonly endpointA: string // location-free unitKey — the qualifiedPath of A's anchor (identity leg)
+  readonly endpointB: string // location-free unitKey — the qualifiedPath of B's anchor (identity leg)
+  readonly grounding: Grounding // EXACTLY two entries: entry[0] anchors A, entry[1] anchors B (freshness)
+  readonly freshness: KnowledgeFreshness
+  readonly claims: readonly ClaimEntry[]
+  readonly authoring: "RELATED" | "SUPERSEDED" // mirrors advisory/predicate authoring literal
+  readonly scope?: string // KNOW-11a — the write scope (authz)
+  readonly obviousness?: ObviousnessScore // ADR-0012 — additive, absent-tolerant
 }
 ```
 
@@ -77,7 +77,7 @@ A NEW pure function, sibling to `nodeKey`, that does NOT go through `deepestComm
  *  Minted through the SEALED kernel seam (canonicalForm ‖ defaultEncoder.hash ‖ asNodeKey) — no raw hashing.
  *  TOTAL over unknown: a missing/empty endpoint or an off-vocabulary kind yields the refusal, never a throw
  *  of raw TypeError out of a door. */
-export function relationKey(a: string, kind: RelationKind, b: string): NodeKey;
+export function relationKey(a: string, kind: RelationKind, b: string): NodeKey
 ```
 
 - Refuses (throws a NAMED `MalformedRelationError`, converted to a fail-closed verdict by the door, mirroring
@@ -101,16 +101,16 @@ A relation is a THIRD `NodeFamily`. Routing semantics:
 
 The relation enters the SAME 16-gate governed door, with exactly TWO gates re-routed and the rest unchanged:
 
-| gate | for advisory/predicate | for relation |
-|---|---|---|
-| 0 WELL-FORMED | tier·scope·family | + `relationKind ∈ RELATION_KINDS`, `endpointA/B` non-empty, `A≠B` |
-| 0.5 ADDRESSABLE | `id(node)` CAS-nameable | unchanged (whole node bytes) |
-| 1 TRUTH DOOR | `gateHolds` re-derives grounding FRESH | unchanged — **grounding has 2 entries, `driftDetect` AND-folds both** (drift.ts:98). Drift-if-either is free. |
-| 2 AUTHZ | `actorInScope(scope)` | unchanged |
-| 2.1 ANCHOR | `scopeOwnsAnchor(scope, primaryAnchor)` | **re-routed**: a relation has no single primary anchor. Bind scope against `endpointA` (the SUBJECT of the directed fact). `primaryAnchorId` is NOT called (would throw). See §4a. |
-| 2.25 INCUMBENT | 4 target-derived gates keyed on `nodeKey` | keyed on `relationKey`; the four incumbent gates apply verbatim (scope authority, corroboration, no-relocation, no-downgrade) |
-| 2.5 RATIFY | `route(candidate, ctx)` | unchanged — a relation is advisory-family for ratification (grounded ∧ lowRisk ∧ T2 ∧ ¬contested auto-accepts; T0 relation needs the token) |
-| 3 UPSERT+PUT | `upsert(WriteRequest)` + `store.put` | `WriteRequest.nodeKey = relationKey`, `family='relation'`; put the whole RelationNode into CAS |
+| gate            | for advisory/predicate                    | for relation                                                                                                                                                                       |
+| --------------- | ----------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 0 WELL-FORMED   | tier·scope·family                         | + `relationKind ∈ RELATION_KINDS`, `endpointA/B` non-empty, `A≠B`                                                                                                                  |
+| 0.5 ADDRESSABLE | `id(node)` CAS-nameable                   | unchanged (whole node bytes)                                                                                                                                                       |
+| 1 TRUTH DOOR    | `gateHolds` re-derives grounding FRESH    | unchanged — **grounding has 2 entries, `driftDetect` AND-folds both** (drift.ts:98). Drift-if-either is free.                                                                      |
+| 2 AUTHZ         | `actorInScope(scope)`                     | unchanged                                                                                                                                                                          |
+| 2.1 ANCHOR      | `scopeOwnsAnchor(scope, primaryAnchor)`   | **re-routed**: a relation has no single primary anchor. Bind scope against `endpointA` (the SUBJECT of the directed fact). `primaryAnchorId` is NOT called (would throw). See §4a. |
+| 2.25 INCUMBENT  | 4 target-derived gates keyed on `nodeKey` | keyed on `relationKey`; the four incumbent gates apply verbatim (scope authority, corroboration, no-relocation, no-downgrade)                                                      |
+| 2.5 RATIFY      | `route(candidate, ctx)`                   | unchanged — a relation is advisory-family for ratification (grounded ∧ lowRisk ∧ T2 ∧ ¬contested auto-accepts; T0 relation needs the token)                                        |
+| 3 UPSERT+PUT    | `upsert(WriteRequest)` + `store.put`      | `WriteRequest.nodeKey = relationKey`, `family='relation'`; put the whole RelationNode into CAS                                                                                     |
 
 **§4a — the anchor-binding decision (2.1) is the one genuinely new governance call.** A directed relation's
 "owning" scope is the SUBJECT's scope (`endpointA`). Rationale: "src/payments/charge depends-on lodash" is a
@@ -156,12 +156,12 @@ file in v1 — derive-on-read over the current map, same as `deriveSubsumes`/`de
 DAG: **R1 (contract core) → { R2 door, R3 read } in parallel → R4 e2e/goldens**. R1 is the freeze; R2/R3 are
 disjoint by owner-file once R1 lands.
 
-| WP | owner-files (disjoint) | depends-on | DoD |
-|---|---|---|---|
-| **R1** | knowledge/src/types.ts, knowledge/src/write/router.ts, knowledge/src/write/upsert.ts | — | `RelationNode` in union; `RelationKind`+`RELATION_KINDS`; `relationKey`+`MalformedRelationError`; `NodeFamily` widened; `routeWrite` relation cell; every exhaustive `.kind`/family switch in @atlas/knowledge handles 'relation'; unit tests: relationKey collision-free over cross-file pair, directed asymmetry, refusal on self/off-vocab; `npm test -w @atlas/knowledge` green; typecheck green |
-| **R2** | adapter-io/src/governed-emit.ts (+ -reasons, +policy binding), adapter-io tests | R1 | `familyOf` handles relation; door routes relation via `relationKey`, 2.1 binds on `endpointA`, `primaryAnchorId` never called on a relation; the 16 gates provably apply (mutation-scoped tests per re-routed gate); a 2-file relation EMITS (the crux — proves #103 throw is bypassed); an off-vocab/self relation REJECTS fail-closed; `npm test -w @atlas/adapter-io` green |
-| **R3** | retrieval/src/relate.ts (or new relations.ts), retrieval/types.ts, cli/src/cli.ts, mcp-server/src/server.ts | R1 | `relationsOf(unit,dir)` fold; CLI `--relations` render; MCP `relations` field + schema doc; total (miss⇒empty); unit tests both directions |
-| **R4** | test/e2e blackbox story (new sNN) | R1,R2,R3 | subprocess story: emit `(A,depends-on,B)` cross-file → query out from A finds it, in from B finds it → edit A's unit → relation reads DRIFTED → edit back → FRESH. Proves identity survives edit (freshness split) |
+| WP     | owner-files (disjoint)                                                                                      | depends-on | DoD                                                                                                                                                                                                                                                                                                                                                                                                  |
+| ------ | ----------------------------------------------------------------------------------------------------------- | ---------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **R1** | knowledge/src/types.ts, knowledge/src/write/router.ts, knowledge/src/write/upsert.ts                        | —          | `RelationNode` in union; `RelationKind`+`RELATION_KINDS`; `relationKey`+`MalformedRelationError`; `NodeFamily` widened; `routeWrite` relation cell; every exhaustive `.kind`/family switch in @atlas/knowledge handles 'relation'; unit tests: relationKey collision-free over cross-file pair, directed asymmetry, refusal on self/off-vocab; `npm test -w @atlas/knowledge` green; typecheck green |
+| **R2** | adapter-io/src/governed-emit.ts (+ -reasons, +policy binding), adapter-io tests                             | R1         | `familyOf` handles relation; door routes relation via `relationKey`, 2.1 binds on `endpointA`, `primaryAnchorId` never called on a relation; the 16 gates provably apply (mutation-scoped tests per re-routed gate); a 2-file relation EMITS (the crux — proves #103 throw is bypassed); an off-vocab/self relation REJECTS fail-closed; `npm test -w @atlas/adapter-io` green                       |
+| **R3** | retrieval/src/relate.ts (or new relations.ts), retrieval/types.ts, cli/src/cli.ts, mcp-server/src/server.ts | R1         | `relationsOf(unit,dir)` fold; CLI `--relations` render; MCP `relations` field + schema doc; total (miss⇒empty); unit tests both directions                                                                                                                                                                                                                                                           |
+| **R4** | test/e2e blackbox story (new sNN)                                                                           | R1,R2,R3   | subprocess story: emit `(A,depends-on,B)` cross-file → query out from A finds it, in from B finds it → edit A's unit → relation reads DRIFTED → edit back → FRESH. Proves identity survives edit (freshness split)                                                                                                                                                                                   |
 
 ## 7. Blast-radius / ratification (GAP-2 rite)
 

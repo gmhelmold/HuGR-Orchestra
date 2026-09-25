@@ -56,5 +56,5 @@
  * `actorInScope` (adapter-io/src/policy.ts) — see the file header.
  */
 export function isScope(v: unknown): v is string {
-  return typeof v === 'string' && v.length > 0;
+  return typeof v === "string" && v.length > 0
 }

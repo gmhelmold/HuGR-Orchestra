@@ -1,6 +1,6 @@
 # #234 — the TRANSITION fact shape (ADR-0015 D4)
 
-The fourth greenfield fact family, grounded in **ADR-0015 D4** (`docs/adr/ADR-0015-grounding-tokens-are-typed-by-fact-shape.md`, L107-110). A transition is an **IMMUTABLE ADVISORY HISTORICAL** record — *"unit returned A, now returns B"* — spanning **TWO revisions**, anchored to the rev-pair `{unit@shaBefore, unit@shaAfter}`, **NEVER re-checked at HEAD** (a closed valid-time interval), **superseded, not falsified**. There is **NO mechanical HEAD oracle** for it.
+The fourth greenfield fact family, grounded in **ADR-0015 D4** (`docs/adr/ADR-0015-grounding-tokens-are-typed-by-fact-shape.md`, L107-110). A transition is an **IMMUTABLE ADVISORY HISTORICAL** record — _"unit returned A, now returns B"_ — spanning **TWO revisions**, anchored to the rev-pair `{unit@shaBefore, unit@shaAfter}`, **NEVER re-checked at HEAD** (a closed valid-time interval), **superseded, not falsified**. There is **NO mechanical HEAD oracle** for it.
 
 ## The design (the five sub-decisions)
 
@@ -14,16 +14,16 @@ The fourth greenfield fact family, grounded in **ADR-0015 D4** (`docs/adr/ADR-00
 
 The negation family is the other advisory-class, no-`check`, seal-carrying greenfield sibling. This WP mirrors it:
 
-| concern | negation (#99b) | transition (#234) |
-|---|---|---|
-| node type | `negation-types.ts` `NegationNode` | `transition-types.ts` `TransitionNode` (re-exported byte-identically from `types.ts`) |
-| `GroundedFact` / `NodeFamily` | `'negation'` | `'transition'` (fifth variant) |
-| identity leg | `negation-key.ts` `negationKey(kind,target,scope)` | `transition-key.ts` `transitionKey(unitKey,shaBefore,shaAfter)` — directed, refuses `shaBefore===shaAfter`; `DROP_TRANSITION_MALFORMED` |
-| admission | `admit-negation.ts` `buildNegation` (door grounds it) | `admit-transition.ts` `buildTransition` (grounds DIRECTLY on the rev-pair, mints `seal:'justified'`+`derivation`, **NO oracle**) |
-| dispatch | `admit-harness.ts` `case 'negation'` | `admit-harness.ts` `case 'transition'` (inline) |
-| proposal | `NegationProposal` | `TransitionProposal` (`admit-proposals.ts`) |
-| routing | check-less ⇒ UPDATE/supersede | check-less ⇒ UPDATE (re-admit same sha-pair = in-place, no dup); lineage supersession is derive-on-read |
-| read fold + CLI | `read/negations.ts` + `atlas negations` | `read/transitions.ts` `transitionsOf` + `atlas transitions` |
+| concern                       | negation (#99b)                                       | transition (#234)                                                                                                                       |
+| ----------------------------- | ----------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| node type                     | `negation-types.ts` `NegationNode`                    | `transition-types.ts` `TransitionNode` (re-exported byte-identically from `types.ts`)                                                   |
+| `GroundedFact` / `NodeFamily` | `'negation'`                                          | `'transition'` (fifth variant)                                                                                                          |
+| identity leg                  | `negation-key.ts` `negationKey(kind,target,scope)`    | `transition-key.ts` `transitionKey(unitKey,shaBefore,shaAfter)` — directed, refuses `shaBefore===shaAfter`; `DROP_TRANSITION_MALFORMED` |
+| admission                     | `admit-negation.ts` `buildNegation` (door grounds it) | `admit-transition.ts` `buildTransition` (grounds DIRECTLY on the rev-pair, mints `seal:'justified'`+`derivation`, **NO oracle**)        |
+| dispatch                      | `admit-harness.ts` `case 'negation'`                  | `admit-harness.ts` `case 'transition'` (inline)                                                                                         |
+| proposal                      | `NegationProposal`                                    | `TransitionProposal` (`admit-proposals.ts`)                                                                                             |
+| routing                       | check-less ⇒ UPDATE/supersede                         | check-less ⇒ UPDATE (re-admit same sha-pair = in-place, no dup); lineage supersession is derive-on-read                                 |
+| read fold + CLI               | `read/negations.ts` + `atlas negations`               | `read/transitions.ts` `transitionsOf` + `atlas transitions`                                                                             |
 
 ## Reachability — a true shipped path
 
@@ -32,6 +32,7 @@ The negation family is the other advisory-class, no-`check`, seal-carrying green
 ### The governed door — why a dedicated branch (billy security review)
 
 A transition MUST NOT persist directly (a second gate-less write into the governed projection is the #87/ADR-0008 class ADR-0008 closed as a structural invariant). It routes through the SAME kind-agnostic `createGovernedEmit` instance the relation derive leg uses; the door's `kind:'transition'` branch (`governed-emit-transition.ts`, mirroring the negation door) applies:
+
 - **KNOW-11 authz** (`actorInScope`) — the actor must be in the unit's own scope (`unitScopeOf(unitKey)`, stamped on `node.scope` by the producer). An unauthorized actor is **REFUSED**, nothing lands.
 - **ARCH-9 anchor** (`scopeOwnsAnchor`) — the declared scope must OWN the unit; authority cannot be borrowed from an unrelated dir.
 - **NO HEAD truth gate** — the main door's gate 1 re-derives freshness of the grounding against HEAD (`driftDetect(grounding, axes)`); a transition grounds on PAST-rev content hashes, so it AND-folds to DRIFTED at any future HEAD by construction (D-T2) and the main gate would reject every legit transition. The transition door replaces it with a STRUCTURAL `isGrounded` check (the two rev entries carry non-empty subtreeHashes) — grounded by construction, minus the freshness that does not apply.
@@ -39,7 +40,7 @@ A transition MUST NOT persist directly (a second gate-less write into the govern
 
 ### Flagged limits (honest, not silent)
 
-- **Derivation prose.** The `derivation` the `justified` seal names is **mechanically generated** ("the unit changed content across these revs"), not authored by a model that read both bodies. A full model-authored producer describing *what* changed is deferred; the transition **fact** is fully admitted from real revs — only the richness of the justification prose is deferred.
+- **Derivation prose.** The `derivation` the `justified` seal names is **mechanically generated** ("the unit changed content across these revs"), not authored by a model that read both bodies. A full model-authored producer describing _what_ changed is deferred; the transition **fact** is fully admitted from real revs — only the richness of the justification prose is deferred.
 - **D-T4 (rename)** and **D-T5 (proven-flip)** are the two design-level deferrals, documented as honest limits.
 
 ## Acceptance (AT-1..AT-9)

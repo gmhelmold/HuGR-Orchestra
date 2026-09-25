@@ -1,8 +1,8 @@
 # `atlas transition`
 
 Produce a **grounded transition** for a unit across **two git revs**. A transition (ADR-0015 **D4** / #234) is
-an **immutable advisory historical record** — *unit `unitKey` returned A at `revBefore`, returns B at
-`revAfter`*. This command is the **reachable producer**: given a unit and two revs, it reads the unit's **real
+an **immutable advisory historical record** — _unit `unitKey` returned A at `revBefore`, returns B at
+`revAfter`_. This command is the **reachable producer**: given a unit and two revs, it reads the unit's **real
 content** at each rev through the arbitrary-rev code index, admits a **`justified`** transition (there is no
 mechanical HEAD oracle for a historical claim, so it is never `proven` — D-T1), and **persists** it.
 
@@ -48,7 +48,7 @@ the gates that bite.
 
 - **Derivation prose.** The `derivation` the `justified` seal names is **mechanically generated** ("the unit
   changed content across these revs"), not authored by a model that read both bodies. A full model-authored
-  producer that describes *what* changed is out of #234's scope; the transition **fact** is fully admitted from
+  producer that describes _what_ changed is out of #234's scope; the transition **fact** is fully admitted from
   real revs — only the richness of the justification prose is deferred.
 - **Rename/move** reconciliation (D-T4) and a **proven-flip** (D-T5) are explicitly deferred, documented as
   honest limits rather than silent non-behavior.

@@ -15,21 +15,21 @@
 epic: none (out-of-band, dispatched by the lead with the frontier magnitudes pre-measured)
 id: WP-FIX-2.GEN
 title: `structuralFrontier` emits `symbol`/`block` sites; the source reader and the evidence span narrow to
-  the unit
+the unit
 
 intent: >
-  `packages/genesis/src/seeds.ts` emitted exactly one `kind` literal and it was `'file'`, so ONE FACT PER
-  FILE was a ceiling BY CONSTRUCTION. Measured on master `e4882a3` against the real repository through the
-  built `dist`: the frontier offers **520** sites, all `kind:'file'`, `droppedNoPath` 0 — while
-  `foldAstUnits`, already on the production path (`adapter-io/src/compose.ts`), had already parsed, keyed
-  and Merkle-hashed **5283 sub-file units** (3798 `item` + 1485 `block`) that were offered to nobody.
-  Ratio 10.2×.
+`packages/genesis/src/seeds.ts` emitted exactly one `kind` literal and it was `'file'`, so ONE FACT PER
+FILE was a ceiling BY CONSTRUCTION. Measured on master `e4882a3` against the real repository through the
+built `dist`: the frontier offers **520** sites, all `kind:'file'`, `droppedNoPath` 0 — while
+`foldAstUnits`, already on the production path (`adapter-io/src/compose.ts`), had already parsed, keyed
+and Merkle-hashed **5283 sub-file units** (3798 `item` + 1485 `block`) that were offered to nobody.
+Ratio 10.2×.
 
-  This card is an EXPERIMENT with a build attached. The hypothesis — at equal budget, a symbol-granular
-  frontier yields more distinct and more narrowly-grounded facts than a file-granular one — is NOT
-  established. The deliverable is a measurement with a stated falsifier, not a feature, and the frontier
-  therefore ships OPT-IN (`ATLAS_FRONTIER=symbol`) so a behaviour that may be reverted is not the one
-  every unrelated caller silently gets meanwhile.
+This card is an EXPERIMENT with a build attached. The hypothesis — at equal budget, a symbol-granular
+frontier yields more distinct and more narrowly-grounded facts than a file-granular one — is NOT
+established. The deliverable is a measurement with a stated falsifier, not a feature, and the frontier
+therefore ships OPT-IN (`ATLAS_FRONTIER=symbol`) so a behaviour that may be reverted is not the one
+every unrelated caller silently gets meanwhile.
 
 ## axioms (inherited premises — given, not re-litigated)
 
@@ -97,97 +97,105 @@ prior is labelled a prior. A refusal says which of its conditions fired. The S2 
 **by construction**, not by care.
 
 anchor:
-  - [`../../../packages/genesis/src/seeds.ts`](../../../packages/genesis/src/seeds.ts) — the frontier; the `kind:'file'` literal it used to be alone in emitting
-  - [`../../../packages/genesis/src/unit-order.ts`](../../../packages/genesis/src/unit-order.ts) — the sub-file vocabulary and the non-hash order (split at the LOC ceiling)
-  - [`../../../packages/adapter-io/src/unit-source.ts`](../../../packages/adapter-io/src/unit-source.ts) — the unit-granular `SourceReader`
-  - [`../../../packages/adapter-io/src/ast.ts`](../../../packages/adapter-io/src/ast.ts) — `unwrapExport`, where export-ness used to be discarded
-  - [`../../../packages/cli/src/mine-frontier.ts`](../../../packages/cli/src/mine-frontier.ts) — the A/B arm selector
+
+- [`../../../packages/genesis/src/seeds.ts`](../../../packages/genesis/src/seeds.ts) — the frontier; the `kind:'file'` literal it used to be alone in emitting
+- [`../../../packages/genesis/src/unit-order.ts`](../../../packages/genesis/src/unit-order.ts) — the sub-file vocabulary and the non-hash order (split at the LOC ceiling)
+- [`../../../packages/adapter-io/src/unit-source.ts`](../../../packages/adapter-io/src/unit-source.ts) — the unit-granular `SourceReader`
+- [`../../../packages/adapter-io/src/ast.ts`](../../../packages/adapter-io/src/ast.ts) — `unwrapExport`, where export-ness used to be discarded
+- [`../../../packages/cli/src/mine-frontier.ts`](../../../packages/cli/src/mine-frontier.ts) — the A/B arm selector
 
 interface_contract:
-  - source: [`../method-tags-gen.md#INV-GEN-2`](../method-tags-gen.md#INV-GEN-2)  # bounded spend, one call per site
-  - source: [`../../reference/atlas-grounding.md`](../../reference/atlas-grounding.md)  # the span carrier landed by #159
+
+- source: [`../method-tags-gen.md#INV-GEN-2`](../method-tags-gen.md#INV-GEN-2) # bounded spend, one call per site
+- source: [`../../reference/atlas-grounding.md`](../../reference/atlas-grounding.md) # the span carrier landed by #159
 
 source_reqs:
-  - source: [`../req-gen.md#REQ-GEN-2b`](../req-gen.md#REQ-GEN-2b)  # spend highest-first — the order this WP keeps total and non-arbitrary
-  - source: [`../req-gen.md#REQ-GEN-2d`](../req-gen.md#REQ-GEN-2d)  # the hard budget ceiling — the reason this card is cost-neutral
+
+- source: [`../req-gen.md#REQ-GEN-2b`](../req-gen.md#REQ-GEN-2b) # spend highest-first — the order this WP keeps total and non-arbitrary
+- source: [`../req-gen.md#REQ-GEN-2d`](../req-gen.md#REQ-GEN-2d) # the hard budget ceiling — the reason this card is cost-neutral
 
 exclusions:
-  - `packages/tools/**`, `harness/gates/adr-citation-guard.mjs` — a LIVE seat owns branch
-    `fix/surface-truth`. Read-only, and untouched.
-  - `packages/index/src/**` — the SCIP `range` carrier is deliberately OUT of scope. **Untouched; the
-    consequence is recorded under "the exclusion that cost the most" below.**
-  - `deriveEdges`, the dependency axis, PPR, and the governed write door — untouched.
-  - The model-backed A/B run — a different seat's card.
+
+- `packages/tools/**`, `harness/gates/adr-citation-guard.mjs` — a LIVE seat owns branch
+  `fix/surface-truth`. Read-only, and untouched.
+- `packages/index/src/**` — the SCIP `range` carrier is deliberately OUT of scope. **Untouched; the
+  consequence is recorded under "the exclusion that cost the most" below.**
+- `deriveEdges`, the dependency axis, PPR, and the governed write door — untouched.
+- The model-backed A/B run — a different seat's card.
 
 action: implement S1, S2, S3; add the acceptance cases; leave arm FILE reachable.
 
 guardrails: worktree-only, byte-level `cp` backup/restore (never `git checkout`/`restore`/`stash`/`reset`),
-  no real-looking credential in any fixture, commit only — never push, never PR, never merge.
+no real-looking credential in any fixture, commit only — never push, never PR, never merge.
 
 repair_budget: N=3 · early-stop { repeated-identical-failure, no-change-diff, semantic-dup-edit }.
-  **Consumed: 1** (the `resolveSiteKey`/`siteOrderKeys` over-broad `::` rule, fixed in one round).
+**Consumed: 1** (the `resolveSiteKey`/`siteOrderKeys` over-broad `::` rule, fixed in one round).
 
 acceptance (DoD) — each proven RED first by targeted mutation with the pattern-match proved:
-  - existing: SCN-GEN-2b-1 / SCN-GEN-2d-1 stay green (descending order preserved, ceiling still caps spend)
-  - NEW: an `item` site's evidence span addresses the unit, not the file (I2)
-  - NEW: a `block` site mints and resolves end to end (C2)
-  - NEW: the within-file order is `(exported, size, path)` and is a strict total order (I4)
-  - NEW: an unresolvable unit key refuses rather than falling back to the file (S2 fail-closed)
 
-deps: [ ]   parallel_group: [P] (disjoint from `fix/surface-truth`)
+- existing: SCN-GEN-2b-1 / SCN-GEN-2d-1 stay green (descending order preserved, ceiling still caps spend)
+- NEW: an `item` site's evidence span addresses the unit, not the file (I2)
+- NEW: a `block` site mints and resolves end to end (C2)
+- NEW: the within-file order is `(exported, size, path)` and is a strict total order (I4)
+- NEW: an unresolvable unit key refuses rather than falling back to the file (S2 fail-closed)
+
+deps: [ ] parallel_group: [P] (disjoint from `fix/surface-truth`)
 
 exit_predicate: all acceptance goldens green ∧ `tsc -b` clean ∧ the suite reconciled against the
-  `origin/master` baseline ∧ every gate exit 0 ∧ I1-I6 and C1-C6 each individually evidenced.
+`origin/master` baseline ∧ every gate exit 0 ∧ I1-I6 and C1-C6 each individually evidenced.
 
 owner: GENESIS + ADAPTERS territory · builder_id: `charlie`
 
 outputs:
-  - `packages/genesis/src/unit-order.ts` (new) · `packages/genesis/src/seeds.ts` · `packages/genesis/src/rank.ts`
-  - `packages/adapter-io/src/unit-source.ts` (new) · `packages/adapter-io/src/ast.ts` · `packages/adapter-io/src/skeleton-source.ts` · `packages/adapter-io/src/index.ts`
-  - `packages/cli/src/mine-frontier.ts` (new) · `packages/cli/src/mine.ts` · `packages/cli/src/mine-staging.ts` · `packages/cli/src/mine-proposer.ts` · `packages/cli/src/mine-worker.ts`
-  - `packages/genesis/test/unit-frontier.test.ts` (new, 15 cases) · `packages/adapter-io/test/unit-source.test.ts` (new, 12 cases) · `packages/adapter-io/test/symbol-frontier.test.ts` (new, 5 cases)
-  - `packages/e2e-blackbox/test/s26-symbol-arm.blackbox.test.ts` (new, 3 cases) — the BUILT-BINARY guard on
-    the proposer pool; see the cold-review section below for why a unit test could not carry it
+
+- `packages/genesis/src/unit-order.ts` (new) · `packages/genesis/src/seeds.ts` · `packages/genesis/src/rank.ts`
+- `packages/adapter-io/src/unit-source.ts` (new) · `packages/adapter-io/src/ast.ts` · `packages/adapter-io/src/skeleton-source.ts` · `packages/adapter-io/src/index.ts`
+- `packages/cli/src/mine-frontier.ts` (new) · `packages/cli/src/mine.ts` · `packages/cli/src/mine-staging.ts` · `packages/cli/src/mine-proposer.ts` · `packages/cli/src/mine-worker.ts`
+- `packages/genesis/test/unit-frontier.test.ts` (new, 15 cases) · `packages/adapter-io/test/unit-source.test.ts` (new, 12 cases) · `packages/adapter-io/test/symbol-frontier.test.ts` (new, 5 cases)
+- `packages/e2e-blackbox/test/s26-symbol-arm.blackbox.test.ts` (new, 3 cases) — the BUILT-BINARY guard on
+  the proposer pool; see the cold-review section below for why a unit test could not carry it
 
 provenance:
-  - **HOW TO READ EVERY ABSOLUTE NUMBER BELOW — the provenance, because without it they do not reproduce.**
-    Atlas here measures ITSELF, so the magnitudes are a function of the working tree at the moment of
-    measurement, and of the SCIP dump the dependency axis is derived from. That dump is
-    `.atlas/index.scip`: **it is NOT committed** — `.gitignore:20` ignores `.atlas/*` except `policy.json`
-    — it is a LOCAL artifact generated at master `e4882a3` and copied into the worktree, and it names
-    exactly **520 documents**, which is why arm FILE is exactly 520 sites. Any file created after
-    `e4882a3` is therefore absent from the dump, has no dependency edge, reaches no frontier slot, and
-    contributes no seed — while its units DO exist in the walked tree. Re-running against a REGENERATED
-    dump would raise the seed counts; `scip-typescript` is not installed here, so it was not regenerated.
-  - MEASURED through the built `dist` at the tree of THIS COMMIT (both arms, one binary): arm FILE **520**
-    sites, all `kind:'file'` — byte-identical to the no-options default and to the master baseline. Arm
-    SYMBOL **5816** sites = 520 `file` + 3805 `symbol` + 1491 `block`. Units in the walked tree **5376**;
-    unit bytes min 7 · median 114 · max 17435; exported 1336, private 4040.
-  - THE CHECKABLE INVARIANT, which is what a reader should verify rather than the constants: every unit in
-    the tree that the frontier does NOT emit belongs to a file the dump does not name. MEASURED —
-    `unitsInTree 5376 − unitsEmitted 5296 = 80`, and the units under files absent from the frontier total
-    **exactly 80**, across 7 files, every one of them created by this task and every one reporting
-    `inScipDump: false, existsInWalkedTree: true`. The identity holds by matched item, not by arithmetic
-    coincidence. (An earlier revision of this card recorded 5830/5310/1329/3981 measured on a mid-task
-    snapshot; those figures did not reproduce at the shipped commit and are superseded here.)
-  - THE HEADLINE FOR S4, and it is a CONFOUND, not a result: at budget 200 arm SYMBOL touches **16**
-    distinct files (16 `file` + 174 `symbol` + 10 `block` sites) against arm FILE's **200**. A unit
-    inherits its file's PPR and therefore sorts adjacent to it, so the budget is spent depth-first. Any
-    deficit arm SYMBOL shows in "distinct facts" is attributable to a 12.5× coverage collapse before it is
-    attributable to granularity. Named here rather than discovered after 200 model calls.
-  - 11 targeted mutants, every pattern proved MATCHED (occurrences = 1) and every file proved changed
-    before the run: **11/11 KILLED**, every restore byte-identical, unmutated control 32/32 green.
-  - BUILT-BINARY probe (subprocess, real worker pool, `echo` stand-in model — no live model): arm FILE
-    exit 0 / 2 sites, all `kind:'file'`; arm SYMBOL exit 0 / 6 sites, all `seeded`; `ATLAS_FRONTIER=symbols`
-    (a typo) reads as arm FILE rather than as a third behaviour.
-  - The worker grammar warm-up is load-bearing and was calibrated by removing it and REBUILDING: arm
-    SYMBOL then exits **1** with the first symbol site `interrupted` and 4 of 6 sites `unvisited`, while
-    arm FILE stays exit 0 and the entire unit suite stays green.
+
+- **HOW TO READ EVERY ABSOLUTE NUMBER BELOW — the provenance, because without it they do not reproduce.**
+  Atlas here measures ITSELF, so the magnitudes are a function of the working tree at the moment of
+  measurement, and of the SCIP dump the dependency axis is derived from. That dump is
+  `.atlas/index.scip`: **it is NOT committed** — `.gitignore:20` ignores `.atlas/*` except `policy.json`
+  — it is a LOCAL artifact generated at master `e4882a3` and copied into the worktree, and it names
+  exactly **520 documents**, which is why arm FILE is exactly 520 sites. Any file created after
+  `e4882a3` is therefore absent from the dump, has no dependency edge, reaches no frontier slot, and
+  contributes no seed — while its units DO exist in the walked tree. Re-running against a REGENERATED
+  dump would raise the seed counts; `scip-typescript` is not installed here, so it was not regenerated.
+- MEASURED through the built `dist` at the tree of THIS COMMIT (both arms, one binary): arm FILE **520**
+  sites, all `kind:'file'` — byte-identical to the no-options default and to the master baseline. Arm
+  SYMBOL **5816** sites = 520 `file` + 3805 `symbol` + 1491 `block`. Units in the walked tree **5376**;
+  unit bytes min 7 · median 114 · max 17435; exported 1336, private 4040.
+- THE CHECKABLE INVARIANT, which is what a reader should verify rather than the constants: every unit in
+  the tree that the frontier does NOT emit belongs to a file the dump does not name. MEASURED —
+  `unitsInTree 5376 − unitsEmitted 5296 = 80`, and the units under files absent from the frontier total
+  **exactly 80**, across 7 files, every one of them created by this task and every one reporting
+  `inScipDump: false, existsInWalkedTree: true`. The identity holds by matched item, not by arithmetic
+  coincidence. (An earlier revision of this card recorded 5830/5310/1329/3981 measured on a mid-task
+  snapshot; those figures did not reproduce at the shipped commit and are superseded here.)
+- THE HEADLINE FOR S4, and it is a CONFOUND, not a result: at budget 200 arm SYMBOL touches **16**
+  distinct files (16 `file` + 174 `symbol` + 10 `block` sites) against arm FILE's **200**. A unit
+  inherits its file's PPR and therefore sorts adjacent to it, so the budget is spent depth-first. Any
+  deficit arm SYMBOL shows in "distinct facts" is attributable to a 12.5× coverage collapse before it is
+  attributable to granularity. Named here rather than discovered after 200 model calls.
+- 11 targeted mutants, every pattern proved MATCHED (occurrences = 1) and every file proved changed
+  before the run: **11/11 KILLED**, every restore byte-identical, unmutated control 32/32 green.
+- BUILT-BINARY probe (subprocess, real worker pool, `echo` stand-in model — no live model): arm FILE
+  exit 0 / 2 sites, all `kind:'file'`; arm SYMBOL exit 0 / 6 sites, all `seeded`; `ATLAS_FRONTIER=symbols`
+  (a typo) reads as arm FILE rather than as a third behaviour.
+- The worker grammar warm-up is load-bearing and was calibrated by removing it and REBUILDING: arm
+  SYMBOL then exits **1** with the first symbol site `interrupted` and 4 of 6 sites `unvisited`, while
+  arm FILE stays exit 0 and the entire unit suite stays green.
 
 trace_ref: branch `feat/symbol-sites`, forked from master `e4882a3`.
 
 rationale:
-  - source: [`../req-gen.md#REQ-GEN-2b`](../req-gen.md#REQ-GEN-2b)
+
+- source: [`../req-gen.md#REQ-GEN-2b`](../req-gen.md#REQ-GEN-2b)
 
 ---
 

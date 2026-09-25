@@ -47,7 +47,7 @@
 // posture ARCH-12/§3.3 already records for `actor` — not an adversarial control. It is written here
 // because a reader who takes it for authentication will build on a guarantee that does not exist.
 
-import type { Candidate } from '../types.js';
+import type { Candidate } from "../types.js"
 
 // ── frozen RatifyApi surface, co-located here (was ref/ratify.ts) ─────────────────────────────────────
 
@@ -56,7 +56,7 @@ import type { Candidate } from '../types.js';
  * oracle-pin-map §8] minimal honest record: the node held in staging, un-committed until ratified.
  */
 export interface Staged {
-  readonly node: Candidate;
+  readonly node: Candidate
 }
 
 /**
@@ -68,7 +68,7 @@ export interface Staged {
  * declaration of who is taking responsibility, not evidence that they did.
  */
 export interface RatifyToken {
-  readonly by: string;
+  readonly by: string
 }
 
 export interface RatifyApi {
@@ -80,12 +80,12 @@ export interface RatifyApi {
    *  `adapter-io`'s two governed write doors (`governed-emit.ts`, `governed-link.ts`), i.e. the LEAD's doors.
    *  The explorer (`atlas mine`) never calls it. Its real durable path is `DiskStore.commitStaging`.
    *  What this actually is: the in-memory adapter that hands a candidate to {@link RatifyApi.ratify}. */
-  stage(candidate: Candidate): Staged;
+  stage(candidate: Candidate): Staged
 
   /** The reconcile/lead ratifier gate: a staged candidate commits ONLY with a ratifier token; a `T0`
    *  candidate additionally requires the billy token (method-tags-knw:71). Pure + total. The `committed`
    *  boolean is the reference-implied return leg (no self-commit assertion). */
-  ratify(staged: Staged, token: RatifyToken): { readonly committed: boolean };
+  ratify(staged: Staged, token: RatifyToken): { readonly committed: boolean }
 }
 
 /**
@@ -106,7 +106,7 @@ export interface RatifyApi {
  * credential needs a verifier and a key-distribution story this product does not have — see ADR-0010, where
  * that is an OPEN owner decision, not a silent gap.
  */
-export const BILLY = 'billy';
+export const BILLY = "billy"
 
 /**
  * Wrap a candidate in the `Staged` handle {@link ratify} consumes. Pure + total — it persists NOTHING.
@@ -116,7 +116,7 @@ export const BILLY = 'billy';
  * is no staging here, and the explorer does not call this. A-D4 / task #83.
  */
 export function stage(candidate: Candidate): Staged {
-  return { node: candidate };
+  return { node: candidate }
 }
 
 /**
@@ -140,10 +140,10 @@ export function stage(candidate: Candidate): Staged {
  * and cannot re-derive it.
  */
 export function ratify(staged: Staged, token: RatifyToken): { readonly committed: boolean } {
-  if (token.by.length === 0) return { committed: false }; // no ratifier token
-  if (staged.node.tier === 'T0' && token.by !== BILLY) return { committed: false }; // T0 requires billy
-  return { committed: true };
+  if (token.by.length === 0) return { committed: false } // no ratifier token
+  if (staged.node.tier === "T0" && token.by !== BILLY) return { committed: false } // T0 requires billy
+  return { committed: true }
 }
 
 /** The frozen-`RatifyApi` binding (conformance handle). */
-export const ratifier: RatifyApi = { stage, ratify };
+export const ratifier: RatifyApi = { stage, ratify }

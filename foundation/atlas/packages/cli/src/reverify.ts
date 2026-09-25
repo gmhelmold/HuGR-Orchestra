@@ -19,14 +19,14 @@
 // There is no exit-1 leg reached from a SUCCESSFUL pass — reaching `reverifyVerdict` means the runtime
 // composed and the loop over `driftFacts` completed; exit 1 is reserved for an uncomposed runtime (cli.ts).
 
-import type { ReverifyReport } from '@atlas/adapter-io';
-import type { CliVerdict } from './render.js';
+import type { ReverifyReport } from "@atlas/adapter-io"
+import type { CliVerdict } from "./render.js"
 
 /** The invariant line every `verify-store` outcome carries — the one property a reader should check the
  *  bytes against. Names all three buckets so a reader cannot mistake "0 broken" for "everything checked
  *  out": `unverifiable` is reported on this SAME line, never folded into a pass. */
 const INVARIANT =
-  'REVERIFY-GATE: every `seal:\'proven\'` fact is re-proved against the LIVE index via its OWN recorded witness — re-proven / broken / unverifiable, three buckets that never merge; a witness-less `proven` seal is `unverifiable`, never a pass';
+  "REVERIFY-GATE: every `seal:'proven'` fact is re-proved against the LIVE index via its OWN recorded witness — re-proven / broken / unverifiable, three buckets that never merge; a witness-less `proven` seal is `unverifiable`, never a pass"
 
 /**
  * Project one finished re-verification pass to the CLI's process outcome. PURE — a function of the
@@ -39,17 +39,17 @@ const INVARIANT =
 export function reverifyVerdict(out: ReverifyReport): CliVerdict {
   // `dangling` joins the refusal condition: a fact served as proven whose bytes are GONE is not a pass
   // under any reading, and it is the one fault this gate used to report as an empty, healthy store.
-  const rejected = out.broken > 0 || out.unverifiable > 0 || out.dangling > 0;
+  const rejected = out.broken > 0 || out.unverifiable > 0 || out.dangling > 0
   const lines = [
-    `status: ${rejected ? 'rejected' : 'ok'}`,
+    `status: ${rejected ? "rejected" : "ok"}`,
     `next: ${nextLine(out)}`,
     `invariant: ${INVARIANT}`,
     `verify-store: ${out.sealedProven} sealed-proven fact(s) — ${out.reProven} re-proven, ${out.broken} broken, ${out.unverifiable} unverifiable, ${out.dangling} dangling`,
     // Per-row, in the durable store's own readback order. A batch verdict that names no row is unactionable —
     // the exact row a `broken`/`unverifiable` verdict points to, and why, is the whole payoff of this door.
     ...out.rows.map((r) => `  ${r.outcome} ${r.nodeKey}: ${r.reason}`),
-  ];
-  return { exitCode: rejected ? 2 : 0, stdout: `${lines.join('\n')}\n` };
+  ]
+  return { exitCode: rejected ? 2 : 0, stdout: `${lines.join("\n")}\n` }
 }
 
 /** The one actionable sentence, derived from the pass's own numbers — never a guess about the wiring.
@@ -60,15 +60,15 @@ export function reverifyVerdict(out: ReverifyReport): CliVerdict {
  *  the store is empty" (the honesty requirement this WP names by name). */
 function nextLine(out: ReverifyReport): string {
   if (out.sealedProven === 0) {
-    return 'the durable store holds NO seal:\'proven\' fact — nothing to re-verify (an honest zero, not a skip); `atlas mine` + `atlas promote` are what seal a fact `proven`';
+    return "the durable store holds NO seal:'proven' fact — nothing to re-verify (an honest zero, not a skip); `atlas mine` + `atlas promote` are what seal a fact `proven`"
   }
   if (out.unverifiable > 0) {
-    return `${out.unverifiable} sealed-proven fact(s) carry NO witness (or an incomplete one) — nothing could be replayed for them; read the rows below${out.broken > 0 ? `, alongside ${out.broken} that replayed and did NOT re-prove` : ''}`;
+    return `${out.unverifiable} sealed-proven fact(s) carry NO witness (or an incomplete one) — nothing could be replayed for them; read the rows below${out.broken > 0 ? `, alongside ${out.broken} that replayed and did NOT re-prove` : ""}`
   }
   if (out.broken > 0) {
-    return `${out.broken} sealed-proven fact(s) no longer re-prove against the live index — the store has drifted from what it claims; read the rows below`;
+    return `${out.broken} sealed-proven fact(s) no longer re-prove against the live index — the store has drifted from what it claims; read the rows below`
   }
-  return `all ${out.reProven} sealed-proven fact(s) replayed PROVEN against the live index — the durable store re-proves itself`;
+  return `all ${out.reProven} sealed-proven fact(s) replayed PROVEN against the live index — the durable store re-proves itself`
 }
 
 /**
@@ -78,5 +78,5 @@ function nextLine(out: ReverifyReport): string {
  * command reads.
  */
 export function runReverify(reverify: () => ReverifyReport): CliVerdict {
-  return reverifyVerdict(reverify());
+  return reverifyVerdict(reverify())
 }

@@ -5,8 +5,8 @@
 // GateApi/AnchorApi + the InterfaceRState seam). `StructRef`/`Freshness`/`Status` are the canonical
 // layer-0 vocabulary owned by @atlas/contracts — imported, NEVER redefined here.
 
-import type { StructRef, Freshness, Status, Hash } from '@atlas/contracts';
-import type { Axes, Rollup } from '@atlas/index';
+import type { StructRef, Freshness, Status, Hash } from "@atlas/contracts"
+import type { Axes, Rollup } from "@atlas/index"
 
 /**
  * The content-addressed grounding receipt. Transcribed EXACTLY from atlas-grounding:38:
@@ -15,7 +15,7 @@ import type { Axes, Rollup } from '@atlas/index';
  * (GROUND-2); an ungrounded grounding MUST NOT ever be FRESH.
  */
 export interface Grounding {
-  readonly entries: readonly GroundingEntry[];
+  readonly entries: readonly GroundingEntry[]
 }
 
 /**
@@ -33,10 +33,10 @@ export interface Grounding {
  *     default asserting a citation nobody made (the `builtAt`/`sameAs`/`derivedAt` precedent).
  */
 export interface GroundingEntry {
-  readonly anchor: StructRef;
-  readonly path: string;
-  readonly displayLines?: string;
-  readonly span?: GroundingSpan;
+  readonly anchor: StructRef
+  readonly path: string
+  readonly displayLines?: string
+  readonly span?: GroundingSpan
 }
 
 /**
@@ -101,9 +101,9 @@ export interface GroundingEntry {
  * it. A span is a POINTER INTO evidence; the oracle stays `anchor.subtreeHash`.
  */
 export interface GroundingSpan {
-  readonly contentHash: Hash;
-  readonly start: number;
-  readonly end: number;
+  readonly contentHash: Hash
+  readonly start: number
+  readonly end: number
 }
 
 // ── frozen API surface, co-located here (was ref/ground.ts · ref/drift.ts · ref/gate.ts · ref/anchor.ts) ─
@@ -128,7 +128,7 @@ export interface AnchorApi {
    *  `resolveAnchor(entry)=entry.anchor.subtreeHash` (a bare `SubtreeHash`). Transcribed to the task's
    *  `StructRef` return (the richer surface — the `subtreeHash` is reachable as `.subtreeHash`); flagged
    *  for the two sources to reconcile whether the resolver returns the `StructRef` or just its oracle. */
-  resolveAnchor(entry: GroundingEntry): StructRef;
+  resolveAnchor(entry: GroundingEntry): StructRef
 }
 
 /**
@@ -148,12 +148,12 @@ export interface GroundApi {
    *  [SIG-TBD — `node`] the reference (atlas-grounding:128) gives `node` no concrete shape; §5 pinned
    *  ONLY `src`, so `node` stays opaque here — the groundable-unit type is the owning WP's to pin from
    *  its reference, NOT guessed (do not import the upward `GroundedFact` — that inverts the DAG). */
-  ground(node: unknown, src: Axes): Grounding;
+  ground(node: unknown, src: Axes): Grounding
 
   /** Real-grounding predicate: `true` iff `g` has ≥1 entry AND every entry's `anchor.subtreeHash` is
    *  non-empty (GROUND-2). An empty/partial grounding fails the predicate and MUST never surface FRESH.
    *  Pure + total. (atlas-grounding:130) */
-  isGrounded(g: Grounding): boolean;
+  isGrounded(g: Grounding): boolean
 }
 
 /**
@@ -163,7 +163,7 @@ export interface GroundApi {
  * `rState` — the type/contract-relevant structure — so a callee whose SIGNATURE changed drifts its
  * callers while a pure-body refactor does not. Owned by @atlas/index (`Rollup.rState`, atlas-index:43).
  */
-export type InterfaceRState = Rollup['rState'];
+export type InterfaceRState = Rollup["rState"]
 
 /**
  * Drift detection: the interface-fold freshness oracle (GROUND-11) + the advisory→STALE router
@@ -193,7 +193,7 @@ export interface DriftApi {
    *  NOT import (would invert the DAG). `driftDetect` returns the raw structural `Freshness`; where the
    *  advisory/predicate split is applied over a `Fact.kind` is left to the knowledge layer (KNOW-5).
    *  Flagged — not modeled here as an arg, to avoid inverting the DAG. */
-  driftDetect(grounding: Grounding, src: Axes): Freshness;
+  driftDetect(grounding: Grounding, src: Axes): Freshness
 }
 
 /**
@@ -217,5 +217,5 @@ export interface GateApi {
    *  [PIN — `src` = built-index `Axes`] Owner DEFINE 2026-07-18 (oracle-pin-map §5): the source-of-truth
    *  snapshot drift is re-checked against is the built-index `@atlas/index` `Axes`, consistent with
    *  `driftDetect`/`ground`. (`candidate` stays `unknown` — upward-owned, see FLAG above.) */
-  gateHolds(candidate: unknown, grounding: Grounding, src: Axes): Status;
+  gateHolds(candidate: unknown, grounding: Grounding, src: Axes): Status
 }

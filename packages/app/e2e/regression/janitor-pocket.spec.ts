@@ -1,6 +1,11 @@
 import { expect, test } from "@playwright/test"
 import { base64Encode } from "@opencode-ai/core/util/encode"
-import { directory, sessionID as routeSessionID, session, setupTimeline } from "../performance/timeline-stability/fixture"
+import {
+  directory,
+  sessionID as routeSessionID,
+  session,
+  setupTimeline,
+} from "../performance/timeline-stability/fixture"
 
 const janitorSessionID = "ses_janitor_chat"
 const report = JSON.stringify({
@@ -29,9 +34,12 @@ test("keeps Janitor chat session, sends prompt, and opens it in session view", a
       },
     }
   }, report)
-  await page.addInitScript(({ directory, sessionID }) => {
-    localStorage.setItem(`opencode.janitor.session.local.${directory}`, sessionID)
-  }, { directory: base64Encode(directory), sessionID: janitorSessionID })
+  await page.addInitScript(
+    ({ directory, sessionID }) => {
+      localStorage.setItem(`opencode.janitor.session.local.${directory}`, sessionID)
+    },
+    { directory: base64Encode(directory), sessionID: janitorSessionID },
+  )
 
   await setupTimeline(page, {
     onPrompt: (input) => prompts.push(input),
@@ -47,7 +55,9 @@ test("keeps Janitor chat session, sends prompt, and opens it in session view", a
     ],
   })
   await expect
-    .poll(() => page.evaluate((key) => localStorage.getItem(key), `opencode.janitor.session.local.${base64Encode(directory)}`))
+    .poll(() =>
+      page.evaluate((key) => localStorage.getItem(key), `opencode.janitor.session.local.${base64Encode(directory)}`),
+    )
     .toBe(janitorSessionID)
 
   await expect(page.getByRole("button", { name: "Open janitor report" })).toBeVisible()

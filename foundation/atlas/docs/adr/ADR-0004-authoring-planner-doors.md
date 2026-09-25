@@ -19,8 +19,8 @@ which the governed door then **discards and re-mints** anyway (WP-F3, the anti-s
 
 The consequence, measured in the dogfood: **zero facts have ever been authored through a product door.**
 The only thing that has ever written a fact is `packages/e2e-blackbox/test/author.ts`, which imports
-`@atlas/index`, `@atlas/adapter-io` and `@atlas/knowledge` and whose own header calls it *"the stand-in
-for the authoring tool a real user would reach for."* `atlas mine`, the automatic path, abstains by design
+`@atlas/index`, `@atlas/adapter-io` and `@atlas/knowledge` and whose own header calls it _"the stand-in
+for the authoring tool a real user would reach for."_ `atlas mine`, the automatic path, abstains by design
 with no model wired.
 
 The obvious framing — "the product needs write doors for authoring" — would re-open INV-TOOLS-1 for the
@@ -40,25 +40,25 @@ Two invariants make this structural rather than aspirational:
 
 > **AMENDED 2026-08-30 — the word "structural" overclaims what ships.** The ratified text above is left
 > intact; this note corrects it. `reference/atlas-architecture.md` (ARCH-11) states the honest reading:
-> *"the honest claim is 'structurally **checked**' (a spy), not 'structurally **guaranteed**' (a type) —
-> and ADR-0004 currently claims the latter."* The planner legs are built as arrow closures in the same
+> _"the honest claim is 'structurally **checked**' (a spy), not 'structurally **guaranteed**' (a type) —
+> and ADR-0004 currently claims the latter."_ The planner legs are built as arrow closures in the same
 > lexical scope as `const store = createDiskStore(…)` (`wire.ts`), so a leg CAN reach `store.put`;
 > write-freedom is enforced today by a runtime spy in tests, not by a type that makes the mutator
 > unreachable. AUTHOR-2 and AUTHOR-13 are true as PROPERTIES; what is not true is that the architecture
 > makes violating them impossible. Closing this is ARCH-11, and its own acceptance criterion is
-> *"enforced by the type, demonstrated by a compile failure, not by a spy"* — not yet implemented.
+> _"enforced by the type, demonstrated by a compile failure, not by a spy"_ — not yet implemented.
 >
 > Corrected because this repository is PUBLIC: a reader relies on the word "structural" meaning the
 > code cannot do otherwise, and today it can.
 
 - **AUTHOR-2** — no planner writes, mutates, stages, caches, or queues any byte; no planner appears in
   `WRITE_PATHS` or `GOVERNANCE_SURFACE`.
-- **AUTHOR-13** — retire/supersede is expressed as a *draft variant* carrying the superseded authoring
+- **AUTHOR-13** — retire/supersede is expressed as a _draft variant_ carrying the superseded authoring
   state, persisted through `atlas-emit` under its full gate set. There is no retire door and no delete door.
 
 The precedent already exists in the ratified product: `atlas doctor reground` returns a
-`RegroundPlan{ fact, action, emit: GroundedFact }` and is documented as *"a PROPOSAL only; persists
-nothing. Run through atlas-emit to persist"* (TOOLS-12, `cli/src/doctor.ts`). The authoring surface is that
+`RegroundPlan{ fact, action, emit: GroundedFact }` and is documented as _"a PROPOSAL only; persists
+nothing. Run through atlas-emit to persist"_ (TOOLS-12, `cli/src/doctor.ts`). The authoring surface is that
 pattern generalized from the drift case to the authoring case.
 
 ## The one coupling this decision accepts, deliberately
@@ -66,7 +66,7 @@ pattern generalized from the drift case to the authoring case.
 `anchors` and `draft` must compute a grounding. The emit truth-gate re-derives one. If those are two
 implementations, **every draft is rejected and the product manufactures the exact drift it exists to
 detect.** The axiomatic-design pass (`design/authoring.md` §3.3) records this as coupling **C1** and
-resolves it by *sequencing, not decoupling*:
+resolves it by _sequencing, not decoupling_:
 
 > **AUTHOR-1 — one grounding computer.** All planner derivations and the truth-gate re-derivation go
 > through a single seam. No second derivation, no cached digest table, no per-caller re-implementation;
@@ -92,7 +92,7 @@ Accepted cost: planners pay a full index build.
 TypeScript programmer inside the Atlas monorepo, it exposes internal seams as public API, and it leaves
 the MCP transport with no story at all.
 
-**(d) Wait for `atlas mine` (wire a model) instead.** Rejected as a *substitute*, kept as a complement.
+**(d) Wait for `atlas mine` (wire a model) instead.** Rejected as a _substitute_, kept as a complement.
 Mining is model-gated and abstains by design; a governed knowledge product whose only possible author is
 an unwired model holds zero human ground truth. Human authoring is the floor mining stands on, not an
 alternative to it.

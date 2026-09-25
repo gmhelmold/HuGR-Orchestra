@@ -110,22 +110,24 @@ describe("pty", () => {
     }),
   )
 
-  ptyTest("retains exited sessions until removed", () =>
-    Effect.gen(function* () {
-      const pty = yield* Pty.Service
-      const events = yield* subscribePtyEvents()
-      const info = yield* createPty("/usr/bin/env", ["sh", "-c", "exit 3"])
+  ptyTest(
+    "retains exited sessions until removed",
+    () =>
+      Effect.gen(function* () {
+        const pty = yield* Pty.Service
+        const events = yield* subscribePtyEvents()
+        const info = yield* createPty("/usr/bin/env", ["sh", "-c", "exit 3"])
 
-      expect(yield* waitForEvents(events, info.id, 2)).toEqual(["created", "exited"])
-      const exited = yield* pty.get(info.id)
-      expect(exited.status).toBe("exited")
-      expect(exited.exitCode).toBe(3)
+        expect(yield* waitForEvents(events, info.id, 2)).toEqual(["created", "exited"])
+        const exited = yield* pty.get(info.id)
+        expect(exited.status).toBe("exited")
+        expect(exited.exitCode).toBe(3)
 
-      yield* pty.remove(info.id)
-      expect(yield* waitForEvents(events, info.id, 1)).toEqual(["deleted"])
-      const missing = yield* pty.get(info.id).pipe(Effect.exit)
-      expect(Exit.isFailure(missing)).toBe(true)
-    }),
+        yield* pty.remove(info.id)
+        expect(yield* waitForEvents(events, info.id, 1)).toEqual(["deleted"])
+        const missing = yield* pty.get(info.id).pipe(Effect.exit)
+        expect(Exit.isFailure(missing)).toBe(true)
+      }),
     30000,
   )
 

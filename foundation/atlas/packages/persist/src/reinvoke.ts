@@ -4,20 +4,20 @@
 // reproduces the seat PURELY from git state (same brief → same seat via the SEALED kernel `id` seam), reading
 // ZERO non-git state; `replay(cp)` re-feeds the RECORDED `Checkpoint` I/O (DISTINCT from the raw transcript).
 
-import { id } from '@atlas/kernel';
-import type { Hash } from '@atlas/contracts';
-import type { Checkpoint } from './types.js';
+import { id } from "@atlas/kernel"
+import type { Hash } from "@atlas/contracts"
+import type { Checkpoint } from "./types.js"
 
 /** The audit view produced by replaying a recorded `Checkpoint`. The view shape is the owning WP's to
  *  pin (SIG-TBD), so the frozen surface keeps it opaque. (atlas-persist:106) */
-export type TranscriptView = unknown;
+export type TranscriptView = unknown
 
 /** Re-invoke surface (PERSIST-7 / 10b): idempotent redispatch (same brief → same seat) + faithful replay
  *  of recorded I/O — NEVER a deterministic resume. `Seat`/`record` are orchestrator-owned, kept
  *  `unknown`. (atlas-persist:105-106) */
 export interface ReinvokeApi {
-  redispatch(record: unknown): unknown;
-  replay(cp: Checkpoint): TranscriptView;
+  redispatch(record: unknown): unknown
+  replay(cp: Checkpoint): TranscriptView
 }
 
 // ── idempotent redispatch (REQ-PERSIST-7-a / 10b-b) ─────────────────────────────────────────────────────
@@ -25,11 +25,11 @@ export interface ReinvokeApi {
 /** The canonical seat brief extracted from a git-versioned record: the record's own `seatBrief` when it
  *  carries one, a bare string brief as-is, else the whole record. Pure over its input — no external read. */
 function briefOf(record: unknown): unknown {
-  if (typeof record === 'string') return record;
-  if (typeof record === 'object' && record !== null && 'seatBrief' in record) {
-    return (record as { seatBrief: unknown }).seatBrief;
+  if (typeof record === "string") return record
+  if (typeof record === "object" && record !== null && "seatBrief" in record) {
+    return (record as { seatBrief: unknown }).seatBrief
   }
-  return record;
+  return record
 }
 
 /**
@@ -40,8 +40,8 @@ function briefOf(record: unknown): unknown {
  * resume — nothing here continues an agent from where it stopped. (REQ-PERSIST-7-a / 10b-b)
  */
 export function redispatch(record: unknown): unknown {
-  const seatId: Hash = id({ kind: 'Seat', brief: briefOf(record) });
-  return { kind: 'Seat', seatId };
+  const seatId: Hash = id({ kind: "Seat", brief: briefOf(record) })
+  return { kind: "Seat", seatId }
 }
 
 // ── faithful replay (REQ-PERSIST-10b-c / 10b-d) ─────────────────────────────────────────────────────────
@@ -55,10 +55,10 @@ export function redispatch(record: unknown): unknown {
  * `TranscriptView = unknown` — the frozen interface is consumed, never widened.
  */
 export interface ReplayView {
-  readonly source: 'recording';
-  readonly seatBrief: string;
-  readonly llmOutputs: readonly string[];
-  readonly toolIO: readonly string[];
+  readonly source: "recording"
+  readonly seatBrief: string
+  readonly llmOutputs: readonly string[]
+  readonly toolIO: readonly string[]
 }
 
 /**
@@ -69,15 +69,15 @@ export interface ReplayView {
  */
 export function replay(cp: Checkpoint): ReplayView {
   return {
-    source: 'recording',
+    source: "recording",
     seatBrief: cp.seatBrief,
     llmOutputs: [...cp.llmOutputs],
     toolIO: [...cp.toolIO],
-  };
+  }
 }
 
 // differential-vs-oracle (compile-time): the impl conforms to the co-located frozen `ReinvokeApi` —
 // `redispatch(record: unknown): unknown` matches exactly, and `replay`'s `ReplayView` is assignable to the
 // opaque `TranscriptView` (`unknown`). No `resume` member exists on the surface (PERSIST-10b-a).
-const _apiCheck: ReinvokeApi = { redispatch, replay };
-void _apiCheck;
+const _apiCheck: ReinvokeApi = { redispatch, replay }
+void _apiCheck

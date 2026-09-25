@@ -83,16 +83,16 @@ creates new revision/validation/presentation; old decision remains history and t
 
 ## Tools and Guards
 
-| Capability | Purpose | Boundary |
-|---|---|---|
-| `plan-revision-read` | read exact immutable revision | Maestro durable evidence read |
-| `plan-validation-record-read` | verify current VALID result | Maestro durable evidence read |
-| `session-message-read` | verify direct user reply, order, role, and current presentation | OpenCode durable conversation read |
-| `session-message-write` | persist exact visible approval target | OpenCode durable conversation write |
-| `approval-decision-write` | later: append immutable conversation decision | only with first governed Task slice |
-| `approval-input-guard` | require exact revision/validation/session/current state | before display/reply |
-| `approval-reply-guard` | require explicit user reply after current presentation | before decision persistence |
-| `no-governed-task-before-approval` | permit later Task/child Session only with this approved revision identity | Session/Task boundary |
+| Capability                         | Purpose                                                                   | Boundary                            |
+| ---------------------------------- | ------------------------------------------------------------------------- | ----------------------------------- |
+| `plan-revision-read`               | read exact immutable revision                                             | Maestro durable evidence read       |
+| `plan-validation-record-read`      | verify current VALID result                                               | Maestro durable evidence read       |
+| `session-message-read`             | verify direct user reply, order, role, and current presentation           | OpenCode durable conversation read  |
+| `session-message-write`            | persist exact visible approval target                                     | OpenCode durable conversation write |
+| `approval-decision-write`          | later: append immutable conversation decision                             | only with first governed Task slice |
+| `approval-input-guard`             | require exact revision/validation/session/current state                   | before display/reply                |
+| `approval-reply-guard`             | require explicit user reply after current presentation                    | before decision persistence         |
+| `no-governed-task-before-approval` | permit later Task/child Session only with this approved revision identity | Session/Task boundary               |
 
 No Atlas read/write, shell, product edit, external account/authentication API, GitHub API, member tool, Task
 creation, or dispatch is granted.
@@ -114,22 +114,22 @@ message against different presentation/revision holds with visible mismatch reas
 
 ## Refusal and Recovery
 
-| Condition | Result |
-|---|---|
-| Invalid/stale/mismatched revision, validation, context, session, presentation, or message order | `HOLD`; require new presentation |
-| Assistant/member/tool/unrelated reply | `HOLD`; no decision/task |
-| Ambiguous user reply/question | remain `PENDING`; Maestro asks one confirmation/question |
-| Explicit user decline/cancel | `DECLINED`; preserve decision; no task |
-| Duplicate exact reply | return stored decision |
-| Interrupted display/write | recover pending/decision from durable Session records, never conversation summary |
+| Condition                                                                                       | Result                                                                            |
+| ----------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------- |
+| Invalid/stale/mismatched revision, validation, context, session, presentation, or message order | `HOLD`; require new presentation                                                  |
+| Assistant/member/tool/unrelated reply                                                           | `HOLD`; no decision/task                                                          |
+| Ambiguous user reply/question                                                                   | remain `PENDING`; Maestro asks one confirmation/question                          |
+| Explicit user decline/cancel                                                                    | `DECLINED`; preserve decision; no task                                            |
+| Duplicate exact reply                                                                           | return stored decision                                                            |
+| Interrupted display/write                                                                       | recover pending/decision from durable Session records, never conversation summary |
 
 ## Runtime Seams
 
-| System | Seam |
-|---|---|
+| System   | Seam                                                                                                                      |
+| -------- | ------------------------------------------------------------------------------------------------------------------------- |
 | OpenCode | exact plan display, durable ordered user/assistant messages, Session identity, decision records, Task/child-Session fence |
-| Atlas | no read/write; context only through revision/validation evidence hashes |
-| GitHub | delivery provenance only: commit, PR, review, and merge; never approval gate |
+| Atlas    | no read/write; context only through revision/validation evidence hashes                                                   |
+| GitHub   | delivery provenance only: commit, PR, review, and merge; never approval gate                                              |
 
 ## Acceptance
 

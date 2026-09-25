@@ -51,11 +51,11 @@ data:
 
 ## Exit codes
 
-| code | meaning |
-| --- | --- |
-| `0` | the relations were read (**including** the honest empty result) |
-| `1` | an out-of-vocabulary direction, or a runtime that is not composed |
-| `2` | a governance gate refused the read (the committed-store tripwire) |
+| code | meaning                                                           |
+| ---- | ----------------------------------------------------------------- |
+| `0`  | the relations were read (**including** the honest empty result)   |
+| `1`  | an out-of-vocabulary direction, or a runtime that is not composed |
+| `2`  | a governance gate refused the read (the committed-store tripwire) |
 
 ## What it refuses, and why
 
@@ -65,7 +65,7 @@ data:
 **A committed durable store.** Like every read door, `relations` is refused at the entrypoint when `.atlas/`
 arrived by commit rather than through a governed door (exit 2). See [`query`](./query.md) for the text.
 
-**Writing.** `relations` reads through a leg with no store-mutating method. A relation is *filed* through
+**Writing.** `relations` reads through a leg with no store-mutating method. A relation is _filed_ through
 [`emit`](./emit.md); there is no write path here.
 
 ## Transport differences

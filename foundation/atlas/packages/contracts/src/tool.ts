@@ -7,7 +7,7 @@
  *  `inputSchema` is a JSON-Schema object (kept structural — the schema DSL is the external MCP
  *  standard, not an atlas-owned shape). */
 export interface ToolSchema {
-  readonly name: string;
-  readonly description: string;
-  readonly inputSchema: Readonly<Record<string, unknown>>;
+  readonly name: string
+  readonly description: string
+  readonly inputSchema: Readonly<Record<string, unknown>>
 }

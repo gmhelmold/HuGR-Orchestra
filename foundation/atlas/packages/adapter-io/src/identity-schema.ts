@@ -91,7 +91,7 @@
  * message naming this constant. That pairing is the whole mechanism: the goldens NOTICE, this constant
  * RECORDS, and the refusal below EXPLAINS.
  */
-export const IDENTITY_SCHEMA = 'atlas-identity-2026-08-02';
+export const IDENTITY_SCHEMA = "atlas-identity-2026-08-02"
 
 /** What a stored sidecar's stamp says about the schema its hashes were minted under.
  *  `current`   — the stamp equals {@link IDENTITY_SCHEMA}. Also the verdict for a store that does not exist
@@ -99,11 +99,11 @@ export const IDENTITY_SCHEMA = 'atlas-identity-2026-08-02';
  *  `unstamped` — the sidecar carries no identity stamp. It was written before stamping existed, so the
  *                schema is UNKNOWN. Never read as "the previous version" — there was no previous version.
  *  `foreign`   — it carries a stamp, and it is not ours (an older tagged schema, or a NEWER Atlas). */
-export type IdentityVerdict = 'current' | 'unstamped' | 'foreign';
+export type IdentityVerdict = "current" | "unstamped" | "foreign"
 
 /** The refusal's machine-readable DISCRIMINANT. One member today; a union so a second identity-level refusal
  *  cannot be added as a bare string. Asserted on for EQUALITY — never as a substring of the prose. */
-export type IdentitySchemaReason = 'identity-schema';
+export type IdentitySchemaReason = "identity-schema"
 
 /**
  * Classify a raw stamp read off a sidecar. TOTAL over `unknown`, because this value comes out of a file
@@ -114,32 +114,32 @@ export type IdentitySchemaReason = 'identity-schema';
  * `foreign` rather than quietly accepted.
  */
 export function classifyIdentity(stamp: unknown): IdentityVerdict {
-  if (typeof stamp !== 'string' || stamp.length === 0) return 'unstamped';
-  return stamp === IDENTITY_SCHEMA ? 'current' : 'foreign';
+  if (typeof stamp !== "string" || stamp.length === 0) return "unstamped"
+  return stamp === IDENTITY_SCHEMA ? "current" : "foreign"
 }
 
 /** The shared head of the refusal. The text before the first `:` is the discriminant `reasonOf` compares,
  *  and it is deliberately NOT a name any other refusal constant in this package mentions. */
 export const REJECTED_FOREIGN_IDENTITY_SCHEMA =
-  'identity-schema: the durable Atlas store under `.atlas/` was written under a DIFFERENT identity schema ' +
-  'than this build computes. Every stored anchor names a structural unit by a key and a subtree hash, and ' +
-  'both are produced by rules that have changed: the Merkle fold now commits to a node\'s own content and ' +
-  'to its child NAMES, and a sub-file anchor is now keyed `<parent>::<kind>:<ordinal>[:<name>]` instead of ' +
-  'by the symbol\'s byte offset. So every fact in that store reads DRIFTED against this build — not because ' +
-  'the code changed, but because the hash function did, and nothing in the store could tell you which.';
+  "identity-schema: the durable Atlas store under `.atlas/` was written under a DIFFERENT identity schema " +
+  "than this build computes. Every stored anchor names a structural unit by a key and a subtree hash, and " +
+  "both are produced by rules that have changed: the Merkle fold now commits to a node's own content and " +
+  "to its child NAMES, and a sub-file anchor is now keyed `<parent>::<kind>:<ordinal>[:<name>]` instead of " +
+  "by the symbol's byte offset. So every fact in that store reads DRIFTED against this build — not because " +
+  "the code changed, but because the hash function did, and nothing in the store could tell you which."
 
 /** What to do about it. Separated from the head because it is the half a user actually acts on. */
 const REMEDIATION =
-  'This CANNOT be migrated automatically and that is a limit, not a shortcut: re-minting an anchor needs ' +
-  'the SOURCE at the revision the fact was grounded against (which the store does not keep) and needs to ' +
-  'know which past schema wrote the old key (which nothing recorded) — and the two key formats are ' +
-  'transpositions of each other, so a wrong guess silently re-anchors a fact at a different symbol. ' +
-  'RE-DERIVE instead: the source is right here and re-deriving needs no guess. Move the old store aside ' +
-  '(`mv .atlas/projection*.json .atlas/staging*.json /tmp/`, keeping `.atlas/policy.json` and `.atlas/cas` ' +
-  '— the CAS blobs are content-addressed and are NOT affected, so nothing you wrote is lost), then re-mine ' +
-  'and re-emit against the current tree. Nothing was written and nothing was deleted by this refusal. ' +
-  'The rules that define a schema, and why re-deriving is the only honest answer, are written out in ' +
-  'packages/adapter-io/src/identity-schema.ts.';
+  "This CANNOT be migrated automatically and that is a limit, not a shortcut: re-minting an anchor needs " +
+  "the SOURCE at the revision the fact was grounded against (which the store does not keep) and needs to " +
+  "know which past schema wrote the old key (which nothing recorded) — and the two key formats are " +
+  "transpositions of each other, so a wrong guess silently re-anchors a fact at a different symbol. " +
+  "RE-DERIVE instead: the source is right here and re-deriving needs no guess. Move the old store aside " +
+  "(`mv .atlas/projection*.json .atlas/staging*.json /tmp/`, keeping `.atlas/policy.json` and `.atlas/cas` " +
+  "— the CAS blobs are content-addressed and are NOT affected, so nothing you wrote is lost), then re-mine " +
+  "and re-emit against the current tree. Nothing was written and nothing was deleted by this refusal. " +
+  "The rules that define a schema, and why re-deriving is the only honest answer, are written out in " +
+  "packages/adapter-io/src/identity-schema.ts."
 
 /**
  * The FULL refusal for a verdict, or `undefined` when there is nothing to refuse.
@@ -150,22 +150,22 @@ const REMEDIATION =
  * say something concrete about itself.
  */
 export function identitySchemaText(verdict: IdentityVerdict, found?: string | undefined): string | undefined {
-  if (verdict === 'current') return undefined;
+  if (verdict === "current") return undefined
   const middle =
-    verdict === 'unstamped'
-      ? 'This store carries no identity stamp at all, so the schema it was written under is UNKNOWN — ' +
-        'stamping did not exist before this build, and no past release was ever tagged, so there is no ' +
-        'version to name and none is claimed here. It may have been written by any Atlas older than this one.'
+    verdict === "unstamped"
+      ? "This store carries no identity stamp at all, so the schema it was written under is UNKNOWN — " +
+        "stamping did not exist before this build, and no past release was ever tagged, so there is no " +
+        "version to name and none is claimed here. It may have been written by any Atlas older than this one."
       : `This store is stamped \`${String(found)}\`, which this build does not speak — it was written by ` +
-        'an Atlas with a different (older or newer) identity schema.';
-  return `${REJECTED_FOREIGN_IDENTITY_SCHEMA} ${middle} This build speaks \`${IDENTITY_SCHEMA}\`. ${REMEDIATION}`;
+        "an Atlas with a different (older or newer) identity schema."
+  return `${REJECTED_FOREIGN_IDENTITY_SCHEMA} ${middle} This build speaks \`${IDENTITY_SCHEMA}\`. ${REMEDIATION}`
 }
 
 /** The shape this module needs from a sidecar read — structural, so `sidecar.ts` can depend on this module
  *  without this module depending back on it (no import cycle, and no fs in here at all). */
 export interface IdentityBearing {
-  readonly identity: IdentityVerdict;
-  readonly identityFound?: string | undefined;
+  readonly identity: IdentityVerdict
+  readonly identityFound?: string | undefined
 }
 
 /**
@@ -188,7 +188,7 @@ export interface IdentityBearing {
  *     rejected `Verdict`, TOOLS-2).
  */
 export function identitySchemaRefusal(read: IdentityBearing): string | undefined {
-  return identitySchemaText(read.identity, read.identityFound);
+  return identitySchemaText(read.identity, read.identityFound)
 }
 
 /**
@@ -208,19 +208,19 @@ export function identitySchemaRefusal(read: IdentityBearing): string | undefined
  * Reason (1) is why this is right; reason (2) is why it was not a close call.
  */
 export class IdentitySchemaError extends Error {
-  readonly reason: IdentitySchemaReason = 'identity-schema';
+  readonly reason: IdentitySchemaReason = "identity-schema"
   constructor(
-    readonly verdict: Exclude<IdentityVerdict, 'current'>,
+    readonly verdict: Exclude<IdentityVerdict, "current">,
     readonly found: string | undefined,
   ) {
-    super(identitySchemaText(verdict, found));
-    this.name = 'IdentitySchemaError';
+    super(identitySchemaText(verdict, found))
+    this.name = "IdentitySchemaError"
   }
 }
 
 /** Refuse a WRITE over a store whose schema is not this build's. Throws {@link IdentitySchemaError};
  *  otherwise returns. Total: a `current` verdict (which includes "no store yet") is a no-op. */
 export function refuseForeignIdentityWrite(read: IdentityBearing): void {
-  if (read.identity === 'current') return;
-  throw new IdentitySchemaError(read.identity, read.identityFound);
+  if (read.identity === "current") return
+  throw new IdentitySchemaError(read.identity, read.identityFound)
 }

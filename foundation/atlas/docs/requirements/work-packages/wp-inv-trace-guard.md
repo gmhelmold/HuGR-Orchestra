@@ -14,34 +14,34 @@
 epic: none (out-of-band, dispatched by the lead; the `INV-TOOLS-6` amendment below is OWNER-RATIFIED)
 id: WP-FIX-5.SPEC
 title: Amend `INV-TOOLS-6` to the two-band reality already ratified by ADR-0013, and add the gate that
-  makes a REQ→INV quote divergence impossible to leave open
+makes a REQ→INV quote divergence impossible to leave open
 
 intent: >
-  Every REQ in this repo carries a verbatim quote of the invariant clause it realizes:
+Every REQ in this repo carries a verbatim quote of the invariant clause it realizes:
 
       source: INV-TOOLS-6 @ reference/atlas-tools.md#tools-6
       normative-clause: "return a `≤ ~2K` **governing** pack of `tier≥T1` invariants"
 
-  **Nothing checked that the quote still appears in the cited invariant.** Verified on master `e4882a3`
-  by three independent means, not by grep alone: `normative-clause` occurs in `harness/gates/` exactly
-  once, inside a COMMENT at `spec-conformance-guard.mjs:143`; no gate parses a `source: INV-… @ …#anchor`
-  pointer (`id-integrity` resolves `#anchor`s but classes `#tools-6` as a free-form slug it COUNTS and
-  DECLARES UNCHECKED); and the corpus was mechanically re-derived here — 637 REQs across 11 documents,
-  50 of them quoting text their cited invariant does not contain. The *satisfies* trace this repo is
-  built on was unverified at exactly the link where it rots.
+**Nothing checked that the quote still appears in the cited invariant.** Verified on master `e4882a3`
+by three independent means, not by grep alone: `normative-clause` occurs in `harness/gates/` exactly
+once, inside a COMMENT at `spec-conformance-guard.mjs:143`; no gate parses a `source: INV-… @ …#anchor`
+pointer (`id-integrity` resolves `#anchor`s but classes `#tools-6` as a free-form slug it COUNTS and
+DECLARES UNCHECKED); and the corpus was mechanically re-derived here — 637 REQs across 11 documents,
+50 of them quoting text their cited invariant does not contain. The _satisfies_ trace this repo is
+built on was unverified at exactly the link where it rots.
 
-  It had already rotted. `INV-TOOLS-6` — a RATIFIED invariant — described a `≤ ~2K` pack of `tier≥T1`
-  invariants as a statement about the WHOLE pack, while ADR-0013 (owner-ratified 2026-08-03) had added a
-  second, separately capped ADVISORY `T2` band that is SHIPPED (`packages/tools/src/bands.ts`
-  `splitBands`/`ADVISORY_CAP`; `Pack.advisory` + `Pack.advisoryDropped` in
-  `packages/contracts/src/pack.ts`). Six requirements (`REQ-TOOLS-6a`…`6f`) cite that invariant. A prior WP
-  correctly refused to amend it — amending a ratified invariant is the owner's surface — and recorded the
-  divergence at `req-tls.md:89-98` rather than straddling it silently. The owner ratified the amendment on
-  2026-08-04; this WP applies it, byte-exact, on all FOUR lines of `atlas-tools.md` that carried the
-  retired claim, and lands the gate that would have caught it.
+It had already rotted. `INV-TOOLS-6` — a RATIFIED invariant — described a `≤ ~2K` pack of `tier≥T1`
+invariants as a statement about the WHOLE pack, while ADR-0013 (owner-ratified 2026-08-03) had added a
+second, separately capped ADVISORY `T2` band that is SHIPPED (`packages/tools/src/bands.ts`
+`splitBands`/`ADVISORY_CAP`; `Pack.advisory` + `Pack.advisoryDropped` in
+`packages/contracts/src/pack.ts`). Six requirements (`REQ-TOOLS-6a`…`6f`) cite that invariant. A prior WP
+correctly refused to amend it — amending a ratified invariant is the owner's surface — and recorded the
+divergence at `req-tls.md:89-98` rather than straddling it silently. The owner ratified the amendment on
+2026-08-04; this WP applies it, byte-exact, on all FOUR lines of `atlas-tools.md` that carried the
+retired claim, and lands the gate that would have caught it.
 
-  **The gate is the deliverable; the amendment is its first real case** — and the amendment proved the
-  teeth, not a planted mutation: applying it turned `REQ-TOOLS-6b` RED before its quote was re-lifted.
+**The gate is the deliverable; the amendment is its first real case** — and the amendment proved the
+teeth, not a planted mutation: applying it turned `REQ-TOOLS-6b` RED before its quote was re-lifted.
 
 ## THE RATIFIED TEXT — OWNER-RATIFIED 2026-08-04, reproduced verbatim
 
@@ -123,35 +123,39 @@ No comment in the gate claims a property the code does not enforce — the one t
 you to ledger a row without printing its key) was caught by the twin and the CODE was fixed.
 
 anchor:
-  - `harness/gates/req-clause-guard.mjs` — the gate (268 LOC)
-  - `docs/reference/atlas-tools.md:53-56` — the amended `TOOLS-6` bullet
-  - `docs/requirements/req-tls.md:84-110` — `REQ-TOOLS-6b`'s clause and the now-CLOSED divergence note
+
+- `harness/gates/req-clause-guard.mjs` — the gate (268 LOC)
+- `docs/reference/atlas-tools.md:53-56` — the amended `TOOLS-6` bullet
+- `docs/requirements/req-tls.md:84-110` — `REQ-TOOLS-6b`'s clause and the now-CLOSED divergence note
 
 interface_contract:
-  - source: ../method-tags-tls.md#TOOLS-6
+
+- source: ../method-tags-tls.md#TOOLS-6
 
 source_reqs:
-  - source: ../req-tls.md#REQ-TOOLS-6b   # the clause that moved
-  - source: ../req-tls.md#REQ-TOOLS-6f   # the ratified two-band requirement the invariant must now reflect
+
+- source: ../req-tls.md#REQ-TOOLS-6b # the clause that moved
+- source: ../req-tls.md#REQ-TOOLS-6f # the ratified two-band requirement the invariant must now reflect
 
 exclusions:
-  - `packages/**` — NO source edits. Live seats own `packages/genesis/src/**`, `packages/adapter-io/src/**`
-    and `packages/tools/src/**`. Read-only, and NOTHING is asked of them: two single-band strings that were
-    live at this branch's fork point `e4882a3` (the MCP tool description in `tools/src/handler.ts` and the
-    `tools/src/types.ts` doc-comment) were both fixed on master by `ed22ae7` (PR #117, #193) while this
-    branch was in flight. Verified against `origin/master`, not assumed: the description is two-band and
-    pinned off-the-wire by e2e-blackbox S26.4, and the retired sentence survives only as a quoted "it said"
-    record in the comment above it.
-  - `harness/gates/adr-citation-guard.mjs`, `harness/lib/**` — owned by `fix/surface-truth`. Not edited and
-    not depended on: this gate imports nothing from `harness/lib/`.
-  - `docs/reference/commands/**`, `docs/how-to/**` — owned by `fix/doc-transcripts`.
-  - `docs/adr/ADR-0013-*.md` — quotes the OLD strings as its own "before" evidence. Unchanged.
-  - Any behavioural change anywhere.
+
+- `packages/**` — NO source edits. Live seats own `packages/genesis/src/**`, `packages/adapter-io/src/**`
+  and `packages/tools/src/**`. Read-only, and NOTHING is asked of them: two single-band strings that were
+  live at this branch's fork point `e4882a3` (the MCP tool description in `tools/src/handler.ts` and the
+  `tools/src/types.ts` doc-comment) were both fixed on master by `ed22ae7` (PR #117, #193) while this
+  branch was in flight. Verified against `origin/master`, not assumed: the description is two-band and
+  pinned off-the-wire by e2e-blackbox S26.4, and the retired sentence survives only as a quoted "it said"
+  record in the comment above it.
+- `harness/gates/adr-citation-guard.mjs`, `harness/lib/**` — owned by `fix/surface-truth`. Not edited and
+  not depended on: this gate imports nothing from `harness/lib/`.
+- `docs/reference/commands/**`, `docs/how-to/**` — owned by `fix/doc-transcripts`.
+- `docs/adr/ADR-0013-*.md` — quotes the OLD strings as its own "before" evidence. Unchanged.
+- Any behavioural change anywhere.
 
 action: re-derive the REQ corpus; build the check; run it before the amendment and capture what fails;
-  apply A1's amendment byte-exact across all four carriers + A2's quote re-lift + A3's note correction;
-  re-run to green; plant and remove a synthetic divergence elsewhere; wire the gate into `package.json` +
-  `ci.yml` (required by `gate-directory.test.mjs`, which fails any gate CI does not name); write this card.
+apply A1's amendment byte-exact across all four carriers + A2's quote re-lift + A3's note correction;
+re-run to green; plant and remove a synthetic divergence elsewhere; wire the gate into `package.json` +
+`ci.yml` (required by `gate-directory.test.mjs`, which fails any gate CI does not name); write this card.
 
 action_surface: `[ read(**), edit(docs/reference/atlas-tools.md), edit(docs/requirements/req-tls.md),
   edit(harness/gates/req-clause-guard.mjs, new file), edit(harness/gates/req-clause-guard.test.mjs, new
@@ -159,98 +163,102 @@ action_surface: `[ read(**), edit(docs/reference/atlas-tools.md), edit(docs/requ
   edit(.github/workflows/ci.yml, one step line),
   edit(docs/requirements/work-packages/wp-inv-trace-guard.md, new file),
   run(tsc -b), run(vitest run), run(node harness/gates/*.mjs) ]`
-  WIDENED by the cold review's fix round (B-F4), to finish a fan-out that had stopped at one file:
-  `[ edit(docs/spec/atlas.md, one table row), edit(docs/reference/atlas-knowledge.md, one table row),
+WIDENED by the cold review's fix round (B-F4), to finish a fan-out that had stopped at one file:
+`[ edit(docs/spec/atlas.md, one table row), edit(docs/reference/atlas-knowledge.md, one table row),
   edit(docs/requirements/method-tags-tls.md, one sentence of an amendment note),
   edit(docs/requirements/properties-tls.md, the 19 digest pins + the re-freeze record) ]`
 
 guardrails: writes confined to the paths above; `packages/**` untouched; no `git checkout`/`restore`/
-  `stash`/`reset` in the worktree — the two falsification demos used `cp` backup + `cp` restore verified by
-  `diff -q`, and the one restoration of `spec-conformance-guard.mjs` used an explicit
-  `git show HEAD:<path> > <path>` write, verified by an empty `git diff` for that file; the synthetic
-  divergence was removed and proven gone by tree-wide grep AND `git status`; no credential-shaped string in
-  any fixture; commit only — no push, no PR, no merge.
+`stash`/`reset` in the worktree — the two falsification demos used `cp` backup + `cp` restore verified by
+`diff -q`, and the one restoration of `spec-conformance-guard.mjs` used an explicit
+`git show HEAD:<path> > <path>` write, verified by an empty `git diff` for that file; the synthetic
+divergence was removed and proven gone by tree-wide grep AND `git status`; no credential-shaped string in
+any fixture; commit only — no push, no PR, no merge.
 
 acceptance:
-  Proof of teeth, both directions, on the SHIPPED artifact:
-  (1) REAL — with `INV-TOOLS-6` amended and `REQ-TOOLS-6b` still carrying master's quote, `req-clause-guard`
-      exits **1** naming `req-tls.md:84 REQ-TOOLS-6b`, "Diverges after 17 char(s): matched
-      "return a `≤ ~2K` " then wanted "pack of `tier≥T1` invariants"". Re-lift the quote ⇒ exit **0**.
-  (2) SYNTHETIC — `REQ-AUTH-2a` in `requirements-authoring.md` perturbed by one word ⇒ exit **1** naming it;
-      restored byte-identically (`diff -q`) ⇒ exit **0**; tree-wide grep for the perturbation: no matches.
-  (3) A 9-case test twin, including the case that a house-form AMENDMENT TOMBSTONE cannot re-satisfy a
-      stale quote — the hole that made the first version of this gate report OK on the very edit it exists
-      to catch.
+Proof of teeth, both directions, on the SHIPPED artifact:
+(1) REAL — with `INV-TOOLS-6` amended and `REQ-TOOLS-6b` still carrying master's quote, `req-clause-guard`
+exits **1** naming `req-tls.md:84 REQ-TOOLS-6b`, "Diverges after 17 char(s): matched
+"return a `≤ ~2K` " then wanted "pack of `tier≥T1` invariants"". Re-lift the quote ⇒ exit **0**.
+(2) SYNTHETIC — `REQ-AUTH-2a` in `requirements-authoring.md` perturbed by one word ⇒ exit **1** naming it;
+restored byte-identically (`diff -q`) ⇒ exit **0**; tree-wide grep for the perturbation: no matches.
+(3) A 9-case test twin, including the case that a house-form AMENDMENT TOMBSTONE cannot re-satisfy a
+stale quote — the hole that made the first version of this gate report OK on the very edit it exists
+to catch.
 
-deps: [ ]   parallel_group: [P] (disjoint from all three live seats by the exclusions above)
+deps: [ ] parallel_group: [P] (disjoint from all three live seats by the exclusions above)
 MERGE ORDER, lead-owned: `fix/surface-truth` → `fix/doc-transcripts` → this branch. Do not rebase.
 
 exit_predicate: acceptance evidenced ∧ `npx tsc -b` exit 0 ∧ `npx vitest run` reconciled literally against
-  the `origin/master` baseline (318 files / 2532 passed + 1 todo → 319 files / 2542 passed + 1 todo; delta
-  = +1 file, +10 tests: 9 from `req-clause-guard.test.mjs` and 1 from `gate-directory.test.mjs`, whose
-  `it.each(gateFiles)` grows by one because a gate was added; 0 pre-existing tests changed) ∧ all 8 gates
-  in `harness/gates/` exit 0, each read directly ∧ I1-I7 and C1-C4 each individually evidenced.
+the `origin/master` baseline (318 files / 2532 passed + 1 todo → 319 files / 2542 passed + 1 todo; delta
+= +1 file, +10 tests: 9 from `req-clause-guard.test.mjs` and 1 from `gate-directory.test.mjs`, whose
+`it.each(gateFiles)` grows by one because a gate was added; 0 pre-existing tests changed) ∧ all 8 gates
+in `harness/gates/` exit 0, each read directly ∧ I1-I7 and C1-C4 each individually evidenced.
 
 context_refs:
-  - source: ../req-tls.md
-  - source: ../../reference/atlas-tools.md
-  - source: ../../method/wp-template.md
-  - source: ./wp-fix-scip-local-edges.md
+
+- source: ../req-tls.md
+- source: ../../reference/atlas-tools.md
+- source: ../../method/wp-template.md
+- source: ./wp-fix-scip-local-edges.md
 
 owner: SPEC territory · builder_id: `charlie`
 
 outputs:
-  - `harness/gates/req-clause-guard.mjs` — the gate, 268 LOC. **A4 DECISION: a new file, not a fifth check
-    inside `spec-conformance-guard.mjs`, and the reason is a MEASUREMENT rather than a preference.** The
-    check was first built inside that guard and measured 433 lines — over the repo's own 400-LOC ceiling,
-    which the card required either way (I7). Externalising only the 50-row ledger would have left the
-    file at ~380, one edit from the cap and with the table hidden from `godfile-guard`'s `.mjs` scope. The
-    check is also its own taproot: check (4) there enforces that an amendment was VISITED in every
-    restatement, this one enforces what the restatement SAYS. The cost is real and was paid in full: a new
-    file in `harness/gates/` MUST be named by an npm script and by `ci.yml` or `gate-directory.test.mjs`
-    fails it, so `package.json` and `.github/workflows/ci.yml` each gained one line.
-  - `harness/gates/req-clause-guard.test.mjs` — 9-case twin over a fixture corpus (`REQ_CLAUSE_ROOT` /
-    `REQ_CLAUSE_LEDGER` overrides), covering pass, the real amend-without-fan-out shape, `…` elision AND
-    its order enforcement, `\"` escaping, the amendment-tombstone hole, emphasis/case NOT being folded,
-    the multi-carrier report, unevaluable-row naming on a PASSING run, and the ledger ratchet both ways
-  - `harness/req-clause-ledger.json` — 50 pre-existing divergences, one authored reason each, shrink-only
-  - `docs/reference/atlas-tools.md` — `INV-TOOLS-6` amended byte-exact (A1) + house-form amendment note;
-    and the SAME retired claim amended on its three other carriers in that file: the `QueryOut` data-model
-    line (21), the `atlas-query` Surface/API line (154) and acceptance item 5 (232)
-  - `docs/requirements/req-tls.md` — `REQ-TOOLS-6b`'s quote re-lifted, its EARS sentence amended to match
-    (it said "a `≤ ~2K` pack of `tier≥T1` invariants" one line above the two-band clause — a REQ
-    contradicting itself, and invisible to the gate, which reads `normative-clause:` only); the divergence
-    note marked CLOSED and its stale sub-claims corrected
-  - `docs/spec/atlas.md`, `docs/reference/atlas-knowledge.md` — the SAME retired claim, in the
-    `atlas-query` row of each file's tool table, amended in the same register (cold review B-F4)
-  - `docs/requirements/method-tags-tls.md` — the closing sentence of INV-TOOLS-6's amendment note recorded
-    `reference/atlas-tools.md#tools-6` as an OPEN divergence, which this WP closes; corrected. The
-    `up-property` is deliberately NOT rewritten — the 2026-08-03 amendment scoped it as a statement about
-    the GOVERNING band, that scoping is ratified and true, and re-authoring a ratified law under cover of a
-    clerical fix is not this WP's surface
-  - `docs/requirements/properties-tls.md` — the 19 `@sha256` pins re-frozen `aa329ac9` → `ecf859a9`, with a
-    record of WHY. The digest tripwire (`spec-conformance-guard` check (3)) fired on the method-tags edit
-    exactly as designed; PROP-TOOLS-6's `law`/`arbitrary`/`teeth`/`witness` are reconciled UNCHANGED,
-    because no `up-property`/`down-model`/`anti-rot` text moved
-  - `package.json`, `.github/workflows/ci.yml` — one line each, wiring the gate (see A4)
-  - `docs/requirements/work-packages/wp-inv-trace-guard.md` — this card
+
+- `harness/gates/req-clause-guard.mjs` — the gate, 268 LOC. **A4 DECISION: a new file, not a fifth check
+  inside `spec-conformance-guard.mjs`, and the reason is a MEASUREMENT rather than a preference.** The
+  check was first built inside that guard and measured 433 lines — over the repo's own 400-LOC ceiling,
+  which the card required either way (I7). Externalising only the 50-row ledger would have left the
+  file at ~380, one edit from the cap and with the table hidden from `godfile-guard`'s `.mjs` scope. The
+  check is also its own taproot: check (4) there enforces that an amendment was VISITED in every
+  restatement, this one enforces what the restatement SAYS. The cost is real and was paid in full: a new
+  file in `harness/gates/` MUST be named by an npm script and by `ci.yml` or `gate-directory.test.mjs`
+  fails it, so `package.json` and `.github/workflows/ci.yml` each gained one line.
+- `harness/gates/req-clause-guard.test.mjs` — 9-case twin over a fixture corpus (`REQ_CLAUSE_ROOT` /
+  `REQ_CLAUSE_LEDGER` overrides), covering pass, the real amend-without-fan-out shape, `…` elision AND
+  its order enforcement, `\"` escaping, the amendment-tombstone hole, emphasis/case NOT being folded,
+  the multi-carrier report, unevaluable-row naming on a PASSING run, and the ledger ratchet both ways
+- `harness/req-clause-ledger.json` — 50 pre-existing divergences, one authored reason each, shrink-only
+- `docs/reference/atlas-tools.md` — `INV-TOOLS-6` amended byte-exact (A1) + house-form amendment note;
+  and the SAME retired claim amended on its three other carriers in that file: the `QueryOut` data-model
+  line (21), the `atlas-query` Surface/API line (154) and acceptance item 5 (232)
+- `docs/requirements/req-tls.md` — `REQ-TOOLS-6b`'s quote re-lifted, its EARS sentence amended to match
+  (it said "a `≤ ~2K` pack of `tier≥T1` invariants" one line above the two-band clause — a REQ
+  contradicting itself, and invisible to the gate, which reads `normative-clause:` only); the divergence
+  note marked CLOSED and its stale sub-claims corrected
+- `docs/spec/atlas.md`, `docs/reference/atlas-knowledge.md` — the SAME retired claim, in the
+  `atlas-query` row of each file's tool table, amended in the same register (cold review B-F4)
+- `docs/requirements/method-tags-tls.md` — the closing sentence of INV-TOOLS-6's amendment note recorded
+  `reference/atlas-tools.md#tools-6` as an OPEN divergence, which this WP closes; corrected. The
+  `up-property` is deliberately NOT rewritten — the 2026-08-03 amendment scoped it as a statement about
+  the GOVERNING band, that scoping is ratified and true, and re-authoring a ratified law under cover of a
+  clerical fix is not this WP's surface
+- `docs/requirements/properties-tls.md` — the 19 `@sha256` pins re-frozen `aa329ac9` → `ecf859a9`, with a
+  record of WHY. The digest tripwire (`spec-conformance-guard` check (3)) fired on the method-tags edit
+  exactly as designed; PROP-TOOLS-6's `law`/`arbitrary`/`teeth`/`witness` are reconciled UNCHANGED,
+  because no `up-property`/`down-model`/`anti-rot` text moved
+- `package.json`, `.github/workflows/ci.yml` — one line each, wiring the gate (see A4)
+- `docs/requirements/work-packages/wp-inv-trace-guard.md` — this card
 
 provenance:
-  - branch `fix/inv-trace-guard`, forked from master `e4882a3`
-  - worktree-local commit; this card does not self-report a sha it did not mint
+
+- branch `fix/inv-trace-guard`, forked from master `e4882a3`
+- worktree-local commit; this card does not self-report a sha it did not mint
 
 trace_ref: manual — lead brief (WP-CARD, with a mid-flight delta widening A1 from one carrier to four) →
-  this card + the files under `outputs`; no automated S0-S4 trace exists for an out-of-band hotfix
+this card + the files under `outputs`; no automated S0-S4 trace exists for an out-of-band hotfix
 
 rationale:
-  - source: ../req-tls.md#REQ-TOOLS-6f
+
+- source: ../req-tls.md#REQ-TOOLS-6f
 
 ---
 
 ## What the lead's framing got wrong
 
 **1. Rule 3 was unsatisfiable as written, and the reason is the finding.** The card required the gate to
-FAIL on `REQ-TOOLS-6b` *before* the amendment. It does not, and cannot: on master `e4882a3` that clause
+FAIL on `REQ-TOOLS-6b` _before_ the amendment. It does not, and cannot: on master `e4882a3` that clause
 quotes the UNAMENDED invariant exactly. The live `INV-TOOLS-6` divergence was SEMANTIC — the REQ corpus
 said two bands, the invariant said one — and a quote-existence check is blind to it by construction. What
 the gate catches is the opposite direction: an invariant amended without its quotes fanned out. Before the

@@ -19,9 +19,9 @@
 // here — `validateTemplate` enforces only the coarse "structured template shape vs raw free prose"
 // distinction (SCN-GROUND-9-1); the field-set/cap guard is pending the A-13 reconciliation lift.
 
-import type { Status } from '@atlas/contracts';
-import type { Axes } from '@atlas/index';
-import type { Grounding, GateApi } from './types.js';
+import type { Status } from "@atlas/contracts"
+import type { Axes } from "@atlas/index"
+import type { Grounding, GateApi } from "./types.js"
 
 /**
  * The admission bar (GROUND-7, as amended by ADR-0012) + the templated-write validator (GROUND-9, spec
@@ -60,14 +60,14 @@ export interface AdmitApi {
    *  type — UPWARD-owned,
    *  this layer-3 module MUST NOT import it (would invert the DAG). Transcribed as `unknown` rather than
    *  invented; flagged for the knowledge layer to supply the concrete shape. */
-  admit(fact: unknown): boolean;
+  admit(fact: unknown): boolean
 
   /** Templated-write validator (GROUND-9, spec A-13): reject a fact missing a required template field,
    *  over cap, or carrying free prose — no free-prose fact persists. Pure + total. (method-tags-grd:82-84)
    *
    *  [FLAG — `fact` arg, upward-owned] Same upward-owned `Fact` as `admit` → `unknown`. The fixed field
    *  set + cap live with the knowledge-layer template; flagged for that layer to supply the shape. */
-  validateTemplate(fact: unknown): boolean;
+  validateTemplate(fact: unknown): boolean
 }
 
 /**
@@ -77,13 +77,13 @@ export interface AdmitApi {
  * seam (no second copy of the gate). Pure + total.
  */
 export function truthDoorHolds(
-  gate: Pick<GateApi, 'gateHolds'>,
+  gate: Pick<GateApi, "gateHolds">,
   candidate: unknown,
   grounding: Grounding,
   src: Axes,
 ): boolean {
-  const verdict: Status = gate.gateHolds(candidate, grounding, src);
-  return verdict === 'HOLDS';
+  const verdict: Status = gate.gateHolds(candidate, grounding, src)
+  return verdict === "HOLDS"
 }
 
 /**
@@ -97,5 +97,5 @@ export function truthDoorHolds(
  * UPWARD-owned; importing it inverts the DAG). The coarse structured-vs-prose check needs no upward type.
  */
 export function validateTemplate(fact: unknown): boolean {
-  return typeof fact === 'object' && fact !== null && !Array.isArray(fact);
+  return typeof fact === "object" && fact !== null && !Array.isArray(fact)
 }

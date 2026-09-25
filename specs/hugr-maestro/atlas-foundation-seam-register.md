@@ -6,12 +6,12 @@ about this foundation.
 
 ## Current Source Candidates
 
-| Candidate | Current source contract | Named current tests | V2 status |
-|---|---|---|---|
-| Ownership read | `@atlas/adapter-io/src/compose-runtime.ts`: `own(scope) -> OwnDispatch { tool, pack: OwnPackPlus }`; current store + axes compose bounded ownership state | `packages/retrieval/test/wp-6.20-retr.own.test.ts` | primary candidate for `assemble-context` after Own-first adapter freeze |
-| Shared Awareness | `@atlas/memory/src/awareness.ts`: derived grounded facets; explicit facet `UN-SEEDED`; cap/injection behavior | `packages/memory/test/wp-6.24-a-mem.test.ts` | candidate for `orient-session` |
-| Shared Orientation | `@atlas/memory/src/orient.ts`: derived from DEFINE artifact + event-log fold; no written-memory persistence | `packages/memory/test/wp-6.24-b-mem.test.ts` | candidate for `orient-session` |
-| Runtime exposure | `packages/adapter-io/src/compose-runtime.ts`, `compose.ts`: `memoryAwareness()` and `memoryOrientation()` reads | package-level runtime tests not yet selected | candidate only; no OpenCode adapter exists |
+| Candidate          | Current source contract                                                                                                                                   | Named current tests                                | V2 status                                                               |
+| ------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------- | ----------------------------------------------------------------------- |
+| Ownership read     | `@atlas/adapter-io/src/compose-runtime.ts`: `own(scope) -> OwnDispatch { tool, pack: OwnPackPlus }`; current store + axes compose bounded ownership state | `packages/retrieval/test/wp-6.20-retr.own.test.ts` | primary candidate for `assemble-context` after Own-first adapter freeze |
+| Shared Awareness   | `@atlas/memory/src/awareness.ts`: derived grounded facets; explicit facet `UN-SEEDED`; cap/injection behavior                                             | `packages/memory/test/wp-6.24-a-mem.test.ts`       | candidate for `orient-session`                                          |
+| Shared Orientation | `@atlas/memory/src/orient.ts`: derived from DEFINE artifact + event-log fold; no written-memory persistence                                               | `packages/memory/test/wp-6.24-b-mem.test.ts`       | candidate for `orient-session`                                          |
+| Runtime exposure   | `packages/adapter-io/src/compose-runtime.ts`, `compose.ts`: `memoryAwareness()` and `memoryOrientation()` reads                                           | package-level runtime tests not yet selected       | candidate only; no OpenCode adapter exists                              |
 
 ## Measured State
 

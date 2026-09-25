@@ -1,4 +1,4 @@
-import { greet } from './greet';
+import { greet } from "./greet"
 export function greetTwice(name: string): string {
-  return greet(name) + ' ' + greet(name);
+  return greet(name) + " " + greet(name)
 }

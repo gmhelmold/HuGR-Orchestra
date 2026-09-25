@@ -16,13 +16,13 @@ are the delta since then. §2.8 records the work of this session.
 
 Build first (`npx tsc -b`), then:
 
-| what | command |
-| --- | --- |
-| all guards | `npm run godfile-guard && npm run spec-conformance-guard && npm run layer-guard && npm run reference-model-guard && npm run command-doc-guard && npm run wiring-guard && npm run adr-citation-guard && npm run req-clause-guard && npm run ears-coamend-guard && npm run doc-transcript-guard && npm run service-gate-guard` |
-| the memory-ring benchmark (M-axis) | `node harness/probes/m1-memory-ring.mjs` |
-| the CAS integrity audit | `node packages/cli/dist/src/bin.js doctor cas` |
-| the proven-fact re-verification | `node packages/cli/dist/src/bin.js verify-store` |
-| the advertised MCP surface | pipe an `initialize` + `tools/list` JSON-RPC pair into `node packages/mcp-server/dist/src/bin.js` |
+| what                               | command                                                                                                                                                                                                                                                                                                                      |
+| ---------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| all guards                         | `npm run godfile-guard && npm run spec-conformance-guard && npm run layer-guard && npm run reference-model-guard && npm run command-doc-guard && npm run wiring-guard && npm run adr-citation-guard && npm run req-clause-guard && npm run ears-coamend-guard && npm run doc-transcript-guard && npm run service-gate-guard` |
+| the memory-ring benchmark (M-axis) | `node harness/probes/m1-memory-ring.mjs`                                                                                                                                                                                                                                                                                     |
+| the CAS integrity audit            | `node packages/cli/dist/src/bin.js doctor cas`                                                                                                                                                                                                                                                                               |
+| the proven-fact re-verification    | `node packages/cli/dist/src/bin.js verify-store`                                                                                                                                                                                                                                                                             |
+| the advertised MCP surface         | pipe an `initialize` + `tools/list` JSON-RPC pair into `node packages/mcp-server/dist/src/bin.js`                                                                                                                                                                                                                            |
 
 Two traps, both paid for in prior sessions:
 
@@ -163,7 +163,7 @@ Three further PRs merged to master after §2.5 was written.
   constants, not comments, so this job was value that no gate catches.
 - `#304 docs/surface-truth-hygiene` — the docs layer corrected to the shipped constants (six
   governance / three write paths / ten read / 18 advertised): `emit.md` (both handles), `init.md`
-  (full `InitOut` render, transcripts marked illustrative), `node.md`, the atlas-* reference pages,
+  (full `InitOut` render, transcripts marked illustrative), `node.md`, the atlas-\* reference pages,
   `wp-campaign-10.md`, `roadmap-authoring.md` (CAMPAIGN-10.1/2/3 marked SHIPPED). One deliberate
   boundary: the RATIFIED `ENTRY-MCP-3` invariant text stayed "exactly five/two" — that was lucy-1,
   handled next.
@@ -175,12 +175,13 @@ product shipped **six / three / ten-read / 18-advertised**. ADR-0006 Decision 2 
 superseded the count with the DERIVED + BUDGETED surface property and CAMPAIGN-11 added
 `atlas-memory-emit`, but the fan-out into the ratified rows never ran. #305 performed the governed
 co-amendment: `INV-TOOLS-1/12/16` + `INV-MCP-3` restated to the derived surface; `REQ-TOOLS-1a/1b/12c/16e`
-+ `REQ-MCP-3d/3g` re-lifted verbatim (live quotes again, ledger shrank by four); goldens/method-tags/
-properties fanned out (teeth bumped to seventh-tool/fourth-door — the conformance tests already pinned
-6/3 since WP-11.W8, the docs were behind their own witness); register rows updated; ADR-0005's count
-superseded with a dated note; A-D3/A-D4 got `[COUNT SUPERSEDED]` tombstones. All 11 gates green.
-**In-flight CI also paid a tax: the disk on the runner filled (ENOSPC), producing two false-red gate
-runs on the same PR; the rerun passed in 8m.** See the operating notes in §1.
+
+- `REQ-MCP-3d/3g` re-lifted verbatim (live quotes again, ledger shrank by four); goldens/method-tags/
+  properties fanned out (teeth bumped to seventh-tool/fourth-door — the conformance tests already pinned
+  6/3 since WP-11.W8, the docs were behind their own witness); register rows updated; ADR-0005's count
+  superseded with a dated note; A-D3/A-D4 got `[COUNT SUPERSEDED]` tombstones. All 11 gates green.
+  **In-flight CI also paid a tax: the disk on the runner filled (ENOSPC), producing two false-red gate
+  runs on the same PR; the rerun passed in 8m.** See the operating notes in §1.
 
 ### #306 — hygiene: recut ledger closed, doc-transcript CI cost re-measured
 
@@ -192,9 +193,9 @@ pointed at ARCH-D3b/D4. And the doc-transcript CI cost was re-measured on the he
 ### #307 — the AUTHORITY ruling (owner, 2026-09-03): CREATE is T2-by-construction, growth by USE-OR-SEAL
 
 The owner ratified the two questions that kept ADR-0010 a proposal. Product framing, verbatim:
-*"who approves is the ORCHESTRATOR, approving only with evidence, clear protocol; both [use-and-success
+_"who approves is the ORCHESTRATOR, approving only with evidence, clear protocol; both [use-and-success
 and human seal] coexist; neither is mandatory; human-in-the-loop kills the purpose, this serves LLMs not
-humans."* Three commitments (ADR-0010 §"Owner ruling"; atlas-architecture §3.4):
+humans."_ Three commitments (ADR-0010 §"Owner ruling"; atlas-architecture §3.4):
 
 1. **CREATE is T2-by-construction** — a new node is born advisory; the one-way join at
    `fastpath.ts:143` already made self-declaring higher cost more than it buys, and the ruling makes T2
@@ -259,15 +260,15 @@ Two merges this session, both on master `1d9fd5a`:
   path-traversal perf assertion gets host headroom 10s→30s (a 37s-measuring assertion was flaking under
   the machine's shared runners — the same family as #311).
 - **#315 req(d3b-b)** — **S1+S2+S3 for ARCH-D3b item 2 (USE-OR-SEAL)**, docs-only: INV **ENTRY-AUTH-16**
-  + 4 REQs + 4 SCNs + the `wp-d3b-b-use-or-seal` work-package card carrying its `success_criteria`.
-  Counts fanned out: 19→20 INVs, 76→80 REQs (re-derive with `docs/requirements/*` + the recount commands
-  in §1). The spec pins the owner ruling (#307): plain per-node usage COUNTER at named constant
-  `USE_THRESHOLD`, human seal as alternative-sufficient, never a precondition.
+  - 4 REQs + 4 SCNs + the `wp-d3b-b-use-or-seal` work-package card carrying its `success_criteria`.
+    Counts fanned out: 19→20 INVs, 76→80 REQs (re-derive with `docs/requirements/*` + the recount commands
+    in §1). The spec pins the owner ruling (#307): plain per-node usage COUNTER at named constant
+    `USE_THRESHOLD`, human seal as alternative-sufficient, never a precondition.
 
 **Loaded-machine flake root-caused.** The step before merge, the same commit's gate failed three tests
 that all pass in isolation: `scanner.wp-11.w5` (2×: `expected 'could-not-run' to be 'hit'` + ENOENT on
 the fake-scanner `stdin-capture` tmpdir) and e2e `SCN-MCP-4b-1` (`Test timed out in 30000ms`). Cause was
-**not the diff** (CI-only, zero product code): sibling self-hosted runners (this time *corelink-server's*
+**not the diff** (CI-only, zero product code): sibling self-hosted runners (this time _corelink-server's_
 CI, ~4 python workers at ~90% CPU each, ~330% aggregate) saturated the machine at the 01:35 run; the
 scanner tests spawn real `/bin/sh` mid-test and the spawns blew their 30s test timeout. Honest markers
 that it was load, not code: the failing tests run green in isolation on a cool box, and the identical
@@ -290,7 +291,7 @@ ARCH-D3b item 2 — USE-OR-SEAL — went from SPECIFIED to **impl in flight**:
     positive integer, one tunable place — NOT the parametric `door2Threshold`, which is a DIFFERENT
     knob), a **`seal(nodeId)`** method (human ratify-token endorsement, independent of the counter),
     and a **`servedClass(nodeId): 'advisory' | 'governing'`** decision `= (hits ≥ USE_THRESHOLD) ∨
-    sealed`; otherwise advisory (never a default rise). `decay` stays KNOW-17.
+sealed`; otherwise advisory (never a default rise). `decay` stays KNOW-17.
   - SCNs to hit: `SCN-AUTH-16a-1/16b-1/16c-1/16d-1` (goldens-authoring.md:534-560), method-tag
     **exhaustive** (method-tags-authoring.md:146-152). Tests in the established hits.know17 pattern,
     plus a heldout `-2` leg (different nodes / `queue/` territory), plus the exit_predicate MUTATION:
@@ -354,6 +355,7 @@ CI runs green. The impl landed as one commit
 ## 3 — The state of THIS repository's own store — AFTER the retirement
 
 Re-derive with the two commands in §1. Store state is unchanged by Campaign 3+6+8. Current HEAD is `61e4b45`:
+
 - `doctor cas` → `objects=1320 referenced=596 corrupt=0 unreadable=0 missing=0 orphan=724 sound=true`.
   **`sound=true` for the first time since the rows went missing.** `orphan` is not a fault (append-only,
   content-keyed CAS; an object outliving the sidecar that referenced it is ordinary). Do not "clean up"
@@ -476,6 +478,7 @@ count in `docs/roadmap/wave-plan.md` is a pre-recut snapshot.
 - **item 3 (derive scope from primaryAnchor)** — CLOSED in code since WP-10.A3 (#251); recorded in #309.
 
 **The state left HONESTLY OPEN by item 2** — now CLOSED (2026-09-05, later in session 3):
+
 - ~~The `hits` ledger has ZERO production callers~~ — **composed**: `compose.ts` binds it and injects
   `config.hits`; hits.ts LEFT the reference-model ledger (entry deleted). The serve path writes the
   counter on a real `atlas query`; the class can rise in-process, proven by the SCN tests and the
@@ -491,6 +494,7 @@ count in `docs/roadmap/wave-plan.md` is a pre-recut snapshot.
   `tools/{diff,push}.ts` and `adapter-io/poke-file.ts` remain explicit no-transport seams.
 
 Two standing threads remain owner-level, unchanged from the prior handoff:
+
 - **The billing lock** — why CI runs on the owner's machine; clearing it restores hosted runners.
 - **The fork-PR contribution flow** — #301 means forks never reach the gate until synced in-repo.
 - **The self-hosted runner's load flakes** (§2.7/§2.8) still bite: `s-mcp-4-draft-parity`,

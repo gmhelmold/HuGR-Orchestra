@@ -22,31 +22,24 @@
 // `export` is the clean mirror: it reads the store and writes a bundle file, opening no write path into any
 // store. Read authority, neither command carries a governed fact-write token (`COMMAND_LEG` → `atlas-query`).
 
-import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
-import { join } from 'node:path';
-import { exportStore, importStore } from '@atlas/persist';
-import {
-  CAS_REL,
-  okfBundlePath,
-  readCas,
-  sameCas,
-  targetHasStore,
-  writeCasObjects,
-} from '@atlas/adapter-io';
-import type { CliVerdict } from './render.js';
+import { mkdirSync, readFileSync, writeFileSync } from "node:fs"
+import { join } from "node:path"
+import { exportStore, importStore } from "@atlas/persist"
+import { CAS_REL, okfBundlePath, readCas, sameCas, targetHasStore, writeCasObjects } from "@atlas/adapter-io"
+import type { CliVerdict } from "./render.js"
 
 /** The invariant every `atlas export` outcome carries (PERSIST-9 — the whole store dumps open, no lock-in). */
 const EXPORT_INVARIANT =
-  'PERSIST-9: the WHOLE store dumps to self-contained open JSON over the SEALED kernel OKF seam — no proprietary encoding, no host path, no lock-in on git; the dump replays 1:1 into a fresh store';
+  "PERSIST-9: the WHOLE store dumps to self-contained open JSON over the SEALED kernel OKF seam — no proprietary encoding, no host path, no lock-in on git; the dump replays 1:1 into a fresh store"
 
 /** The invariant every `atlas import` outcome carries (PERSIST-9 + the governed-doors discipline). */
 const IMPORT_INVARIANT =
-  'PERSIST-9/ADR-0003: import replays the OKF dump 1:1 into a FRESH EMPTY store ONLY — CAS bytes yes, the guarded projection NEVER, so an import cannot become a back-channel FACT write past the governed emit door';
+  "PERSIST-9/ADR-0003: import replays the OKF dump 1:1 into a FRESH EMPTY store ONLY — CAS bytes yes, the guarded projection NEVER, so an import cannot become a back-channel FACT write past the governed emit door"
 
 /** The invariant every FAIL-CLOSED outcome carries (CLI-1b — a malformed invocation is structured, never a
  *  crash). */
 const FAILURE_INVARIANT =
-  'CLI-1b: a malformed invocation yields a structured error + guidance + non-zero exit, never a crash';
+  "CLI-1b: a malformed invocation yields a structured error + guidance + non-zero exit, never a crash"
 
 /** A structured fail-closed CliVerdict (the SAME status/next/invariant/reason shape `renderVerdict` emits for
  *  an `ok:false` handler verdict — uniform bytes through the ONE process-outcome path). */
@@ -54,7 +47,7 @@ function failVerdict(verb: string, message: string): CliVerdict {
   return {
     exitCode: 1,
     stdout: `status: error\nnext: ${message}\ninvariant: ${FAILURE_INVARIANT}\nreason: ${verb}: ${message}\n`,
-  };
+  }
 }
 
 /**
@@ -65,37 +58,38 @@ function failVerdict(verb: string, message: string): CliVerdict {
  * error: a fresh repo has an empty CAS, and the empty dump still replays 1:1.
  */
 export function runOkfExport(casDir: string, outDir: string): CliVerdict {
-  let bundle: string;
-  let objects: number;
+  let bundle: string
+  let objects: number
   try {
-    const cas = readCas(casDir);
-    objects = cas.size;
-    bundle = exportStore(cas);
+    const cas = readCas(casDir)
+    objects = cas.size
+    bundle = exportStore(cas)
   } catch (e) {
-    return failVerdict('atlas export', `could not assemble the OKF bundle — ${(e as Error).message}`);
+    return failVerdict("atlas export", `could not assemble the OKF bundle — ${(e as Error).message}`)
   }
-  let bundleFile: string;
+  let bundleFile: string
   try {
-    bundleFile = okfBundlePath(outDir);
-    mkdirSync(outDir, { recursive: true });
-    writeFileSync(bundleFile, bundle, 'utf8');
+    bundleFile = okfBundlePath(outDir)
+    mkdirSync(outDir, { recursive: true })
+    writeFileSync(bundleFile, bundle, "utf8")
   } catch (e) {
-    return failVerdict('atlas export', `could not write the bundle — ${(e as Error).message}`);
+    return failVerdict("atlas export", `could not write the bundle — ${(e as Error).message}`)
   }
-  return okfExportVerdict({ bundleFile, objects });
+  return okfExportVerdict({ bundleFile, objects })
 }
 
 /** The rendered success receipt for one export pass. PURE — a function of the out shape alone. */
 export function okfExportVerdict(out: { readonly bundleFile: string; readonly objects: number }): CliVerdict {
   return {
     exitCode: 0,
-    stdout: [
-      'status: ok',
-      `next: OKF bundle of the durable store written to '${out.bundleFile}' — ${out.objects} CAS object(s); replay it INTO A FRESH STORE with 'atlas import <thisBundle> <freshTargetDir>'`,
-      `invariant: ${EXPORT_INVARIANT}`,
-      `export: ${out.objects} CAS object(s) dumped — located, not copied`,
-    ].join('\n') + '\n',
-  };
+    stdout:
+      [
+        "status: ok",
+        `next: OKF bundle of the durable store written to '${out.bundleFile}' — ${out.objects} CAS object(s); replay it INTO A FRESH STORE with 'atlas import <thisBundle> <freshTargetDir>'`,
+        `invariant: ${EXPORT_INVARIANT}`,
+        `export: ${out.objects} CAS object(s) dumped — located, not copied`,
+      ].join("\n") + "\n",
+  }
 }
 
 /**
@@ -121,45 +115,52 @@ export function runOkfImport(bundlePath: string, targetDir: string): CliVerdict 
         `back-channel write path for FACT rows past the governed emit door\n` +
         `invariant: ${IMPORT_INVARIANT}\n` +
         `reason: atlas import : target '${targetDir}' is not a fresh empty store\n`,
-    };
+    }
   }
 
-  let bundle: string;
+  let bundle: string
   try {
-    bundle = readFileSync(bundlePath, 'utf8');
+    bundle = readFileSync(bundlePath, "utf8")
   } catch (e) {
-    return failVerdict('atlas import', `could not read the bundle '${bundlePath}' — ${(e as Error).message}`);
+    return failVerdict("atlas import", `could not read the bundle '${bundlePath}' — ${(e as Error).message}`)
   }
 
-  let cas;
+  let cas
   try {
-    cas = importStore(bundle);
+    cas = importStore(bundle)
   } catch (e) {
-    return failVerdict('atlas import', `malformed OKF bundle — ${(e as Error).message}. Nothing was written (fail-closed).`);
+    return failVerdict(
+      "atlas import",
+      `malformed OKF bundle — ${(e as Error).message}. Nothing was written (fail-closed).`,
+    )
   }
 
-  const casDir = join(targetDir, CAS_REL);
+  const casDir = join(targetDir, CAS_REL)
   try {
-    writeCasObjects(cas, casDir);
+    writeCasObjects(cas, casDir)
     if (!sameCas(readCas(casDir), cas)) {
-      return failVerdict('atlas import', `the fresh store did not replay 1:1 (verified after writing) — refusing to report success`);
+      return failVerdict(
+        "atlas import",
+        `the fresh store did not replay 1:1 (verified after writing) — refusing to report success`,
+      )
     }
   } catch (e) {
-    return failVerdict('atlas import', `could not write the fresh store — ${(e as Error).message}`);
+    return failVerdict("atlas import", `could not write the fresh store — ${(e as Error).message}`)
   }
 
-  return okfImportVerdict({ casDir, objects: cas.size });
+  return okfImportVerdict({ casDir, objects: cas.size })
 }
 
 /** The rendered success receipt for one import pass. PURE — a function of the out shape alone. */
 export function okfImportVerdict(out: { readonly casDir: string; readonly objects: number }): CliVerdict {
   return {
     exitCode: 0,
-    stdout: [
-      'status: ok',
-      `next: ${out.objects} CAS object(s) replayed 1:1 into a FRESH store at '${out.casDir}' — the guarded projection is NOT written; serve these facts only through the governed emit door ('atlas init' installs the .gitignore deny if this target is a git repo)`,
-      `invariant: ${IMPORT_INVARIANT}`,
-      `import: ${out.objects} CAS object(s) replayed — verified byte-identical after writing`,
-    ].join('\n') + '\n',
-  };
+    stdout:
+      [
+        "status: ok",
+        `next: ${out.objects} CAS object(s) replayed 1:1 into a FRESH store at '${out.casDir}' — the guarded projection is NOT written; serve these facts only through the governed emit door ('atlas init' installs the .gitignore deny if this target is a git repo)`,
+        `invariant: ${IMPORT_INVARIANT}`,
+        `import: ${out.objects} CAS object(s) replayed — verified byte-identical after writing`,
+      ].join("\n") + "\n",
+  }
 }

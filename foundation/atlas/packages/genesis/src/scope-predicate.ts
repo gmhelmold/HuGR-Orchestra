@@ -15,7 +15,7 @@
 // mode `anchor-scope.ts`'s own header calls out). If `anchor-scope.ts` ever changes, this copy must change
 // with it — the single point that has to be kept in sync, not N.
 
-import type { Hash } from '@atlas/contracts';
+import type { Hash } from "@atlas/contracts"
 
 /** `true` iff `anchor` lies UNDER `scope` — TRANSCRIBED verbatim from `anchor-scope.ts`'s `underScope`
  *  (@atlas/adapter-io; layering forbids importing it here, see module header). A SEGMENT-WISE prefix test on
@@ -23,12 +23,12 @@ import type { Hash } from '@atlas/contracts';
  *  scope `src` covers `src/foo::bar` but scope `sr` does NOT). Total: an empty scope trivially covers every
  *  anchor. */
 export function underScope(anchor: string, scope: string): boolean {
-  const filePath = anchor.split('::')[0] ?? anchor;
-  const anchorSegs = filePath.split('/');
-  const scopeSegs = scope.split('/');
-  if (scopeSegs.length > anchorSegs.length) return false;
-  for (let i = 0; i < scopeSegs.length; i++) if (scopeSegs[i] !== anchorSegs[i]) return false;
-  return true;
+  const filePath = anchor.split("::")[0] ?? anchor
+  const anchorSegs = filePath.split("/")
+  const scopeSegs = scope.split("/")
+  if (scopeSegs.length > anchorSegs.length) return false
+  for (let i = 0; i < scopeSegs.length; i++) if (scopeSegs[i] !== anchorSegs[i]) return false
+  return true
 }
 
 /** Does ANY hash in `hashes` have a KNOWN path (fail-closed on an unmapped hash — never assume in-scope)
@@ -39,9 +39,9 @@ export function anyInScope(
   scope: string,
 ): boolean {
   return hashes.some((h) => {
-    const p = pathOfHash(h);
-    return p !== undefined && underScope(p, scope);
-  });
+    const p = pathOfHash(h)
+    return p !== undefined && underScope(p, scope)
+  })
 }
 
 /** How MANY hashes in `hashes` have a KNOWN path lying UNDER `scope` — the cardinality `|hashes ∩ S|`,
@@ -54,10 +54,10 @@ export function countInScope(
   pathOfHash: (h: Hash) => string | undefined,
   scope: string,
 ): number {
-  let n = 0;
+  let n = 0
   for (const h of hashes) {
-    const p = pathOfHash(h);
-    if (p !== undefined && underScope(p, scope)) n++;
+    const p = pathOfHash(h)
+    if (p !== undefined && underScope(p, scope)) n++
   }
-  return n;
+  return n
 }

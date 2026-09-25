@@ -1,4 +1,4 @@
-import { shout } from './shout';
+import { shout } from "./shout"
 export function shoutTwice(msg: string): string {
-  return shout(msg) + ' ' + shout(msg);
+  return shout(msg) + " " + shout(msg)
 }

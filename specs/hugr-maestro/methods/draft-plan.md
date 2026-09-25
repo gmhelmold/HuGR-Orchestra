@@ -82,20 +82,20 @@ after guard success. Hand its identity to `assemble-context`.
 
 ## Skills
 
-| Skill | Stage | Output | Stop condition |
-|---|---|---|---|
+| Skill            | Stage                                    | Output                                | Stop condition                                                                  |
+| ---------------- | ---------------------------------------- | ------------------------------------- | ------------------------------------------------------------------------------- |
 | `draft-contract` | frame facts/proposals and build contract | `PlanRevision` or `ClarificationNeed` | all plan fields source-labeled, or one material decision blocks honest proposal |
 
 ## Tools and Guards
 
-| Capability | Purpose | Boundary |
-|---|---|---|
-| `admission-record-read` | read immutable plan intent | Maestro durable evidence read |
-| `scope-proposal-read` | read immutable catalog-backed scope | Maestro durable evidence read |
-| `plan-revision-write` | persist proposed revision/lineage | Maestro durable evidence write |
-| `plan-input-link-guard` | require committed intent/scope/orientation and no prior revision | before reasoning |
-| `plan-provenance-guard` | require field sources, scope binding, visible assumptions, valid v1 identity | before persistence |
-| `no-governed-task-before-approval` | deny Task/child Session without approved revision identity | Session/Task boundary |
+| Capability                         | Purpose                                                                      | Boundary                       |
+| ---------------------------------- | ---------------------------------------------------------------------------- | ------------------------------ |
+| `admission-record-read`            | read immutable plan intent                                                   | Maestro durable evidence read  |
+| `scope-proposal-read`              | read immutable catalog-backed scope                                          | Maestro durable evidence read  |
+| `plan-revision-write`              | persist proposed revision/lineage                                            | Maestro durable evidence write |
+| `plan-input-link-guard`            | require committed intent/scope/orientation and no prior revision             | before reasoning               |
+| `plan-provenance-guard`            | require field sources, scope binding, visible assumptions, valid v1 identity | before persistence             |
+| `no-governed-task-before-approval` | deny Task/child Session without approved revision identity                   | Session/Task boundary          |
 
 No live Atlas read/write, shell, product edit, external network, member tool, Task creation, approval write, or
 plan validation is granted.
@@ -118,22 +118,22 @@ Any stakeholder answer or changed context after v1 enters `revise-plan`; v1 rema
 
 ## Refusal and Recovery
 
-| Condition | Result |
-|---|---|
-| One material decision absent | `CLARIFY` with one `ClarificationNeed`; no plan/task |
-| Invalid admission/orientation link | `HOLD`, visible evidence IDs and reason |
-| Missing/mismatched ScopeProposal | `HOLD`; require resolve-scope, no broad Atlas lookup or plan/task |
-| Existing prior revision | `HOLD`; require revise-plan, never overwrite v1 |
-| Invalid model output/provenance | `HOLD`; preserve inputs, never silently repair proposal |
-| Duplicate trigger | return stored draft/question |
-| Model/tool interruption | `HOLD`; retry only as linked new attempt or stakeholder-triggered revision |
+| Condition                          | Result                                                                     |
+| ---------------------------------- | -------------------------------------------------------------------------- |
+| One material decision absent       | `CLARIFY` with one `ClarificationNeed`; no plan/task                       |
+| Invalid admission/orientation link | `HOLD`, visible evidence IDs and reason                                    |
+| Missing/mismatched ScopeProposal   | `HOLD`; require resolve-scope, no broad Atlas lookup or plan/task          |
+| Existing prior revision            | `HOLD`; require revise-plan, never overwrite v1                            |
+| Invalid model output/provenance    | `HOLD`; preserve inputs, never silently repair proposal                    |
+| Duplicate trigger                  | return stored draft/question                                               |
+| Model/tool interruption            | `HOLD`; retry only as linked new attempt or stakeholder-triggered revision |
 
 ## Runtime Seams
 
-| System | Seam |
-|---|---|
+| System   | Seam                                                                                                     |
+| -------- | -------------------------------------------------------------------------------------------------------- |
 | OpenCode | durable Session/message identity, proposed-plan UI, immutable revision records, Task/child-Session fence |
-| Atlas | no direct call/write; only session orientation previously bound at intake |
+| Atlas    | no direct call/write; only session orientation previously bound at intake                                |
 
 ## Acceptance
 

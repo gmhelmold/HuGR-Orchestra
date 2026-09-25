@@ -16,43 +16,43 @@
 // same rank — nothing on the ISSUED side is fingerprinted at emission; that is a further step, not this
 // one's claim.
 
-import { describe, it, expect } from 'vitest';
-import { asSubtreeHash, asNodeKey } from '@atlas/kernel';
-import type { StructRef } from '@atlas/contracts';
-import type { Candidate, Fact, MinedSignals } from '@atlas/genesis';
-import type { Skeleton } from '@atlas/genesis';
-import { makeRunController, NO_MODEL_IDENTITY, type Plan, type ControllerDeps } from '../src/run-controller.js';
+import { describe, it, expect } from "vitest"
+import { asSubtreeHash, asNodeKey } from "@atlas/kernel"
+import type { StructRef } from "@atlas/contracts"
+import type { Candidate, Fact, MinedSignals } from "@atlas/genesis"
+import type { Skeleton } from "@atlas/genesis"
+import { makeRunController, NO_MODEL_IDENTITY, type Plan, type ControllerDeps } from "../src/run-controller.js"
 
-const ZERO_SIGNALS: MinedSignals = { hotspot: 0, szzBugCommits: 0, coChanged: [], owners: [], messages: [] };
+const ZERO_SIGNALS: MinedSignals = { hotspot: 0, szzBugCommits: 0, coChanged: [], owners: [], messages: [] }
 
 const siteOf = (file: string, id: string): StructRef => ({
-  kind: 'symbol',
+  kind: "symbol",
   qualifiedPath: `${file}::${id}`,
   subtreeHash: asSubtreeHash(`st-${file}-${id}`),
-});
+})
 
 const cand = (file: string, id: string, ppr: number, rank: number): Candidate => ({
   site: siteOf(file, id),
   signals: ZERO_SIGNALS,
   ppr,
   rank,
-});
+})
 
 const factFor = (c: Candidate): Fact =>
   ({
-    kind: 'advisory',
+    kind: "advisory",
     id: asNodeKey(`nk-${c.site.qualifiedPath}`),
-    tier: 'T2',
+    tier: "T2",
     claimNorm: `claim@${c.site.qualifiedPath}`,
     grounding: { entries: [{ anchor: c.site, path: c.site.qualifiedPath }] },
-    freshness: 'FRESH',
+    freshness: "FRESH",
     claims: [],
-    authoring: 'ADVISORY',
-  }) as unknown as Fact;
+    authoring: "ADVISORY",
+  }) as unknown as Fact
 
-const SKELETON = { axes: {}, manifest: { territories: [] } } as unknown as Skeleton;
+const SKELETON = { axes: {}, manifest: { territories: [] } } as unknown as Skeleton
 
-const planOf = (sites: readonly Candidate[]): Plan => ({ malformed: false, skeleton: SKELETON, sites });
+const planOf = (sites: readonly Candidate[]): Plan => ({ malformed: false, skeleton: SKELETON, sites })
 
 /** Build `ControllerDeps` over a fixed 3-site frontier. Every site is VISITED (so `modelCalls`/`llmCalls`
  *  are identical across the two runs the #209 test compares) but only the sites named in `stored` carry a
@@ -71,111 +71,111 @@ function depsWithReceipts(
     handoffTo: () => {},
     ...(modelIdentity !== undefined ? { modelIdentity } : {}),
     answerReceipts: () => [...stored.values()],
-  };
+  }
 }
 
-describe('#210 — GenesisReport.modelIdentity', () => {
-  it('unwired ⇒ the sentinel, never a fabricated identity', () => {
-    const sites = [cand('a.ts', 's1', 0.9, 1)];
-    const api = makeRunController(depsWithReceipts(sites, new Map()));
-    const report = api.genesis('repo', 'rev');
-    expect(report.modelIdentity).toBe(NO_MODEL_IDENTITY);
-  });
+describe("#210 — GenesisReport.modelIdentity", () => {
+  it("unwired ⇒ the sentinel, never a fabricated identity", () => {
+    const sites = [cand("a.ts", "s1", 0.9, 1)]
+    const api = makeRunController(depsWithReceipts(sites, new Map()))
+    const report = api.genesis("repo", "rev")
+    expect(report.modelIdentity).toBe(NO_MODEL_IDENTITY)
+  })
 
-  it('wired ⇒ the threaded identity string, verbatim', () => {
-    const sites = [cand('a.ts', 's1', 0.9, 1)];
-    const identity = 'claude -p @ 1.2.3';
-    const api = makeRunController(depsWithReceipts(sites, new Map(), identity));
-    const report = api.genesis('repo', 'rev');
-    expect(report.modelIdentity).toBe(identity);
-  });
+  it("wired ⇒ the threaded identity string, verbatim", () => {
+    const sites = [cand("a.ts", "s1", 0.9, 1)]
+    const identity = "claude -p @ 1.2.3"
+    const api = makeRunController(depsWithReceipts(sites, new Map(), identity))
+    const report = api.genesis("repo", "rev")
+    expect(report.modelIdentity).toBe(identity)
+  })
 
-  it('a caller that never wires `answerReceipts`/`modelIdentity` still gets an honest total-degrade report', () => {
+  it("a caller that never wires `answerReceipts`/`modelIdentity` still gets an honest total-degrade report", () => {
     // A malformed plan (no seam wired at all) — the total-degrade path (emptyReport) must ALSO carry the
     // sentinel + the empty-set witness, never `undefined`/a throw.
     const api = makeRunController({
       plan: () => {
-        throw new Error('corrupt');
+        throw new Error("corrupt")
       },
       visit: () => [],
       upsert: (incoming) => incoming,
       changed: () => ({ idChanged: false, stateChanged: false, changedBuckets: [] }),
       handoffTo: () => {},
-    });
-    const report = api.genesis('repo', 'rev');
-    expect(report.modelIdentity).toBe(NO_MODEL_IDENTITY);
-    expect(report.answersStored).toBe(0);
-    expect(typeof report.answersDigest).toBe('string');
-  });
-});
+    })
+    const report = api.genesis("repo", "rev")
+    expect(report.modelIdentity).toBe(NO_MODEL_IDENTITY)
+    expect(report.answersStored).toBe(0)
+    expect(typeof report.answersDigest).toBe("string")
+  })
+})
 
-describe('#209 — the report WITNESSES what was actually stored, not merely issued', () => {
-  const sites = [cand('a.ts', 's1', 0.9, 1), cand('b.ts', 's2', 0.8, 2), cand('c.ts', 's3', 0.7, 3)];
+describe("#209 — the report WITNESSES what was actually stored, not merely issued", () => {
+  const sites = [cand("a.ts", "s1", 0.9, 1), cand("b.ts", "s2", 0.8, 2), cand("c.ts", "s3", 0.7, 3)]
 
-  it('THE TEETH: two runs with the SAME issued count but DIFFERENT stored answers produce DIFFERENT reports', () => {
+  it("THE TEETH: two runs with the SAME issued count but DIFFERENT stored answers produce DIFFERENT reports", () => {
     // Run A: s1 and s2 admitted with a receipt (s3 abstained/no-receipt — absent, never fabricated).
     const runA = makeRunController(
       depsWithReceipts(
         sites,
         new Map([
-          ['s1', 'cas:aaa'],
-          ['s2', 'cas:bbb'],
+          ["s1", "cas:aaa"],
+          ["s2", "cas:bbb"],
         ]),
       ),
-    );
+    )
     // Run B: SAME site count issued (3 sites visited ⇒ modelCalls/llmCalls equal to run A), but DIFFERENT
     // stored answers — s1 and s3 this time, and s1's receipt bytes differ too.
     const runB = makeRunController(
       depsWithReceipts(
         sites,
         new Map([
-          ['s1', 'cas:aaa-different'],
-          ['s3', 'cas:ccc'],
+          ["s1", "cas:aaa-different"],
+          ["s3", "cas:ccc"],
         ]),
       ),
-    );
+    )
 
-    const reportA = runA.genesis('repo', 'rev');
-    const reportB = runB.genesis('repo', 'rev');
+    const reportA = runA.genesis("repo", "rev")
+    const reportB = runB.genesis("repo", "rev")
 
     // issued (modelCalls) is falsifiably EQUAL — both runs visited/paid for the same 3 sites.
-    expect(reportA.modelCalls).toBe(reportB.modelCalls);
-    expect(reportA.llmCalls).toBe(reportB.llmCalls);
+    expect(reportA.modelCalls).toBe(reportB.modelCalls)
+    expect(reportA.llmCalls).toBe(reportB.llmCalls)
     // stored (answersStored) is ALSO equal in count (2 each) — a count-only witness would miss this defect.
-    expect(reportA.answersStored).toBe(2);
-    expect(reportB.answersStored).toBe(2);
+    expect(reportA.answersStored).toBe(2)
+    expect(reportB.answersStored).toBe(2)
     // yet the CONTENT stored differs, and the digest — the actual #209 witness — must say so.
-    expect(reportA.answersDigest).not.toBe(reportB.answersDigest);
+    expect(reportA.answersDigest).not.toBe(reportB.answersDigest)
     // the whole report is therefore NOT byte-identical, closing the 2026-08-04 defect class.
-    expect(JSON.stringify(reportA)).not.toBe(JSON.stringify(reportB));
-  });
+    expect(JSON.stringify(reportA)).not.toBe(JSON.stringify(reportB))
+  })
 
-  it('answersStored counts ONLY facts carrying a receipt — absent answerRef is never fabricated', () => {
+  it("answersStored counts ONLY facts carrying a receipt — absent answerRef is never fabricated", () => {
     // Only 1 of 3 visited sites stored a receipt (the other two: abstained, or a non-mine/pre-#195 fact).
-    const api = makeRunController(depsWithReceipts(sites, new Map([['s2', 'cas:only-one']])));
-    const report = api.genesis('repo', 'rev');
-    expect(report.modelCalls).toBe(3); // 3 sites issued
-    expect(report.answersStored).toBe(1); // but only 1 carried a receipt — fail-closed, not "3 assumed"
-  });
+    const api = makeRunController(depsWithReceipts(sites, new Map([["s2", "cas:only-one"]])))
+    const report = api.genesis("repo", "rev")
+    expect(report.modelCalls).toBe(3) // 3 sites issued
+    expect(report.answersStored).toBe(1) // but only 1 carried a receipt — fail-closed, not "3 assumed"
+  })
 
-  it('order-independence: the SAME stored set, admitted in a different order, witnesses IDENTICALLY', () => {
+  it("order-independence: the SAME stored set, admitted in a different order, witnesses IDENTICALLY", () => {
     const depsFwd: ControllerDeps = {
       plan: () => planOf(sites),
       visit: (c) => [factFor(c)],
       upsert: (incoming) => incoming,
       changed: () => ({ idChanged: false, stateChanged: false, changedBuckets: [] }),
       handoffTo: () => {},
-      answerReceipts: () => ['cas:aaa', 'cas:bbb', 'cas:ccc'],
-    };
-    const depsRev: ControllerDeps = { ...depsFwd, answerReceipts: () => ['cas:ccc', 'cas:aaa', 'cas:bbb'] };
+      answerReceipts: () => ["cas:aaa", "cas:bbb", "cas:ccc"],
+    }
+    const depsRev: ControllerDeps = { ...depsFwd, answerReceipts: () => ["cas:ccc", "cas:aaa", "cas:bbb"] }
 
-    const a = makeRunController(depsFwd).genesis('repo', 'rev');
-    const b = makeRunController(depsRev).genesis('repo', 'rev');
-    expect(a.answersStored).toBe(b.answersStored);
-    expect(a.answersDigest).toBe(b.answersDigest);
-  });
+    const a = makeRunController(depsFwd).genesis("repo", "rev")
+    const b = makeRunController(depsRev).genesis("repo", "rev")
+    expect(a.answersStored).toBe(b.answersStored)
+    expect(a.answersDigest).toBe(b.answersDigest)
+  })
 
-  it('an unwired `answerReceipts` port honestly witnesses zero — never a throw, never a fabricated count', () => {
+  it("an unwired `answerReceipts` port honestly witnesses zero — never a throw, never a fabricated count", () => {
     const api = makeRunController({
       plan: () => planOf(sites),
       visit: (c) => [factFor(c)],
@@ -183,10 +183,10 @@ describe('#209 — the report WITNESSES what was actually stored, not merely iss
       changed: () => ({ idChanged: false, stateChanged: false, changedBuckets: [] }),
       handoffTo: () => {},
       // no `answerReceipts` wired at all
-    });
-    const report = api.genesis('repo', 'rev');
-    expect(report.answersStored).toBe(0);
-    expect(typeof report.answersDigest).toBe('string');
-    expect(report.answersDigest!.length).toBeGreaterThan(0);
-  });
-});
+    })
+    const report = api.genesis("repo", "rev")
+    expect(report.answersStored).toBe(0)
+    expect(typeof report.answersDigest).toBe("string")
+    expect(report.answersDigest!.length).toBeGreaterThan(0)
+  })
+})

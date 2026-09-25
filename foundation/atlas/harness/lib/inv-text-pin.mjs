@@ -65,13 +65,13 @@
 // nothing else is watching. It is still a real tax, and it is why the set is DERIVED rather than authored —
 // a carrier that gains a live quote makes its pin STALE, and a stale pin FAILS, so the set only shrinks.
 
-import { createHash } from 'node:crypto';
+import { createHash } from "node:crypto"
 
 /** The guard's own normalisation: runs of whitespace collapse to one space. */
-export const norm = (s) => s.replace(/\s+/g, ' ').trim();
+export const norm = (s) => s.replace(/\s+/g, " ").trim()
 
 /** The stable identity of one carrier: its anchor plus its 1-based ordinal in document order. */
-export const carrierKey = (anchorKey, ordinal) => `${anchorKey}@carrier${ordinal}`;
+export const carrierKey = (anchorKey, ordinal) => `${anchorKey}@carrier${ordinal}`
 
 /**
  * The pin over ONE carrier: its key hashed together with its normalised text.
@@ -79,7 +79,7 @@ export const carrierKey = (anchorKey, ordinal) => `${anchorKey}@carrier${ordinal
  * @param {string} text the carrier's raw text, as `req-clause-guard`'s `invCarriers` returns it
  */
 export function carrierDigest(key, text) {
-  return createHash('sha256').update(key).update(' ').update(norm(text)).digest('hex').slice(0, 32);
+  return createHash("sha256").update(key).update(" ").update(norm(text)).digest("hex").slice(0, 32)
 }
 
 /**
@@ -91,17 +91,22 @@ export function carrierDigest(key, text) {
  *        with the same `holds` it publishes its verdicts with, so no second opinion can exist here).
  */
 export function uncoveredCarriers(coverage) {
-  const out = [];
+  const out = []
   for (const [anchor, v] of [...coverage].sort()) {
     v.carriers.forEach((c, i) => {
-      if (v.carrierLive[i].length > 0) return;
+      if (v.carrierLive[i].length > 0) return
       out.push({
-        anchor, ordinal: i + 1, of: v.carriers.length, line: c.line, text: c.text,
-        key: carrierKey(anchor, i + 1), first: i === 0,
-      });
-    });
+        anchor,
+        ordinal: i + 1,
+        of: v.carriers.length,
+        line: c.line,
+        text: c.text,
+        key: carrierKey(anchor, i + 1),
+        first: i === 0,
+      })
+    })
   }
-  return out;
+  return out
 }
 
 /**
@@ -110,14 +115,15 @@ export function uncoveredCarriers(coverage) {
  * pinned set can never rot into a standing exemption list.
  */
 export function pinProblems(uncovered, pins, pinFile) {
-  const problems = [];
-  const expected = new Map(uncovered.map((c) => [c.key, c]));
+  const problems = []
+  const expected = new Map(uncovered.map((c) => [c.key, c]))
   for (const c of uncovered) {
-    const where = c.of === 1
-      ? `line ${c.line}`
-      : `line ${c.line}, carrier ${c.ordinal} of ${c.of}${c.first ? '' : ' — an ## Acceptance restatement, which no live quote can ever reach'}`;
-    const digest = carrierDigest(c.key, c.text);
-    const pin = pins[c.key];
+    const where =
+      c.of === 1
+        ? `line ${c.line}`
+        : `line ${c.line}, carrier ${c.ordinal} of ${c.of}${c.first ? "" : " — an ## Acceptance restatement, which no live quote can ever reach"}`
+    const digest = carrierDigest(c.key, c.text)
+    const pin = pins[c.key]
     if (pin === undefined) {
       problems.push(
         `UNPROTECTED CARRIER '${c.key}' (${where}): no live REQ quote resolves into this carrier, so NOTHING ` +
@@ -125,28 +131,28 @@ export function pinProblems(uncovered, pins, pinFile) {
           `still green. Restore protection by making a citing REQ lift this carrier verbatim; or PIN it: add ` +
           `"${c.key}": { "digest": "${digest}", "why": "<who ratified this text, and when>" } to ${pinFile}. ` +
           `That digest is computed from the tree as it stands right now.`,
-      );
+      )
     } else if (pin.digest !== digest) {
       problems.push(
         `PINNED CARRIER '${c.key}' (${where}) HAS CHANGED: no live REQ quote covers this carrier, so its pin is ` +
           `the only thing holding its ratified text, and that text no longer matches. Pinned ` +
           `${JSON.stringify(pin.digest)}, tree is ${JSON.stringify(digest)}. If the edit is ratified, update the ` +
           `digest in ${pinFile} IN THE SAME COMMIT and record who ratified it; otherwise revert the edit. ` +
-          `Pinned because: ${JSON.stringify(pin.why ?? '(no reason recorded)')}.`,
-      );
+          `Pinned because: ${JSON.stringify(pin.why ?? "(no reason recorded)")}.`,
+      )
     }
   }
   for (const key of Object.keys(pins)) {
-    if (expected.has(key)) continue;
+    if (expected.has(key)) continue
     problems.push(
       `STALE PIN '${key}' in ${pinFile}: this carrier is no longer in the uncovered set, so the pin would ` +
         `silently outlive the condition that justified it. Either a live REQ quote reaches it again (good — ` +
         `delete the entry, the pinned set only shrinks), or the carrier itself is GONE: the anchor lost a ` +
         `carrier, was renumbered, or no evaluable REQ cites it any more, and deleting ratified text must be ` +
         `said deliberately rather than done by letting a pin dangle.`,
-    );
+    )
   }
-  return problems;
+  return problems
 }
 
 /**
@@ -159,12 +165,12 @@ export function pinProblems(uncovered, pins, pinFile) {
  *          visible before it bites, never gated on).
  */
 export function classifyCoverage(coverage) {
-  const unprotected = [];
-  const nearMiss = [];
+  const unprotected = []
+  const nearMiss = []
   for (const [anchor, v] of [...coverage].sort()) {
-    const row = { anchor, live: v.live, waived: v.waived, carriers: v.carriers };
-    if (v.live.length === 0) unprotected.push(row);
-    else if (v.live.length === 1 && v.waived.length > 0) nearMiss.push(row);
+    const row = { anchor, live: v.live, waived: v.waived, carriers: v.carriers }
+    if (v.live.length === 0) unprotected.push(row)
+    else if (v.live.length === 1 && v.waived.length > 0) nearMiss.push(row)
   }
-  return { unprotected, nearMiss };
+  return { unprotected, nearMiss }
 }

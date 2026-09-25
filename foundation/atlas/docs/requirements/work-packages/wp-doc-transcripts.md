@@ -15,23 +15,23 @@
 epic: none (out-of-band, dispatched by the lead)
 id: WP-FIX-4.DOCS
 title: Eight documented `atlas query` transcripts showed pre-#107 output the shipped CLI no longer produces —
-  regenerated them from the binary and added the gate that would have caught it
+regenerated them from the binary and added the gate that would have caught it
 
 intent: >
-  A sibling seat closing #193 found documentation transcripts still showing the pre-#107 `next:`/`invariant:`
-  guidance and a `data:` block with no `advisoryDropped` row. The one-time fix was the smaller half: nothing
-  in the repo verified a documented transcript against the binary. Measured on master `e4882a3`,
-  `harness/gates/command-doc-guard.mjs` is 170 lines and contains no `exec`, no `spawn` and no transcript
-  comparison — it checks that each shipped command IS documented, never that the documented OUTPUT is real.
+A sibling seat closing #193 found documentation transcripts still showing the pre-#107 `next:`/`invariant:`
+guidance and a `data:` block with no `advisoryDropped` row. The one-time fix was the smaller half: nothing
+in the repo verified a documented transcript against the binary. Measured on master `e4882a3`,
+`harness/gates/command-doc-guard.mjs` is 170 lines and contains no `exec`, no `spawn` and no transcript
+comparison — it checks that each shipped command IS documented, never that the documented OUTPUT is real.
 
-  What the sweep actually found is larger than the brief. #107 rotted the pages on THREE axes, not one: the
-  two guidance strings (greppable, and what the sibling found), the `advisoryDropped` row, and a
-  `[<freshness>]` field on every `inv` row — which no grep for the guidance strings can see, and which is why
-  a NINTH site (`reference/commands/link.md`) was missed. Worse, #107 changed BEHAVIOUR the pages assert in
-  prose: `atlas query` now serves `T2` in a separately capped advisory band, so `promote.md`'s central
-  claim — "`atlas query` will not show it, and that is correct, not a failure" — became false, along with the
-  same claim in `design/genesis-output-contract.md` and `reference/atlas-architecture.md`. Measured through
-  the real staging + promotion doors, not inferred.
+What the sweep actually found is larger than the brief. #107 rotted the pages on THREE axes, not one: the
+two guidance strings (greppable, and what the sibling found), the `advisoryDropped` row, and a
+`[<freshness>]` field on every `inv` row — which no grep for the guidance strings can see, and which is why
+a NINTH site (`reference/commands/link.md`) was missed. Worse, #107 changed BEHAVIOUR the pages assert in
+prose: `atlas query` now serves `T2` in a separately capped advisory band, so `promote.md`'s central
+claim — "`atlas query` will not show it, and that is correct, not a failure" — became false, along with the
+same claim in `design/genesis-output-contract.md` and `reference/atlas-architecture.md`. Measured through
+the real staging + promotion doors, not inferred.
 
 ## axioms (inherited premises)
 
@@ -86,96 +86,104 @@ made it unreachable, rather than left as a comment describing a branch that cann
 anchor: `harness/gates/doc-transcript-guard.mjs` (new) · the five regenerated pages under `outputs`
 
 interface_contract:
-  - source: ../method-tags-tls.md#TOOLS-6
+
+- source: ../method-tags-tls.md#TOOLS-6
 
 source_reqs:
-  - source: ../req-tls.md#REQ-TOOLS-6f   # the two-band pack the transcripts must show (READ-ONLY here)
+
+- source: ../req-tls.md#REQ-TOOLS-6f # the two-band pack the transcripts must show (READ-ONLY here)
 
 exclusions:
-  - `packages/**` — no source edits; live seats own `genesis`/`adapter-io` (`feat/symbol-sites`) and
-    `tools` (`fix/surface-truth`). Read-only.
-  - `harness/gates/adr-citation-guard.mjs`, `harness/lib/**` — owned by `fix/surface-truth`. Not touched;
-    the new gate imports nothing from `harness/`.
-  - `docs/requirements/req-tls.md`, `docs/reference/atlas-tools.md` — owned by `fix/inv-trace-guard`.
-  - `docs/adr/ADR-0013-*.md` — A4, deliberately frozen.
-  - Any behavioural change anywhere.
+
+- `packages/**` — no source edits; live seats own `genesis`/`adapter-io` (`feat/symbol-sites`) and
+  `tools` (`fix/surface-truth`). Read-only.
+- `harness/gates/adr-citation-guard.mjs`, `harness/lib/**` — owned by `fix/surface-truth`. Not touched;
+  the new gate imports nothing from `harness/`.
+- `docs/requirements/req-tls.md`, `docs/reference/atlas-tools.md` — owned by `fix/inv-trace-guard`.
+- `docs/adr/ADR-0013-*.md` — A4, deliberately frozen.
+- Any behavioural change anywhere.
 
 action: build the binary; enumerate and classify all 70 documented output blocks; regenerate the 8 drifted
-  transcripts from real runs; correct the prose claims #107 falsified on 5 pages; add the new gate; wire it
-  into `package.json` + `.github/workflows/ci.yml` (mandatory — see the framing section); watch it fail then
-  pass in three independent ways.
+transcripts from real runs; correct the prose claims #107 falsified on 5 pages; add the new gate; wire it
+into `package.json` + `.github/workflows/ci.yml` (mandatory — see the framing section); watch it fail then
+pass in three independent ways.
 
 action_surface: `[ read(**), edit(docs/**), edit(harness/gates/doc-transcript-guard.mjs, new file),
   edit(package.json, one script line), edit(.github/workflows/ci.yml, one run line),
   run(npm ci), run(tsc -b), run(vitest run), run(node harness/gates/*.mjs), run(node <cli> …) ]`
 
 guardrails: worktree `fix/doc-transcripts` only; never `git checkout <path>`/`restore`/`stash`/`reset` —
-  every perturbation backed up and restored with `cp`, verified with `diff -q`; fixture repos created under
-  `os.tmpdir()` and removed by explicit path; the fixture actor is the obviously-synthetic
-  `dev@example.com` and is not a credential (`.atlas/policy.json` is a self-asserted anti-accident
-  guardrail, `adapter-io/src/policy.ts` says so in its own header); commit only, never push.
+every perturbation backed up and restored with `cp`, verified with `diff -q`; fixture repos created under
+`os.tmpdir()` and removed by explicit path; the fixture actor is the obviously-synthetic
+`dev@example.com` and is not a credential (`.atlas/policy.json` is a self-asserted anti-accident
+guardrail, `adapter-io/src/policy.ts` says so in its own header); commit only, never push.
 
 repair_budget: N=3 · early-stop { repeated-identical-failure, no-change-diff, semantic-dup-edit }. Used 1
-  of 3 (the promote regeneration, discarded and redone — see the framing section).
+of 3 (the promote regeneration, discarded and redone — see the framing section).
 
 acceptance (DoD):
-  - the enumerated C2 set with every block classified and the list printed — the gate PRINTS it on every run
-  - each regenerated transcript shown beside the raw run that produced it
-  - the gate's fail-then-pass transcript, both exit codes shown, three independent failure legs
-  - a run showing the gate naming its unverifiable transcripts
-  - `git diff --stat` proving I2 and I6
+
+- the enumerated C2 set with every block classified and the list printed — the gate PRINTS it on every run
+- each regenerated transcript shown beside the raw run that produced it
+- the gate's fail-then-pass transcript, both exit codes shown, three independent failure legs
+- a run showing the gate naming its unverifiable transcripts
+- `git diff --stat` proving I2 and I6
 
 deps: [ ] — MERGE ORDER `fix/surface-truth` → this branch → `fix/inv-trace-guard`. Not rebased here.
 parallel_group: [P]
 
 exit_predicate: acceptance evidenced ∧ `npx tsc -b` clean ∧ `npx vitest run` reconciled against the
-  `origin/master` baseline measured in a clean-room clone (literal delta in the return card) ∧ every gate in
-  `harness/gates/` exit 0, each by name ∧ I1-I6 and C1-C4 each individually evidenced.
+`origin/master` baseline measured in a clean-room clone (literal delta in the return card) ∧ every gate in
+`harness/gates/` exit 0, each by name ∧ I1-I6 and C1-C4 each individually evidenced.
 
 context_refs:
-  - source: ../req-tls.md
-  - source: ../../method/wp-template.md
-  - source: ./wp-fix-scip-local-edges.md
+
+- source: ../req-tls.md
+- source: ../../method/wp-template.md
+- source: ./wp-fix-scip-local-edges.md
 
 owner: DOCS territory · builder_id: `rosie`
 
 outputs:
-  - `harness/gates/doc-transcript-guard.mjs` — NEW gate, 387 LOC. Enumerates all 70 documented output blocks,
-    re-runs **12** against fixture repos it builds, declares 1 FROZEN and 57 NOT-REPRODUCIBLE each with a
-    stated reason printed on every run. Derives the command from the transcript's own `$` line — it carries
-    no second copy of any invocation. Blank lines are compared, not normalised away.
-  - `harness/gates/doc-transcript-guard.test.mjs` — NEW twin, 11 cases: every refusal branch, the I4
-    naming on BOTH the passing and the failing run, and `every declaration is EARNED` — which empties both
-    declaration maps in a copy of the gate, force-verifies the whole corpus, and fails if any declared block
-    reproduces byte-exactly. That last case is what would have caught A-F3; proven non-vacuous by
-    re-introducing the exact defect and watching it name the block.
-  - `docs/reference/commands/query.md` — 4 transcripts regenerated; row-grammar, `advisory`,
-    `[<freshness>]` and `advisoryDropped` documented; the two-band summary corrected
-  - `docs/reference/commands/promote.md` — 1 transcript regenerated (through the real staging + promotion
-    doors); the "`query` will not show it" section rewritten to the measured truth, with the shipped
-    guidance string's own falsehood recorded in a block quote rather than papered over
-  - `docs/reference/commands/link.md` — 1 transcript regenerated (the site the brief's list missed); the
-    "and nothing else" prose corrected
-  - `docs/how-to/emit-a-grounded-fact.md` · `docs/how-to/move-a-repo-in.md` ·
-    `docs/how-to/find-and-fix-drift.md` — 1 transcript each, regenerated
-  - `docs/design/genesis-output-contract.md` · `docs/reference/atlas-architecture.md` — the same
-    `T2`-is-bounded-out claim, falsified by #107, corrected
-  - `package.json` + `.github/workflows/ci.yml` — the gate registered (mandatory, see framing)
-  - `docs/requirements/work-packages/wp-doc-transcripts.md` — this card
+
+- `harness/gates/doc-transcript-guard.mjs` — NEW gate, 387 LOC. Enumerates all 70 documented output blocks,
+  re-runs **12** against fixture repos it builds, declares 1 FROZEN and 57 NOT-REPRODUCIBLE each with a
+  stated reason printed on every run. Derives the command from the transcript's own `$` line — it carries
+  no second copy of any invocation. Blank lines are compared, not normalised away.
+- `harness/gates/doc-transcript-guard.test.mjs` — NEW twin, 11 cases: every refusal branch, the I4
+  naming on BOTH the passing and the failing run, and `every declaration is EARNED` — which empties both
+  declaration maps in a copy of the gate, force-verifies the whole corpus, and fails if any declared block
+  reproduces byte-exactly. That last case is what would have caught A-F3; proven non-vacuous by
+  re-introducing the exact defect and watching it name the block.
+- `docs/reference/commands/query.md` — 4 transcripts regenerated; row-grammar, `advisory`,
+  `[<freshness>]` and `advisoryDropped` documented; the two-band summary corrected
+- `docs/reference/commands/promote.md` — 1 transcript regenerated (through the real staging + promotion
+  doors); the "`query` will not show it" section rewritten to the measured truth, with the shipped
+  guidance string's own falsehood recorded in a block quote rather than papered over
+- `docs/reference/commands/link.md` — 1 transcript regenerated (the site the brief's list missed); the
+  "and nothing else" prose corrected
+- `docs/how-to/emit-a-grounded-fact.md` · `docs/how-to/move-a-repo-in.md` ·
+  `docs/how-to/find-and-fix-drift.md` — 1 transcript each, regenerated
+- `docs/design/genesis-output-contract.md` · `docs/reference/atlas-architecture.md` — the same
+  `T2`-is-bounded-out claim, falsified by #107, corrected
+- `package.json` + `.github/workflows/ci.yml` — the gate registered (mandatory, see framing)
+- `docs/requirements/work-packages/wp-doc-transcripts.md` — this card
 
 provenance:
-  - branch `fix/doc-transcripts`, forked from `origin/master` at `e4882a3`
-  - regeneration performed by a scratch program (`regen.mjs`, NOT committed, removed before commit and
-    proven absent by `git status` + a tree-wide grep) that spawned the built
-    `packages/cli/dist/src/bin.js` and spliced its real stdout into each fence. It imported `@atlas/*`
-    ONLY to author the grounded facts a populated pack needs — the same concession
-    `packages/e2e-blackbox/test/author.ts` makes, and the reason the GATE cannot do it (see framing).
+
+- branch `fix/doc-transcripts`, forked from `origin/master` at `e4882a3`
+- regeneration performed by a scratch program (`regen.mjs`, NOT committed, removed before commit and
+  proven absent by `git status` + a tree-wide grep) that spawned the built
+  `packages/cli/dist/src/bin.js` and spliced its real stdout into each fence. It imported `@atlas/*`
+  ONLY to author the grounded facts a populated pack needs — the same concession
+  `packages/e2e-blackbox/test/author.ts` makes, and the reason the GATE cannot do it (see framing).
 
 trace_ref: manual — lead brief (WP card, five-part gate structure) → this card + the files under `outputs`;
-  no automated S0–S4 trace exists for an out-of-band hotfix
+no automated S0–S4 trace exists for an out-of-band hotfix
 
 rationale:
-  - source: ../req-tls.md#REQ-TOOLS-6f
+
+- source: ../req-tls.md#REQ-TOOLS-6f
 
 ---
 

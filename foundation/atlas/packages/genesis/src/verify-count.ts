@@ -26,31 +26,31 @@
 // and `isLocal` are supplied by the CALLER exactly as `verifyDependency` requires them (see
 // `packages/adapter-io/src/verify-fact-source.ts`, `createVerifyFactLeg`).
 
-import type { Hash } from '@atlas/contracts';
-import type { SymbolReverseApi } from '@atlas/index';
-import type { FactVerdict } from './verify-fact.js';
-import { countInScope, anyInScope } from './scope-predicate.js';
+import type { Hash } from "@atlas/contracts"
+import type { SymbolReverseApi } from "@atlas/index"
+import type { FactVerdict } from "./verify-fact.js"
+import { countInScope, anyInScope } from "./scope-predicate.js"
 
 /** One "global symbol B is referenced by ≥ `atLeast` distinct units under `sourceScope`" claim. `atLeast`
  *  is the asserted lower bound (a positive integer). `exact: true` upgrades the claim to "EXACTLY `atLeast`"
  *  — provable only in a closed world. `worldScope` is the directory the completeness check ranges over
  *  (used only by the exact-mode closed-world test / the diagnostic reason); it mirrors `DepClaim`. */
 export type CountClaim = {
-  readonly sourceScope: string;
-  readonly target: string;
-  readonly atLeast: number;
-  readonly worldScope: string;
-  readonly exact?: boolean;
-};
+  readonly sourceScope: string
+  readonly target: string
+  readonly atLeast: number
+  readonly worldScope: string
+  readonly exact?: boolean
+}
 
 /** Reuses `verify-fact.ts`'s `FactVerdict` verbatim — the count oracle is the SAME `symbol-reverse` oracle
  *  answering a cardinality question, never a second decision-maker with its own verdict vocabulary. */
-const abstain = (reason: string): FactVerdict => ({ verdict: 'abstain', reason, oracle: 'symbol-reverse' });
+const abstain = (reason: string): FactVerdict => ({ verdict: "abstain", reason, oracle: "symbol-reverse" })
 
 /** `n` is a POSITIVE INTEGER (≥ 1). A count claim of 0 is vacuous ("≥ 0 callers" holds for every symbol,
  *  including a phantom) and is rejected as malformed — the oracle grounds a real cardinality, never a
  *  tautology. NaN / Infinity / fractional / negative all fail this. */
-const isPositiveInt = (n: number): boolean => Number.isInteger(n) && n >= 1;
+const isPositiveInt = (n: number): boolean => Number.isInteger(n) && n >= 1
 
 /**
  * PROVE/ABSTAIN on `claim`, over the live `reverse` feed (`SymbolReverseApi`, @atlas/index) — the CARDINALITY
@@ -75,24 +75,20 @@ export function verifyCount(
   pathOfHash: (h: Hash) => string | undefined,
   isLocal: (sym: string) => boolean,
 ): FactVerdict {
-  const { sourceScope, target, worldScope, atLeast, exact = false } = claim;
-  if (target.length === 0 || sourceScope.length === 0 || worldScope.length === 0) return abstain('malformed');
-  if (!isPositiveInt(atLeast)) return abstain('malformed');
-  if (isLocal(target)) return abstain('target-not-global');
-  if (!reverse.resolves(target)) return abstain('target-unresolvable');
+  const { sourceScope, target, worldScope, atLeast, exact = false } = claim
+  if (target.length === 0 || sourceScope.length === 0 || worldScope.length === 0) return abstain("malformed")
+  if (!isPositiveInt(atLeast)) return abstain("malformed")
+  if (isLocal(target)) return abstain("target-not-global")
+  if (!reverse.resolves(target)) return abstain("target-unresolvable")
 
-  const witnessed = countInScope(reverse.reverseCallers(target), pathOfHash, sourceScope);
+  const witnessed = countInScope(reverse.reverseCallers(target), pathOfHash, sourceScope)
 
   if (!exact) {
     // Lower bound: a witnessed cardinality bounds the truth from below in ANY world — no closed-world test.
-    return witnessed >= atLeast
-      ? { verdict: 'proven', oracle: 'symbol-reverse' }
-      : abstain('below-witnessed-bound');
+    return witnessed >= atLeast ? { verdict: "proven", oracle: "symbol-reverse" } : abstain("below-witnessed-bound")
   }
 
   // Exact: an equality is a closed-world claim — a hole in the world could be an unseen (N+1)-th caller.
-  if (anyInScope(reverse.holeSources(), pathOfHash, worldScope)) return abstain('scope-open');
-  return witnessed === atLeast
-    ? { verdict: 'proven', oracle: 'symbol-reverse' }
-    : abstain('exact-count-mismatch');
+  if (anyInScope(reverse.holeSources(), pathOfHash, worldScope)) return abstain("scope-open")
+  return witnessed === atLeast ? { verdict: "proven", oracle: "symbol-reverse" } : abstain("exact-count-mismatch")
 }

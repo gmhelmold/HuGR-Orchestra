@@ -5,7 +5,7 @@
 // normalizer exists in this product, so a reformat OF the cited unit drifts. REQ-GROUND-5b / KNOW-3
 // were amended 2026-08-02; `@atlas/grounding` `src/subtree.ts` carries the reason.
 
-import type { SubtreeHash } from './hash.js';
+import type { SubtreeHash } from "./hash.js"
 
 /** A grounding anchor into the structural tree. `subtreeHash` is the drift oracle (never line
  *  numbers). 'repo'/'project' anchors a global rule to a policy artifact's heading/section BLOCK
@@ -18,7 +18,7 @@ import type { SubtreeHash } from './hash.js';
  *  carrier for a directory-scoped negation's completeness witness (#99b / ADR-0015 D3, §3(ii)): the
  *  scope Merkle root a `(¬calls, X, S)` fact grounds against so a NEW caller entering S drifts it. */
 export interface StructRef {
-  readonly kind: 'symbol' | 'block' | 'file' | 'repo' | 'project' | 'directory';
+  readonly kind: "symbol" | "block" | "file" | "repo" | "project" | "directory"
 
   /**
    * A REPO-RELATIVE PATH, and — since #155 — only ever that. **ONE FORM. There is no union.**
@@ -44,7 +44,7 @@ export interface StructRef {
    * WHAT A PRODUCER OWES: a path that exists in the repository, or nothing at all. A producer that holds
    * only a node identity MUST resolve it or drop the site — it may NOT widen this field back into a union.
    */
-  readonly qualifiedPath: string;
+  readonly qualifiedPath: string
 
-  readonly subtreeHash: SubtreeHash;
+  readonly subtreeHash: SubtreeHash
 }

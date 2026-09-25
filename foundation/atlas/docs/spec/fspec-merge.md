@@ -7,7 +7,7 @@
 > **Authority (nothing invented):** Shapiro et al. 2011 (INRIA RR-7506) — the state-based CRDT
 > **join-semilattice** reduction: `merge` = least-upper-bound (LUB), **commutative / associative / idempotent**;
 > Gomes, Kleppmann et al., OOPSLA'17 — the Isabelle-mechanized theorem: concurrent operations **commute ⇒
-> strong eventual consistency (SEC)** under causal / apply-once delivery. We *lean on* Gomes'17 rather than
+> strong eventual consistency (SEC)** under causal / apply-once delivery. We _lean on_ Gomes'17 rather than
 > re-proving SEC — our obligation is to show our merge is a semilattice join and our delivery is apply-once.
 >
 > This is the **only** cluster in the Atlas with a standing FSPEC. That is the ratified baseline, not a
@@ -19,12 +19,12 @@
 
 A cluster earns a machine-checked model only if **all three** hold (AWS/CACM'15 + ShardStore/SOSP'21):
 
-1. **High-consequence & hard to recover.** A merge that drops or resurrects a claim corrupts the *shared*
+1. **High-consequence & hard to recover.** A merge that drops or resurrects a claim corrupts the _shared_
    Atlas fold silently, and that corruption travels through git history into every clone — the U2
    resurrection bug (seq-LWW picking a stale "last writer"). There is no cheap undo: the bad state is
    content-addressed and already folded everywhere.
 2. **Combinatorial state that human review + example tests cannot cover.** Convergence must hold under
-   *arbitrary* concurrent writers × branch / merge / rebase interleavings × supersede / decay orderings. The
+   _arbitrary_ concurrent writers × branch / merge / rebase interleavings × supersede / decay orderings. The
    decisive bugs (LWW resurrection, order-dependent heads) live in multi-step interleavings that a competent
    engineer + example tests plausibly miss — the discriminator for `formal` (AWS's decisive bug needed a
    35-step trace).
@@ -52,8 +52,8 @@ deletes). Reduce to Shapiro'11:
   - **commutative**: `a ∪ b = b ∪ a`
   - **associative**: `(a ∪ b) ∪ c = a ∪ (b ∪ c)`
   - **idempotent**: `a ∪ a = a`
-  → it is the **LUB**. By Shapiro'11 this is a valid state-based CRDT; by Gomes'17 (union commutes, delivery is
-  apply-once because ids are content-hashes) it converges to **SEC**.
+    → it is the **LUB**. By Shapiro'11 this is a valid state-based CRDT; by Gomes'17 (union commutes, delivery is
+    apply-once because ids are content-hashes) it converges to **SEC**.
 - **Apply-once delivery** is free: an event's id **is** its content-hash (KERNEL-9), so re-delivery of a
   byte-identical event is a set-insert of an id already present = a no-op. No causal-order barrier is needed —
   union is unordered.
@@ -63,7 +63,7 @@ Concretely, **`canonicalForm(event)` omits `seq`** — exactly as KERNEL-8's can
 side-indexes (grounding/status/freshness) — so `id(e)=hash(canonical(e))` is invariant under any reseq, and the
 seq-invariance law below has a real oracle in the reference model (`RefLog.id` / `RefLog.reseq`).
 This is what removes the U2 seq-LWW branch — there is **no "last writer"** to pick because the two colliding
-events assert the *same* claim / re-run the *same* `check`, so freshness is identical and the fold **unions**.
+events assert the _same_ claim / re-run the _same_ `check`, so freshness is identical and the fold **unions**.
 
 ---
 
@@ -80,12 +80,12 @@ events assert the *same* claim / re-run the *same* `check`, so freshness is iden
   `max-by-contentHash` among the FRESH, non-superseded entries — `contentHash` is the **sole tie-break** (never
   `seq`/clock/LLM), so `head` is invariant under reseq/reclock.
   **Direction is pinned-canonical (`max`).** The frozen KERNEL-10 clause fixes the tie-break to `contentHash`
-  *alone* but is silent on **min vs max**; the direction is immaterial to correctness (any fixed total order on
+  _alone_ but is silent on **min vs max**; the direction is immaterial to correctness (any fixed total order on
   `contentHash` is a pure content function) — **but it MUST be pinned**, because KERNEL-11 requires a
   byte-identical `AtlasState` across independent implementations, and a min-head impl would diverge from a
   max-head impl on the surfaced head. This spec pins **`max`** as the canonical direction; every golden and
-  implementation follows it. *(Open reconciliation: the KERNEL-10 reference clause should absorb this
-  `max` direction so the choice is grounded upstream, not only in the FSPEC — routed to DEFINE.)*
+  implementation follows it. _(Open reconciliation: the KERNEL-10 reference clause should absorb this
+  `max` direction so the choice is grounded upstream, not only in the FSPEC — routed to DEFINE.)_
 - **KERNEL-11 — convergent fold / strong eventual consistency (liveness→safety).** Two replicas whose
   delivered event-sets are equal have byte-identical `AtlasState`: any permutation, re-batching, or
   branch-union of the **same set** folds to a byte-identical `AtlasState` (0 order-dependence).
@@ -96,67 +96,89 @@ events assert the *same* claim / re-run the *same* `check`, so freshness is iden
 
 ## DOWN — the executable reference model (build language: TypeScript)
 
-The simplest interface-compatible impl (ShardStore: "an LSM-tree's model *is* a hash map"). This module is the
+The simplest interface-compatible impl (ShardStore: "an LSM-tree's model _is_ a hash map"). This module is the
 **oracle** for conformance and is **reused verbatim as the unit-test mock** (§Conformance) — no second copy.
 
 ```ts
 // spec/fspec-merge — reference model. Build language = the mock. Do not fork.
-type Hash = string;                                   // blake3hex(canonicalForm(x))
-type NodeKey = string;                                // normalize(claimNorm) | normalize(check)
-interface Event { id: Hash; seq: number; nodeKey?: NodeKey; contentHash: Hash;
-                  fresh: boolean; supersedes: Hash[]; payload: unknown }
+type Hash = string // blake3hex(canonicalForm(x))
+type NodeKey = string // normalize(claimNorm) | normalize(check)
+interface Event {
+  id: Hash
+  seq: number
+  nodeKey?: NodeKey
+  contentHash: Hash
+  fresh: boolean
+  supersedes: Hash[]
+  payload: unknown
+}
 
 // ---- an OR-Set log = a set of ids + a version map. (KERNEL-9) ----
 class RefLog {
-  private ids = new Set<Hash>();                      // the OR-Set (grow-only)
-  private ver = new Map<Hash, Event>();               // id -> event  (version map)
-  append(e: Event): RefLog {                          // set-insert; idempotent on equal id
-    if (!this.ids.has(e.id)) { this.ids.add(e.id); this.ver.set(e.id, e); }
-    return this;                                       // re-append of equal bytes = no-op
-  }
-  static id(e: Omit<Event, 'id'>): Hash {             // identity = content, seq EXCLUDED (KERNEL-9, cf KERNEL-8)
-    return blake3hex(canonical({ ...e, seq: 0 }));     // seq pinned out of the preimage
-  }
-  reseq(relabel: (e: Event) => number): RefLog {      // relabel seq only — the KERNEL-9 seq-invariant oracle
-    const out = new RefLog();
-    for (const e of this.ver.values()) {
-      const e2 = { ...e, seq: relabel(e) };
-      out.append({ ...e2, id: RefLog.id(e2) });        // id drops seq ⇒ identical id ⇒ keyset + fold unchanged
+  private ids = new Set<Hash>() // the OR-Set (grow-only)
+  private ver = new Map<Hash, Event>() // id -> event  (version map)
+  append(e: Event): RefLog {
+    // set-insert; idempotent on equal id
+    if (!this.ids.has(e.id)) {
+      this.ids.add(e.id)
+      this.ver.set(e.id, e)
     }
-    return out;
+    return this // re-append of equal bytes = no-op
   }
-  static merge(a: RefLog, b: RefLog): RefLog {        // plain set-union; commut/assoc/idemp (KERNEL-9/11)
-    const out = new RefLog();
-    for (const e of a.ver.values()) out.append(e);
-    for (const e of b.ver.values()) out.append(e);
-    return out;
+  static id(e: Omit<Event, "id">): Hash {
+    // identity = content, seq EXCLUDED (KERNEL-9, cf KERNEL-8)
+    return blake3hex(canonical({ ...e, seq: 0 })) // seq pinned out of the preimage
   }
-  events(): Event[] { return [...this.ver.values()]; }
+  reseq(relabel: (e: Event) => number): RefLog {
+    // relabel seq only — the KERNEL-9 seq-invariant oracle
+    const out = new RefLog()
+    for (const e of this.ver.values()) {
+      const e2 = { ...e, seq: relabel(e) }
+      out.append({ ...e2, id: RefLog.id(e2) }) // id drops seq ⇒ identical id ⇒ keyset + fold unchanged
+    }
+    return out
+  }
+  static merge(a: RefLog, b: RefLog): RefLog {
+    // plain set-union; commut/assoc/idemp (KERNEL-9/11)
+    const out = new RefLog()
+    for (const e of a.ver.values()) out.append(e)
+    for (const e of b.ver.values()) out.append(e)
+    return out
+  }
+  events(): Event[] {
+    return [...this.ver.values()]
+  }
 }
 
 // ---- per-nodeKey OR-Set node; grow-only union + contentHash-alone head. (KERNEL-10) ----
-interface Node { nodeKey: NodeKey; entries: Map<Hash, Event> }  // keyed by contentHash, grow-only
-function mergeNode(x: Node, y: Node): Node {          // commutative, grow-only union — 0 dropped
-  const entries = new Map(x.entries);
-  for (const [h, e] of y.entries) if (!entries.has(h)) entries.set(h, e);
-  return { nodeKey: x.nodeKey, entries };
+interface Node {
+  nodeKey: NodeKey
+  entries: Map<Hash, Event>
+} // keyed by contentHash, grow-only
+function mergeNode(x: Node, y: Node): Node {
+  // commutative, grow-only union — 0 dropped
+  const entries = new Map(x.entries)
+  for (const [h, e] of y.entries) if (!entries.has(h)) entries.set(h, e)
+  return { nodeKey: x.nodeKey, entries }
 }
-function head(n: Node): Event {                       // forced single head = contentHash ALONE
-  const fresh = [...n.entries.values()].filter(e => e.fresh && !supersededBy(e, n));
-  return fresh.sort((a, b) => (a.contentHash < b.contentHash ? 1 : -1))[0]; // never seq/clock/LLM
+function head(n: Node): Event {
+  // forced single head = contentHash ALONE
+  const fresh = [...n.entries.values()].filter((e) => e.fresh && !supersededBy(e, n))
+  return fresh.sort((a, b) => (a.contentHash < b.contentHash ? 1 : -1))[0] // never seq/clock/LLM
 }
-const supersededBy = (e: Event, n: Node) =>
-  [...n.entries.values()].some(o => o.supersedes.includes(e.contentHash));
+const supersededBy = (e: Event, n: Node) => [...n.entries.values()].some((o) => o.supersedes.includes(e.contentHash))
 
 // ---- the convergent fold: reduce the set via per-nodeKey LUB. (KERNEL-11) ----
-function fold(log: RefLog): Map<NodeKey, Node> {      // order-independent by construction
-  const state = new Map<NodeKey, Node>();
-  for (const e of log.events()) {                     // iteration order irrelevant: union commutes
-    if (e.nodeKey === undefined) continue;
-    const cur = state.get(e.nodeKey) ?? { nodeKey: e.nodeKey, entries: new Map() };
-    state.set(e.nodeKey, mergeNode(cur, { nodeKey: e.nodeKey, entries: new Map([[e.contentHash, e]]) }));
+function fold(log: RefLog): Map<NodeKey, Node> {
+  // order-independent by construction
+  const state = new Map<NodeKey, Node>()
+  for (const e of log.events()) {
+    // iteration order irrelevant: union commutes
+    if (e.nodeKey === undefined) continue
+    const cur = state.get(e.nodeKey) ?? { nodeKey: e.nodeKey, entries: new Map() }
+    state.set(e.nodeKey, mergeNode(cur, { nodeKey: e.nodeKey, entries: new Map([[e.contentHash, e]]) }))
   }
-  return state;                                        // AtlasState projection = canonical serialize(state)
+  return state // AtlasState projection = canonical serialize(state)
 }
 ```
 

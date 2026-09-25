@@ -20,7 +20,7 @@ module MUST NOT phrase around them (honestidade inegociável):
   step, a pure **whitespace reformat** or **comment reindent** as well ⇒ a still-true fact flips BROKEN.
   This is wider than a "normalized structure" oracle would be, and it is the accepted side of a
   deliberate trade — see GROUND-5 below.
-- **False negative.** A behavior-**changing** edit to a *callee* leaves a *caller*-anchored fact FRESH
+- **False negative.** A behavior-**changing** edit to a _callee_ leaves a _caller_-anchored fact FRESH
   though it is now false — the caller's own bytes did not move.
 
 The gate therefore narrows false HOLDs; it does not eliminate them. GROUND-11 closes the false-negative
@@ -54,13 +54,13 @@ Status         = 'HOLDS' | 'BROKEN' | 'NA' | 'advisory'
 
 - **The drift oracle is `subtreeHash`**, computed over the cited unit's **raw source slice**
   (`src.slice(startIndex, endIndex)`), NFC-normalized only by `canonicalForm`.
-  - ⚠️ **AMENDED 2026-08-02 (HONESTY-TAPROOT).** This bullet previously read *"computed over the unit's
+  - ⚠️ **AMENDED 2026-08-02 (HONESTY-TAPROOT).** This bullet previously read _"computed over the unit's
     **normalized** AST subtree (whitespace, comments-if-configured, and De-Bruijn / param-name / lifetime
-    noise erased — reuse v1's `SymRef` / `normalizedSignature`)"*. **That normalizer was never built** —
+    noise erased — reuse v1's `SymRef` / `normalizedSignature`)"_. **That normalizer was never built** —
     there is no whitespace pass, no comment stripper, no De-Bruijn indexing, no param-name or lifetime
     erasure anywhere in the product. Consequence, stated rather than implied: an in-unit reformat DRIFTS.
 - **Hash function: BLAKE3**, reached through the `@orchestra/kernel` encoder seam (KERNEL-2), chosen
-  because its native Merkle tree *is* the hierarchical index (see [atlas-index](./atlas-index.md)).
+  because its native Merkle tree _is_ the hierarchical index (see [atlas-index](./atlas-index.md)).
 - **Fallback:** a non-parseable file (`kind:'file'`) anchors on the BLAKE3 of its bytes — the weakest
   rung, isolated to where structure is unavailable.
 
@@ -75,7 +75,7 @@ Status         = 'HOLDS' | 'BROKEN' | 'NA' | 'advisory'
 
 > **Hash-consistency note (sanity-fix #8).** Grounding hashes with **BLAKE3**; a downstream consumer's
 > relay-token (e.g. the Orchestra orchestrator) may hash a brief with **SHA-256** (`relayToken =
-> sha256(canonical(brief))`). These are **separate contracts, not a bug** — but a consumer SHOULD route
+sha256(canonical(brief))`). These are **separate contracts, not a bug** — but a consumer SHOULD route
 > its hashing through the Atlas kernel encoder seam so the system has one swappable hash authority.
 > Aligning them is a consistency recommendation, not a required change to either contract.
 
@@ -167,13 +167,13 @@ admit(fact): boolean                  // both doors: truth (gateHolds FRESH) ∧
 
 1. **GROUND-1 / GROUND-5** — A real change to the cited unit ⇒ `DRIFTED`; an import or license header
    added above it, or an unrelated rename elsewhere, ⇒ still `FRESH`. A reformat OF the cited unit ⇒
-   `DRIFTED` (accepted false alarm — see GROUND-5).   <!-- AMENDED 2026-08-02 (HONESTY-TAPROOT) -->
+   `DRIFTED` (accepted false alarm — see GROUND-5). <!-- AMENDED 2026-08-02 (HONESTY-TAPROOT) -->
 2. **GROUND-2** — An empty grounding ⇒ `isGrounded==false` and `driftDetect==DRIFTED`.
 3. **GROUND-3** — A citation whose unit/path is gone ⇒ the whole fact grounds to nothing in `ground`, `DRIFTED` by `driftDetect`,
    no throw.
 4. **GROUND-4 / GROUND-6** — A `HOLDS` candidate that is ungrounded or drifted serves `NA`; `emit` of an
    ungrounded node ⇒ `emitted:false`, nothing persisted.
-5. **GROUND-7** — A grounded, drift-FRESH but *obvious* fact is rejected at admission (usefulness door);
+5. **GROUND-7** — A grounded, drift-FRESH but _obvious_ fact is rejected at admission (usefulness door);
    an ungrounded-but-useful fact is rejected at the truth door.
 6. **GROUND-8** — An `untrusted`-source claim is advisory and absent from the gate's inputs.
 7. **GROUND-9** — A fact missing a required template field, or over cap, is rejected; no free-prose fact

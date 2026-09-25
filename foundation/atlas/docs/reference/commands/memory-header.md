@@ -35,10 +35,10 @@ this command surfaces it here, ranked, the next time this actor's turn starts.
 
 ## Exit codes
 
-| code | meaning |
-| --- | --- |
-| `0` | the header was assembled. `next:` reports the number of `rules` injected this turn |
-| `1` | an uncomposed runtime — the composition root failed to stand up, never a throw |
+| code | meaning                                                                            |
+| ---- | ---------------------------------------------------------------------------------- |
+| `0`  | the header was assembled. `next:` reports the number of `rules` injected this turn |
+| `1`  | an uncomposed runtime — the composition root failed to stand up, never a throw     |
 
 There is no `2` (rejected) outcome for this door: it opens no governed token and persists nothing, so there
 is no gate for it to fail.

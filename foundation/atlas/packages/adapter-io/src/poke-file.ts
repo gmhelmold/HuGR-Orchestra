@@ -25,20 +25,20 @@
 //
 // Declared in the ledger at `harness/gates/reference-model-guard.mjs`.
 
-import { mkdirSync, writeFileSync } from 'node:fs';
-import { join } from 'node:path';
-import { canonicalForm } from '@atlas/kernel';
-import type { PhasePushSource } from '@atlas/tools';
+import { mkdirSync, writeFileSync } from "node:fs"
+import { join } from "node:path"
+import { canonicalForm } from "@atlas/kernel"
+import type { PhasePushSource } from "@atlas/tools"
 
 /** The fixed artifact-name law: one poke file per seat, `<seat>.poke.json`. The `.poke.json` suffix names
  *  the poke-as-file transport; the `<seat>` stem makes the path a pure function of the seat (no timestamp,
  *  no counter) so re-materializing overwrites the SAME path with byte-identical bytes. */
-export const POKE_FILE_EXT = '.poke.json';
+export const POKE_FILE_EXT = ".poke.json"
 
 /** The deterministic artifact path for a seat under `outDir` — `<outDir>/<seat>.poke.json`. Pure: a
  *  function of `(outDir, seat)` alone, no clock/random, so the write target is stable across runs. */
 export function pokeFilePath(outDir: string, seat: string): string {
-  return join(outDir, `${seat}${POKE_FILE_EXT}`);
+  return join(outDir, `${seat}${POKE_FILE_EXT}`)
 }
 
 /**
@@ -55,22 +55,17 @@ export function pokeFilePath(outDir: string, seat: string): string {
  * the ONLY effect is writing the artifact the orchestrator will `Read` — no store write path is opened, no
  * governance is computed here (the surface is decided upstream by the injected source).
  */
-export function materializePoke(
-  source: PhasePushSource,
-  seat: string,
-  scope: string,
-  outDir: string,
-): string {
+export function materializePoke(source: PhasePushSource, seat: string, scope: string, outDir: string): string {
   // Ask the injected source for THIS seat/scope's fresh surface — a `Pack | Poke`. Nothing is invented
   // here; this facet decides only WHERE and in WHICH bytes the surface lands, never WHAT it contains.
-  const surface = source(seat, scope);
+  const surface = source(seat, scope)
   // Canonical preimage bytes via the SEALED seam ALONE — sorted keys, deterministic, byte-identical. No
   // local key ordering / JSON.stringify: identity flows through `canonicalForm` (KERNEL-1), nothing else.
-  const bytes = canonicalForm(surface);
-  const path = pokeFilePath(outDir, seat);
+  const bytes = canonicalForm(surface)
+  const path = pokeFilePath(outDir, seat)
   // Create `outDir` if missing (recursive; a no-op when it already exists). This is the only filesystem
   // reach beyond the artifact write — the PUSH tier WRITES the file the seat will `Read`, nothing more.
-  mkdirSync(outDir, { recursive: true });
-  writeFileSync(path, bytes);
-  return path;
+  mkdirSync(outDir, { recursive: true })
+  writeFileSync(path, bytes)
+  return path
 }

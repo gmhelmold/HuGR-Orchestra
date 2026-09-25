@@ -10,8 +10,8 @@
 // CLI-5c-1). Adding a command means widening `COMMANDS`+`COMMAND_LEG`+`ARITY` together (map.ts/parse.ts
 // already force this); the moment that compiles, `renderHelp()` names it — automatically, not by edit.
 
-import { COMMAND_LEG } from './map.js';
-import { ARITY, VALUED_FLAGS } from './parse.js';
+import { COMMAND_LEG } from "./map.js"
+import { ARITY, VALUED_FLAGS } from "./parse.js"
 
 /**
  * The two environment channels that govern a write (ENTRY-CLI-5: "the actor identity and the ratifier
@@ -25,7 +25,7 @@ import { ARITY, VALUED_FLAGS } from './parse.js';
  * names are the WHOLE set `composeRuntime` reads off `process.env`, so a third channel added there without
  * being added here fails the test loudly rather than silently under-documenting the write surface.
  */
-export const ENV_CHANNELS = ['ATLAS_ACTOR', 'ATLAS_RATIFY_TOKEN'] as const;
+export const ENV_CHANNELS = ["ATLAS_ACTOR", "ATLAS_RATIFY_TOKEN"] as const
 
 /**
  * Render the help door (ENTRY-CLI-5): every command in `COMMAND_LEG` with its required positional arity,
@@ -34,18 +34,18 @@ export const ENV_CHANNELS = ['ATLAS_ACTOR', 'ATLAS_RATIFY_TOKEN'] as const;
  * source-of-truth tables above — no clock, no cwd, no I/O — so it renders byte-identically every call.
  */
 export function renderHelp(): string {
-  const commands = Object.keys(COMMAND_LEG) as ReadonlyArray<keyof typeof ARITY>;
+  const commands = Object.keys(COMMAND_LEG) as ReadonlyArray<keyof typeof ARITY>
   const lines: string[] = [
-    'atlas <command> [args...] [--flag | --flag=value | --flag value]',
-    '',
-    'commands (name — required positional argument count):',
+    "atlas <command> [args...] [--flag | --flag=value | --flag value]",
+    "",
+    "commands (name — required positional argument count):",
     ...commands.map((c) => `  ${c} — ${ARITY[c]} positional argument(s)`),
-    '',
-    'flags accepted with a value (--flag=v or --flag v; any other --flag is a bare boolean):',
+    "",
+    "flags accepted with a value (--flag=v or --flag v; any other --flag is a bare boolean):",
     ...[...VALUED_FLAGS].sort().map((f) => `  --${f}`),
-    '',
-    'environment (write governance — ENTRY-CLI-5):',
+    "",
+    "environment (write governance — ENTRY-CLI-5):",
     ...ENV_CHANNELS.map((e) => `  ${e}`),
-  ];
-  return `${lines.join('\n')}\n`;
+  ]
+  return `${lines.join("\n")}\n`
 }

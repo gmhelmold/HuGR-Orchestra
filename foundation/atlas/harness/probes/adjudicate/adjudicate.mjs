@@ -12,8 +12,8 @@
 //
 // Harness invariant (harness/README.md): no `@atlas/*` import.
 
-import { spawnSync } from 'node:child_process';
-import { countsFromVerdicts, fleissKappa, detectionRates, CATEGORIES } from './fleiss.mjs';
+import { spawnSync } from "node:child_process"
+import { countsFromVerdicts, fleissKappa, detectionRates, CATEGORIES } from "./fleiss.mjs"
 
 /**
  * Parse a judge's raw stdout into one verdict category.
@@ -28,24 +28,29 @@ import { countsFromVerdicts, fleissKappa, detectionRates, CATEGORIES } from './f
  * @returns {'GROUNDED_TRUE'|'HALLUCINATED'|'ABSTAIN'}
  */
 export function parseVerdict(raw) {
-  const text = String(raw ?? '');
-  const tokens = new Set(CATEGORIES);
-  const norm = (s) => s.trim().replace(/^[\s`'"*.#>-]+|[\s`'"*.#>:]+$/g, '').toUpperCase().replace(/[\s-]+/g, '_');
+  const text = String(raw ?? "")
+  const tokens = new Set(CATEGORIES)
+  const norm = (s) =>
+    s
+      .trim()
+      .replace(/^[\s`'"*.#>-]+|[\s`'"*.#>:]+$/g, "")
+      .toUpperCase()
+      .replace(/[\s-]+/g, "_")
 
   // 1) bottom-up: the last line that IS exactly a token wins (the instructed contract).
-  const lines = text.split(/\r?\n/);
+  const lines = text.split(/\r?\n/)
   for (let i = lines.length - 1; i >= 0; i--) {
-    const t = norm(lines[i]);
-    if (tokens.has(t)) return /** @type {any} */ (t);
+    const t = norm(lines[i])
+    if (tokens.has(t)) return /** @type {any} */ (t)
   }
 
   // 2) fallback: a UNIQUE token appearing anywhere. Multiple distinct tokens ⇒ ambiguous ⇒ ABSTAIN.
-  const found = new Set();
+  const found = new Set()
   for (const cat of tokens) {
-    if (new RegExp(`\\b${cat}\\b`, 'i').test(text)) found.add(cat);
+    if (new RegExp(`\\b${cat}\\b`, "i").test(text)) found.add(cat)
   }
-  if (found.size === 1) return /** @type {any} */ ([...found][0]);
-  return 'ABSTAIN';
+  if (found.size === 1) return /** @type {any} */ ([...found][0])
+  return "ABSTAIN"
 }
 
 /**
@@ -61,16 +66,16 @@ export function callJudge(judge, prompt, timeoutMs = 180_000, extraEnv = {}) {
     input: prompt,
     timeout: timeoutMs,
     maxBuffer: 64 * 1024 * 1024,
-    encoding: 'utf8',
+    encoding: "utf8",
     env: { ...process.env, ...extraEnv },
-  });
-  const raw = r.stdout ?? '';
-  const err = r.stderr ?? '';
+  })
+  const raw = r.stdout ?? ""
+  const err = r.stderr ?? ""
   // A spawn failure (missing command) or non-zero exit means the judge did not answer — that is an ABSTAIN
   // for scoring purposes, but we surface status/err so a broken judge is visible, not silently absorbed.
-  const status = r.status;
-  const verdict = status === 0 ? parseVerdict(raw) : 'ABSTAIN';
-  return { verdict, status: status ?? null, raw, err: String(r.error?.message ?? err ?? '') };
+  const status = r.status
+  const verdict = status === 0 ? parseVerdict(raw) : "ABSTAIN"
+  return { verdict, status: status ?? null, raw, err: String(r.error?.message ?? err ?? "") }
 }
 
 /**
@@ -90,34 +95,34 @@ export function callJudge(judge, prompt, timeoutMs = 180_000, extraEnv = {}) {
  * }}
  */
 export function runPanel(fixtures, renderPrompt, judge, opts = {}) {
-  const passes = opts.passes ?? 3;
-  const timeoutMs = opts.timeoutMs ?? 180_000;
-  if (!(passes >= 2)) throw new Error('runPanel: passes must be ≥2 (κ needs ≥2 raters per item)');
+  const passes = opts.passes ?? 3
+  const timeoutMs = opts.timeoutMs ?? 180_000
+  if (!(passes >= 2)) throw new Error("runPanel: passes must be ≥2 (κ needs ≥2 raters per item)")
 
-  const perItemVerdicts = [];
-  const labels = [];
-  const transcript = [];
+  const perItemVerdicts = []
+  const labels = []
+  const transcript = []
 
   for (const fx of fixtures) {
-    const prompt = renderPrompt(fx);
-    const verdicts = [];
-    const statuses = [];
+    const prompt = renderPrompt(fx)
+    const verdicts = []
+    const statuses = []
     for (let p = 0; p < passes; p++) {
       // ATLAS_JUDGE_PASS lets a judge vary its answer per pass (a real judge may seed sampling on it; the
       // fake judge uses it to make passes disagree so κ<1 paths are exercised). A judge that ignores it is
       // unaffected.
-      const res = callJudge(judge, prompt, timeoutMs, { ATLAS_JUDGE_PASS: String(p) });
-      verdicts.push(res.verdict);
-      statuses.push(res.status);
-      opts.onCall?.({ id: fx.id, pass: p, ...res });
+      const res = callJudge(judge, prompt, timeoutMs, { ATLAS_JUDGE_PASS: String(p) })
+      verdicts.push(res.verdict)
+      statuses.push(res.status)
+      opts.onCall?.({ id: fx.id, pass: p, ...res })
     }
-    perItemVerdicts.push(verdicts);
-    labels.push(fx.label);
-    transcript.push({ id: fx.id, label: fx.label, falseKind: fx.falseKind, verdicts, statuses });
+    perItemVerdicts.push(verdicts)
+    labels.push(fx.label)
+    transcript.push({ id: fx.id, label: fx.label, falseKind: fx.falseKind, verdicts, statuses })
   }
 
-  const counts = countsFromVerdicts(perItemVerdicts);
-  const fleiss = fleissKappa(counts);
-  const detection = detectionRates(counts, labels);
-  return { passes, perItemVerdicts, counts, labels, fleiss, detection, transcript };
+  const counts = countsFromVerdicts(perItemVerdicts)
+  const fleiss = fleissKappa(counts)
+  const detection = detectionRates(counts, labels)
+  return { passes, perItemVerdicts, counts, labels, fleiss, detection, transcript }
 }

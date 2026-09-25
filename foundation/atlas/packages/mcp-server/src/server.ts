@@ -41,36 +41,29 @@
 // verdict is rendered as an `isError` result whose text CARRIES `rejected` + `guidance` (never an empty
 // error — the known past bug). Pure + total: no clock, no random, and the transport never throws to the SDK.
 
-import { Server } from '@modelcontextprotocol/sdk/server/index.js';
-import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
-import {
-  CallToolRequestSchema,
-  ListToolsRequestSchema,
-} from '@modelcontextprotocol/sdk/types.js';
-import type {
-  CallToolResult,
-  ListToolsResult,
-  Tool as SdkTool,
-} from '@modelcontextprotocol/sdk/types.js';
-import type { NegationLeg, RelationLeg, WiredHandler } from '@atlas/adapter-io';
-import { negationsVerdict, relationsVerdict } from '@atlas/adapter-io';
-import { faultOf, GOVERNANCE_SURFACE } from '@atlas/tools';
-import type { Tool, Verdict } from '@atlas/tools';
-import type { ReadSurfaceLegs } from './server-read-tools.js';
-import { advertisedAuthoringTools, callAuthoringTool } from './server-read-tools.js';
-import type { MemoryReadSurfaceLegs } from './server-memory-tools.js';
-import { advertisedMemoryTools, callMemoryTool } from './server-memory-tools.js';
+import { Server } from "@modelcontextprotocol/sdk/server/index.js"
+import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js"
+import { CallToolRequestSchema, ListToolsRequestSchema } from "@modelcontextprotocol/sdk/types.js"
+import type { CallToolResult, ListToolsResult, Tool as SdkTool } from "@modelcontextprotocol/sdk/types.js"
+import type { NegationLeg, RelationLeg, WiredHandler } from "@atlas/adapter-io"
+import { negationsVerdict, relationsVerdict } from "@atlas/adapter-io"
+import { faultOf, GOVERNANCE_SURFACE } from "@atlas/tools"
+import type { Tool, Verdict } from "@atlas/tools"
+import type { ReadSurfaceLegs } from "./server-read-tools.js"
+import { advertisedAuthoringTools, callAuthoringTool } from "./server-read-tools.js"
+import type { MemoryReadSurfaceLegs } from "./server-memory-tools.js"
+import { advertisedMemoryTools, callMemoryTool } from "./server-memory-tools.js"
 
 /** The stdio MCP server handle (frozen ring shape — `start()` connects the SDK stdio transport). */
 export interface McpServer {
-  start(): Promise<void>;
+  start(): Promise<void>
 }
 
 /** The frozen verdict shape every tool call returns over the transport (referenced to pin the edge). */
-type _Verdict = Verdict;
+type _Verdict = Verdict
 
 /** This server's advertised identity (constant — no clock/random in the mapping). */
-const SERVER_INFO = { name: '@atlas/mcp-server', version: '0.0.0' } as const;
+const SERVER_INFO = { name: "@atlas/mcp-server", version: "0.0.0" } as const
 
 /**
  * The advertised tool list (ListTools) — the `GOVERNANCE_SURFACE` slice: the six governance tools (TOOLS-1,
@@ -86,13 +79,13 @@ const SERVER_INFO = { name: '@atlas/mcp-server', version: '0.0.0' } as const;
  */
 export function advertisedTools(handler: WiredHandler): SdkTool[] {
   return GOVERNANCE_SURFACE.map((tool): SdkTool => {
-    const s = handler.schema(tool);
+    const s = handler.schema(tool)
     return {
       name: tool,
       description: s.description,
-      inputSchema: s.inputSchema as SdkTool['inputSchema'],
-    };
-  });
+      inputSchema: s.inputSchema as SdkTool["inputSchema"],
+    }
+  })
 }
 
 /**
@@ -102,7 +95,7 @@ export function advertisedTools(handler: WiredHandler): SdkTool[] {
  * handler: it opens no governed surface and has no `Tool` token, so `handler.schema` cannot own its schema.
  * The schema is therefore DOCUMENTED here and advertised verbatim — the one place it lives.
  */
-export const RELATIONS_TOOL = 'atlas-relations';
+export const RELATIONS_TOOL = "atlas-relations"
 
 /**
  * The DOCUMENTED input schema for `atlas-relations` (JSON-Schema). `unit` is the required nodeKey the
@@ -118,18 +111,18 @@ export const RELATIONS_TOOL = 'atlas-relations';
  * totally). Do not read the advertised schema as a validator this server runs.
  */
 export const RELATIONS_INPUT_SCHEMA = {
-  type: 'object',
+  type: "object",
   properties: {
-    unit: { type: 'string', description: 'the nodeKey the grounded relations touch' },
+    unit: { type: "string", description: "the nodeKey the grounded relations touch" },
     direction: {
-      type: 'string',
-      enum: ['out', 'in', 'both'],
-      description: 'out = unit is the subject, in = the object, both = the union (default both)',
+      type: "string",
+      enum: ["out", "in", "both"],
+      description: "out = unit is the subject, in = the object, both = the union (default both)",
     },
   },
-  required: ['unit'],
+  required: ["unit"],
   additionalProperties: false,
-} as const;
+} as const
 
 /**
  * The `atlas negations` MCP tool (#99b). Like `atlas-relations` it is a READ tool served DIRECTLY from an
@@ -137,7 +130,7 @@ export const RELATIONS_INPUT_SCHEMA = {
  * is untouched. It mirrors the CLI, where `negations` is intercepted BEFORE the handler: it opens no governed
  * surface and has no `Tool` token, so its schema is DOCUMENTED here and advertised verbatim.
  */
-export const NEGATIONS_TOOL = 'atlas-negations';
+export const NEGATIONS_TOOL = "atlas-negations"
 
 /**
  * The DOCUMENTED input schema for `atlas-negations` (JSON-Schema). `scope` is the required scope key whose
@@ -152,41 +145,42 @@ export const NEGATIONS_TOOL = 'atlas-negations';
  * undocumented field — `abstained` is the only optional field and it is read by the shared builder.
  */
 export const NEGATIONS_INPUT_SCHEMA = {
-  type: 'object',
+  type: "object",
   properties: {
-    scope: { type: 'string', description: 'the scope key whose grounded negatives + abstentions to read' },
+    scope: { type: "string", description: "the scope key whose grounded negatives + abstentions to read" },
     abstained: {
-      type: 'boolean',
-      description: 'focus the reader on the honest abstentions (both negatives and abstentions are always returned; default false)',
+      type: "boolean",
+      description:
+        "focus the reader on the honest abstentions (both negatives and abstentions are always returned; default false)",
     },
   },
-  required: ['scope'],
+  required: ["scope"],
   additionalProperties: false,
-} as const;
+} as const
 
 /** The read tools advertised beside the governance surface — the `relations` (#99a) and `negations` (#99b)
  *  tools, each when its leg is injected, else none (so the closed-governance pin holds byte-for-byte when no
  *  read leg is composed). Order fixed: relations before negations (the order they were added), so the
  *  advertised list is deterministic. */
 export function advertisedReadTools(relations?: RelationLeg, negations?: NegationLeg): SdkTool[] {
-  const tools: SdkTool[] = [];
+  const tools: SdkTool[] = []
   if (relations !== undefined) {
     tools.push({
       name: RELATIONS_TOOL,
       description:
-        'Read the GROUNDED relation facts (family:relation) touching a unit, both directions (#99a / ADR-0015 D2). Read-only; opens no governed surface.',
-      inputSchema: RELATIONS_INPUT_SCHEMA as unknown as SdkTool['inputSchema'],
-    });
+        "Read the GROUNDED relation facts (family:relation) touching a unit, both directions (#99a / ADR-0015 D2). Read-only; opens no governed surface.",
+      inputSchema: RELATIONS_INPUT_SCHEMA as unknown as SdkTool["inputSchema"],
+    })
   }
   if (negations !== undefined) {
     tools.push({
       name: NEGATIONS_TOOL,
       description:
-        'Read the GROUNDED negatives (family:negation) AND the honest ABSTENTIONS under a scope (#99b / ADR-0015 D3). An abstention is the door declining to decide a negative over an OPEN scope — it FIRED and is on the record (#202). Read-only; opens no governed surface.',
-      inputSchema: NEGATIONS_INPUT_SCHEMA as unknown as SdkTool['inputSchema'],
-    });
+        "Read the GROUNDED negatives (family:negation) AND the honest ABSTENTIONS under a scope (#99b / ADR-0015 D3). An abstention is the door declining to decide a negative over an OPEN scope — it FIRED and is on the record (#202). Read-only; opens no governed surface.",
+      inputSchema: NEGATIONS_INPUT_SCHEMA as unknown as SdkTool["inputSchema"],
+    })
   }
-  return tools;
+  return tools
 }
 
 /** The ListTools response — the closed governance surface (TOOLS-1, six), PLUS the `relations`/`negations`
@@ -208,7 +202,7 @@ export function listTools(
       ...advertisedAuthoringTools(readLegs),
       ...advertisedMemoryTools(memoryLegs),
     ],
-  };
+  }
 }
 
 /**
@@ -226,11 +220,11 @@ export function listTools(
  */
 export function verdictToResult(verdict: Verdict): CallToolResult {
   if (verdict.ok) {
-    const text = JSON.stringify({ data: verdict.data, guidance: verdict.guidance });
-    return { content: [{ type: 'text', text }] };
+    const text = JSON.stringify({ data: verdict.data, guidance: verdict.guidance })
+    return { content: [{ type: "text", text }] }
   }
-  const text = JSON.stringify({ fault: faultOf(verdict), rejected: verdict.rejected, guidance: verdict.guidance });
-  return { content: [{ type: 'text', text }], isError: true };
+  const text = JSON.stringify({ fault: faultOf(verdict), rejected: verdict.rejected, guidance: verdict.guidance })
+  return { content: [{ type: "text", text }], isError: true }
 }
 
 /**
@@ -253,12 +247,12 @@ export function callTool(
   // byte-identical `Verdict` on both transports. NONE reaches a write path (`node` rides the handler's
   // read-only `resolveNode`; the rest ride read/planner legs that persist nothing). `undefined` ⇒ `name`
   // is not one of these six tokens; fall through.
-  const readVerdict = callAuthoringTool(handler, readLegs, name, args);
-  if (readVerdict !== undefined) return verdictToResult(readVerdict);
+  const readVerdict = callAuthoringTool(handler, readLegs, name, args)
+  if (readVerdict !== undefined) return verdictToResult(readVerdict)
   // The four memory READ_SURFACE members (WP-11.W8) are routed the SAME way, over their own shared verdict
   // builders (`@atlas/adapter-io` `memory-verdicts.ts`). `undefined` ⇒ fall through.
-  const memoryVerdict = callMemoryTool(memoryLegs, name, args);
-  if (memoryVerdict !== undefined) return verdictToResult(memoryVerdict);
+  const memoryVerdict = callMemoryTool(memoryLegs, name, args)
+  if (memoryVerdict !== undefined) return verdictToResult(memoryVerdict)
   // `atlas-relations` (#99a) is served DIRECTLY from the injected read leg through the SHARED verdict builder
   // (`relationsVerdict`, @atlas/adapter-io) — the SAME body the CLI drives, so identical input yields a
   // byte-identical `Verdict` on both transports (the SCHEMA + VERDICT parity invariant). It never reaches
@@ -266,10 +260,10 @@ export function callTool(
   // `''` and a non-string `direction` to `undefined`, then `relationsVerdict` ENFORCES `required:['unit']`
   // (a missing/empty unit fails CLOSED to `isError`, matching the CLI) and rejects a bad `direction` — never a throw.
   if (relations !== undefined && name === RELATIONS_TOOL) {
-    const a = (typeof args === 'object' && args !== null ? args : {}) as { unit?: unknown; direction?: unknown };
-    const unit = typeof a.unit === 'string' ? a.unit : '';
-    const direction = typeof a.direction === 'string' ? a.direction : undefined;
-    return verdictToResult(relationsVerdict(relations, unit, direction));
+    const a = (typeof args === "object" && args !== null ? args : {}) as { unit?: unknown; direction?: unknown }
+    const unit = typeof a.unit === "string" ? a.unit : ""
+    const direction = typeof a.direction === "string" ? a.direction : undefined
+    return verdictToResult(relationsVerdict(relations, unit, direction))
   }
   // `atlas-negations` (#99b) is served the SAME way — DIRECTLY from the injected read leg through the SHARED
   // verdict builder (`negationsVerdict`), so identical input yields a byte-identical `Verdict` on both
@@ -277,13 +271,13 @@ export function callTool(
   // `required:['scope']`, failing CLOSED to `isError`, matching the CLI) and a non-boolean `abstained` to
   // `false`; never a throw. It never reaches `handler.handle`: it is not a `Tool` and has no governed token.
   if (negations !== undefined && name === NEGATIONS_TOOL) {
-    const a = (typeof args === 'object' && args !== null ? args : {}) as { scope?: unknown; abstained?: unknown };
-    const scope = typeof a.scope === 'string' ? a.scope : '';
-    const abstained = a.abstained === true;
-    return verdictToResult(negationsVerdict(negations, scope, abstained));
+    const a = (typeof args === "object" && args !== null ? args : {}) as { scope?: unknown; abstained?: unknown }
+    const scope = typeof a.scope === "string" ? a.scope : ""
+    const abstained = a.abstained === true
+    return verdictToResult(negationsVerdict(negations, scope, abstained))
   }
-  const verdict = handler.handle(name as Tool, args);
-  return verdictToResult(verdict);
+  const verdict = handler.handle(name as Tool, args)
+  return verdictToResult(verdict)
 }
 
 /** Wire the SDK `Server` over the one handler: advertise the closed surface (+ the `relations` read tool when
@@ -295,12 +289,12 @@ function configureServer(
   readLegs?: ReadSurfaceLegs,
   memoryLegs?: MemoryReadSurfaceLegs,
 ): Server {
-  const server = new Server(SERVER_INFO, { capabilities: { tools: {} } });
-  server.setRequestHandler(ListToolsRequestSchema, () => listTools(handler, relations, negations, readLegs, memoryLegs));
+  const server = new Server(SERVER_INFO, { capabilities: { tools: {} } })
+  server.setRequestHandler(ListToolsRequestSchema, () => listTools(handler, relations, negations, readLegs, memoryLegs))
   server.setRequestHandler(CallToolRequestSchema, (request) =>
     callTool(handler, request.params.name, request.params.arguments, relations, negations, readLegs, memoryLegs),
-  );
-  return server;
+  )
+  return server
 }
 
 /** Construct the stdio MCP server over the one wired handler (MCP-1), optionally exposing the `relations`
@@ -317,9 +311,9 @@ export function createMcpServer(
 ): McpServer {
   return {
     async start(): Promise<void> {
-      const server = configureServer(handler, relations, negations, readLegs, memoryLegs);
-      const transport = new StdioServerTransport();
-      await server.connect(transport);
+      const server = configureServer(handler, relations, negations, readLegs, memoryLegs)
+      const transport = new StdioServerTransport()
+      await server.connect(transport)
     },
-  };
+  }
 }

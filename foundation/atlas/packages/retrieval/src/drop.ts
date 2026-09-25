@@ -8,7 +8,7 @@
 // `tokenEstimate`); the ceiling arithmetic is `resolveCeiling`, sharing the identical order. [FLAG] the
 // hitRate-tie key κ is an OPEN DEFINE dependency — the cold-start priority is the pinned tie-break backbone.
 
-import type { Budget, InjectionKind, Pack } from '@atlas/contracts';
+import type { Budget, InjectionKind, Pack } from "@atlas/contracts"
 
 /**
  * Bounded deterministic DROP under capacity (RETR-6). Droppable kinds drop by OBSERVED per-kind `hitRate`
@@ -24,7 +24,7 @@ export interface DropApi {
    *  `Budget[]` ledger in (carrying `kind` + `hitRate` — the drop oracle, both contracts-frozen) and the
    *  ordered drop sequence `InjectionKind[]` out. Both records are @atlas/contracts-frozen.
    *  (method-tags-ret:60) */
-  dropOrder(items: readonly Budget[]): readonly InjectionKind[];
+  dropOrder(items: readonly Budget[]): readonly InjectionKind[]
 }
 
 /**
@@ -40,18 +40,18 @@ export interface StaleApi {
    *  backing record; transcribed as the exact frozen expression's shape — a list of `{ drifted:
    *  boolean }` (the drift bit per backing). NOT widened beyond the reference; the owning WP pins the
    *  fuller backing record. (method-tags-ret:40) */
-  isStale(backings: readonly { readonly drifted: boolean }[]): boolean;
+  isStale(backings: readonly { readonly drifted: boolean }[]): boolean
 }
 
 /** The hard injection ceiling `~5K` (RETR-6), a concrete count under the pinned `cl100k_base` measure. */
-export const CEILING = 5000;
+export const CEILING = 5000
 /** A kind dropped on `>20%` of turns is mis-capped / mis-prioritized (RETR-6f drop-counter threshold). */
-export const MISCAP_THRESHOLD = 0.2;
+export const MISCAP_THRESHOLD = 0.2
 
 /** The two exempt kinds — the constitution (T0) and safety-critical protocols (T0-adjacent) NEVER drop. */
-const PINS: ReadonlySet<InjectionKind> = new Set(['awareness', 'protocols.safetyCritical']);
+const PINS: ReadonlySet<InjectionKind> = new Set(["awareness", "protocols.safetyCritical"])
 /** A kind is pinned iff it is one of the two exempt kinds (derived from the kind alone). */
-export const isPin = (kind: InjectionKind): boolean => PINS.has(kind);
+export const isPin = (kind: InjectionKind): boolean => PINS.has(kind)
 
 /**
  * The documented COLD-START drop order (atlas-retrieval:96-106), drop-FIRST first (lowest priority first),
@@ -62,20 +62,20 @@ export const isPin = (kind: InjectionKind): boolean => PINS.has(kind);
  */
 const COLD_START_DROP_RANK: Readonly<Record<InjectionKind, number>> = {
   poke: 0,
-  'protocols.advisory': 1,
+  "protocols.advisory": 1,
   pack: 2,
   own: 3,
   projectMem: 4,
   orientation: 5,
-  'protocols.safetyCritical': 98, // pin — never dropped (excluded before ranking)
+  "protocols.safetyCritical": 98, // pin — never dropped (excluded before ranking)
   awareness: 99, // pin — never dropped
-};
+}
 
 /** The minimal ledger shape the drop order reads: the kind + its observed `hitRate`/`hits` (RETR-8). */
 interface DropRow {
-  readonly kind: InjectionKind;
-  readonly hitRate: number;
-  readonly hits: number;
+  readonly kind: InjectionKind
+  readonly hitRate: number
+  readonly hits: number
 }
 
 /**
@@ -85,7 +85,7 @@ interface DropRow {
  * priority order. Pure + total; never a hashmap-iteration / insertion order.
  */
 function orderDroppable(rows: readonly DropRow[]): InjectionKind[] {
-  const warm = rows.some((r) => r.hits > 0);
+  const warm = rows.some((r) => r.hits > 0)
   return rows
     .filter((r) => !isPin(r.kind))
     .slice()
@@ -94,7 +94,7 @@ function orderDroppable(rows: readonly DropRow[]): InjectionKind[] {
         ? a.hitRate - b.hitRate // hitRate-asc: the least-used kind drops first (RETR-6b / RETR-8)
         : COLD_START_DROP_RANK[a.kind] - COLD_START_DROP_RANK[b.kind],
     )
-    .map((r) => r.kind);
+    .map((r) => r.kind)
 }
 
 /**
@@ -104,24 +104,24 @@ function orderDroppable(rows: readonly DropRow[]): InjectionKind[] {
  * which needs the per-turn `tokenEstimate` absent from the frozen `Budget`). Pure + total.
  */
 export function dropOrder(items: readonly Budget[]): readonly InjectionKind[] {
-  return orderDroppable(items);
+  return orderDroppable(items)
 }
 
 // ── the per-turn ceiling enforcer (RETR-6a/6b/6c) ────────────────────────────────────────────────────────
 
 /** One turn's actual injection: the pinned `cl100k_base` `tokenEstimate` + the RETR-8 observed hitRate/hits. */
 export interface Injection {
-  readonly kind: InjectionKind;
-  readonly tokenEstimate: number; // this turn's pinned cl100k_base count (index-supplied; never tokenized here)
-  readonly hitRate: number;
-  readonly hits: number;
+  readonly kind: InjectionKind
+  readonly tokenEstimate: number // this turn's pinned cl100k_base count (index-supplied; never tokenized here)
+  readonly hitRate: number
+  readonly hits: number
 }
 
 /** The outcome of enforcing the ceiling on one turn's injections: who survived, who dropped, the final sum. */
 export interface CeilingResult {
-  readonly survivors: readonly Injection[];
-  readonly dropped: readonly InjectionKind[]; // in drop order (least-used first)
-  readonly sum: number; // post-drop total ≤ CEILING (unless only the two pins remain over the ceiling)
+  readonly survivors: readonly Injection[]
+  readonly dropped: readonly InjectionKind[] // in drop order (least-used first)
+  readonly sum: number // post-drop total ≤ CEILING (unless only the two pins remain over the ceiling)
 }
 
 /**
@@ -131,31 +131,31 @@ export interface CeilingResult {
  * Deterministic; total.
  */
 export function resolveCeiling(injections: readonly Injection[], ceiling: number = CEILING): CeilingResult {
-  const order = orderDroppable(injections);
-  const byKind = new Map(injections.map((i) => [i.kind, i] as const));
-  const surviving = new Set(injections);
-  const dropped: InjectionKind[] = [];
-  let sum = injections.reduce((s, i) => s + i.tokenEstimate, 0);
+  const order = orderDroppable(injections)
+  const byKind = new Map(injections.map((i) => [i.kind, i] as const))
+  const surviving = new Set(injections)
+  const dropped: InjectionKind[] = []
+  let sum = injections.reduce((s, i) => s + i.tokenEstimate, 0)
   for (const kind of order) {
-    if (sum <= ceiling) break;
-    const victim = byKind.get(kind);
-    if (victim === undefined) continue;
-    surviving.delete(victim);
-    dropped.push(kind);
-    sum -= victim.tokenEstimate;
+    if (sum <= ceiling) break
+    const victim = byKind.get(kind)
+    if (victim === undefined) continue
+    surviving.delete(victim)
+    dropped.push(kind)
+    sum -= victim.tokenEstimate
   }
-  return { survivors: injections.filter((i) => surviving.has(i)), dropped, sum };
+  return { survivors: injections.filter((i) => surviving.has(i)), dropped, sum }
 }
 
 // ── the per-kind drop-counter ledger (RETR-6f) ───────────────────────────────────────────────────────────
 
 /** A per-kind drop-counter row: how many of the last `turns` turns dropped `kind`, its rate, and the flag. */
 export interface DropStat {
-  readonly kind: InjectionKind;
-  readonly dropped: number;
-  readonly turns: number;
-  readonly rate: number;
-  readonly flagged: boolean; // rate > MISCAP_THRESHOLD ⇒ mis-capped / mis-prioritized
+  readonly kind: InjectionKind
+  readonly dropped: number
+  readonly turns: number
+  readonly rate: number
+  readonly flagged: boolean // rate > MISCAP_THRESHOLD ⇒ mis-capped / mis-prioritized
 }
 
 /**
@@ -163,15 +163,15 @@ export interface DropStat {
  * that turn; a kind whose drop-rate exceeds `MISCAP_THRESHOLD` (`>20%`) is flagged mis-capped. Deterministic.
  */
 export function dropCounter(history: readonly (readonly InjectionKind[])[]): readonly DropStat[] {
-  const turns = history.length;
-  const counts = new Map<InjectionKind, number>();
-  for (const turn of history) for (const kind of new Set(turn)) counts.set(kind, (counts.get(kind) ?? 0) + 1);
+  const turns = history.length
+  const counts = new Map<InjectionKind, number>()
+  for (const turn of history) for (const kind of new Set(turn)) counts.set(kind, (counts.get(kind) ?? 0) + 1)
   return [...counts.entries()]
     .map(([kind, dropped]): DropStat => {
-      const rate = turns === 0 ? 0 : dropped / turns;
-      return { kind, dropped, turns, rate, flagged: rate > MISCAP_THRESHOLD };
+      const rate = turns === 0 ? 0 : dropped / turns
+      return { kind, dropped, turns, rate, flagged: rate > MISCAP_THRESHOLD }
     })
-    .sort((a, b) => COLD_START_DROP_RANK[a.kind] - COLD_START_DROP_RANK[b.kind]); // deterministic key order
+    .sort((a, b) => COLD_START_DROP_RANK[a.kind] - COLD_START_DROP_RANK[b.kind]) // deterministic key order
 }
 
 // ── fail-closed staleness (RETR-3) ───────────────────────────────────────────────────────────────────────
@@ -182,12 +182,12 @@ export function dropCounter(history: readonly (readonly InjectionKind[])[]): rea
  * The empty backing set is `false` (the identity element of OR). Pure + deterministic.
  */
 export function isStale(backings: readonly { readonly drifted: boolean }[]): boolean {
-  return backings.some((b) => b.drifted);
+  return backings.some((b) => b.drifted)
 }
 
 /** A `stale:true` pack is NOT trusted as-is (RETR-3a); a fresh (`stale:false`) pack is trusted. Pure. */
 export function isTrusted(p: { readonly stale: boolean }): boolean {
-  return !p.stale;
+  return !p.stale
 }
 
 /**
@@ -196,13 +196,13 @@ export function isTrusted(p: { readonly stale: boolean }): boolean {
  * drifts, the pack is NOT served (`null`) — a stale pack is never trusted. Deterministic given `reground`.
  */
 export function servePack(p: Pack, reground: (p: Pack) => Pack): Pack | null {
-  if (!p.stale) return p; // fresh: trusted, served as-is
-  const fresh = reground(p); // stale: re-ground BEFORE use (RETR-3b)
-  return fresh.stale ? null : fresh; // fail-closed: never serve a still-stale pack (RETR-3a)
+  if (!p.stale) return p // fresh: trusted, served as-is
+  const fresh = reground(p) // stale: re-ground BEFORE use (RETR-3b)
+  return fresh.stale ? null : fresh // fail-closed: never serve a still-stale pack (RETR-3a)
 }
 
 // ── frozen-interface BIND (compile-time only) ────────────────────────────────────────────────────────────
-const _dropBind = { dropOrder } satisfies DropApi;
-const _staleBind = { isStale } satisfies StaleApi;
-void _dropBind;
-void _staleBind;
+const _dropBind = { dropOrder } satisfies DropApi
+const _staleBind = { isStale } satisfies StaleApi
+void _dropBind
+void _staleBind

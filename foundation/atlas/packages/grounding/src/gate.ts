@@ -26,9 +26,9 @@
 // exclusion keys on the candidate's provenance and is applied at candidate-set construction (owned by
 // WP-4.11-b.GROUND) — it is NOT re-implemented here.
 
-import type { Status, Freshness } from '@atlas/contracts';
-import type { Axes } from '@atlas/index';
-import type { Grounding, GateApi, GroundApi, DriftApi } from './types.js';
+import type { Status, Freshness } from "@atlas/contracts"
+import type { Axes } from "@atlas/index"
+import type { Grounding, GateApi, GroundApi, DriftApi } from "./types.js"
 
 /**
  * The grounded ∧ FRESH inputs the truth-gate gates on (GROUND-2/3/5), injected build-ahead. Owned by
@@ -36,21 +36,21 @@ import type { Grounding, GateApi, GroundApi, DriftApi } from './types.js';
  */
 export interface GateDeps {
   /** GROUND-2 real-grounding predicate: ≥1 entry ∧ every entry carries a non-empty `subtreeHash`. */
-  readonly isGrounded: GroundApi['isGrounded'];
+  readonly isGrounded: GroundApi["isGrounded"]
   /** GROUND-11 freshness verdict against the built-index snapshot `src` (Owner-DEFINE pin: `Axes`). */
-  readonly driftDetect: DriftApi['driftDetect'];
+  readonly driftDetect: DriftApi["driftDetect"]
 }
 
-const STATUSES: readonly Status[] = ['HOLDS', 'BROKEN', 'NA', 'advisory'];
+const STATUSES: readonly Status[] = ["HOLDS", "BROKEN", "NA", "advisory"]
 
 /**
  * Read the candidate's incoming `Status` verdict, totally and fail-closed. A recognized `Status` string
  * passes through; ANYTHING else collapses to `NA` — a non-`Status` value can never earn a `HOLDS`.
  */
 function coerceStatus(candidate: unknown): Status {
-  return typeof candidate === 'string' && (STATUSES as readonly string[]).includes(candidate)
+  return typeof candidate === "string" && (STATUSES as readonly string[]).includes(candidate)
     ? (candidate as Status)
-    : 'NA';
+    : "NA"
 }
 
 /**
@@ -67,12 +67,12 @@ function coerceStatus(candidate: unknown): Status {
  */
 export function bindGate(deps: GateDeps): GateApi {
   const gateHolds = (candidate: unknown, grounding: Grounding, src: Axes): Status => {
-    const incoming = coerceStatus(candidate);
+    const incoming = coerceStatus(candidate)
     // (d) pass-through + (c) idempotence: only a `HOLDS` is eligible for downgrade; all else is a no-op.
-    if (incoming !== 'HOLDS') return incoming;
+    if (incoming !== "HOLDS") return incoming
     // (a) HOLDS-iff-grounded∧FRESH; (b) the sole move is HOLDS→NA — fail-closed on anything but FRESH.
-    const fresh: Freshness = deps.driftDetect(grounding, src);
-    return deps.isGrounded(grounding) && fresh === 'FRESH' ? 'HOLDS' : 'NA';
-  };
-  return { gateHolds };
+    const fresh: Freshness = deps.driftDetect(grounding, src)
+    return deps.isGrounded(grounding) && fresh === "FRESH" ? "HOLDS" : "NA"
+  }
+  return { gateHolds }
 }

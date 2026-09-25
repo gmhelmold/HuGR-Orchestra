@@ -17,23 +17,23 @@
 // honest failure mode is a malformed identity — a missing leg, or two IDENTICAL rev content hashes (a zero
 // interval spans no transition) — which is DROPPED here (gate-0), never admitted.
 
-import type { TransitionNode } from '@atlas/knowledge';
+import type { TransitionNode } from "@atlas/knowledge"
 // The transition identity leg — the SEALED mint (`transitionKey`). Identity is minted from the proposal's
 // (unitKey, shaBefore, shaAfter), where the two shas are the two rev entries' `subtreeHash`es; NEVER trusted
 // off a payload (the proposal carries no id leg at all — KNOW-15b parity).
-import { transitionKey } from '@atlas/knowledge';
-import type { TransitionProposal } from './admit-proposals.js';
+import { transitionKey } from "@atlas/knowledge"
+import type { TransitionProposal } from "./admit-proposals.js"
 
 // The ONE honest transition drop (ADR-0015 D4, #234). A malformed identity has no address to mint. There is
 // deliberately NO `ungrounded`/`abstain` reason: a transition carries its own two rev-pair entries (it grounds
 // on the revs it spans, never on HEAD), and its truth is not a live question anything can decide — so the only
 // way to fail is a malformed identity. The `shape-not-yet-emitted` stub reason never existed here.
 export const DROP_TRANSITION_MALFORMED =
-  'malformed transition: the identity triple (unitKey, shaBefore, shaAfter) is not well-formed — unitKey must ' +
-  'be a non-empty unit key, and the two rev entries must each carry a non-empty content hash (subtreeHash) that ' +
-  'are DISTINCT (shaBefore === shaAfter spans no interval — the unit did not change across the two revs, so it ' +
-  'is not a transition). A malformed triple has no address to mint (ADR-0015 D4 — MalformedTransitionError\'s ' +
-  'conditions, checked here so `transitionKey` never throws out of the total `admit`)';
+  "malformed transition: the identity triple (unitKey, shaBefore, shaAfter) is not well-formed — unitKey must " +
+  "be a non-empty unit key, and the two rev entries must each carry a non-empty content hash (subtreeHash) that " +
+  "are DISTINCT (shaBefore === shaAfter spans no interval — the unit did not change across the two revs, so it " +
+  "is not a transition). A malformed triple has no address to mint (ADR-0015 D4 — MalformedTransitionError's " +
+  "conditions, checked here so `transitionKey` never throws out of the total `admit`)"
 
 /** The two rev content hashes a transition's identity binds — read off the two grounding entries' anchors. A
  *  transition's `shaBefore`/`shaAfter` ARE the unit's `subtreeHash` at each rev (content-addressed, D-T2), so
@@ -41,9 +41,9 @@ export const DROP_TRANSITION_MALFORMED =
  *  Total over an untrusted proposal: a missing/malformed entry yields an empty string, which `transitionWellFormed`
  *  refuses BEFORE the mint. */
 export function transitionShas(p: TransitionProposal): { shaBefore: string; shaAfter: string } {
-  const b = p.refBefore?.anchor?.subtreeHash;
-  const a = p.refAfter?.anchor?.subtreeHash;
-  return { shaBefore: typeof b === 'string' ? b : '', shaAfter: typeof a === 'string' ? a : '' };
+  const b = p.refBefore?.anchor?.subtreeHash
+  const a = p.refAfter?.anchor?.subtreeHash
+  return { shaBefore: typeof b === "string" ? b : "", shaAfter: typeof a === "string" ? a : "" }
 }
 
 /**
@@ -55,9 +55,9 @@ export function transitionShas(p: TransitionProposal): { shaBefore: string; shaA
  * did not change, so there is no transition to state — a malformed identity, not an undecidable one.
  */
 export function transitionWellFormed(p: TransitionProposal): boolean {
-  if (typeof p.unitKey !== 'string' || p.unitKey.length === 0) return false;
-  const { shaBefore, shaAfter } = transitionShas(p);
-  return shaBefore.length > 0 && shaAfter.length > 0 && shaBefore !== shaAfter;
+  if (typeof p.unitKey !== "string" || p.unitKey.length === 0) return false
+  const { shaBefore, shaAfter } = transitionShas(p)
+  return shaBefore.length > 0 && shaAfter.length > 0 && shaBefore !== shaAfter
 }
 
 /**
@@ -75,20 +75,20 @@ export function transitionWellFormed(p: TransitionProposal): boolean {
  * conditionally so an absent ground stays ABSENT (exactOptionalPropertyTypes discipline), never fabricated.
  */
 export function buildTransition(p: TransitionProposal): TransitionNode {
-  const { shaBefore, shaAfter } = transitionShas(p);
+  const { shaBefore, shaAfter } = transitionShas(p)
   return {
-    kind: 'transition',
+    kind: "transition",
     id: transitionKey(p.unitKey, shaBefore, shaAfter), // MINTED over the two rev content hashes, never trusted
     tier: p.tier,
     unitKey: p.unitKey,
     shaBefore,
     shaAfter,
     grounding: { entries: [p.refBefore, p.refAfter] }, // the rev-pair, carried DIRECTLY (D-T2) — no door construction
-    freshness: 'FRESH', // STAMPED at emit, never re-checked (D-T2)
+    freshness: "FRESH", // STAMPED at emit, never re-checked (D-T2)
     claims: [],
-    authoring: 'TRANSITIONED', // the mint value; lineage head/predecessor is derive-on-read (D-T3)
-    seal: 'justified', // ADR-0017 — a transition is ALWAYS justified, NEVER proven (D-T1)
-    ...(typeof p.scope === 'string' && p.scope.length > 0 ? { scope: p.scope } : {}), // KNOW-11a authz scope — the governed door authorizes against it (absent-tolerant)
-    ...(typeof p.derivation === 'string' && p.derivation.length > 0 ? { derivation: p.derivation } : {}),
-  };
+    authoring: "TRANSITIONED", // the mint value; lineage head/predecessor is derive-on-read (D-T3)
+    seal: "justified", // ADR-0017 — a transition is ALWAYS justified, NEVER proven (D-T1)
+    ...(typeof p.scope === "string" && p.scope.length > 0 ? { scope: p.scope } : {}), // KNOW-11a authz scope — the governed door authorizes against it (absent-tolerant)
+    ...(typeof p.derivation === "string" && p.derivation.length > 0 ? { derivation: p.derivation } : {}),
+  }
 }

@@ -39,12 +39,11 @@ export const MaestroPresentApprovalTool = Tool.define(
           const agent = yield* agents.get(ctx.agent)
           if (agent?.id !== "maestro") return yield* Effect.fail(new Error("Approval presentation requires Maestro"))
           return yield* Effect.fail(
-            new Error("Approval presentation unavailable: durable plan revision and validation readers are not implemented"),
+            new Error(
+              "Approval presentation unavailable: durable plan revision and validation readers are not implemented",
+            ),
           )
-        }).pipe(
-          Effect.provideService(Agent.Service, agents),
-          Effect.orDie,
-        ),
+        }).pipe(Effect.provideService(Agent.Service, agents), Effect.orDie),
     }
   }),
 )

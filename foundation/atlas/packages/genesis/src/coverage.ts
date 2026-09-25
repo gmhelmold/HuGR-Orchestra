@@ -19,7 +19,7 @@
 //   3. It never reads an ABSENT ledger as an empty one. `reconcile(undefined)` is UNEVALUABLE, the same
 //      discipline the genesis-output probe applies when it declines to round a `?` up to a `✓`.
 
-import type { Candidate, ExtractResult, Fact, RunCoverage, SiteOutcome, WhyNot } from './types.js';
+import type { Candidate, ExtractResult, Fact, RunCoverage, SiteOutcome, WhyNot } from "./types.js"
 
 /**
  * What the `ControllerDeps.visit` port handed back, normalized.
@@ -31,18 +31,18 @@ import type { Candidate, ExtractResult, Fact, RunCoverage, SiteOutcome, WhyNot }
  * OPTIONAL here, and its absence is a fact about the PORT rather than about the site.
  */
 export interface VisitRecord {
-  readonly facts: readonly Fact[];
-  readonly abstained?: readonly WhyNot[];
+  readonly facts: readonly Fact[]
+  readonly abstained?: readonly WhyNot[]
 }
 
 /** The note an `unrecorded` row carries. Names the PORT, because that is what the limitation is about — the
  *  site may well have abstained with a perfectly good grounded reason that never left `visit`. */
 export const UNRECORDED_NOTE =
-  'the `visit` port returned facts only (a bare Fact[], not the ExtractResult `runExtract` produces), so this site\'s grounded WhyNot never reached the run — outcome not recorded rather than guessed';
+  "the `visit` port returned facts only (a bare Fact[], not the ExtractResult `runExtract` produces), so this site's grounded WhyNot never reached the run — outcome not recorded rather than guessed"
 
 /** Normalize either arm of the `visit` union. `Array.isArray` is the discriminant; there is no third shape. */
 export function readVisit(r: readonly Fact[] | ExtractResult): VisitRecord {
-  return Array.isArray(r) ? { facts: r as readonly Fact[] } : (r as ExtractResult);
+  return Array.isArray(r) ? { facts: r as readonly Fact[] } : (r as ExtractResult)
 }
 
 /**
@@ -56,57 +56,57 @@ export function readVisit(r: readonly Fact[] | ExtractResult): VisitRecord {
  *   • no facts, and the port reported nothing ⇒ `unrecorded`. NOT an abstention: nothing grounded it.
  */
 export function classifyVisit(cand: Candidate, r: VisitRecord): SiteOutcome {
-  const base = { rank: cand.rank, site: cand.site } as const;
+  const base = { rank: cand.rank, site: cand.site } as const
   if (r.facts.length > 0) {
-    return { ...base, outcome: 'seeded', facts: r.facts.map((f) => f.id as unknown as string) };
+    return { ...base, outcome: "seeded", facts: r.facts.map((f) => f.id as unknown as string) }
   }
-  const whyNot = r.abstained?.[0];
-  if (whyNot !== undefined) return { ...base, outcome: 'abstained', whyNot };
-  return { ...base, outcome: 'unrecorded', note: UNRECORDED_NOTE };
+  const whyNot = r.abstained?.[0]
+  if (whyNot !== undefined) return { ...base, outcome: "abstained", whyNot }
+  return { ...base, outcome: "unrecorded", note: UNRECORDED_NOTE }
 }
 
 /** A site the run never spent a call on, and WHY — the cold tail is a coverage fact, not an absence. */
-export function unvisited(cand: Candidate, cause: 'ceiling' | 'after-interrupt'): SiteOutcome {
-  return { rank: cand.rank, site: cand.site, outcome: 'unvisited', cause };
+export function unvisited(cand: Candidate, cause: "ceiling" | "after-interrupt"): SiteOutcome {
+  return { rank: cand.rank, site: cand.site, outcome: "unvisited", cause }
 }
 
 /** A site whose `visit` threw. GEN-8c catches it WITHOUT a cause, so the row carries none either — the
  *  honest shape, and the reason `MinePass.refusal`/`onFault` exist beside the report rather than in it. */
 export function interruptedAt(cand: Candidate): SiteOutcome {
-  return { rank: cand.rank, site: cand.site, outcome: 'interrupted' };
+  return { rank: cand.rank, site: cand.site, outcome: "interrupted" }
 }
 
 /** The ledger a run with no frontier produces. `plan` threw, so there is nothing to account for — and this
  *  says exactly that, which is NOT the same claim as "the repository has no sites". */
-export const NO_FRONTIER: RunCoverage = { frontier: 'unavailable', planned: 0, sites: [] };
+export const NO_FRONTIER: RunCoverage = { frontier: "unavailable", planned: 0, sites: [] }
 
 /** The reconciliation verdict — whether a run's site set CLOSES over its own frontier. */
 export interface Reconciliation {
   /** `true` only when a planned frontier was recorded, every planned site has exactly one row, and no site
    *  is recorded twice. Anything else is a ledger that cannot establish coverage. */
-  readonly closes: boolean;
-  readonly planned: number;
-  readonly recorded: number;
-  readonly seeded: number;
-  readonly abstained: number;
-  readonly unrecorded: number;
-  readonly interrupted: number;
-  readonly unvisited: number;
+  readonly closes: boolean
+  readonly planned: number
+  readonly recorded: number
+  readonly seeded: number
+  readonly abstained: number
+  readonly unrecorded: number
+  readonly interrupted: number
+  readonly unvisited: number
   /** Planned sites with no row — the sites that were DROPPED. Non-zero is the defect this ledger detects. */
-  readonly unaccounted: number;
+  readonly unaccounted: number
   /** `qualifiedPath`s recorded more than once: a double-count inflates coverage as surely as a gap deflates it. */
-  readonly duplicates: readonly string[];
+  readonly duplicates: readonly string[]
   /** The verdict as one sentence, safe to print. Says UNEVALUABLE where it is, never PASS-by-default. */
-  readonly why: string;
+  readonly why: string
 }
 
-const KINDS = ['seeded', 'abstained', 'unrecorded', 'interrupted', 'unvisited'] as const;
+const KINDS = ["seeded", "abstained", "unrecorded", "interrupted", "unvisited"] as const
 
 /** Count the rows of one outcome kind. */
-function tally(sites: readonly SiteOutcome[], kind: SiteOutcome['outcome']): number {
-  let n = 0;
-  for (const s of sites) if (s.outcome === kind) n += 1;
-  return n;
+function tally(sites: readonly SiteOutcome[], kind: SiteOutcome["outcome"]): number {
+  let n = 0
+  for (const s of sites) if (s.outcome === kind) n += 1
+  return n
 }
 
 /**
@@ -120,33 +120,49 @@ export function reconcile(coverage: RunCoverage | undefined): Reconciliation {
   const counts = Object.fromEntries(KINDS.map((k) => [k, tally(coverage?.sites ?? [], k)])) as Record<
     (typeof KINDS)[number],
     number
-  >;
-  const seen = new Map<string, number>();
+  >
+  const seen = new Map<string, number>()
   for (const s of coverage?.sites ?? []) {
-    const k = s.site.qualifiedPath;
-    seen.set(k, (seen.get(k) ?? 0) + 1);
+    const k = s.site.qualifiedPath
+    seen.set(k, (seen.get(k) ?? 0) + 1)
   }
-  const duplicates = [...seen.entries()].filter(([, n]) => n > 1).map(([k]) => k);
-  const planned = coverage?.planned ?? 0;
-  const recorded = coverage?.sites.length ?? 0;
-  const unaccounted = Math.max(planned - recorded, 0);
-  const base = { planned, recorded, ...counts, unaccounted, duplicates } as const;
+  const duplicates = [...seen.entries()].filter(([, n]) => n > 1).map(([k]) => k)
+  const planned = coverage?.planned ?? 0
+  const recorded = coverage?.sites.length ?? 0
+  const unaccounted = Math.max(planned - recorded, 0)
+  const base = { planned, recorded, ...counts, unaccounted, duplicates } as const
 
   if (coverage === undefined) {
-    return { ...base, closes: false, why: 'coverage UNEVALUABLE — this run recorded no site ledger, so its site set cannot be reconciled (an absent ledger is not an empty one)' };
+    return {
+      ...base,
+      closes: false,
+      why: "coverage UNEVALUABLE — this run recorded no site ledger, so its site set cannot be reconciled (an absent ledger is not an empty one)",
+    }
   }
-  if (coverage.frontier === 'unavailable') {
-    return { ...base, closes: false, why: 'coverage UNEVALUABLE — the run never obtained a frontier (planning failed), so there is no site set to reconcile; this is not a claim that the repository is empty' };
+  if (coverage.frontier === "unavailable") {
+    return {
+      ...base,
+      closes: false,
+      why: "coverage UNEVALUABLE — the run never obtained a frontier (planning failed), so there is no site set to reconcile; this is not a claim that the repository is empty",
+    }
   }
   if (unaccounted > 0) {
-    return { ...base, closes: false, why: `coverage DOES NOT CLOSE — ${planned} site(s) planned but only ${recorded} accounted for: ${unaccounted} site(s) were DROPPED with no recorded outcome` };
+    return {
+      ...base,
+      closes: false,
+      why: `coverage DOES NOT CLOSE — ${planned} site(s) planned but only ${recorded} accounted for: ${unaccounted} site(s) were DROPPED with no recorded outcome`,
+    }
   }
   if (duplicates.length > 0) {
-    return { ...base, closes: false, why: `coverage DOES NOT CLOSE — ${duplicates.length} site(s) recorded more than once (${duplicates.slice(0, 3).join(', ')}), so the row count overstates the frontier` };
+    return {
+      ...base,
+      closes: false,
+      why: `coverage DOES NOT CLOSE — ${duplicates.length} site(s) recorded more than once (${duplicates.slice(0, 3).join(", ")}), so the row count overstates the frontier`,
+    }
   }
   return {
     ...base,
     closes: true,
     why: `coverage CLOSES — all ${planned} planned site(s) accounted for: ${counts.seeded} seeded, ${counts.abstained} abstained, ${counts.unrecorded} unrecorded, ${counts.interrupted} interrupted, ${counts.unvisited} never visited`,
-  };
+  }
 }

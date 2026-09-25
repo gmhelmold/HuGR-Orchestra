@@ -2,135 +2,479 @@
 
 <style>
   :root {
-    --paper: #EEEAE0; --paper-2: #E7E1D4; --ink: #17150F; --ink-soft: #4A463C;
-    --muted: #8A8477; --line: #D9D3C4; --line-soft: #E3DECF;
-    --accent: #9A6E28; --accent-2: #B98F3E; --panel: #E7E1D4; --code-bg: #E4DDCC;
-    --seal: #3F6E4C; --hold: #8F6A1C; --block: #9A3F2C;
-    --score-paper: #EAE5D8; --score-ink: #201D15; --score-line: #B9B09A;
+    --paper: #eeeae0;
+    --paper-2: #e7e1d4;
+    --ink: #17150f;
+    --ink-soft: #4a463c;
+    --muted: #8a8477;
+    --line: #d9d3c4;
+    --line-soft: #e3decf;
+    --accent: #9a6e28;
+    --accent-2: #b98f3e;
+    --panel: #e7e1d4;
+    --code-bg: #e4ddcc;
+    --seal: #3f6e4c;
+    --hold: #8f6a1c;
+    --block: #9a3f2c;
+    --score-paper: #eae5d8;
+    --score-ink: #201d15;
+    --score-line: #b9b09a;
   }
   @media (prefers-color-scheme: dark) {
     :root {
-      --paper: #141210; --paper-2: #1B1812; --ink: #ECE7DB; --ink-soft: #B7B1A1;
-      --muted: #8C8674; --line: #2C2820; --line-soft: #241F18;
-      --accent: #D8A94B; --accent-2: #E4BE68; --panel: #1B1812; --code-bg: #100E0A;
-      --seal: #6FA97E; --hold: #D3A64F; --block: #D67256;
+      --paper: #141210;
+      --paper-2: #1b1812;
+      --ink: #ece7db;
+      --ink-soft: #b7b1a1;
+      --muted: #8c8674;
+      --line: #2c2820;
+      --line-soft: #241f18;
+      --accent: #d8a94b;
+      --accent-2: #e4be68;
+      --panel: #1b1812;
+      --code-bg: #100e0a;
+      --seal: #6fa97e;
+      --hold: #d3a64f;
+      --block: #d67256;
     }
   }
   :root[data-theme="dark"] {
-    --paper: #141210; --paper-2: #1B1812; --ink: #ECE7DB; --ink-soft: #B7B1A1;
-    --muted: #8C8674; --line: #2C2820; --line-soft: #241F18;
-    --accent: #D8A94B; --accent-2: #E4BE68; --panel: #1B1812; --code-bg: #100E0A;
-    --seal: #6FA97E; --hold: #D3A64F; --block: #D67256;
+    --paper: #141210;
+    --paper-2: #1b1812;
+    --ink: #ece7db;
+    --ink-soft: #b7b1a1;
+    --muted: #8c8674;
+    --line: #2c2820;
+    --line-soft: #241f18;
+    --accent: #d8a94b;
+    --accent-2: #e4be68;
+    --panel: #1b1812;
+    --code-bg: #100e0a;
+    --seal: #6fa97e;
+    --hold: #d3a64f;
+    --block: #d67256;
   }
   :root[data-theme="light"] {
-    --paper: #EEEAE0; --paper-2: #E7E1D4; --ink: #17150F; --ink-soft: #4A463C;
-    --muted: #8A8477; --line: #D9D3C4; --line-soft: #E3DECF;
-    --accent: #9A6E28; --accent-2: #B98F3E; --panel: #E7E1D4; --code-bg: #E4DDCC;
-    --seal: #3F6E4C; --hold: #8F6A1C; --block: #9A3F2C;
+    --paper: #eeeae0;
+    --paper-2: #e7e1d4;
+    --ink: #17150f;
+    --ink-soft: #4a463c;
+    --muted: #8a8477;
+    --line: #d9d3c4;
+    --line-soft: #e3decf;
+    --accent: #9a6e28;
+    --accent-2: #b98f3e;
+    --panel: #e7e1d4;
+    --code-bg: #e4ddcc;
+    --seal: #3f6e4c;
+    --hold: #8f6a1c;
+    --block: #9a3f2c;
   }
 
-  * { box-sizing: border-box; }
-  html { -webkit-text-size-adjust: 100%; }
+  * {
+    box-sizing: border-box;
+  }
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
   body {
-    margin: 0; background: var(--paper); color: var(--ink);
-    font-family: 'Iowan Old Style', 'Palatino Linotype', Palatino, 'Book Antiqua', Georgia, serif;
-    font-size: 18px; line-height: 1.6; -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility;
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif;
+    font-size: 18px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
   }
-  .wrap { max-width: 940px; margin: 0 auto; padding: 0 26px; }
-  .mono, code, .tag { font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace; }
-  code { background: var(--code-bg); padding: 1px 6px; border-radius: 4px; font-size: 0.86em; }
-  .label { font-family: ui-monospace, Menlo, monospace; font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+  .wrap {
+    max-width: 940px;
+    margin: 0 auto;
+    padding: 0 26px;
+  }
+  .mono,
+  code,
+  .tag {
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  }
+  code {
+    background: var(--code-bg);
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-size: 0.86em;
+  }
+  .label {
+    font-family: ui-monospace, Menlo, monospace;
+    font-size: 11px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-weight: 600;
+  }
 
-  header.masthead { border-bottom: 1px solid var(--line); padding: clamp(48px,8vw,88px) 0 clamp(32px,5vw,52px); position: relative; overflow: hidden; }
-  .staff { position: absolute; inset: 0; pointer-events: none; opacity: 0.45;
-    background-image: repeating-linear-gradient(to bottom, transparent 0, transparent 13px,
-      color-mix(in srgb, var(--muted) 26%, transparent) 13px, color-mix(in srgb, var(--muted) 26%, transparent) 14px, transparent 14px, transparent 27px);
+  header.masthead {
+    border-bottom: 1px solid var(--line);
+    padding: clamp(48px, 8vw, 88px) 0 clamp(32px, 5vw, 52px);
+    position: relative;
+    overflow: hidden;
+  }
+  .staff {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.45;
+    background-image: repeating-linear-gradient(
+      to bottom,
+      transparent 0,
+      transparent 13px,
+      color-mix(in srgb, var(--muted) 26%, transparent) 13px,
+      color-mix(in srgb, var(--muted) 26%, transparent) 14px,
+      transparent 14px,
+      transparent 27px
+    );
     mask-image: linear-gradient(to bottom, transparent, #000 45%, transparent 80%);
-    -webkit-mask-image: linear-gradient(to bottom, transparent, #000 45%, transparent 80%); }
-  .masthead .wrap { position: relative; }
-  .eyebrow { display: flex; align-items: center; gap: 13px; margin-bottom: 22px; }
-  .eyebrow .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--accent); flex: none; box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 18%, transparent); }
-  .wordmark { font-size: clamp(2.8rem,8vw,4.8rem); line-height: 0.98; font-weight: 600; letter-spacing: -0.02em; margin: 0 0 14px; }
-  .wordmark .set { color: var(--accent); font-style: italic; }
-  .punch { font-size: clamp(1.15rem,2.6vw,1.6rem); line-height: 1.35; color: var(--ink); max-width: 24ch; margin: 0 0 22px; font-weight: 600; text-wrap: balance; }
-  .punch .hl { color: var(--accent); }
-  .sub { font-family: ui-monospace, Menlo, monospace; font-size: 13px; line-height: 1.65; color: var(--ink-soft); max-width: 62ch; padding-left: 16px; border-left: 2px solid var(--accent); }
-  .sub b { color: var(--ink); }
+    -webkit-mask-image: linear-gradient(to bottom, transparent, #000 45%, transparent 80%);
+  }
+  .masthead .wrap {
+    position: relative;
+  }
+  .eyebrow {
+    display: flex;
+    align-items: center;
+    gap: 13px;
+    margin-bottom: 22px;
+  }
+  .eyebrow .dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--accent);
+    flex: none;
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 18%, transparent);
+  }
+  .wordmark {
+    font-size: clamp(2.8rem, 8vw, 4.8rem);
+    line-height: 0.98;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    margin: 0 0 14px;
+  }
+  .wordmark .set {
+    color: var(--accent);
+    font-style: italic;
+  }
+  .punch {
+    font-size: clamp(1.15rem, 2.6vw, 1.6rem);
+    line-height: 1.35;
+    color: var(--ink);
+    max-width: 24ch;
+    margin: 0 0 22px;
+    font-weight: 600;
+    text-wrap: balance;
+  }
+  .punch .hl {
+    color: var(--accent);
+  }
+  .sub {
+    font-family: ui-monospace, Menlo, monospace;
+    font-size: 13px;
+    line-height: 1.65;
+    color: var(--ink-soft);
+    max-width: 62ch;
+    padding-left: 16px;
+    border-left: 2px solid var(--accent);
+  }
+  .sub b {
+    color: var(--ink);
+  }
 
-  section { padding: clamp(40px,6vw,64px) 0; border-bottom: 1px solid var(--line-soft); }
-  h2 { font-size: clamp(1.4rem,3vw,2rem); line-height: 1.1; font-weight: 600; letter-spacing: -0.015em; margin: 0 0 6px; text-wrap: balance; }
-  h2 .q { color: var(--muted); font-weight: 500; font-size: 0.62em; display: block; margin-top: 8px; }
-  p { margin: 0 0 14px; }
+  section {
+    padding: clamp(40px, 6vw, 64px) 0;
+    border-bottom: 1px solid var(--line-soft);
+  }
+  h2 {
+    font-size: clamp(1.4rem, 3vw, 2rem);
+    line-height: 1.1;
+    font-weight: 600;
+    letter-spacing: -0.015em;
+    margin: 0 0 6px;
+    text-wrap: balance;
+  }
+  h2 .q {
+    color: var(--muted);
+    font-weight: 500;
+    font-size: 0.62em;
+    display: block;
+    margin-top: 8px;
+  }
+  p {
+    margin: 0 0 14px;
+  }
 
   /* fusion cards */
-  .fuse { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 24px; }
-  @media (max-width: 620px) { .fuse { grid-template-columns: 1fr; } }
-  .fc { background: var(--paper-2); border: 1px solid var(--line); border-radius: 10px; padding: 20px; border-top: 3px solid var(--accent); }
-  .fc .n { font-family: ui-monospace, Menlo, monospace; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent); font-weight: 700; }
-  .fc .t { font-weight: 600; font-size: 1.08rem; margin: 4px 0 7px; }
-  .fc p { font-size: 0.92rem; color: var(--ink-soft); margin: 0; line-height: 1.5; }
+  .fuse {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-top: 24px;
+  }
+  @media (max-width: 620px) {
+    .fuse {
+      grid-template-columns: 1fr;
+    }
+  }
+  .fc {
+    background: var(--paper-2);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 20px;
+    border-top: 3px solid var(--accent);
+  }
+  .fc .n {
+    font-family: ui-monospace, Menlo, monospace;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--accent);
+    font-weight: 700;
+  }
+  .fc .t {
+    font-weight: 600;
+    font-size: 1.08rem;
+    margin: 4px 0 7px;
+  }
+  .fc p {
+    font-size: 0.92rem;
+    color: var(--ink-soft);
+    margin: 0;
+    line-height: 1.5;
+  }
 
   /* the law — 3 punch points */
-  .law { display: grid; gap: 12px; margin-top: 22px; }
-  .rule { display: flex; gap: 16px; align-items: flex-start; background: var(--paper-2); border: 1px solid var(--line); border-radius: 10px; padding: 18px 20px; }
-  .rule .mk { font-family: ui-monospace, Menlo, monospace; font-weight: 700; color: var(--accent); font-size: 0.95rem; flex: none; padding-top: 1px; }
-  .rule .bd { font-size: 0.98rem; }
-  .rule .bd b { color: var(--ink); }
-  .rule .bd .g { color: var(--ink-soft); }
+  .law {
+    display: grid;
+    gap: 12px;
+    margin-top: 22px;
+  }
+  .rule {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+    background: var(--paper-2);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 18px 20px;
+  }
+  .rule .mk {
+    font-family: ui-monospace, Menlo, monospace;
+    font-weight: 700;
+    color: var(--accent);
+    font-size: 0.95rem;
+    flex: none;
+    padding-top: 1px;
+  }
+  .rule .bd {
+    font-size: 0.98rem;
+  }
+  .rule .bd b {
+    color: var(--ink);
+  }
+  .rule .bd .g {
+    color: var(--ink-soft);
+  }
 
-  .score { background: var(--score-paper); border: 1px solid var(--score-line); border-radius: 10px; padding: 24px 18px; overflow-x: auto; margin-top: 22px; }
-  .score pre.mermaid { margin: 0; text-align: center; min-width: 500px; }
-  .score-cap { font-family: ui-monospace, Menlo, monospace; font-size: 11px; color: #6a6350; margin-top: 12px; text-align: center; }
+  .score {
+    background: var(--score-paper);
+    border: 1px solid var(--score-line);
+    border-radius: 10px;
+    padding: 24px 18px;
+    overflow-x: auto;
+    margin-top: 22px;
+  }
+  .score pre.mermaid {
+    margin: 0;
+    text-align: center;
+    min-width: 500px;
+  }
+  .score-cap {
+    font-family: ui-monospace, Menlo, monospace;
+    font-size: 11px;
+    color: #6a6350;
+    margin-top: 12px;
+    text-align: center;
+  }
 
   /* entra/fica/sai strip */
-  .flow3 { display: grid; grid-template-columns: repeat(3,1fr); gap: 14px; margin-top: 22px; }
-  @media (max-width: 620px) { .flow3 { grid-template-columns: 1fr; } }
-  .fl { border: 1px solid var(--line); border-radius: 10px; padding: 18px; background: var(--paper-2); }
-  .fl .h { font-family: ui-monospace, Menlo, monospace; font-weight: 700; font-size: 0.8rem; letter-spacing: 0.06em; text-transform: uppercase; padding-bottom: 9px; margin-bottom: 9px; border-bottom: 2px solid; }
-  .fl.in .h { color: var(--seal); border-color: var(--seal); }
-  .fl.stay .h { color: var(--accent); border-color: var(--accent); }
-  .fl.out .h { color: var(--block); border-color: var(--block); }
-  .fl p { font-size: 0.9rem; color: var(--ink-soft); margin: 0; line-height: 1.5; }
-  .fl code { font-size: 0.82em; }
+  .flow3 {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+    margin-top: 22px;
+  }
+  @media (max-width: 620px) {
+    .flow3 {
+      grid-template-columns: 1fr;
+    }
+  }
+  .fl {
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 18px;
+    background: var(--paper-2);
+  }
+  .fl .h {
+    font-family: ui-monospace, Menlo, monospace;
+    font-weight: 700;
+    font-size: 0.8rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding-bottom: 9px;
+    margin-bottom: 9px;
+    border-bottom: 2px solid;
+  }
+  .fl.in .h {
+    color: var(--seal);
+    border-color: var(--seal);
+  }
+  .fl.stay .h {
+    color: var(--accent);
+    border-color: var(--accent);
+  }
+  .fl.out .h {
+    color: var(--block);
+    border-color: var(--block);
+  }
+  .fl p {
+    font-size: 0.9rem;
+    color: var(--ink-soft);
+    margin: 0;
+    line-height: 1.5;
+  }
+  .fl code {
+    font-size: 0.82em;
+  }
 
   /* is / isn't */
-  .isnt { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 22px; }
-  @media (max-width: 620px) { .isnt { grid-template-columns: 1fr; } }
-  .box { border: 1px solid var(--line); border-radius: 10px; padding: 20px; background: var(--paper-2); }
-  .box.yes { border-top: 3px solid var(--seal); }
-  .box.no { border-top: 3px solid var(--block); }
-  .box .h { font-family: ui-monospace, Menlo, monospace; font-weight: 700; font-size: 0.85rem; margin-bottom: 10px; }
-  .box.yes .h { color: var(--seal); }
-  .box.no .h { color: var(--block); }
-  .box ul { margin: 0; padding: 0; list-style: none; }
-  .box li { font-size: 0.92rem; color: var(--ink-soft); padding: 7px 0; border-top: 1px dashed var(--line); line-height: 1.45; }
-  .box li:first-child { border-top: none; }
-  .box li b { color: var(--ink); }
+  .isnt {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-top: 22px;
+  }
+  @media (max-width: 620px) {
+    .isnt {
+      grid-template-columns: 1fr;
+    }
+  }
+  .box {
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 20px;
+    background: var(--paper-2);
+  }
+  .box.yes {
+    border-top: 3px solid var(--seal);
+  }
+  .box.no {
+    border-top: 3px solid var(--block);
+  }
+  .box .h {
+    font-family: ui-monospace, Menlo, monospace;
+    font-weight: 700;
+    font-size: 0.85rem;
+    margin-bottom: 10px;
+  }
+  .box.yes .h {
+    color: var(--seal);
+  }
+  .box.no .h {
+    color: var(--block);
+  }
+  .box ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .box li {
+    font-size: 0.92rem;
+    color: var(--ink-soft);
+    padding: 7px 0;
+    border-top: 1px dashed var(--line);
+    line-height: 1.45;
+  }
+  .box li:first-child {
+    border-top: none;
+  }
+  .box li b {
+    color: var(--ink);
+  }
 
-  .vocab { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 22px; }
-  .v { font-family: ui-monospace, Menlo, monospace; font-size: 12px; padding: 6px 11px; border-radius: 7px; border: 1px solid var(--line); background: var(--paper-2); color: var(--ink-soft); }
-  .v b { color: var(--accent); font-weight: 600; }
+  .vocab {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 22px;
+  }
+  .v {
+    font-family: ui-monospace, Menlo, monospace;
+    font-size: 12px;
+    padding: 6px 11px;
+    border-radius: 7px;
+    border: 1px solid var(--line);
+    background: var(--paper-2);
+    color: var(--ink-soft);
+  }
+  .v b {
+    color: var(--accent);
+    font-weight: 600;
+  }
 
-  footer { padding: 44px 0 70px; }
-  .fnote { font-family: ui-monospace, Menlo, monospace; font-size: 12.5px; color: var(--muted); }
-  .fnote b { color: var(--ink-soft); }
+  footer {
+    padding: 44px 0 70px;
+  }
+  .fnote {
+    font-family: ui-monospace, Menlo, monospace;
+    font-size: 12.5px;
+    color: var(--muted);
+  }
+  .fnote b {
+    color: var(--ink-soft);
+  }
 
   @media (prefers-reduced-motion: no-preference) {
-    .rise { animation: rise .6s cubic-bezier(.2,.7,.2,1) both; }
-    @keyframes rise { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+    .rise {
+      animation: rise 0.6s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+    }
+    @keyframes rise {
+      from {
+        opacity: 0;
+        transform: translateY(12px);
+      }
+      to {
+        opacity: 1;
+        transform: none;
+      }
+    }
   }
 </style>
 
 <header class="masthead">
   <div class="staff" aria-hidden="true"></div>
   <div class="wrap rise">
-    <div class="eyebrow"><span class="dot" aria-hidden="true"></span><span class="label">Orchestra · the knowledge layer · the concept, chewed</span></div>
+    <div class="eyebrow">
+      <span class="dot" aria-hidden="true"></span
+      ><span class="label">Orchestra · the knowledge layer · the concept, chewed</span>
+    </div>
     <h1 class="wordmark">The&nbsp;Atl<span class="set">a</span>s</h1>
-    <p class="punch">A knowledge layer that <span class="hl">can't lie</span> — because every fact re-checks against the code.</p>
+    <p class="punch">
+      A knowledge layer that <span class="hl">can't lie</span> — because every fact re-checks against the code.
+    </p>
     <p class="sub">
-      A knowledge base + a <b>Karpathy-style wiki</b> + <b>open knowledge (OKF)</b> — fused into one layer.<br/>
-      The Atlas holds <b>both</b>: shared <b>knowledge</b> and per-member <b>memory</b> — distinct kinds, one substrate.<br/>
-      The catch nobody else has: every fact is <b>pinned to source@sha</b> — change the code, the fact <b>rots on its own.</b>
+      A knowledge base + a <b>Karpathy-style wiki</b> + <b>open knowledge (OKF)</b> — fused into one layer.<br />
+      The Atlas holds <b>both</b>: shared <b>knowledge</b> and per-member <b>memory</b> — distinct kinds, one
+      substrate.<br />
+      The catch nobody else has: every fact is <b>pinned to source@sha</b> — change the code, the fact
+      <b>rots on its own.</b>
     </p>
   </div>
 </header>
@@ -140,25 +484,37 @@
   <div class="wrap">
     <h2>As molduras — e a fronteira<span class="q">KB + wiki + open knowledge · memória NÃO entra</span></h2>
     <div class="fuse">
-      <div class="fc" style="border-top-color:var(--block)">
-        <div class="n" style="color:var(--block)">knowledge + memory</div>
+      <div class="fc" style="border-top-color: var(--block)">
+        <div class="n" style="color: var(--block)">knowledge + memory</div>
         <div class="t">o Atlas guarda os dois</div>
-        <p><b>Knowledge</b> (compartilhado, aterrado) e <b>memory</b> (por membro: task/pr/project). Mesmo substrato/índice/formato — <b>distintos, nunca misturados</b>, mas <b>não são dois sistemas</b>.</p>
+        <p>
+          <b>Knowledge</b> (compartilhado, aterrado) e <b>memory</b> (por membro: task/pr/project). Mesmo
+          substrato/índice/formato — <b>distintos, nunca misturados</b>, mas <b>não são dois sistemas</b>.
+        </p>
       </div>
       <div class="fc">
         <div class="n">knowledge base</div>
         <div class="t">grafo aterrado, tierado</div>
-        <p>Nós de conhecimento por <b>criticidade T0/T1/T2</b>, consultáveis por território. Predicados que re-checam + advisories — content-addressed.</p>
+        <p>
+          Nós de conhecimento por <b>criticidade T0/T1/T2</b>, consultáveis por território. Predicados que re-checam +
+          advisories — content-addressed.
+        </p>
       </div>
       <div class="fc">
         <div class="n">karpathy wiki</div>
         <div class="t">nasce do trabalho</div>
-        <p>Não é catalogação. Os agentes <b>crescem o wiki</b>: jimmy propõe, o wave-close ratifica. O jimmy de amanhã é mais afiado que o de hoje neste repo.</p>
+        <p>
+          Não é catalogação. Os agentes <b>crescem o wiki</b>: jimmy propõe, o wave-close ratifica. O jimmy de amanhã é
+          mais afiado que o de hoje neste repo.
+        </p>
       </div>
       <div class="fc">
         <div class="n">open knowledge · okf</div>
         <div class="t">seu, exportável, sem cadeia</div>
-        <p><b>100% exportável</b>, zero formato proprietário, nada preso em nuvem de terceiro. Todo claim carrega <b>proveniência</b> e citação.</p>
+        <p>
+          <b>100% exportável</b>, zero formato proprietário, nada preso em nuvem de terceiro. Todo claim carrega
+          <b>proveniência</b> e citação.
+        </p>
       </div>
     </div>
   </div>
@@ -167,23 +523,49 @@
 <!-- 2 — the law that makes it work -->
 <section>
   <div class="wrap">
-    <h2>A lei que faz tudo funcionar<span class="q">grounding@sha — o que separa um atlas de um wiki que apodrece</span></h2>
+    <h2>
+      A lei que faz tudo funcionar<span class="q">grounding@sha — o que separa um atlas de um wiki que apodrece</span>
+    </h2>
     <div class="law">
       <div class="rule">
         <span class="mk">01</span>
-        <div class="bd"><b>Um fato nunca se declara verdadeiro.</b> <span class="g">A única prova é uma citação <code>path@sha</code> que <b>re-checa agora</b>. Sem grounding → NA. Rumor não entra (fail-closed).</span></div>
+        <div class="bd">
+          <b>Um fato nunca se declara verdadeiro.</b>
+          <span class="g"
+            >A única prova é uma citação <code>path@sha</code> que <b>re-checa agora</b>. Sem grounding → NA. Rumor não
+            entra (fail-closed).</span
+          >
+        </div>
       </div>
       <div class="rule">
         <span class="mk">02</span>
-        <div class="bd"><b>Esquece por drift, sozinho.</b> <span class="g">Editou dentro do range citado → o sha muda → o fato <b>flipa BROKEN</b> e <b>bloqueia o merge</b> (exit 2). Um wiki que não pode apodrecer em silêncio — e sabe qual commit quebrou o fato.</span></div>
+        <div class="bd">
+          <b>Esquece por drift, sozinho.</b>
+          <span class="g"
+            >Editou dentro do range citado → o sha muda → o fato <b>flipa BROKEN</b> e <b>bloqueia o merge</b> (exit 2).
+            Um wiki que não pode apodrecer em silêncio — e sabe qual commit quebrou o fato.</span
+          >
+        </div>
       </div>
       <div class="rule">
         <span class="mk">03</span>
-        <div class="bd"><b>Começa vazio e honesto.</b> <span class="g">Move-in é <code>$0-LLM</code>, tudo advisory/T2. <b>T0</b> (auth/crypto/money) <b>só humano ratifica</b> — nunca auto-promove.</span></div>
+        <div class="bd">
+          <b>Começa vazio e honesto.</b>
+          <span class="g"
+            >Move-in é <code>$0-LLM</code>, tudo advisory/T2. <b>T0</b> (auth/crypto/money) <b>só humano ratifica</b> —
+            nunca auto-promove.</span
+          >
+        </div>
       </div>
       <div class="rule">
         <span class="mk">04</span>
-        <div class="bd"><b>Evolui por edição, não append.</b> <span class="g">Informação nova quase sempre é <b>editar/sobrepor</b> um fato que já existe — não empilhar outro. Content-addressed dedup + supersede + decay. Sem isso: <b>montanha de lixo inoperável</b>.</span></div>
+        <div class="bd">
+          <b>Evolui por edição, não append.</b>
+          <span class="g"
+            >Informação nova quase sempre é <b>editar/sobrepor</b> um fato que já existe — não empilhar outro.
+            Content-addressed dedup + supersede + decay. Sem isso: <b>montanha de lixo inoperável</b>.</span
+          >
+        </div>
       </div>
     </div>
   </div>
@@ -192,9 +574,13 @@
 <!-- 3 — the loop -->
 <section>
   <div class="wrap">
-    <h2>Como ele nasce, é lembrado, e esquece<span class="q">o loop — do trabalho ao pack, e o drift que arquiva (nada morre)</span></h2>
+    <h2>
+      Como ele nasce, é lembrado, e esquece<span class="q"
+        >o loop — do trabalho ao pack, e o drift que arquiva (nada morre)</span
+      >
+    </h2>
     <div class="score">
-<pre class="mermaid">
+      <pre class="mermaid">
 %%{init: {'theme':'base','themeVariables':{'background':'#EAE5D8','primaryColor':'#EAE5D8','primaryTextColor':'#201D15','primaryBorderColor':'#9A6E28','lineColor':'#8f846a','fontFamily':'ui-monospace, Menlo, monospace','fontSize':'12px'}}}%%
 flowchart TD
   INIT["init · $0-LLM<br/>esqueleto: territórios + blast-radius<br/>vazio e honesto (T2 / advisory)"]
@@ -212,7 +598,10 @@ flowchart TD
   DRIFT -->|"fato flipa BROKEN · bloqueia o merge"| ATLAS
 </pre>
     </div>
-    <div class="score-cap">Nasce do trabalho, não de catalogação. Propõe → ratifica (quem minera ≠ quem aceita). O código mudando é o sinal de esquecer.</div>
+    <div class="score-cap">
+      Nasce do trabalho, não de catalogação. Propõe → ratifica (quem minera ≠ quem aceita). O código mudando é o sinal
+      de esquecer.
+    </div>
   </div>
 </section>
 
@@ -223,15 +612,24 @@ flowchart TD
     <div class="flow3">
       <div class="fl in">
         <div class="h">entra</div>
-        <p>Grounded a <code>source@sha</code>, contestado (2+ fontes), rotulado <b>grounded/advisory</b>, tierado. T0 exige humano. Ungrounded → recusado.</p>
+        <p>
+          Grounded a <code>source@sha</code>, contestado (2+ fontes), rotulado <b>grounded/advisory</b>, tierado. T0
+          exige humano. Ungrounded → recusado.
+        </p>
       </div>
       <div class="fl stay">
         <div class="h">fica</div>
-        <p>Enquanto a citação re-checa <b>FRESH</b>. É recuperado por território num <b>pack ≤2K</b> e injetado no brief do agente — recall estrutural, não busca por embedding.</p>
+        <p>
+          Enquanto a citação re-checa <b>FRESH</b>. É recuperado por território num <b>pack ≤2K</b> e injetado no brief
+          do agente — recall estrutural, não busca por embedding.
+        </p>
       </div>
       <div class="fl out">
         <div class="h">sai</div>
-        <p>Código driftou → <b>BROKEN</b> → re-author ou <b>supersede</b> (o antigo fica addressável, vira histórico/lineage). Nunca some silenciosamente.</p>
+        <p>
+          Código driftou → <b>BROKEN</b> → re-author ou <b>supersede</b> (o antigo fica addressável, vira
+          histórico/lineage). Nunca some silenciosamente.
+        </p>
       </div>
     </div>
   </div>
@@ -279,6 +677,11 @@ flowchart TD
 
 <footer>
   <div class="wrap">
-    <p class="fnote"><b>Base:</b> o conceito do Atlas como desenhado pro Maestro — <code>contract.ts</code> (nós/grounding/tier), <code>grounding.ts</code> (o truth-gate M2), <code>move-in.ts</code> (born-from-work), <code>jimmy.md</code> (propõe→ratifica), <code>export.ts</code> (OKF/zero-lock-in). Elevado a camada 0 do Orchestra.</p>
+    <p class="fnote">
+      <b>Base:</b> o conceito do Atlas como desenhado pro Maestro — <code>contract.ts</code> (nós/grounding/tier),
+      <code>grounding.ts</code> (o truth-gate M2), <code>move-in.ts</code> (born-from-work),
+      <code>jimmy.md</code> (propõe→ratifica), <code>export.ts</code> (OKF/zero-lock-in). Elevado a camada 0 do
+      Orchestra.
+    </p>
   </div>
 </footer>

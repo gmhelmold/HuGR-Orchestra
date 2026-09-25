@@ -67,7 +67,7 @@ the parts that exist — and says plainly where the gap is.
    a successful write.
 
 3. **Keep the `data.id`.** That is the fact's **content address**, and it is the only thing
-   [`atlas node`](../reference/commands/node.md) accepts. It is *not* the `id` inside your JSON file — that
+   [`atlas node`](../reference/commands/node.md) accepts. It is _not_ the `id` inside your JSON file — that
    one is the nodeKey, which is what `query` prints and what `link` takes.
 
 4. **Read it back.**
@@ -103,14 +103,14 @@ the parts that exist — and says plainly where the gap is.
 A refusal exits `2` and names the gate that fired. All three below are real runs of the same fact file,
 with one precondition removed each time.
 
-| you see | which gate | what to do |
-| --- | --- | --- |
-| `unauthorized: actor not in fact scope (KNOW-11)` | authorization | add your actor to the fact's `scope` in `.atlas/policy.json`, or set `ATLAS_ACTOR` to a listed one |
-| `unratified: T0/contested fact requires human+billy ratification (KNOW-8)` | ratification | set `ATLAS_RATIFY_TOKEN` (any non-empty value for `T1`; `billy` for `T0`) |
-| `ungrounded: citation does not re-derive FRESH at source (TOOLS-7b / GROUND-6)` | truth | your `subtreeHash` is not what the index computes for that path — recompute it |
+| you see                                                                         | which gate    | what to do                                                                                         |
+| ------------------------------------------------------------------------------- | ------------- | -------------------------------------------------------------------------------------------------- |
+| `unauthorized: actor not in fact scope (KNOW-11)`                               | authorization | add your actor to the fact's `scope` in `.atlas/policy.json`, or set `ATLAS_ACTOR` to a listed one |
+| `unratified: T0/contested fact requires human+billy ratification (KNOW-8)`      | ratification  | set `ATLAS_RATIFY_TOKEN` (any non-empty value for `T1`; `billy` for `T0`)                          |
+| `ungrounded: citation does not re-derive FRESH at source (TOOLS-7b / GROUND-6)` | truth         | your `subtreeHash` is not what the index computes for that path — recompute it                     |
 
 Exit `1` is a different class entirely: a usage error, like a missing `--at` or an unreadable file. `1`
-means *your invocation was wrong*; `2` means *your invocation was fine and a gate declined it*, so
+means _your invocation was wrong_; `2` means _your invocation was fine and a gate declined it_, so
 re-running it unchanged will not help.
 
 ## How to verify you got the right thing
@@ -118,9 +118,9 @@ re-running it unchanged will not help.
 - `atlas query <scope>` lists your claim on an `inv` line with `stale: false`.
 - `atlas doctor archive` includes the content address `emit` printed.
 - Emitting the **same bytes** again returns the same `data.id` — the write deduplicates rather than
-  creating a second node. Emitting a *different* claim at the same anchor and slot updates the same node:
+  creating a second node. Emitting a _different_ claim at the same anchor and slot updates the same node:
   measured, the pack line became `greet never returns an empty string; greet always returns a non-empty
-  string` — one node, a set-union of claims.
+string` — one node, a set-union of claims.
 - A refused write left nothing behind: the claim is absent from the pack.
 
 ## Notes

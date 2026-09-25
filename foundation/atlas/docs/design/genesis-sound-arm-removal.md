@@ -7,6 +7,7 @@ Nothing here is executed until ratified; the shipped surface is merged, tested, 
 by reviewed WPs, never a blind delete.
 
 Decision vocabulary (from the contract):
+
 - **CUT** — deterministic truth-gate for a model-proposed semantic fact. Remove; `PROPOSE`
   (grounded self-refutation) becomes the only "proof".
 - **RELABEL** — today stamps `seal:'proven'` on what is really a model assertion → becomes
@@ -16,19 +17,20 @@ Decision vocabulary (from the contract):
 
 ## The cut table
 
-| # | Piece | file:line | Decision | What breaks / becomes |
-|---|---|---|---|---|
-| 1 | Dependency admit truth-gate | `admit-harness.ts:256` (`verifyDependency(t,s)!=="proven" ⇒ drop`) | **CUT** | dependency fact no longer gated by oracle; admitted iff grounded + PROPOSE survived |
-| 2 | Count admit truth-gate | `admit-harness.ts:271` (`verifyCount!=="proven" ⇒ drop`) | **CUT** | same |
-| 3 | `buildSound` + `seal:'proven'` mint | `admit-harness.ts:365`, `:378` | **RELABEL / CUT** (fork F1) | the only place `proven` is stamped in the mine path |
-| 4 | Oracle wiring into `atlas mine` | `compose-mine-admission.ts:80,94,104` | **CUT** | `createVerifyFactLeg` no longer fed into `AdmitDeps` |
-| 5 | Negation door closed-world ADMIT/REFUTE | `governed-emit-negation.ts:296-391` (refute `:296-297`, admit `:299-391`) | **CUT** (fork F2) | negation stops being a closed-world proven claim; becomes justified/grounded model assertion |
-| 6 | Negation gate-1 escape / dynamic-reach / hole legs | `governed-emit-negation.ts:246-291` | **CUT with F2** | the closed-world completeness machinery goes with the admit it served |
-| 7 | `Seal` type + witness re-prove machinery | `knowledge/types.ts:147`; `admit-harness.ts:405/417/431`; `reverify-store.ts`; `store-provenance` witness legs | **coupled to F1** | exist only to serve `seal:'proven'`; die iff proven is cut, survive iff proven is kept as a label |
-| 8 | Standalone `atlas verify-fact` CLI oracle | `cli.ts:365-371`, `compose.ts:342/520`, `verify-fact-source.ts:139` | **KEEP or CUT** (fork F3) | a deterministic dependency *query*, not an admit gate — orthogonal to the cut |
-| 9 | The three oracles themselves | `verify-fact.ts:85`, `verify-count.ts:72`, `verify-negation.ts:76` | **KEEP as reference models** (only reachable via F3 or tests) | pure/total, harmless when not wired as a gate; kept iff F3 keeps the CLI, else become dead → remove |
+| #   | Piece                                              | file:line                                                                                                      | Decision                                                      | What breaks / becomes                                                                               |
+| --- | -------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| 1   | Dependency admit truth-gate                        | `admit-harness.ts:256` (`verifyDependency(t,s)!=="proven" ⇒ drop`)                                             | **CUT**                                                       | dependency fact no longer gated by oracle; admitted iff grounded + PROPOSE survived                 |
+| 2   | Count admit truth-gate                             | `admit-harness.ts:271` (`verifyCount!=="proven" ⇒ drop`)                                                       | **CUT**                                                       | same                                                                                                |
+| 3   | `buildSound` + `seal:'proven'` mint                | `admit-harness.ts:365`, `:378`                                                                                 | **RELABEL / CUT** (fork F1)                                   | the only place `proven` is stamped in the mine path                                                 |
+| 4   | Oracle wiring into `atlas mine`                    | `compose-mine-admission.ts:80,94,104`                                                                          | **CUT**                                                       | `createVerifyFactLeg` no longer fed into `AdmitDeps`                                                |
+| 5   | Negation door closed-world ADMIT/REFUTE            | `governed-emit-negation.ts:296-391` (refute `:296-297`, admit `:299-391`)                                      | **CUT** (fork F2)                                             | negation stops being a closed-world proven claim; becomes justified/grounded model assertion        |
+| 6   | Negation gate-1 escape / dynamic-reach / hole legs | `governed-emit-negation.ts:246-291`                                                                            | **CUT with F2**                                               | the closed-world completeness machinery goes with the admit it served                               |
+| 7   | `Seal` type + witness re-prove machinery           | `knowledge/types.ts:147`; `admit-harness.ts:405/417/431`; `reverify-store.ts`; `store-provenance` witness legs | **coupled to F1**                                             | exist only to serve `seal:'proven'`; die iff proven is cut, survive iff proven is kept as a label   |
+| 8   | Standalone `atlas verify-fact` CLI oracle          | `cli.ts:365-371`, `compose.ts:342/520`, `verify-fact-source.ts:139`                                            | **KEEP or CUT** (fork F3)                                     | a deterministic dependency _query_, not an admit gate — orthogonal to the cut                       |
+| 9   | The three oracles themselves                       | `verify-fact.ts:85`, `verify-count.ts:72`, `verify-negation.ts:76`                                             | **KEEP as reference models** (only reachable via F3 or tests) | pure/total, harmless when not wired as a gate; kept iff F3 keeps the CLI, else become dead → remove |
 
 ### KEEP (infra — explicitly NOT cut)
+
 - Grounding span existence / freshness — `doors.grounded` at `admit-harness.ts:257,272`, whole
   `packages/grounding/*`, `compose.ts:190 buildGate`. This is the justification check (does the cited
   span re-derive at source@sha) — the heart of `justified`, not a truth oracle.
@@ -70,18 +72,19 @@ it pins behaviour that survives as `justified`.
     strictly entailing**.
   - Consequence for the cut: the oracle stops being the **mandatory admit gate** (a fact is NOT dropped
     just because the oracle did not prove it), but the **witness / evidence-carrier machinery STAYS**
-    (item 7 is repurposed, not deleted) — it now carries the *model's* proof, not only the oracle's.
+    (item 7 is repurposed, not deleted) — it now carries the _model's_ proof, not only the oracle's.
     Admit iff grounded; seal `proven` when the carried evidence entails, else `justified`.
 - **F2 — the negation door closed-world admit → CUT.** Negation becomes a justified grounded model
   assertion (no closed-world REFUTE/ADMIT). Closed-world admit is unsound by construction (flagged in
   `verify-fact.ts:56-59`), the contract's exact target.
 - **F3 — the standalone `atlas verify-fact` CLI → KEEP** as a user-invocable deterministic dependency
   query (honest: "this dependency is mechanically present"), separate from mining. Keeps the three
-  oracles from becoming dead code; one legitimate *source* of a `proven`-grade witness under F1.
+  oracles from becoming dead code; one legitimate _source_ of a `proven`-grade witness under F1.
 
 ### What this does to the cut table
-- Item 1,2 (oracle admit truth-gate) — still **CUT** as the *mandatory* gate; the oracle may still
-  *contribute* a witness that seals `proven`, but its abstention no longer DROPS the fact.
+
+- Item 1,2 (oracle admit truth-gate) — still **CUT** as the _mandatory_ gate; the oracle may still
+  _contribute_ a witness that seals `proven`, but its abstention no longer DROPS the fact.
 - Item 3 (`buildSound`/`seal:'proven'`) — **KEEP the seal, REWIRE its trigger**: sealed `proven` iff
   the fact carries entailing evidence (model- or oracle-supplied), not iff the oracle re-derived it.
 - Item 7 (witness / reverify machinery) — **KEEP**, repurposed as the model's proof-carrier.

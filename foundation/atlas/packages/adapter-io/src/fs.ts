@@ -25,21 +25,21 @@
 // binaries. Resolving links is precisely the business the two `isContainedIn` fixes removed from two other
 // doors; the walker never enters it.
 
-import { readFileSync } from 'node:fs';
-import { join } from 'node:path';
-import type { FileTree } from '@atlas/index';
-import { runGit } from './run-git.js';
+import { readFileSync } from "node:fs"
+import { join } from "node:path"
+import type { FileTree } from "@atlas/index"
+import { runGit } from "./run-git.js"
 
 /** The git index mode of a SYMLINK entry. Its blob content is the link target path text. */
-const GIT_MODE_SYMLINK = '120000';
+const GIT_MODE_SYMLINK = "120000"
 
 /** One `git ls-files -s -z` record: the mode the REPO DECLARES, the blob it names, and the path. The mode
  *  is preferred over an `lstat` deliberately — `lstat` reports what this HOST currently has (and reports
  *  nothing at all for a symlink checked out as a regular file), while the mode is what the commit says. */
 interface TrackedEntry {
-  readonly mode: string;
-  readonly oid: string;
-  readonly path: string;
+  readonly mode: string
+  readonly oid: string
+  readonly path: string
 }
 
 /**
@@ -50,24 +50,24 @@ interface TrackedEntry {
  * out) minted from something that is not a source file at all.
  */
 export interface SymlinkLeaf extends FileTree {
-  readonly symlink: true;
+  readonly symlink: true
 }
 
 /** Is this node a mode-120000 leaf (see `SymlinkLeaf`)? Total, structural, no cast into `any`. */
 export function isSymlinkLeaf(node: FileTree): boolean {
-  return (node as Partial<SymlinkLeaf>).symlink === true;
+  return (node as Partial<SymlinkLeaf>).symlink === true
 }
 
 // A mutable directory node under construction: an ordered map from the next path segment to either a
 // nested directory builder or a materialized file leaf. Directories are keyed so siblings stay unique;
 // order is imposed at the end by an ASCII sort on `path`, matching `T_ref`.
 interface DirBuild {
-  readonly path: string;
-  readonly dirs: Map<string, DirBuild>;
-  readonly files: FileTree[];
+  readonly path: string
+  readonly dirs: Map<string, DirBuild>
+  readonly files: FileTree[]
 }
 
-const newDir = (path: string): DirBuild => ({ path, dirs: new Map(), files: [] });
+const newDir = (path: string): DirBuild => ({ path, dirs: new Map(), files: [] })
 
 /**
  * Walk a real repo into the frozen `FileTree` (ADAPT-FS-1). The tracked set is derived from
@@ -87,32 +87,32 @@ export function walkFileTree(repoPath: string): FileTree {
   // (raw stack trace). Degrade to the EMPTY tracked set — the SAME structural view as an empty repo — never
   // a throw. The valid-git-repo happy path is byte-identical (only the throwing paths are absorbed). Same
   // no-shell git seam + `try {} catch {}` idiom as `gitUserEmail`/`readScipOrEmpty`.
-  const tracked = gitLsFiles(repoPath);
+  const tracked = gitLsFiles(repoPath)
 
-  const root = newDir('.');
+  const root = newDir(".")
   for (const entry of tracked) {
-    const rel = entry.path;
-    const segments = rel.split('/');
-    let node = root;
+    const rel = entry.path
+    const segments = rel.split("/")
+    let node = root
     // Walk/create the directory chain (all but the final segment).
     for (let i = 0; i < segments.length - 1; i++) {
-      const dirPath = segments.slice(0, i + 1).join('/');
-      let next = node.dirs.get(dirPath);
+      const dirPath = segments.slice(0, i + 1).join("/")
+      let next = node.dirs.get(dirPath)
       if (next === undefined) {
-        next = newDir(dirPath);
-        node.dirs.set(dirPath, next);
+        next = newDir(dirPath)
+        node.dirs.set(dirPath, next)
       }
-      node = next;
+      node = next
     }
     // The final segment is the file leaf; `rel` (POSIX) is already the repo-relative path. A path listed by
     // `git ls-files` but UNREADABLE in the working tree (tracked-but-deleted ⇒ ENOENT, or permission) must
     // NOT crash boot: SKIP it so the walk stays TOTAL. A readable tracked file is byte-identical.
-    const leaf = leafFor(repoPath, entry);
-    if (leaf === undefined) continue;
-    node.files.push(leaf);
+    const leaf = leafFor(repoPath, entry)
+    if (leaf === undefined) continue
+    node.files.push(leaf)
   }
 
-  return freeze(root);
+  return freeze(root)
 }
 
 /**
@@ -130,22 +130,22 @@ export function walkFileTree(repoPath: string): FileTree {
  */
 function gitLsFiles(repoPath: string): TrackedEntry[] {
   try {
-    const out = runGit(repoPath, ['ls-files', '-s', '-z']);
-    const entries: TrackedEntry[] = [];
-    for (const record of out.split('\0')) {
-      if (record.length === 0) continue;
-      const tab = record.indexOf('\t');
-      if (tab < 0) continue;
-      const meta = record.slice(0, tab).split(' ');
-      const path = record.slice(tab + 1);
-      const mode = meta[0];
-      const oid = meta[1];
-      if (mode === undefined || oid === undefined || path.length === 0) continue;
-      entries.push({ mode, oid, path });
+    const out = runGit(repoPath, ["ls-files", "-s", "-z"])
+    const entries: TrackedEntry[] = []
+    for (const record of out.split("\0")) {
+      if (record.length === 0) continue
+      const tab = record.indexOf("\t")
+      if (tab < 0) continue
+      const meta = record.slice(0, tab).split(" ")
+      const path = record.slice(tab + 1)
+      const mode = meta[0]
+      const oid = meta[1]
+      if (mode === undefined || oid === undefined || path.length === 0) continue
+      entries.push({ mode, oid, path })
     }
-    return entries;
+    return entries
   } catch {
-    return [];
+    return []
   }
 }
 
@@ -154,14 +154,14 @@ function gitLsFiles(repoPath: string): TrackedEntry[] {
  *  Everything else ⇒ the working-tree bytes, exactly as before. */
 function leafFor(repoPath: string, entry: TrackedEntry): FileTree | undefined {
   if (entry.mode === GIT_MODE_SYMLINK) {
-    const target = gitBlobOrSkip(repoPath, entry.oid);
-    if (target === undefined) return undefined;
-    const leaf: SymlinkLeaf = { path: entry.path, children: [], content: target, symlink: true };
-    return leaf;
+    const target = gitBlobOrSkip(repoPath, entry.oid)
+    if (target === undefined) return undefined
+    const leaf: SymlinkLeaf = { path: entry.path, children: [], content: target, symlink: true }
+    return leaf
   }
-  const content = readFileOrSkip(join(repoPath, entry.path));
-  if (content === undefined) return undefined;
-  return { path: entry.path, children: [], content };
+  const content = readFileOrSkip(join(repoPath, entry.path))
+  if (content === undefined) return undefined
+  return { path: entry.path, children: [], content }
 }
 
 /** The bytes of blob `oid` in `repoPath`'s object database, or `undefined` — never throws. The oid is
@@ -169,28 +169,27 @@ function leafFor(repoPath: string, entry: TrackedEntry): FileTree | undefined {
  *  would be read by git as an OPTION rather than an object (the `runGit` seam is shell-free, so this is the
  *  remaining way a malformed field could change what the command means). */
 function gitBlobOrSkip(repoPath: string, oid: string): string | undefined {
-  if (!/^[0-9a-f]{40,64}$/.test(oid)) return undefined;
+  if (!/^[0-9a-f]{40,64}$/.test(oid)) return undefined
   try {
-    return runGit(repoPath, ['cat-file', 'blob', oid]);
+    return runGit(repoPath, ["cat-file", "blob", oid])
   } catch {
-    return undefined;
+    return undefined
   }
 }
 
 /** The working-tree bytes at `abs`, or `undefined` when unreadable (deleted/permission) — never throws. */
 function readFileOrSkip(abs: string): string | undefined {
   try {
-    return readFileSync(abs, 'utf8');
+    return readFileSync(abs, "utf8")
   } catch {
-    return undefined;
+    return undefined
   }
 }
 
 /** Materialize a `DirBuild` into an immutable `FileTree`, with siblings ASCII-sorted by `path`. */
 function freeze(node: DirBuild): FileTree {
-  const children: FileTree[] = [
-    ...node.files,
-    ...[...node.dirs.values()].map(freeze),
-  ].sort((a, b) => (a.path < b.path ? -1 : a.path > b.path ? 1 : 0));
-  return { path: node.path, children };
+  const children: FileTree[] = [...node.files, ...[...node.dirs.values()].map(freeze)].sort((a, b) =>
+    a.path < b.path ? -1 : a.path > b.path ? 1 : 0,
+  )
+  return { path: node.path, children }
 }

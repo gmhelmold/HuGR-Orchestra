@@ -1,6 +1,6 @@
 # harness — the governed-execution machinery
 
-This directory is **not** part of the Atlas product. It is the reusable *harness* that
+This directory is **not** part of the Atlas product. It is the reusable _harness_ that
 governs how Atlas (and any future layer) is decomposed, built, gated, and shipped. It is
 staged here so it can be lifted out cleanly into its own sibling repo — `/HuGR/orchestra` —
 with a single `git mv`.
@@ -13,7 +13,7 @@ The machinery of governed execution, independent of any one product:
   build itself. Six today: `godfile-guard`, `layer-guard`, `reference-model-guard`,
   `spec-conformance-guard`, `id-integrity`, `command-doc-guard`. Same doctrine as the CI: the
   bar Orchestra enforces on seats is enforced on Orchestra itself.
-- **Gate libraries** — `harness/lib/`. What the gates *delegate to*: `lexing.mjs` (the ONE
+- **Gate libraries** — `harness/lib/`. What the gates _delegate to_: `lexing.mjs` (the ONE
   TypeScript comment stripper), `reachability.mjs` (the value-vs-type analyser behind
   reference-model-guard), `drift-patterns.mjs` (the governance-count drift vocabulary). See
   the rule below — this directory exists so that `harness/gates/` can mean one thing.
@@ -21,7 +21,6 @@ The machinery of governed execution, independent of any one product:
   contract and is invoked by hand, so nothing here is wired into `ci.yml` and `package.json` exposes no
   script for it. The distinction is load-bearing — a gate whose input is absent on CI exits 0 having
   checked nothing, which reads exactly like coverage. Today:
-
   - `genesis-output-probe.mjs` (with `atlas-store-read.mjs`, `mine-report.mjs`) — the instrument for
     `docs/design/genesis-output-contract.md`.
   - **the concurrency kit** — `model-call-shim.mjs` (a recording passthrough that stands where
@@ -43,6 +42,7 @@ The machinery of governed execution, independent of any one product:
   eight-wide and asserts the report says exactly 8, then serially and asserts exactly 1. It therefore
   cannot be vacuous on CI, which is the property the rule below is actually protecting. An instrument
   nobody has watched succeed at the thing it measures is worth exactly what the last one was worth.
+
 - **The execution method** — the governed pipeline `S0 → S1 → S2 → S3 → C → S4` plus the
   per-work-package execution loop `BIND → RED → GREEN → REFACTOR → GATE → SEAL`. These live
   as prompt + protocol docs under `docs/` (see the inventory below); they are harness-owned
@@ -51,7 +51,7 @@ The machinery of governed execution, independent of any one product:
   convention (goldens are compiled into acceptance/heldout tests; a seat cannot see the
   held-out cases while building). Doctrine documented under `docs/CONVENTIONS.md` and the
   method docs; the mechanics ride in each package's own test files.
-- **Governed CI/CD** — `.github/workflows/*`. `ci.yml` is the product build gate (it *runs*
+- **Governed CI/CD** — `.github/workflows/*`. `ci.yml` is the product build gate (it _runs_
   the harness gates against Atlas); `release.yml` is the CD skeleton. The workflow files are
   infra that belongs to the harness even while they gate the product.
 
@@ -101,7 +101,7 @@ Direction of the split is fixed: **Atlas depends on the harness, never the rever
 
 Atlas consumes the harness purely as **dev tooling** (a `package.json` script invokes
 `harness/gates/godfile-guard.mjs`; CI invokes the gates). The harness reasons about the repo
-from the *outside* — it reads tracked files via `git ls-files`, it does not link Atlas
+from the _outside_ — it reads tracked files via `git ls-files`, it does not link Atlas
 internals. This keeps the future `git mv` a clean lift: nothing in `harness/` resolves an
 `@atlas/*` module, so nothing breaks when it leaves.
 
@@ -124,16 +124,16 @@ on every `npm test` rather than by whoever remembers to paste a grep.
 Declared harness-owned, migrating to Orchestra at split time. Left physically under `docs/`
 so the WP-card pointer + digest reference graph stays intact:
 
-| Concern                    | Path                                   |
-|----------------------------|----------------------------------------|
-| Execution protocol         | `docs/EXECUTION-PROTOCOL.md`           |
-| Decomposition protocol     | `docs/DECOMPOSITION-PROTOCOL.md`       |
-| Test-harness conventions   | `docs/CONVENTIONS.md`                  |
-| Method overview            | `docs/method/README.md`                |
-| Pipeline stage prompts     | `docs/method/prompts/{S0,S1,S2,S3,C,S4}.md` |
-| Review prompt              | `docs/method/prompts/review.md`        |
-| Per-WP execution prompts   | `docs/method/prompts/exec/{BIND,RED,GREEN,REFACTOR,GATE,SEAL}.md` |
-| WP / properties templates  | `docs/method/{wp-template.md,properties-template.md,product-design.md}` |
+| Concern                   | Path                                                                    |
+| ------------------------- | ----------------------------------------------------------------------- |
+| Execution protocol        | `docs/EXECUTION-PROTOCOL.md`                                            |
+| Decomposition protocol    | `docs/DECOMPOSITION-PROTOCOL.md`                                        |
+| Test-harness conventions  | `docs/CONVENTIONS.md`                                                   |
+| Method overview           | `docs/method/README.md`                                                 |
+| Pipeline stage prompts    | `docs/method/prompts/{S0,S1,S2,S3,C,S4}.md`                             |
+| Review prompt             | `docs/method/prompts/review.md`                                         |
+| Per-WP execution prompts  | `docs/method/prompts/exec/{BIND,RED,GREEN,REFACTOR,GATE,SEAL}.md`       |
+| WP / properties templates | `docs/method/{wp-template.md,properties-template.md,product-design.md}` |
 
 Everything else under `docs/` (requirements, roadmap, spec, reference, ADRs, design) is
 **Atlas product** and stays with Atlas.

@@ -48,7 +48,7 @@ carries no such predicate, so its frontier is pure PPR, byte-identical to before
 
 The model is configured **outside the repository**, at `$ATLAS_MODEL_CONFIG`, else
 `$XDG_CONFIG_HOME/atlas/model.json`, else `~/.config/atlas/model.json`. That location is enforced, not just
-recommended — see *What it refuses*.
+recommended — see _What it refuses_.
 
 ## Worked example — the zero-config run
 
@@ -64,13 +64,13 @@ coverage: coverage CLOSES — all 0 planned site(s) accounted for: 0 seeded, 0 a
 **Read the third line before concluding anything.** A `0` here has more than one cause and `mine` computes
 which one from the run's own report rather than guessing:
 
-- `0 sites visited` — the run stopped *upstream* of the model. The structural frontier was empty, so no
+- `0 sites visited` — the run stopped _upstream_ of the model. The structural frontier was empty, so no
   proposer was ever consulted. Wiring a model changes nothing; run
   [`atlas doctor index`](./doctor.md#doctor-index--why-mine-found-nothing), which reports whether this
   repository has the SCIP index the frontier is derived from and prints the command that produces one. It
   points, it does not promise — an indexed repository can still have an empty frontier, and that leg says
   which case you are in.
-- `N site(s) visited and every one abstained: no proposer model is wired` — *this* is the abstention case.
+- `N site(s) visited and every one abstained: no proposer model is wired` — _this_ is the abstention case.
   No model is configured, so nothing could be proposed. Facts are never fabricated.
 - `N site(s) visited and every one abstained` with a model wired — the model was asked and declined, or the
   admission gate refused. Also not a failure.
@@ -107,18 +107,18 @@ not upgrade "produced no fact" into "abstained" on the strength of a reason it n
 `unrecorded` and names the port. This is the honest current state and it is one token wide: return the whole
 `ExtractResult` from that port and every row becomes `"outcome":"abstained"` carrying its reason.
 
-| outcome | means |
-| --- | --- |
-| `seeded` | the site produced facts, and the row names **which** — one site may yield more than one |
-| `abstained` | the site was visited and produced no fact, and the grounded `WhyNot` (GEN-12) says why |
-| `unrecorded` | the site was visited and produced no fact, and the run could **not** obtain its `WhyNot`. Not an abstention: nothing grounded it. The row names the reason it could not |
-| `interrupted` | `visit` threw at this site. It is not completed, and the run carries a `resumeToken` |
-| `unvisited` | no call was spent here — `cause: ceiling` (the budget cold tail, left to born-from-work) or `cause: after-interrupt` |
+| outcome       | means                                                                                                                                                                   |
+| ------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `seeded`      | the site produced facts, and the row names **which** — one site may yield more than one                                                                                 |
+| `abstained`   | the site was visited and produced no fact, and the grounded `WhyNot` (GEN-12) says why                                                                                  |
+| `unrecorded`  | the site was visited and produced no fact, and the run could **not** obtain its `WhyNot`. Not an abstention: nothing grounded it. The row names the reason it could not |
+| `interrupted` | `visit` threw at this site. It is not completed, and the run carries a `resumeToken`                                                                                    |
+| `unvisited`   | no call was spent here — `cause: ceiling` (the budget cold tail, left to born-from-work) or `cause: after-interrupt`                                                    |
 
 **Why per-site and not a count.** "N abstained" does not let anyone establish that no site was **dropped**,
 and until this ledger existed nothing could: `GenesisReport` carried no abstention field and the run
 controller discarded every `WhyNot`, so a site that abstained and a site that vanished produced the same
-artifact — which made *"Atlas mined this repository completely"* unfalsifiable. The verdict line is computed
+artifact — which made _"Atlas mined this repository completely"_ unfalsifiable. The verdict line is computed
 by `reconcile` (`packages/genesis/src/coverage.ts`) and it does **not** subtract: one site may yield more
 than one fact, so `sites − facts` is not a residual. It compares the row set against the frontier the run
 was handed, and refuses to close on a gap **or** on a duplicate.
@@ -140,11 +140,11 @@ coverage: coverage CLOSES — all 0 planned site(s) accounted for: 0 seeded, 0 a
 
 ## Exit codes
 
-| code | meaning |
-| --- | --- |
-| `0` | the pass ran to completion (a `0`-candidate pass is still a completed pass) |
-| `1` | the pass was partial — a budget ran out, or a staging commit was refused. The report says which, and prints `partial: resume at rank <n>` |
-| `2` | a governed refusal: the model configuration could not be trusted |
+| code | meaning                                                                                                                                   |
+| ---- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| `0`  | the pass ran to completion (a `0`-candidate pass is still a completed pass)                                                               |
+| `1`  | the pass was partial — a budget ran out, or a staging commit was refused. The report says which, and prints `partial: resume at rank <n>` |
+| `2`  | a governed refusal: the model configuration could not be trusted                                                                          |
 
 The `1`/`2` split is deliberate: a run that legitimately ran out of budget keeps its report and exits `1`,
 so it stays distinguishable from a misconfiguration. The `0` and `2` rows below are executed on this page;
@@ -156,7 +156,7 @@ repository whose frontier is empty.
 Both blocks below are real runs with the absolute paths shortened to `/tmp/demo` and `/tmp/config`;
 everything else is verbatim.
 
-**A model config inside the repository under analysis.** The config names an executable Atlas will *run*, so
+**A model config inside the repository under analysis.** The config names an executable Atlas will _run_, so
 sourcing it from a cloned repository would be an arbitrary-code-execution path. Checked before the file is
 even opened, so the refusal cannot depend on its contents:
 

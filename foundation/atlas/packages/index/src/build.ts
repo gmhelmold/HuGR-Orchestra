@@ -5,10 +5,10 @@
 // resolve (incl. every cross-language/FFI boundary) is declared `unresolved` (to: null), never guessed;
 // identity is minted ONLY through the sealed kernel seam (no self-rolled hash).
 
-import { id, asSubtreeHash } from '@atlas/kernel';
-import type { Hash, SubtreeHash } from '@atlas/contracts';
-import { foldNodeHash } from './rollup.js';
-import type { Axes, Axis, DepEdge, FileTree, IndexNode, ScipOutput } from './types.js';
+import { id, asSubtreeHash } from "@atlas/kernel"
+import type { Hash, SubtreeHash } from "@atlas/contracts"
+import { foldNodeHash } from "./rollup.js"
+import type { Axes, Axis, DepEdge, FileTree, IndexNode, ScipOutput } from "./types.js"
 
 /** The mechanical, `$0`-LLM axis build (INDEX-3): derive every axis-view purely from the file tree +
  *  recorded SCIP output; deterministic, idempotent, unresolved edges declared (never guessed). */
@@ -16,18 +16,18 @@ export interface BuildApi {
   /** Derive all axis-views from the file tree + recorded SCIP output; deterministic, `$0`-LLM,
    *  idempotent (rebuild twice ⇒ identical trees). The SCIP binary is a black-box input (fixtures),
    *  NOT modeled here (method-tags-idx:38-39). (method-tags-idx:38; atlas-index:157-159) */
-  build(tree: FileTree, scipOutput: ScipOutput): Axes;
+  build(tree: FileTree, scipOutput: ScipOutput): Axes
 }
 
 // Level vocabularies (atlas-index:54, 70). The build maps tree DEPTH to the level NAME along each rail;
 // a depth past the vocabulary pins to the deepest name (no invented level).
-const SPATIAL_LEVELS = ['repo', 'crate', 'module', 'file', 'item', 'block'] as const;
-const TERRITORY_LEVELS = ['project', 'territory', 'region'] as const;
+const SPATIAL_LEVELS = ["repo", "crate", "module", "file", "item", "block"] as const
+const TERRITORY_LEVELS = ["project", "territory", "region"] as const
 
 /** The sub-file refinement separator (`file::item::block`, adapter-io/ast.ts `unitPath`; the descent that
  *  reads it is resolve.ts `descentSteps`). A node key nests on `::` as well as `/`, so a `::` in a key is
  *  a claim of real structural containment. */
-const UNIT_SEP = '::';
+const UNIT_SEP = "::"
 
 /**
  * THE key-component escape — the reason a node key can be trusted as a structural ADDRESS.
@@ -48,22 +48,22 @@ const UNIT_SEP = '::';
  * For a normal path (no `:`, no `%`) this is the IDENTITY function — no existing key moves.
  */
 export function escapeKeyComponent(component: string): string {
-  return component.replaceAll('%', '%25').replaceAll(':', '%3A');
+  return component.replaceAll("%", "%25").replaceAll(":", "%3A")
 }
 
 /** The exact inverse of `escapeKeyComponent` (`unescape(escape(s)) === s` for every string) — so a key is
  *  a lossless encoding of the path/name it addresses, not a lossy sanitization. */
 export function unescapeKeyComponent(component: string): string {
-  return component.replaceAll(/%3A/g, ':').replaceAll(/%25/g, '%');
+  return component.replaceAll(/%3A/g, ":").replaceAll(/%25/g, "%")
 }
 
 /** The parent context one level up: its RAW tree path (what the adapter minted its children against), its
  *  already-MINTED key, and whether it carries its own bytes (only a content-bearing node can have sub-file
  *  refinement children — a directory cannot). */
 interface Parent {
-  readonly path: string;
-  readonly key: string;
-  readonly content: string | undefined;
+  readonly path: string
+  readonly key: string
+  readonly content: string | undefined
 }
 
 /**
@@ -74,9 +74,8 @@ interface Parent {
  * forged segment boundary.
  */
 function safeUnitLocal(local: string): string {
-  const wellFormed =
-    local.length > 0 && !local.includes(UNIT_SEP) && !local.startsWith(':') && !local.endsWith(':');
-  return wellFormed ? local : escapeKeyComponent(local);
+  const wellFormed = local.length > 0 && !local.includes(UNIT_SEP) && !local.startsWith(":") && !local.endsWith(":")
+  return wellFormed ? local : escapeKeyComponent(local)
 }
 
 /**
@@ -92,9 +91,9 @@ function safeUnitLocal(local: string): string {
  */
 function mintKey(node: FileTree, parent: Parent | undefined): string {
   if (parent !== undefined && parent.content !== undefined && node.path.startsWith(parent.path + UNIT_SEP)) {
-    return `${parent.key}${UNIT_SEP}${safeUnitLocal(node.path.slice(parent.path.length + UNIT_SEP.length))}`;
+    return `${parent.key}${UNIT_SEP}${safeUnitLocal(node.path.slice(parent.path.length + UNIT_SEP.length))}`
   }
-  return node.path.split('/').map(escapeKeyComponent).join('/');
+  return node.path.split("/").map(escapeKeyComponent).join("/")
 }
 
 /** subtreeHash via the sealed seam. Delegates to `foldNodeHash` — THE single rollup implementation
@@ -103,22 +102,16 @@ function mintKey(node: FileTree, parent: Parent | undefined): string {
  *  The fold is keyed by the MINTED key (not the raw path) so a child's relative name is computed in the
  *  same namespace the children were minted in. */
 function rollupHash(key: string, node: FileTree, children: readonly IndexNode[]): SubtreeHash {
-  return foldNodeHash({ key, content: node.content, children });
+  return foldNodeHash({ key, content: node.content, children })
 }
 
 /** Build one rooted axis hierarchy from the file tree along a level vocabulary. Deterministic + total. */
-function hierarchy(
-  node: FileTree,
-  axis: Axis,
-  levels: readonly string[],
-  depth: number,
-  parent?: Parent,
-): IndexNode {
-  const level = levels[Math.min(depth, levels.length - 1)] ?? levels[levels.length - 1] ?? '';
-  const key = mintKey(node, parent);
-  const self: Parent = { path: node.path, key, content: node.content };
-  const children = node.children.map((c) => hierarchy(c, axis, levels, depth + 1, self));
-  return { axis, level, key, subtreeHash: rollupHash(key, node, children), children, objects: [] };
+function hierarchy(node: FileTree, axis: Axis, levels: readonly string[], depth: number, parent?: Parent): IndexNode {
+  const level = levels[Math.min(depth, levels.length - 1)] ?? levels[levels.length - 1] ?? ""
+  const key = mintKey(node, parent)
+  const self: Parent = { path: node.path, key, content: node.content }
+  const children = node.children.map((c) => hierarchy(c, axis, levels, depth + 1, self))
+  return { axis, level, key, subtreeHash: rollupHash(key, node, children), children, objects: [] }
 }
 
 /**
@@ -129,13 +122,13 @@ function hierarchy(
  * `genesis`'s `resolveSiteKey` looks a mined `StructRef` up by. A parallel copy of `id({file})` in an
  * adapter is a second source of truth for identity — the class of drift KERNEL-1 exists to forbid.
  */
-export const nodeHashOfPath = (relativePath: string): Hash => id({ file: relativePath });
+export const nodeHashOfPath = (relativePath: string): Hash => id({ file: relativePath })
 
 /** A stable per-document node hash (the dependency axis keys structural units by hash, atlas-index:105). */
-const docHash = nodeHashOfPath;
+const docHash = nodeHashOfPath
 
 /** A canonical, order-independent key for one edge — used for dedup + deterministic sort. */
-const edgeKey = (e: DepEdge): string => `${String(e.from)}\0${e.to === null ? '' : String(e.to)}\0${e.kind}`;
+const edgeKey = (e: DepEdge): string => `${String(e.from)}\0${e.to === null ? "" : String(e.to)}\0${e.kind}`
 
 /**
  * A SCIP symbol is DOCUMENT-SCOPED (unrelated to any same-named symbol in another document) iff it is a
@@ -151,7 +144,7 @@ const edgeKey = (e: DepEdge): string => `${String(e.from)}\0${e.to === null ? ''
  * `.atlas/index.scip`: every occurrence matching `/^local/i` renders as exactly `local N` (never `Local N`,
  * `local:N`, or any other spelling) — so `startsWith('local ')` is the exact, spec-anchored predicate.
  */
-export const isLocalSymbol = (symbol: string): boolean => symbol.startsWith('local ');
+export const isLocalSymbol = (symbol: string): boolean => symbol.startsWith("local ")
 
 /**
  * CANON-AND-VERIFY (#189 cross-package): a reference into another in-repo package is recorded by
@@ -193,7 +186,7 @@ export const isLocalSymbol = (symbol: string): boolean => symbol.startsWith('loc
  * cannot catch. Holds for `tsc --declaration` per-file output (this repo); revisit for bundled declarations.
  */
 export const canonicalizeSymbol = (symbol: string): string =>
-  symbol.replace(/ dist\/(?:src\/)?((?:[^`]*\/)?`[^`]+)\.d\.ts`/, ' src/$1.ts`');
+  symbol.replace(/ dist\/(?:src\/)?((?:[^`]*\/)?`[^`]+)\.d\.ts`/, " src/$1.ts`")
 
 /**
  * Derive the depends-on edge ledger from the SCIP occurrences alone. A `reference` whose symbol has an
@@ -210,28 +203,28 @@ export const canonicalizeSymbol = (symbol: string): string =>
  * -wins — fabricating a cross-document edge the SCIP data never asserted.
  */
 function deriveEdges(scip: ScipOutput): DepEdge[] {
-  const defs = new Map<string, Hash>();
+  const defs = new Map<string, Hash>()
   for (const doc of scip.documents) {
-    const h = docHash(doc.relativePath);
+    const h = docHash(doc.relativePath)
     for (const occ of doc.occurrences) {
-      if (occ.role === 'definition' && !isLocalSymbol(occ.symbol) && !defs.has(occ.symbol)) defs.set(occ.symbol, h);
+      if (occ.role === "definition" && !isLocalSymbol(occ.symbol) && !defs.has(occ.symbol)) defs.set(occ.symbol, h)
     }
   }
-  const seen = new Map<string, DepEdge>();
+  const seen = new Map<string, DepEdge>()
   for (const doc of scip.documents) {
-    const from = docHash(doc.relativePath);
+    const from = docHash(doc.relativePath)
     for (const occ of doc.occurrences) {
-      if (occ.role !== 'reference' || isLocalSymbol(occ.symbol)) continue;
+      if (occ.role !== "reference" || isLocalSymbol(occ.symbol)) continue
       // CANON-AND-VERIFY (#189): a same-package hit wins as-is; else try the src-form of a published-types
       // (`dist/…d.ts`) descriptor and take it ONLY if it resolves to a real in-index definition.
-      const target = defs.get(occ.symbol) ?? defs.get(canonicalizeSymbol(occ.symbol));
+      const target = defs.get(occ.symbol) ?? defs.get(canonicalizeSymbol(occ.symbol))
       const edge: DepEdge =
-        target !== undefined ? { from, to: target, kind: 'resolved' } : { from, to: null, kind: 'unresolved' };
-      const k = edgeKey(edge);
-      if (!seen.has(k)) seen.set(k, edge);
+        target !== undefined ? { from, to: target, kind: "resolved" } : { from, to: null, kind: "unresolved" }
+      const k = edgeKey(edge)
+      if (!seen.has(k)) seen.set(k, edge)
     }
   }
-  return [...seen.values()].sort((a, b) => (edgeKey(a) < edgeKey(b) ? -1 : edgeKey(a) > edgeKey(b) ? 1 : 0));
+  return [...seen.values()].sort((a, b) => (edgeKey(a) < edgeKey(b) ? -1 : edgeKey(a) > edgeKey(b) ? 1 : 0))
 }
 
 /**
@@ -255,33 +248,33 @@ function deriveEdges(scip: ScipOutput): DepEdge[] {
  * shared root cause of #98/#189 — an unqualified §3.5 rule that had no stated exception).
  */
 function dependencyAxis(edges: readonly DepEdge[]): IndexNode {
-  const nodes = new Set<string>();
+  const nodes = new Set<string>()
   for (const e of edges) {
-    nodes.add(String(e.from));
-    if (e.to !== null) nodes.add(String(e.to));
+    nodes.add(String(e.from))
+    if (e.to !== null) nodes.add(String(e.to))
   }
   const children: IndexNode[] = [...nodes].sort().map((h) => ({
-    axis: 'dependency',
-    level: 'unit',
+    axis: "dependency",
+    level: "unit",
     key: h,
     subtreeHash: asSubtreeHash(h),
     children: [],
     objects: [],
-  }));
-  const subtreeHash = asSubtreeHash(id({ edges: edges.map(edgeKey), nodes: children.map((c) => c.key).sort() }));
-  return { axis: 'dependency', level: 'root', key: 'dependency', subtreeHash, children, objects: [] };
+  }))
+  const subtreeHash = asSubtreeHash(id({ edges: edges.map(edgeKey), nodes: children.map((c) => c.key).sort() }))
+  return { axis: "dependency", level: "root", key: "dependency", subtreeHash, children, objects: [] }
 }
 
 /** INDEX-3 build: the three axis-views + the honest edge ledger, $0-LLM and idempotent. */
 export function build(tree: FileTree, scipOutput: ScipOutput): Axes {
-  const edges = deriveEdges(scipOutput);
+  const edges = deriveEdges(scipOutput)
   return {
-    spatial: hierarchy(tree, 'spatial', SPATIAL_LEVELS, 0),
-    territory: hierarchy(tree, 'territory', TERRITORY_LEVELS, 0),
+    spatial: hierarchy(tree, "spatial", SPATIAL_LEVELS, 0),
+    territory: hierarchy(tree, "territory", TERRITORY_LEVELS, 0),
     dependency: dependencyAxis(edges),
     edges,
-  };
+  }
 }
 
 /** The frozen `BuildApi` surface, wired to the pure `build` above. */
-export const buildApi: BuildApi = { build };
+export const buildApi: BuildApi = { build }

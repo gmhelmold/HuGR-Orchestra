@@ -18,11 +18,14 @@ export type RecordAdmissionInput = {
 
 export type AdmissionRecord = Schema.Schema.Type<typeof MaestroEvent.Admission.Decided.data>
 
-export class AdmissionConflictError extends Schema.TaggedErrorClass<AdmissionConflictError>()("MaestroAdmissionConflict", {
-  sessionID: Schema.String,
-  messageID: Schema.String,
-  methodVersion: Schema.String,
-}) {}
+export class AdmissionConflictError extends Schema.TaggedErrorClass<AdmissionConflictError>()(
+  "MaestroAdmissionConflict",
+  {
+    sessionID: Schema.String,
+    messageID: Schema.String,
+    methodVersion: Schema.String,
+  },
+) {}
 
 function eventID(input: Pick<RecordAdmissionInput, "sessionID" | "messageID" | "methodVersion">) {
   const key = [input.sessionID, input.messageID, input.methodVersion].join("\u0000")
@@ -45,7 +48,12 @@ export const readAdmission = Effect.fn("MaestroAdmission.read")(function* (
   input: Pick<RecordAdmissionInput, "sessionID" | "messageID" | "methodVersion">,
 ) {
   const { db } = yield* Database.Service
-  const row = yield* db.select().from(EventTable).where(eq(EventTable.id, eventID(input))).get().pipe(Effect.orDie)
+  const row = yield* db
+    .select()
+    .from(EventTable)
+    .where(eq(EventTable.id, eventID(input)))
+    .get()
+    .pipe(Effect.orDie)
   if (!row) return undefined
   if (row.type !== EventV2.versionedType(MaestroEvent.Admission.Decided.type, 1)) return undefined
   return Schema.decodeUnknownSync(MaestroEvent.Admission.Decided.data)(row.data)

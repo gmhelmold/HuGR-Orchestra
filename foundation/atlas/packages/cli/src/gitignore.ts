@@ -30,49 +30,49 @@
 // a REPORTED outcome, never a throw and never a silent success. `atlas init` must not become a command that
 // can crash on a read-only checkout.
 
-import { appendFileSync, readFileSync, writeFileSync } from 'node:fs';
-import { join } from 'node:path';
+import { appendFileSync, readFileSync, writeFileSync } from "node:fs"
+import { join } from "node:path"
 
 /** The exact pattern that denies every child of `.atlas/`, and the exact negation that re-admits the
  *  admin-owned policy. Both are matched VERBATIM when deciding whether the rule is already present, so a
  *  user who wrote `.atlas/` (the broken variant that swallows `policy.json`) is still told about it. */
-export const ATLAS_IGNORE_PATTERN = '.atlas/*';
-export const ATLAS_POLICY_NEGATION = '!.atlas/policy.json';
+export const ATLAS_IGNORE_PATTERN = ".atlas/*"
+export const ATLAS_POLICY_NEGATION = "!.atlas/policy.json"
 
 /** The block `atlas init` appends, comments included — the comments are the reason a later reader does not
  *  delete the two lines. Newline-terminated so an append can never join the previous line. */
 export const ATLAS_IGNORE_BLOCK = [
-  '',
-  '# ── the Atlas durable store is DATA, never source (written by `atlas init`) ──────────────────────',
-  '# `.atlas/projection.json` IS the governed knowledge and `.atlas/cas/**` are its bytes; committing them',
-  '# would publish rows past every governed door, because no door is involved in a `git add`. Atlas detects',
-  '# a committed store and REFUSES to serve or write it, so without this rule the first `git add -A` after',
-  '# an emit turns Atlas off. `.atlas/staging.json` is worse in kind: unratified candidates.',
-  '# Deny every child, then re-admit the one file that is genuinely source. `.atlas/*` (not `.atlas/`) is',
-  '# load-bearing: git cannot re-include a path under an excluded DIRECTORY, so the negation below would be',
-  '# unreachable and `policy.json` would be silently dropped. The negation must come AFTER the pattern.',
+  "",
+  "# ── the Atlas durable store is DATA, never source (written by `atlas init`) ──────────────────────",
+  "# `.atlas/projection.json` IS the governed knowledge and `.atlas/cas/**` are its bytes; committing them",
+  "# would publish rows past every governed door, because no door is involved in a `git add`. Atlas detects",
+  "# a committed store and REFUSES to serve or write it, so without this rule the first `git add -A` after",
+  "# an emit turns Atlas off. `.atlas/staging.json` is worse in kind: unratified candidates.",
+  "# Deny every child, then re-admit the one file that is genuinely source. `.atlas/*` (not `.atlas/`) is",
+  "# load-bearing: git cannot re-include a path under an excluded DIRECTORY, so the negation below would be",
+  "# unreachable and `policy.json` would be silently dropped. The negation must come AFTER the pattern.",
   ATLAS_IGNORE_PATTERN,
   ATLAS_POLICY_NEGATION,
-  '',
-].join('\n');
+  "",
+].join("\n")
 
 /** What `ensureAtlasIgnored` did. `outcome` is a DISCRIMINANT — a closed union asserted on by equality, not
  *  a prose message parsed by a test (the vacuous-assertion class this repo has already been bitten by). */
-export type IgnoreOutcome = 'installed' | 'already-present' | 'partial-repaired' | 'failed';
+export type IgnoreOutcome = "installed" | "already-present" | "partial-repaired" | "failed"
 
 export interface IgnoreResult {
-  readonly outcome: IgnoreOutcome;
+  readonly outcome: IgnoreOutcome
   /** The `.gitignore` path considered — always reported, so the user knows WHERE to look. */
-  readonly path: string;
+  readonly path: string
   /** One line, rendered on `atlas init`'s stdout. Never empty. */
-  readonly note: string;
+  readonly note: string
 }
 
 /** Does `content` already deny the durable store? Matched line-wise on the EXACT pattern (leading/trailing
  *  whitespace trimmed), never `includes()`: `.atlas/*` is a substring of a comment mentioning it, and a
  *  commented-out rule denies nothing. */
 function hasLine(content: string, line: string): boolean {
-  return content.split(/\r?\n/).some((l) => l.trim() === line);
+  return content.split(/\r?\n/).some((l) => l.trim() === line)
 }
 
 /**
@@ -87,35 +87,59 @@ function hasLine(content: string, line: string): boolean {
  *   · `failed`            — the filesystem refused. Reported with the path so the user can add it by hand.
  */
 export function ensureAtlasIgnored(repoPath: string): IgnoreResult {
-  const path = join(repoPath, '.gitignore');
-  let content: string;
+  const path = join(repoPath, ".gitignore")
+  let content: string
   try {
-    content = readFileSync(path, 'utf8');
+    content = readFileSync(path, "utf8")
   } catch {
     // No `.gitignore` at all (the common case for a fresh repo) — create it with just the Atlas block.
     try {
-      writeFileSync(path, ATLAS_IGNORE_BLOCK.replace(/^\n/, ''), 'utf8');
-      return { outcome: 'installed', path, note: `gitignore: created ${path} denying .atlas/* (Atlas's durable store is DATA, never source)` };
+      writeFileSync(path, ATLAS_IGNORE_BLOCK.replace(/^\n/, ""), "utf8")
+      return {
+        outcome: "installed",
+        path,
+        note: `gitignore: created ${path} denying .atlas/* (Atlas's durable store is DATA, never source)`,
+      }
     } catch {
-      return { outcome: 'failed', path, note: `gitignore: could NOT write ${path} — add '${ATLAS_IGNORE_PATTERN}' and '${ATLAS_POLICY_NEGATION}' by hand, or a 'git add -A' will turn Atlas off` };
+      return {
+        outcome: "failed",
+        path,
+        note: `gitignore: could NOT write ${path} — add '${ATLAS_IGNORE_PATTERN}' and '${ATLAS_POLICY_NEGATION}' by hand, or a 'git add -A' will turn Atlas off`,
+      }
     }
   }
 
-  const denies = hasLine(content, ATLAS_IGNORE_PATTERN);
-  const readmits = hasLine(content, ATLAS_POLICY_NEGATION);
+  const denies = hasLine(content, ATLAS_IGNORE_PATTERN)
+  const readmits = hasLine(content, ATLAS_POLICY_NEGATION)
   if (denies && readmits) {
-    return { outcome: 'already-present', path, note: `gitignore: ${ATLAS_IGNORE_PATTERN} already denied in ${path} — nothing to do` };
+    return {
+      outcome: "already-present",
+      path,
+      note: `gitignore: ${ATLAS_IGNORE_PATTERN} already denied in ${path} — nothing to do`,
+    }
   }
   // A `.gitignore` ending without a newline would otherwise glue the first appended line onto the last
   // existing one, producing a pattern that matches nothing and looks correct in a diff.
-  const lead = content.length > 0 && !content.endsWith('\n') ? '\n' : '';
-  const block = denies ? `${lead}${ATLAS_POLICY_NEGATION}\n` : `${lead}${ATLAS_IGNORE_BLOCK}`;
+  const lead = content.length > 0 && !content.endsWith("\n") ? "\n" : ""
+  const block = denies ? `${lead}${ATLAS_POLICY_NEGATION}\n` : `${lead}${ATLAS_IGNORE_BLOCK}`
   try {
-    appendFileSync(path, block, 'utf8');
+    appendFileSync(path, block, "utf8")
   } catch {
-    return { outcome: 'failed', path, note: `gitignore: could NOT append to ${path} — add '${ATLAS_IGNORE_PATTERN}' and '${ATLAS_POLICY_NEGATION}' by hand, or a 'git add -A' will turn Atlas off` };
+    return {
+      outcome: "failed",
+      path,
+      note: `gitignore: could NOT append to ${path} — add '${ATLAS_IGNORE_PATTERN}' and '${ATLAS_POLICY_NEGATION}' by hand, or a 'git add -A' will turn Atlas off`,
+    }
   }
   return denies
-    ? { outcome: 'partial-repaired', path, note: `gitignore: added the missing '${ATLAS_POLICY_NEGATION}' to ${path} — the admin policy is source and must stay in git` }
-    : { outcome: 'installed', path, note: `gitignore: added '${ATLAS_IGNORE_PATTERN}' (+ the policy.json exception) to ${path} — Atlas refuses a COMMITTED store, so this rule is what keeps it on` };
+    ? {
+        outcome: "partial-repaired",
+        path,
+        note: `gitignore: added the missing '${ATLAS_POLICY_NEGATION}' to ${path} — the admin policy is source and must stay in git`,
+      }
+    : {
+        outcome: "installed",
+        path,
+        note: `gitignore: added '${ATLAS_IGNORE_PATTERN}' (+ the policy.json exception) to ${path} — Atlas refuses a COMMITTED store, so this rule is what keeps it on`,
+      }
 }

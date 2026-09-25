@@ -3,8 +3,9 @@
 The governed **MEMORY** write door (CAMPAIGN-11, WP-11.W8) — the ONE path a `MemoryEntry` reaches the durable
 per-seat memory log (`.atlas/memory.jsonl`). You hand it an entry as a JSON file; it derives the entry's
 `kind` from its shape, runs it through the SEVEN fail-closed MEM gates (kind derivation, template, partition
-+ owner, logbook discipline, cap, pre-write secret scan, persist), and either appends it or tells you which
-gate said no.
+
+- owner, logbook discipline, cap, pre-write secret scan, persist), and either appends it or tells you which
+  gate said no.
 
 This page describes the **CLI** command `atlas memory-emit`. The MCP tool is `atlas-memory-emit`. It is a
 genuinely NEW governed write door, distinct from [`emit`](./emit.md)/[`link`](./link.md): the durable log it
@@ -18,7 +19,7 @@ atlas memory-emit <entryJsonPath>
 ```
 
 - `<entryJsonPath>` — required. A file holding one `MemoryEntry` as JSON — a `project` rule (`{rule, scope,
-  frecency, grounding?}`), a `task` record, a `pr` record, or a `logbook` entry (see
+frecency, grounding?}`), a `task` record, a `pr` record, or a `logbook` entry (see
   `docs/reference/atlas-memory.md`). There is no `--at`: memory carries no source@sha anchor requirement.
 - The entry's `kind` is never a flag or a field you set — `memoryKindOf` derives it from which template's
   required fields are present and no OTHER template's are (MEM-2). An entry that matches zero or more than
@@ -40,7 +41,7 @@ read:
 The entry file:
 
 ```json
-{"rule":"prefer named exports over default exports","scope":"src","frecency":1}
+{ "rule": "prefer named exports over default exports", "scope": "src", "frecency": 1 }
 ```
 
 ```
@@ -71,11 +72,11 @@ a knowledge `GroundedFact`) — `owner`/`kind` are its two structural fields, an
 
 ## Exit codes
 
-| code | meaning |
-| --- | --- |
-| `0` | the entry was admitted and appended to `.atlas/memory.jsonl`; `data.owner`/`data.kind` name the record |
-| `1` | usage error — missing entry file, unreadable file, malformed JSON |
-| `2` | a MEM gate refused the write. Nothing was persisted |
+| code | meaning                                                                                                |
+| ---- | ------------------------------------------------------------------------------------------------------ |
+| `0`  | the entry was admitted and appended to `.atlas/memory.jsonl`; `data.owner`/`data.kind` name the record |
+| `1`  | usage error — missing entry file, unreadable file, malformed JSON                                      |
+| `2`  | a MEM gate refused the write. Nothing was persisted                                                    |
 
 ## What it refuses, and why
 

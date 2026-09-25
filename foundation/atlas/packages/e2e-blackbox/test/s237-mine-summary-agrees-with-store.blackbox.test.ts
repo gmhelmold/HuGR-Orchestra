@@ -14,64 +14,74 @@
 // ZERO METERED MODEL SPEND — `echo` stands in for the model (the S33 idiom): `ATLAS_MODEL_CONFIG` points
 // OUTSIDE the repo (the arbitrary-code-execution guard `atlas mine` enforces against an in-repo config).
 
-import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
-import { tmpdir } from 'node:os';
-import { join } from 'node:path';
-import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { makeFixtureRepo, runAtlas } from '../src/harness.js';
-import type { FixtureRepo } from '../src/harness.js';
+import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs"
+import { tmpdir } from "node:os"
+import { join } from "node:path"
+import { afterAll, beforeAll, describe, expect, it } from "vitest"
+import { makeFixtureRepo, runAtlas } from "../src/harness.js"
+import type { FixtureRepo } from "../src/harness.js"
 
 const FILES = {
-  'src/util.ts': 'export function greet(n: string): string {\n  return `hi ${n}`;\n}\n',
-  'src/app.ts': "import { greet } from './util';\n\nexport function main(): string {\n  return greet('world');\n}\n",
-};
+  "src/util.ts": "export function greet(n: string): string {\n  return `hi ${n}`;\n}\n",
+  "src/app.ts": "import { greet } from './util';\n\nexport function main(): string {\n  return greet('world');\n}\n",
+}
 const INDEX = [
-  { path: 'src/util.ts', defines: ['util/greet().'] },
-  { path: 'src/app.ts', references: ['util/greet().'] },
-];
-const POLICY = JSON.stringify({ nearDup: { claimNormThreshold: 1 }, t0Heuristic: { keywords: [] }, authz: { scopes: {} } });
+  { path: "src/util.ts", defines: ["util/greet()."] },
+  { path: "src/app.ts", references: ["util/greet()."] },
+]
+const POLICY = JSON.stringify({
+  nearDup: { claimNormThreshold: 1 },
+  t0Heuristic: { keywords: [] },
+  authz: { scopes: {} },
+})
 
-let repo: FixtureRepo;
-let modelConfigPath: string;
-let modelConfigDir: string;
+let repo: FixtureRepo
+let modelConfigPath: string
+let modelConfigDir: string
 
 beforeAll(() => {
-  repo = makeFixtureRepo({ files: FILES, index: INDEX, policy: POLICY });
-  modelConfigDir = mkdtempSync(join(tmpdir(), 'atlas-s237-operator-'));
-  modelConfigPath = join(modelConfigDir, 'model.json');
-  const claimBlock = '```atlas-fact\n{"claim":"this site does something notable"}\n```';
-  writeFileSync(modelConfigPath, JSON.stringify({ roles: { propose: { cmd: 'echo', args: [claimBlock] } } }));
-});
+  repo = makeFixtureRepo({ files: FILES, index: INDEX, policy: POLICY })
+  modelConfigDir = mkdtempSync(join(tmpdir(), "atlas-s237-operator-"))
+  modelConfigPath = join(modelConfigDir, "model.json")
+  const claimBlock = '```atlas-fact\n{"claim":"this site does something notable"}\n```'
+  writeFileSync(modelConfigPath, JSON.stringify({ roles: { propose: { cmd: "echo", args: [claimBlock] } } }))
+})
 afterAll(() => {
-  repo?.cleanup();
-  if (modelConfigDir) rmSync(modelConfigDir, { recursive: true, force: true });
-});
+  repo?.cleanup()
+  if (modelConfigDir) rmSync(modelConfigDir, { recursive: true, force: true })
+})
 
-describe('S237 — a single-arm `atlas mine` rerun reports what the store actually holds', () => {
-  it('BY USE: first run seeds 2, second run (idempotent rerun, same sites already staged) STILL reports 2 — never a false 0/abstained', () => {
-    const env = { ATLAS_MODEL_CONFIG: modelConfigPath, ATLAS_MINE_SLOT: 'advisory' };
+describe("S237 — a single-arm `atlas mine` rerun reports what the store actually holds", () => {
+  it("BY USE: first run seeds 2, second run (idempotent rerun, same sites already staged) STILL reports 2 — never a false 0/abstained", () => {
+    const env = { ATLAS_MODEL_CONFIG: modelConfigPath, ATLAS_MINE_SLOT: "advisory" }
 
-    const run1 = runAtlas(repo.repoPath, ['mine', '.'], env);
-    expect(run1.exitCode).toBe(0);
-    expect(run1.stdout).toContain('genesis: seeded 2 candidate fact(s)');
+    const run1 = runAtlas(repo.repoPath, ["mine", "."], env)
+    expect(run1.exitCode).toBe(0)
+    expect(run1.stdout).toContain("genesis: seeded 2 candidate fact(s)")
 
-    const staging1 = JSON.parse(readFileSync(join(repo.repoPath, '.atlas', 'staging.json'), 'utf8')) as { current: unknown[] };
-    expect(staging1.current).toHaveLength(2);
+    const staging1 = JSON.parse(readFileSync(join(repo.repoPath, ".atlas", "staging.json"), "utf8")) as {
+      current: unknown[]
+    }
+    expect(staging1.current).toHaveLength(2)
 
     // THE MEASURED SCENARIO: rerun over the SAME repo — every site is already staged.
-    const run2 = runAtlas(repo.repoPath, ['mine', '.'], env);
-    expect(run2.exitCode).toBe(0);
+    const run2 = runAtlas(repo.repoPath, ["mine", "."], env)
+    expect(run2.exitCode).toBe(0)
 
     // THE STORE — unchanged (an idempotent rerun writes nothing new).
-    const staging2 = JSON.parse(readFileSync(join(repo.repoPath, '.atlas', 'staging.json'), 'utf8')) as { current: unknown[] };
-    expect(staging2.current).toHaveLength(2);
+    const staging2 = JSON.parse(readFileSync(join(repo.repoPath, ".atlas", "staging.json"), "utf8")) as {
+      current: unknown[]
+    }
+    expect(staging2.current).toHaveLength(2)
 
     // THE SUMMARY must agree with the store it sits beside — this is the #237 fix.
-    expect(run2.stdout).toContain('genesis: seeded 2 candidate fact(s)');
-    expect(run2.stdout).not.toContain('genesis: seeded 0 candidate fact(s)');
-    expect(run2.stdout).not.toContain('every one abstained');
+    expect(run2.stdout).toContain("genesis: seeded 2 candidate fact(s)")
+    expect(run2.stdout).not.toContain("genesis: seeded 0 candidate fact(s)")
+    expect(run2.stdout).not.toContain("every one abstained")
     // and the per-site ledger it must not contradict:
-    const seededLines = run2.stdout.split('\n').filter((l) => l.startsWith('site: ') && l.includes('"outcome":"seeded"'));
-    expect(seededLines).toHaveLength(2);
-  });
-});
+    const seededLines = run2.stdout
+      .split("\n")
+      .filter((l) => l.startsWith("site: ") && l.includes('"outcome":"seeded"'))
+    expect(seededLines).toHaveLength(2)
+  })
+})

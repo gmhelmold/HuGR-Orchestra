@@ -1,6 +1,11 @@
 {
   "what": "Cross-repo A1-dogfood: the SAME apparatus (real `atlas mine` advisory slot -> capture/replay -> Sonnet proposer effort=medium -> 3 blind Sonnet judges, majority-3) run on a THIRD-PARTY repo (zod) instead of Atlas-on-Atlas, to remove home-field advantage.",
-  "target": { "repo": "colinhacks/zod", "tag": "v3.23.8", "head": "ca42965df46b2f7e2747db29c40a26bcb32a51d5", "index": "scip-typescript 0.4.0 -> .atlas/index.scip (2.5MB)" },
+  "target": {
+    "repo": "colinhacks/zod",
+    "tag": "v3.23.8",
+    "head": "ca42965df46b2f7e2747db29c40a26bcb32a51d5",
+    "index": "scip-typescript 0.4.0 -> .atlas/index.scip (2.5MB)"
+  },
   "run": { "slot": "advisory", "sites_visited": 83, "facts_emitted": 76, "abstained": 7, "emit_rate": "91.6%" },
   "A1_precision": "66/76 = 86.8%",
   "wilson95": ["77.4", "92.7"],

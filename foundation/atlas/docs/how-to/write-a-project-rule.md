@@ -6,7 +6,7 @@ clear before it earns its slot.
 
 ## Prerequisites
 
-- A **real** `task` or `pr` lesson to promote (see [reference: templates](../reference/atlas-memory.md#templates-every-write-fills-one--no-free-prose)). Rules are *promoted* from lived experience, never invented up front.
+- A **real** `task` or `pr` lesson to promote (see [reference: templates](../reference/atlas-memory.md#templates-every-write-fills-one--no-free-prose)). Rules are _promoted_ from lived experience, never invented up front.
 - The member's current injected `project` memory and its remaining token budget (`≤ ~500 tok` total; orchestrator `≤ ~800`).
 - Write access to that member's Memory (you MUST NOT write another member's — [MEM-1](../reference/atlas-memory.md#invariants)).
 
@@ -21,18 +21,18 @@ clear before it earns its slot.
 3. **Make it specific and testable-in-spirit.** A reader must be able to tell whether they violated it.
    Name the concrete surface (a header, a path, a command), not a vibe.
 
-4. **Give it a `scope`.** A path glob, a tool, or a phase — so it surfaces *only* when it is role-relevant
+4. **Give it a `scope`.** A path glob, a tool, or a phase — so it surfaces _only_ when it is role-relevant
    and stays silent otherwise. A rule with no scope injects on every unrelated turn; that is bloat.
 
 5. **Attach `grounding` if you can (optional).** A `path@subtreeHash`, PR, or commit that proves the rule.
    Grounding earns the rule its place and lets CI flag it if the code moves out from under it.
 
 6. **Check the usefulness bar: actionable AND non-obvious.** If a competent member would already do it
-   without being told, it is not worth a token. Reject the obvious. *(This is a **Memory** project rule under a
+   without being told, it is not worth a token. Reject the obvious. _(This is a **Memory** project rule under a
    hard per-member token cap, where a slot spent is a slot denied — not a Knowledge fact. Knowledge admission
    does the opposite: obviousness is scored, never gated, per
    [ADR-0012](../adr/ADR-0012-obviousness-is-scored-never-gated.md). The bar differs because the constraint
-   differs — Memory is capped and rival, the Atlas is not.)*
+   differs — Memory is capped and rival, the Atlas is not.)_
 
 7. **Dedupe and fit the cap.** Confirm no existing entry already says it. Confirm the addition keeps the
    member's total injected `project` memory `≤` cap ([MEM-3](../reference/atlas-memory.md#invariants)). If
@@ -52,6 +52,7 @@ clear before it earns its slot.
   hits:      0,
 }
 ```
+
 Why it passes: one imperative line; a concrete, checkable surface (the `Authorization` header); scoped to
 where it applies (`src/http/**`), so it stays silent elsewhere; grounded to the file that proves it;
 non-obvious enough that a member could get it wrong.
@@ -64,6 +65,7 @@ non-obvious enough that a member could get it wrong.
   scope: "**",
 }
 ```
+
 Why it fails: vague and untestable ("be careful", "secure") — you cannot tell if you violated it (fails
 step 3); no real scope (`**` injects on every turn — step 4); obvious (any member already aims for this —
 step 6); missing `hits` and grounding (fails the template — step 8). It taxes every context and prevents

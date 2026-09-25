@@ -97,738 +97,525 @@
     "1": [
       {
         "true": true,
-        "sources": [
-          "atlas",
-          "lister"
-        ],
+        "sources": ["atlas", "lister"],
         "shape": "predicate"
       },
       {
         "true": true,
-        "sources": [
-          "lister"
-        ],
+        "sources": ["lister"],
         "shape": "predicate"
       },
       {
         "true": true,
-        "sources": [
-          "lister"
-        ],
+        "sources": ["lister"],
         "shape": "predicate"
       },
       {
         "true": true,
-        "sources": [
-          "lister"
-        ],
+        "sources": ["lister"],
         "shape": "predicate"
       },
       {
         "true": true,
-        "sources": [
-          "lister"
-        ],
+        "sources": ["lister"],
         "shape": "predicate"
       },
       {
         "true": true,
-        "sources": [
-          "lister"
-        ],
+        "sources": ["lister"],
         "shape": "dependency"
       },
       {
         "true": true,
-        "sources": [
-          "lister"
-        ],
+        "sources": ["lister"],
         "shape": "predicate"
       },
       {
         "true": true,
-        "sources": [
-          "lister"
-        ],
+        "sources": ["lister"],
         "shape": "predicate"
       },
       {
         "true": true,
-        "sources": [
-          "lister"
-        ],
+        "sources": ["lister"],
         "shape": "dependency"
       },
       {
         "true": true,
-        "sources": [
-          "lister"
-        ],
+        "sources": ["lister"],
         "shape": "negation"
       },
       {
         "true": true,
-        "sources": [
-          "lister"
-        ],
+        "sources": ["lister"],
         "shape": "negation"
       },
       {
         "true": true,
-        "sources": [
-          "lister"
-        ],
+        "sources": ["lister"],
         "shape": "predicate"
       }
     ],
     "2": [
       {
         "true": true,
-        "sources": [
-          "atlas",
-          "lister"
-        ],
+        "sources": ["atlas", "lister"],
         "shape": "advisory"
       },
       {
         "true": true,
-        "sources": [
-          "lister"
-        ],
+        "sources": ["lister"],
         "shape": "advisory"
       },
       {
         "true": true,
-        "sources": [
-          "lister"
-        ],
+        "sources": ["lister"],
         "shape": "predicate"
       },
       {
         "true": true,
-        "sources": [
-          "lister"
-        ],
+        "sources": ["lister"],
         "shape": "predicate"
       },
       {
         "true": true,
-        "sources": [
-          "lister"
-        ],
+        "sources": ["lister"],
         "shape": "negation"
       },
       {
         "true": true,
-        "sources": [
-          "lister"
-        ],
+        "sources": ["lister"],
         "shape": "predicate"
       },
       {
         "true": true,
-        "sources": [
-          "lister"
-        ],
+        "sources": ["lister"],
         "shape": "negation"
       },
       {
         "true": true,
-        "sources": [
-          "lister"
-        ],
+        "sources": ["lister"],
         "shape": "predicate"
       }
     ],
     "3": [
       {
         "true": true,
-        "sources": [
-          "atlas",
-          "lister"
-        ],
+        "sources": ["atlas", "lister"],
         "shape": "predicate"
       },
       {
         "true": true,
-        "sources": [
-          "lister"
-        ],
+        "sources": ["lister"],
         "shape": "advisory"
       },
       {
         "true": true,
-        "sources": [
-          "lister"
-        ],
+        "sources": ["lister"],
         "shape": "predicate"
       },
       {
         "true": true,
-        "sources": [
-          "lister"
-        ],
+        "sources": ["lister"],
         "shape": "advisory"
       },
       {
         "true": true,
-        "sources": [
-          "lister"
-        ],
+        "sources": ["lister"],
         "shape": "predicate"
       },
       {
         "true": true,
-        "sources": [
-          "lister"
-        ],
+        "sources": ["lister"],
         "shape": "predicate"
       },
       {
         "true": false,
-        "sources": [
-          "lister"
-        ],
+        "sources": ["lister"],
         "shape": "advisory"
       }
     ],
     "4": [
       {
         "true": true,
-        "sources": [
-          "atlas",
-          "lister"
-        ],
+        "sources": ["atlas", "lister"],
         "shape": "predicate"
       },
       {
         "true": false,
-        "sources": [
-          "lister"
-        ],
+        "sources": ["lister"],
         "shape": "other"
       },
       {
         "true": false,
-        "sources": [
-          "lister"
-        ],
+        "sources": ["lister"],
         "shape": "predicate"
       },
       {
         "true": false,
-        "sources": [
-          "lister"
-        ],
+        "sources": ["lister"],
         "shape": "other"
       },
       {
         "true": false,
-        "sources": [
-          "lister"
-        ],
+        "sources": ["lister"],
         "shape": "predicate"
       },
       {
         "true": false,
-        "sources": [
-          "lister"
-        ],
+        "sources": ["lister"],
         "shape": "negation"
       },
       {
         "true": false,
-        "sources": [
-          "lister"
-        ],
+        "sources": ["lister"],
         "shape": "negation"
       },
       {
         "true": false,
-        "sources": [
-          "lister"
-        ],
+        "sources": ["lister"],
         "shape": "other"
       },
       {
         "true": false,
-        "sources": [
-          "lister"
-        ],
+        "sources": ["lister"],
         "shape": "dependency"
       },
       {
         "true": true,
-        "sources": [
-          "lister"
-        ],
+        "sources": ["lister"],
         "shape": "negation"
       },
       {
         "true": false,
-        "sources": [
-          "lister"
-        ],
+        "sources": ["lister"],
         "shape": "advisory"
       }
     ],
     "5": [
       {
         "true": true,
-        "sources": [
-          "atlas",
-          "lister"
-        ],
+        "sources": ["atlas", "lister"],
         "shape": "predicate"
       },
       {
         "true": true,
-        "sources": [
-          "lister"
-        ],
+        "sources": ["lister"],
         "shape": "predicate"
       },
       {
         "true": true,
-        "sources": [
-          "lister"
-        ],
+        "sources": ["lister"],
         "shape": "predicate"
       },
       {
         "true": true,
-        "sources": [
-          "lister"
-        ],
+        "sources": ["lister"],
         "shape": "negation"
       },
       {
         "true": true,
-        "sources": [
-          "lister"
-        ],
+        "sources": ["lister"],
         "shape": "advisory"
       },
       {
         "true": true,
-        "sources": [
-          "lister"
-        ],
+        "sources": ["lister"],
         "shape": "predicate"
       }
     ],
     "6": [
       {
         "true": true,
-        "sources": [
-          "atlas",
-          "lister"
-        ],
+        "sources": ["atlas", "lister"],
         "shape": "predicate"
       },
       {
         "true": false,
-        "sources": [
-          "lister"
-        ],
+        "sources": ["lister"],
         "shape": "other"
       },
       {
         "true": false,
-        "sources": [
-          "lister"
-        ],
+        "sources": ["lister"],
         "shape": "dependency"
       },
       {
         "true": false,
-        "sources": [
-          "lister"
-        ],
+        "sources": ["lister"],
         "shape": "advisory"
       },
       {
         "true": false,
-        "sources": [
-          "lister"
-        ],
+        "sources": ["lister"],
         "shape": "other"
       },
       {
         "true": false,
-        "sources": [
-          "lister"
-        ],
+        "sources": ["lister"],
         "shape": "other"
       },
       {
         "true": false,
-        "sources": [
-          "lister"
-        ],
+        "sources": ["lister"],
         "shape": "other"
       },
       {
         "true": false,
-        "sources": [
-          "lister"
-        ],
+        "sources": ["lister"],
         "shape": "dependency"
       },
       {
         "true": true,
-        "sources": [
-          "lister"
-        ],
+        "sources": ["lister"],
         "shape": "predicate"
       },
       {
         "true": false,
-        "sources": [
-          "lister"
-        ],
+        "sources": ["lister"],
         "shape": "other"
       },
       {
         "true": true,
-        "sources": [
-          "lister"
-        ],
+        "sources": ["lister"],
         "shape": "advisory"
       }
     ],
     "7": [
       {
         "true": true,
-        "sources": [
-          "atlas",
-          "lister"
-        ],
+        "sources": ["atlas", "lister"],
         "shape": "predicate"
       },
       {
         "true": true,
-        "sources": [
-          "comment",
-          "lister"
-        ],
+        "sources": ["comment", "lister"],
         "shape": "predicate"
       },
       {
         "true": true,
-        "sources": [
-          "lister"
-        ],
+        "sources": ["lister"],
         "shape": "predicate"
       },
       {
         "true": true,
-        "sources": [
-          "lister"
-        ],
+        "sources": ["lister"],
         "shape": "predicate"
       },
       {
         "true": true,
-        "sources": [
-          "comment",
-          "lister"
-        ],
+        "sources": ["comment", "lister"],
         "shape": "predicate"
       },
       {
         "true": true,
-        "sources": [
-          "lister"
-        ],
+        "sources": ["lister"],
         "shape": "predicate"
       },
       {
         "true": true,
-        "sources": [
-          "lister"
-        ],
+        "sources": ["lister"],
         "shape": "predicate"
       },
       {
         "true": true,
-        "sources": [
-          "lister"
-        ],
+        "sources": ["lister"],
         "shape": "predicate"
       },
       {
         "true": true,
-        "sources": [
-          "lister"
-        ],
+        "sources": ["lister"],
         "shape": "predicate"
       },
       {
         "true": true,
-        "sources": [
-          "lister"
-        ],
+        "sources": ["lister"],
         "shape": "predicate"
       },
       {
         "true": true,
-        "sources": [
-          "lister"
-        ],
+        "sources": ["lister"],
         "shape": "dependency"
       }
     ],
     "8": [
       {
         "true": true,
-        "sources": [
-          "atlas",
-          "lister"
-        ],
+        "sources": ["atlas", "lister"],
         "shape": "predicate"
       },
       {
         "true": true,
-        "sources": [
-          "lister"
-        ],
+        "sources": ["lister"],
         "shape": "advisory"
       },
       {
         "true": true,
-        "sources": [
-          "lister"
-        ],
+        "sources": ["lister"],
         "shape": "predicate"
       },
       {
         "true": true,
-        "sources": [
-          "lister"
-        ],
+        "sources": ["lister"],
         "shape": "predicate"
       },
       {
         "true": true,
-        "sources": [
-          "lister"
-        ],
+        "sources": ["lister"],
         "shape": "predicate"
       },
       {
         "true": true,
-        "sources": [
-          "lister"
-        ],
+        "sources": ["lister"],
         "shape": "predicate"
       },
       {
         "true": true,
-        "sources": [
-          "lister"
-        ],
+        "sources": ["lister"],
         "shape": "relation"
       },
       {
         "true": true,
-        "sources": [
-          "lister"
-        ],
+        "sources": ["lister"],
         "shape": "dependency"
       },
       {
         "true": true,
-        "sources": [
-          "lister"
-        ],
+        "sources": ["lister"],
         "shape": "advisory"
       },
       {
         "true": true,
-        "sources": [
-          "lister"
-        ],
+        "sources": ["lister"],
         "shape": "predicate"
       },
       {
         "true": true,
-        "sources": [
-          "lister"
-        ],
+        "sources": ["lister"],
         "shape": "advisory"
       }
     ],
     "9": [
       {
         "true": true,
-        "sources": [
-          "atlas"
-        ],
+        "sources": ["atlas"],
         "shape": "predicate"
       },
       {
         "true": false,
-        "sources": [
-          "lister"
-        ],
+        "sources": ["lister"],
         "shape": "predicate"
       },
       {
         "true": false,
-        "sources": [
-          "lister"
-        ],
+        "sources": ["lister"],
         "shape": "predicate"
       },
       {
         "true": false,
-        "sources": [
-          "lister"
-        ],
+        "sources": ["lister"],
         "shape": "predicate"
       },
       {
         "true": false,
-        "sources": [
-          "lister"
-        ],
+        "sources": ["lister"],
         "shape": "predicate"
       },
       {
         "true": false,
-        "sources": [
-          "lister"
-        ],
+        "sources": ["lister"],
         "shape": "predicate"
       },
       {
         "true": false,
-        "sources": [
-          "lister"
-        ],
+        "sources": ["lister"],
         "shape": "predicate"
       },
       {
         "true": false,
-        "sources": [
-          "lister"
-        ],
+        "sources": ["lister"],
         "shape": "predicate"
       },
       {
         "true": false,
-        "sources": [
-          "lister"
-        ],
+        "sources": ["lister"],
         "shape": "predicate"
       },
       {
         "true": false,
-        "sources": [
-          "lister"
-        ],
+        "sources": ["lister"],
         "shape": "predicate"
       },
       {
         "true": false,
-        "sources": [
-          "lister"
-        ],
+        "sources": ["lister"],
         "shape": "predicate"
       },
       {
         "true": false,
-        "sources": [
-          "lister"
-        ],
+        "sources": ["lister"],
         "shape": "predicate"
       },
       {
         "true": false,
-        "sources": [
-          "lister"
-        ],
+        "sources": ["lister"],
         "shape": "predicate"
       },
       {
         "true": false,
-        "sources": [
-          "lister"
-        ],
+        "sources": ["lister"],
         "shape": "predicate"
       }
     ],
     "10": [
       {
         "true": true,
-        "sources": [
-          "atlas",
-          "lister"
-        ],
+        "sources": ["atlas", "lister"],
         "shape": "predicate"
       },
       {
         "true": true,
-        "sources": [
-          "lister"
-        ],
+        "sources": ["lister"],
         "shape": "predicate"
       },
       {
         "true": true,
-        "sources": [
-          "lister"
-        ],
+        "sources": ["lister"],
         "shape": "predicate"
       },
       {
         "true": true,
-        "sources": [
-          "lister"
-        ],
+        "sources": ["lister"],
         "shape": "predicate"
       },
       {
         "true": false,
-        "sources": [
-          "lister"
-        ],
+        "sources": ["lister"],
         "shape": "predicate"
       },
       {
         "true": false,
-        "sources": [
-          "lister"
-        ],
+        "sources": ["lister"],
         "shape": "predicate"
       },
       {
         "true": false,
-        "sources": [
-          "lister"
-        ],
+        "sources": ["lister"],
         "shape": "predicate"
       },
       {
         "true": false,
-        "sources": [
-          "lister"
-        ],
+        "sources": ["lister"],
         "shape": "dependency"
       },
       {
         "true": false,
-        "sources": [
-          "lister"
-        ],
+        "sources": ["lister"],
         "shape": "dependency"
       },
       {
         "true": false,
-        "sources": [
-          "lister"
-        ],
+        "sources": ["lister"],
         "shape": "other"
       }
     ]

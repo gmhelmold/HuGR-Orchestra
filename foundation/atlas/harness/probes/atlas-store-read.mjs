@@ -21,19 +21,19 @@
 // TOTAL AND READ-ONLY. Every function here answers `undefined` / an empty result on a miss, a non-regular
 // file, unparseable bytes or an absent directory, and none of them writes, creates or removes anything.
 
-import { execFileSync } from 'node:child_process';
-import { existsSync, lstatSync, readFileSync, readdirSync } from 'node:fs';
-import { join } from 'node:path';
+import { execFileSync } from "node:child_process"
+import { existsSync, lstatSync, readFileSync, readdirSync } from "node:fs"
+import { join } from "node:path"
 
 /** A CAS key / nodeKey at runtime: exactly 64 lowercase hex (`store.ts` `get`, applied before any read). */
-export const HEX64 = /^[0-9a-f]{64}$/;
+export const HEX64 = /^[0-9a-f]{64}$/
 
 /** The store root and the CAS root of a repository (`compose.ts`: `.atlas/` and `.atlas/cas`). */
-export const atlasDir = (repo) => join(repo, '.atlas');
-export const casDir = (repo) => join(atlasDir(repo), 'cas');
+export const atlasDir = (repo) => join(repo, ".atlas")
+export const casDir = (repo) => join(atlasDir(repo), "cas")
 
 /** The sharded, content-addressed value path for `h` — `<cas>/<h[0:2]>/<h>` (`store.ts` `valuePath`). */
-export const valuePath = (repo, h) => join(casDir(repo), h.slice(0, 2), h);
+export const valuePath = (repo, h) => join(casDir(repo), h.slice(0, 2), h)
 
 /**
  * Every published generation NUMBER of one sidecar family, DESCENDING — including ones that fail to parse,
@@ -41,19 +41,19 @@ export const valuePath = (repo, h) => join(casDir(repo), h.slice(0, 2), h);
  * directory is "no generations", never a throw.
  */
 export function generations(repo, base) {
-  let names;
+  let names
   try {
-    names = readdirSync(atlasDir(repo));
+    names = readdirSync(atlasDir(repo))
   } catch {
-    return [];
+    return []
   }
-  const re = new RegExp(`^${base}\\.(\\d{1,15})\\.json$`);
-  const out = [];
+  const re = new RegExp(`^${base}\\.(\\d{1,15})\\.json$`)
+  const out = []
   for (const n of names) {
-    const m = re.exec(n);
-    if (m !== null) out.push(Number(m[1]));
+    const m = re.exec(n)
+    if (m !== null) out.push(Number(m[1]))
   }
-  return out.sort((a, b) => b - a);
+  return out.sort((a, b) => b - a)
 }
 
 /**
@@ -65,15 +65,15 @@ export function generations(repo, base) {
  * and wrong for a probe, whose entire value is naming WHICH row is bad.
  */
 function readSidecarFile(file) {
-  let wire;
+  let wire
   try {
-    wire = JSON.parse(readFileSync(file, 'utf8'));
+    wire = JSON.parse(readFileSync(file, "utf8"))
   } catch {
-    return undefined;
+    return undefined
   }
-  if (wire === null || typeof wire !== 'object') return undefined;
-  if (!Array.isArray(wire.current) || !Array.isArray(wire.cas)) return undefined;
-  return { entries: wire.current, cas: wire.cas, identity: wire.identity, gen: wire.gen, builtAt: wire.builtAt, file };
+  if (wire === null || typeof wire !== "object") return undefined
+  if (!Array.isArray(wire.current) || !Array.isArray(wire.cas)) return undefined
+  return { entries: wire.current, cas: wire.cas, identity: wire.identity, gen: wire.gen, builtAt: wire.builtAt, file }
 }
 
 /**
@@ -85,16 +85,16 @@ function readSidecarFile(file) {
  * erasure, and the one `promote.md` warns about in the other direction.
  */
 export function readSidecar(repo, base) {
-  const gens = generations(repo, base);
-  const top = gens.length > 0 ? gens[0] : 0;
+  const gens = generations(repo, base)
+  const top = gens.length > 0 ? gens[0] : 0
   for (const g of gens) {
-    const hit = readSidecarFile(join(atlasDir(repo), `${base}.${g}.json`));
-    if (hit !== undefined) return { ...hit, present: true, unreadable: false, top };
+    const hit = readSidecarFile(join(atlasDir(repo), `${base}.${g}.json`))
+    if (hit !== undefined) return { ...hit, present: true, unreadable: false, top }
   }
-  const mirror = readSidecarFile(join(atlasDir(repo), `${base}.json`));
-  if (mirror !== undefined) return { ...mirror, present: true, unreadable: false, top };
-  const anyFile = gens.length > 0 || existsSync(join(atlasDir(repo), `${base}.json`));
-  return { present: false, unreadable: anyFile, top, entries: [], cas: [] };
+  const mirror = readSidecarFile(join(atlasDir(repo), `${base}.json`))
+  if (mirror !== undefined) return { ...mirror, present: true, unreadable: false, top }
+  const anyFile = gens.length > 0 || existsSync(join(atlasDir(repo), `${base}.json`))
+  return { present: false, unreadable: anyFile, top, entries: [], cas: [] }
 }
 
 /**
@@ -105,13 +105,13 @@ export function readSidecar(repo, base) {
  * never would.
  */
 export function casGet(repo, h) {
-  if (typeof h !== 'string' || !HEX64.test(h)) return undefined;
-  const p = valuePath(repo, h);
+  if (typeof h !== "string" || !HEX64.test(h)) return undefined
+  const p = valuePath(repo, h)
   try {
-    if (!lstatSync(p).isFile()) return undefined;
-    return JSON.parse(readFileSync(p, 'utf8'));
+    if (!lstatSync(p).isFile()) return undefined
+    return JSON.parse(readFileSync(p, "utf8"))
   } catch {
-    return undefined;
+    return undefined
   }
 }
 
@@ -122,15 +122,15 @@ export function casGet(repo, h) {
  * never assumed clean.
  */
 export function trackedStoreFiles(repo) {
-  let listed;
+  let listed
   try {
-    listed = execFileSync('git', ['ls-files', '--', '.atlas'], { cwd: repo, encoding: 'utf8' });
+    listed = execFileSync("git", ["ls-files", "--", ".atlas"], { cwd: repo, encoding: "utf8" })
   } catch {
-    return undefined;
+    return undefined
   }
   return listed
-    .split('\n')
+    .split("\n")
     .map((l) => l.trim())
     .filter((l) => l.length > 0)
-    .filter((l) => /(^|\/)(projection|staging)(\.\d+)?\.json$/.test(l) || l.includes('/cas/'));
+    .filter((l) => /(^|\/)(projection|staging)(\.\d+)?\.json$/.test(l) || l.includes("/cas/"))
 }

@@ -25,35 +25,35 @@
 // and `goal` reads as empty until one exists. Inventing a file convention for it would be authoring the
 // artifact rather than reading it, which is the inversion this campaign has already refused once.
 
-import { join } from 'node:path';
-import type { Hash } from '@atlas/contracts';
-import type { EventLog } from '@atlas/kernel';
-import { orient, orientEvent } from '@atlas/memory';
-import { id as objectId } from '@atlas/kernel';
-import type { Orientation, OrientChannel } from '@atlas/memory';
-import { createDurableLog } from './durable-log.js';
+import { join } from "node:path"
+import type { Hash } from "@atlas/contracts"
+import type { EventLog } from "@atlas/kernel"
+import { orient, orientEvent } from "@atlas/memory"
+import { id as objectId } from "@atlas/kernel"
+import type { Orientation, OrientChannel } from "@atlas/memory"
+import { createDurableLog } from "./durable-log.js"
 
 /** The tracked log's path under a repo root. */
-export const orientationLogPath = (repoPath: string): string => join(repoPath, '.atlas', 'orientation.jsonl');
+export const orientationLogPath = (repoPath: string): string => join(repoPath, ".atlas", "orientation.jsonl")
 
 /** What a read found — the folded event log and the lines it refused. */
 export interface OrientationRead {
-  readonly log: EventLog;
+  readonly log: EventLog
   /** Lines that did not parse, or whose stored `id` is not their content hash. Never silently discarded. */
-  readonly rejected: number;
+  readonly rejected: number
 }
 
 export interface DurableOrientation {
-  readonly path: string;
+  readonly path: string
   /** Fold the tracked log. Total — a missing file is an empty log, not an error. */
-  read(): OrientationRead;
+  read(): OrientationRead
   /** Append one derived-channel event. Identity is the sealed kernel seam; lineage rides `supersedes`. */
-  append(channel: OrientChannel, label: string, supersedes?: readonly Hash[]): void;
+  append(channel: OrientChannel, label: string, supersedes?: readonly Hash[]): void
   /**
    * Assemble the slab from the durable log. `define` is opaque and caller-supplied for the reason in the
    * header; with none, `goal` is empty and the fold still carries `last` / `current` / `state`.
    */
-  orientation(define?: unknown): Orientation;
+  orientation(define?: unknown): Orientation
 }
 
 export function createDurableOrientation(repoPath: string): DurableOrientation {
@@ -62,16 +62,16 @@ export function createDurableOrientation(repoPath: string): DurableOrientation {
   // line this store writes. The predicate is therefore the payload one — and `durable-log.ts`'s `LineKeyed`
   // doc states exactly what that narrower check does and does not catch, rather than letting the difference
   // pass as if the two logs were equally defended.
-  const log = createDurableLog(orientationLogPath(repoPath), (ev) => objectId(ev.payload) === ev.id);
+  const log = createDurableLog(orientationLogPath(repoPath), (ev) => objectId(ev.payload) === ev.id)
 
   return {
     path: log.path,
     read: (): OrientationRead => log.read(),
     append(channel: OrientChannel, label: string, supersedes: readonly Hash[] = []): void {
-      log.append(orientEvent(channel, label, supersedes));
+      log.append(orientEvent(channel, label, supersedes))
     },
     orientation(define?: unknown): Orientation {
-      return orient(define, log.read().log);
+      return orient(define, log.read().log)
     },
-  };
+  }
 }

@@ -1,7 +1,7 @@
 # `atlas own`
 
 The briefing for a scope you are about to work in. `query` gives you a flat, bounded pack of one-line
-claims; `own` gives you the same facts *organised* — a role line, the invariants, the gotchas kept separate
+claims; `own` gives you the same facts _organised_ — a role line, the invariants, the gotchas kept separate
 from them, the terrain, what depends on you, and a content-free map of what else is reachable.
 
 It is composed by **index reads alone**: no model call, no free prose, no ranking anybody trained. Equal
@@ -54,24 +54,24 @@ own: own_src — 3 invariant(s), 1 gotcha(s), 0 advisory; tokenEstimate 147
 
 ### The rows, and where each one comes from
 
-| row | source |
-| --- | --- |
-| `role` | the `definition`-slot fact under the scope; falling back to the covering territory's key |
-| `grounding` | `tree` for a path scope — it names a real node in the spatial axis |
-| `owner` | the actors the admin put in the covering `authz.scopes` key of `.atlas/policy.json` |
-| `tier` | the strictest governance class **actually filed** here (`T2` when nothing is) |
-| `contains` | the scope's immediate children in the code index |
-| `inv` | one per fact, `tier≥T1`, **not** in a gotcha/rationale slot — same row format `query` prints |
-| `gotcha` | one per fact in the `gotcha` or `rationale` slot |
-| `advisory` | one per `T2` fact — a machine proposal no ratifier saw, with its own freshness verdict in brackets |
-| `advisoryDropped` | how many advisory rows the advisory sub-cap cut; each of them is also a `pull-reachable` row |
-| `dependent` | facts anchored at code that depends on this scope (the reverse closure) |
-| `finer` | the child scope-units you can drill into |
-| `available` | a content-free pointer to a reachable surface, and the command that pulls it |
-| `pull-reachable` | a fact the budget pushed out — named, never silently dropped |
+| row               | source                                                                                             |
+| ----------------- | -------------------------------------------------------------------------------------------------- |
+| `role`            | the `definition`-slot fact under the scope; falling back to the covering territory's key           |
+| `grounding`       | `tree` for a path scope — it names a real node in the spatial axis                                 |
+| `owner`           | the actors the admin put in the covering `authz.scopes` key of `.atlas/policy.json`                |
+| `tier`            | the strictest governance class **actually filed** here (`T2` when nothing is)                      |
+| `contains`        | the scope's immediate children in the code index                                                   |
+| `inv`             | one per fact, `tier≥T1`, **not** in a gotcha/rationale slot — same row format `query` prints       |
+| `gotcha`          | one per fact in the `gotcha` or `rationale` slot                                                   |
+| `advisory`        | one per `T2` fact — a machine proposal no ratifier saw, with its own freshness verdict in brackets |
+| `advisoryDropped` | how many advisory rows the advisory sub-cap cut; each of them is also a `pull-reachable` row       |
+| `dependent`       | facts anchored at code that depends on this scope (the reverse closure)                            |
+| `finer`           | the child scope-units you can drill into                                                           |
+| `available`       | a content-free pointer to a reachable surface, and the command that pulls it                       |
+| `pull-reachable`  | a fact the budget pushed out — named, never silently dropped                                       |
 
 **Every identifier printed here is a nodeKey**, the same identifier `atlas query`'s `inv` lines carry.
-[`atlas node`](./node.md) takes a *content address* and will miss on all of them; `atlas doctor why
+[`atlas node`](./node.md) takes a _content address_ and will miss on all of them; `atlas doctor why
 <nodeKey>` and `atlas link` are the doors that take these.
 
 ### Drilling in
@@ -139,7 +139,7 @@ under-serves rather than over-serves, which is the safe direction for a budget.
 A briefing has **two bands**, and the difference between them is who signed off.
 
 - the **governing** band — `inv` and `gotcha` rows — is `tier≥T1`: facts a ratifier accepted;
-- the **advisory** band — `advisory` rows — is `T2`: machine proposals *nobody* ratified.
+- the **advisory** band — `advisory` rows — is `T2`: machine proposals _nobody_ ratified.
 
 They are never interleaved and they never share a verb, so an advisory row cannot be misread as a ratified
 one. Each advisory row carries its own freshness verdict in brackets, re-derived on this read, exactly as a
@@ -219,11 +219,11 @@ it — the fail-closed default.
 
 ## Exit codes
 
-| code | meaning |
-| --- | --- |
-| `0` | the briefing was composed — **including** the honest empty one |
-| `1` | a missing `<scope>` argument, or a runtime that is not composed |
-| `2` | a governance gate refused the read (the committed-store tripwire, applied at the entrypoint) |
+| code | meaning                                                                                      |
+| ---- | -------------------------------------------------------------------------------------------- |
+| `0`  | the briefing was composed — **including** the honest empty one                               |
+| `1`  | a missing `<scope>` argument, or a runtime that is not composed                              |
+| `2`  | a governance gate refused the read (the committed-store tripwire, applied at the entrypoint) |
 
 There is no exit-2 leg inside this command. It is a read that no gate can decline; the one refusal that can
 reach you fires before it, over a `.atlas/` that arrived by commit. See [`query`](./query.md) for that text.
@@ -245,13 +245,13 @@ Driving the door leaves `.atlas/` byte-identical. Writes funnel through [`emit`]
 
 **Serving a `T2` on a governing verb.** A `T2` is a machine proposal no ratifier saw. It never arrives on an
 `inv` or a `gotcha` row — it arrives on the `advisory` verb, under its own cap, exactly as it does in a
-`query` pack. The two doors apply the *same* bound, from the same place; a second read door with a *laxer*
-bound would be a route around the first one, and a second read door that stayed *stricter* was a door that
+`query` pack. The two doors apply the _same_ bound, from the same place; a second read door with a _laxer_
+bound would be a route around the first one, and a second read door that stayed _stricter_ was a door that
 disagreed with its neighbour about what the store contains (see [The advisory band](#the-advisory-band)).
 
 **Serving an unrecognized tier.** Neither band admits one. Both are stated as membership — `tier≥T1` for the
 governing band, `tier = T2` for the advisory one — so a row carrying, say, `T3` out of a committed `.atlas/`
-that passed no write door is in *neither*, and it is not counted as a truncation either: it was refused, not
+that passed no write door is in _neither_, and it is not counted as a truncation either: it was refused, not
 cut for budget.
 
 **Guessing.** It reads one store — the same one `atlas query` reads — and reports what is in it.
@@ -262,11 +262,11 @@ Four inputs the design calls for have no producer in this product yet. They are 
 zero rather than as a plausible-looking number, because a fabricated ranking signal is indistinguishable
 from a real one at the point where somebody trusts the order.
 
-| input | state |
-| --- | --- |
-| **frecency** (`hits`) | nothing records a served pack anywhere durable, so every candidate is `hits: 0` and the ranking degenerates to `(tier, nodeKey)` — deterministic, but not frecency-ranked |
-| **importance** (`ppr`) | the personalized-PageRank score lives on a mining *candidate* and is not carried onto a stored fact; `0` for every row |
-| **memory pointers** | the per-seat memory layer has no production instance; the briefing carries none |
+| input                  | state                                                                                                                                                                                      |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **frecency** (`hits`)  | nothing records a served pack anywhere durable, so every candidate is `hits: 0` and the ranking degenerates to `(tier, nodeKey)` — deterministic, but not frecency-ranked                  |
+| **importance** (`ppr`) | the personalized-PageRank score lives on a mining _candidate_ and is not carried onto a stored fact; `0` for every row                                                                     |
+| **memory pointers**    | the per-seat memory layer has no production instance; the briefing carries none                                                                                                            |
 | **`dependency` edges** | the index exposes a reverse closure and **no forward closure**, so the briefing can say what depends on you and cannot say what you depend on. There are no `dependency` rows, ever, today |
 
 ## Related

@@ -11,14 +11,14 @@ The first A1 measurement (30 real atlas sites, reason-freely sub-agent proposers
 manual audit → **29/30 = 96.7% grounded+true**) is **not a citable number**. It is LLM self-verification, and
 three converging results say self-verification does not measure truth:
 
-- LLM-judge agreement with a *mechanical* oracle on code-truth tasks is only κ≈0.10–0.21 — the weakest task
+- LLM-judge agreement with a _mechanical_ oracle on code-truth tasks is only κ≈0.10–0.21 — the weakest task
   class for LLM judges; judges hallucinate bugs in correct code (arXiv 2507.16587).
 - Same-family self-preference: a judge favours text that "sounds like itself", so sonnet judging
   sonnet-proposed claims is directionally inflated (arXiv 2410.21819).
 - "Nine Judges, Two Effective Votes": 9 judges across 7 families ≈ 2.2 effective votes; **same-family ≈ 1
   effective vote** (arXiv 2605.29800). So a 3×sonnet panel's Fleiss κ measures **self-consistency, not
   correctness** — three correlated judges can agree loudly while jointly wrong. And LLM-Modulo (arXiv
-  2402.01817): an LLM verifies no better than it generates; verification must come from *outside* the model.
+  2402.01817): an LLM verifies no better than it generates; verification must come from _outside_ the model.
 
 Therefore **the 96.7% is demoted to "smoke, non-citable."** It stays only as evidence the pipeline runs.
 
@@ -34,7 +34,7 @@ Fleiss-κ-as-truth, human gold — into a single move, scored by arithmetic:
 - We hold a set of `(code, fact)` pairs whose label we **decided by construction**: 10 grounded-true, 10
   planted-false (the false ones mention the anchored code — so a shallow "is it about this code?" grounding
   check passes — but assert something false: wrong constant, wrong callee, inverted condition, fabricated
-  behaviour, or a stale comment reported as current). This is the exact #95 failure: grounding is *aboutness*,
+  behaviour, or a stale comment reported as current). This is the exact #95 failure: grounding is _aboutness_,
   not truth. Ground truth is Khatib mutation-analysis (arXiv 2602.17838): does the claim track the code?
 - A **single fresh-context subject** (sonnet sub-agent, per [[model-in-loop-is-subagents]], driven by the
   **frozen** `renderPrompt` — never improvised prose, per [[benchmark-prompts-must-be-frozen-artifacts]])
@@ -55,7 +55,7 @@ headline; cutting them entirely is acceptable.
 
 ## What this number is, and what it is NOT (structural honesty)
 
-The subject-test isolates **one faculty**: the LLM's ability to *reject a false claim about code*. That is
+The subject-test isolates **one faculty**: the LLM's ability to _reject a false claim about code_. That is
 precisely the faculty that gates advisory admission on the shipped path — an advisory fact has **no mechanical
 oracle**, so its only guard against falsehood is the model's own emit/abstain judgment. So this is not a proxy
 for a separate thing; it is that exact faculty, isolated with a clean planted label. Its limits, stated as
@@ -64,7 +64,7 @@ limits not TODOs:
 - It measures **precision** (does the model reject falses), not **recall/generation** (does the model surface
   the good facts) — recall is A4's separate ground-truth trail ([`95a`](95a-recall-a4-methodology.md)).
 - The fixtures are **synthetic-but-clean by design**: you can only plant a false if you know the truth, so
-  clean labels beat repo fidelity here. Precision on *real* mined atlas facts is a separate, weaker number
+  clean labels beat repo fidelity here. Precision on _real_ mined atlas facts is a separate, weaker number
   that would need a judge — which is exactly the loop we removed. The planted subject-test is the strong one.
 - n is small (20). Expansion is trivial and additive (append `(code, fact, label)` pairs); noted as a limit.
 
@@ -73,7 +73,7 @@ limits not TODOs:
 The honest #95 story splits by seal, and the strong claim needs no LLM at all:
 
 - **`proven`** (dependency / count / negation) — a 0-FP **mechanical oracle** (`tsc`, export index, canon
-  residual) on **real** atlas code. This is the Clover boundary (arXiv 2310.17807: 0-FP is reachable *only*
+  residual) on **real** atlas code. This is the Clover boundary (arXiv 2310.17807: 0-FP is reachable _only_
   where a formal check exists). Dependency and count are 0-false-admit by a witnessed **reference**-existence
   oracle (`reverseCallers`, `packages/index/src/symbol-reverse.ts`, counts any SCIP `reference` occurrence —
   imports and type-only positions included, not only calls), sound in any world. This is NOT a call-graph
@@ -87,21 +87,21 @@ The honest #95 story splits by seal, and the strong claim needs no LLM at all:
   `atlas verify-fact negation`). The fix (#178, `opaqueRefSources` split-feed → abstain scope-open) restores a
   GENUINE **0-false-admit**, and the sound property holds ACROSS index builds; **recall is the only number
   that swings, and it is index-BUILD-dependent.** Three measured points, all 0-false-admit post-fix:
-    - **committed dist-form index** (the OPERATING case — `.atlas/index.scip` built with the packages'
-      `dist/*.d.ts` declarations present): **0-FA, recall 32.5%** (n=1352; measured 2026-08-17). Cross-package
-      refs resolve to `dist/*.d.ts` descriptors that `canonicalizeSymbol` (#189) bridges to their source defs,
-      so the opaque-local gate rarely fires — the gate-off teeth here is only **0.66%**, not 80%.
-    - **degenerate dist-ABSENT rebuild** (`scip-typescript index` run WITHOUT building declarations first):
-      **0-FA, recall 4.25%** — every cross-package import collapses to an opaque `local` the door honestly
-      abstains over. This is a MISBUILD, not the operating recall; it is where the pre-fix door false-admitted
-      80.86% (dist-form was already near-sound).
-    - **historical 2026-08-12 dist-form index (#232)**: 0-FA, recall 80.9% — a different, superseded snapshot,
-      kept only as the record.
-  So **"Approach-3" is not a code campaign but a BUILD RECIPE**: build the packages' declarations (`tsc -b`)
-  before `scip-typescript index`, so cross-package refs are dist-form and the existing `canonicalizeSymbol`
-  recovers recall. Recall is not a single citable number until the index build is pinned/frozen. Defensible
-  headline: negation is **sound (0-false-admit) on any build**; recall is build-dependent (32.5% operating,
-  4.25% on a dist-absent misbuild).
+  - **committed dist-form index** (the OPERATING case — `.atlas/index.scip` built with the packages'
+    `dist/*.d.ts` declarations present): **0-FA, recall 32.5%** (n=1352; measured 2026-08-17). Cross-package
+    refs resolve to `dist/*.d.ts` descriptors that `canonicalizeSymbol` (#189) bridges to their source defs,
+    so the opaque-local gate rarely fires — the gate-off teeth here is only **0.66%**, not 80%.
+  - **degenerate dist-ABSENT rebuild** (`scip-typescript index` run WITHOUT building declarations first):
+    **0-FA, recall 4.25%** — every cross-package import collapses to an opaque `local` the door honestly
+    abstains over. This is a MISBUILD, not the operating recall; it is where the pre-fix door false-admitted
+    80.86% (dist-form was already near-sound).
+  - **historical 2026-08-12 dist-form index (#232)**: 0-FA, recall 80.9% — a different, superseded snapshot,
+    kept only as the record.
+    So **"Approach-3" is not a code campaign but a BUILD RECIPE**: build the packages' declarations (`tsc -b`)
+    before `scip-typescript index`, so cross-package refs are dist-form and the existing `canonicalizeSymbol`
+    recovers recall. Recall is not a single citable number until the index build is pinned/frozen. Defensible
+    headline: negation is **sound (0-false-admit) on any build**; recall is build-dependent (32.5% operating,
+    4.25% on a dist-absent misbuild).
 - **advisory (unsealed, semantic)** — no sound oracle exists (field-level limit), so it is measured by the
   planted subject-test above and reported as **false-admit-rate + n (+ optional Wilson CI)**, never as
   "accuracy," never overclaimed. **(Corrected 2026-08-16: this bullet used to read "`validated` seal". The
@@ -109,7 +109,7 @@ The honest #95 story splits by seal, and the strong claim needs no LLM at all:
   truth-seal; the planted subject-test measures the precision of that UNSEALED advisory faculty, not a seal.
   The measurement is unchanged; only the label the seal gave it is gone.)**
 
-Terminology is Huang et al. (ACM TOIS 10.1145/3703155): *grounded* = the faithfulness axis, *true* = the
+Terminology is Huang et al. (ACM TOIS 10.1145/3703155): _grounded_ = the faithfulness axis, _true_ = the
 factuality axis. We did not coin it.
 
 ## Verified references

@@ -35,21 +35,21 @@ INV  ⇄  REQ  ⇄  SCN        FSPEC  ⇄  INV        WP  ⇄  REQ/SCN
 
 ## The mechanical checks (GATE — all pass or the freeze blocks)
 
-| check | predicate | severity if failed |
-|---|---|---|
-| **referential existence** | every `REQ`/`SCN`/`FSPEC`/`WP` cites an extant upstream id; no orphan either direction | CRITICAL |
-| **coverage counts** | every **behavioural** `INV` has ≥1 `REQ`; coverage = **100%** over the behavioural set; every non-behavioural `INV` carries an `exempt:` disposition | CRITICAL (uncovered behavioural INV **or** un-dispositioned INV) |
-| **method-tag completeness** (at the S2 freeze) | every **behavioural** `INV` carries a `method-tag` ∈ {formal, exhaustive, PBT, reference-model}; **exempt** INVs carry `n/a` | CRITICAL |
-| **guard coverage** | every unwanted-behaviour clause has its `If-then` `REQ` and its guard `SCN` | **CRITICAL** |
-| **structural invariants** | each `REQ` has exactly one `SHALL` and matches one EARS pattern; each `SCN` keys off its `REQ` | MAJOR |
-| **banned-token lint** | no `~`, `TODO`, `TBD`, `fast`/`robust`/`appropriate` in a normative clause | MAJOR |
-| **id integrity** | ids follow the pinned scheme; no duplicate id; no gap that dangles a reference | MAJOR |
+| check                                          | predicate                                                                                                                                            | severity if failed                                               |
+| ---------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------- |
+| **referential existence**                      | every `REQ`/`SCN`/`FSPEC`/`WP` cites an extant upstream id; no orphan either direction                                                               | CRITICAL                                                         |
+| **coverage counts**                            | every **behavioural** `INV` has ≥1 `REQ`; coverage = **100%** over the behavioural set; every non-behavioural `INV` carries an `exempt:` disposition | CRITICAL (uncovered behavioural INV **or** un-dispositioned INV) |
+| **method-tag completeness** (at the S2 freeze) | every **behavioural** `INV` carries a `method-tag` ∈ {formal, exhaustive, PBT, reference-model}; **exempt** INVs carry `n/a`                         | CRITICAL                                                         |
+| **guard coverage**                             | every unwanted-behaviour clause has its `If-then` `REQ` and its guard `SCN`                                                                          | **CRITICAL**                                                     |
+| **structural invariants**                      | each `REQ` has exactly one `SHALL` and matches one EARS pattern; each `SCN` keys off its `REQ`                                                       | MAJOR                                                            |
+| **banned-token lint**                          | no `~`, `TODO`, `TBD`, `fast`/`robust`/`appropriate` in a normative clause                                                                           | MAJOR                                                            |
+| **id integrity**                               | ids follow the pinned scheme; no duplicate id; no gap that dangles a reference                                                                       | MAJOR                                                            |
 
 **Severity ladder:** `CRITICAL` = an uncovered behavioural invariant, a dangling reference, an
 **un-dispositioned** `INV` (neither behavioural-with-a-`REQ` nor `exempt:`), or an **unmet unwanted-behaviour
 guard** → **blocks the freeze**. `MAJOR`/`MINOR` = drift/lint → dispositioned before freeze, no hard-block.
 
-**Blind spot (honest):** a *never-enumerated* unwanted-behaviour has **no clause** for guard-coverage to key on
+**Blind spot (honest):** a _never-enumerated_ unwanted-behaviour has **no clause** for guard-coverage to key on
 — it is invisible to this mechanical gate and caught only by the judgment/capture layer (`completeness` Gates
 1–2). The gate enforces the guards that were **named**; naming them is judgment. This is the method's crux
 failure mode and it deliberately does not live in the mechanical layer.

@@ -18,11 +18,11 @@
 // `harness/lib/` is admin-owned in CODEOWNERS for the same reason `harness/gates/` is: the comment stripper
 // this module leans on decides how many imports layer-guard can see at all.
 
-import { readFileSync, readdirSync, existsSync } from 'node:fs';
-import { join } from 'node:path';
-import { stripComments } from './lexing.mjs';
+import { readFileSync, readdirSync, existsSync } from "node:fs"
+import { join } from "node:path"
+import { stripComments } from "./lexing.mjs"
 
-const shortName = (dep) => (dep.startsWith('@atlas/') ? dep.slice('@atlas/'.length) : null);
+const shortName = (dep) => (dep.startsWith("@atlas/") ? dep.slice("@atlas/".length) : null)
 
 /**
  * The layer ranking is DERIVED, never transcribed.
@@ -47,27 +47,33 @@ const shortName = (dep) => (dep.startsWith('@atlas/') ? dep.slice('@atlas/'.leng
  * the direction check; `notes` says why, in the caller's own violation vocabulary.
  */
 export function canonicalRanks(architectureDoc, known, ringOrder) {
-  const notes = [];
+  const notes = []
   if (!existsSync(architectureDoc)) {
-    notes.push(`ARCH-1 canonical layer diagram missing: ${architectureDoc} — the layer order MUST be declared, not inferred`);
-    return { ranks: null, notes };
+    notes.push(
+      `ARCH-1 canonical layer diagram missing: ${architectureDoc} — the layer order MUST be declared, not inferred`,
+    )
+    return { ranks: null, notes }
   }
-  const ranks = new Map();
-  for (const line of readFileSync(architectureDoc, 'utf8').split('\n')) {
-    const m = /^(.*?)\bL(\d)\b/.exec(line);
-    if (m === null) continue;
+  const ranks = new Map()
+  for (const line of readFileSync(architectureDoc, "utf8").split("\n")) {
+    const m = /^(.*?)\bL(\d)\b/.exec(line)
+    if (m === null) continue
     for (const word of m[1].match(/[a-z][a-z-]*/g) ?? []) {
-      if (known.has(word)) ranks.set(word, Number(m[2]));
+      if (known.has(word)) ranks.set(word, Number(m[2]))
     }
   }
   if (ranks.size === 0) {
-    notes.push(`ARCH-1 no \`L<n>\` layer rows parsed from ${architectureDoc} — the diagram format changed; this gate is blind until it is fixed`);
-    return { ranks: null, notes };
+    notes.push(
+      `ARCH-1 no \`L<n>\` layer rows parsed from ${architectureDoc} — the diagram format changed; this gate is blind until it is fixed`,
+    )
+    return { ranks: null, notes }
   }
   // The ring is stacked strictly above the deepest core layer.
-  const base = Math.max(...ranks.values()) + 1;
-  ringOrder.forEach((pkg, i) => { if (known.has(pkg)) ranks.set(pkg, base + i); });
-  return { ranks, notes };
+  const base = Math.max(...ranks.values()) + 1
+  ringOrder.forEach((pkg, i) => {
+    if (known.has(pkg)) ranks.set(pkg, base + i)
+  })
+  return { ranks, notes }
 }
 
 /**
@@ -99,58 +105,67 @@ export function canonicalRanks(architectureDoc, known, ringOrder) {
  *   the SAME package and cannot change which package is being coupled to.
  */
 export function sourceImports(pkgsDir, pkgDir) {
-  const out = { edges: new Set(), opaque: [] };
-  const srcRoot = join(pkgsDir, pkgDir, 'src');
-  if (!existsSync(srcRoot)) return out;
+  const out = { edges: new Set(), opaque: [] }
+  const srcRoot = join(pkgsDir, pkgDir, "src")
+  if (!existsSync(srcRoot)) return out
   const walk = (dir) => {
     for (const entry of readdirSync(dir, { withFileTypes: true })) {
-      const p = join(dir, entry.name);
-      if (entry.isDirectory()) { walk(p); continue; }
-      if (!/\.(ts|tsx|mts|js|mjs)$/.test(entry.name)) continue;
+      const p = join(dir, entry.name)
+      if (entry.isDirectory()) {
+        walk(p)
+        continue
+      }
+      if (!/\.(ts|tsx|mts|js|mjs)$/.test(entry.name)) continue
       // Strip comments FIRST. This codebase is comment-dense and routinely NAMES other packages in prose
       // ("`@atlas/contracts`-owned", "would invert the DAG"). Scanning raw text turns every such mention
       // into a phantom edge — an earlier revision of this scanner reported 68 violations, all false.
       //
       // The stripper is the SHARED, parser-backed one. The two-regex form that used to sit on this line
       // deleted real imports — see `lexing.mjs`; pinned by fixture in layer-guard.test.mjs.
-      const src = stripComments(readFileSync(p, 'utf8'), entry.name);
+      const src = stripComments(readFileSync(p, "utf8"), entry.name)
       // Only real specifier positions count. `[a-z0-9-]` and the `(?:\/…)?` tail: see DIGITS/SUBPATHS above.
       const SPECIFIER =
-        /(?:\bfrom\s*|\bimport\s*|\brequire\s*\(\s*|\bimport\s*\(\s*)['"]@atlas\/([a-z][a-z0-9-]*)(?:\/[^'"]*)?['"]/g;
-      for (const m of src.matchAll(SPECIFIER)) out.edges.add(m[1]);
+        /(?:\bfrom\s*|\bimport\s*|\brequire\s*\(\s*|\bimport\s*\(\s*)['"]@atlas\/([a-z][a-z0-9-]*)(?:\/[^'"]*)?['"]/g
+      for (const m of src.matchAll(SPECIFIER)) out.edges.add(m[1])
       // A dynamic import whose specifier is not a string literal is statically unresolvable. HEURISTIC, and
       // stated as one: a captured `:` means this is a TypeScript signature for a METHOD NAMED `import`
       // (`import(json: string): Cas`, which both portable.ts files declare), not a dynamic import — a real
       // specifier expression cannot carry a top-level colon. Without this exclusion the scan reports those
       // two interface members as unresolvable imports.
       for (const m of src.matchAll(/\bimport\s*\(\s*(?!['"`])([^)]{0,60})\)/g)) {
-        if (m[1].includes(':')) continue;
-        out.opaque.push(`${pkgDir}/src/${p.slice(srcRoot.length + 1)}: import(${m[1].trim().slice(0, 40)})`);
+        if (m[1].includes(":")) continue
+        out.opaque.push(`${pkgDir}/src/${p.slice(srcRoot.length + 1)}: import(${m[1].trim().slice(0, 40)})`)
       }
     }
-  };
-  walk(srcRoot);
-  return out;
+  }
+  walk(srcRoot)
+  return out
 }
 
 /** The workspace graph as `{ graph: Map(pkg → deps[]), undeclared[], opaque[] }` — manifest ∪ source. */
 export function workspaceGraph(pkgsDir) {
-  const graph = new Map();
-  const undeclared = [];
-  const opaque = [];
+  const graph = new Map()
+  const undeclared = []
+  const opaque = []
   for (const dir of readdirSync(pkgsDir)) {
-    const manifest = join(pkgsDir, dir, 'package.json');
-    if (!existsSync(manifest)) continue;
-    const pkg = JSON.parse(readFileSync(manifest, 'utf8'));
+    const manifest = join(pkgsDir, dir, "package.json")
+    if (!existsSync(manifest)) continue
+    const pkg = JSON.parse(readFileSync(manifest, "utf8"))
     const declared = new Set(
-      Object.keys({ ...pkg.dependencies, ...pkg.devDependencies }).map(shortName).filter((d) => d !== null),
-    );
-    const imported = sourceImports(pkgsDir, dir);
+      Object.keys({ ...pkg.dependencies, ...pkg.devDependencies })
+        .map(shortName)
+        .filter((d) => d !== null),
+    )
+    const imported = sourceImports(pkgsDir, dir)
     for (const dep of imported.edges) {
-      if (dep !== dir && !declared.has(dep)) undeclared.push(`@atlas/${dir} imports @atlas/${dep} but does not declare it`);
+      if (dep !== dir && !declared.has(dep))
+        undeclared.push(`@atlas/${dir} imports @atlas/${dep} but does not declare it`)
     }
-    opaque.push(...imported.opaque);
-    graph.set(dir, [...new Set([...declared, ...imported.edges])].filter((d) => d !== dir));
+    opaque.push(...imported.opaque)
+    graph.set(
+      dir,
+      [...new Set([...declared, ...imported.edges])].filter((d) => d !== dir),
+    )
   }
-  return { graph, undeclared, opaque };
+  return { graph, undeclared, opaque }
 }

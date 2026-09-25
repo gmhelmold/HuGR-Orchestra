@@ -1,2 +1,2 @@
-export { shout } from './shout';
-export { shoutTwice } from './shoutTwice';
+export { shout } from "./shout"
+export { shoutTwice } from "./shoutTwice"

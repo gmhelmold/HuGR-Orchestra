@@ -64,11 +64,13 @@ describe("Maestro admit request", () => {
   })
 
   test("mutation probe: claim labels cannot cross fact and proposal boundary", () => {
-    expect(
-      decideAdmission({ ...work, known: [{ text: "Guess", source: "maestro" }] }),
-    ).toEqual({ outcome: "CLARIFY", reason: "invalid-assessment" })
-    expect(
-      decideAdmission({ ...work, proposals: [{ text: "Fact", source: "stakeholder" }] }),
-    ).toEqual({ outcome: "CLARIFY", reason: "invalid-assessment" })
+    expect(decideAdmission({ ...work, known: [{ text: "Guess", source: "maestro" }] })).toEqual({
+      outcome: "CLARIFY",
+      reason: "invalid-assessment",
+    })
+    expect(decideAdmission({ ...work, proposals: [{ text: "Fact", source: "stakeholder" }] })).toEqual({
+      outcome: "CLARIFY",
+      reason: "invalid-assessment",
+    })
   })
 })

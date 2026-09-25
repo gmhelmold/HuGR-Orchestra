@@ -21,9 +21,9 @@
 // the canonical preimage (`canonicalForm`, KERNEL-1) through the injected seam and brands the result as
 // the drift-leg `SubtreeHash` (`asSubtreeHash`, the sanctioned mint site). No raw digest is imported here.
 
-import { asSubtreeHash, canonicalForm } from '@atlas/kernel';
-import type { CasObject, Encoder } from '@atlas/kernel';
-import type { SubtreeHash } from '@atlas/contracts';
+import { asSubtreeHash, canonicalForm } from "@atlas/kernel"
+import type { CasObject, Encoder } from "@atlas/kernel"
+import type { SubtreeHash } from "@atlas/contracts"
 
 /**
  * The GROUND-10 seam contract. A reference to @atlas/contracts/@atlas/kernel's `Encoder` (KERNEL-2) —
@@ -31,7 +31,7 @@ import type { SubtreeHash } from '@atlas/contracts';
  * through every anchor (the seam-substitution property, method-tags-grd:89-91); an inlined local
  * `blake3` digest call would diverge from the swapped seam and break the substitution test.
  */
-export type SubtreeSeam = Encoder;
+export type SubtreeSeam = Encoder
 
 export interface SubtreeApi {
   /** BLAKE3 over the unit's source slice — the drift oracle (branded `SubtreeHash`, from contracts).
@@ -46,7 +46,7 @@ export interface SubtreeApi {
    *  lower index layer. Transcribed as the kernel `CasObject` (`= unknown` at layer 1 — a stored CAS
    *  object, DAG-safe: index/kernel are BELOW grounding) rather than invented. Flagged for the index
    *  layer to surface the concrete node shape. */
-  subtreeHash(unit: CasObject): SubtreeHash;
+  subtreeHash(unit: CasObject): SubtreeHash
 }
 
 /**
@@ -56,7 +56,6 @@ export interface SubtreeApi {
  * The returned `subtreeHash` conforms EXACTLY to the frozen `SubtreeApi.subtreeHash(unit)` and is pure.
  */
 export function bindSubtree(encoder: Encoder): SubtreeApi {
-  const subtreeHash = (unit: CasObject): SubtreeHash =>
-    asSubtreeHash(encoder.hash(canonicalForm(unit)));
-  return { subtreeHash };
+  const subtreeHash = (unit: CasObject): SubtreeHash => asSubtreeHash(encoder.hash(canonicalForm(unit)))
+  return { subtreeHash }
 }

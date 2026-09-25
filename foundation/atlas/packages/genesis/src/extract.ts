@@ -7,15 +7,15 @@
 // a seed's self-declaration is NEVER consulted (GEN-4d). The ranking, the 2-door gate, and the escalation
 // defaults are CALLED through the injected `ExtractDeps` seams, never authored here.
 
-import type { PredicateSlot, RelationKind } from '@atlas/knowledge';
-import type { Candidate, ExtractApi, ExtractResult, Fact, GenesisBudget, WhyNot } from './types.js';
+import type { PredicateSlot, RelationKind } from "@atlas/knowledge"
+import type { Candidate, ExtractApi, ExtractResult, Fact, GenesisBudget, WhyNot } from "./types.js"
 
 // ── GEN-2 marginal-value stop — the FIXED scheduler policy (atlas-genesis:117, types.ts) ──────────────
 // Transcribed from the frozen `MarginalValueStop` literal type: a trailing window of the last 20 ranked
 // sites; HALT once that window admits fewer than 4 (a `< 20%` admit-rate). Applied by the scheduler here,
 // never carried on `GenesisBudget`.
-export const MARGINAL_WINDOW = 20 as const;
-export const MARGINAL_MIN_ADMITS = 4 as const;
+export const MARGINAL_WINDOW = 20 as const
+export const MARGINAL_MIN_ADMITS = 4 as const
 
 /**
  * The hard budget ceiling default (GEN-2): `min(frontier_size, 200)` sites/run. A bare numeric `--budget N`
@@ -23,7 +23,7 @@ export const MARGINAL_MIN_ADMITS = 4 as const;
  * so the GEN-2 formula lives with the enforcement it governs.
  */
 export function defaultCeiling(frontierSize: number): number {
-  return Math.min(frontierSize, 200);
+  return Math.min(frontierSize, 200)
 }
 
 /**
@@ -32,7 +32,7 @@ export function defaultCeiling(frontierSize: number): number {
  * (`selfAsserted` / `confidence`); the driver NEVER reads it (GEN-4d) — admission is the gate's verdict alone.
  */
 interface SeedBase {
-  readonly cand: Candidate;
+  readonly cand: Candidate
   /**
    * The trimmed CLAIM text. REQUIRED on every family (not just advisory): the existing advisory gates read
    * `seed.claim` off the un-narrowed `SeedProposal` unconditionally (mine-fixtures / e2e / genesis gates),
@@ -41,7 +41,7 @@ interface SeedBase {
    * claim string (unread by the relation/negation proposal it builds, which grounds off its own legs). This
    * is the one place THIS WP overrides the brief's per-shape field list; see the returned card's framing note.
    */
-  readonly claim: string;
+  readonly claim: string
   /**
    * [#195c] The VALIDATED answer bytes as a string — the untrimmed answer envelope the model returned, of
    * which `claim` is the trimmed projection. Present ONLY on a model-produced seed that passed the adapter's
@@ -50,9 +50,9 @@ interface SeedBase {
    * routed straight to the gate). Absent on a hand-built / human seed. Typed here rather than ridden as an
    * untyped widened field, so the emit path can thread it without a cast.
    */
-  readonly rawAnswer?: string;
-  readonly selfAsserted?: boolean; // IGNORED by the driver (GEN-4d) — never promotes a seed
-  readonly confidence?: number; //    IGNORED by the driver (GEN-4d) — never promotes a seed
+  readonly rawAnswer?: string
+  readonly selfAsserted?: boolean // IGNORED by the driver (GEN-4d) — never promotes a seed
+  readonly confidence?: number //    IGNORED by the driver (GEN-4d) — never promotes a seed
 }
 
 /**
@@ -60,17 +60,17 @@ interface SeedBase {
  * OPTIONAL so every existing producer/fixture (which omits it) stays a valid advisory seed byte-for-byte.
  */
 export interface AdvisorySeed extends SeedBase {
-  readonly kind?: 'advisory';
+  readonly kind?: "advisory"
 }
 
 /** A PREDICATE seed (GEN-12) — carries the `slot` that drives SOUND-ORACLE-FIRST at admission (GEN-12k). */
 export interface PredicateSeed extends SeedBase {
-  readonly kind: 'predicate';
-  readonly slot: PredicateSlot;
-  readonly target?: string; // ADR-0017 dependency-slot leg — the global symbol X the fact depends on (absent for non-oracle slots)
-  readonly scope?: string; //  ADR-0017 dependency-slot leg — the directory key S the dependency witness ranges over
-  readonly atLeast?: number; // #196c count-slot leg — the WITNESSED lower bound N the harness derived (absent for non-count slots)
-  readonly derivation?: string; // 196b justified-slot leg — the contestable grounds a semantic slot carries onto `node.derivation`. UNLIKE `scratch` (discarded chain-of-thought), this is PERSISTED as the `justified` seal's own witness-analog (ADR-0017 CORRECTION 5). Absent for oracle slots (their witness is the proof).
+  readonly kind: "predicate"
+  readonly slot: PredicateSlot
+  readonly target?: string // ADR-0017 dependency-slot leg — the global symbol X the fact depends on (absent for non-oracle slots)
+  readonly scope?: string //  ADR-0017 dependency-slot leg — the directory key S the dependency witness ranges over
+  readonly atLeast?: number // #196c count-slot leg — the WITNESSED lower bound N the harness derived (absent for non-count slots)
+  readonly derivation?: string // 196b justified-slot leg — the contestable grounds a semantic slot carries onto `node.derivation`. UNLIKE `scratch` (discarded chain-of-thought), this is PERSISTED as the `justified` seal's own witness-analog (ADR-0017 CORRECTION 5). Absent for oracle slots (their witness is the proof).
 }
 
 /**
@@ -78,10 +78,10 @@ export interface PredicateSeed extends SeedBase {
  * NO relationKey: identity is minted DOWNSTREAM, never proposed by the model (KNOW-15b parity).
  */
 export interface RelationSeed extends SeedBase {
-  readonly kind: 'relation';
-  readonly relationKind: RelationKind;
-  readonly endpointA: string; // location-free unitKey of A (subject)
-  readonly endpointB: string; // location-free unitKey of B (object)
+  readonly kind: "relation"
+  readonly relationKind: RelationKind
+  readonly endpointA: string // location-free unitKey of A (subject)
+  readonly endpointB: string // location-free unitKey of B (object)
 }
 
 /**
@@ -89,10 +89,10 @@ export interface RelationSeed extends SeedBase {
  * grounding: the governed door CONSTRUCTS the scope-directory Merkle grounding at admit (WP-96-N), not the seed.
  */
 export interface NegationSeed extends SeedBase {
-  readonly kind: 'negation';
-  readonly relationKind: RelationKind; // the NEGATED relation (shares #99a's closed vocabulary)
-  readonly target: string; //            location-free GLOBAL symbol key the negative is about
-  readonly scope: string; //             the CLOSED scope (a DIRECTORY key) the witness ranges over
+  readonly kind: "negation"
+  readonly relationKind: RelationKind // the NEGATED relation (shares #99a's closed vocabulary)
+  readonly target: string //            location-free GLOBAL symbol key the negative is about
+  readonly scope: string //             the CLOSED scope (a DIRECTORY key) the witness ranges over
 }
 
 /**
@@ -101,7 +101,7 @@ export interface NegationSeed extends SeedBase {
  * so a mine pass can carry a predicate / relation / negation shape and the gate can dispatch on it; the
  * default proposer still emits advisory (a `kind`-less `AdvisorySeed`), so back-compat is byte-identical.
  */
-export type SeedProposal = AdvisorySeed | PredicateSeed | RelationSeed | NegationSeed;
+export type SeedProposal = AdvisorySeed | PredicateSeed | RelationSeed | NegationSeed
 
 /**
  * The single bounded LLM call per site (GEN-2). CALLED, never defined here (the proposer/admission engine
@@ -113,13 +113,13 @@ export type SeedProposal = AdvisorySeed | PredicateSeed | RelationSeed | Negatio
  *     `WhyNot` instead of vanishing into the silent `null` case (the 2026-08-04 splice was invisible).
  */
 export interface SiteProposer {
-  propose(cand: Candidate): SeedProposal | { readonly abstain: string } | null;
+  propose(cand: Candidate): SeedProposal | { readonly abstain: string } | null
 }
 
 /** The gate's mechanical verdict: an admitted grounded `Fact`, or a grounded `WhyNot` abstention. */
 export type EmitVerdict =
   | { readonly emitted: true; readonly fact: Fact }
-  | { readonly emitted: false; readonly whyNot: WhyNot };
+  | { readonly emitted: false; readonly whyNot: WhyNot }
 
 /**
  * The admission bar at atlas-emit (truth: grounding re-derives FRESH by subtreeHash; usefulness: non-obvious
@@ -127,26 +127,26 @@ export type EmitVerdict =
  * seed's own self-declaration is never an input (GEN-4d). An un-admitted seed yields a grounded `WhyNot`.
  */
 export interface EmitGate {
-  emit(seed: SeedProposal, cand: Candidate): EmitVerdict;
+  emit(seed: SeedProposal, cand: Candidate): EmitVerdict
 }
 
 /** The injected S2 seams the driver calls (GEN-2/4). Nothing here is authored by this WP — it orchestrates. */
 export interface ExtractDeps {
-  readonly proposer: SiteProposer;
-  readonly gate: EmitGate;
+  readonly proposer: SiteProposer
+  readonly gate: EmitGate
 }
 
 /** Highest-PPR-first order (GEN-2). Deterministic: PPR descending, ties broken by the stable `rank` (GEN-11). */
 function byPprDescending(a: Candidate, b: Candidate): number {
-  if (b.ppr !== a.ppr) return b.ppr - a.ppr;
-  return a.rank - b.rank;
+  if (b.ppr !== a.ppr) return b.ppr - a.ppr
+  return a.rank - b.rank
 }
 
 /** Count of admits within the trailing window (GEN-2 marginal-value stop). */
 function admitsIn(window: readonly boolean[]): number {
-  let n = 0;
-  for (const admitted of window) if (admitted) n += 1;
-  return n;
+  let n = 0
+  for (const admitted of window) if (admitted) n += 1
+  return n
 }
 
 /**
@@ -160,52 +160,48 @@ function admitsIn(window: readonly boolean[]): number {
  *   • mints NO fact from `candidate.signals` — the fact set is built solely from gate verdicts (GEN-6).
  * Total: never throws on the driver path.
  */
-export function runExtract(
-  cands: readonly Candidate[],
-  budget: GenesisBudget,
-  deps: ExtractDeps,
-): ExtractResult {
-  const ranked = [...cands].sort(byPprDescending); // highest-PPR-first (GEN-2b), deterministic
-  const facts: Fact[] = [];
-  const abstained: WhyNot[] = [];
-  const window: boolean[] = []; // trailing admit-outcomes (GEN-2 marginal-value stop)
-  let visited = 0; // one bounded call per visited site — the GEN-2 spend counter
+export function runExtract(cands: readonly Candidate[], budget: GenesisBudget, deps: ExtractDeps): ExtractResult {
+  const ranked = [...cands].sort(byPprDescending) // highest-PPR-first (GEN-2b), deterministic
+  const facts: Fact[] = []
+  const abstained: WhyNot[] = []
+  const window: boolean[] = [] // trailing admit-outcomes (GEN-2 marginal-value stop)
+  let visited = 0 // one bounded call per visited site — the GEN-2 spend counter
 
   for (const cand of ranked) {
     // GEN-2d hard ceiling: no call past the budget.
-    if (visited >= budget.ceiling) break;
+    if (visited >= budget.ceiling) break
     // GEN-2e marginal-value halt: once the trailing-20 window admits `< 4`, stop — do NOT drain the budget.
-    if (window.length >= MARGINAL_WINDOW && admitsIn(window) < MARGINAL_MIN_ADMITS) break;
+    if (window.length >= MARGINAL_WINDOW && admitsIn(window) < MARGINAL_MIN_ADMITS) break
 
     // GEN-2c: EXACTLY ONE bounded call per site (no self-consistency, no re-call).
-    const seed = deps.proposer.propose(cand);
-    visited += 1;
+    const seed = deps.proposer.propose(cand)
+    visited += 1
 
-    let admitted = false;
+    let admitted = false
     if (seed === null) {
       // GEN-12: abstention is first-class — a site that yields no proposal yields a grounded WhyNot.
-      abstained.push({ site: cand.site, reason: 'model abstained: no grounded fact at site' });
-    } else if ('abstain' in seed) {
+      abstained.push({ site: cand.site, reason: "model abstained: no grounded fact at site" })
+    } else if ("abstain" in seed) {
       // [#195c] A MALFORMED-answer abstention is DISTINCT from a plain model-abstain: it produces a grounded
       // WhyNot whose reason is the sanity gate's `answer-malformed:*` sub-reason (carried VERBATIM, never
       // re-derived), so the spliced/corrupt-answer class is GREPPABLE in the run ledger rather than silent.
-      abstained.push({ site: cand.site, reason: seed.abstain });
+      abstained.push({ site: cand.site, reason: seed.abstain })
     } else {
       // GEN-4: admission is the mechanical 2-door verdict alone (self-declaration on `seed` is NOT read).
-      const verdict = deps.gate.emit(seed, cand);
+      const verdict = deps.gate.emit(seed, cand)
       if (verdict.emitted) {
-        facts.push(verdict.fact); // GEN-6: the fact comes from the gate, never from cand.signals
-        admitted = true;
+        facts.push(verdict.fact) // GEN-6: the fact comes from the gate, never from cand.signals
+        admitted = true
       } else {
-        abstained.push(verdict.whyNot);
+        abstained.push(verdict.whyNot)
       }
     }
 
-    window.push(admitted);
-    if (window.length > MARGINAL_WINDOW) window.shift(); // keep only the trailing 20
+    window.push(admitted)
+    if (window.length > MARGINAL_WINDOW) window.shift() // keep only the trailing 20
   }
 
-  return { facts, abstained };
+  return { facts, abstained }
 }
 
 /**
@@ -215,11 +211,10 @@ export function runExtract(
  */
 export function makeExtract(deps: ExtractDeps): ExtractApi {
   return {
-    extract: (cands: readonly Candidate[], budget: GenesisBudget): ExtractResult =>
-      runExtract(cands, budget, deps),
-  };
+    extract: (cands: readonly Candidate[], budget: GenesisBudget): ExtractResult => runExtract(cands, budget, deps),
+  }
 }
 
 // differential-vs-oracle (compile-time): `makeExtract` conforms to the frozen ExtractApi surface.
-const _extract: (deps: ExtractDeps) => ExtractApi = makeExtract;
-void _extract;
+const _extract: (deps: ExtractDeps) => ExtractApi = makeExtract
+void _extract

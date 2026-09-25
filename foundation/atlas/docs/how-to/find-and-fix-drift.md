@@ -31,7 +31,7 @@ There is a real ceiling in step 4, measured and stated rather than glossed. Read
    # exit 0
    ```
 
-   `stale: true` is a *do not trust this yet* signal, not a diagnosis. `query` re-derives nothing; see
+   `stale: true` is a _do not trust this yet_ signal, not a diagnosis. `query` re-derives nothing; see
    [the reference](../reference/commands/query.md#what-stale-actually-means).
 
 2. **Ask which fact, and what kind of drift.** `doctor why` takes the nodeKey from the `inv` line:
@@ -71,7 +71,7 @@ There is a real ceiling in step 4, measured and stated rather than glossed. Read
 
 4. **Re-emit — and check what actually happened.** The repair is an
    [`atlas emit`](../reference/commands/emit.md) like any other. **Here is the ceiling.** A re-emit whose
-   `claimNorm` is byte-identical to the stored claim is *deduplicated*: it exits `0`, hands you back the
+   `claimNorm` is byte-identical to the stored claim is _deduplicated_: it exits `0`, hands you back the
    **old** content address, persists nothing new — and still re-stamps the freshness watermark, so
    `stale` flips to `false` while the fact is still drifted. Measured end to end, in this order:
 

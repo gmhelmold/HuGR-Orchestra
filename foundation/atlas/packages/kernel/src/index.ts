@@ -6,16 +6,16 @@
 // frozen interface is co-located with its impl; the shared data model lives in types.ts.
 
 // The shared frozen data model (Event / EventLog / Node / AtlasState / CasObject / Cas / ClaimEntry).
-export type * from './types.js';
+export type * from "./types.js"
 
 // The branded-value mint boundary — the sanctioned cast sites for Hash/SubtreeHash/NodeKey.
-export { asHash, asSubtreeHash, asNodeKey } from './brand.js';
+export { asHash, asSubtreeHash, asNodeKey } from "./brand.js"
 
 // ── Runtime surface + co-located frozen interfaces ─────────────────────────────────────────────────
-export * from './encoder.js';   // the digest seam: default BLAKE3 encoder (Encoder / EncoderApi)
-export * from './canonical.js'; // canonicalForm + id — content-addressed identity (CanonicalApi)
-export * from './store.js';     // the single CAS: createStore (StoreApi)
-export * from './log.js';       // append-only event log + eventId/combine/reseq (LogApi/RefLog/RefLogStatics)
-export * from './fold.js';      // fold + convergent merge/mergeNode/head (FoldApi)
-export * from './portable.js';  // open-JSON (OKF) export/import of the CAS (PortableApi)
-export * from './jsonl.js';     // content-keyed JSONL log form + safe-degrade line-merge
+export * from "./encoder.js" // the digest seam: default BLAKE3 encoder (Encoder / EncoderApi)
+export * from "./canonical.js" // canonicalForm + id — content-addressed identity (CanonicalApi)
+export * from "./store.js" // the single CAS: createStore (StoreApi)
+export * from "./log.js" // append-only event log + eventId/combine/reseq (LogApi/RefLog/RefLogStatics)
+export * from "./fold.js" // fold + convergent merge/mergeNode/head (FoldApi)
+export * from "./portable.js" // open-JSON (OKF) export/import of the CAS (PortableApi)
+export * from "./jsonl.js" // content-keyed JSONL log form + safe-degrade line-merge

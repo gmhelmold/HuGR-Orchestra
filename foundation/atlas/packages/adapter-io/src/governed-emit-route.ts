@@ -8,10 +8,10 @@
 //
 // PURE: no store, no policy, no clock. It takes a class the CALLER derived and returns a `RatifyContext`.
 
-import type { Tier } from '@atlas/contracts';
-import type { RatifyContext, WriteOrigin } from '@atlas/knowledge';
+import type { Tier } from "@atlas/contracts"
+import type { RatifyContext, WriteOrigin } from "@atlas/knowledge"
 
-export type { WriteOrigin };
+export type { WriteOrigin }
 
 /** The door-derived fast-path verdicts — the ARCH-9 replacement for the former `DOOR_RATIFY_CTX` constant.
  *  `lowRisk` (KNOW-18a/17b) is DERIVED from the candidate having cleared the door's own TRUTH gate (a
@@ -19,8 +19,8 @@ export type { WriteOrigin };
  *  store contention during the write attempt. See `ratifyCtxFor` — ARCH-9 forbids a module-level constant
  *  that pins the gate open, so these MUST come from the caller, never defaulted here. */
 export interface FastPathVerdicts {
-  readonly lowRisk: boolean;
-  readonly contested: boolean;
+  readonly lowRisk: boolean
+  readonly contested: boolean
 }
 
 /**
@@ -82,5 +82,5 @@ export function ratifyCtxFor(
     contested: verdicts.contested,
     ...(derivedTier !== undefined ? { derivedTier } : {}),
     ...(origin !== undefined ? { origin } : {}),
-  };
+  }
 }

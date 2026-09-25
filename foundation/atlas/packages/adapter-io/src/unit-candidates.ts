@@ -7,26 +7,26 @@
 // and the sound oracle re-proves it. Pure delegation: the candidate SET is the index's business, not the
 // prompt's (mirrors `createUnitSourceReader` delegating unit slicing to the AST).
 
-import type { StructRef } from '@atlas/contracts';
-import { createUnitDeps } from '@atlas/index';
-import type { ScipOutput } from '@atlas/index';
+import type { StructRef } from "@atlas/contracts"
+import { createUnitDeps } from "@atlas/index"
+import type { ScipOutput } from "@atlas/index"
 
-import type { CandidateReader } from './prompt.js';
-import type { DepResolver } from './llm.js';
+import type { CandidateReader } from "./prompt.js"
+import type { DepResolver } from "./llm.js"
 
 /** The FILE portion of a `qualifiedPath` — the prefix up to the FIRST `::` (mirrors `unit-source.ts`'s helper;
  *  candidates are a UNIT-level (per-file) property, so a `::symbol` site resolves to its file's dep set). */
 function filePathOf(qualifiedPath: string): string {
-  const at = qualifiedPath.indexOf('::');
-  return at === -1 ? qualifiedPath : qualifiedPath.slice(0, at);
+  const at = qualifiedPath.indexOf("::")
+  return at === -1 ? qualifiedPath : qualifiedPath.slice(0, at)
 }
 
 /** Build the candidate reader over one SCIP output — the unit's cross-unit dep NAMES for a site's file.
  *  Total: an unknown file (or one with no cross-unit dep) yields `[]`, which renders as an empty candidate
  *  list; the candidate-grounded prompt frames that as "no non-obvious dependency here" and the model abstains. */
 export function createUnitDepCandidates(scip: ScipOutput): CandidateReader {
-  const deps = createUnitDeps(scip);
-  return { candidates: (site: StructRef): readonly string[] => deps.candidatesFor(filePathOf(site.qualifiedPath)) };
+  const deps = createUnitDeps(scip)
+  return { candidates: (site: StructRef): readonly string[] => deps.candidatesFor(filePathOf(site.qualifiedPath)) }
 }
 
 /** The gate/parser-side resolver: a picked dependency NAME → the mined unit's OWN cross-unit dependency symbol
@@ -35,6 +35,6 @@ export function createUnitDepCandidates(scip: ScipOutput): CandidateReader {
  *  let an off-candidate name ride an unrelated file's same-named symbol (lucy BLOCKER). Pairs with
  *  `makeDependencyClaimParser` (llm.ts), which puts the resolved SYMBOL on the seed's `target`. */
 export function createDepResolver(scip: ScipOutput): DepResolver {
-  const deps = createUnitDeps(scip);
-  return (name: string, site: StructRef): string | null => deps.resolveDepFor(filePathOf(site.qualifiedPath), name);
+  const deps = createUnitDeps(scip)
+  return (name: string, site: StructRef): string | null => deps.resolveDepFor(filePathOf(site.qualifiedPath), name)
 }

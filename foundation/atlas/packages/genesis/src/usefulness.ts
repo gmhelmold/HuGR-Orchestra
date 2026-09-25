@@ -25,8 +25,8 @@
 //     hits (the shared ledger), never to a proposer score.
 // No hashing, no clock, no IO here; node identity is the sealed @atlas/kernel `NodeKey` (minted by callers).
 
-import type { NodeKey, StructRef } from '@atlas/contracts';
-import type { DecayConfig, LedgerEntry, HitsApi, ObviousnessScore } from '@atlas/knowledge';
+import type { NodeKey, StructRef } from "@atlas/contracts"
+import type { DecayConfig, LedgerEntry, HitsApi, ObviousnessScore } from "@atlas/knowledge"
 
 /**
  * A proposer candidate presented to the genesis seed gate (GENESIS-HOME). It MAY carry the proposer's own
@@ -35,10 +35,10 @@ import type { DecayConfig, LedgerEntry, HitsApi, ObviousnessScore } from '@atlas
  * citation re-derive at `source@sha`?). Usefulness is NOT a candidate field — it is measured a-posteriori.
  */
 export interface SeedCandidate {
-  readonly site: StructRef; // the anchored structural unit the fact is grounded to (GEN-4)
-  readonly grounded: boolean; // GEN-4: does the citation re-derive? — the honest mechanical admission bar
-  readonly self_score?: number; // PROPOSER self-assessment — present, but the gate NEVER reads it (GEN-16a)
-  readonly importance?: number; // proposer self-assessment alias — also NEVER read (GEN-16a)
+  readonly site: StructRef // the anchored structural unit the fact is grounded to (GEN-4)
+  readonly grounded: boolean // GEN-4: does the citation re-derive? — the honest mechanical admission bar
+  readonly self_score?: number // PROPOSER self-assessment — present, but the gate NEVER reads it (GEN-16a)
+  readonly importance?: number // proposer self-assessment alias — also NEVER read (GEN-16a)
 }
 
 /**
@@ -50,9 +50,9 @@ export interface SeedCandidate {
  * honest absence rather than a fabricated default.
  */
 export interface SeedDecision {
-  readonly seeded: boolean;
-  readonly reason: 'loose-but-thin' | 'ungrounded';
-  readonly obviousness?: ObviousnessScore;
+  readonly seeded: boolean
+  readonly reason: "loose-but-thin" | "ungrounded"
+  readonly obviousness?: ObviousnessScore
 }
 
 /**
@@ -71,10 +71,10 @@ export function seedGate(candidate: SeedCandidate, obviousness?: ObviousnessScor
   // it beside `self_score`/`importance`, where the next reader has to work out which of the three the
   // proposer authored. Here the shape says it: the candidate is what the proposer sent, the second argument
   // is what the harness measured.
-  if (!candidate.grounded) return { seeded: false, reason: 'ungrounded' };
+  if (!candidate.grounded) return { seeded: false, reason: "ungrounded" }
   return obviousness === undefined
-    ? { seeded: true, reason: 'loose-but-thin' }
-    : { seeded: true, reason: 'loose-but-thin', obviousness };
+    ? { seeded: true, reason: "loose-but-thin" }
+    : { seeded: true, reason: "loose-but-thin", obviousness }
 }
 
 /**
@@ -83,7 +83,7 @@ export function seedGate(candidate: SeedCandidate, obviousness?: ObviousnessScor
  * VALUE is not frozen (it calibrates on observed downstream hits, not the proposer's score). Mirrors the
  * KNOW-17 `Calibrate`; genesis applies it to the SHARED ledger's observed hit-count.
  */
-export type Calibrate = (observedHits: number) => number;
+export type Calibrate = (observedHits: number) => number
 
 /**
  * The injected KNOW-17 seam (build-ahead; CONSUMED, never redefined — card exclusions):
@@ -92,8 +92,8 @@ export type Calibrate = (observedHits: number) => number;
  *   - `calibrate` — the parametric OPEN-DEFINE `f(hits)`; applied to observed hits, never a self-score.
  */
 export interface SeedGateDeps {
-  readonly hits: HitsApi;
-  readonly calibrate: Calibrate;
+  readonly hits: HitsApi
+  readonly calibrate: Calibrate
 }
 
 /**
@@ -104,16 +104,16 @@ export interface SeedGateDeps {
 export interface SeedGate {
   /** GEN-16a/16b — seed loose-but-thin; reads no proposer self-assessment. The optional ADR-0012 score is
    *  carried onto the decision for ranking and never enters the seeded/ungrounded verdict. */
-  seed(candidate: SeedCandidate, obviousness?: ObviousnessScore): SeedDecision;
+  seed(candidate: SeedCandidate, obviousness?: ObviousnessScore): SeedDecision
   /** GEN-16c — a wave consults a seeded fact ⇒ accrue one LOGGED CITED hit (KNOW-17 `logHit`). Returns the
    *  minimal ledger record; its `hits` is the observed count the threshold calibrates against. */
-  consult(nodeId: NodeKey): LedgerEntry;
+  consult(nodeId: NodeKey): LedgerEntry
   /** GEN-16d — the decay pass (KNOW-17): a fact with 0 hits in the window is archived to CAS (never deleted)
    *  and dropped from the served set; it may re-enter on a later `consult`. */
-  decay(cfg: DecayConfig): { readonly decayed: readonly NodeKey[]; readonly retained: readonly NodeKey[] };
+  decay(cfg: DecayConfig): { readonly decayed: readonly NodeKey[]; readonly retained: readonly NodeKey[] }
   /** GEN-16e — the admission threshold = `calibrate(observedHits)`, a function of OBSERVED hits (the shared
    *  ledger), never a hard-coded constant and never a proposer self-score. */
-  admissionThreshold(observedHits: number): number;
+  admissionThreshold(observedHits: number): number
 }
 
 /**
@@ -130,5 +130,5 @@ export function bindSeedGate(deps: SeedGateDeps): SeedGate {
     decay: (cfg: DecayConfig) => deps.hits.decay(cfg),
     // GEN-16e: threshold == f(observed hits) — the parametric OPEN-DEFINE calibration over the shared ledger.
     admissionThreshold: (observedHits: number): number => deps.calibrate(observedHits),
-  };
+  }
 }

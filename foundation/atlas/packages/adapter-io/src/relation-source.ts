@@ -14,23 +14,23 @@
 // (`relationsVerdict`) that BOTH transports drive, so the `Verdict` (`data` + `guidance`) is byte-identical
 // on CLI and MCP — the SCHEMA + VERDICT parity invariant, sourced from ONE body rather than transcribed twice.
 
-import { relationsOf } from '@atlas/knowledge';
-import type { RelationDirection, RelationEdge } from '@atlas/knowledge';
-import type { Guidance, Verdict } from '@atlas/tools';
-import { rehydrateProjection } from './store.js';
-import type { DiskStore } from './store.js';
+import { relationsOf } from "@atlas/knowledge"
+import type { RelationDirection, RelationEdge } from "@atlas/knowledge"
+import type { Guidance, Verdict } from "@atlas/tools"
+import { rehydrateProjection } from "./store.js"
+import type { DiskStore } from "./store.js"
 
 /** The composition-root leg: `(unit, direction)` → the grounded relation edges touching `unit`. TOTAL —
  *  `relationsOf` is pure + total (an empty/malformed unit yields the empty list, never a throw). Re-reads the
  *  LIVE projection per call, so an in-session `atlas emit` of a relation is visible to the very next call. */
-export type RelationLeg = (unit: string, direction: RelationDirection) => readonly RelationEdge[];
+export type RelationLeg = (unit: string, direction: RelationDirection) => readonly RelationEdge[]
 
 /** The data payload a `relations` verdict carries — the edges plus the query that produced them, so an EMPTY
  *  result is a measured fact (this unit, this direction, zero edges) and never an absent line. */
 export interface RelationsData {
-  readonly relations: readonly RelationEdge[];
-  readonly unit: string;
-  readonly direction: RelationDirection;
+  readonly relations: readonly RelationEdge[]
+  readonly unit: string
+  readonly direction: RelationDirection
 }
 
 /** Build the composition-root read leg over the durable `store` — the SAME store the handler's query leg and
@@ -42,22 +42,22 @@ export interface RelationsData {
  *  a PRE-EXISTING MCP-wide gap this leg inherits, not one #99a introduces, and it is strictly read-only (the
  *  leg opens no write path). Closing it means threading `readRefusal` into `createMcpServer`. */
 export function createRelationLeg(store: DiskStore): RelationLeg {
-  return (unit, direction) => relationsOf(rehydrateProjection(store), unit, direction);
+  return (unit, direction) => relationsOf(rehydrateProjection(store), unit, direction)
 }
 
 /** The three legal directions — `out` (unit is the SUBJECT), `in` (the OBJECT), `both` (the union). */
-const DIRECTIONS: readonly RelationDirection[] = ['out', 'in', 'both'];
+const DIRECTIONS: readonly RelationDirection[] = ["out", "in", "both"]
 
 /** The one property a reader should check the bytes against — stated identically on both transports. */
 const INVARIANT =
-  'REL-1: `atlas relations` reads GROUNDED relation FACTS (family:relation) off the live projection the query readback rides — directed (out=subject, in=object, both=union), sorted (relationKind, endpointA, endpointB, nodeKey) so equal input is byte-identical output, never a throw, no write path';
+  "REL-1: `atlas relations` reads GROUNDED relation FACTS (family:relation) off the live projection the query readback rides — directed (out=subject, in=object, both=union), sorted (relationKind, endpointA, endpointB, nodeKey) so equal input is byte-identical output, never a throw, no write path"
 
 /** The one actionable sentence, derived from the result's own numbers — never a guess about the wiring. */
 function nextLine(unit: string, direction: RelationDirection, edges: readonly RelationEdge[]): string {
   if (edges.length === 0) {
-    return `no grounded relation fact touches '${unit}' in direction '${direction}' — a relation is filed by the truth door (\`atlas emit\` a family:relation fact); check the spelling of the unit key, or widen the direction to 'both'`;
+    return `no grounded relation fact touches '${unit}' in direction '${direction}' — a relation is filed by the truth door (\`atlas emit\` a family:relation fact); check the spelling of the unit key, or widen the direction to 'both'`
   }
-  return `${edges.length} grounded relation(s) touch '${unit}' (direction '${direction}') — each carries its own nodeKey; inspect one with \`atlas doctor why <nodeKey>\``;
+  return `${edges.length} grounded relation(s) touch '${unit}' (direction '${direction}') — each carries its own nodeKey; inspect one with \`atlas doctor why <nodeKey>\``
 }
 
 /**
@@ -78,22 +78,22 @@ export function relationsVerdict(
   unit: string,
   rawDirection: string | undefined,
 ): Verdict<RelationsData> {
-  if (typeof unit !== 'string' || unit.length === 0) {
+  if (typeof unit !== "string" || unit.length === 0) {
     const guidance: Guidance = {
-      next: '`atlas relations <unit> [out|in|both]` requires the unit key whose grounded relations to read (schema `required:[\'unit\']`)',
-      invariant: 'CLI-1b: a malformed invocation yields a structured error + guidance + non-zero exit, never a crash',
-    };
-    return { ok: false, rejected: 'missing unit: `atlas relations` requires a non-empty unit key', guidance };
+      next: "`atlas relations <unit> [out|in|both]` requires the unit key whose grounded relations to read (schema `required:['unit']`)",
+      invariant: "CLI-1b: a malformed invocation yields a structured error + guidance + non-zero exit, never a crash",
+    }
+    return { ok: false, rejected: "missing unit: `atlas relations` requires a non-empty unit key", guidance }
   }
   if (rawDirection !== undefined && !DIRECTIONS.includes(rawDirection as RelationDirection)) {
     const guidance: Guidance = {
       next: `unknown direction '${rawDirection}' — expected one of out|in|both (default both)`,
-      invariant: 'CLI-1b: a malformed invocation yields a structured error + guidance + non-zero exit, never a crash',
-    };
-    return { ok: false, rejected: `unknown direction '${rawDirection}': expected out|in|both`, guidance };
+      invariant: "CLI-1b: a malformed invocation yields a structured error + guidance + non-zero exit, never a crash",
+    }
+    return { ok: false, rejected: `unknown direction '${rawDirection}': expected out|in|both`, guidance }
   }
-  const direction: RelationDirection = (rawDirection ?? 'both') as RelationDirection;
-  const relations = leg(unit, direction);
-  const guidance: Guidance = { next: nextLine(unit, direction, relations), invariant: INVARIANT };
-  return { ok: true, guidance, data: { relations, unit, direction } };
+  const direction: RelationDirection = (rawDirection ?? "both") as RelationDirection
+  const relations = leg(unit, direction)
+  const guidance: Guidance = { next: nextLine(unit, direction, relations), invariant: INVARIANT }
+  return { ok: true, guidance, data: { relations, unit, direction } }
 }

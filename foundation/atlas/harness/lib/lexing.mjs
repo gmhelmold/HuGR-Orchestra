@@ -24,7 +24,7 @@
 // job is to not miss things. So lexing is delegated to `typescript` (a direct devDependency this repo
 // already builds with) and stops being any gate's problem.
 
-import ts from 'typescript';
+import ts from "typescript"
 
 /**
  * Blank every COMMENT in `text`, byte-for-byte, leaving code, strings, templates and regex literals intact.
@@ -54,39 +54,39 @@ import ts from 'typescript';
  * INDEX and anchors on `^\s*`, so a stripper that shortened the text would move the block it then reads.
  * Newlines are preserved for the same reason.
  */
-export function stripComments(text, fileName = 'in-memory.ts') {
-  const kind = /\.tsx$/.test(fileName) ? ts.ScriptKind.TSX : ts.ScriptKind.TS;
-  const sf = ts.createSourceFile(fileName, text, ts.ScriptTarget.Latest, true, kind);
-  const out = [...text];
+export function stripComments(text, fileName = "in-memory.ts") {
+  const kind = /\.tsx$/.test(fileName) ? ts.ScriptKind.TSX : ts.ScriptKind.TS
+  const sf = ts.createSourceFile(fileName, text, ts.ScriptTarget.Latest, true, kind)
+  const out = [...text]
   const blank = (from, to) => {
-    for (let i = from; i < to; i++) if (out[i] !== '\n' && out[i] !== '\r') out[i] = ' ';
-  };
+    for (let i = from; i < to; i++) if (out[i] !== "\n" && out[i] !== "\r") out[i] = " "
+  }
   const trivia = (from, to) => {
-    let i = from;
+    let i = from
     while (i < to) {
-      if (text[i] === '/' && text[i + 1] === '/') {
-        let j = i + 2;
-        while (j < to && text[j] !== '\n' && text[j] !== '\r') j++;
-        blank(i, j);
-        i = j;
-      } else if (text[i] === '/' && text[i + 1] === '*') {
-        const close = text.indexOf('*/', i + 2);
-        const j = close < 0 ? to : Math.min(close + 2, to);
-        blank(i, j);
-        i = j;
-      } else i++;
+      if (text[i] === "/" && text[i + 1] === "/") {
+        let j = i + 2
+        while (j < to && text[j] !== "\n" && text[j] !== "\r") j++
+        blank(i, j)
+        i = j
+      } else if (text[i] === "/" && text[i + 1] === "*") {
+        const close = text.indexOf("*/", i + 2)
+        const j = close < 0 ? to : Math.min(close + 2, to)
+        blank(i, j)
+        i = j
+      } else i++
     }
-  };
+  }
   const walk = (node) => {
-    const kids = node.getChildren(sf);
+    const kids = node.getChildren(sf)
     if (kids.length === 0) {
-      trivia(node.pos, node.getStart(sf));
-      return;
+      trivia(node.pos, node.getStart(sf))
+      return
     }
-    for (const kid of kids) walk(kid);
-  };
-  walk(sf);
+    for (const kid of kids) walk(kid)
+  }
+  walk(sf)
   // The EndOfFileToken carries the file's trailing trivia; `getChildren` on SourceFile yields it, so the
   // walk above already covers a comment that closes the file with no code after it. Asserted by fixture.
-  return out.join('');
+  return out.join("")
 }

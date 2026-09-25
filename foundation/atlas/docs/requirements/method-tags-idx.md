@@ -18,6 +18,7 @@
 ---
 
 ### INV-INDEX-1
+
 method-tag: reference-model
 fspec: —
 up-property: "single-index sufficiency: one content-addressed index serves both drift detection and discovery across every axis; there exists no separate discovery structure and no separate staleness pass (auxiliary-structure count == 0)"
@@ -25,13 +26,15 @@ down-model: "reference index = one CAS + N axis-views over it; both drift(query)
 anti-rot: `index/ref/index.ts` (the single-index reference) is the mock; any code path that stands up a second discovery or sweep structure fails the structure-count assertion in the shared unit test.
 
 ### INV-INDEX-2
+
 method-tag: PBT
 fspec: —
 up-property: "rollup determinism + edit-locality: each node's rollup is BLAKE3 over sorted child hashes (order-independent given the sort); an edit re-hashes exactly the leaf→root path on the affected axis and leaves every unaffected subtree's hash byte-identical (0 sibling re-hashes)"
 down-model: "reference Merkle rollup `subtreeHash(node)=blake3(concat(sorted(childHashes)))`; PBT the determinism law (same children ⇒ same root under any input order) + the locality law (mutate one leaf ⇒ the set of changed node-hashes == the leaf→root path, sibling hashes invariant)"
-anti-rot: `index/ref/rollup.ts` (the reference Merkle rollup) is the mock in the rollup unit tests; a code path that re-hashes a sibling or reorders children fails the locality/determinism property against it. *(Tag is `PBT`, not `reference-model`: the shape is a determinism + ordering/locality law, not general totality — the properties, not a differential oracle, are the teeth.)*
+anti-rot: `index/ref/rollup.ts` (the reference Merkle rollup) is the mock in the rollup unit tests; a code path that re-hashes a sibling or reorders children fails the locality/determinism property against it. _(Tag is `PBT`, not `reference-model`: the shape is a determinism + ordering/locality law, not general totality — the properties, not a differential oracle, are the teeth.)_
 
 ### INV-INDEX-3
+
 method-tag: reference-model
 fspec: —
 up-property: "mechanical zero-LLM build: every axis (structural, territory, depends-on + blast radius) is derived from the real file tree / import graph via a per-language SCIP indexer with 0 model calls; rebuilding twice yields identical trees; an edge that cannot be statically resolved (incl. every cross-language edge) is declared `unresolved`, never guessed"
@@ -39,6 +42,7 @@ down-model: "reference `build(tree, scipOutput)=axes`; the SCIP binary is a blac
 anti-rot: `index/ref/build.ts` is the mock, fed recorded SCIP fixtures; a build path that calls a model or fabricates an edge diverges from the reference and breaks the build.
 
 ### INV-INDEX-4
+
 method-tag: reference-model
 fspec: —
 up-property: "resolution totality + roll-up: resolving a `path` returns its covering node, and a file query also surfaces its module's and crate's invariants (hierarchy roll-up), for every path in the tree"
@@ -46,6 +50,7 @@ down-model: "reference `resolve(axis,key)` walks the spatial hierarchy returning
 anti-rot: `index/ref/resolve.ts` is the mock; a code resolver that misses an ancestor's invariants diverges from it and breaks the roll-up test.
 
 ### INV-INDEX-5
+
 method-tag: reference-model
 fspec: —
 up-property: "drift oracle: because retrieval keys on `subtreeHash`, an entry whose anchor hash ≠ current is visible at query time and excluded/flagged — with 0 re-embedding and 0 separate sweep"
@@ -53,13 +58,15 @@ down-model: "reference query compares each hit's anchor hash to the current node
 anti-rot: `index/ref/retrieval.ts` (shared with INDEX-8) is the mock; a code path that needs a sweep to detect staleness fails the no-sweep assertion.
 
 ### INV-INDEX-6
+
 method-tag: reference-model
 fspec: —
 up-property: "closed retrieval surface: relevance resolves by exactly scope, dependency, and trigger; any request through a fourth mode (e.g. free-text / similarity) does not resolve — the surface exposes no `search()`"
 down-model: "reference retrieval exposes exactly {byScope, byDependency, byTrigger}; PBT-fuzz over arbitrary mode tokens asserts only the three resolve and every other returns empty — no fourth path exists"
-anti-rot: `index/ref/retrieval.ts` is the mock; a code path that adds a similarity / free-text entry point diverges from the closed reference surface and breaks the build. *(Shape note: the 3 modes are finite but the non-mode input space is unbounded, so this is totality/robustness → `reference-model` + PBT-fuzz, NOT `exhaustive` — there is no finite decision table to enumerate.)*
+anti-rot: `index/ref/retrieval.ts` is the mock; a code path that adds a similarity / free-text entry point diverges from the closed reference surface and breaks the build. _(Shape note: the 3 modes are finite but the non-mode input space is unbounded, so this is totality/robustness → `reference-model` + PBT-fuzz, NOT `exhaustive` — there is no finite decision table to enumerate.)_
 
 ### INV-INDEX-7
+
 method-tag: reference-model
 fspec: —
 up-property: "no-embeddings substrate: no embedding model, vector store, or ANN backs the index (0 such dependencies); the three deterministic modes are the whole of retrieval (A-14)"
@@ -67,6 +74,7 @@ down-model: "reference retrieval is pure lookup over the CAS/axes with 0 embeddi
 anti-rot: `index/ref/retrieval.ts` is the mock; introducing an embedding/vector dependency on the retrieval path fails the dependency-free assertion.
 
 ### INV-INDEX-8
+
 method-tag: PBT
 fspec: —
 up-property: "query determinism: two identical queries (same axis/key/tag against the same CAS snapshot) return byte-identical results (0 nondeterminism, 0 fuzzy recall)"
@@ -74,13 +82,15 @@ down-model: "reference `byScope`/`byDependency`/`byTrigger` is a pure function o
 anti-rot: `index/ref/retrieval.ts` is the mock; a code path that introduces nondeterministic ordering or a stateful cache diverges under the idempotence property and breaks the build.
 
 ### INV-INDEX-9
+
 method-tag: reference-model
 fspec: —
 up-property: "totality: a malformed / missing path, tag, or axis yields an empty result and never throws (0 exceptions) across every entry point"
 down-model: "the reference index is total by construction — every entry point returns empty/undefined, never throws; the golden generator is PBT-fuzz over arbitrary + malformed inputs asserting no-throw + empty"
-anti-rot: the total reference index (`index/ref/*.ts`) is the mock; PBT fuzzes it and the code side-by-side so a throwing code path fails the shared no-throw property. *(Note: the golden generator is PBT-fuzz; the tag stays `reference-model` because the total reference IS the oracle — the shape is robustness/totality, not ordering, so it does not earn a standalone `PBT` tag. Cf. KERNEL-7.)*
+anti-rot: the total reference index (`index/ref/*.ts`) is the mock; PBT fuzzes it and the code side-by-side so a throwing code path fails the shared no-throw property. _(Note: the golden generator is PBT-fuzz; the tag stays `reference-model` because the total reference IS the oracle — the shape is robustness/totality, not ordering, so it does not earn a standalone `PBT` tag. Cf. KERNEL-7.)_
 
 ### INV-INDEX-10
+
 method-tag: reference-model
 fspec: —
 up-property: "multi-axis single-store: the index exposes ≥3 axes (spatial, territory, dependency), each with its own rollup; one object is cross-indexed on all applicable axes but stored once (0 duplication)"
@@ -88,6 +98,7 @@ down-model: "reference index holds one CAS map + ≥3 axis-views referencing obj
 anti-rot: `index/ref/index.ts` is the mock; a code path that duplicates an object across axes fails the single-storage assertion.
 
 ### INV-INDEX-11
+
 method-tag: reference-model
 fspec: —
 up-property: "universal content-addressing: every Atlas object kind — code, knowledge, memory, provenance, transcripts, and docs — is a BLAKE3-keyed CAS object, grounded and drift-checked like any fact (0 un-addressed kinds)"
@@ -95,13 +106,15 @@ down-model: "reference `put(object)` keys every kind by `blake3(canonical(object
 anti-rot: `index/ref/cas.ts` (shares the KERNEL CAS reference `kernel/ref/store.ts`) is the mock; a kind that bypasses content-addressing fails the round-trip / drift-eligibility assertion.
 
 ### INV-INDEX-12
+
 method-tag: PBT
 fspec: —
 up-property: "bounded incremental re-check: a `Delta` distinguishes `rId` (structure) from `rState` (state) and names only the changed buckets; a re-check touches only affected buckets (never `N`); the spatial `rId` re-hash is the changed leaf→root path only; the dependency `rState` eager re-hash is bounded — a drift dirty-bit propagates eagerly across the reverse closure, the hash is recomputed lazily on-read, eager re-hash capped at `maxHops=2`, deeper nodes marked `state-suspect` and resolved only on query (eager touch-count ≤ nodes-within-2-hops, never O(blast-radius))"
 down-model: "reference dual-rollup with an instrumented touch-counter: `propagateDirty` (eager, whole reverse closure — a bit, O(1)/node) + `rehashState` (lazy, capped at maxHops=2); PBT the **boundedness** property — for an arbitrary DAG + edit, the count of eager `rState` re-hashes ≤ |nodes-within-maxHops(2)|, independent of blast-radius — plus the spatial leaf→root property (changed `rId` hashes == leaf→root path) and Delta bucket-naming"
-anti-rot: `index/ref/fold.ts` (the instrumented bounded fold) is the mock; a code fold that re-hashes beyond `maxHops` or eagerly folds the whole closure exceeds the touch-count bound and breaks the boundedness property. *(Tag is `PBT`: the teeth are the boundedness + locality laws, asserted directly on the instrumented reference — this is exactly the "never O(blast-radius)" property, not a general differential oracle.)*
+anti-rot: `index/ref/fold.ts` (the instrumented bounded fold) is the mock; a code fold that re-hashes beyond `maxHops` or eagerly folds the whole closure exceeds the touch-count bound and breaks the boundedness property. _(Tag is `PBT`: the teeth are the boundedness + locality laws, asserted directly on the instrumented reference — this is exactly the "never O(blast-radius)" property, not a general differential oracle.)_
 
 ### INV-INDEX-13
+
 method-tag: reference-model
 fspec: —
 up-property: "honest under-approximation: the `depends-on` graph records every unresolvable import/call and every cross-language boundary as an explicit `unresolved`/`dynamic` edge — never silently omitted, never a fabricated target; a reverse closure over such a node is reportable `under-approximate` and, when flagged, unions the node's `coChanged` band labeled correlational, never presented as complete / static"
@@ -109,13 +122,15 @@ down-model: "reference graph carries edges tagged `resolved|unresolved|dynamic`;
 anti-rot: `index/ref/depgraph.ts` is the mock; a code path that omits an unresolved edge or fabricates a target diverges from the reference closure and breaks the build.
 
 ### INV-INDEX-14
+
 method-tag: PBT
 fspec: —
 up-property: "deterministic overlap resolution: a unit matched by ≥2 overlapping globs resolves to exactly one owner+tier by longest-path-match, then manifest declaration order (total, single-valued); a no-glob path is flagged `uncovered` and, if T0-adjacent, defaults to deny; assignment is byte-identical across rebuilds and calls no model"
 down-model: "reference `assign(path, manifest)=argmax` over matching globs by (literalPrefixLength, −declIndex); PBT the determinism (assign is a pure total function, byte-identical on re-run), single-valuedness (exactly one owner+tier), the tie-break laws (longest-match dominates; declaration order breaks the remaining tie), and the uncovered → T0-adjacent → deny default"
-anti-rot: `index/ref/territory.ts` (the reference resolver) is the mock in the assignment unit tests; a non-deterministic or model-calling assignment path diverges from it and breaks the build. *(Tag is `PBT`: the shape is a deterministic ordering / tie-break law with byte-identity — cf. RETR-6 drop-order — not general totality.)*
+anti-rot: `index/ref/territory.ts` (the reference resolver) is the mock in the assignment unit tests; a non-deterministic or model-calling assignment path diverges from it and breaks the build. _(Tag is `PBT`: the shape is a deterministic ordering / tie-break law with byte-identity — cf. RETR-6 drop-order — not general totality.)_
 
 ### INV-INDEX-15
+
 method-tag: reference-model
 fspec: —
 up-property: "generated + reconciled ownership: territory `owner` is generated from the structural graph + git-blame authorship the index already holds; an explicit manifest override beats the generated owner; reconciliation is deterministic and $0-LLM; `tier` stays human-ratified (never generated); the manifest is not the sole ownership source"
@@ -123,11 +138,12 @@ down-model: "reference `reconcile(graph, blame, manifest)`=deterministic owner-g
 anti-rot: `index/ref/ownership.ts` is the mock; a code path that lets a generated owner beat an override, generates a `tier`, or calls a model diverges from the reference and breaks the build. **Open:** `req-idx.md` carries a `[NEEDS RECONCILIATION]` on INDEX-15a (owner-generation is `SHOULD` in the clause, projected with a `shall`) — the **method-tag holds regardless**; whether owner-generation is a hard mandate or a recommended default is a DEFINE-seat design call, not an S2 verification-method question.
 
 ### INV-INDEX-16
+
 method-tag: reference-model
 fspec: —
 up-property: "standing coverage gate: the `unresolved`-edge ratio (`unresolved/total`) is a per-territory published health metric on every rollup; the T0 ceiling (>15%) is enforced as a standing gate from day one — a T0 territory that crosses it fails the gate (not merely schedules the `functional` axis)"
 down-model: "reference `ratio(territory)=unresolvedEdges/totalEdges` published on each rollup; `gate(territory)= tier==T0 ∧ ratio>0.15 ⇒ FAIL`; conformance-tested that crossing the ceiling in a T0 zone fails the build-time gate and the ratio is readable on the rollup"
-anti-rot: `index/ref/coverage.ts` is the mock; a code path that defers the T0 gate or omits the ratio from the rollup diverges from the reference gate and breaks the build. *(The ratio has a clean deterministic oracle — `unresolved/total` — so it is modeled, not refused; only the index's runtime **performance** is refused, below.)*
+anti-rot: `index/ref/coverage.ts` is the mock; a code path that defers the T0 gate or omits the ratio from the rollup diverges from the reference gate and breaks the build. _(The ratio has a clean deterministic oracle — `unresolved/total` — so it is modeled, not refused; only the index's runtime **performance** is refused, below.)_
 
 ---
 

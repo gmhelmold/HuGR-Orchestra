@@ -53,25 +53,25 @@
 // Run: `node harness/gates/doc-transcript-guard.mjs` (requires a BUILT `packages/cli/dist` — it runs the
 // product, it does not read it).
 
-import { execFileSync, spawnSync } from 'node:child_process';
-import { existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
-import { dirname, join } from 'node:path';
-import { tmpdir } from 'node:os';
-import { fileURLToPath } from 'node:url';
+import { execFileSync, spawnSync } from "node:child_process"
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs"
+import { dirname, join } from "node:path"
+import { tmpdir } from "node:os"
+import { fileURLToPath } from "node:url"
 
-const ROOT = process.env.DOC_TRANSCRIPT_GUARD_ROOT ?? join(dirname(fileURLToPath(import.meta.url)), '..', '..');
-const DOCS = join(ROOT, 'docs');
-const CLI = join(ROOT, 'packages', 'cli', 'dist', 'src', 'bin.js');
+const ROOT = process.env.DOC_TRANSCRIPT_GUARD_ROOT ?? join(dirname(fileURLToPath(import.meta.url)), "..", "..")
+const DOCS = join(ROOT, "docs")
+const CLI = join(ROOT, "packages", "cli", "dist", "src", "bin.js")
 
 /** The fixture actor. Synthetic, and it is not a credential: `.atlas/policy.json` is a self-asserted
  *  anti-accident guardrail (policy.ts says so in its own header), so this is a name, not a secret. */
-const ACTOR = 'dev@example.com';
+const ACTOR = "dev@example.com"
 /** The fixture tree — the repository the reference pages describe (`README.md` and `src/{greet,math}.ts`). */
 const FILES = {
-  'README.md': '# demo\n',
-  'src/greet.ts': 'export function greet(name: string): string {\n  return `hi ${name}`;\n}\n',
-  'src/math.ts': 'export function add(a: number, b: number): number {\n  return a + b;\n}\n',
-};
+  "README.md": "# demo\n",
+  "src/greet.ts": "export function greet(name: string): string {\n  return `hi ${name}`;\n}\n",
+  "src/math.ts": "export function add(a: number, b: number): number {\n  return a + b;\n}\n",
+}
 
 // ── the declarations ────────────────────────────────────────────────────────────────────────────────────
 // Keyed `<docs-relative file>#<invocation slug>#<ordinal among blocks with THAT slug, 1-based>`.
@@ -100,91 +100,144 @@ const FILES = {
 
 /** Blocks that quote output the product no longer produces, ON PURPOSE. Each states why. */
 const FROZEN = {
-  'adr/ADR-0013-the-pack-has-two-bands-governing-and-advisory.md#atlas-query-packages/kernel#1':
+  "adr/ADR-0013-the-pack-has-two-bands-governing-and-advisory.md#atlas-query-packages/kernel#1":
     'ADR-0013 quotes the PRE-#107 output as its own "before" evidence. Regenerating it would delete the ' +
-    'record of the change the ADR exists to justify.',
-};
+    "record of the change the ADR exists to justify.",
+}
 
 /** A stored grounded fact — unreachable from the binary alone (see the header). */
-const NEEDS_FACT = 'needs a stored grounded fact; authoring one requires the subtreeHash the index computes, and no shipped command prints it';
+const NEEDS_FACT =
+  "needs a stored grounded fact; authoring one requires the subtreeHash the index computes, and no shipped command prints it"
 /** A staged candidate — `mine` abstains at every site with no operator model wired (ADR-0011). */
-const NEEDS_STAGED = 'needs a staged/promoted candidate; `mine` abstains with no operator model wired';
+const NEEDS_STAGED = "needs a staged/promoted candidate; `mine` abstains with no operator model wired"
 /** The page DECLARES a transformation, so the block is deliberately not a verbatim run. */
-const EDITED = 'the page states the block is edited (path shortened / trimmed / long line reflowed) — good documentation, not drift';
+const EDITED =
+  "the page states the block is edited (path shortened / trimmed / long line reflowed) — good documentation, not drift"
 /** An argument this gate\'s fixture cannot hold. */
-const FOREIGN_REV = 'an argument names a revision or nodeKey from the authoring repository, absent here';
+const FOREIGN_REV = "an argument names a revision or nodeKey from the authoring repository, absent here"
 
 /** `{key: reason}` for keys sharing one obstruction. */
-const each = (reason, ...keys) => Object.fromEntries(keys.map((k) => [k, reason]));
+const each = (reason, ...keys) => Object.fromEntries(keys.map((k) => [k, reason]))
 
 /** Blocks that cannot be reproduced mechanically. Each states the precise obstruction. Grouped by reason,
  *  every key still listed individually — the LIST is the evidence, so it is never summarised to a count. */
 const UNVERIFIABLE = {
-  ...each(NEEDS_FACT,
-    'how-to/emit-a-grounded-fact.md#ATLAS_RATIFY_TOKEN-lead-atlas-emit-greet-fact.json---at-20ff#1', 'how-to/emit-a-grounded-fact.md#atlas-query-src#1', 'how-to/emit-a-grounded-fact.md#atlas-node-20512b7622b0d8864f20311700f4091b991ea5317797ce615#1',
-    'how-to/find-and-fix-drift.md#atlas-query-src#1', 'how-to/find-and-fix-drift.md#atlas-doctor-why-f9517988f330a775ffc767c072fa01e52f386422204#1', 'how-to/find-and-fix-drift.md#atlas-doctor-reground-f9517988f330a775ffc767c072fa01e52f3864#1',
-    'reference/commands/doctor.md#atlas-doctor-archive#1', 'reference/commands/doctor.md#atlas-doctor-why-f9517988f330a775ffc767c072fa01e52f386422204#1', 'reference/commands/doctor.md#atlas-doctor-reground-f9517988f330a775ffc767c072fa01e52f3864#1',
-    'reference/commands/doctor.md#atlas-doctor-hotset-2000#1', 'reference/commands/emit.md#ATLAS_RATIFY_TOKEN-lead-atlas-emit-greet-fact.json---at-20ff#1', 'reference/commands/emit.md#atlas-emit-greet-fact.json---at-20ff947f42e7a2052326a59399a9#1',
-    'reference/commands/emit.md#atlas-emit-greet-fact.json---at-20ff947f42e7a2052326a59399a9#2', 'reference/commands/emit.md#ATLAS_RATIFY_TOKEN-lead-atlas-emit-bad-fact.json---at-22b3ca#1', 'reference/commands/link.md#ATLAS_RATIFY_TOKEN-lead-atlas-link-bb4094b5aa8ca84d6d5d4e2c1#1',
-    'reference/commands/link.md#atlas-query-src#1', 'reference/commands/node.md#atlas-node-20512b7622b0d8864f20311700f4091b991ea5317797ce615#1', 'reference/commands/own.md#atlas-own-src#1',
-    'reference/commands/own.md#atlas-own-src/greet.ts#1', 'reference/commands/own.md#atlas-own-src#2', 'reference/commands/own.md#atlas-own-packages/adapter-io#1',
-    'reference/commands/own.md#atlas-own-src/typo.ts#1', 'reference/commands/own.md#atlas-own-lib#1', 'reference/commands/query.md#atlas-query-src#1'
+  ...each(
+    NEEDS_FACT,
+    "how-to/emit-a-grounded-fact.md#ATLAS_RATIFY_TOKEN-lead-atlas-emit-greet-fact.json---at-20ff#1",
+    "how-to/emit-a-grounded-fact.md#atlas-query-src#1",
+    "how-to/emit-a-grounded-fact.md#atlas-node-20512b7622b0d8864f20311700f4091b991ea5317797ce615#1",
+    "how-to/find-and-fix-drift.md#atlas-query-src#1",
+    "how-to/find-and-fix-drift.md#atlas-doctor-why-f9517988f330a775ffc767c072fa01e52f386422204#1",
+    "how-to/find-and-fix-drift.md#atlas-doctor-reground-f9517988f330a775ffc767c072fa01e52f3864#1",
+    "reference/commands/doctor.md#atlas-doctor-archive#1",
+    "reference/commands/doctor.md#atlas-doctor-why-f9517988f330a775ffc767c072fa01e52f386422204#1",
+    "reference/commands/doctor.md#atlas-doctor-reground-f9517988f330a775ffc767c072fa01e52f3864#1",
+    "reference/commands/doctor.md#atlas-doctor-hotset-2000#1",
+    "reference/commands/emit.md#ATLAS_RATIFY_TOKEN-lead-atlas-emit-greet-fact.json---at-20ff#1",
+    "reference/commands/emit.md#atlas-emit-greet-fact.json---at-20ff947f42e7a2052326a59399a9#1",
+    "reference/commands/emit.md#atlas-emit-greet-fact.json---at-20ff947f42e7a2052326a59399a9#2",
+    "reference/commands/emit.md#ATLAS_RATIFY_TOKEN-lead-atlas-emit-bad-fact.json---at-22b3ca#1",
+    "reference/commands/link.md#ATLAS_RATIFY_TOKEN-lead-atlas-link-bb4094b5aa8ca84d6d5d4e2c1#1",
+    "reference/commands/link.md#atlas-query-src#1",
+    "reference/commands/node.md#atlas-node-20512b7622b0d8864f20311700f4091b991ea5317797ce615#1",
+    "reference/commands/own.md#atlas-own-src#1",
+    "reference/commands/own.md#atlas-own-src/greet.ts#1",
+    "reference/commands/own.md#atlas-own-src#2",
+    "reference/commands/own.md#atlas-own-packages/adapter-io#1",
+    "reference/commands/own.md#atlas-own-src/typo.ts#1",
+    "reference/commands/own.md#atlas-own-lib#1",
+    "reference/commands/query.md#atlas-query-src#1",
   ),
-  ...each('an annotated composite of three runs with margin notes; it has no `status:` header and is not one run',
-    'how-to/find-and-fix-drift.md#ATLAS_RATIFY_TOKEN-lead-atlas-emit-f.json---at-HEAD#1'
+  ...each(
+    "an annotated composite of three runs with margin notes; it has no `status:` header and is not one run",
+    "how-to/find-and-fix-drift.md#ATLAS_RATIFY_TOKEN-lead-atlas-emit-f.json---at-HEAD#1",
   ),
-  ...each(FOREIGN_REV,
-    'how-to/find-and-fix-drift.md#atlas-reconcile-20ff947f42e7a2052326a59399a94a1864301b47#1', 'reference/commands/link.md#ATLAS_RATIFY_TOKEN-lead-atlas-link-bb4094b5-f9517988---retra#1', 'reference/commands/link.md#atlas-link-bb4094b5-f9517988#1',
-    'reference/commands/link.md#ATLAS_RATIFY_TOKEN-lead-atlas-link-bb4094b5-bb4094b5#1', 'reference/commands/link.md#ATLAS_RATIFY_TOKEN-lead-atlas-link-bb4094b5-1111111111111111#1', 'reference/commands/link.md#atlas-link-bb4094b5-f9517988---hurry#1',
-    'reference/commands/link.md#ATLAS_RATIFY_TOKEN-lead-atlas-link-bb4094b5-f9517988#1', 'reference/commands/reconcile.md#atlas-reconcile-20ff947f42e7a2052326a59399a94a1864301b47#1', 'reference/commands/reconcile.md#atlas-reconcile-22b3ca01865aaa34fff93f050db9c7bd927b4546#1'
+  ...each(
+    FOREIGN_REV,
+    "how-to/find-and-fix-drift.md#atlas-reconcile-20ff947f42e7a2052326a59399a94a1864301b47#1",
+    "reference/commands/link.md#ATLAS_RATIFY_TOKEN-lead-atlas-link-bb4094b5-f9517988---retra#1",
+    "reference/commands/link.md#atlas-link-bb4094b5-f9517988#1",
+    "reference/commands/link.md#ATLAS_RATIFY_TOKEN-lead-atlas-link-bb4094b5-bb4094b5#1",
+    "reference/commands/link.md#ATLAS_RATIFY_TOKEN-lead-atlas-link-bb4094b5-1111111111111111#1",
+    "reference/commands/link.md#atlas-link-bb4094b5-f9517988---hurry#1",
+    "reference/commands/link.md#ATLAS_RATIFY_TOKEN-lead-atlas-link-bb4094b5-f9517988#1",
+    "reference/commands/reconcile.md#atlas-reconcile-20ff947f42e7a2052326a59399a94a1864301b47#1",
+    "reference/commands/reconcile.md#atlas-reconcile-22b3ca01865aaa34fff93f050db9c7bd927b4546#1",
   ),
-  ...each(EDITED,
-    'how-to/move-a-repo-in.md#atlas-init-.#1', 'how-to/move-a-repo-in.md#atlas-query-src#2', 'reference/commands/init.md#atlas-init-.#1',
-    'reference/commands/init.md#atlas-init-.#2', 'reference/commands/init.md#atlas-init-src#1', 'reference/commands/init.md#atlas-init-no/such/path#1',
-    'reference/commands/query.md#atlas-query-src#3'
+  ...each(
+    EDITED,
+    "how-to/move-a-repo-in.md#atlas-init-.#1",
+    "how-to/move-a-repo-in.md#atlas-query-src#2",
+    "reference/commands/init.md#atlas-init-.#1",
+    "reference/commands/init.md#atlas-init-.#2",
+    "reference/commands/init.md#atlas-init-src#1",
+    "reference/commands/init.md#atlas-init-no/such/path#1",
+    "reference/commands/query.md#atlas-query-src#3",
   ),
-  ...each('shows a SCIP-indexed repository and a pinned external indexer version',
-    'reference/commands/doctor.md#atlas-doctor-index#1', 'reference/commands/doctor.md#atlas-doctor-index#2'
+  ...each(
+    "shows a SCIP-indexed repository and a pinned external indexer version",
+    "reference/commands/doctor.md#atlas-doctor-index#1",
+    "reference/commands/doctor.md#atlas-doctor-index#2",
   ),
-  ...each(NEEDS_STAGED,
-    'reference/commands/mine.md#ATLAS_MINE_SLOT-advisory-atlas-mine-.#2', 'reference/commands/mine.md#ATLAS_MINE_SLOT-advisory-atlas-mine-.#3', 'reference/commands/mine.md#ATLAS_MODEL_CONFIG-PWD/.atlas/model.json-atlas-mine-.#1',
-    'reference/commands/mine.md#atlas-mine-.#1', 'reference/commands/promote.md#atlas-mine-.#1', 'reference/commands/promote.md#atlas-mine-.#2',
-    'reference/commands/promote.md#ATLAS_ACTOR-seat-orchestrator-atlas-promote#1', 'reference/commands/promote.md#ATLAS_ACTOR-seat-orchestrator-ATLAS_RATIFY_TOKEN-seat-orches#1', 'reference/commands/promote.md#atlas-node-83660b81ecf5f0b371e37448124b1465d1626bc134b7be5ac#1',
-    'reference/commands/promote.md#atlas-query-src#1', 'reference/commands/promote.md#ATLAS_ACTOR-seat-orchestrator-ATLAS_RATIFY_TOKEN-seat-orches#2', 'reference/commands/promote.md#ATLAS_ACTOR-seat-orchestrator-ATLAS_RATIFY_TOKEN-seat-orches#3',
-    'reference/commands/promote.md#ATLAS_ACTOR-seat-orchestrator-ATLAS_RATIFY_TOKEN-seat-orches#4', 'reference/commands/promote.md#ATLAS_ACTOR-seat-orchestrator-ATLAS_RATIFY_TOKEN-seat-orches#6'
+  ...each(
+    NEEDS_STAGED,
+    "reference/commands/mine.md#ATLAS_MINE_SLOT-advisory-atlas-mine-.#2",
+    "reference/commands/mine.md#ATLAS_MINE_SLOT-advisory-atlas-mine-.#3",
+    "reference/commands/mine.md#ATLAS_MODEL_CONFIG-PWD/.atlas/model.json-atlas-mine-.#1",
+    "reference/commands/mine.md#atlas-mine-.#1",
+    "reference/commands/promote.md#atlas-mine-.#1",
+    "reference/commands/promote.md#atlas-mine-.#2",
+    "reference/commands/promote.md#ATLAS_ACTOR-seat-orchestrator-atlas-promote#1",
+    "reference/commands/promote.md#ATLAS_ACTOR-seat-orchestrator-ATLAS_RATIFY_TOKEN-seat-orches#1",
+    "reference/commands/promote.md#atlas-node-83660b81ecf5f0b371e37448124b1465d1626bc134b7be5ac#1",
+    "reference/commands/promote.md#atlas-query-src#1",
+    "reference/commands/promote.md#ATLAS_ACTOR-seat-orchestrator-ATLAS_RATIFY_TOKEN-seat-orches#2",
+    "reference/commands/promote.md#ATLAS_ACTOR-seat-orchestrator-ATLAS_RATIFY_TOKEN-seat-orches#3",
+    "reference/commands/promote.md#ATLAS_ACTOR-seat-orchestrator-ATLAS_RATIFY_TOKEN-seat-orches#4",
+    "reference/commands/promote.md#ATLAS_ACTOR-seat-orchestrator-ATLAS_RATIFY_TOKEN-seat-orches#6",
   ),
   // #99a — `atlas relations` worked examples are ILLUSTRATIVE: they show fabricated unit keys
   // (`pkg/order.ts::placeOrder`) and abbreviated relation nodeKeys (`rel:abc…`), so no clean checkout
   // reproduces them byte-exactly — a store first has to be seeded with those exact grounded relations
   // (`atlas emit` a `family:relation` fact per edge). The BEHAVIOUR they illustrate is mechanically pinned
   // by `packages/cli/test/relations-cli.test.ts` (real composed store) — this page is the human narration of it.
-  ...each('an illustrative worked example over fabricated units + abbreviated relation nodeKeys; the behaviour is pinned by relations-cli.test.ts over a real composed store, not reproducible from a clean checkout',
-    'reference/commands/relations.md#atlas-relations-pkg/order.ts-placeOrder-both#1', 'reference/commands/relations.md#atlas-relations-pkg/order.ts-placeOrder-out#1'
+  ...each(
+    "an illustrative worked example over fabricated units + abbreviated relation nodeKeys; the behaviour is pinned by relations-cli.test.ts over a real composed store, not reproducible from a clean checkout",
+    "reference/commands/relations.md#atlas-relations-pkg/order.ts-placeOrder-both#1",
+    "reference/commands/relations.md#atlas-relations-pkg/order.ts-placeOrder-out#1",
   ),
   // #99b — POPULATED `atlas negations` examples show a SEEDED negation + fired abstention a clean checkout lacks (it reproduces to the empty negations.md#3, which IS diffed).
-  ...each('an illustrative worked example over a SEEDED negation + fired abstention (a clean checkout stores neither, so it reproduces to the empty form of negations.md#3); the behaviour is pinned by negations-cli.test.ts + negations-mcp.test.ts, not reproducible from a clean checkout',
-    'reference/commands/negations.md#atlas-negations-src#1', 'reference/commands/negations.md#atlas-negations-src---abstained#1'
+  ...each(
+    "an illustrative worked example over a SEEDED negation + fired abstention (a clean checkout stores neither, so it reproduces to the empty form of negations.md#3); the behaviour is pinned by negations-cli.test.ts + negations-mcp.test.ts, not reproducible from a clean checkout",
+    "reference/commands/negations.md#atlas-negations-src#1",
+    "reference/commands/negations.md#atlas-negations-src---abstained#1",
   ),
   // sound-genesis PROVEN family — PROVEN/REFUTED need a witnessed caller edge an un-indexed fixture lacks
   // (it ABSTAINS on every symbol — that IS the diffed verify-fact.md#1); pinned by s32-verify-fact.blackbox.
-  ...each('an illustrative worked example needing a witnessed caller edge in the index (a clean checkout has none, so it reproduces to the ABSTAIN form of verify-fact.md#1); the PROVEN/REFUTED behaviour is pinned by s32-verify-fact.blackbox.test.ts over a controlled index.scip, not reproducible from a clean checkout',
-    'reference/commands/verify-fact.md#atlas-verify-fact-dependency-scip-.-.-greet---scope-src/app#1', 'reference/commands/verify-fact.md#atlas-verify-fact-negation-scip-.-.-greet---scope-src/app#1'
+  ...each(
+    "an illustrative worked example needing a witnessed caller edge in the index (a clean checkout has none, so it reproduces to the ABSTAIN form of verify-fact.md#1); the PROVEN/REFUTED behaviour is pinned by s32-verify-fact.blackbox.test.ts over a controlled index.scip, not reproducible from a clean checkout",
+    "reference/commands/verify-fact.md#atlas-verify-fact-dependency-scip-.-.-greet---scope-src/app#1",
+    "reference/commands/verify-fact.md#atlas-verify-fact-negation-scip-.-.-greet---scope-src/app#1",
   ),
   // REVERIFY-GATE — the `broken`/`unverifiable` transcripts need a POPULATED durable store carrying a
   // sealed-proven fact (a clean checkout has none, so it reproduces to the empty form of verify-store.md#1,
   // which IS diffed). Both buckets are mechanically pinned end to end by
   // reverify-gate-compose.test.ts (@atlas/adapter-io, a real composed runtime + real oracle) and
   // s34-reverify-store.blackbox.test.ts (the shipped binary), not reproducible from a clean checkout.
-  ...each('needs a populated durable store carrying a seal:\'proven\' fact (a clean checkout has none, so it reproduces to the empty form of the same page’s zero-fact block); the broken/unverifiable behaviour is pinned by reverify-gate-compose.test.ts + s34-reverify-store.blackbox.test.ts, not reproducible from a clean checkout',
-    'reference/commands/verify-store.md#atlas-verify-store#2', 'reference/commands/verify-store.md#atlas-verify-store#3'
+  ...each(
+    "needs a populated durable store carrying a seal:'proven' fact (a clean checkout has none, so it reproduces to the empty form of the same page’s zero-fact block); the broken/unverifiable behaviour is pinned by reverify-gate-compose.test.ts + s34-reverify-store.blackbox.test.ts, not reproducible from a clean checkout",
+    "reference/commands/verify-store.md#atlas-verify-store#2",
+    "reference/commands/verify-store.md#atlas-verify-store#3",
   ),
   // #99 R7 — the `atlas derive-relations` OUTPUT-SHAPE block is an ILLUSTRATIVE template over placeholders
   // (`<N>`/`<E>`/`<A>`/`<contentHash>`), not one run: a real pass needs a SCIP-indexed repo with a witnessed
   // cross-unit edge AND an actor granted the subject scope (a clean checkout has neither). The behaviour is
   // pinned end to end by relation-derive-reachability.test.ts (@atlas/adapter-io, a real composed runtime +
   // real oracle, AR-13) and derive-relations-cli.test.ts (the CLI render), not reproducible from a clean checkout.
-  ...each('an illustrative output-shape template over placeholders needing a SCIP-indexed repo + a witnessed cross-unit edge + an authorized actor (a clean checkout has none); the behaviour is pinned by relation-derive-reachability.test.ts + derive-relations-cli.test.ts, not reproducible from a clean checkout',
-    'reference/commands/derive-relations.md#status#1'
+  ...each(
+    "an illustrative output-shape template over placeholders needing a SCIP-indexed repo + a witnessed cross-unit edge + an authorized actor (a clean checkout has none); the behaviour is pinned by relation-derive-reachability.test.ts + derive-relations-cli.test.ts, not reproducible from a clean checkout",
+    "reference/commands/derive-relations.md#status#1",
   ),
   // #234 D4 — the `atlas transitions`/`atlas transition` POPULATED examples show a unit lineage
   // (`src/pay.ts::charge`) with a produced transition across two revs where its content changed. The clean
@@ -192,8 +245,10 @@ const UNVERIFIABLE = {
   // reproduces to the EMPTY/rejected form, not the populated success shown. The behaviour is pinned by the
   // #234 acceptance suite (transition-family.test.ts / cli/test/transitions-cli.test.ts + the blackbox e2e over
   // a real 2-rev fixture), not reproducible from a clean checkout.
-  ...each('an illustrative worked example over a produced 2-rev transition (a clean fixture holds no such unit lineage nor two-rev change, so it reproduces to the empty/rejected form); the behaviour is pinned by the #234 acceptance suite + the blackbox e2e over a real 2-rev fixture, not reproducible from a clean checkout',
-    'reference/commands/transitions.md#atlas-transitions-src/pay.ts-charge#1', 'reference/commands/transition.md#atlas-transition-src/pay.ts-charge-HEAD-1-HEAD#1'
+  ...each(
+    "an illustrative worked example over a produced 2-rev transition (a clean fixture holds no such unit lineage nor two-rev change, so it reproduces to the empty/rejected form); the behaviour is pinned by the #234 acceptance suite + the blackbox e2e over a real 2-rev fixture, not reproducible from a clean checkout",
+    "reference/commands/transitions.md#atlas-transitions-src/pay.ts-charge#1",
+    "reference/commands/transition.md#atlas-transition-src/pay.ts-charge-HEAD-1-HEAD#1",
   ),
   // #95 D5 — the `atlas test-vacuity`/`atlas test-vacuities` POPULATED examples show a produced proven
   // test-vacuity fact (a named test whose only assertions sit inside `catch`). The clean fixture (README +
@@ -201,16 +256,19 @@ const UNVERIFIABLE = {
   // reproduces to the EMPTY/abstain form, not the populated success shown. The behaviour is pinned by the #95
   // acceptance anchor (s95-test-vacuity.blackbox.test.ts over a real fixture repo), not reproducible from a
   // clean checkout.
-  ...each('an illustrative worked example over a produced proven test-vacuity fact (a clean fixture holds no assertion-only-in-catch test unit, so it reproduces to the empty/abstain form); the behaviour is pinned by the #95 acceptance anchor s95-test-vacuity.blackbox.test.ts over a real fixture repo, not reproducible from a clean checkout',
-    'reference/commands/test-vacuity.md#atlas-test-vacuity-.#1', 'reference/commands/test-vacuities.md#atlas-test-vacuities-test/sample.test.ts#1'
+  ...each(
+    "an illustrative worked example over a produced proven test-vacuity fact (a clean fixture holds no assertion-only-in-catch test unit, so it reproduces to the empty/abstain form); the behaviour is pinned by the #95 acceptance anchor s95-test-vacuity.blackbox.test.ts over a real fixture repo, not reproducible from a clean checkout",
+    "reference/commands/test-vacuity.md#atlas-test-vacuity-.#1",
+    "reference/commands/test-vacuities.md#atlas-test-vacuities-test/sample.test.ts#1",
   ),
   // WP-10.A3.CLI — the `atlas check` dry-run verdict NAMES the first refusing gate and carries that gate's
   // remedy; the gate and remedy vary by candidate, anchor, and revision (over the clean fixture the citation
   // does not re-derive so gate 'truth' refuses, but the remedy string is not byte-stable across fixtures). The
   // behaviour — composes via the draft planner, dry-runs the gate chain, fails closed, refuses an out-of-vocab
   // slot at the draft surface — is pinned by packages/cli/test/check-cli.test.ts over a real composed runtime.
-  ...each('an illustrative dry-run verdict naming the first refusing gate + its remedy (which vary by candidate, anchor, and revision — not byte-stable across fixtures); the behaviour is pinned by check-cli.test.ts over a real composed runtime, not reproducible from a clean checkout',
-    'reference/commands/check.md#status#1'
+  ...each(
+    "an illustrative dry-run verdict naming the first refusing gate + its remedy (which vary by candidate, anchor, and revision — not byte-stable across fixtures); the behaviour is pinned by check-cli.test.ts over a real composed runtime, not reproducible from a clean checkout",
+    "reference/commands/check.md#status#1",
   ),
   // WP-11.W8 — `atlas memory-emit` needs a `MemoryEntry` JSON file on disk (like `atlas emit` needs a fact
   // file, NEEDS_FACT above); this gate's fixture writes ONLY `README.md`/`src/{greet,math}.ts` (see `FILES`),
@@ -220,21 +278,23 @@ const UNVERIFIABLE = {
   // entry file, not reproducible from a clean checkout with no such file. `memory-emit.md#3` (the
   // `missing.json` usage error) needs no entry file to exist AT ALL — that is the point of the block — so it
   // stays VERIFIED, not listed here.
-  ...each('needs a MemoryEntry JSON file this gate\'s fixture does not create (like atlas emit\'s NEEDS_FACT); the behaviour is pinned by memory-emit-cli.test.ts + memory-emit-mcp.test.ts over a real composed runtime with an injected fixture file, not reproducible from a clean checkout',
-    'reference/commands/memory-emit.md#ATLAS_ACTOR-dev@example.com-atlas-memory-emit-project-entry.#1', 'reference/commands/memory-emit.md#status#1'
+  ...each(
+    "needs a MemoryEntry JSON file this gate's fixture does not create (like atlas emit's NEEDS_FACT); the behaviour is pinned by memory-emit-cli.test.ts + memory-emit-mcp.test.ts over a real composed runtime with an injected fixture file, not reproducible from a clean checkout",
+    "reference/commands/memory-emit.md#ATLAS_ACTOR-dev@example.com-atlas-memory-emit-project-entry.#1",
+    "reference/commands/memory-emit.md#status#1",
   ),
-};
+}
 
 // ── enumeration ─────────────────────────────────────────────────────────────────────────────────────────
 
 /** Every `.md` under `docs/`, sorted, recursive. */
 function markdown(dir, out = []) {
   for (const e of readdirSync(dir, { withFileTypes: true }).sort((a, b) => a.name.localeCompare(b.name))) {
-    const p = join(dir, e.name);
-    if (e.isDirectory()) markdown(p, out);
-    else if (e.name.endsWith('.md')) out.push(p);
+    const p = join(dir, e.name)
+    if (e.isDirectory()) markdown(p, out)
+    else if (e.name.endsWith(".md")) out.push(p)
   }
-  return out;
+  return out
 }
 
 /**
@@ -245,62 +305,72 @@ function markdown(dir, out = []) {
 /** The invocation, reduced to a key-safe slug. Deterministic and total: any argv reduces to SOMETHING, and
  *  an empty reduction falls back to `cmd` rather than to an empty key that would silently pool blocks. */
 function slugOf(invocation) {
-  const s = invocation.replace(/[^A-Za-z0-9._/@-]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 60);
-  return s.length === 0 ? 'cmd' : s;
+  const s = invocation
+    .replace(/[^A-Za-z0-9._/@-]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 60)
+  return s.length === 0 ? "cmd" : s
 }
 
 function transcripts() {
-  const out = [];
+  const out = []
   for (const abs of markdown(DOCS)) {
-    const file = abs.slice(DOCS.length + 1).split(/[\\/]/).join('/');
-    const ords = new Map(); // slug -> how many blocks with that slug have been seen in THIS file
-    const lines = readFileSync(abs, 'utf8').split('\n');
-    let open = null;
+    const file = abs
+      .slice(DOCS.length + 1)
+      .split(/[\\/]/)
+      .join("/")
+    const ords = new Map() // slug -> how many blocks with that slug have been seen in THIS file
+    const lines = readFileSync(abs, "utf8").split("\n")
+    let open = null
     for (let i = 0; i < lines.length; i++) {
-      const m = /^(\s*)(```+|~~~+)(.*)$/.exec(lines[i]);
-      if (m === null) continue;
+      const m = /^(\s*)(```+|~~~+)(.*)$/.exec(lines[i])
+      if (m === null) continue
       if (open === null) {
-        open = { line: i + 1, indent: m[1], info: m[3].trim() };
-        continue;
+        open = { line: i + 1, indent: m[1], info: m[3].trim() }
+        continue
       }
-      if (m[3].trim() !== '') continue; // an opener for a new block cannot close the current one
-      const body = lines.slice(open.line, i).map((l) => (l.startsWith(open.indent) ? l.slice(open.indent.length) : l));
+      if (m[3].trim() !== "") continue // an opener for a new block cannot close the current one
+      const body = lines.slice(open.line, i).map((l) => (l.startsWith(open.indent) ? l.slice(open.indent.length) : l))
       if (body.some((l) => /^\$ .*\batlas\b/.test(l) || /^status: (ok|error|rejected)$/.test(l))) {
         // The invocation IS the key's discriminant. A block with no `$` line is a bare verdict header; those
         // share the `status` slot, which is exactly as narrow as the information available.
-        const dollar = body.find((l) => /^\$ .*\batlas\b/.test(l));
-        const slug = dollar === undefined ? 'status' : slugOf(dollar.slice(2).trim());
-        const ord = (ords.get(slug) ?? 0) + 1;
-        ords.set(slug, ord);
-        out.push({ key: `${file}#${slug}#${ord}`, file, ord, line: open.line, body });
+        const dollar = body.find((l) => /^\$ .*\batlas\b/.test(l))
+        const slug = dollar === undefined ? "status" : slugOf(dollar.slice(2).trim())
+        const ord = (ords.get(slug) ?? 0) + 1
+        ords.set(slug, ord)
+        out.push({ key: `${file}#${slug}#${ord}`, file, ord, line: open.line, body })
       }
-      open = null;
+      open = null
     }
   }
-  return out;
+  return out
 }
 
 // ── the run ─────────────────────────────────────────────────────────────────────────────────────────────
 
 /** A fresh on-disk git fixture: the tree above, a policy authorizing {@link ACTOR} over `src`, one commit. */
 function fixture() {
-  const repo = mkdtempSync(join(tmpdir(), 'atlas-doc-transcript-'));
+  const repo = mkdtempSync(join(tmpdir(), "atlas-doc-transcript-"))
   for (const [rel, body] of Object.entries(FILES)) {
-    mkdirSync(join(repo, dirname(rel)), { recursive: true });
-    writeFileSync(join(repo, rel), body);
+    mkdirSync(join(repo, dirname(rel)), { recursive: true })
+    writeFileSync(join(repo, rel), body)
   }
-  mkdirSync(join(repo, '.atlas'), { recursive: true });
+  mkdirSync(join(repo, ".atlas"), { recursive: true })
   writeFileSync(
-    join(repo, '.atlas', 'policy.json'),
-    JSON.stringify({ nearDup: { claimNormThreshold: 1 }, t0Heuristic: { keywords: [] }, authz: { scopes: { src: [ACTOR] } } }),
-  );
-  const git = (...a) => execFileSync('git', a, { cwd: repo, stdio: 'ignore' });
-  git('init', '-q');
-  git('config', 'user.email', ACTOR);
-  git('config', 'user.name', 'demo');
-  git('add', '-A');
-  git('commit', '-q', '-m', 'genesis');
-  return repo;
+    join(repo, ".atlas", "policy.json"),
+    JSON.stringify({
+      nearDup: { claimNormThreshold: 1 },
+      t0Heuristic: { keywords: [] },
+      authz: { scopes: { src: [ACTOR] } },
+    }),
+  )
+  const git = (...a) => execFileSync("git", a, { cwd: repo, stdio: "ignore" })
+  git("init", "-q")
+  git("config", "user.email", ACTOR)
+  git("config", "user.name", "demo")
+  git("add", "-A")
+  git("commit", "-q", "-m", "genesis")
+  return repo
 }
 
 /**
@@ -309,17 +379,17 @@ function fixture() {
  * treated as "nothing to check" — the caller turns it into a NAMED unverifiable.
  */
 function invocation(dollarLine) {
-  const toks = dollarLine.slice(2).trim().split(/\s+/);
-  const env = {};
-  let i = 0;
+  const toks = dollarLine.slice(2).trim().split(/\s+/)
+  const env = {}
+  let i = 0
   for (; i < toks.length && /^[A-Z][A-Z0-9_]*=[^\s]*$/.test(toks[i]); i++) {
-    const eq = toks[i].indexOf('=');
-    env[toks[i].slice(0, eq)] = toks[i].slice(eq + 1);
+    const eq = toks[i].indexOf("=")
+    env[toks[i].slice(0, eq)] = toks[i].slice(eq + 1)
   }
-  if (toks[i] !== 'atlas') return null;
-  const argv = toks.slice(i + 1);
-  if (argv.some((a) => a.includes('…') || a.includes('<') || a.includes('$'))) return null;
-  return { env, argv };
+  if (toks[i] !== "atlas") return null
+  const argv = toks.slice(i + 1)
+  if (argv.some((a) => a.includes("…") || a.includes("<") || a.includes("$"))) return null
+  return { env, argv }
 }
 
 /**
@@ -330,13 +400,13 @@ function invocation(dollarLine) {
  * the hole it closes.
  */
 function segments(body) {
-  const segs = [];
+  const segs = []
   for (const raw of body) {
-    if (raw.startsWith('$ ')) segs.push({ dollar: raw, expected: [] });
-    else if (segs.length > 0) segs.at(-1).expected.push(raw);
+    if (raw.startsWith("$ ")) segs.push({ dollar: raw, expected: [] })
+    else if (segs.length > 0) segs.at(-1).expected.push(raw)
   }
-  for (const s of segs) while (s.expected.length > 0 && s.expected.at(-1) === '') s.expected.pop();
-  return segs;
+  for (const s of segs) while (s.expected.length > 0 && s.expected.at(-1) === "") s.expected.pop()
+  return segs
 }
 
 /**
@@ -346,106 +416,114 @@ function segments(body) {
  * `null` on a match, or `{ at, want, got }` naming the FIRST divergence.
  */
 function diff(expected, actual) {
-  let e = 0;
-  let a = 0;
+  let e = 0
+  let a = 0
   while (e < expected.length) {
-    if (expected[e].trim() === '[…]') {
-      const next = expected[e + 1];
-      if (next === undefined) return null; // a trailing elision swallows whatever remains
-      while (a < actual.length && actual[a] !== next) a++;
-      e++;
-      continue;
+    if (expected[e].trim() === "[…]") {
+      const next = expected[e + 1]
+      if (next === undefined) return null // a trailing elision swallows whatever remains
+      while (a < actual.length && actual[a] !== next) a++
+      e++
+      continue
     }
-    if (a >= actual.length) return { at: e, want: expected[e], got: '<end of output>' };
-    if (actual[a] !== expected[e]) return { at: e, want: expected[e], got: actual[a] };
-    e++;
-    a++;
+    if (a >= actual.length) return { at: e, want: expected[e], got: "<end of output>" }
+    if (actual[a] !== expected[e]) return { at: e, want: expected[e], got: actual[a] }
+    e++
+    a++
   }
-  if (a < actual.length) return { at: expected.length, want: '<end of block>', got: actual[a] };
-  return null;
+  if (a < actual.length) return { at: expected.length, want: "<end of block>", got: actual[a] }
+  return null
 }
 
 /** Run one transcript's segments against a fresh fixture. Returns a list of human-readable failures. */
 function verify(t) {
-  const segs = segments(t.body);
-  if (segs.length === 0) return [`${t.key} (docs/${t.file}:${t.line}) — VERIFIED block has no \`$ \` line to run`];
-  const bad = [];
-  const repo = fixture();
+  const segs = segments(t.body)
+  if (segs.length === 0) return [`${t.key} (docs/${t.file}:${t.line}) — VERIFIED block has no \`$ \` line to run`]
+  const bad = []
+  const repo = fixture()
   try {
     for (const seg of segs) {
-      const inv = invocation(seg.dollar);
+      const inv = invocation(seg.dollar)
       if (inv === null) {
-        bad.push(`${t.key} (docs/${t.file}:${t.line}) — cannot parse \`${seg.dollar}\`; declare it UNVERIFIABLE instead`);
-        continue;
+        bad.push(
+          `${t.key} (docs/${t.file}:${t.line}) — cannot parse \`${seg.dollar}\`; declare it UNVERIFIABLE instead`,
+        )
+        continue
       }
       const res = spawnSync(process.execPath, [CLI, ...inv.argv], {
         cwd: repo,
-        encoding: 'utf8',
+        encoding: "utf8",
         env: { ...process.env, ATLAS_ACTOR: ACTOR, ...inv.env },
-      });
+      })
       // Only TRAILING empties are dropped (the final-newline artifact); interior blanks are real output.
-      const actual = (res.stdout ?? '').split('\n');
-      while (actual.length > 0 && actual.at(-1) === '') actual.pop();
-      const want = seg.expected.filter((l) => !/^# exit \d+$/.test(l));
-      const wantExit = seg.expected.find((l) => /^# exit \d+$/.test(l));
-      const d = diff(want, actual);
+      const actual = (res.stdout ?? "").split("\n")
+      while (actual.length > 0 && actual.at(-1) === "") actual.pop()
+      const want = seg.expected.filter((l) => !/^# exit \d+$/.test(l))
+      const wantExit = seg.expected.find((l) => /^# exit \d+$/.test(l))
+      const d = diff(want, actual)
       if (d !== null) {
         bad.push(
-          `${t.key} (docs/${t.file}:${t.line}) — output diverged\n      ran:  atlas ${inv.argv.join(' ')}  (cwd = a fresh fixture repo)\n` +
+          `${t.key} (docs/${t.file}:${t.line}) — output diverged\n      ran:  atlas ${inv.argv.join(" ")}  (cwd = a fresh fixture repo)\n` +
             `      doc:  ${JSON.stringify(d.want)}\n      real: ${JSON.stringify(d.got)}`,
-        );
+        )
       } else if (wantExit !== undefined && wantExit !== `# exit ${res.status}`) {
         bad.push(
-          `${t.key} (docs/${t.file}:${t.line}) — exit code diverged\n      ran:  atlas ${inv.argv.join(' ')}\n` +
+          `${t.key} (docs/${t.file}:${t.line}) — exit code diverged\n      ran:  atlas ${inv.argv.join(" ")}\n` +
             `      doc:  ${wantExit}\n      real: # exit ${res.status}`,
-        );
+        )
       }
     }
   } finally {
-    rmSync(repo, { recursive: true, force: true });
+    rmSync(repo, { recursive: true, force: true })
   }
-  return bad;
+  return bad
 }
 
 // ── the sweep ───────────────────────────────────────────────────────────────────────────────────────────
 
-const fail = [];
+const fail = []
 
 if (!existsSync(DOCS)) {
-  console.error(`doc-transcript-guard: FAIL\n\n  ✗ no docs/ tree at ${DOCS}. There is nothing to check, and a gate that reports OK on an unreadable corpus is the defect it exists to stop.\n`);
-  process.exit(1);
+  console.error(
+    `doc-transcript-guard: FAIL\n\n  ✗ no docs/ tree at ${DOCS}. There is nothing to check, and a gate that reports OK on an unreadable corpus is the defect it exists to stop.\n`,
+  )
+  process.exit(1)
 }
 if (!existsSync(CLI)) {
-  console.error(`doc-transcript-guard: FAIL\n\n  ✗ no built CLI at ${CLI}. This gate RUNS the product; without a build it could only ever agree with the page. Run \`npm run build\` first.\n`);
-  process.exit(1);
+  console.error(
+    `doc-transcript-guard: FAIL\n\n  ✗ no built CLI at ${CLI}. This gate RUNS the product; without a build it could only ever agree with the page. Run \`npm run build\` first.\n`,
+  )
+  process.exit(1)
 }
 
-const blocks = transcripts();
+const blocks = transcripts()
 if (blocks.length === 0) {
-  console.error('doc-transcript-guard: FAIL\n\n  ✗ ZERO output transcripts found under docs/. Either every page lost its worked example, or this gate\'s block extraction broke — and a gate that checks zero transcripts prints OK for a fully rotted docs tree. Failing instead.\n');
-  process.exit(1);
+  console.error(
+    "doc-transcript-guard: FAIL\n\n  ✗ ZERO output transcripts found under docs/. Either every page lost its worked example, or this gate's block extraction broke — and a gate that checks zero transcripts prints OK for a fully rotted docs tree. Failing instead.\n",
+  )
+  process.exit(1)
 }
 
-const verified = [];
-const frozen = [];
-const unverifiable = [];
-const seen = new Set();
+const verified = []
+const frozen = []
+const unverifiable = []
+const seen = new Set()
 
 /** `docs/<file>:<line>  <the command>` — how a block is NAMED to a human, derived, never used for lookup. */
 const where = (t) => {
-  const cmd = t.body.find((l) => l.startsWith('$ '));
-  return `${t.key}  (docs/${t.file}:${t.line}${cmd === undefined ? '' : `, \`${cmd}\``})`;
-};
+  const cmd = t.body.find((l) => l.startsWith("$ "))
+  return `${t.key}  (docs/${t.file}:${t.line}${cmd === undefined ? "" : `, \`${cmd}\``})`
+}
 
 for (const t of blocks) {
-  seen.add(t.key);
+  seen.add(t.key)
   if (FROZEN[t.key] !== undefined) {
-    frozen.push(`${where(t)}\n        ${FROZEN[t.key]}`);
+    frozen.push(`${where(t)}\n        ${FROZEN[t.key]}`)
   } else if (UNVERIFIABLE[t.key] !== undefined) {
-    unverifiable.push(`${where(t)}\n        ${UNVERIFIABLE[t.key]}`);
+    unverifiable.push(`${where(t)}\n        ${UNVERIFIABLE[t.key]}`)
   } else {
-    verified.push(where(t));
-    fail.push(...verify(t));
+    verified.push(where(t))
+    fail.push(...verify(t))
   }
 }
 
@@ -454,9 +532,9 @@ for (const [key, why] of [...Object.entries(FROZEN), ...Object.entries(UNVERIFIA
   if (!seen.has(key)) {
     fail.push(
       `STALE DECLARATION — ${key} is exempted here ("${why}") and names no transcript in docs/.\n` +
-        '      The block moved or was deleted. Re-key the declaration or drop it: an exemption that outlives\n' +
-        '      what it exempts is a hole with a comment in front of it.',
-    );
+        "      The block moved or was deleted. Re-key the declaration or drop it: an exemption that outlives\n" +
+        "      what it exempts is a hole with a comment in front of it.",
+    )
   }
 }
 
@@ -465,23 +543,23 @@ for (const [key, why] of [...Object.entries(FROZEN), ...Object.entries(UNVERIFIA
 console.log(
   `doc-transcript-guard: ${blocks.length} output transcript(s) under docs/ — ` +
     `${verified.length} re-run against the built binary, ${frozen.length} frozen, ${unverifiable.length} not mechanically reproducible.\n`,
-);
-console.log(`  VERIFIED (${verified.length}) — re-run and diffed:`);
-for (const v of verified) console.log(`    ✓ ${v}`);
-console.log(`\n  FROZEN (${frozen.length}) — quotes superseded output on purpose:`);
-for (const f of frozen) console.log(`    ○ ${f}`);
-console.log(`\n  NOT MECHANICALLY REPRODUCIBLE (${unverifiable.length}) — NOT checked, and this is why:`);
-for (const u of unverifiable) console.log(`    ! ${u}`);
-console.log('');
+)
+console.log(`  VERIFIED (${verified.length}) — re-run and diffed:`)
+for (const v of verified) console.log(`    ✓ ${v}`)
+console.log(`\n  FROZEN (${frozen.length}) — quotes superseded output on purpose:`)
+for (const f of frozen) console.log(`    ○ ${f}`)
+console.log(`\n  NOT MECHANICALLY REPRODUCIBLE (${unverifiable.length}) — NOT checked, and this is why:`)
+for (const u of unverifiable) console.log(`    ! ${u}`)
+console.log("")
 
 if (fail.length > 0) {
-  console.error('doc-transcript-guard: FAIL\n');
-  for (const f of fail) console.error(`  ✗ ${f}\n`);
+  console.error("doc-transcript-guard: FAIL\n")
+  for (const f of fail) console.error(`  ✗ ${f}\n`)
   console.error(
     `${fail.length} violation(s). The BINARY is the oracle: regenerate the block from a real run — never hand-edit\n` +
-      'it to match what the output is believed to be, which is how this drift entered in the first place.',
-  );
-  process.exit(1);
+      "it to match what the output is believed to be, which is how this drift entered in the first place.",
+  )
+  process.exit(1)
 }
 
-console.log('doc-transcript-guard: OK — every re-runnable transcript matches the built binary line for line.');
+console.log("doc-transcript-guard: OK — every re-runnable transcript matches the built binary line for line.")

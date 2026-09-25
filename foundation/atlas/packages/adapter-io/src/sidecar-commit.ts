@@ -16,24 +16,15 @@
 //      none theorised, and collapsing the middle one into the last is what made a pass disown its own rows.
 //   6. Republish the compat mirror, prune, sync the directory — the HEAD publisher's housekeeping only.
 
-import {
-  closeSync,
-  fsyncSync,
-  linkSync,
-  mkdirSync,
-  openSync,
-  renameSync,
-  unlinkSync,
-  writeFileSync,
-} from 'node:fs';
-import { join } from 'node:path';
-import { emptyStore } from '@atlas/knowledge';
-import type { StoreProjection } from '@atlas/knowledge';
-import { generations, genPath, mirrorPath, readSidecarSet } from './sidecar.js';
-import { abstainedToWire } from './sidecar-abstained.js';
-import type { CommitDecision, CommitResult, SidecarBase, SidecarCtx, WireProjection } from './sidecar.js';
-import { IDENTITY_SCHEMA, refuseForeignIdentityWrite } from './identity-schema.js';
-import { stampGeneration } from './freshness-watermark.js';
+import { closeSync, fsyncSync, linkSync, mkdirSync, openSync, renameSync, unlinkSync, writeFileSync } from "node:fs"
+import { join } from "node:path"
+import { emptyStore } from "@atlas/knowledge"
+import type { StoreProjection } from "@atlas/knowledge"
+import { generations, genPath, mirrorPath, readSidecarSet } from "./sidecar.js"
+import { abstainedToWire } from "./sidecar-abstained.js"
+import type { CommitDecision, CommitResult, SidecarBase, SidecarCtx, WireProjection } from "./sidecar.js"
+import { IDENTITY_SCHEMA, refuseForeignIdentityWrite } from "./identity-schema.js"
+import { stampGeneration } from "./freshness-watermark.js"
 
 /** How many times a contended writer re-reads and re-decides before refusing. Bounded so a pathological
  *  writer cannot spin forever; the size is MEASURED, not guessed. At 16 an 8-process TIGHT COMMIT LOOP
@@ -41,7 +32,7 @@ import { stampGeneration } from './freshness-watermark.js';
  *  shape the CLI produces) exhausted the budget on 1.25% of commits: a correct, visible refusal, but poor
  *  liveness. At 64 the same stress shows none. The real `atlas emit` race (8 concurrent CLI processes over
  *  a 1000-node store, 18 trials) never retries more than a handful of times. */
-const MAX_ATTEMPTS = 64;
+const MAX_ATTEMPTS = 64
 
 /** How many generations survive the prune: head + 3 predecessors. The window is kept wide enough that
  *  recycling is rare and narrow enough that the directory holds a bounded multiple of the projection's size.
@@ -52,12 +43,12 @@ const MAX_ATTEMPTS = 64;
  *  retries; changing it moves that bound with it, which is why the boundary is pinned on both sides by a
  *  test rather than left to this comment. The previous sentence here — "correctness does NOT depend on
  *  this" — was true of the check as first written and is false of the one below. */
-const RETAINED_GENERATIONS = 4;
+const RETAINED_GENERATIONS = 4
 
 /** Process-unique temp discriminator. `pid` separates processes; the counter separates concurrent commits
  *  INSIDE one process (an in-process MCP session runs both doors). Sharing a temp name between two writers
  *  reintroduces the torn write this whole protocol exists to remove. */
-let tmpCounter = 0;
+let tmpCounter = 0
 
 /**
  * What one publication attempt DID — three outcomes, not two, and the third is why this type exists.
@@ -84,7 +75,7 @@ let tmpCounter = 0;
  * on disk. The comment this replaces called the retry "a wasted round, never a wrong answer"; that was true
  * of `next` and false of `out`.
  */
-type PublishOutcome = 'published' | 'superseded' | 'lost';
+type PublishOutcome = "published" | "superseded" | "lost"
 
 /** Serialize + publish ONE generation — see {@link PublishOutcome} for the three answers. Every failure that
  *  is NOT contention (ENOSPC, EACCES, EROFS) PROPAGATES: a broken disk is not a lost race, and reporting it
@@ -100,7 +91,7 @@ function publish(
   gen: number,
   prev: StoreProjection | undefined,
 ): PublishOutcome {
-  const builtAt = ctx.headSha?.();
+  const builtAt = ctx.headSha?.()
   const wire: WireProjection = {
     // N11 — PER-ROW. Each row is stamped with the HEAD its OWN stored freshness reflects; a carried-forward
     // row keeps its own, older stamp. `builtAt` below stays for back-compat and is no longer load-bearing.
@@ -120,9 +111,9 @@ function publish(
     // carries no stamp of its own, which is every row in every store written before the per-row stamp existed.
     // It is no longer what `stale` is decided on: as the ONLY signal it was laundered by any write at all.
     ...(builtAt !== undefined ? { builtAt } : {}),
-  };
-  mkdirSync(ctx.dir, { recursive: true });
-  const tmp = join(ctx.dir, `${ctx.base}.${process.pid}.${tmpCounter++}.tmp`);
+  }
+  mkdirSync(ctx.dir, { recursive: true })
+  const tmp = join(ctx.dir, `${ctx.base}.${process.pid}.${tmpCounter++}.tmp`)
   // fsync the BYTES before any name points at them. Without it the atomicity is only crash-consistent
   // against process death, not power loss: `link` could publish a name whose data blocks are still in the
   // page cache. THE PRICE IS MEASURED AND IT IS NOT SMALL — on this box (APFS, Intel) fsync(file) is
@@ -130,15 +121,15 @@ function publish(
   // therefore costs ~+40 ms of durability it did not previously buy. That is a deliberate purchase, and it
   // is stated here rather than buried: it is a few percent of an `atlas emit` CLI invocation, and it is the
   // difference between "the last write survives a power cut" and "the store is whatever the page cache had".
-  const bytes = JSON.stringify(wire);
-  const fd = openSync(tmp, 'w');
+  const bytes = JSON.stringify(wire)
+  const fd = openSync(tmp, "w")
   try {
-    writeFileSync(fd, bytes, 'utf8');
-    fsyncSync(fd);
+    writeFileSync(fd, bytes, "utf8")
+    fsyncSync(fd)
   } finally {
-    closeSync(fd);
+    closeSync(fd)
   }
-  let committed = false;
+  let committed = false
   try {
     // A PRE-LINK HEAD CHECK WAS TRIED HERE AND REMOVED, because it buys nothing and the reason is worth
     // keeping: it would shrink the window in which our target name can be RECYCLED (from our whole ~45 ms
@@ -146,10 +137,10 @@ function publish(
     // already answers CORRECTLY. The case it answers wrongly is the opposite one, and that window is the
     // link→readdir gap either way. Narrowing the branch that is already right is not a fix.
     try {
-      linkSync(tmp, genPath(ctx.dir, ctx.base, gen)); // THE compare-and-swap — EEXIST ⇒ someone else won
+      linkSync(tmp, genPath(ctx.dir, ctx.base, gen)) // THE compare-and-swap — EEXIST ⇒ someone else won
     } catch (e) {
-      if ((e as NodeJS.ErrnoException).code !== 'EEXIST') throw e; // ENOSPC/EACCES is not contention
-      return 'lost';
+      if ((e as NodeJS.ErrnoException).code !== "EEXIST") throw e // ENOSPC/EACCES is not contention
+      return "lost"
     }
     // ── HEAD VERIFICATION — the half of the CAS that a name-based CAS does NOT give you for free ────────
     // MEASURED DEFECT, found by an 8-process tight-loop stress and NOT by the CLI race: winning the name
@@ -185,12 +176,12 @@ function publish(
     // The stale file is deliberately NOT unlinked: it sits below the head, so no reader resolves it, and
     // the next publisher's prune reclaims it. Removing it here would delete the g-1 fallback out from under
     // a reader in the (real) case where the rival that fired this check had legitimately built on us.
-    const headNow = generations(ctx.dir, ctx.base)[0];
+    const headNow = generations(ctx.dir, ctx.base)[0]
     if (headNow !== undefined && headNow > gen) {
-      const superseded = headNow < gen + RETAINED_GENERATIONS;
-      return superseded ? 'superseded' : 'lost';
+      const superseded = headNow < gen + RETAINED_GENERATIONS
+      return superseded ? "superseded" : "lost"
     }
-    committed = true;
+    committed = true
     // THE MIRROR IS AN INDEPENDENT COPY, published by its own temp+rename — never a rename of the temp we
     // just linked. MEASURED BUG in the first version of this file: `link` + `rename(tmp, mirror)` leaves the
     // mirror and the head generation as two NAMES FOR ONE INODE, so anything that writes
@@ -199,23 +190,23 @@ function publish(
     // separate inode costs one more small write (~0.3 ms, no fsync: the mirror is derived) and makes the
     // generation files unreachable by name from outside. Atomic all the same: readers see the old mirror or
     // the new one, never a prefix. Best-effort — losing the mirror must never fail a committed write.
-    const mtmp = join(ctx.dir, `${ctx.base}.${process.pid}.${tmpCounter++}.mirror.tmp`);
+    const mtmp = join(ctx.dir, `${ctx.base}.${process.pid}.${tmpCounter++}.mirror.tmp`)
     try {
-      writeFileSync(mtmp, bytes, 'utf8');
-      renameSync(mtmp, mirrorPath(ctx.dir, ctx.base));
+      writeFileSync(mtmp, bytes, "utf8")
+      renameSync(mtmp, mirrorPath(ctx.dir, ctx.base))
     } catch {
       try {
-        unlinkSync(mtmp);
+        unlinkSync(mtmp)
       } catch {
         /* best-effort */
       }
     }
-    return 'published';
+    return "published"
   } finally {
     // The temp is ALWAYS ours to remove now that the mirror gets its own inode: on a win the generation
     // name holds the data, on a loss nothing does.
     try {
-      unlinkSync(tmp);
+      unlinkSync(tmp)
     } catch {
       /* best-effort */
     }
@@ -228,11 +219,11 @@ function publish(
       // refuse to open a directory for fsync, and a failure here costs durability on power loss, never
       // correctness — so it may not fail a committed write.
       try {
-        const dfd = openSync(ctx.dir, 'r');
+        const dfd = openSync(ctx.dir, "r")
         try {
-          fsyncSync(dfd);
+          fsyncSync(dfd)
         } finally {
-          closeSync(dfd);
+          closeSync(dfd)
         }
       } catch {
         /* best-effort dir sync */
@@ -240,9 +231,9 @@ function publish(
       // LAZY PRUNE — keep the head and RETAINED_GENERATIONS-1 predecessors; drop the rest. Another writer
       // may have pruned the same name already, so every unlink is best-effort.
       for (const g of generations(ctx.dir, ctx.base)) {
-        if (g > gen - RETAINED_GENERATIONS) continue;
+        if (g > gen - RETAINED_GENERATIONS) continue
         try {
-          unlinkSync(genPath(ctx.dir, ctx.base, g));
+          unlinkSync(genPath(ctx.dir, ctx.base, g))
         } catch {
           /* already gone / raced */
         }
@@ -255,7 +246,7 @@ function publish(
  *  Matched by EQUALITY on that one sentinel and nothing wider: an injected `put` seam is free to answer
  *  anything else it likes (a test double answers `undefined`), and narrowing further would turn this guard
  *  into a shape check on a seam whose shape is the caller's business. */
-const CAS_EMPTY = '';
+const CAS_EMPTY = ""
 
 /** A `decision.put` object the CAS refused to address. A NAMED `Error`, not the engine `TypeError` this
  *  used to surface as: `@atlas/tools` `fault.ts` files an engine fault as `internal-fault` ("a defect in
@@ -267,8 +258,8 @@ export class UnaddressableCasObjectError extends Error {
       `unaddressable-cas-object: refusing to publish the ${base} sidecar — a decision named a CAS object the ` +
         `store could not address (its canonical form or its JSON serialization does not exist), so publishing ` +
         `would durably reference bytes that were never written. Nothing was written and nothing was served.`,
-    );
-    this.name = 'UnaddressableCasObjectError';
+    )
+    this.name = "UnaddressableCasObjectError"
   }
 }
 
@@ -280,7 +271,7 @@ export class UnaddressableCasObjectError extends Error {
  * decision made against a stale snapshot is the confused-deputy bypass the header describes.
  */
 export function commitSidecar<T>(ctx: SidecarCtx, decide: (p: StoreProjection) => CommitDecision<T>): CommitResult<T> {
-  return commitLoop(ctx, decide, true);
+  return commitLoop(ctx, decide, true)
 }
 
 /** The shared loop. `guardUnreadable` is what separates a DECISION from an unconditional publish: a decision
@@ -293,14 +284,14 @@ function commitLoop<T>(
   guardUnreadable: boolean,
 ): CommitResult<T> {
   for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
-    const read = readSidecarSet(ctx.dir, ctx.base, ctx.trusted);
+    const read = readSidecarSet(ctx.dir, ctx.base, ctx.trusted)
     // PROVENANCE — UNCONDITIONAL, unlike `unreadable`. The `guardUnreadable` distinction exists because an
     // unconditional persist never looked at the snapshot, so refusing over a torn read would brick a caller
     // whose decision does not depend on it. That reasoning does not transfer here: writing over a COMMITTED
     // store would LAUNDER it — the attacker's rows become a file this process produced, indistinguishable
     // from door output afterwards, with the tracked-file evidence overwritten. Both write shapes refuse, and
     // `persistSidecar` turns this into a thrown, readable error rather than a silent no-op.
-    if (read.untrusted) return { settled: false, refusal: 'untrusted' };
+    if (read.untrusted) return { settled: false, refusal: "untrusted" }
     // #112 — THE IDENTITY SCHEMA, and it is UNCONDITIONAL for exactly the reason `untrusted` is: LAUNDERING.
     // Publishing over a store whose hashes were minted by different rules stamps the successor generation
     // with the CURRENT schema, so a store that provably cannot be addressed by this build starts asserting
@@ -316,11 +307,11 @@ function commitLoop<T>(
     // A THROW rather than a fourth `CommitRefusal` member — see `IdentitySchemaError` for the semantic
     // reason and for the measured one. Both write shapes take it: `persistSidecar`'s exhaustion guard below
     // does not run, because this never reaches a return.
-    refuseForeignIdentityWrite(read);
-    if (guardUnreadable && read.unreadable) return { settled: false, refusal: 'unreadable' };
-    const snapshot = read.projection ?? emptyStore();
-    const decision = decide(snapshot);
-    if (decision.next === undefined) return { settled: true, out: decision.out }; // governed refusal: no write
+    refuseForeignIdentityWrite(read)
+    if (guardUnreadable && read.unreadable) return { settled: false, refusal: "unreadable" }
+    const snapshot = read.projection ?? emptyStore()
+    const decision = decide(snapshot)
+    if (decision.next === undefined) return { settled: true, out: decision.out } // governed refusal: no write
     // CAS bytes FIRST, then the projection that references them. Idempotent by content address, so a retry
     // re-putting the same object writes nothing new; a failing `put` (disk-full/permission) throws BEFORE
     // any sidecar byte, so the sidecar can never reference a hash whose bytes are absent.
@@ -346,7 +337,7 @@ function commitLoop<T>(
     // it as that door's own recorded refusal, so the operator gets an exit-2 verdict rather than an exception
     // — but a caller that skips the door still gets stopped here rather than publishing a dangling row.
     for (const obj of decision.put ?? []) {
-      if (ctx.put(obj) === CAS_EMPTY) throw new UnaddressableCasObjectError(ctx.base);
+      if (ctx.put(obj) === CAS_EMPTY) throw new UnaddressableCasObjectError(ctx.base)
     }
     // NO-OP FAST PATH — a decision that returns the VERY snapshot it read, unmodified (reference-identical),
     // has minted nothing: the current head ALREADY holds these exact bytes. `mine`'s abstaining pass is the
@@ -384,18 +375,18 @@ function commitLoop<T>(
     // against?" question the unreadable/corrupt-fallback paths ask. The churn win is unaffected: only the
     // very first abstaining site of a fresh run still publishes (an empty generation); every later site reads a
     // defined head and skips.
-    if (decision.next === read.projection) return { settled: true, out: decision.out };
+    if (decision.next === read.projection) return { settled: true, out: decision.out }
     // `superseded` SETTLES. The decision's bytes are durable (see {@link PublishOutcome}), so the ONLY
     // honest answers are this call's own `out` — the one belonging to the attempt that actually published —
     // or a re-run that cannot see it wrote. Re-running is what produced a truthful `next` and a false `out`.
     // `read.projection` is handed on as the PREVIOUS generation so the per-row watermark can tell a row this
     // decision produced from one it merely carried forward. It is the same snapshot `decide` just ran over,
     // so on a retry the comparison is re-made against the NEW snapshot — never a stale baseline.
-    if (publish(ctx, decision.next, read.top + 1, read.projection) !== 'lost') {
-      return { settled: true, out: decision.out };
+    if (publish(ctx, decision.next, read.top + 1, read.projection) !== "lost") {
+      return { settled: true, out: decision.out }
     }
   }
-  return { settled: false, refusal: 'contended' };
+  return { settled: false, refusal: "contended" }
 }
 
 /** The UNCONDITIONAL publish behind `persistProjection` — the pre-existing seam, which has
@@ -404,9 +395,9 @@ function commitLoop<T>(
  *  cannot fire through it. Exhaustion THROWS: this signature returns void, and a silent no-op persist would
  *  be a new instance of the exact defect this file removes. */
 export function persistSidecar(ctx: SidecarCtx, projection: StoreProjection): void {
-  const result = commitLoop(ctx, () => ({ out: undefined, next: projection }), false);
+  const result = commitLoop(ctx, () => ({ out: undefined, next: projection }), false)
   if (!result.settled) {
-    if (result.refusal === 'untrusted') {
+    if (result.refusal === "untrusted") {
       // Named separately because the operator action is completely different from the other two, and a
       // generic "could not persist" would send them to look at the disk.
       throw new Error(
@@ -414,12 +405,12 @@ export function persistSidecar(ctx: SidecarCtx, projection: StoreProjection): vo
           `durable store arrived by COMMIT rather than through a governed door. A committed store carries rows ` +
           `no gate ever saw. Nothing was written and nothing was served. Remove it from version control ` +
           `(\`git rm -r --cached .atlas\`, keeping \`.atlas/policy.json\`) and re-derive the store locally.`,
-      );
+      )
     }
     throw new Error(
       `atlas: could not persist the ${ctx.base} sidecar (${result.refusal}) after ${MAX_ATTEMPTS} attempts — ` +
         `nothing was written. This is reported rather than swallowed: a persist that silently does nothing ` +
         `is the lost update this protocol exists to make impossible.`,
-    );
+    )
   }
 }

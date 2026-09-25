@@ -35,26 +35,26 @@
 //
 // Harness invariant (harness/README.md): no `@atlas/*` import.
 
-import { execFileSync } from 'node:child_process';
-import { createHash } from 'node:crypto';
-import { appendFileSync, readFileSync, writeSync } from 'node:fs';
+import { execFileSync } from "node:child_process"
+import { createHash } from "node:crypto"
+import { appendFileSync, readFileSync, writeSync } from "node:fs"
 
-const MODEL = process.env.METERED_MODEL || 'claude-sonnet-4-6';
-const SIDECAR = process.env.ATLAS_COST_SIDECAR;
-const CLAUDE_BIN = process.env.METERED_CLAUDE_BIN || 'claude';
-const TIMEOUT_MS = 180_000;
+const MODEL = process.env.METERED_MODEL || "claude-sonnet-4-6"
+const SIDECAR = process.env.ATLAS_COST_SIDECAR
+const CLAUDE_BIN = process.env.METERED_CLAUDE_BIN || "claude"
+const TIMEOUT_MS = 180_000
 
 /** Fail loud: a metering run with nowhere to record is a silent-loss bug. */
-if (!SIDECAR || SIDECAR.trim() === '') {
+if (!SIDECAR || SIDECAR.trim() === "") {
   writeSync(
     2,
-    'metered-claude: ATLAS_COST_SIDECAR is required (nowhere to record cost = silent loss). Set it to a JSONL path.\n',
-  );
-  process.exit(3);
+    "metered-claude: ATLAS_COST_SIDECAR is required (nowhere to record cost = silent loss). Set it to a JSONL path.\n",
+  )
+  process.exit(3)
 }
 
 /** Read the WHOLE prompt from stdin as bytes (fd 0). Atlas pipes the prompt in; we pass it through unread. */
-const prompt = readFileSync(0);
+const prompt = readFileSync(0)
 
 /**
  * ── THE POOL-SAFE SITE KEY (bench axis A3, defect (a)) ─────────────────────────────────────────────────────
@@ -76,24 +76,30 @@ const prompt = readFileSync(0);
  * Both are pool-safe: they are derived from this call's own stdin, independent of any interleaving.
  */
 function deriveSiteKey(promptBuf) {
-  const prompt_sha256 = createHash('sha256').update(promptBuf).digest('hex');
-  const m = /<unit path="([^"]*)" name="([^"]*)">/.exec(promptBuf.toString('utf8'));
-  if (m === null) return { site: null, prompt_sha256 };
-  const [, path, name] = m;
+  const prompt_sha256 = createHash("sha256").update(promptBuf).digest("hex")
+  const m = /<unit path="([^"]*)" name="([^"]*)">/.exec(promptBuf.toString("utf8"))
+  if (m === null) return { site: null, prompt_sha256 }
+  const [, path, name] = m
   // Reconstruct the qualifiedPath: `<file>::<symbol>`, or a bare path for a file/repo anchor (name===path).
-  const site = name === path ? path : `${path}::${name}`;
-  return { site, prompt_sha256 };
+  const site = name === path ? path : `${path}::${name}`
+  return { site, prompt_sha256 }
 }
 
-const SITE = deriveSiteKey(prompt);
+const SITE = deriveSiteKey(prompt)
 
 /** Append exactly one JSON line to the sidecar. Never truncates (appendFileSync = O_APPEND). Every row carries
  *  the pool-safe site key so a concurrent run's per-site cost is recoverable (see `deriveSiteKey`). */
 function recordSidecar(fields) {
   appendFileSync(
     SIDECAR,
-    JSON.stringify({ ts: new Date().toISOString(), model: MODEL, site: SITE.site, prompt_sha256: SITE.prompt_sha256, ...fields }) + '\n',
-  );
+    JSON.stringify({
+      ts: new Date().toISOString(),
+      model: MODEL,
+      site: SITE.site,
+      prompt_sha256: SITE.prompt_sha256,
+      ...fields,
+    }) + "\n",
+  )
 }
 
 /**
@@ -105,19 +111,19 @@ function recordSidecar(fields) {
  * if ABSTAIN_SENTINEL ever changes, this string must follow).
  */
 function isAbstainSentinel(answer) {
-  const stripped = answer.trim().replace(/^[\s`'"*.[\](){}]+|[\s`'"*.[\](){}]+$/g, '');
-  return stripped.toUpperCase() === 'NO-FACT';
+  const stripped = answer.trim().replace(/^[\s`'"*.[\](){}]+|[\s`'"*.[\](){}]+$/g, "")
+  return stripped.toUpperCase() === "NO-FACT"
 }
 
-let stdoutBuf;
+let stdoutBuf
 try {
-  stdoutBuf = execFileSync(CLAUDE_BIN, ['-p', '--model', MODEL, '--output-format', 'json'], {
+  stdoutBuf = execFileSync(CLAUDE_BIN, ["-p", "--model", MODEL, "--output-format", "json"], {
     input: prompt,
     timeout: TIMEOUT_MS,
     maxBuffer: 64 * 1024 * 1024,
     // capture stdout as a Buffer; let stderr flow to our stderr for visibility
-    stdio: ['pipe', 'pipe', 'inherit'],
-  });
+    stdio: ["pipe", "pipe", "inherit"],
+  })
 } catch (err) {
   // non-zero exit / ENOENT / timeout — record it, emit nothing, but do NOT kill the mine run.
   recordSidecar({
@@ -129,14 +135,14 @@ try {
     is_error: true,
     abstained: true,
     error: String((err && err.code) || (err && err.message) || err),
-  });
-  process.exit(0);
+  })
+  process.exit(0)
 }
 
 /** Parse the claude JSON envelope. A parse failure is itself a recorded error, not a crash. */
-let env;
+let env
 try {
-  env = JSON.parse(stdoutBuf.toString('utf8'));
+  env = JSON.parse(stdoutBuf.toString("utf8"))
 } catch (err) {
   recordSidecar({
     input_tokens: null,
@@ -146,15 +152,15 @@ try {
     total_cost_usd: null,
     is_error: true,
     abstained: true,
-    error: 'unparseable-claude-json: ' + String((err && err.message) || err),
-  });
-  process.exit(0);
+    error: "unparseable-claude-json: " + String((err && err.message) || err),
+  })
+  process.exit(0)
 }
 
-const isError = env.is_error === true;
-const result = typeof env.result === 'string' ? env.result : '';
-const usage = env.usage && typeof env.usage === 'object' ? env.usage : {};
-const emptyResult = result.trim() === '';
+const isError = env.is_error === true
+const result = typeof env.result === "string" ? env.result : ""
+const usage = env.usage && typeof env.usage === "object" ? env.usage : {}
+const emptyResult = result.trim() === ""
 
 // STDOUT contract: write nothing on error or empty/whitespace result; else pass `result` VERBATIM. The
 // abstain SENTINEL is passed THROUGH like any other bytes — Atlas's own gate (isAbstainToken, llm.ts) is the
@@ -162,24 +168,24 @@ const emptyResult = result.trim() === '';
 // wrapper shortcut.
 if (!isError && !emptyResult) {
   // write the exact bytes of `result` — no re-encode of newlines, Atlas's gate judges the shape.
-  writeSync(1, Buffer.from(result, 'utf8'));
+  writeSync(1, Buffer.from(result, "utf8"))
 }
 
 // abstained = the outcome Atlas WILL record, so the sidecar's abstention-rate reading is truthful: an error,
 // empty stdout, OR the abstain sentinel (#201) all become an abstention at the seam. Empty-stdout alone was
 // wrong here — after the #201 fix the model abstains by emitting the NON-empty token NO-FACT, which this
 // wrapper otherwise booked as abstained=false (measured 2026-08-11 integ-smoke). See isAbstainSentinel.
-const abstained = isError || emptyResult || isAbstainSentinel(result);
+const abstained = isError || emptyResult || isAbstainSentinel(result)
 
 recordSidecar({
   input_tokens: usage.input_tokens ?? null,
   output_tokens: usage.output_tokens ?? null,
   cache_read_input_tokens: usage.cache_read_input_tokens ?? null,
   cache_creation_input_tokens: usage.cache_creation_input_tokens ?? null,
-  total_cost_usd: typeof env.total_cost_usd === 'number' ? env.total_cost_usd : null,
+  total_cost_usd: typeof env.total_cost_usd === "number" ? env.total_cost_usd : null,
   is_error: isError,
   abstained,
-  ...(typeof env.duration_api_ms === 'number' ? { duration_api_ms: env.duration_api_ms } : {}),
-});
+  ...(typeof env.duration_api_ms === "number" ? { duration_api_ms: env.duration_api_ms } : {}),
+})
 
-process.exit(0);
+process.exit(0)

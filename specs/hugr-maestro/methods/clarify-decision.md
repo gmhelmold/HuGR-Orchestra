@@ -67,19 +67,19 @@ reply re-enters `admit-request`; it is never parsed as approval.
 
 ## Skills
 
-| Skill | Stage | Output | Stop condition |
-|---|---|---|---|
+| Skill            | Stage                           | Output                  | Stop condition                                         |
+| ---------------- | ------------------------------- | ----------------------- | ------------------------------------------------------ |
 | `frame-question` | frame smallest neutral question | `ClarificationQuestion` | one question names one decision and its unblock effect |
 
 ## Tools and Guards
 
-| Capability | Purpose | Boundary |
-|---|---|---|
-| `admission-record-read` | read immutable parent record | Maestro durable evidence read |
-| `clarification-record-write` | persist question linked to parent | Maestro durable evidence write |
-| `clarification-need-schema-guard` | reject malformed parent need | before reasoning |
-| `clarification-question-guard` | reject compound/leading/malformed question | before persistence/display |
-| `no-governed-task-before-approval` | deny Task/child Session creation without approved revision identity | Session/Task boundary |
+| Capability                         | Purpose                                                             | Boundary                       |
+| ---------------------------------- | ------------------------------------------------------------------- | ------------------------------ |
+| `admission-record-read`            | read immutable parent record                                        | Maestro durable evidence read  |
+| `clarification-record-write`       | persist question linked to parent                                   | Maestro durable evidence write |
+| `clarification-need-schema-guard`  | reject malformed parent need                                        | before reasoning               |
+| `clarification-question-guard`     | reject compound/leading/malformed question                          | before persistence/display     |
+| `no-governed-task-before-approval` | deny Task/child Session creation without approved revision identity | Session/Task boundary          |
 
 No shell, product edit, external network, Atlas read/write, plan compiler, member tool, or task creation is
 granted.
@@ -99,20 +99,20 @@ it does not rerun `frame-question`. A newer admission record supersedes an undel
 
 ## Refusal and Recovery
 
-| Condition | Result |
-|---|---|
-| Invalid/missing parent need | visible `CLARIFY` hold with linked admission issue; no question, no task |
-| Invalid model output | visible `CLARIFY` hold; preserve source need for deterministic retry/recovery |
-| Session cannot display response | persist undelivered record; deliver on session recovery, never regenerate |
-| New user message supersedes question | preserve prior record and return to `admit-request` |
-| Duplicate trigger | return recorded question |
+| Condition                            | Result                                                                        |
+| ------------------------------------ | ----------------------------------------------------------------------------- |
+| Invalid/missing parent need          | visible `CLARIFY` hold with linked admission issue; no question, no task      |
+| Invalid model output                 | visible `CLARIFY` hold; preserve source need for deterministic retry/recovery |
+| Session cannot display response      | persist undelivered record; deliver on session recovery, never regenerate     |
+| New user message supersedes question | preserve prior record and return to `admit-request`                           |
+| Duplicate trigger                    | return recorded question                                                      |
 
 ## Runtime Seams
 
-| System | Seam |
-|---|---|
+| System   | Seam                                                                                     |
+| -------- | ---------------------------------------------------------------------------------------- |
 | OpenCode | durable `SessionID`/`MessageID`, visible assistant response, Session/Task creation fence |
-| Atlas | none; request has not earned project-context access beyond admission orientation |
+| Atlas    | none; request has not earned project-context access beyond admission orientation         |
 
 ## Acceptance
 

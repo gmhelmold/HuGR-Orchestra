@@ -13,7 +13,7 @@ oracle** (`ts.createProgram`) — zero LLM anywhere in the label or scoring path
 `harness/probes/a4-recall-pilot.json` as a recall number for these four shapes: that pilot's denominator was
 100% same-family-LLM-judge `GROUNDED_TRUE` verdicts (judge = same model family as the miner, never calibrated
 live) and it stored no fact text, so it cannot even be re-scored. Per the ratified methodology, a same-family
-judge measures *agreement*, not recall.
+judge measures _agreement_, not recall.
 
 **Not covered:** advisory / predicate prose has no sound oracle; it is out of scope here (see
 `docs/design/95-benchmark-methodology.md` and the `calibration-report.a1-subject.*` planted subject-test for
@@ -63,15 +63,15 @@ so the metric itself is stable even where the raw artifact bytes are not.
 
 `.atlas/index.scip` = 16,306,497 bytes. `targets=1333 scopes=19`.
 
-| arm | falseAdmit | recallTrue | n |
-| --- | --- | --- | --- |
-| count | 0/163 = 0.00% | 7/163 = 4.29% | 326 |
-| relation | 452/452 = 100.00% | 452/452 = 100.00% | 904 |
-| dependency | 18/23702 = 0.08% | 7/163 = 4.29% | 23865 |
-| negation | 0/163 = 0.00% | 51/1200 = 4.25% | 1363 |
+| arm        | falseAdmit        | recallTrue        | n     |
+| ---------- | ----------------- | ----------------- | ----- |
+| count      | 0/163 = 0.00%     | 7/163 = 4.29%     | 326   |
+| relation   | 452/452 = 100.00% | 452/452 = 100.00% | 904   |
+| dependency | 18/23702 = 0.08%  | 7/163 = 4.29%     | 23865 |
+| negation   | 0/163 = 0.00%     | 51/1200 = 4.25%   | 1363  |
 
 Negation TEETH (opaque cross-package-collapse gate forced OFF, non-vacuity check): 132/163 = 80.98% false-admit
-— confirms the door's 0% above is *earned* by the gate, not vacuous (matches the door's historically-adjudicated
+— confirms the door's 0% above is _earned_ by the gate, not vacuous (matches the door's historically-adjudicated
 ~80.86% pre-fix regime). **Shipped test suite result on this build: GREEN.**
 
 ## Table 2 — dist-FORM index (operating/intended state per the methodology doc)
@@ -91,18 +91,18 @@ reported under both, named:**
   this predicate, unsoundness means: admitted, but tsc finds ZERO reference occurrence of the target in the
   flipped scope.
 - **Definition B — mismatch vs the bench's CALL label.** `isCallee` (`packages/adapter-io/test/support/
-  neg-bench-lib.ts:81-84`) labels a fact FALSE only when the target has no `CallExpression`/`NewExpression`
+neg-bench-lib.ts:81-84`) labels a fact FALSE only when the target has no `CallExpression`/`NewExpression`
   callee occurrence in scope — it does not check references. A row can be Definition-B-"false" (no call) while
   being Definition-A-true (a real reference exists) at the same time; that gap is a **labelling mismatch
   between what the bench calls "false" and what the gate proves**, not a case where the gate admitted something
   it cannot back with a witness.
 
-| arm | Def A — unsound (0 reference witness, gate's own predicate) | Def B — mismatch vs bench's CALL label | recallTrue | n |
-| --- | --- | --- | --- | --- |
-| count | 0/163 = 0.00% | 9/163 = 5.52% | 163/163 = 100.00% | 326 |
-| relation | n/a — `admitRelation` states no truth predicate (see below), so nothing to be unsound against | 452/452 = 100.00% | 452/452 = 100.00% | 904 |
-| dependency | 0/23702 = 0.00% | 309/23702 = 1.30% | 163/163 = 100.00% | 23865 |
-| negation | 0/163 = 0.00% | 0/163 = 0.00% | 428/1200 = 35.67% | 1363 |
+| arm        | Def A — unsound (0 reference witness, gate's own predicate)                                   | Def B — mismatch vs bench's CALL label | recallTrue        | n     |
+| ---------- | --------------------------------------------------------------------------------------------- | -------------------------------------- | ----------------- | ----- |
+| count      | 0/163 = 0.00%                                                                                 | 9/163 = 5.52%                          | 163/163 = 100.00% | 326   |
+| relation   | n/a — `admitRelation` states no truth predicate (see below), so nothing to be unsound against | 452/452 = 100.00%                      | 452/452 = 100.00% | 904   |
+| dependency | 0/23702 = 0.00%                                                                               | 309/23702 = 1.30%                      | 163/163 = 100.00% | 23865 |
+| negation   | 0/163 = 0.00%                                                                                 | 0/163 = 0.00%                          | 428/1200 = 35.67% | 1363  |
 
 **Every Definition-B row was adjudicated line-by-line against the code (cold-seat verified, spot-cold-checked
 against source) and found to be a definitional gap, not unsoundness:**
@@ -117,7 +117,7 @@ against source) and found to be a definitional gap, not unsoundness:**
   `:111`. Both witnesses are references, never calls; both are the SAME kind of gap as the other 307, not a
   distinct residual unsoundness.
 - **Count, all 9 rows:** each is a boundary case where `atLeast == (in-scope call count) + 1` while in-scope
-  *references* (the gate's actual witness set) `>= atLeast` — i.e. the gate correctly proves a reference-bound
+  _references_ (the gate's actual witness set) `>= atLeast` — i.e. the gate correctly proves a reference-bound
   the bench's call-only oracle cannot see. 9/9.
 - **Relation, all 452 rows:** `admitRelation` (`packages/genesis/src/admit-harness.ts:217-221`) applies no
   direction/truth door at all beyond well-formedness + endpoint grounding — every relation proposal driven is
@@ -132,7 +132,7 @@ finding, NOT fixed here:** because both the gate-ON and gate-OFF negation false-
 build+index, the shipped non-vacuity assertion at `packages/adapter-io/test/semantic-bench.test.ts:252`
 (`expect(teeth.negation.falseAdmit!).toBeGreaterThan(s.negation.falseAdmit!)`) reduces to
 `expect(0).toBeGreaterThan(0)` on this exact state — i.e. negation's 0-false-admit is currently proven
-non-vacuous by *nothing* on the operating (dist-form) index, only on the dist-absent misbuild (Table 1, where
+non-vacuous by _nothing_ on the operating (dist-form) index, only on the dist-absent misbuild (Table 1, where
 gate-OFF is 132/163 = 80.98% > 0). This report does not diagnose or fix it; another seat is triaging it.
 
 **Shipped test suite result on this build: RED.** `AC-6` fails on the first Definition-B dependency row it
@@ -186,7 +186,7 @@ soundness nor unsoundness, just the shape of a gate that does not check directio
   adjudication above. All 318 Definition-B rows (309 dependency + 9 count) trace to a labelling gap (bench
   checks calls, gate proves references); 0/318 are unwitnessed admits under the gate's own predicate.
 - **Still open (not fixed here):** negation's `AC-6` non-vacuity teeth (`semantic-bench.test.ts:252`) is proven
-  by *nothing* on the dist-form (operating) index at this rev — both gate-ON and gate-OFF false-admit are 0/163
+  by _nothing_ on the dist-form (operating) index at this rev — both gate-ON and gate-OFF false-admit are 0/163
   there, so the assertion reduces to `expect(0).toBeGreaterThan(0)`. Non-vacuity for negation is currently
   demonstrated only on the dist-absent misbuild (Table 1). Flagged for the code owner (another seat is
   triaging it), not diagnosed further here.
@@ -205,7 +205,7 @@ soundness nor unsoundness, just the shape of a gate that does not check directio
    **Correction (WP-C3, 2026-08-18):** the phrase "a soundness finding, not just a recall swing" written here
    was itself an overclaim in the pessimistic direction. Line-by-line adjudication of all 318 flagged rows
    (see the Definition A / Definition B table above) found `AC-6` fails because it checks call-existence, a
-   *stricter and undocumented* label than the gate's own witnessed-reference-existence predicate — 0/318 rows
+   _stricter and undocumented_ label than the gate's own witnessed-reference-existence predicate — 0/318 rows
    are admitted without a witness under the predicate the gate actually implements. It is a labelling-vs-gate
    mismatch (Definition B), not evidence the door admits an unwitnessed fact (Definition A, 0/318). This
    report's own framing needed the same correction it was written to apply to the methodology doc.

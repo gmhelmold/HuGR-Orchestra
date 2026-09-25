@@ -25,10 +25,10 @@
 // interpreter — purely a function of the passed `IndexNode`, with no code-exec fallback (an unrecognized
 // query yields NA, never a shell-out). Flagged as a build-ahead choice, NOT a frozen contract.
 
-import type { Status } from '@atlas/contracts';
-import type { NodeKey } from '@atlas/contracts';
-import type { IndexNode } from '@atlas/index';
-import type { Check, EvaluatorApi } from '../types.js';
+import type { Status } from "@atlas/contracts"
+import type { NodeKey } from "@atlas/contracts"
+import type { IndexNode } from "@atlas/index"
+import type { Check, EvaluatorApi } from "../types.js"
 
 /**
  * The evaluator verdict — the 3-state subset of `Status` the evaluator can yield. The `'advisory'`
@@ -36,7 +36,7 @@ import type { Check, EvaluatorApi } from '../types.js';
  * UPSTREAM (see `admit`), never returned here. `Verdict` is assignable to `Status`, so an
  * `(check, indexState) => Verdict` function satisfies the frozen `EvaluatorApi.evaluate` signature.
  */
-export type Verdict = Extract<Status, 'HOLDS' | 'BROKEN' | 'NA'>;
+export type Verdict = Extract<Status, "HOLDS" | "BROKEN" | "NA">
 
 // ── admission gate (REQ-KNOW-16b / 16c) ──────────────────────────────────────
 //
@@ -47,8 +47,8 @@ export type Verdict = Extract<Status, 'HOLDS' | 'BROKEN' | 'NA'>;
 /** A raw proposed check fed to the admission gate — evaluable (`Check`) or runtime-requiring. */
 export type ProposedCheck =
   | Check
-  | { readonly kind: 'code-exec'; readonly script: string }
-  | { readonly kind: 'runtime'; readonly behavior: string };
+  | { readonly kind: "code-exec"; readonly script: string }
+  | { readonly kind: "runtime"; readonly behavior: string }
 
 /**
  * The admission verdict: an evaluable `Check` (→ predicate) or a refusal (→ stays advisory).
@@ -62,8 +62,8 @@ export type ProposedCheck =
  */
 export type Admission =
   | { readonly evaluable: true; readonly check: Check }
-  | { readonly evaluable: false; readonly reason: 'code-exec' | 'runtime' }
-  | { readonly evaluable: false; readonly reason: 'malformed-check'; readonly expected: string };
+  | { readonly evaluable: false; readonly reason: "code-exec" | "runtime" }
+  | { readonly evaluable: false; readonly reason: "malformed-check"; readonly expected: string }
 
 /**
  * Classify a proposed check (KNOW-16). A deterministic index-query or a pinned declarative assertion is
@@ -84,20 +84,20 @@ export type Admission =
  */
 export function admit(proposed: ProposedCheck): Admission {
   switch (proposed.kind) {
-    case 'index-query':
-    case 'assertion': {
-      const expected = whyUnparseable(proposed);
+    case "index-query":
+    case "assertion": {
+      const expected = whyUnparseable(proposed)
       return expected === null
         ? { evaluable: true, check: proposed }
-        : { evaluable: false, reason: 'malformed-check', expected };
+        : { evaluable: false, reason: "malformed-check", expected }
     }
-    case 'code-exec':
-      return { evaluable: false, reason: 'code-exec' };
-    case 'runtime':
-      return { evaluable: false, reason: 'runtime' };
+    case "code-exec":
+      return { evaluable: false, reason: "code-exec" }
+    case "runtime":
+      return { evaluable: false, reason: "runtime" }
     default: {
-      const _exhaustive: never = proposed;
-      return _exhaustive;
+      const _exhaustive: never = proposed
+      return _exhaustive
     }
   }
 }
@@ -112,33 +112,33 @@ export function admit(proposed: ProposedCheck): Admission {
  *  message — an operator reading "expected `child-count|<key>|<non-negative integer>`" can fix the string
  *  without opening this file. Adding a member here is a grammar change, not a message change. */
 const QUERY_FORMS = {
-  exists: 'exists|<key>',
-  absent: 'absent|<key>',
-  'has-object': 'has-object|<hash>',
-} as const;
+  exists: "exists|<key>",
+  absent: "absent|<key>",
+  "has-object": "has-object|<hash>",
+} as const
 const ASSERTION_FORMS = {
-  'child-count': 'child-count|<key>|<non-negative integer>',
-  'subtree-hash': 'subtree-hash|<key>|<hash>',
-} as const;
+  "child-count": "child-count|<key>|<non-negative integer>",
+  "subtree-hash": "subtree-hash|<key>|<hash>",
+} as const
 
-const formsOf = (t: Record<string, string>): string => Object.values(t).join(' · ');
+const formsOf = (t: Record<string, string>): string => Object.values(t).join(" · ")
 
 /** The query leg's split: the operator, then EVERYTHING after the FIRST `|` as the argument — so a key
  *  that itself contains a `|` survives intact. Shared with `evalQuery`: one split, one language. */
 function splitQuery(query: string): { readonly op: string; readonly arg: string } {
-  const bar = query.indexOf('|');
-  return { op: (bar === -1 ? query : query.slice(0, bar)).trim(), arg: bar === -1 ? '' : query.slice(bar + 1).trim() };
+  const bar = query.indexOf("|")
+  return { op: (bar === -1 ? query : query.slice(0, bar)).trim(), arg: bar === -1 ? "" : query.slice(bar + 1).trim() }
 }
 
 /** The assertion leg's split: `|`-delimited, every part trimmed. Shared with `evalAssertion`. */
 function splitAssertion(expr: string): readonly string[] {
-  return expr.split('|').map((p) => p.trim());
+  return expr.split("|").map((p) => p.trim())
 }
 
 /** A child count is a NON-NEGATIVE INTEGER in decimal. Deliberately not `Number(v) >= 0`, which accepts
  *  `''` (coerces to `0`), `'2.5'`, `'0x2'` and `'1e3'` — and the first of those is precisely the input that
  *  used to fabricate a `HOLDS` on any node with no children. */
-const COUNT = /^\d+$/;
+const COUNT = /^\d+$/
 
 /**
  * Parse a `Check` against the shipped grammar. `null` ⇒ it parses; otherwise the message the door serves.
@@ -150,27 +150,27 @@ const COUNT = /^\d+$/;
  * to the same verdict, pinned by SCN-KNOW-16a-3 before this function existed.
  */
 function whyUnparseable(check: Check): string | null {
-  if (check.kind === 'index-query') {
-    const { op, arg } = splitQuery(check.query);
-    const form = (QUERY_FORMS as Record<string, string>)[op];
+  if (check.kind === "index-query") {
+    const { op, arg } = splitQuery(check.query)
+    const form = (QUERY_FORMS as Record<string, string>)[op]
     if (form === undefined)
-      return `an index-query must name one of ${formsOf(QUERY_FORMS)} — read ${JSON.stringify(check.query)}`;
-    if (arg === '') return `${form} takes one non-empty argument — read ${JSON.stringify(check.query)}`;
-    return null;
+      return `an index-query must name one of ${formsOf(QUERY_FORMS)} — read ${JSON.stringify(check.query)}`
+    if (arg === "") return `${form} takes one non-empty argument — read ${JSON.stringify(check.query)}`
+    return null
   }
-  const parts = splitAssertion(check.expr);
-  const [op = '', key = '', value = ''] = parts;
-  const form = (ASSERTION_FORMS as Record<string, string>)[op];
+  const parts = splitAssertion(check.expr)
+  const [op = "", key = "", value = ""] = parts
+  const form = (ASSERTION_FORMS as Record<string, string>)[op]
   if (form === undefined)
-    return `an assertion must name one of ${formsOf(ASSERTION_FORMS)} — read ${JSON.stringify(check.expr)}`;
+    return `an assertion must name one of ${formsOf(ASSERTION_FORMS)} — read ${JSON.stringify(check.expr)}`
   if (parts.length !== 3)
-    return `${form} takes exactly two arguments, got ${parts.length - 1} — read ${JSON.stringify(check.expr)}`;
-  if (key === '') return `${form} needs a non-empty <key> — read ${JSON.stringify(check.expr)}`;
-  if (op === 'child-count' && !COUNT.test(value))
-    return `${form} needs a non-negative decimal integer count — read ${JSON.stringify(check.expr)}`;
-  if (op === 'subtree-hash' && value === '')
-    return `${form} needs a non-empty <hash> — read ${JSON.stringify(check.expr)}`;
-  return null;
+    return `${form} takes exactly two arguments, got ${parts.length - 1} — read ${JSON.stringify(check.expr)}`
+  if (key === "") return `${form} needs a non-empty <key> — read ${JSON.stringify(check.expr)}`
+  if (op === "child-count" && !COUNT.test(value))
+    return `${form} needs a non-negative decimal integer count — read ${JSON.stringify(check.expr)}`
+  if (op === "subtree-hash" && value === "")
+    return `${form} needs a non-empty <hash> — read ${JSON.stringify(check.expr)}`
+  return null
 }
 
 // ── the pure interpreter (REQ-KNOW-16a / 16d) ─────────────────────────────────
@@ -178,18 +178,18 @@ function whyUnparseable(check: Check): string | null {
 /** DFS lookup by `key` over the index subtree — pure, deterministic, no IO. First match wins (keys are
  *  unique per axis; the walk order is fixed by `children`, so the result is index-state-determined). */
 function findNode(root: IndexNode, key: string): IndexNode | undefined {
-  if (root.key === key) return root;
+  if (root.key === key) return root
   for (const child of root.children) {
-    const hit = findNode(child, key);
-    if (hit !== undefined) return hit;
+    const hit = findNode(child, key)
+    if (hit !== undefined) return hit
   }
-  return undefined;
+  return undefined
 }
 
 /** True iff any node in the subtree carries `hash` in its `objects` — pure, deterministic. */
 function hasObject(root: IndexNode, hash: string): boolean {
-  if (root.objects.some((o) => String(o) === hash)) return true;
-  return root.children.some((c) => hasObject(c, hash));
+  if (root.objects.some((o) => String(o) === hash)) return true
+  return root.children.some((c) => hasObject(c, hash))
 }
 
 /** Interpret a deterministic index-query leg. Unrecognized ⇒ `NA` (never a code-exec fallback).
@@ -199,16 +199,16 @@ function hasObject(root: IndexNode, hash: string): boolean {
  *  What changed is that a check which came THROUGH `admit` can no longer land here — the door refuses the
  *  unrecognized form first. Uses the shared `splitQuery`, so the door cannot narrow what this accepts. */
 function evalQuery(query: string, root: IndexNode): Verdict {
-  const { op, arg } = splitQuery(query);
+  const { op, arg } = splitQuery(query)
   switch (op) {
-    case 'exists':
-      return findNode(root, arg) !== undefined ? 'HOLDS' : 'BROKEN';
-    case 'absent':
-      return findNode(root, arg) === undefined ? 'HOLDS' : 'BROKEN';
-    case 'has-object':
-      return hasObject(root, arg) ? 'HOLDS' : 'BROKEN';
+    case "exists":
+      return findNode(root, arg) !== undefined ? "HOLDS" : "BROKEN"
+    case "absent":
+      return findNode(root, arg) === undefined ? "HOLDS" : "BROKEN"
+    case "has-object":
+      return hasObject(root, arg) ? "HOLDS" : "BROKEN"
     default:
-      return 'NA';
+      return "NA"
   }
 }
 
@@ -219,18 +219,18 @@ function evalQuery(query: string, root: IndexNode): Verdict {
  *  and SCN-KNOW-16a-1 does), but no longer by anything the door let through. Uses the shared
  *  `splitAssertion`. */
 function evalAssertion(expr: string, root: IndexNode): Verdict {
-  const [op, key, value] = splitAssertion(expr);
-  if (op === 'child-count' && key !== undefined && value !== undefined) {
-    const node = findNode(root, key);
-    if (node === undefined) return 'NA';
-    return node.children.length === Number(value) ? 'HOLDS' : 'BROKEN';
+  const [op, key, value] = splitAssertion(expr)
+  if (op === "child-count" && key !== undefined && value !== undefined) {
+    const node = findNode(root, key)
+    if (node === undefined) return "NA"
+    return node.children.length === Number(value) ? "HOLDS" : "BROKEN"
   }
-  if (op === 'subtree-hash' && key !== undefined && value !== undefined) {
-    const node = findNode(root, key);
-    if (node === undefined) return 'NA';
-    return String(node.subtreeHash) === value ? 'HOLDS' : 'BROKEN';
+  if (op === "subtree-hash" && key !== undefined && value !== undefined) {
+    const node = findNode(root, key)
+    if (node === undefined) return "NA"
+    return String(node.subtreeHash) === value ? "HOLDS" : "BROKEN"
   }
-  return 'NA';
+  return "NA"
 }
 
 /**
@@ -238,15 +238,13 @@ function evalAssertion(expr: string, root: IndexNode): Verdict {
  * IO; same `(check, indexState)` ⇒ same `Verdict`. Yields exactly one of `HOLDS | BROKEN | NA`.
  */
 export function evaluate(check: Check, indexState: IndexNode): Verdict {
-  return check.kind === 'index-query'
-    ? evalQuery(check.query, indexState)
-    : evalAssertion(check.expr, indexState);
+  return check.kind === "index-query" ? evalQuery(check.query, indexState) : evalAssertion(check.expr, indexState)
 }
 
 /** The FROZEN `EvaluatorApi` implementation (types.ts). Standalone + OPTIONAL — the store wires
  *  it only for the predicate family; with none wired, advisory nodes operate alone (REQ-KNOW-9b). */
 export function makeEvaluator(): EvaluatorApi {
-  return { evaluate };
+  return { evaluate }
 }
 
 // ── feed the verdict to atlas-reconcile (REQ-KNOW-16e) ────────────────────────
@@ -256,11 +254,11 @@ export function makeEvaluator(): EvaluatorApi {
 
 /** A packaged evaluator verdict keyed by the predicate node — the carrier the reconcile input consumes. */
 export interface VerdictFeed {
-  readonly node: NodeKey;
-  readonly verdict: Verdict;
+  readonly node: NodeKey
+  readonly verdict: Verdict
 }
 
 /** Evaluate a predicate's check and package the verdict for the `atlas-reconcile` feed (REQ-KNOW-16e). */
 export function verdictFor(node: NodeKey, check: Check, indexState: IndexNode): VerdictFeed {
-  return { node, verdict: evaluate(check, indexState) };
+  return { node, verdict: evaluate(check, indexState) }
 }

@@ -44,38 +44,38 @@ import {
   openSync,
   readFileSync,
   writeFileSync,
-} from 'node:fs';
-import { dirname, join } from 'node:path';
-import type { Hash } from '@atlas/contracts';
-import { asHash, id } from '@atlas/kernel';
-import type { CasObject, StoreApi } from '@atlas/kernel';
-import { emptyStore } from '@atlas/knowledge';
-import type { StoreProjection } from '@atlas/knowledge';
-import { isContainedIn } from './containment.js';
-import { readSidecarSet } from './sidecar.js';
-import type { SidecarTrust } from './store-provenance.js';
-import { commitSidecar, persistSidecar } from './sidecar-commit.js';
-import type { CommitDecision, CommitResult, SidecarBase, SidecarCtx } from './sidecar.js';
+} from "node:fs"
+import { dirname, join } from "node:path"
+import type { Hash } from "@atlas/contracts"
+import { asHash, id } from "@atlas/kernel"
+import type { CasObject, StoreApi } from "@atlas/kernel"
+import { emptyStore } from "@atlas/knowledge"
+import type { StoreProjection } from "@atlas/knowledge"
+import { isContainedIn } from "./containment.js"
+import { readSidecarSet } from "./sidecar.js"
+import type { SidecarTrust } from "./store-provenance.js"
+import { commitSidecar, persistSidecar } from "./sidecar-commit.js"
+import type { CommitDecision, CommitResult, SidecarBase, SidecarCtx } from "./sidecar.js"
 
 /** A filesystem path to the on-disk CAS root (D4: value files at `<casPath>/<h[0:2]>/<h>`). */
-export type CasPath = string;
+export type CasPath = string
 
 /** The honest-empty content handle: a malformed put stores nothing and returns this non-resolving key
  *  (mirrors kernel/store.ts:26 — `asHash('')`, the sole EMPTY sentinel). */
-const EMPTY: Hash = asHash('');
+const EMPTY: Hash = asHash("")
 
 /** The two mutable sidecar FAMILIES — NOT content-addressed; they live beside the CAS root (D4), one
  *  directory up. `staging` is the explorer's CANDIDATE store (ADR-0008): same shape as the projection,
  *  DELIBERATELY a different file, because keeping the two in one place is exactly what let an ungoverned
  *  mine pass destroy, then mutate, governed knowledge. Named here and NOWHERE else, so the mutant
  *  `STAGING_BASE → 'projection'` stays the one-line, test-killable change it was. */
-const PROJECTION_BASE: SidecarBase = 'projection';
-const STAGING_BASE: SidecarBase = 'staging';
+const PROJECTION_BASE: SidecarBase = "projection"
+const STAGING_BASE: SidecarBase = "staging"
 
 /** The upper bound on a single CAS object read (N13 DoS guard): a CAS object is a small JSON fact/skeleton
  *  (KB-scale). A value whose on-disk size exceeds this is rejected as a miss BEFORE it is read — belt for a
  *  planted oversized regular file. Generous (64 MiB) so it never trips a legitimate object, far below OOM. */
-const MAX_CAS_BYTES = 64 * 1024 * 1024;
+const MAX_CAS_BYTES = 64 * 1024 * 1024
 
 /** N14 (billy PoC — symlink TOCTOU): the open flags that make the check-and-read share ONE inode.
  *  `O_NOFOLLOW` → a symlink AT the final path component fails to open (ELOOP) atomically — the pre-N14
@@ -83,12 +83,11 @@ const MAX_CAS_BYTES = 64 * 1024 * 1024;
  *  the checks re-opened the OOM; opening the final component with `O_NOFOLLOW` refuses it in one syscall.
  *  `O_NONBLOCK` → opening a FIFO returns immediately instead of blocking on a writer. Both exist on
  *  macOS+Linux (the CI targets); default to 0 defensively so the module still loads if ever absent. */
-const O_READ_NO_SYMLINK =
-  fsConstants.O_RDONLY | (fsConstants.O_NOFOLLOW ?? 0) | (fsConstants.O_NONBLOCK ?? 0);
+const O_READ_NO_SYMLINK = fsConstants.O_RDONLY | (fsConstants.O_NOFOLLOW ?? 0) | (fsConstants.O_NONBLOCK ?? 0)
 
 /** The sharded, content-addressed value path for `H`: `<casPath>/<H[0:2]>/<H>` (D4). */
 function valuePath(casPath: CasPath, h: Hash): string {
-  return join(casPath, h.slice(0, 2), h);
+  return join(casPath, h.slice(0, 2), h)
 }
 
 /** The sidecar DIRECTORY: `dirname(casPath)` — OUTSIDE the `cas/` root (D4). Both sidecar families live
@@ -96,7 +95,7 @@ function valuePath(casPath: CasPath, h: Hash): string {
  *  Point `STAGING_BASE` at `'projection'` and mining reaches governed knowledge again — the mutant the
  *  suites kill (ADR-0008). */
 function sidecarDir(casPath: CasPath): string {
-  return dirname(casPath);
+  return dirname(casPath)
 }
 
 /** The commit CONTEXT for one sidecar family: where it lives, which family it is, the N11 watermark seam,
@@ -108,7 +107,7 @@ function ctxFor(
   put: (o: unknown) => unknown,
   trusted: SidecarTrust | undefined,
 ): SidecarCtx {
-  return { dir: sidecarDir(casPath), base, headSha, put, trusted };
+  return { dir: sidecarDir(casPath), base, headSha, put, trusted }
 }
 
 /**
@@ -135,20 +134,20 @@ export interface DiskStore extends StoreApi {
    *
    * `settled:false` is a VISIBLE refusal (contended, or an unreadable sidecar), never a silent no-op.
    */
-  commitProjection<T>(decide: (projection: StoreProjection) => CommitDecision<T>): CommitResult<T>;
+  commitProjection<T>(decide: (projection: StoreProjection) => CommitDecision<T>): CommitResult<T>
   /** The SAME primitive over the candidate sidecar (ADR-0008) — one implementation, different file, so the
    *  two cannot drift in atomicity any more than they can in totality. THE ONLY staging door: `mine` adopted
    *  it (`cli/src/mine.ts`), and the weaker `persistStaging`/`loadStaging` pair it replaced has been deleted
    *  (see the file header). A caller that wants only to READ the staged head passes a decision that returns
    *  no `next` — `commitStaging((p) => ({ out: p }))` — which reads the snapshot and writes nothing. */
-  commitStaging<T>(decide: (projection: StoreProjection) => CommitDecision<T>): CommitResult<T>;
+  commitStaging<T>(decide: (projection: StoreProjection) => CommitDecision<T>): CommitResult<T>
   /** Persist the whole `StoreProjection` durably (the mutable sidecar, NOT content-addressed).
    *  UNCONDITIONAL, therefore last-writer-wins BY DEFINITION — it carries no decision to re-run. It is
    *  atomic (no reader ever sees a prefix) but it is NOT the concurrency-safe door: a read-modify-write MUST
    *  go through `commitProjection`. THROWS rather than silently doing nothing on exhaustion. */
-  persistProjection(projection: StoreProjection): void;
+  persistProjection(projection: StoreProjection): void
   /** Read the durable `StoreProjection` back; `undefined` when none has been persisted yet. */
-  loadProjection(): StoreProjection | undefined;
+  loadProjection(): StoreProjection | undefined
 }
 
 /**
@@ -202,32 +201,32 @@ export function createDiskStore(
       // caller's. Reachable from an in-process embedder, which gate 0 of `governed-emit.ts` names as in the
       // threat model in as many words. Both serializations are inside the try now, so the door has ONE
       // answer for "these bytes cannot be stored": the honest empty handle.
-      let h: Hash;
-      let bytes: string;
+      let h: Hash
+      let bytes: string
       try {
         // canonicalize → hash via the sealed seam; the caller never supplies the key (KERNEL-1/2a).
-        h = id(obj);
+        h = id(obj)
         // the STORED bytes, produced BEFORE any directory is made — so a value that cannot serialize
         // leaves not one filesystem trace, exactly as a value that cannot canonicalize does.
-        bytes = JSON.stringify(obj);
+        bytes = JSON.stringify(obj)
         // `JSON.stringify` is NOT total either, and its OTHER failure mode is silent: it ANSWERS
         // `undefined` — no throw — for a bare `undefined`, a top-level function or a top-level symbol.
         // Meanwhile `canonicalForm` maps `undefined` to `null`, so `id` happily returns an address for it.
         // Storing that answer writes a value that cannot be parsed back to the object it addresses, i.e. a
         // durable row that reads as absent — the bricked row a refusal is strictly better than. Same sentinel.
-        if (typeof bytes !== 'string') return EMPTY;
+        if (typeof bytes !== "string") return EMPTY
       } catch {
         // malformed input (float / bigint / symbol / cyclic / an NFC key collision) → honest empty, write
         // nothing, never throw. This is the contract `index/cas.ts` already codes against (`if (h)`).
-        return EMPTY;
+        return EMPTY
       }
-      const path = valuePath(casPath, h);
+      const path = valuePath(casPath, h)
       // content-keyed dedup: equal content already on disk ⇒ store nothing new (idempotent).
       if (!existsSync(path)) {
-        mkdirSync(dirname(path), { recursive: true });
-        writeFileSync(path, bytes, 'utf8');
+        mkdirSync(dirname(path), { recursive: true })
+        writeFileSync(path, bytes, "utf8")
       }
-      return h;
+      return h
     },
 
     get(h: Hash): CasObject | undefined {
@@ -238,8 +237,8 @@ export function createDiskStore(
       // late to stop an unbounded read (a `../`-traversal to /dev/zero would hang + OOM). Belt-and-suspenders:
       // also require the resolved value path to stay INSIDE the CAS root (no escape), treating either failure
       // as a plain miss (`undefined`), never a filesystem touch.
-      if (!/^[0-9a-f]{64}$/.test(h)) return undefined;
-      const path = valuePath(casPath, h);
+      if (!/^[0-9a-f]{64}$/.test(h)) return undefined
+      const path = valuePath(casPath, h)
       // N14 (billy PoC — the residual symlink TOCTOU): N13 guarded with THREE separate path-based syscalls
       // (statSync → realpathSync → readFileSync), each re-resolving the symlink independently, so a concurrent
       // attacker who wins a sub-ms race could point `<cas>/<xx>/<H>` at a small in-CAS regular file during the
@@ -255,11 +254,11 @@ export function createDiskStore(
       //   (4) The realpathSync sandbox is KEPT for INTERMEDIATE components — O_NOFOLLOW only covers the FINAL
       //       component, so a symlinked intermediate dir `<xx>` still needs the cas-root containment check.
       // Total on every branch (→ undefined, never a throw/hang); the fd is ALWAYS closed (finally).
-      let fd: number | undefined;
+      let fd: number | undefined
       try {
-        fd = openSync(path, O_READ_NO_SYMLINK); // final-component symlink ⇒ ELOOP ⇒ throw ⇒ miss
-        const st = fstatSync(fd); // on the pinned inode, not a re-resolved path
-        if (!st.isFile() || st.size > MAX_CAS_BYTES) return undefined; // non-regular / oversized ⇒ never read
+        fd = openSync(path, O_READ_NO_SYMLINK) // final-component symlink ⇒ ELOOP ⇒ throw ⇒ miss
+        const st = fstatSync(fd) // on the pinned inode, not a re-resolved path
+        if (!st.isFile() || st.size > MAX_CAS_BYTES) return undefined // non-regular / oversized ⇒ never read
         // intermediate-component sandbox: the final component is provably NOT a symlink (O_NOFOLLOW opened it),
         // so any symlink resolved on the way to it is an intermediate dir — the bytes must still live inside cas.
         // Asked of `isContainedIn`, the ONE containment predicate (containment.ts), rather than the string
@@ -269,29 +268,29 @@ export function createDiskStore(
         // divergence and it was a FALSE MISS (a case-variant CAS root read as an escape, i.e. fail-closed, and
         // reachable only with write access inside the CAS root already). It changes for one reason: one question
         // deserves one answer, and the inode predicate has no false miss to explain.
-        if (!isContainedIn(casPath, path)) return undefined; // intermediate escapes ⇒ miss
-        const raw = readFileSync(fd, 'utf8'); // FROM THE fd — the inode is pinned, no re-resolve
-        let parsed: CasObject;
+        if (!isContainedIn(casPath, path)) return undefined // intermediate escapes ⇒ miss
+        const raw = readFileSync(fd, "utf8") // FROM THE fd — the inode is pinned, no re-resolve
+        let parsed: CasObject
         try {
-          parsed = JSON.parse(raw) as CasObject;
+          parsed = JSON.parse(raw) as CasObject
         } catch {
-          return undefined; // corrupt bytes
+          return undefined // corrupt bytes
         }
-        let rehash: Hash;
+        let rehash: Hash
         try {
-          rehash = id(parsed);
+          rehash = id(parsed)
         } catch {
-          return undefined;
+          return undefined
         }
         // tamper-safe: the mandatory re-hash-on-read — bytes whose `id !== key` read as absent (adapt-store-1).
-        if (rehash !== h) return undefined;
-        return parsed;
+        if (rehash !== h) return undefined
+        return parsed
       } catch {
-        return undefined; // ELOOP (final-component symlink) / ENOENT / any fs error ⇒ plain miss
+        return undefined // ELOOP (final-component symlink) / ENOENT / any fs error ⇒ plain miss
       } finally {
         if (fd !== undefined) {
           try {
-            closeSync(fd);
+            closeSync(fd)
           } catch {
             /* best-effort close; the miss/hit decision above is already made */
           }
@@ -302,28 +301,36 @@ export function createDiskStore(
     commitProjection<T>(decide: (projection: StoreProjection) => CommitDecision<T>): CommitResult<T> {
       // The CAS door handed to the commit is THIS store's own `put`, so the bytes a decision depends on are
       // durable before the generation that references them is linked into existence.
-      return commitSidecar(ctxFor(casPath, PROJECTION_BASE, headSha, (o) => store.put(o as CasObject), trusted), decide);
+      return commitSidecar(
+        ctxFor(casPath, PROJECTION_BASE, headSha, (o) => store.put(o as CasObject), trusted),
+        decide,
+      )
     },
 
     commitStaging<T>(decide: (projection: StoreProjection) => CommitDecision<T>): CommitResult<T> {
-      return commitSidecar(ctxFor(casPath, STAGING_BASE, headSha, (o) => store.put(o as CasObject), trusted), decide);
+      return commitSidecar(
+        ctxFor(casPath, STAGING_BASE, headSha, (o) => store.put(o as CasObject), trusted),
+        decide,
+      )
     },
 
     persistProjection(projection: StoreProjection): void {
-      persistSidecar(ctxFor(casPath, PROJECTION_BASE, headSha, (o) => store.put(o as CasObject), trusted), projection);
+      persistSidecar(
+        ctxFor(casPath, PROJECTION_BASE, headSha, (o) => store.put(o as CasObject), trusted),
+        projection,
+      )
     },
 
     loadProjection(): StoreProjection | undefined {
-      return readSidecarSet(sidecarDir(casPath), PROJECTION_BASE, trusted).projection;
+      return readSidecarSet(sidecarDir(casPath), PROJECTION_BASE, trusted).projection
     },
-
-  };
-  return store;
+  }
+  return store
 }
 
 /** Rehydrate the territory `StoreProjection` from a disk-backed store, minting nothing (ADAPT-STORE-3). */
 export function rehydrateProjection(store: DiskStore): StoreProjection {
   // pure read-back: reconstruct the projection from the durable sidecar, minting nothing — NEITHER
   // routeWrite/upsert NOR put. Missing sidecar ⇒ the empty projection (adapt-store-3, 12b).
-  return store.loadProjection() ?? emptyStore();
+  return store.loadProjection() ?? emptyStore()
 }

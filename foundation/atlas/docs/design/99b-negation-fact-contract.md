@@ -3,7 +3,7 @@
 **Status:** FROZEN (lead pre-work, 2026-08-10). Lands the **D3** leg of
 [ADR-0015](../adr/ADR-0015-grounding-tokens-are-typed-by-fact-shape.md) (owner-ratified 2026-08-09). This is
 the SECOND third of the [#99](../../README.md) product limit ("Atlas cannot ground a negative, a relation, or
-a transition") and the ADR names it *"the honesty core"* — the axis where the easy version ships a lie. The
+a transition") and the ADR names it _"the honesty core"_ — the axis where the easy version ships a lie. The
 [#99a RELATION contract](99a-relation-fact-contract.md) is the structural template (typed family, own identity
 mint, own door traversal, reused oracle where sound).
 
@@ -24,11 +24,12 @@ mint, own door traversal, reused oracle where sound).
 > Every surface cited below was READ, not assumed.
 
 > **Owner framing RATIFIED 2026-08-10 (the two product-honesty commitments):**
+>
 > 1. **SYMBOL-level, not file-level.** The owner REFUSED the file-level proxy ("no file depends on X's file")
->    the shipped doc→doc graph grounds today, and requires the real *"symbol f is never called"*. This adds a
+>    the shipped doc→doc graph grounds today, and requires the real _"symbol f is never called"_. This adds a
 >    PREREQUISITE (N0): a symbol-keyed reverse graph in `@atlas/index`.
 > 2. **Abstention emits an EXPLICIT `ABSTAINED` record** ("checked, scope not closed — cannot decide"), NOT a
->    silent fail-closed refuse. It must be *testable that it FIRES* (closes the #202 finding: 0/300 abstentions).
+>    silent fail-closed refuse. It must be _testable that it FIRES_ (closes the #202 finding: 0/300 abstentions).
 
 ## 0. The crux this contract exists to resolve
 
@@ -36,8 +37,8 @@ A negation is `¬∃` over a relation ("no unit **calls** X"). Closed-world nega
 **only if the negated relation was computed COMPLETELY over the scope** — an under-approximated graph makes every
 negative a lie. Atlas's shipped dependency graph IS an under-approximation (#189: cross-language/FFI targets are
 `unresolved`, SCIP `local` symbols are document-scoped), so an **unscoped** negative has no witness and the door
-**MUST refuse it**. The honest, groundable form is the **scoped positive**: *"within closed scope S under
-edge-model E, no caller of X was found"* — falsifiable, carrying its own completeness proof.
+**MUST refuse it**. The honest, groundable form is the **scoped positive**: _"within closed scope S under
+edge-model E, no caller of X was found"_ — falsifiable, carrying its own completeness proof.
 
 The completeness machinery **already exists and is measured, not theory** (grounded 2026-08-10):
 
@@ -49,16 +50,16 @@ The completeness machinery **already exists and is measured, not theory** (groun
   (reflective/FFI) boundary; `unresolved` is the incompleteness hole; `underApprox` folds both.
 - `IndexerPlan.version` (`adapter-io/src/scip.ts:26`) — the pinned extractor release = the edge-model version.
 
-**The one genuinely new grounding mechanism** is the *scope Merkle root* (§3): the shipped `subtreeHash` oracle is
+**The one genuinely new grounding mechanism** is the _scope Merkle root_ (§3): the shipped `subtreeHash` oracle is
 per-unit and is **monotone-blind to a unit ENTERING the scope** — a new caller of X inserted as a brand-new unit
 does not change any existing unit's hash. A negation's freshness MUST drift on insertion, so its token is a root
-over the *set* of in-scope units, not a per-unit hash. This is D3's "insertion-sensitivity a per-unit hash lacks",
+over the _set_ of in-scope units, not a per-unit hash. This is D3's "insertion-sensitivity a per-unit hash lacks",
 made concrete — the analogue of what `relationKey` was for #99a.
 
 ## 0a. THE PREREQUISITE (N0) — symbol-level reverse graph. Why the shipped `reverseClosure` is not enough.
 
 The shipped `dependencyAxis` keys endpoints by `docHash(path)` (`build.ts:170` `deriveEdges` → `dependencyAxis`),
-so `reverseClosure` answers at FILE granularity: *"which files depend on file F"*. The owner ratified SYMBOL
+so `reverseClosure` answers at FILE granularity: _"which files depend on file F"_. The owner ratified SYMBOL
 granularity, so N0 builds a **symbol-keyed** reverse graph over the SAME SCIP occurrences `deriveEdges` already
 reads. Grounded that the data suffices (2026-08-10): `deriveEdges` already builds `defs: Map<globalSymbol,
 docHash>` from `role==='definition'` occurrences and walks `role==='reference'` occurrences — it merely PROJECTS
@@ -82,38 +83,38 @@ not left as a reference model — the #99a lesson (relationsOf was dormant until
 ratification (it carries no `check`).
 
 ```ts
-export type GroundedFact = AdvisoryNode | PredicateNode | RelationNode | NegationNode;
+export type GroundedFact = AdvisoryNode | PredicateNode | RelationNode | NegationNode
 
 export interface NegationNode {
-  readonly kind: 'negation';
-  readonly id: NodeKey;                 // = negationKey (see §2); minted, never trusted from payload
-  readonly tier: Tier;
-  readonly relationKind: RelationKind;  // the NEGATED relation (reuse #99a's closed 'depends-on'|'calls')
-  readonly target: string;             // the location-free GLOBAL symbol key X the negative is ABOUT (¬∃ · →X)
-  readonly scope: string;              // the CLOSED scope S (a DIRECTORY key) the witness ranges over (identity leg)
-  readonly grounding: Grounding;        // ONE entry anchored at S; its subtreeHash IS the scope Merkle (see §3 — DECIDED)
-  readonly edgeModel: string;          // the IndexerPlan.version at emit — the ONE witness clause the oracle can't see (§3)
-  readonly freshness: KnowledgeFreshness;
-  readonly claims: readonly ClaimEntry[];
-  readonly authoring: 'NEGATED' | 'SUPERSEDED';
-  readonly obviousness?: ObviousnessScore;   // ADR-0012, additive, absent-tolerant
-  readonly authzScope?: string;             // F3 (WP-96-N) — the scope the DOOR's authz gate binds instead of the
-                                            // witness `scope`, when present. NEVER an identity leg (negationKey
-                                            // reads the triple only) and NEVER read by the abstention law. Absent
-                                            // ⇒ authz binds the witness `scope` (human negations UNCHANGED).
+  readonly kind: "negation"
+  readonly id: NodeKey // = negationKey (see §2); minted, never trusted from payload
+  readonly tier: Tier
+  readonly relationKind: RelationKind // the NEGATED relation (reuse #99a's closed 'depends-on'|'calls')
+  readonly target: string // the location-free GLOBAL symbol key X the negative is ABOUT (¬∃ · →X)
+  readonly scope: string // the CLOSED scope S (a DIRECTORY key) the witness ranges over (identity leg)
+  readonly grounding: Grounding // ONE entry anchored at S; its subtreeHash IS the scope Merkle (see §3 — DECIDED)
+  readonly edgeModel: string // the IndexerPlan.version at emit — the ONE witness clause the oracle can't see (§3)
+  readonly freshness: KnowledgeFreshness
+  readonly claims: readonly ClaimEntry[]
+  readonly authoring: "NEGATED" | "SUPERSEDED"
+  readonly obviousness?: ObviousnessScore // ADR-0012, additive, absent-tolerant
+  readonly authzScope?: string // F3 (WP-96-N) — the scope the DOOR's authz gate binds instead of the
+  // witness `scope`, when present. NEVER an identity leg (negationKey
+  // reads the triple only) and NEVER read by the abstention law. Absent
+  // ⇒ authz binds the witness `scope` (human negations UNCHANGED).
 }
 
 /** The explicit honest-abstention record (owner-ratified). NOT a GroundedFact — it asserts NOTHING about the
  *  world; it records that the door was ASKED a negative it could not soundly decide, and why. Durable + read-
  *  back so "abstention fired" is observable (closes #202). */
 export interface AbstainedRecord {
-  readonly kind: 'abstained';
-  readonly id: NodeKey;                 // = negationKey(the refused question) — same address the negation WOULD take
-  readonly relationKind: RelationKind;
-  readonly target: string;
-  readonly scope: string;
-  readonly reason: 'scope-open' | 'target-not-global' | 'scope-empty' | 'target-unresolvable';   // WHY it could not decide (closed set)
-  readonly witness: { readonly underApproxSources: readonly string[] };  // the unresolved/dynamic edges that opened S
+  readonly kind: "abstained"
+  readonly id: NodeKey // = negationKey(the refused question) — same address the negation WOULD take
+  readonly relationKind: RelationKind
+  readonly target: string
+  readonly scope: string
+  readonly reason: "scope-open" | "target-not-global" | "scope-empty" | "target-unresolvable" // WHY it could not decide (closed set)
+  readonly witness: { readonly underApproxSources: readonly string[] } // the unresolved/dynamic edges that opened S
 }
 ```
 
@@ -131,7 +132,7 @@ named `MalformedNegationError`):
  *  the preimage SET disjoint from relationKey's ({a,k,b}) and nodeKey's ({a,s[,c]}) — no cross-family address
  *  collision (the #103 discipline). Directed by construction (a negation is not symmetric). TOTAL over unknown:
  *  a non-string/empty target or scope, or an off-vocabulary relationKind, yields the refusal, never a raw throw. */
-export function negationKey(kind: RelationKind, target: string, scope: string): NodeKey;
+export function negationKey(kind: RelationKind, target: string, scope: string): NodeKey
 ```
 
 Refuses (`MalformedNegationError`, converted to a fail-closed verdict by the door) iff `target`/`scope` is not a
@@ -150,6 +151,7 @@ per-FILE hash — but a per-DIRECTORY hash is a BRANCH over named children, so i
 root D3 wanted. This was only visible by reading the rollup preimage law, which is why the freeze deferred it.
 
 **Consequence — the "genuinely new mechanism" collapses to near-free reuse.** Scope `S` is a DIRECTORY key.
+
 - clause **3** (scope Merkle) `==` `resolveCurrent(S)` — the directory's own folded `subtreeHash`. `driftDetect`
   already computes this. It **SUBSUMES clause 1** (a NEW caller of X is a new `reference` occurrence, which requires
   either a new file in S → dir hash changes, or an edit to an in-S file → its hash changes → dir hash changes — so
@@ -186,12 +188,13 @@ The two mechanical facts §3 said N1 must confirm were measured by the lead befo
   routes by `negationKey`, never `primaryAnchorId`, so it is unaffected.
 
 **The encoding, therefore:**
+
 - The negation's `grounding` = **ONE ordinary `GroundingEntry`** anchored at the scope directory: `anchor =
-  { kind: 'directory', qualifiedPath: S, subtreeHash: <S's folded hash at emit> }`. `isGrounded` passes (non-empty
+{ kind: 'directory', qualifiedPath: S, subtreeHash: <S's folded hash at emit> }`. `isGrounded` passes (non-empty
   subtreeHash); `driftDetect(grounding, axes)` rides **verbatim** — NO change to the sealed
   `grounding/src/{ground,drift}.ts`, NO new oracle logic. The only sacred touch is the one honest enum member above.
 - The door's negation freshness (N2) = `driftDetect(node.grounding, axes) === FRESH && node.edgeModel ===
-  currentEdgeModel`. A tiny door-side conjunct, not an oracle rewrite.
+currentEdgeModel`. A tiny door-side conjunct, not an oracle rewrite.
 
 ## 4. Family, routing, door traversal (knowledge/write + adapter-io/governed-emit)
 
@@ -203,7 +206,7 @@ The two mechanical facts §3 said N1 must confirm were measured by the lead befo
     GLOBAL symbol** (not `local`) — else the door emits an `AbstainedRecord{reason:'target-not-global'}`.
   - **gate 1 TRUTH DOOR — the abstention gate (the honesty core).** Compute `reverseCallers(target)` over the
     scope. If `underApprox` (scope open) ⇒ **do NOT admit the negation; emit `AbstainedRecord{reason:'scope-open',
-    witness}`** (durable, exit-legible, NOT a silent refusal). If **`target` does not RESOLVE** — a global symbol
+witness}`** (durable, exit-legible, NOT a silent refusal). If **`target` does not RESOLVE** — a global symbol
     with no in-index definition, a phantom (`resolves(target)==false`, #220) ⇒ **do NOT admit; emit
     `AbstainedRecord{reason:'target-unresolvable'}`**, because `reverseCallers` is `[]` for a phantom BY
     CONSTRUCTION, so "not called in S" would be VACUOUSLY true — a negative about a symbol Atlas cannot see.
@@ -219,6 +222,7 @@ The two mechanical facts §3 said N1 must confirm were measured by the lead befo
 ## 5. Read surface (cli + mcp) + the abstention read
 
 Mirror #99a's separate-command surface (owner-ratified divergence there; be CONSISTENT):
+
 - `relationsOf`-style fold `negationsOf(projection, scope?)` and `abstentionsOf(projection, scope?)` (derive-on-read
   over `family:'negation'` / `kind:'abstained'` rows).
 - CLI: `atlas negations <scope>` (grounded negatives) and the abstention MUST be visible — either a column/flag or
@@ -232,13 +236,13 @@ Mirror #99a's separate-command surface (owner-ratified divergence there; be CONS
 DAG: **N0 (index prereq) → N1 (knowledge core) → { N2 door, N3 read } → N4 e2e.** N0 is a hard predecessor (nothing
 grounds without the symbol-reverse graph); N1 freezes the shape+witness encoding; N2/N3 disjoint by owner-file.
 
-| WP | owner-files (disjoint) | dep | DoD |
-|---|---|---|---|
-| **N0** | index/src (new `symbol-reverse.ts` + `index.ts`), adapter-io wiring (`wire.ts`/`index-adapter.ts`), tests | — | `reverseCallers(globalSymbol): {callers, underApprox}` over the SAME occurrences `deriveEdges` reads; doc-level `dependencyAxis` UNCHANGED; WIRED (production caller in adapter-io, not a reference model); unit tests incl. an inserted-caller and an `underApprox` (unresolved/dynamic) case |
-| **N1** | contracts/src/struct.ts (SACRED — the `'directory'` enum member, §3(ii)) + genesis-output-probe.mjs ANCHOR_KINDS; knowledge/src/types.ts, negation-key.ts, router.ts, upsert.ts | N0 | `StructRef.kind` widened with `'directory'` (§3(ii) DECIDED) + probe Set + honest comment; `NegationNode`+`AbstainedRecord` in the model; `negationKey`+`MalformedNegationError`; `NodeFamily` widened; witness grounding = one `kind:'directory'` entry (§3); every exhaustive `.kind`/family switch handles 'negation'+'abstained'; the two `fact.kind === 'relation' ? undefined : predicateSlot` sites (governed-emit.ts:240, own-bands.ts:52, own-source.ts:264, cli/mine.ts:263) also treat 'negation' as slotless; `driftDetect` 4-clause freshness; unit tests incl. insertion-drift + scope-open-abstain |
-| **N2** | adapter-io/src/governed-emit*.ts (+reasons), the abstention gate | N1 | the door computes `reverseCallers`, ABSTAINS (emits `AbstainedRecord`) on `underApprox`, REJECTS on a real caller, ADMITS only the closed-empty case; scope authz on `scope`; the crux tested (a scope-open question ABSTAINS, not silently drops); mutation-scoped per re-routed gate |
-| **N3** | index/knowledge read folds, cli/src, mcp-server/src | N1 | `negationsOf`/`abstentionsOf`; `atlas negations` CLI + `atlas-negations` MCP; abstention VISIBLE on both; total (miss⇒empty); CLI≡MCP parity |
-| **N4** | e2e-blackbox (new sNN); reconcile/doctor negation-freshness wiring | N0-N3 | subprocess story: emit `(f, ¬calls, S)` grounded (f global, S closed) → `atlas negations S` finds it → INSERT a caller of f → the negation reads DRIFTED → a `¬calls` over an OPEN scope (unresolved/dynamic in S) EMITS AN ABSTAINED record, readable (proves abstention FIRES — closes #202). **MANDATORY (billy F1, deferred from N2): WIRE the §3 clause-4 `edgeModel` conjunct into the negation freshness recompute** — a negation's read/reconcile freshness = `driftDetect(grounding) FRESH ∧ edgeModel === currentEdgeModel`; today `edgeModel` is stamped at emit but read NOWHERE (`currentEdgeModel` does not exist), so a negation admitted under edge-model E1 is never re-flagged when an extractor upgrade newly resolves a caller of X with no byte change in S. N4 must wire the conjunct, surface `freshness` on `GroundedNegation`, and PROVE it with a killing e2e (bump the pinned extractor version → the negation reads DRIFTED). Until N4 lands this, a negation is sound only under a FIXED edge model (the N2 in-code comments state this honestly). Also probe billy F2's two assumed completeness bounds (a hole whose docHash has no spatial path; a caller in an unindexed language). |
+| WP     | owner-files (disjoint)                                                                                                                                                          | dep   | DoD                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **N0** | index/src (new `symbol-reverse.ts` + `index.ts`), adapter-io wiring (`wire.ts`/`index-adapter.ts`), tests                                                                       | —     | `reverseCallers(globalSymbol): {callers, underApprox}` over the SAME occurrences `deriveEdges` reads; doc-level `dependencyAxis` UNCHANGED; WIRED (production caller in adapter-io, not a reference model); unit tests incl. an inserted-caller and an `underApprox` (unresolved/dynamic) case                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| **N1** | contracts/src/struct.ts (SACRED — the `'directory'` enum member, §3(ii)) + genesis-output-probe.mjs ANCHOR_KINDS; knowledge/src/types.ts, negation-key.ts, router.ts, upsert.ts | N0    | `StructRef.kind` widened with `'directory'` (§3(ii) DECIDED) + probe Set + honest comment; `NegationNode`+`AbstainedRecord` in the model; `negationKey`+`MalformedNegationError`; `NodeFamily` widened; witness grounding = one `kind:'directory'` entry (§3); every exhaustive `.kind`/family switch handles 'negation'+'abstained'; the two `fact.kind === 'relation' ? undefined : predicateSlot` sites (governed-emit.ts:240, own-bands.ts:52, own-source.ts:264, cli/mine.ts:263) also treat 'negation' as slotless; `driftDetect` 4-clause freshness; unit tests incl. insertion-drift + scope-open-abstain                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| **N2** | adapter-io/src/governed-emit\*.ts (+reasons), the abstention gate                                                                                                               | N1    | the door computes `reverseCallers`, ABSTAINS (emits `AbstainedRecord`) on `underApprox`, REJECTS on a real caller, ADMITS only the closed-empty case; scope authz on `scope`; the crux tested (a scope-open question ABSTAINS, not silently drops); mutation-scoped per re-routed gate                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| **N3** | index/knowledge read folds, cli/src, mcp-server/src                                                                                                                             | N1    | `negationsOf`/`abstentionsOf`; `atlas negations` CLI + `atlas-negations` MCP; abstention VISIBLE on both; total (miss⇒empty); CLI≡MCP parity                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| **N4** | e2e-blackbox (new sNN); reconcile/doctor negation-freshness wiring                                                                                                              | N0-N3 | subprocess story: emit `(f, ¬calls, S)` grounded (f global, S closed) → `atlas negations S` finds it → INSERT a caller of f → the negation reads DRIFTED → a `¬calls` over an OPEN scope (unresolved/dynamic in S) EMITS AN ABSTAINED record, readable (proves abstention FIRES — closes #202). **MANDATORY (billy F1, deferred from N2): WIRE the §3 clause-4 `edgeModel` conjunct into the negation freshness recompute** — a negation's read/reconcile freshness = `driftDetect(grounding) FRESH ∧ edgeModel === currentEdgeModel`; today `edgeModel` is stamped at emit but read NOWHERE (`currentEdgeModel` does not exist), so a negation admitted under edge-model E1 is never re-flagged when an extractor upgrade newly resolves a caller of X with no byte change in S. N4 must wire the conjunct, surface `freshness` on `GroundedNegation`, and PROVE it with a killing e2e (bump the pinned extractor version → the negation reads DRIFTED). Until N4 lands this, a negation is sound only under a FIXED edge model (the N2 in-code comments state this honestly). Also probe billy F2's two assumed completeness bounds (a hole whose docHash has no spatial path; a caller in an unindexed language). |
 
 ## 7. Blast-radius / ratification (GAP-2 rite)
 

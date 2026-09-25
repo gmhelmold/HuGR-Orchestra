@@ -5,15 +5,15 @@
 // (Pack/PackInvariant/InjectionKind/Budget) is @atlas/contracts-owned — re-exported here, never redefined;
 // retrieval never imports @atlas/memory (cycle broken memory→retrieval). `ppr` is a stored field, not a call.
 
-import type { Hash, NodeKey, Tier, InjectionKind, Territory } from '@atlas/contracts';
-import type { Pack, PackInvariant } from '@atlas/contracts';
-import type { ToolSchema } from '@atlas/contracts';
-import type { GroundedFact } from '@atlas/knowledge';
-import type { IndexNode } from '@atlas/index';
+import type { Hash, NodeKey, Tier, InjectionKind, Territory } from "@atlas/contracts"
+import type { Pack, PackInvariant } from "@atlas/contracts"
+import type { ToolSchema } from "@atlas/contracts"
+import type { GroundedFact } from "@atlas/knowledge"
+import type { IndexNode } from "@atlas/index"
 
 // Re-export the contracts-owned injection vocabulary so consumers of the retrieval surface can pull the
 // whole dialect from the bare package root. Owned by @atlas/contracts — re-exported, NOT redefined.
-export type { Pack, PackInvariant, InjectionKind, Budget } from '@atlas/contracts';
+export type { Pack, PackInvariant, InjectionKind, Budget } from "@atlas/contracts"
 
 /**
  * [FLAG — reference names `Path`; no contracts `Path` brand exists] atlas-retrieval:167-172 types
@@ -21,26 +21,21 @@ export type { Pack, PackInvariant, InjectionKind, Budget } from '@atlas/contract
  * underlying `string` (the same discipline contracts applied to `Territory.owner` / `Territory.globs`).
  * NOT invented as a new exported brand. Flagged for a `Path` type to be sourced if one is ratified.
  */
-export type Path = string;
+export type Path = string
 
 /**
  * The scope-unit `level` vocabulary. Transcribed EXACTLY from atlas-retrieval:22 —
  *   `level ∈ crate|module|service|feature`. The list is closed here; an `epic` is deliberately NOT a
  * grounded `own` level (RETR-12: it is a project-memory goal, not a grounded node).
  */
-export type OwnLevel = 'crate' | 'module' | 'service' | 'feature';
+export type OwnLevel = "crate" | "module" | "service" | "feature"
 
 /**
  * The relation-kind partition (RETR-10). Transcribed from atlas-retrieval:33-41 / 120-126 — the closed
  * set of bands `relate()` partitions a closure into; `coChanged` is opt-in + labeled, never mixed into
  * the structural bands.
  */
-export type RelationKind =
-  | 'enclosing'
-  | 'dependents'
-  | 'dependencies'
-  | 'governing'
-  | 'coChanged';
+export type RelationKind = "enclosing" | "dependents" | "dependencies" | "governing" | "coChanged"
 
 /**
  * The handle behind an `own_<id>` tool (RETR-12). Transcribed EXACTLY from atlas-retrieval:22 —
@@ -56,9 +51,9 @@ export type RelationKind =
  * adding a grounding dep. If the owning WP needs the grounded `Grounding` type, add the dep first.
  */
 export interface OwnUnit {
-  readonly level: OwnLevel;
-  readonly id: string; // [PINNED] unit identity behind `own_<id>` — string (no brand sourced)
-  readonly grounding: unknown; // [PINNED unknown] groundedness handle — grounding not a dep, not imported
+  readonly level: OwnLevel
+  readonly id: string // [PINNED] unit identity behind `own_<id>` — string (no brand sourced)
+  readonly grounding: unknown // [PINNED unknown] groundedness handle — grounding not a dep, not imported
 }
 
 /**
@@ -69,13 +64,13 @@ export interface OwnUnit {
  *                   (RETR-11); NOT a call into genesis.
  */
 export interface RelatedFact {
-  readonly nodeId: NodeKey;
-  readonly relation: RelationKind;
-  readonly distance: number; // closure hops from the touched unit
-  readonly tier: Tier;
-  readonly ppr: number; // [LEAD-RATIFIED] stored precomputed importance (GEN-11) — a field, not a call
-  readonly claim: string;
-  readonly stale: boolean;
+  readonly nodeId: NodeKey
+  readonly relation: RelationKind
+  readonly distance: number // closure hops from the touched unit
+  readonly tier: Tier
+  readonly ppr: number // [LEAD-RATIFIED] stored precomputed importance (GEN-11) — a field, not a call
+  readonly claim: string
+  readonly stale: boolean
 }
 
 /**
@@ -86,11 +81,11 @@ export interface RelatedFact {
  * `rank` is transcribed as the exact frozen literal (the deterministic total rank of RETR-11).
  */
 export interface BoundMeta {
-  readonly maxHops: number;
-  readonly rank: 'tier-desc,ppr-desc,distance-asc,nodeKey-asc';
-  readonly total: number; // full pre-truncation count (honest)
-  readonly returned: number;
-  readonly truncated: boolean;
+  readonly maxHops: number
+  readonly rank: "tier-desc,ppr-desc,distance-asc,nodeKey-asc"
+  readonly total: number // full pre-truncation count (honest)
+  readonly returned: number
+  readonly truncated: boolean
 }
 
 /**
@@ -106,13 +101,13 @@ export interface BoundMeta {
  *   - `coChanged?`      — git-history co-change: deterministic but correlational; opt-in + labeled.
  */
 export interface RelationSet {
-  readonly unit: Path;
-  readonly enclosing: readonly PackInvariant[];
-  readonly dependents: readonly RelatedFact[];
-  readonly dependents_meta: BoundMeta;
-  readonly dependencies: readonly RelatedFact[];
-  readonly governing: readonly PackInvariant[];
-  readonly coChanged?: readonly RelatedFact[]; // opt-in, labeled; never mixed into the structural bands
+  readonly unit: Path
+  readonly enclosing: readonly PackInvariant[]
+  readonly dependents: readonly RelatedFact[]
+  readonly dependents_meta: BoundMeta
+  readonly dependencies: readonly RelatedFact[]
+  readonly governing: readonly PackInvariant[]
+  readonly coChanged?: readonly RelatedFact[] // opt-in, labeled; never mixed into the structural bands
 }
 
 /**
@@ -141,13 +136,13 @@ export interface RelationSet {
  * bag — NEVER a memory type. Flagged.
  */
 export interface OwnPack {
-  readonly unit: string; // [FLAG] a 1-line role line (atlas-retrieval:24), not an OwnUnit
-  readonly invariants: readonly PackInvariant[]; // top tier≥T1 of the unit, ranked, capped
-  readonly shape: { readonly contents: readonly NodeKey[]; readonly owner: string; readonly tier: Tier }; // [PINNED] terrain: contents + owner + tier (atlas-retrieval:26)
-  readonly edges: { readonly dependents: readonly NodeKey[]; readonly dependencies: readonly NodeKey[] }; // [PINNED] capped relate() blast summary (atlas-retrieval:27)
-  readonly gotchas: readonly GroundedFact[]; // [FLAG] gotcha/rationale slots — knowledge facts
-  readonly memory: unknown; // [FLAG] upward memory-owned pointers — NOT a memory type, never imported
-  readonly drill: OwnDrill;
+  readonly unit: string // [FLAG] a 1-line role line (atlas-retrieval:24), not an OwnUnit
+  readonly invariants: readonly PackInvariant[] // top tier≥T1 of the unit, ranked, capped
+  readonly shape: { readonly contents: readonly NodeKey[]; readonly owner: string; readonly tier: Tier } // [PINNED] terrain: contents + owner + tier (atlas-retrieval:26)
+  readonly edges: { readonly dependents: readonly NodeKey[]; readonly dependencies: readonly NodeKey[] } // [PINNED] capped relate() blast summary (atlas-retrieval:27)
+  readonly gotchas: readonly GroundedFact[] // [FLAG] gotcha/rationale slots — knowledge facts
+  readonly memory: unknown // [FLAG] upward memory-owned pointers — NOT a memory type, never imported
+  readonly drill: OwnDrill
 }
 
 /**
@@ -160,9 +155,9 @@ export interface OwnPack {
  * content-free affordance pointer pinned to `{ pull: string }` — a how-to-pull name/label only.
  */
 export interface OwnDrill {
-  readonly finer: readonly OwnUnit[]; // finer scope-units
-  readonly refresh: { readonly pull: string }; // [PINNED] re-poke affordance — how-to-pull pointer (D1)
-  readonly complement: { readonly pull: string }; // [PINNED] relate() affordance — how-to-pull pointer (D1)
+  readonly finer: readonly OwnUnit[] // finer scope-units
+  readonly refresh: { readonly pull: string } // [PINNED] re-poke affordance — how-to-pull pointer (D1)
+  readonly complement: { readonly pull: string } // [PINNED] relate() affordance — how-to-pull pointer (D1)
 }
 
 /**
@@ -173,9 +168,9 @@ export interface OwnDrill {
  * notice (under the pinned cap measure). Transcribed as `string`.
  */
 export interface Poke {
-  readonly scope: Path;
-  readonly pack: Pack;
-  readonly notice: string; // [FLAG] compact push notice ≤ ~150 tokens (pinned cap measure)
+  readonly scope: Path
+  readonly pack: Pack
+  readonly notice: string // [FLAG] compact push notice ≤ ~150 tokens (pinned cap measure)
 }
 
 /**
@@ -186,9 +181,9 @@ export interface Poke {
  * (oracle-pin theme #2: the ONE shared MCP tool-schema record, byte-identical with @atlas/tools).
  */
 export interface NodeTool {
-  readonly nodeId: NodeKey;
-  readonly scope: Path;
-  readonly schema: ToolSchema; // [PINNED] shared MCP tool-schema record (@atlas/contracts)
+  readonly nodeId: NodeKey
+  readonly scope: Path
+  readonly schema: ToolSchema // [PINNED] shared MCP tool-schema record (@atlas/contracts)
 }
 
 /**
@@ -203,10 +198,10 @@ export interface NodeTool {
  * `Pack.territory` key discipline in @atlas/contracts.
  */
 export interface OffAtlas {
-  readonly territory: string; // [FLAG] territory name / governance key
-  readonly served: number;
-  readonly offAtlasReads: number;
-  readonly offAtlasRate: number;
+  readonly territory: string // [FLAG] territory name / governance key
+  readonly served: number
+  readonly offAtlasReads: number
+  readonly offAtlasRate: number
 }
 
 // ── frozen API surface, co-located here (was ref/caps.ts · ref/bound.ts · ref/resolve.ts) ────────────
@@ -223,7 +218,7 @@ export interface OffAtlas {
 export interface CapsApi {
   /** Injection kind → its pinned sweet-spot cap in the pinned cap-measure unit (RETR-7). A pure lookup
    *  over the cap-table; deterministic. (method-tags-ret:67) */
-  capFor(kind: InjectionKind): number;
+  capFor(kind: InjectionKind): number
 }
 
 /**
@@ -243,7 +238,7 @@ export interface BoundApi {
     node: IndexNode,
     maxHops: number,
     K: number,
-  ): { readonly closure: readonly RelatedFact[]; readonly meta: BoundMeta };
+  ): { readonly closure: readonly RelatedFact[]; readonly meta: BoundMeta }
 }
 
 /**
@@ -254,5 +249,5 @@ export interface BoundApi {
 export interface ResolveApi {
   /** Scope (path) → the covering territory/-ies, resolved by the index (§3.5). Pure + total (miss ⇒
    *  empty, no throw — RETR-9); byte-identical for equal input (RETR-1). (atlas-retrieval:167) */
-  resolve(scope: Path): readonly Territory[];
+  resolve(scope: Path): readonly Territory[]
 }

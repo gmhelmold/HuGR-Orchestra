@@ -20,7 +20,7 @@ because keeping it in a private probe would leave the project's only other measu
 undisclosed. Read the two scopes separately; there is no headline that spans them.
 
 **Not measured here:** retrieval quality, the versioned store and its travel-by-reproof, the
-governance ring, the MCP and CLI transports *as surfaces* (two CLI commands — `derive-relations` in §2
+governance ring, the MCP and CLI transports _as surfaces_ (two CLI commands — `derive-relations` in §2
 and `test-vacuity` in §6 — are used as measurement instruments; their ergonomics, parity and transport
 behaviour are not what is scored). §7 drives its own CLI door end to end, but scores the gates behind it,
 never the surface. Also not measured: the authoring planners. Those are Atlas the system;
@@ -31,12 +31,12 @@ a score for Atlas as a product.
 
 Facts enter under one of two seals, and they are measured differently:
 
-| seal | what it means | how it is measured |
-| --- | --- | --- |
-| **`proven`** | a mechanical witness exists; the admission gate *refuses* anything it cannot prove | judge-free mutation bench against an independent `tsc` oracle — no LLM anywhere in the label or scoring path |
-| **`justified`** (advisory) | LLM-mined prose, grounded in cited bytes, never marked proven | blind LLM panel adjudication + planted subject-tests + an out-of-instrument fourth seat |
+| seal                       | what it means                                                                      | how it is measured                                                                                           |
+| -------------------------- | ---------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| **`proven`**               | a mechanical witness exists; the admission gate _refuses_ anything it cannot prove | judge-free mutation bench against an independent `tsc` oracle — no LLM anywhere in the label or scoring path |
+| **`justified`** (advisory) | LLM-mined prose, grounded in cited bytes, never marked proven                      | blind LLM panel adjudication + planted subject-tests + an out-of-instrument fourth seat                      |
 
-The design bet: *grow the proven tier, keep the advisory tier honest about being advisory.*
+The design bet: _grow the proven tier, keep the advisory tier honest about being advisory._
 
 ---
 
@@ -47,11 +47,11 @@ the label comes from an independent `ts.createProgram` oracle, never from the ga
 Operating build state (`tsc -b` before `scip-typescript index`).
 Artifact: [`harness/probes/adjudicate/calibration-report.a4-planted.md`](harness/probes/adjudicate/calibration-report.a4-planted.md) (+ `.json`).
 
-| arm | false admits | recall (true, groundable) |
-| --- | --- | --- |
-| `dependency` | **0 / 23,702** | 163/163 = 100% |
-| `count` | **0 / 163** | 163/163 = 100% |
-| `negation` | **0 / 163** | 428/1200 = 35.7% |
+| arm          | false admits   | recall (true, groundable) |
+| ------------ | -------------- | ------------------------- |
+| `dependency` | **0 / 23,702** | 163/163 = 100%            |
+| `count`      | **0 / 163**    | 163/163 = 100%            |
+| `negation`   | **0 / 163**    | 428/1200 = 35.7%          |
 
 - Figures are reported under **two named definitions**. Definition A is the gate's own
   documented predicate (witnessed reference-existence): 0-false on all three arms.
@@ -66,15 +66,15 @@ Artifact: [`harness/probes/adjudicate/calibration-report.a4-planted.md`](harness
   not guaranteed to rise: rows already abstained by the upstream gates abstain identically under
   both doors, so this would legitimately measure 0 — and fail — if gate (c) were not the leg
   carrying the soundness. The older diagnostic (switching off the #99 opaque gate) measures 0 on
-  this build state and is *not* the witness here; it is load-bearing only on the dist-absent
+  this build state and is _not_ the witness here; it is load-bearing only on the dist-absent
   misbuild, where it false-admits 132/163. Both are printed. That re-run also measures a larger
   planted pool than the table above (204 FALSE rows vs. the artifact's 163) — the door is 0-false
   on both. Artifact:
   [`negation-nonvacuity-recheck.json`](harness/probes/adjudicate/negation-nonvacuity-recheck.json).
-- **What the `dependency` / `count` / `relation` zeros range over** (this does *not* apply to
+- **What the `dependency` / `count` / `relation` zeros range over** (this does _not_ apply to
   negation, which has no advisory tier): they are the **proven-sealed** admits. Since the
   abstain⇒justified inversion, the `justified` advisory tier deliberately admits a grounded claim
-  the oracle cannot refute — that is the two-tier design, not a leak — so the bench's *raw* per-arm
+  the oracle cannot refute — that is the two-tier design, not a leak — so the bench's _raw_ per-arm
   admit rates on those three arms are near-total and carry no soundness claim. Soundness is
   asserted only where the door stamped `proven`.
 - The legacy `relation` arm states **no truth predicate** (it admits all 452/452 by design)
@@ -86,12 +86,12 @@ Artifact: [`harness/probes/adjudicate/calibration-report.a4-planted.md`](harness
 on a third-party repo, zod v3.23.8. Both sides mechanical; zero LLM tokens.
 Artifact: [`harness/probes/adjudicate/xrepo-zod-sota-comparator.json`](harness/probes/adjudicate/xrepo-zod-sota-comparator.json).
 
-| | edges |
-| --- | --- |
-| Atlas proven | 231 |
-| madge | 129 |
-| intersection | **129 — Atlas misses nothing madge finds (100% recall vs. madge)** |
-| Atlas-only | 102 — semantic symbol→definition edges through re-export barrels, which an import-statement graph structurally cannot represent |
+|              | edges                                                                                                                           |
+| ------------ | ------------------------------------------------------------------------------------------------------------------------------- |
+| Atlas proven | 231                                                                                                                             |
+| madge        | 129                                                                                                                             |
+| intersection | **129 — Atlas misses nothing madge finds (100% recall vs. madge)**                                                              |
+| Atlas-only   | 102 — semantic symbol→definition edges through re-export barrels, which an import-statement graph structurally cannot represent |
 
 The definitional gap (semantic vs. syntactic) is the finding. Caveat as recorded in the
 artifact: the barrel-piercing mechanism was verified and sampled; not all 102 extra edges
@@ -102,10 +102,10 @@ were individually hand-traced.
 Frozen v3 propose prompt, capture/replay, proposer `claude-sonnet-5`, three blind
 `claude-sonnet-5` judges, majority-of-3, full grid, no gaps.
 
-| run | precision | 95% CI (Wilson) | artifact |
-| --- | --- | --- | --- |
-| Atlas-on-Atlas, 657 facts | **93.8%** (616/657) | [91.6, 95.4] | [`a1-dogfood-fullrepo.json`](harness/probes/adjudicate/a1-dogfood-fullrepo.json) |
-| Cross-repo (zod v3.23.8), 76 facts | **86.8%** (66/76) | [77.4, 92.7] | [`xrepo-zod-a1.json`](harness/probes/adjudicate/xrepo-zod-a1.json) |
+| run                                | precision           | 95% CI (Wilson) | artifact                                                                         |
+| ---------------------------------- | ------------------- | --------------- | -------------------------------------------------------------------------------- |
+| Atlas-on-Atlas, 657 facts          | **93.8%** (616/657) | [91.6, 95.4]    | [`a1-dogfood-fullrepo.json`](harness/probes/adjudicate/a1-dogfood-fullrepo.json) |
+| Cross-repo (zod v3.23.8), 76 facts | **86.8%** (66/76)   | [77.4, 92.7]    | [`xrepo-zod-a1.json`](harness/probes/adjudicate/xrepo-zod-a1.json)               |
 
 - The ~7-point drop off home turf is real proposer hallucination, not judge noise
   (67/76 unanimous; two FALSEs mechanically verified — one inverted boolean, one test that
@@ -138,7 +138,7 @@ teeth: [`harness/probes/a2-staleness-teeth.mjs`](harness/probes/a2-staleness-tee
   normalization — where dumb checkers false-alarm and the oracle does not.
 - Deeper tier: `A2r` re-proof ([`a2r-reproof.mjs`](harness/probes/a2r-reproof.mjs)) drives
   the shipped `reverifyFact` over a scratch worktree with real edits and a fresh build —
-  staleness answered by *re-proof*, not by timestamp.
+  staleness answered by _re-proof_, not by timestamp.
 
 ## 5 — A3: cost
 
@@ -162,7 +162,7 @@ and `no-assertion-in-test` (~3). The other two idioms are **not getting shapes o
 that are findings rather than backlog:
 
 - `unasserted-parse-call` (~2) is **subsumed** — a discarded call with no wrapping assertion already yields
-  `no-assertion-in-test`. And the claims themselves say the test *does* check something ("it only checks
+  `no-assertion-in-test`. And the claims themselves say the test _does_ check something ("it only checks
   that parsing does not throw"), so a shape asserting vacuity over it would publish a false characterisation.
 - `commented-out-tests` (~2) is **half subsumed** (the one executing no-op test is proven by
   `no-assertion-in-test`) and half **outside the identity model**: a commented-out test has no AST node, so
@@ -183,17 +183,17 @@ Instrument: [`harness/probes/m1-memory-ring.mjs`](harness/probes/m1-memory-ring.
 `gitleaks` on `PATH` — and reads only what a user reads: the exit code and the rendered verdict.
 
 **Why not the unit suites.** `packages/*/test` proves each memory piece against injected fakes, which is
-how the pre-write scanner shipped refusing *every* write (#290): every `memory-emit` test injected a fake
+how the pre-write scanner shipped refusing _every_ write (#290): every `memory-emit` test injected a fake
 scanner, so the one argv the product actually runs was executed by nothing. Re-running those suites would
 have reproduced the blind spot at greater cost.
 
-| axis | what it decides | result | its control |
-| --- | --- | --- | --- |
-| M1 | a memory written by one process is read back by another | 3/3 | recall *before* any write answers empty |
-| M2 | the 7-gate write chain, per named refusal | 14/14 | **a clean record is ADMITTED** |
-| M3 | MEM-1 owner scoping (no cross-seat leak) | 3/3 | the two seats hold **different** counts |
-| M4 | MEM-4 consultable-not-injected | 4/4 | the header counter tracks writes at all |
-| M5 | type discipline at the JSON boundary | 7/7 | the same shape, correctly typed, is admitted |
+| axis | what it decides                                         | result | its control                                  |
+| ---- | ------------------------------------------------------- | ------ | -------------------------------------------- |
+| M1   | a memory written by one process is read back by another | 3/3    | recall _before_ any write answers empty      |
+| M2   | the 7-gate write chain, per named refusal               | 14/14  | **a clean record is ADMITTED**               |
+| M3   | MEM-1 owner scoping (no cross-seat leak)                | 3/3    | the two seats hold **different** counts      |
+| M4   | MEM-4 consultable-not-injected                          | 4/4    | the header counter tracks writes at all      |
+| M5   | type discipline at the JSON boundary                    | 7/7    | the same shape, correctly typed, is admitted |
 
 **8/8 planted violations refused BY NAME**, each at exit 2. The oracle is not "it refused" — a door that
 answered `undetermined-kind` to everything would refuse 100% of them and be wrong on seven.
@@ -204,12 +204,12 @@ asymmetric counts, "no leak" is unfalsifiable, because 1 vs 1 leaks invisibly.
 
 ### Mutations, against the shipped `dist`
 
-| mutation | outcome |
-| --- | --- |
-| MEM-1 owner scoping removed | **killed** — M3 3/3 → 0/3 |
-| MEM-9 scanner gate removed | **killed** — M2 `scanner-blocked` red |
-| MEM-5 type loop removed | **killed** — M2 `template-invalid` red |
-| MEM-4 kind filter removed | **survives this surface**, killed at the door level |
+| mutation                    | outcome                                             |
+| --------------------------- | --------------------------------------------------- |
+| MEM-1 owner scoping removed | **killed** — M3 3/3 → 0/3                           |
+| MEM-9 scanner gate removed  | **killed** — M2 `scanner-blocked` red               |
+| MEM-5 type loop removed     | **killed** — M2 `template-invalid` red              |
+| MEM-4 kind filter removed   | **survives this surface**, killed at the door level |
 
 The last row is reported in both directions rather than dropped once a killer was found. The only CLI door
 onto the ranked slab renders `injected` alone, and the leak lands in `evicted`; `projectSlab()` exposes it,
@@ -222,14 +222,14 @@ Recorded because they are the reason to trust the rest of the numbers, not despi
 survived a mutation pass; neither was going to be caught by reading the code.
 
 1. **A broken oracle.** The gate-name check tested the whole of stdout — and every refusal's `next:` line
-   *enumerates* all nine gate names as guidance. It reported `named=true` on writes that **exited 0**.
+   _enumerates_ all nine gate names as guidance. It reported `named=true` on writes that **exited 0**.
 2. **A vacuous assertion.** M4 asserted a task id was absent from the header's stdout. It passed under a
-   mutation that injected every kind, because the header renders a *count* and never entry text.
+   mutation that injected every kind, because the header renders a _count_ and never entry text.
 
 ### What this axis does NOT measure
 
 Retrieval quality, ranking usefulness, the MCP transport (CLI only), the Awareness/Orientation slab
-*content* (their doors are exercised for liveness, not for correctness of what they derive), and anything
+_content_ (their doors are exercised for liveness, not for correctness of what they derive), and anything
 about how well the memory serves a real session. It scores whether the declared gates hold on the shipped
 binary — nothing about whether the memory is any good.
 

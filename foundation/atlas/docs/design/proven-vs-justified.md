@@ -16,22 +16,22 @@ how does admit decide `proven` vs `justified` **mechanically, without re-derivin
 
 A proof is **hard to find, easy to check**. Split the labour on that seam:
 
-- **The model does the hard part**: find the evidence AND cast the claim into a *typed witness form* —
+- **The model does the hard part**: find the evidence AND cast the claim into a _typed witness form_ —
   a shape whose truth is decidable over the cited bytes.
 - **The harness does the easy part**: run that form's small, deterministic **checker** over the
-  carried witness + the source bytes. It validates *the supplied witness*, it does not re-derive the
+  carried witness + the source bytes. It validates _the supplied witness_, it does not re-derive the
   fact.
 
 Concretely, a fact may carry an optional **typed witness** drawn from a small **registry of decidable
 witness forms**. Each form is a tiny mechanical checker binding a claim-shape to a check:
 
-| witness form | claim shape | the checker (deterministic, over cited bytes) |
-|---|---|---|
-| `dependency` | "code under S references global symbol T" | symbol index resolves T and a caller of T lies under S (the existing `verifyDependency`, now just one form) |
-| `type` | "X has type / never returns null / …" | `tsc` confirms over the cited unit |
-| `throws-on` | "F throws when C" | AST: the cited span is a `throw` reachable under guard C |
-| `returns-const` | "F returns literal K" | AST: the cited return is literal K |
-| `log-emits` | "path P logs L" | the cited span is a log call whose argument matches L |
+| witness form    | claim shape                               | the checker (deterministic, over cited bytes)                                                               |
+| --------------- | ----------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| `dependency`    | "code under S references global symbol T" | symbol index resolves T and a caller of T lies under S (the existing `verifyDependency`, now just one form) |
+| `type`          | "X has type / never returns null / …"     | `tsc` confirms over the cited unit                                                                          |
+| `throws-on`     | "F throws when C"                         | AST: the cited span is a `throw` reachable under guard C                                                    |
+| `returns-const` | "F returns literal K"                     | AST: the cited return is literal K                                                                          |
+| `log-emits`     | "path P logs L"                           | the cited span is a log call whose argument matches L                                                       |
 
 On admit, per fact:
 
@@ -50,13 +50,13 @@ the fact still lands as `justified` if grounded. That is the exact inversion of 
 ## Why this is not the old sound gate (and not re-derivation)
 
 - **Old**: the oracle re-derives the fact; abstain ⇒ **DROP**. Truth is gated on a machine agreeing.
-- **New**: the model supplies a witness in a checkable form; the checker validates *that witness*;
+- **New**: the model supplies a witness in a checkable form; the checker validates _that witness_;
   no witness ⇒ still admitted as `justified`. Admission is gated on **grounding**, and the **seal
   reflects proof-strength**, not admission.
 
 The checker never judges free prose and never re-derives a semantic claim. `proven` is reachable
-**only** when the claim is expressible in a typed witness form — which is the model's *choice and
-work*, not a mandatory tollgate. Free-prose claims are first-class and simply land `justified`.
+**only** when the claim is expressible in a typed witness form — which is the model's _choice and
+work_, not a mandatory tollgate. Free-prose claims are first-class and simply land `justified`.
 
 ## What each seal honestly means to a reader
 
@@ -64,7 +64,7 @@ work*, not a mandatory tollgate. Free-prose claims are first-class and simply la
   grounds. Narrow by nature (the registry is small), and often also machine-derivable — that is fine:
   `proven` is the honest floor, never the product's value claim.
 - **`justified`** — grounded (span re-derives at source@sha), the model self-refuted it against the
-  bytes, and it is stated as a contestable reading. This is where the *valuable* semantic facts live.
+  bytes, and it is stated as a contestable reading. This is where the _valuable_ semantic facts live.
   Confidence is raised — never converted to `proven` — by model-independent means (independent-model
   ensemble agreement, human ratification, survival on re-read); those are the `validated` lever, kept
   distinct from `proven`.
@@ -72,7 +72,7 @@ work*, not a mandatory tollgate. Free-prose claims are first-class and simply la
 ## What this reuses vs discards from the shipped code
 
 - **Reuses (as form-checkers, not gates)**: `verifyDependency` / `verifyCount` / `type` oracle become
-  entries in the witness-form registry — run to *award* `proven`, never to *drop*. The witness /
+  entries in the witness-form registry — run to _award_ `proven`, never to _drop_. The witness /
   grounding carrier (`admit-harness.ts` witness legs, `reverify-store`) stays as the proof carrier.
 - **Discards**: the mandatory `oracle !== 'proven' ⇒ drop` lines (`admit-harness.ts:256,271`), the
   closed-world negation door (F2), and `seal:'proven'`-means-"oracle-agreed" semantics.

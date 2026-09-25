@@ -15,8 +15,8 @@
 //    fields on the returned view: `TerritoryView` (types.ts) has no `family`/`invariants` leg. The
 //    skeleton carries ONLY the frozen territory fields; nothing authored can leak.
 
-import type { NodeKey } from '@atlas/contracts';
-import type { TerritoryView } from '../types.js';
+import type { NodeKey } from "@atlas/contracts"
+import type { TerritoryView } from "../types.js"
 
 // ── frozen InitApi surface, co-located here (was ref/init.ts) ─────────────────────────────────────────
 
@@ -29,7 +29,7 @@ export interface InitApi {
    *  structural tree snapshot (a LOWER-layer artifact); transcribed as `unknown`, flagged.
    *  [FLAG — return carries no `invariants`] the zero-invariant property is a by-construction guarantee of
    *  the emitter, not a field on `TerritoryView`. Flagged. */
-  init(tree: unknown): readonly TerritoryView[];
+  init(tree: unknown): readonly TerritoryView[]
 }
 
 /**
@@ -37,23 +37,19 @@ export interface InitApi {
  * `tree` arg is `unknown`, downward-owned) — the minimal skeleton inputs, no authored content.
  */
 export interface TerritorySeed {
-  readonly path: string;
-  readonly owner: string;
-  readonly files: readonly string[];
-  readonly blastRadius?: readonly NodeKey[];
+  readonly path: string
+  readonly owner: string
+  readonly files: readonly string[]
+  readonly blastRadius?: readonly NodeKey[]
 }
 
 /** The structural tree snapshot the `$0`-LLM move-in narrows `unknown` to. */
 export interface StructuralTree {
-  readonly territories: readonly TerritorySeed[];
+  readonly territories: readonly TerritorySeed[]
 }
 
 function isTree(t: unknown): t is StructuralTree {
-  return (
-    typeof t === 'object' &&
-    t !== null &&
-    Array.isArray((t as { territories?: unknown }).territories)
-  );
+  return typeof t === "object" && t !== null && Array.isArray((t as { territories?: unknown }).territories)
 }
 
 function toTerritory(seed: TerritorySeed): TerritoryView {
@@ -62,10 +58,10 @@ function toTerritory(seed: TerritorySeed): TerritoryView {
   return {
     path: seed.path,
     owner: seed.owner,
-    tier: 'T2',
+    tier: "T2",
     files: seed.files,
     blastRadius: seed.blastRadius ?? [],
-  };
+  }
 }
 
 /**
@@ -73,9 +69,9 @@ function toTerritory(seed: TerritorySeed): TerritoryView {
  * `tier=T2` (advisory / zero-invariant by construction). Pure + total — a non-tree input yields `[]`.
  */
 export function init(tree: unknown): readonly TerritoryView[] {
-  if (!isTree(tree)) return [];
-  return tree.territories.map(toTerritory);
+  if (!isTree(tree)) return []
+  return tree.territories.map(toTerritory)
 }
 
 /** The frozen-`InitApi` binding (conformance handle). */
-export const initializer: InitApi = { init };
+export const initializer: InitApi = { init }

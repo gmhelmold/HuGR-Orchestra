@@ -10,50 +10,49 @@
 // The template's own per-clause justification lives inside it as an HTML comment and is STRIPPED here, so
 // the reasoning is versioned next to the text without being sent to the model.
 
-import { closeSync, constants as fsConstants, existsSync, fstatSync, openSync, readFileSync } from 'node:fs';
-import { dirname, isAbsolute, join, relative, resolve } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { closeSync, constants as fsConstants, existsSync, fstatSync, openSync, readFileSync } from "node:fs"
+import { dirname, isAbsolute, join, relative, resolve } from "node:path"
+import { fileURLToPath } from "node:url"
 
-import { id, defaultEncoder } from '@atlas/kernel';
-import { bindSpan } from '@atlas/grounding';
-import type { GroundingSpan } from '@atlas/grounding';
-import type { Hash, StructRef } from '@atlas/contracts';
-import type { Candidate } from '@atlas/genesis';
+import { id, defaultEncoder } from "@atlas/kernel"
+import { bindSpan } from "@atlas/grounding"
+import type { GroundingSpan } from "@atlas/grounding"
+import type { Hash, StructRef } from "@atlas/contracts"
+import type { Candidate } from "@atlas/genesis"
 
-import { isContainedIn } from './containment.js';
+import { isContainedIn } from "./containment.js"
 
 /** The read-open flags of the N14 door (`store.ts`), which this reader now mirrors. `O_NOFOLLOW` ⇒ a symlink
  *  AT the final component fails to open (ELOOP) atomically; `O_NONBLOCK` ⇒ opening a FIFO returns instead of
  *  blocking on a writer. Declared here rather than exported from `store.ts`: the flag set is three constants,
  *  and widening a store's public surface to share them would cost more than restating them. */
-const O_READ_NO_SYMLINK =
-  fsConstants.O_RDONLY | (fsConstants.O_NOFOLLOW ?? 0) | (fsConstants.O_NONBLOCK ?? 0);
+const O_READ_NO_SYMLINK = fsConstants.O_RDONLY | (fsConstants.O_NOFOLLOW ?? 0) | (fsConstants.O_NONBLOCK ?? 0)
 
 /** Why a prompt could not be built. Thrown, never papered over — see `NO_SOURCE` in particular. */
 export type PromptRefusal =
-  | 'template-unreadable'
-  | 'template-has-no-source-slot' //   a template that never interpolates the code would send an empty ask
-  | 'template-has-no-related-slot' //  a `related` reader was injected but the template omits {{RELATED}}
-  | 'template-has-no-candidates-slot' // a `candidates` reader was injected but the template omits {{CANDIDATES}}
-  | 'source-unreadable'; //            sending a source-less prompt is what invites a fabricated fact
+  | "template-unreadable"
+  | "template-has-no-source-slot" //   a template that never interpolates the code would send an empty ask
+  | "template-has-no-related-slot" //  a `related` reader was injected but the template omits {{RELATED}}
+  | "template-has-no-candidates-slot" // a `candidates` reader was injected but the template omits {{CANDIDATES}}
+  | "source-unreadable" //            sending a source-less prompt is what invites a fabricated fact
 
 export class PromptError extends Error {
   constructor(
     readonly refusal: PromptRefusal,
     message: string,
   ) {
-    super(message);
-    this.name = 'PromptError';
+    super(message)
+    this.name = "PromptError"
   }
 }
 
 /** The four slots the template may interpolate. `{{SOURCE}}` is MANDATORY (see `assertUsable`). `{{RELATED}}`
  *  is MANDATORY ONLY when an enriched template is used (a `related` reader is injected). */
-const SLOT_SOURCE = '{{SOURCE}}';
-const SLOT_PATH = '{{PATH}}';
-const SLOT_UNIT = '{{UNIT}}';
-const SLOT_RELATED = '{{RELATED}}';
-const SLOT_CANDIDATES = '{{CANDIDATES}}';
+const SLOT_SOURCE = "{{SOURCE}}"
+const SLOT_PATH = "{{PATH}}"
+const SLOT_UNIT = "{{UNIT}}"
+const SLOT_RELATED = "{{RELATED}}"
+const SLOT_CANDIDATES = "{{CANDIDATES}}"
 
 /**
  * The shipped template, resolved from the PACKAGE ROOT — the nearest ancestor holding a `package.json`.
@@ -67,14 +66,14 @@ const SLOT_CANDIDATES = '{{CANDIDATES}}';
  * No cwd is consulted, so the CLI, the MCP server and a test all resolve the same file.
  */
 export function shippedTemplatePath(): string {
-  return join(packageRoot(dirname(fileURLToPath(import.meta.url))), 'prompts', 'propose.md');
+  return join(packageRoot(dirname(fileURLToPath(import.meta.url))), "prompts", "propose.md")
 }
 
 /** The ENRICHED proposal template (opt-in ENRICH arm) — resolved the same package-root way as
  *  `shippedTemplatePath` (see its note on why not module-relative). Carries the `{{RELATED}}` slot the
  *  bare template omits; used only when a `SiblingReader` is injected into `createPromptFactory`. */
 export function shippedEnrichedTemplatePath(): string {
-  return join(packageRoot(dirname(fileURLToPath(import.meta.url))), 'prompts', 'propose-enriched.md');
+  return join(packageRoot(dirname(fileURLToPath(import.meta.url))), "prompts", "propose-enriched.md")
 }
 
 /** The DEPENDENCY proposal template (ADR-0017 dependency slot, opt-in `ATLAS_MINE_SLOT=dependency` arm) —
@@ -82,7 +81,7 @@ export function shippedEnrichedTemplatePath(): string {
  *  <target> @ <scope>` line (or `NO-FACT`); paired with `dependencyClaimParser` (llm.ts). Uses only
  *  `{{PATH}}`/`{{UNIT}}`/`{{SOURCE}}` — no `{{RELATED}}` — so it loads with no sibling reader injected. */
 export function shippedDependencyTemplatePath(): string {
-  return join(packageRoot(dirname(fileURLToPath(import.meta.url))), 'prompts', 'propose-dependency.md');
+  return join(packageRoot(dirname(fileURLToPath(import.meta.url))), "prompts", "propose-dependency.md")
 }
 
 /** The COUNT proposal template (#196c cardinality slot, opt-in `ATLAS_MINE_SLOT=count` arm) — resolved the same
@@ -90,7 +89,7 @@ export function shippedDependencyTemplatePath(): string {
  *  name SELECTED from the closed `{{CANDIDATES}}` list of the unit's externally-called exports; paired with
  *  `makeCountClaimParser` (llm.ts). Uses `{{PATH}}`/`{{UNIT}}`/`{{SOURCE}}`/`{{CANDIDATES}}` — no `{{RELATED}}`. */
 export function shippedCountTemplatePath(): string {
-  return join(packageRoot(dirname(fileURLToPath(import.meta.url))), 'prompts', 'propose-count.md');
+  return join(packageRoot(dirname(fileURLToPath(import.meta.url))), "prompts", "propose-count.md")
 }
 
 /** The DEFINITION proposal template (#196d definition slot, opt-in `ATLAS_MINE_SLOT=definition` arm) — resolved
@@ -98,7 +97,7 @@ export function shippedCountTemplatePath(): string {
  *  `NO-FACT`), the name SELECTED from the closed `{{CANDIDATES}}` list of the unit's own definitions; paired with
  *  `makeDefinitionClaimParser` (llm.ts). Uses `{{PATH}}`/`{{UNIT}}`/`{{SOURCE}}`/`{{CANDIDATES}}` — no `{{RELATED}}`. */
 export function shippedDefinitionTemplatePath(): string {
-  return join(packageRoot(dirname(fileURLToPath(import.meta.url))), 'prompts', 'propose-definition.md');
+  return join(packageRoot(dirname(fileURLToPath(import.meta.url))), "prompts", "propose-definition.md")
 }
 
 /** The SEMANTIC proposal template (196c — the ONE general justified arm, opt-in `ATLAS_MINE_SLOT=semantic`) —
@@ -109,25 +108,25 @@ export function shippedDefinitionTemplatePath(): string {
  *  with `semanticClaimParser` (llm.ts). Uses only `{{PATH}}`/`{{UNIT}}`/`{{SOURCE}}` — no `{{CANDIDATES}}`, no
  *  `{{RELATED}}` — so it loads with just a source reader injected (like the bare `propose.md`, `block` contract). */
 export function shippedSemanticTemplatePath(): string {
-  return join(packageRoot(dirname(fileURLToPath(import.meta.url))), 'prompts', 'propose-semantic.md');
+  return join(packageRoot(dirname(fileURLToPath(import.meta.url))), "prompts", "propose-semantic.md")
 }
 
 /** Walk up to the nearest directory containing `package.json`. Bounded by the filesystem root, so a module
  *  outside any package yields its own directory rather than looping. */
 function packageRoot(from: string): string {
-  let dir = from;
+  let dir = from
   for (;;) {
-    if (existsSync(join(dir, 'package.json'))) return dir;
-    const up = dirname(dir);
-    if (up === dir) return from; // reached the root without finding one
-    dir = up;
+    if (existsSync(join(dir, "package.json"))) return dir
+    const up = dirname(dir)
+    if (up === dir) return from // reached the root without finding one
+    dir = up
   }
 }
 
 /** Read the anchored unit's source. Injected because slicing a symbol out of a file is the AST's business,
  *  not this module's; `null` means the bytes could not be produced (deleted file, unresolvable anchor). */
 export interface SourceReader {
-  read(site: StructRef): string | null;
+  read(site: StructRef): string | null
 }
 
 /** One RELATED unit shown to the model as CONTEXT alongside the anchored target — its name and its bytes.
@@ -135,15 +134,15 @@ export interface SourceReader {
  *  truth depends on a sibling unit's bytes/type is derivable instead of guessed (#201, the cross-unit trap
  *  measured in A4-LEVER.md). The grounding anchor and the evidence span stay on the TARGET (see below). */
 export interface RelatedUnit {
-  readonly name: string;
-  readonly content: string;
+  readonly name: string
+  readonly content: string
 }
 
 /** Resolve the CONTEXT units a target site references — the minimal same-file sibling set (identifier BFS,
  *  capped) that the anchored-unit-only view hides. Injected for the same reason as `SourceReader`: which
  *  siblings a symbol references is the AST's business. Total: an unresolvable/whole-file site yields `[]`. */
 export interface SiblingReader {
-  readSiblings(site: StructRef): readonly RelatedUnit[];
+  readSiblings(site: StructRef): readonly RelatedUnit[]
 }
 
 /** [#196a candidate-grounded] Resolve the CLOSED CANDIDATE LIST a dependency proposer selects from — the
@@ -152,7 +151,7 @@ export interface SiblingReader {
  *  not the prompt's. The model may only SELECT from this list, which is what makes the pick sound (it resolves
  *  to a real symbol the gate re-proves) instead of a free-form guess. Total: an unknown/no-dep site yields `[]`. */
 export interface CandidateReader {
-  candidates(site: StructRef): readonly string[];
+  candidates(site: StructRef): readonly string[]
 }
 
 /** A prompt builder plus the digest of the template it was built from — the pair is what makes an override
@@ -167,8 +166,8 @@ export interface CandidateReader {
  *  `id` in general), and it is stated here so nobody reads "raw bytes" and concludes the digest witnesses
  *  the file byte-for-byte. What it witnesses is the artifact up to Unicode normalization. */
 export interface PromptFactory {
-  readonly digest: Hash;
-  readonly build: (cand: Candidate) => string;
+  readonly digest: Hash
+  readonly build: (cand: Candidate) => string
 
   /**
    * THE EVIDENCE SPAN (owner-approved SPAN amendment, 2026-08-02): a `GroundingSpan` addressing the exact
@@ -189,7 +188,7 @@ export interface PromptFactory {
    * symbol-precision: what lands now is the CARRIER — content-addressed, re-derivable, no stored text —
    * and when symbol slicing arrives the range narrows with no change to the shape or to its readers.
    */
-  readonly evidenceSpan: (cand: Candidate) => GroundingSpan | null;
+  readonly evidenceSpan: (cand: Candidate) => GroundingSpan | null
 }
 
 /**
@@ -201,58 +200,58 @@ export interface PromptFactory {
  * text is unchanged.
  */
 export function createPromptFactory(deps: {
-  source: SourceReader;
-  templatePath?: string;
+  source: SourceReader
+  templatePath?: string
   /** OPT-IN cross-unit context (the ENRICH fix, A4-LEVER.md). ABSENT ⇒ byte-identical to the shipped
    *  anchored-unit-only prompt — the default arm is unchanged. PRESENT ⇒ the template MUST carry `{{RELATED}}`
    *  and `build` interpolates the sibling context; the grounding anchor and `evidenceSpan` are UNTOUCHED — a
    *  related unit is what the model SEES, never what the fact is anchored to (KNOW-15g). */
-  related?: SiblingReader;
+  related?: SiblingReader
   /** [#196a] OPT-IN candidate list for the CANDIDATE-GROUNDED dependency arm. ABSENT ⇒ unchanged. PRESENT ⇒
    *  the template MUST carry `{{CANDIDATES}}` and `build` interpolates the unit's real cross-unit dep NAMES,
    *  the closed set the model SELECTS from. Does not touch the anchor or `evidenceSpan`. */
-  candidates?: CandidateReader;
+  candidates?: CandidateReader
 }): PromptFactory {
-  const path = deps.templatePath ?? shippedTemplatePath();
-  let raw: string;
+  const path = deps.templatePath ?? shippedTemplatePath()
+  let raw: string
   try {
-    raw = readFileSync(path, 'utf8');
+    raw = readFileSync(path, "utf8")
   } catch (e) {
-    throw new PromptError('template-unreadable', `the prompt template at ${path} could not be read: ${String(e)}`);
+    throw new PromptError("template-unreadable", `the prompt template at ${path} could not be read: ${String(e)}`)
   }
-  const template = assertUsable(stripComments(raw), path, deps.related !== undefined, deps.candidates !== undefined);
-  const digest = id({ promptTemplate: raw } as never);
+  const template = assertUsable(stripComments(raw), path, deps.related !== undefined, deps.candidates !== undefined)
+  const digest = id({ promptTemplate: raw } as never)
   // The GROUND-10 seam, not a local digest: a blake3↔stub encoder swap flows through spans exactly as it
   // flows through every anchor. `bindSpan` refuses anything that is not a real in-bounds byte range.
-  const { mintSpan } = bindSpan(defaultEncoder);
+  const { mintSpan } = bindSpan(defaultEncoder)
 
   return {
     digest,
     evidenceSpan(cand: Candidate): GroundingSpan | null {
-      const source = deps.source.read(cand.site);
-      if (source === null) return null; // no bytes ⇒ no span. Absent means UNKNOWN, never "the whole unit".
-      const bytes = new TextEncoder().encode(source);
-      return mintSpan(bytes, 0, bytes.length) ?? null;
+      const source = deps.source.read(cand.site)
+      if (source === null) return null // no bytes ⇒ no span. Absent means UNKNOWN, never "the whole unit".
+      const bytes = new TextEncoder().encode(source)
+      return mintSpan(bytes, 0, bytes.length) ?? null
     },
     build(cand: Candidate): string {
-      const site = cand.site;
-      const source = deps.source.read(site);
+      const site = cand.site
+      const source = deps.source.read(site)
       if (source === null) {
         // NOT an abstention. An abstention says "this unit holds no fact"; this says "we never showed the
         // model the unit". Collapsing the two would let a broken source path read as a barren repository.
         throw new PromptError(
-          'source-unreadable',
+          "source-unreadable",
           `no source could be read for ${site.qualifiedPath} — refusing to prompt without the bytes the ` +
             `claim must re-derive from`,
-        );
+        )
       }
       // The RELATED context (opt-in). Interpolated BEFORE the target source so the target bytes — injected
       // LAST — are never re-scanned for a slot token. A related unit is CONTEXT the model sees; it is not
       // grounded and does not touch `evidenceSpan`/the anchor above.
-      const related = deps.related === undefined ? '' : renderRelated(deps.related.readSiblings(site));
+      const related = deps.related === undefined ? "" : renderRelated(deps.related.readSiblings(site))
       // [#196a] The CANDIDATE list (opt-in) — the unit's real cross-unit dep names the model selects from. Also
       // interpolated BEFORE the source, for the same reason. Never touches the anchor/`evidenceSpan`.
-      const candidates = deps.candidates === undefined ? '' : deps.candidates.candidates(site).join(', ');
+      const candidates = deps.candidates === undefined ? "" : deps.candidates.candidates(site).join(", ")
       return template
         .split(SLOT_PATH)
         .join(filePathOf(site))
@@ -263,9 +262,9 @@ export function createPromptFactory(deps: {
         .split(SLOT_CANDIDATES)
         .join(candidates)
         .split(SLOT_SOURCE)
-        .join(source);
+        .join(source)
     },
-  };
+  }
 }
 
 /**
@@ -300,32 +299,32 @@ export function createPromptFactory(deps: {
  * `null` into a stated refusal rather than a prompt without source.
  */
 export function createFileSourceReader(repoPath: string): SourceReader {
-  const root = resolve(repoPath);
+  const root = resolve(repoPath)
   return {
     read(site: StructRef): string | null {
-      const rel = filePathOf(site);
-      const abs = resolve(root, rel);
-      const inside = relative(root, abs);
-      if (inside === '' || inside.startsWith('..') || isAbsolute(inside)) return null; // escapes the repo
-      if (!isContainedIn(root, abs)) return null; // …and the bytes really live there, by (dev, ino)
-      let fd: number | undefined;
+      const rel = filePathOf(site)
+      const abs = resolve(root, rel)
+      const inside = relative(root, abs)
+      if (inside === "" || inside.startsWith("..") || isAbsolute(inside)) return null // escapes the repo
+      if (!isContainedIn(root, abs)) return null // …and the bytes really live there, by (dev, ino)
+      let fd: number | undefined
       try {
-        fd = openSync(abs, O_READ_NO_SYMLINK); // final-component symlink ⇒ ELOOP ⇒ refused
-        if (!fstatSync(fd).isFile()) return null; // device / FIFO / dir / socket, decided on the pinned inode
-        return readFileSync(fd, 'utf8'); // FROM THE fd — the inode is pinned, never re-resolved
+        fd = openSync(abs, O_READ_NO_SYMLINK) // final-component symlink ⇒ ELOOP ⇒ refused
+        if (!fstatSync(fd).isFile()) return null // device / FIFO / dir / socket, decided on the pinned inode
+        return readFileSync(fd, "utf8") // FROM THE fd — the inode is pinned, never re-resolved
       } catch {
-        return null; // deleted / unreadable / a directory — the caller REFUSES rather than prompting blind
+        return null // deleted / unreadable / a directory — the caller REFUSES rather than prompting blind
       } finally {
         if (fd !== undefined) {
           try {
-            closeSync(fd);
+            closeSync(fd)
           } catch {
             /* best-effort close; the refuse/read decision above is already made */
           }
         }
       }
     },
-  };
+  }
 }
 
 /** Remove the template's own justification block. Non-greedy and repeated, so several comments are handled
@@ -334,7 +333,7 @@ export function createFileSourceReader(repoPath: string): SourceReader {
  *  one comment and no stray `-->`, so dropping the `?` survived the entire suite until a fixture with two
  *  comments and an arrow in the prose between them was added. */
 function stripComments(text: string): string {
-  return text.replace(/<!--[\s\S]*?-->\n?/g, '').trimStart();
+  return text.replace(/<!--[\s\S]*?-->\n?/g, "").trimStart()
 }
 
 /** A template that never interpolates the code would send a well-formed ask with nothing to ground against,
@@ -345,26 +344,26 @@ function stripComments(text: string): string {
 function assertUsable(template: string, path: string, requireRelated: boolean, requireCandidates: boolean): string {
   if (!template.includes(SLOT_SOURCE)) {
     throw new PromptError(
-      'template-has-no-source-slot',
+      "template-has-no-source-slot",
       `the prompt template at ${path} never interpolates ${SLOT_SOURCE} — a prompt carrying no source ` +
         `cannot be grounded, and the model would answer it from parametric memory`,
-    );
+    )
   }
   if (requireRelated && !template.includes(SLOT_RELATED)) {
     throw new PromptError(
-      'template-has-no-related-slot',
+      "template-has-no-related-slot",
       `the prompt template at ${path} never interpolates ${SLOT_RELATED}, but a sibling reader was injected ` +
         `— the enriched context would be silently dropped. Use the enriched template, or drop the reader`,
-    );
+    )
   }
   if (requireCandidates && !template.includes(SLOT_CANDIDATES)) {
     throw new PromptError(
-      'template-has-no-candidates-slot',
+      "template-has-no-candidates-slot",
       `the prompt template at ${path} never interpolates ${SLOT_CANDIDATES}, but a candidate reader was ` +
         `injected — the candidate list would be silently dropped. Use the candidate-grounded template, or drop the reader`,
-    );
+    )
   }
-  return template;
+  return template
 }
 
 /** Render the RELATED units as CONTEXT blocks — the same shape the target unit is shown in, tagged as
@@ -372,20 +371,20 @@ function assertUsable(template: string, path: string, requireRelated: boolean, r
  *  surrounding prose states that no related units means none were found). Order is the reader's — the caller
  *  (`createUnitSiblingReader`) returns them in a deterministic BFS order. */
 function renderRelated(units: readonly RelatedUnit[]): string {
-  return units.map((u) => `<related-unit name="${u.name}">\n${u.content}\n</related-unit>`).join('\n');
+  return units.map((u) => `<related-unit name="${u.name}">\n${u.content}\n</related-unit>`).join("\n")
 }
 
 /** `qualifiedPath` is `<file>::<symbol>` for a symbol anchor and a bare path otherwise (struct.ts). Split on
  *  the FIRST separator only: a path may legitimately contain more (`::` is escaped upstream, not absent). */
 function filePathOf(site: StructRef): string {
-  const at = site.qualifiedPath.indexOf('::');
-  return at === -1 ? site.qualifiedPath : site.qualifiedPath.slice(0, at);
+  const at = site.qualifiedPath.indexOf("::")
+  return at === -1 ? site.qualifiedPath : site.qualifiedPath.slice(0, at)
 }
 
 /** The unit's own name — the symbol for a symbol anchor, otherwise the whole path (a file/repo anchor IS
  *  its path). Never empty: an unnamed unit gives the model nothing to anchor the claim to. */
 function unitNameOf(site: StructRef): string {
-  const at = site.qualifiedPath.indexOf('::');
-  const name = at === -1 ? site.qualifiedPath : site.qualifiedPath.slice(at + 2);
-  return name === '' ? site.qualifiedPath : name;
+  const at = site.qualifiedPath.indexOf("::")
+  const name = at === -1 ? site.qualifiedPath : site.qualifiedPath.slice(at + 2)
+  return name === "" ? site.qualifiedPath : name
 }

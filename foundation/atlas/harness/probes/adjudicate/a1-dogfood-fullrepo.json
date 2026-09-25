@@ -14,10 +14,7 @@
   },
   "A1_precision": 0.9375951293759512,
   "A1_pct": 93.8,
-  "wilson95": [
-    91.6,
-    95.4
-  ],
+  "wilson95": [91.6, 95.4],
   "unanimous_3of3": 604,
   "per_judge_alone_TG_pct": {
     "judge1": 93.2,

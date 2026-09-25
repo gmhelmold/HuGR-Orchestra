@@ -16,8 +16,8 @@ description: >
 ## The law
 
 **Never conclude absence from an empty result.** Run the same query against a case you KNOW exists and show
-that the instrument returns rows when rows exist. An empty output has two causes — *there is nothing*, and
-*the instrument is broken* — and they are indistinguishable without the control.
+that the instrument returns rows when rows exist. An empty output has two causes — _there is nothing_, and
+_the instrument is broken_ — and they are indistinguishable without the control.
 
 The same law in the other direction: **never conclude presence from a green test.** Break the thing the
 test is supposed to be protecting and confirm the test goes red. A test that passes against a broken
@@ -39,23 +39,23 @@ Do this **before** the finding leaves your mouth, not after someone doubts it. A
 calibrated is not a measurement, it is a hope.
 
 **A control must be measured, not assumed.** Checking a secret scanner, the obvious control is a synthetic
-AWS or GitHub token — and those are *allowlisted example values that do not fire*. A control you assumed
+AWS or GitHub token — and those are _allowlisted example values that do not fire_. A control you assumed
 would trip, and did not, silently converts your test into a tautology.
 
 ## Shell traps that return empty instead of failing
 
 Each of these produced a wrong answer that looked like a finding:
 
-| trap | what it does | defense |
-|---|---|---|
-| unmatched glob (zsh) | **aborts the whole command** — `ls COPYING*` with no match runs nothing | quote every glob passed to a program: `--include='*.ts'` |
-| `sed` with a bad expression | swallows the pipeline's output; hid **63 real matches** behind a clean-looking empty | check the exit code, not just the output |
-| pattern starting with `-` | `grep -----BEGIN` parses as options; the class goes silently unsearched | `grep -e "$pattern"` or `--` |
-| exclusion by basename | excluding `foo.ts` also excludes `other/dir/foo.ts` | anchor the path |
-| `cmd \| head` exit code | `$?` is **head's** status, not the command's | `${PIPESTATUS[0]}`, or check the text |
-| `A && echo done` | prints `error` and `done` on the same line when A partly fails | verify by **listing the resulting state**, never by the word you told it to echo |
-| zsh word-splitting | unquoted `$var` holding `"a b"` passes ONE argument, not two | arrays, or `${=var}` deliberately |
-| `git add -A` | swept **1300 untracked store blobs** into a commit, twice | stage by NAME; `git show --stat` before every push |
+| trap                        | what it does                                                                         | defense                                                                          |
+| --------------------------- | ------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------- |
+| unmatched glob (zsh)        | **aborts the whole command** — `ls COPYING*` with no match runs nothing              | quote every glob passed to a program: `--include='*.ts'`                         |
+| `sed` with a bad expression | swallows the pipeline's output; hid **63 real matches** behind a clean-looking empty | check the exit code, not just the output                                         |
+| pattern starting with `-`   | `grep -----BEGIN` parses as options; the class goes silently unsearched              | `grep -e "$pattern"` or `--`                                                     |
+| exclusion by basename       | excluding `foo.ts` also excludes `other/dir/foo.ts`                                  | anchor the path                                                                  |
+| `cmd \| head` exit code     | `$?` is **head's** status, not the command's                                         | `${PIPESTATUS[0]}`, or check the text                                            |
+| `A && echo done`            | prints `error` and `done` on the same line when A partly fails                       | verify by **listing the resulting state**, never by the word you told it to echo |
+| zsh word-splitting          | unquoted `$var` holding `"a b"` passes ONE argument, not two                         | arrays, or `${=var}` deliberately                                                |
+| `git add -A`                | swept **1300 untracked store blobs** into a commit, twice                            | stage by NAME; `git show --stat` before every push                               |
 
 ## Fail-closed has a hole, and it is the expensive one
 
@@ -63,7 +63,7 @@ Each of these produced a wrong answer that looked like a finding:
 > assigns it a meaning — and a broken call is free to land on it.**
 
 Measured: an adapter invoked `gitleaks detect --source -`. That is not a stdin spelling, so gitleaks
-resolved `-` as a path, failed, and exited **1**. The adapter's table documented exit 1 as *a finding*. So a
+resolved `-` as a path, failed, and exited **1**. The adapter's table documented exit 1 as _a finding_. So a
 wrong invocation arrived wearing the one code that means "secret detected", and the door refused **every**
 write on any machine with the tool installed. The unknown-exit fallback never ran.
 

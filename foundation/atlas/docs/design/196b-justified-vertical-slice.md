@@ -28,11 +28,11 @@ slices that reuse this contract. One slot, all three holes closed.
 
 ## The three holes this closes (design ↔ shipped delta, measured on `0f541f5`)
 
-| the ratified design says | shipped `0f541f5` does | hole |
-|---|---|---|
-| `Seal = 'proven' \| 'justified'`, each naming its ground (`genesis-epistemic-contract.md` §"seal names its grounds") | `Seal = 'proven'` only (`packages/knowledge/src/types.ts:147`); a grounded semantic fact lands as an UNSEALED advisory via `admitAbstainedAsJustified` (`admit-harness.ts:256-267`) | `justified` is not a first-class seal — indistinguishable from a bare advisory |
-| the fact carries its slot (one of 13, `types.ts:312-325`) | only `dependency`/`count` carry a slot; the other 11 fall to slotless advisory | the type is dropped for 11 slots |
-| the justification (grounding span + **derivation**) travels (`epistemic-contract` §JUSTIFIED L27) | the node carries `claimNorm` + `grounding` spans, **no derivation carrier** | the "what leads a reader to the same conclusion" is parsed away as scratch and never stored |
+| the ratified design says                                                                                             | shipped `0f541f5` does                                                                                                                                                              | hole                                                                                        |
+| -------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| `Seal = 'proven' \| 'justified'`, each naming its ground (`genesis-epistemic-contract.md` §"seal names its grounds") | `Seal = 'proven'` only (`packages/knowledge/src/types.ts:147`); a grounded semantic fact lands as an UNSEALED advisory via `admitAbstainedAsJustified` (`admit-harness.ts:256-267`) | `justified` is not a first-class seal — indistinguishable from a bare advisory              |
+| the fact carries its slot (one of 13, `types.ts:312-325`)                                                            | only `dependency`/`count` carry a slot; the other 11 fall to slotless advisory                                                                                                      | the type is dropped for 11 slots                                                            |
+| the justification (grounding span + **derivation**) travels (`epistemic-contract` §JUSTIFIED L27)                    | the node carries `claimNorm` + `grounding` spans, **no derivation carrier**                                                                                                         | the "what leads a reader to the same conclusion" is parsed away as scratch and never stored |
 
 ## Contract (freeze FIRST, sequential — every leg reads it)
 
@@ -50,29 +50,29 @@ slices that reuse this contract. One slot, all three holes closed.
    semantic-slot case (dependency/count `proven` path unchanged; ungrounded still drops).
 4. **Proposer output grammar** — the frozen `propose.md` gains a slot classification + a derivation line for a
    `gotcha` candidate; the parser (`llm.ts`) turns it into `PredicateSeed{ kind:'predicate', slot:'gotcha',
-   derivation, grounding }`. Provenance digest of `propose.md` changes (a deliberate, recorded change).
+derivation, grounding }`. Provenance digest of `propose.md` changes (a deliberate, recorded change).
 
 ## Acceptance items (RED now; each 1:1 a real test)
 
-| id | acceptance test | kind | owning WP |
-|---|---|---|---|
-| A1 | `Seal` type admits `'justified'`; a fact with `seal:'justified'` round-trips store→projection→query, and a pre-existing seal-less fact still reads `seal:undefined` (additive, no migration) | testable | SEAL |
-| A2 | a grounded `gotcha` proposal with no witness is ADMITTED carrying `predicateSlot:'gotcha'` + `seal:'justified'` + a non-empty `derivation` | testable | ADMIT |
-| A3 | an UNGROUNDED `gotcha` proposal is DROPPED (`DROP_UNGROUNDED`) — grounding is still the door | testable | ADMIT |
-| A4 | the proposer emits, for a real gotcha unit, a parseable `{slot:'gotcha', derivation, grounding}` seed; a non-gotcha unit emits `NO-FACT` | testable | PROPOSER |
-| A5 | `verify-store` routes a `seal:'justified'` fact correctly (does not treat it as `proven`, does not crash on it, does not silently skip it as seal-absent) | testable | STORE |
-| A6 | `atlas mine` on a fixture repo with a known gotcha emits ONE fact, durably, carrying slot+justified+derivation, visible via `atlas query`/`atlas node` (blackbox subprocess) | testable | BENCH |
-| A7 | the derivation stored is the contestable claim-derivation, NOT the raw scratch reasoning (scratch is still parsed away) | judged | BENCH |
+| id  | acceptance test                                                                                                                                                                              | kind     | owning WP |
+| --- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------- | --------- |
+| A1  | `Seal` type admits `'justified'`; a fact with `seal:'justified'` round-trips store→projection→query, and a pre-existing seal-less fact still reads `seal:undefined` (additive, no migration) | testable | SEAL      |
+| A2  | a grounded `gotcha` proposal with no witness is ADMITTED carrying `predicateSlot:'gotcha'` + `seal:'justified'` + a non-empty `derivation`                                                   | testable | ADMIT     |
+| A3  | an UNGROUNDED `gotcha` proposal is DROPPED (`DROP_UNGROUNDED`) — grounding is still the door                                                                                                 | testable | ADMIT     |
+| A4  | the proposer emits, for a real gotcha unit, a parseable `{slot:'gotcha', derivation, grounding}` seed; a non-gotcha unit emits `NO-FACT`                                                     | testable | PROPOSER  |
+| A5  | `verify-store` routes a `seal:'justified'` fact correctly (does not treat it as `proven`, does not crash on it, does not silently skip it as seal-absent)                                    | testable | STORE     |
+| A6  | `atlas mine` on a fixture repo with a known gotcha emits ONE fact, durably, carrying slot+justified+derivation, visible via `atlas query`/`atlas node` (blackbox subprocess)                 | testable | BENCH     |
+| A7  | the derivation stored is the contestable claim-derivation, NOT the raw scratch reasoning (scratch is still parsed away)                                                                      | judged   | BENCH     |
 
 ## WP slices + conflict map
 
-| WP | owns files (disjoint) | owns AC | dep-on | model |
-|---|---|---|---|---|
-| **SEAL** (contract, FIRST, sequential) | `packages/knowledge/src/types.ts` (Seal union + `derivation?`), the frozen-projection seam | A1 | — | sonnet |
-| **PROPOSER** | `packages/adapter-io/prompts/propose.md`, `packages/adapter-io/src/llm.ts` (parser), `packages/cli/src/mine-proposer.ts` (arm) | A4 | SEAL@contract | sonnet |
-| **ADMIT** | `packages/genesis/src/admit-harness.ts` (semantic-justified path), `packages/adapter-io/src/compose-mine-admission.ts` | A2, A3 | SEAL@contract | sonnet |
-| **STORE** | `packages/adapter-io/src/reverify-store.ts` + `verify-store` leg | A5 | SEAL@contract | sonnet |
-| **BENCH** (last, integrates) | `packages/e2e-blackbox/**` new story + a gotcha fixture | A6, A7 | PROPOSER+ADMIT+STORE | sonnet |
+| WP                                     | owns files (disjoint)                                                                                                          | owns AC | dep-on               | model  |
+| -------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ | ------- | -------------------- | ------ |
+| **SEAL** (contract, FIRST, sequential) | `packages/knowledge/src/types.ts` (Seal union + `derivation?`), the frozen-projection seam                                     | A1      | —                    | sonnet |
+| **PROPOSER**                           | `packages/adapter-io/prompts/propose.md`, `packages/adapter-io/src/llm.ts` (parser), `packages/cli/src/mine-proposer.ts` (arm) | A4      | SEAL@contract        | sonnet |
+| **ADMIT**                              | `packages/genesis/src/admit-harness.ts` (semantic-justified path), `packages/adapter-io/src/compose-mine-admission.ts`         | A2, A3  | SEAL@contract        | sonnet |
+| **STORE**                              | `packages/adapter-io/src/reverify-store.ts` + `verify-store` leg                                                               | A5      | SEAL@contract        | sonnet |
+| **BENCH** (last, integrates)           | `packages/e2e-blackbox/**` new story + a gotcha fixture                                                                        | A6, A7  | PROPOSER+ADMIT+STORE | sonnet |
 
 **Conflict map:** SEAL is the one shared file (`types.ts`) every leg reads → freeze it FIRST (sequential),
 then PROPOSER ∥ ADMIT ∥ STORE run parallel (disjoint files), BENCH integrates last. Same shape as 196a. No

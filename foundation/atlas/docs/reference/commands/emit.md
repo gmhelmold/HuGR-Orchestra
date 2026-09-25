@@ -88,11 +88,11 @@ tool, not a description of the outcome. Read `status:`, not `next:`.
 
 ## Exit codes
 
-| code | meaning |
-| --- | --- |
-| `0` | the fact was admitted and persisted; `data.id` is its content address |
-| `1` | usage error — missing `--at`, unreadable file, malformed JSON |
-| `2` | a governance gate refused the write. Nothing was persisted |
+| code | meaning                                                               |
+| ---- | --------------------------------------------------------------------- |
+| `0`  | the fact was admitted and persisted; `data.id` is its content address |
+| `1`  | usage error — missing `--at`, unreadable file, malformed JSON         |
+| `2`  | a governance gate refused the write. Nothing was persisted            |
 
 ## What it refuses, and why
 

@@ -31,27 +31,27 @@
 // OWN the unit is REFUSED. The transition door runs NO HEAD truth gate (a transition grounds on PAST revs, D-T2,
 // which the main gate would always drift-reject) — see `governed-emit-transition.ts` for the full ladder.
 
-import { transitionsOf } from '@atlas/knowledge';
-import type { GroundedTransition, TransitionNode } from '@atlas/knowledge';
-import { buildTransition, transitionWellFormed } from '@atlas/genesis';
-import type { TransitionProposal } from '@atlas/genesis';
-import type { GroundingEntry } from '@atlas/grounding';
-import type { StructRef, Tier, Hash } from '@atlas/contracts';
-import type { EmitOut, Guidance, Verdict } from '@atlas/tools';
-import { unitScopeOf } from './llm.js';
-import { rehydrateProjection } from './store.js';
-import type { DiskStore } from './store.js';
-import type { RevIndex } from './rev-index.js';
+import { transitionsOf } from "@atlas/knowledge"
+import type { GroundedTransition, TransitionNode } from "@atlas/knowledge"
+import { buildTransition, transitionWellFormed } from "@atlas/genesis"
+import type { TransitionProposal } from "@atlas/genesis"
+import type { GroundingEntry } from "@atlas/grounding"
+import type { StructRef, Tier, Hash } from "@atlas/contracts"
+import type { EmitOut, Guidance, Verdict } from "@atlas/tools"
+import { unitScopeOf } from "./llm.js"
+import { rehydrateProjection } from "./store.js"
+import type { DiskStore } from "./store.js"
+import type { RevIndex } from "./rev-index.js"
 
 /** The composition-root READ leg: `unit` → the grounded transitions on that lineage (empty ⇒ every lineage).
  *  TOTAL — `transitionsOf` is pure + total. Re-reads the LIVE projection per call, so a transition produced in
  *  this session is visible to the very next call. */
-export type TransitionLeg = (unit: string) => readonly GroundedTransition[];
+export type TransitionLeg = (unit: string) => readonly GroundedTransition[]
 
 /** Build the READ leg over the durable `store` — the SAME store the handler's query leg reads (so `atlas
  *  transitions` and `atlas query` are two projections of ONE store). Read-only; opens no write path. */
 export function createTransitionLeg(store: DiskStore): TransitionLeg {
-  return (unit) => transitionsOf(rehydrateProjection(store), unit);
+  return (unit) => transitionsOf(rehydrateProjection(store), unit)
 }
 
 /** The outcome of one produce-and-emit pass — a MEASURED record, never a manufactured fact. `admitted:false`
@@ -59,35 +59,35 @@ export function createTransitionLeg(store: DiskStore): TransitionLeg {
  *  the GOVERNED DOOR REFUSED the write (unauthorized actor / anchor). `persisted:false` on a governed refusal is
  *  the whole point of the security fix — a gate-less path would have landed it. */
 export interface TransitionRun {
-  readonly admitted: boolean;
-  readonly unitKey: string;
-  readonly revBefore: string;
-  readonly revAfter: string;
-  readonly id?: string; // the durable content address the door returned, present iff persisted
-  readonly shaBefore?: string; // the unit's content hash at revBefore, present iff both revs resolved
-  readonly shaAfter?: string; //  the unit's content hash at revAfter,  present iff both revs resolved
-  readonly persisted?: boolean; // whether the governed door COMMITTED (false ⇒ authz/anchor/ratify refusal — see reason)
-  readonly reason?: string; // the honest why-not / the governed door's refusal text, present iff NOT admitted-and-persisted
+  readonly admitted: boolean
+  readonly unitKey: string
+  readonly revBefore: string
+  readonly revAfter: string
+  readonly id?: string // the durable content address the door returned, present iff persisted
+  readonly shaBefore?: string // the unit's content hash at revBefore, present iff both revs resolved
+  readonly shaAfter?: string //  the unit's content hash at revAfter,  present iff both revs resolved
+  readonly persisted?: boolean // whether the governed door COMMITTED (false ⇒ authz/anchor/ratify refusal — see reason)
+  readonly reason?: string // the honest why-not / the governed door's refusal text, present iff NOT admitted-and-persisted
 }
 
 /** The governed emit door leg the producer writes THROUGH — `createGovernedEmit(...).emit` (compose binds it).
  *  Its `kind:'transition'` branch (`governed-emit-transition.ts`) applies KNOW-11 authz + ARCH-9 anchor. */
-export type TransitionEmit = (node: TransitionNode, at: Hash) => EmitOut;
+export type TransitionEmit = (node: TransitionNode, at: Hash) => EmitOut
 
 /** The composition-root PRODUCER leg: `(unit, revBefore, revAfter)` → produce + GOVERNED-emit a justified transition. */
-export type TransitionProducer = (unit: string, revBefore: string, revAfter: string) => TransitionRun;
+export type TransitionProducer = (unit: string, revBefore: string, revAfter: string) => TransitionRun
 
 /** The FILE half of a `unitKey` (`file::item::block` → `file`) — the repo-relative path a grounding entry
  *  carries for humans/navigation. A bare file key has no `::` and is returned whole. */
 function fileOf(unitKey: string): string {
-  const at = unitKey.indexOf('::');
-  return at === -1 ? unitKey : unitKey.slice(0, at);
+  const at = unitKey.indexOf("::")
+  return at === -1 ? unitKey : unitKey.slice(0, at)
 }
 
 /** One rev's resolved anchor as a `GroundingEntry` — the `StructRef` `resolveAnchorAt` returns (whose
  *  `subtreeHash` IS the unit's content hash at that rev, content-addressed) wrapped with the file path. */
 function entryOf(ref: StructRef, unitKey: string): GroundingEntry {
-  return { anchor: ref, path: fileOf(unitKey) };
+  return { anchor: ref, path: fileOf(unitKey) }
 }
 
 /**
@@ -105,35 +105,51 @@ function entryOf(ref: StructRef, unitKey: string): GroundingEntry {
  */
 export function createTransitionProducer(revIndex: RevIndex, emit: TransitionEmit, at: Hash): TransitionProducer {
   return (unit, revBefore, revAfter) => {
-    const base: TransitionRun = { admitted: false, unitKey: unit, revBefore, revAfter };
-    if (typeof unit !== 'string' || unit.length === 0) return { ...base, reason: 'missing unit key' };
+    const base: TransitionRun = { admitted: false, unitKey: unit, revBefore, revAfter }
+    if (typeof unit !== "string" || unit.length === 0) return { ...base, reason: "missing unit key" }
 
-    const refBefore = revIndex.resolveAnchorAt(revBefore, unit);
-    const refAfter = revIndex.resolveAnchorAt(revAfter, unit);
-    if (refBefore === undefined) return { ...base, reason: `unit '${unit}' does not resolve at rev '${revBefore}' — nothing to ground the before-leg of a transition on` };
-    if (refAfter === undefined) return { ...base, reason: `unit '${unit}' does not resolve at rev '${revAfter}' — nothing to ground the after-leg of a transition on` };
+    const refBefore = revIndex.resolveAnchorAt(revBefore, unit)
+    const refAfter = revIndex.resolveAnchorAt(revAfter, unit)
+    if (refBefore === undefined)
+      return {
+        ...base,
+        reason: `unit '${unit}' does not resolve at rev '${revBefore}' — nothing to ground the before-leg of a transition on`,
+      }
+    if (refAfter === undefined)
+      return {
+        ...base,
+        reason: `unit '${unit}' does not resolve at rev '${revAfter}' — nothing to ground the after-leg of a transition on`,
+      }
 
-    const shaBefore = String(refBefore.subtreeHash);
-    const shaAfter = String(refAfter.subtreeHash);
+    const shaBefore = String(refBefore.subtreeHash)
+    const shaAfter = String(refAfter.subtreeHash)
     const proposal: TransitionProposal = {
-      kind: 'transition',
+      kind: "transition",
       unitKey: unit,
       refBefore: entryOf(refBefore, unit),
       refAfter: entryOf(refAfter, unit),
-      tier: 'T2' as Tier, // the mined tier — a transition is a produced, advisory-class fact (mirrors the sound-arm tier)
+      tier: "T2" as Tier, // the mined tier — a transition is a produced, advisory-class fact (mirrors the sound-arm tier)
       scope: unitScopeOf(unit), // KNOW-11a authz scope — the unit's own containing directory; the door authorizes against it
       // DEFERRED (flagged): mechanically-derived derivation prose, NOT an LLM that read both bodies (§header).
       derivation: `unit '${unit}' changed content across revs ${revBefore.slice(0, 12)}→${revAfter.slice(0, 12)} (subtreeHash ${shaBefore.slice(0, 12)}→${shaAfter.slice(0, 12)}); a model-authored account of WHAT changed is deferred (#234 honest limit)`,
-    };
-
-    if (!transitionWellFormed(proposal)) {
-      return { ...base, shaBefore, shaAfter, reason: shaBefore === shaAfter ? `unit '${unit}' has IDENTICAL content at both revs (${shaBefore.slice(0, 12)}) — no change, so no transition` : 'malformed transition identity' };
     }
 
-    const fact = buildTransition(proposal);
+    if (!transitionWellFormed(proposal)) {
+      return {
+        ...base,
+        shaBefore,
+        shaAfter,
+        reason:
+          shaBefore === shaAfter
+            ? `unit '${unit}' has IDENTICAL content at both revs (${shaBefore.slice(0, 12)}) — no change, so no transition`
+            : "malformed transition identity",
+      }
+    }
+
+    const fact = buildTransition(proposal)
     // ROUTE THROUGH THE GOVERNED DOOR — KNOW-11 authz + ARCH-9 anchor gates apply here (the security fix). A
     // refusal (unauthorized actor / anchor, or an unratified commit) is a MEASURED persisted:false, never a throw.
-    const out: EmitOut = emit(fact, at);
+    const out: EmitOut = emit(fact, at)
     return {
       admitted: true,
       unitKey: unit,
@@ -142,9 +158,9 @@ export function createTransitionProducer(revIndex: RevIndex, emit: TransitionEmi
       shaBefore,
       shaAfter,
       persisted: out.emitted,
-      ...(out.emitted ? { id: String(out.id) } : { reason: out.rejected ?? 'the governed door refused the write' }),
-    };
-  };
+      ...(out.emitted ? { id: String(out.id) } : { reason: out.rejected ?? "the governed door refused the write" }),
+    }
+  }
 }
 
 // ── THE READ VERDICT (SCHEMA + VERDICT parity source, mirrors relationsVerdict/negationsVerdict) ─────────────
@@ -152,22 +168,22 @@ export function createTransitionProducer(revIndex: RevIndex, emit: TransitionEmi
 /** The data payload a `transitions` read verdict carries — the transitions on the lineage plus the query unit,
  *  so an EMPTY result is a MEASURED fact (this unit, zero transitions) and never an absent line. */
 export interface TransitionsData {
-  readonly transitions: readonly GroundedTransition[];
-  readonly unit: string;
+  readonly transitions: readonly GroundedTransition[]
+  readonly unit: string
 }
 
 /** The one property a reader should check the bytes against. */
 const INVARIANT =
-  'TRN-1: `atlas transitions` reads GROUNDED 2-rev historical records (family:transition) off the live projection the query readback rides — one unit LINEAGE, sorted (unitKey, shaBefore, shaAfter, nodeKey) so equal input is byte-identical output, the current head marked TRANSITIONED and predecessors SUPERSEDED (derive-on-read, D-T3), never re-checked at HEAD (D-T2), never a throw, no write path';
+  "TRN-1: `atlas transitions` reads GROUNDED 2-rev historical records (family:transition) off the live projection the query readback rides — one unit LINEAGE, sorted (unitKey, shaBefore, shaAfter, nodeKey) so equal input is byte-identical output, the current head marked TRANSITIONED and predecessors SUPERSEDED (derive-on-read, D-T3), never re-checked at HEAD (D-T2), never a throw, no write path"
 
 /** The one actionable sentence, derived from the result's own numbers. */
 function nextLine(unit: string, ts: readonly GroundedTransition[]): string {
   if (ts.length === 0) {
-    return `no grounded transition on lineage '${unit}' — a transition is produced by \`atlas transition <unit> <revBefore> <revAfter>\` over two revs where the unit's content changed; check the unit key spelling`;
+    return `no grounded transition on lineage '${unit}' — a transition is produced by \`atlas transition <unit> <revBefore> <revAfter>\` over two revs where the unit's content changed; check the unit key spelling`
   }
-  const head = ts.filter((t) => t.authoring === 'TRANSITIONED').length;
-  const superseded = ts.length - head;
-  return `${ts.length} transition(s) on lineage '${unit}': ${head} current (TRANSITIONED), ${superseded} SUPERSEDED — supersession is derive-on-read over the shaBefore→shaAfter chain (D-T3), the record is never falsified`;
+  const head = ts.filter((t) => t.authoring === "TRANSITIONED").length
+  const superseded = ts.length - head
+  return `${ts.length} transition(s) on lineage '${unit}': ${head} current (TRANSITIONED), ${superseded} SUPERSEDED — supersession is derive-on-read over the shaBefore→shaAfter chain (D-T3), the record is never falsified`
 }
 
 /**
@@ -176,16 +192,16 @@ function nextLine(unit: string, ts: readonly GroundedTransition[]): string {
  * verdict (exit 1 on the CLI), never a throw.
  */
 export function transitionsVerdict(leg: TransitionLeg, unit: string): Verdict<TransitionsData> {
-  if (typeof unit !== 'string' || unit.length === 0) {
+  if (typeof unit !== "string" || unit.length === 0) {
     const guidance: Guidance = {
       next: "`atlas transitions <unit>` requires the unit lineage key whose grounded transitions to read",
-      invariant: 'CLI-1b: a malformed invocation yields a structured error + guidance + non-zero exit, never a crash',
-    };
-    return { ok: false, rejected: 'missing unit: `atlas transitions` requires a non-empty unit key', guidance };
+      invariant: "CLI-1b: a malformed invocation yields a structured error + guidance + non-zero exit, never a crash",
+    }
+    return { ok: false, rejected: "missing unit: `atlas transitions` requires a non-empty unit key", guidance }
   }
-  const transitions = leg(unit);
-  const guidance: Guidance = { next: nextLine(unit, transitions), invariant: INVARIANT };
-  return { ok: true, guidance, data: { transitions, unit } };
+  const transitions = leg(unit)
+  const guidance: Guidance = { next: nextLine(unit, transitions), invariant: INVARIANT }
+  return { ok: true, guidance, data: { transitions, unit } }
 }
 
-export type { GroundedTransition, TransitionNode };
+export type { GroundedTransition, TransitionNode }

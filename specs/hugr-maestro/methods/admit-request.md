@@ -106,8 +106,8 @@ READY_TO_DRAFT:  intent summary, known facts, visible uncertainty, next owner `d
 
 ## Skills
 
-| Skill | Stage | Output | Stop condition |
-|---|---|---|---|
+| Skill           | Stage                        | Output                                                | Stop condition                               |
+| --------------- | ---------------------------- | ----------------------------------------------------- | -------------------------------------------- |
 | `frame-request` | structured intent assessment | `IntentAssessment` + `ClarificationNeed` when blocked | cannot identify a usable goal or distinction |
 
 This skill grants no tools, approves no plan, and delegates no work. `clarify-decision` owns wording and asking
@@ -115,13 +115,13 @@ the smallest question.
 
 ## Tools and Guards
 
-| Capability | Purpose | Boundary |
-|---|---|---|
-| `session-read` | read durable user message and session state | OpenCode read only |
-| `atlas-orientation-read` | read compact project orientation | Atlas read only |
-| `maestro-admission-record` | persist method result keyed to message | OpenCode durable event/metadata |
-| `admission-schema-guard` | reject malformed assessment/result | before record |
-| `no-governed-task-before-approval` | deny Task/child Session creation without approved revision identity | Session/Task boundary |
+| Capability                         | Purpose                                                             | Boundary                        |
+| ---------------------------------- | ------------------------------------------------------------------- | ------------------------------- |
+| `session-read`                     | read durable user message and session state                         | OpenCode read only              |
+| `atlas-orientation-read`           | read compact project orientation                                    | Atlas read only                 |
+| `maestro-admission-record`         | persist method result keyed to message                              | OpenCode durable event/metadata |
+| `admission-schema-guard`           | reject malformed assessment/result                                  | before record                   |
+| `no-governed-task-before-approval` | deny Task/child Session creation without approved revision identity | Session/Task boundary           |
 
 No shell, edit, write, external network, Atlas write, or member tool is granted to this method.
 
@@ -149,20 +149,20 @@ is unobservable, active work could be changed, or assessment fails validation. I
 
 ## Runtime Seams
 
-| System | Seam |
-|---|---|
+| System   | Seam                                                                                                                  |
+| -------- | --------------------------------------------------------------------------------------------------------------------- |
 | OpenCode | durable `SessionID`/`MessageID`, message reads, session metadata/event persistence, Task/child-Session creation fence |
-| Atlas | read-only project/session orientation reference; no scoped pack or write |
+| Atlas    | read-only project/session orientation reference; no scoped pack or write                                              |
 
 ## Failure and Recovery
 
-| Condition | Result |
-|---|---|
-| Invalid assessment schema | `CLARIFY`, visible system reason, no task |
-| Model/tool timeout | `CLARIFY`, preserve original message, retry only on stakeholder request or durable recovery |
-| Missing orientation | Continue only with explicit `UN-SEEDED`; never fabricate context |
-| Duplicate message delivery | Return recorded admission result |
-| New request conflicts with active work | `CLARIFY`: ask whether to steer existing work, revise plan, or start a new plan |
+| Condition                              | Result                                                                                      |
+| -------------------------------------- | ------------------------------------------------------------------------------------------- |
+| Invalid assessment schema              | `CLARIFY`, visible system reason, no task                                                   |
+| Model/tool timeout                     | `CLARIFY`, preserve original message, retry only on stakeholder request or durable recovery |
+| Missing orientation                    | Continue only with explicit `UN-SEEDED`; never fabricate context                            |
+| Duplicate message delivery             | Return recorded admission result                                                            |
+| New request conflicts with active work | `CLARIFY`: ask whether to steer existing work, revise plan, or start a new plan             |
 
 ## Acceptance
 

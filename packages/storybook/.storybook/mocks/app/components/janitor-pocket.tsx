@@ -7,12 +7,16 @@ export function JanitorPocketChat(props: { report: JanitorReport; onSessionID?: 
     <div class="flex min-h-0 flex-col border-t border-v2-border-border-base">
       <div class="flex max-h-[360px] min-h-0 flex-col gap-3 overflow-y-auto px-4 py-3">
         <div class="flex items-start gap-2.5">
-          <div class="mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-full bg-v2-background-bg-layer-03 text-[11px] text-v2-text-text-muted">J</div>
+          <div class="mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-full bg-v2-background-bg-layer-03 text-[11px] text-v2-text-text-muted">
+            J
+          </div>
           <div class="min-w-0 flex-1">
             <div class="mb-1 text-[12px] leading-4 text-v2-text-text-faint">Janitor</div>
             <div class="rounded-[6px] bg-v2-background-bg-layer-02 px-3 py-2.5 text-[13px] leading-5 text-v2-text-text-base">
               I found {props.report.findings.length} things worth checking. Ask me what to clean first.
-              <div class="mt-2 border-t border-v2-border-border-base pt-2">Disk pressure is urgent. Inspect caches before removal.</div>
+              <div class="mt-2 border-t border-v2-border-border-base pt-2">
+                Disk pressure is urgent. Inspect caches before removal.
+              </div>
             </div>
           </div>
         </div>
@@ -47,15 +51,37 @@ export function JanitorPocketChat(props: { report: JanitorReport; onSessionID?: 
         <div class="rounded-[6px] border border-v2-border-border-base bg-v2-background-bg-base px-3 py-2">
           <div class="text-[13px] leading-5 text-v2-text-text-faint">Ask about this report...</div>
           <div class="mt-3 flex items-center gap-1.5">
-            <button type="button" class="h-7 cursor-pointer rounded-[4px] bg-v2-background-bg-layer-03 px-2.5 text-[11px] text-v2-text-text-muted">+ Attach</button>
-            <button type="button" class="h-7 cursor-pointer rounded-[4px] bg-v2-background-bg-layer-03 px-2.5 text-[11px] text-v2-text-text-muted">Context</button>
-            <button type="button" class="h-7 cursor-pointer rounded-[4px] bg-v2-background-bg-layer-03 px-2.5 text-[11px] text-v2-text-text-muted">Thinking</button>
+            <button
+              type="button"
+              class="h-7 cursor-pointer rounded-[4px] bg-v2-background-bg-layer-03 px-2.5 text-[11px] text-v2-text-text-muted"
+            >
+              + Attach
+            </button>
+            <button
+              type="button"
+              class="h-7 cursor-pointer rounded-[4px] bg-v2-background-bg-layer-03 px-2.5 text-[11px] text-v2-text-text-muted"
+            >
+              Context
+            </button>
+            <button
+              type="button"
+              class="h-7 cursor-pointer rounded-[4px] bg-v2-background-bg-layer-03 px-2.5 text-[11px] text-v2-text-text-muted"
+            >
+              Thinking
+            </button>
           </div>
           <div class="mt-3 flex items-center justify-between border-t border-v2-border-border-base pt-2">
             <div class="flex items-center gap-2">
-              <button type="button" class="h-7 cursor-pointer text-[12px] text-v2-text-text-muted">Claude 3.7 Sonnet <span class="text-[11px] text-v2-text-text-faint">▾</span></button>
+              <button type="button" class="h-7 cursor-pointer text-[12px] text-v2-text-text-muted">
+                Claude 3.7 Sonnet <span class="text-[11px] text-v2-text-text-faint">▾</span>
+              </button>
             </div>
-            <button type="button" class="h-7 cursor-pointer rounded-[4px] bg-v2-background-bg-layer-03 px-3 text-[12px] font-[530] text-v2-text-text-base">Send</button>
+            <button
+              type="button"
+              class="h-7 cursor-pointer rounded-[4px] bg-v2-background-bg-layer-03 px-3 text-[12px] font-[530] text-v2-text-text-base"
+            >
+              Send
+            </button>
           </div>
         </div>
       </div>

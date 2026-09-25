@@ -15,21 +15,21 @@
 // they are absent by construction (the oracle is internal-only, sound in any world). Pure, $0-LLM, no I/O, no
 // clock, deterministic — a rebuild is byte-identical.
 
-import { canonicalizeSymbol, isLocalSymbol, nodeHashOfPath } from './build.js';
-import type { ScipOutput } from './types.js';
+import { canonicalizeSymbol, isLocalSymbol, nodeHashOfPath } from "./build.js"
+import type { ScipOutput } from "./types.js"
 
 /** The two lookups dependency genesis needs over one SCIP output. Both pure + total (never throw). */
 export interface UnitDepsApi {
   /** The cross-unit dependency NAMES a unit references — the CANDIDATE set shown to the model (prompt side).
    *  Empty for an unknown path or a unit with no cross-unit dep. Deterministic, sorted, deduped by name. */
-  candidatesFor(unitPath: string): readonly string[];
+  candidatesFor(unitPath: string): readonly string[]
   /** Resolve a picked NAME to THIS UNIT'S OWN cross-unit dependency symbol — the gate/parser binding that keeps
    *  the admitted fact tied to the unit (lucy cold-review BLOCKER: an index-wide name→symbol lookup let a name
    *  outside the unit's candidate list ride an unrelated sibling's same-named symbol). `null` when `name` is not
    *  a cross-unit dependency name of `unitPath` (an off-list guess, a builtin, a typo) — the caller then abstains.
    *  Deterministic: on the rare intra-unit terminal-name collision, the lexically-first symbol (a real dep of
    *  this unit either way). This is the SOUND resolution — the symbol is provably referenced by this unit. */
-  resolveDepFor(unitPath: string, name: string): string | null;
+  resolveDepFor(unitPath: string, name: string): string | null
 }
 
 /** The terminal identifier of a SCIP descriptor chain — the human name a reader (and the model) sees:
@@ -40,8 +40,8 @@ export interface UnitDepsApi {
  *  WRONG name (verified over the live 29,677-def index) — so they cost RECALL, never soundness. Widening the
  *  extractor is the recall follow-up; it is deliberately conservative here. */
 export function symbolTerminalName(symbol: string): string {
-  const m = symbol.match(/([A-Za-z0-9_$]+)\s*(?:#|\(\)\.|\.|\/)?$/);
-  return m ? m[1]! : '';
+  const m = symbol.match(/([A-Za-z0-9_$]+)\s*(?:#|\(\)\.|\.|\/)?$/)
+  return m ? m[1]! : ""
 }
 
 /**
@@ -65,58 +65,58 @@ export function symbolTerminalName(symbol: string): string {
  * Pure function of `scip` ⇒ the shared instance is byte-identical to a fresh build; the `WeakMap` releases with
  * the `ScipOutput`, adding no lifetime.
  */
-const unitDepsCache = new WeakMap<ScipOutput, UnitDepsApi>();
+const unitDepsCache = new WeakMap<ScipOutput, UnitDepsApi>()
 export function createUnitDeps(scip: ScipOutput): UnitDepsApi {
-  const memo = unitDepsCache.get(scip);
-  if (memo !== undefined) return memo;
-  const api = buildUnitDeps(scip);
-  unitDepsCache.set(scip, api);
-  return api;
+  const memo = unitDepsCache.get(scip)
+  if (memo !== undefined) return memo
+  const api = buildUnitDeps(scip)
+  unitDepsCache.set(scip, api)
+  return api
 }
 
 function buildUnitDeps(scip: ScipOutput): UnitDepsApi {
-  const defDoc = new Map<string, string>();
+  const defDoc = new Map<string, string>()
   for (const doc of scip.documents) {
-    const h = String(nodeHashOfPath(doc.relativePath));
+    const h = String(nodeHashOfPath(doc.relativePath))
     for (const occ of doc.occurrences) {
-      if (occ.role === 'definition' && !isLocalSymbol(occ.symbol) && !defDoc.has(occ.symbol)) defDoc.set(occ.symbol, h);
+      if (occ.role === "definition" && !isLocalSymbol(occ.symbol) && !defDoc.has(occ.symbol)) defDoc.set(occ.symbol, h)
     }
   }
 
   // The SRC-form symbol a reference resolves to, or undefined if it resolves to no in-index definition
   // (an external/builtin/unresolved ref — a hole, never a cross-unit dep). Mirrors `createSymbolReverse`.
   const resolvedDef = (symbol: string): string | undefined =>
-    defDoc.has(symbol) ? symbol : defDoc.has(canonicalizeSymbol(symbol)) ? canonicalizeSymbol(symbol) : undefined;
+    defDoc.has(symbol) ? symbol : defDoc.has(canonicalizeSymbol(symbol)) ? canonicalizeSymbol(symbol) : undefined
 
-  const docByPath = new Map(scip.documents.map((d) => [d.relativePath, d]));
+  const docByPath = new Map(scip.documents.map((d) => [d.relativePath, d]))
 
   /** name → the unit's OWN cross-unit dependency symbol (lexically-first on a rare intra-unit name collision).
    *  Memoized per unit path — the same walk backs both `candidatesFor` (keys) and `resolveDepFor` (lookup). */
-  const cache = new Map<string, ReadonlyMap<string, string>>();
+  const cache = new Map<string, ReadonlyMap<string, string>>()
   const crossUnitDepMap = (unitPath: string): ReadonlyMap<string, string> => {
-    const memo = cache.get(unitPath);
-    if (memo !== undefined) return memo;
-    const doc = docByPath.get(unitPath);
-    const byName = new Map<string, string>();
+    const memo = cache.get(unitPath)
+    if (memo !== undefined) return memo
+    const doc = docByPath.get(unitPath)
+    const byName = new Map<string, string>()
     if (doc !== undefined) {
-      const self = String(nodeHashOfPath(unitPath));
+      const self = String(nodeHashOfPath(unitPath))
       for (const occ of doc.occurrences) {
-        if (occ.role !== 'reference' || isLocalSymbol(occ.symbol)) continue;
-        const resolved = resolvedDef(occ.symbol);
-        if (resolved === undefined) continue; //          external/builtin/unresolved — not a cross-unit dep
-        if (defDoc.get(resolved) === self) continue; //   defined IN this unit — its own vocabulary, not a dep
-        const n = symbolTerminalName(resolved);
-        if (n === '') continue;
-        const prev = byName.get(n);
-        if (prev === undefined || resolved < prev) byName.set(n, resolved); // deterministic: lexically-first symbol
+        if (occ.role !== "reference" || isLocalSymbol(occ.symbol)) continue
+        const resolved = resolvedDef(occ.symbol)
+        if (resolved === undefined) continue //          external/builtin/unresolved — not a cross-unit dep
+        if (defDoc.get(resolved) === self) continue //   defined IN this unit — its own vocabulary, not a dep
+        const n = symbolTerminalName(resolved)
+        if (n === "") continue
+        const prev = byName.get(n)
+        if (prev === undefined || resolved < prev) byName.set(n, resolved) // deterministic: lexically-first symbol
       }
     }
-    cache.set(unitPath, byName);
-    return byName;
-  };
+    cache.set(unitPath, byName)
+    return byName
+  }
 
   return {
     candidatesFor: (unitPath) => [...crossUnitDepMap(unitPath).keys()].sort(),
     resolveDepFor: (unitPath, name) => crossUnitDepMap(unitPath).get(name) ?? null,
-  };
+  }
 }

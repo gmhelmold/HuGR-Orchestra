@@ -7,8 +7,8 @@
 // required flag, an unreadable emit fact file, or malformed fact JSON fails CLOSED to a structured error string
 // (never a throw), preserving CLI-1b totality.
 
-import { readFileSync } from 'node:fs';
-import type { Command } from './map.js';
+import { readFileSync } from "node:fs"
+import type { Command } from "./map.js"
 
 /** A marshalled named-arg object bound for `handle`, OR a structured failure reason (never a throw).
  *  `refusal: true` (AUTHOR-7b/7c, WP-10.A2-a.CLI) marks a failure that is a GOVERNED REFUSAL — a
@@ -17,7 +17,7 @@ import type { Command } from './map.js';
  *  (not `false`) on every pre-existing marshal failure, so back-compat is exact (exactOptionalPropertyTypes). */
 export type MarshalResult =
   | { readonly ok: true; readonly args: unknown }
-  | { readonly ok: false; readonly error: string; readonly refusal?: true };
+  | { readonly ok: false; readonly error: string; readonly refusal?: true }
 
 /**
  * Map ONE command's `{positionals, flags}` to the exact named-arg object its wired leg reads (wire.ts):
@@ -40,44 +40,44 @@ export function marshalArgs(
   flags: Readonly<Record<string, string>>,
 ): MarshalResult {
   switch (command) {
-    case 'init':
+    case "init":
       // `atlas init [path]` — parse enforces arity 1, so positionals[0] is present via the normal flow; the
       // `?? '.'` honors the card's documented default when marshalled directly (defensive totality).
-      return { ok: true, args: { path: positionals[0] ?? '.' } };
-    case 'query': {
+      return { ok: true, args: { path: positionals[0] ?? "." } }
+    case "query": {
       // `atlas query <scope> [--by scope|dependency|trigger]` — the leg reads `.scope` (back-compat) + `.by`
       // (the retrieval mode). `--by` defaults to `scope` (the pre-existing behavior). VALIDATE fail-CLOSED:
       // an unknown mode yields a structured marshal error, mirroring the emit missing-`--at` guard below.
-      const by = (flags['by'] as string | undefined) ?? 'scope';
-      if (by !== 'scope' && by !== 'dependency' && by !== 'trigger') {
-        return { ok: false, error: `query --by must be one of scope|dependency|trigger` };
+      const by = (flags["by"] as string | undefined) ?? "scope"
+      if (by !== "scope" && by !== "dependency" && by !== "trigger") {
+        return { ok: false, error: `query --by must be one of scope|dependency|trigger` }
       }
-      return { ok: true, args: { scope: positionals[0], by } };
+      return { ok: true, args: { scope: positionals[0], by } }
     }
-    case 'reconcile':
+    case "reconcile":
       // `atlas reconcile <mergeBase>` — the leg reads `mergeBase` + `options?: {acceptReground?}`. There is NO
       // `topic` in the leg's shape, so nothing else is marshalled; `--accept-reground` drives the one option.
       return {
         ok: true,
-        args: { mergeBase: positionals[0], options: { acceptReground: flags['accept-reground'] === 'true' } },
-      };
-    case 'emit':
-      return marshalEmit(positionals, flags);
-    case 'link':
-      return marshalLink(positionals, flags);
-    case 'memory-emit':
-      return marshalMemoryEmit(positionals);
+        args: { mergeBase: positionals[0], options: { acceptReground: flags["accept-reground"] === "true" } },
+      }
+    case "emit":
+      return marshalEmit(positionals, flags)
+    case "link":
+      return marshalLink(positionals, flags)
+    case "memory-emit":
+      return marshalMemoryEmit(positionals)
     default:
       // doctor/mine are intercepted before routing; a stray command here fails closed rather than routing blind.
-      return { ok: false, error: `command '${command}' has no argument marshaller` };
+      return { ok: false, error: `command '${command}' has no argument marshaller` }
   }
 }
 
 /** The ONLY flag `atlas link` accepts, and the only values that select the retraction MODE. `parse` folds a
  *  bare `--retract` to the string `'true'`, and `--retract=true` arrives as the same string, so ONE literal
  *  covers both spellings a user would reasonably type. */
-const LINK_FLAG = 'retract';
-const LINK_TRUE = 'true';
+const LINK_FLAG = "retract"
+const LINK_TRUE = "true"
 
 /**
  * `atlas link <a> <b> [--retract]` — the governed sameAs door (WP-SAMEAS / A-D3). The leg reads
@@ -115,17 +115,17 @@ function marshalLink(positionals: readonly string[], flags: Readonly<Record<stri
       return {
         ok: false,
         error: `link: unknown flag '--${name}'. The only flag this door accepts is '--retract' (withdraw a previously asserted equivalence); a governed write door does not ignore an argument you supplied`,
-      };
+      }
     }
   }
-  const raw = flags[LINK_FLAG];
+  const raw = flags[LINK_FLAG]
   if (raw !== undefined && raw !== LINK_TRUE) {
     return {
       ok: false,
       error: `link: '--retract' is a bare flag — write '--retract' or '--retract=true'; got '--retract=${raw}'. To assert (not retract), omit the flag entirely`,
-    };
+    }
   }
-  return { ok: true, args: { a: positionals[0], b: positionals[1], retract: raw === LINK_TRUE } };
+  return { ok: true, args: { a: positionals[0], b: positionals[1], retract: raw === LINK_TRUE } }
 }
 
 /**
@@ -135,27 +135,27 @@ function marshalLink(positionals: readonly string[], flags: Readonly<Record<stri
  * or malformed JSON fails CLOSED to a structured error — never a throw.
  */
 function marshalEmit(positionals: readonly string[], flags: Readonly<Record<string, string>>): MarshalResult {
-  const at = flags['at'];
-  if (at === undefined || at === 'true' || at.length === 0) {
-    return { ok: false, error: `emit requires --at <sha>: the anchor rev the fact must re-derive at` };
+  const at = flags["at"]
+  if (at === undefined || at === "true" || at.length === 0) {
+    return { ok: false, error: `emit requires --at <sha>: the anchor rev the fact must re-derive at` }
   }
-  const factPath = positionals[0];
+  const factPath = positionals[0]
   if (factPath === undefined) {
-    return { ok: false, error: `emit requires a fact JSON file path (positional 1)` };
+    return { ok: false, error: `emit requires a fact JSON file path (positional 1)` }
   }
-  let raw: string;
+  let raw: string
   try {
-    raw = readFileSync(factPath, 'utf8');
+    raw = readFileSync(factPath, "utf8")
   } catch {
-    return { ok: false, error: `emit: cannot read fact file '${factPath}'` };
+    return { ok: false, error: `emit: cannot read fact file '${factPath}'` }
   }
-  let node: unknown;
+  let node: unknown
   try {
-    node = JSON.parse(raw);
+    node = JSON.parse(raw)
   } catch {
-    return { ok: false, error: `emit: fact file '${factPath}' is not valid JSON` };
+    return { ok: false, error: `emit: fact file '${factPath}' is not valid JSON` }
   }
-  return marshalEmitNode(node, at);
+  return marshalEmitNode(node, at)
 }
 
 /**
@@ -174,20 +174,20 @@ function marshalEmit(positionals: readonly string[], flags: Readonly<Record<stri
  * at R, emit `--at R`) reaches the SAME door a bare fact always did, with no new argument shape for it.
  */
 function marshalEmitNode(node: unknown, at: string): MarshalResult {
-  if (typeof node === 'object' && node !== null && 'fact' in node && 'rev' in node) {
-    const env = node as { readonly fact: unknown; readonly rev: unknown };
-    if (typeof env.rev === 'string' && env.rev !== at) {
+  if (typeof node === "object" && node !== null && "fact" in node && "rev" in node) {
+    const env = node as { readonly fact: unknown; readonly rev: unknown }
+    if (typeof env.rev === "string" && env.rev !== at) {
       return {
         ok: false,
         error:
           `rev mismatch: this draft's grounding was computed at rev '${env.rev}' but --at requested '${at}' — ` +
           `a STALE REV, not a bad claim; re-run \`atlas draft\` to re-ground at '${at}' (or emit with --at ${env.rev})`,
         refusal: true,
-      };
+      }
     }
-    return { ok: true, args: { node: env.fact, at } };
+    return { ok: true, args: { node: env.fact, at } }
   }
-  return { ok: true, args: { node, at } };
+  return { ok: true, args: { node, at } }
 }
 
 /**
@@ -198,21 +198,21 @@ function marshalEmitNode(node: unknown, at: string): MarshalResult {
  * throw, mirroring `marshalEmit`.
  */
 function marshalMemoryEmit(positionals: readonly string[]): MarshalResult {
-  const entryPath = positionals[0];
+  const entryPath = positionals[0]
   if (entryPath === undefined) {
-    return { ok: false, error: `memory-emit requires a MemoryEntry JSON file path (positional 1)` };
+    return { ok: false, error: `memory-emit requires a MemoryEntry JSON file path (positional 1)` }
   }
-  let raw: string;
+  let raw: string
   try {
-    raw = readFileSync(entryPath, 'utf8');
+    raw = readFileSync(entryPath, "utf8")
   } catch {
-    return { ok: false, error: `memory-emit: cannot read entry file '${entryPath}'` };
+    return { ok: false, error: `memory-emit: cannot read entry file '${entryPath}'` }
   }
-  let entry: unknown;
+  let entry: unknown
   try {
-    entry = JSON.parse(raw);
+    entry = JSON.parse(raw)
   } catch {
-    return { ok: false, error: `memory-emit: entry file '${entryPath}' is not valid JSON` };
+    return { ok: false, error: `memory-emit: entry file '${entryPath}' is not valid JSON` }
   }
-  return { ok: true, args: { entry } };
+  return { ok: true, args: { entry } }
 }

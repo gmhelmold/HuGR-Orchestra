@@ -8,10 +8,10 @@
 // a push at spawn, off the ARCHIVED fold, scoped to own+resumed only. The PERSIST Checkpoint substrate is
 // consumed as a seam fixture (see the test) — no upward package dependency introduced here.
 
-import { id, eventId, createLog, combine } from '@atlas/kernel';
-import type { Event, EventLog } from '@atlas/kernel';
-import type { Hash } from '@atlas/contracts';
-import type { MemberId, MemoryKind, MemoryRecord, MemoryStore, TaskMemoryEntry } from './types.js';
+import { id, eventId, createLog, combine } from "@atlas/kernel"
+import type { Event, EventLog } from "@atlas/kernel"
+import type { Hash } from "@atlas/contracts"
+import type { MemberId, MemoryKind, MemoryRecord, MemoryStore, TaskMemoryEntry } from "./types.js"
 
 // ── frozen re-spawn surface, co-located here (was ref/respawn.ts) ──────────────────────────────────────────
 
@@ -20,7 +20,7 @@ import type { MemberId, MemoryKind, MemoryRecord, MemoryStore, TaskMemoryEntry }
  * Transcribed as the `{ attempted, failedWith, stoppedAt, lesson }` projection of `TaskMemoryEntry`
  * (atlas-memory:19, 127). (`pr` folds carry the analogous decisions/outcomes subset of `PrMemoryEntry`.)
  */
-export type ClosingFold = Pick<TaskMemoryEntry, 'attempted' | 'failedWith' | 'stoppedAt' | 'lesson'>;
+export type ClosingFold = Pick<TaskMemoryEntry, "attempted" | "failedWith" | "stoppedAt" | "lesson">
 
 /**
  * The unit a seat is resuming (a `task` / `pr` it previously touched — MEM-13).
@@ -29,15 +29,15 @@ export type ClosingFold = Pick<TaskMemoryEntry, 'attempted' | 'failedWith' | 'st
  * transcribed as `{ kind, id }` over the two resumable kinds — `id` is `string`, NOT invented as a brand.
  */
 export interface ResumeUnit {
-  readonly kind: 'task' | 'pr'; // the resumable Memory kinds (project/logbook are not resumed folds)
-  readonly id: string; // [PINNED] taskId / prId — no frozen brand
+  readonly kind: "task" | "pr" // the resumable Memory kinds (project/logbook are not resumed folds)
+  readonly id: string // [PINNED] taskId / prId — no frozen brand
 }
 
 export interface RespawnApi {
   /** Push the seat's OWN archived closing fold for the resumed unit, ONCE at spawn — deterministic off
    *  the archived record, scoped to own + resumed only, fires at SPAWN (not on a running turn — MEM-13).
    *  Reuses MEM-10's versioned archive. Pure + deterministic. (method-tags-mem:109) */
-  spawnRecall(seat: MemberId, unit: ResumeUnit): ClosingFold;
+  spawnRecall(seat: MemberId, unit: ResumeUnit): ClosingFold
 }
 
 // ── MEM-10a: the versioned record (SEALED kernel insert-only content-keyed log) ──────────────────────────
@@ -48,15 +48,15 @@ export interface RespawnApi {
  * local ordering hint pinned out of the id preimage (KERNEL-9); the record rides as the opaque `payload`.
  */
 function toEvent(rec: MemoryRecord): Event {
-  const contentHash: Hash = id(rec);
+  const contentHash: Hash = id(rec)
   const content = {
     seq: 0,
     contentHash,
     fresh: true,
     supersedes: [] as readonly Hash[],
     payload: rec,
-  };
-  return { ...content, id: eventId(content) };
+  }
+  return { ...content, id: eventId(content) }
 }
 
 /**
@@ -65,10 +65,10 @@ function toEvent(rec: MemoryRecord): Event {
  * grow-only). Because it is the ONE git-native log, no type is siphoned into a non-versioned side-store.
  */
 export function versioned(store: MemoryStore): EventLog {
-  const log = createLog();
-  let snapshot: EventLog = new Map();
-  for (const rec of store) snapshot = log.append(toEvent(rec));
-  return snapshot;
+  const log = createLog()
+  let snapshot: EventLog = new Map()
+  for (const rec of store) snapshot = log.append(toEvent(rec))
+  return snapshot
 }
 
 /**
@@ -78,12 +78,12 @@ export function versioned(store: MemoryStore): EventLog {
  * non-versioned side-store would lose that type here — this carry keeps every record.
  */
 export function carry(base: EventLog, incoming: EventLog = base): EventLog {
-  return combine(base, incoming);
+  return combine(base, incoming)
 }
 
 /** The set of memory TYPES present in a versioned record — witnesses that every type TRAVELS (MEM-10a). */
 export function typesIn(log: EventLog): ReadonlySet<MemoryKind> {
-  return new Set([...log.values()].map((ev) => (ev.payload as MemoryRecord).kind));
+  return new Set([...log.values()].map((ev) => (ev.payload as MemoryRecord).kind))
 }
 
 // ── MEM-10b: a run re-spawnable SOLELY from the versioned record ─────────────────────────────────────────
@@ -95,7 +95,7 @@ export function typesIn(log: EventLog): ReadonlySet<MemoryKind> {
  * kernel log is preserved by the `Map`, so two re-spawns yield an identical store.)
  */
 export function respawnFromRecord(log: EventLog): MemoryStore {
-  return [...log.values()].map((ev) => ev.payload as MemoryRecord);
+  return [...log.values()].map((ev) => ev.payload as MemoryRecord)
 }
 
 // ── MEM-13: recall pushed at re-spawn off the archived fold ──────────────────────────────────────────────
@@ -106,13 +106,13 @@ export function respawnFromRecord(log: EventLog): MemoryStore {
  * spawn push a pure, kind-agnostic lookup that is deterministic off the archived record.
  */
 export interface ArchivedFold {
-  readonly owner: MemberId;
-  readonly unit: ResumeUnit;
-  readonly fold: ClosingFold;
+  readonly owner: MemberId
+  readonly unit: ResumeUnit
+  readonly fold: ClosingFold
 }
 
 /** The closing-fold archive — MEM-10's versioned-record archive projected for MEM-13 recall. */
-export type FoldArchive = readonly ArchivedFold[];
+export type FoldArchive = readonly ArchivedFold[]
 
 /**
  * The PINNED `task` closing-fold projection — the `{ attempted, failedWith, stoppedAt, lesson }` `Pick` of a
@@ -125,12 +125,12 @@ export function taskClosingFold(t: TaskMemoryEntry): ClosingFold {
     failedWith: t.failedWith,
     stoppedAt: t.stoppedAt,
     lesson: t.lesson,
-  };
+  }
 }
 
 /** Archive a seat's closed `task` as its resumable closing fold (MEM-10 versioned-record archive entry). */
 export function archiveTaskFold(owner: MemberId, t: TaskMemoryEntry): ArchivedFold {
-  return { owner, unit: { kind: 'task', id: t.taskId }, fold: taskClosingFold(t) };
+  return { owner, unit: { kind: "task", id: t.taskId }, fold: taskClosingFold(t) }
 }
 
 /**
@@ -140,8 +140,8 @@ export function archiveTaskFold(owner: MemberId, t: TaskMemoryEntry): ArchivedFo
  */
 export function foldArchiveFromRecord(log: EventLog): FoldArchive {
   return respawnFromRecord(log)
-    .filter((r) => r.kind === 'task')
-    .map((r) => archiveTaskFold(r.owner, r.entry as TaskMemoryEntry));
+    .filter((r) => r.kind === "task")
+    .map((r) => archiveTaskFold(r.owner, r.entry as TaskMemoryEntry))
 }
 
 /** A deep, immutable copy of a closing fold — so a spawn push can never alias mutable archive state. */
@@ -151,7 +151,7 @@ function copyFold(f: ClosingFold): ClosingFold {
     failedWith: [...f.failedWith],
     stoppedAt: f.stoppedAt,
     lesson: f.lesson,
-  };
+  }
 }
 
 /**
@@ -165,21 +165,17 @@ function copyFold(f: ClosingFold): ClosingFold {
 export function makeRespawn(archive: FoldArchive): RespawnApi {
   return {
     spawnRecall(seat: MemberId, unit: ResumeUnit): ClosingFold {
-      const own = archive.find(
-        (a) => a.owner === seat && a.unit.kind === unit.kind && a.unit.id === unit.id,
-      );
+      const own = archive.find((a) => a.owner === seat && a.unit.kind === unit.kind && a.unit.id === unit.id)
       if (own === undefined) {
-        throw new Error(
-          `re-spawn recall: no own archived ${unit.kind} fold for '${unit.id}' (seat '${seat}')`,
-        );
+        throw new Error(`re-spawn recall: no own archived ${unit.kind} fold for '${unit.id}' (seat '${seat}')`)
       }
-      return copyFold(own.fold);
+      return copyFold(own.fold)
     },
-  };
+  }
 }
 
 // differential-vs-oracle (compile-time): the built surface conforms to the FROZEN `RespawnApi`
 // (the frozen `RespawnApi`) — `spawnRecall(seat: MemberId, unit: ResumeUnit): ClosingFold` matches exactly. No
 // discretionary-pull / general-consultable member is added to the surface (MEM-13 / MEM-4).
-const _apiCheck: (a: FoldArchive) => RespawnApi = makeRespawn;
-void _apiCheck;
+const _apiCheck: (a: FoldArchive) => RespawnApi = makeRespawn
+void _apiCheck

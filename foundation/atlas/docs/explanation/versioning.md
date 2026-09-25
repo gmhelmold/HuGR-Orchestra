@@ -3,7 +3,7 @@
 ## The idea
 
 The Atlas does not keep its knowledge, memory, and per-agent history in a database beside the repo. It
-keeps them *inside* version control — as content-addressed objects, commit trailers, and git notes under
+keeps them _inside_ version control — as content-addressed objects, commit trailers, and git notes under
 `refs/notes/orchestra` — so that everything an agent knew and did travels with the code at every
 commit, PR, branch, fork, and merge. State is a fold over an append-only event **set** (keyed by
 content-hash, not position), and nothing is ever deleted: superseded facts, decayed memories, and closed
@@ -13,7 +13,7 @@ tasks are archived and stay re-spawnable.
 
 A sidecar knowledge store fails the moment the repo moves. Clone it onto another machine and the sidecar
 is gone; fork it and the fork starts amnesiac; hand it to a teammate and the provenance evaporates. The
-knowledge that mattered most — *why this code is the way it is, what an agent tried, what a WP cost* — is
+knowledge that mattered most — _why this code is the way it is, what an agent tried, what a WP cost_ — is
 exactly the knowledge a separate database strands.
 
 Git already solved distributed, verifiable, portable history. The Atlas rides it instead of reinventing a
@@ -25,7 +25,7 @@ clone, for any user. No non-git state is required, so no non-git state can be lo
 
 **Nothing dies** follows from the same instinct. Deleting knowledge is how a map rots silently — a fact
 that was true is quietly gone, and no one can tell whether it was wrong or merely archived. So the Atlas
-never deletes. "Forgetting" is defined narrowly as *leaving the active/injected set* — the hot, poked,
+never deletes. "Forgetting" is defined narrowly as _leaving the active/injected set_ — the hot, poked,
 in-context slice stays lean, but the archived entry is deduped, retained, and retrievable. The append-only
 log accretes; the folded knowledge evolves by supersede-with-lineage. History is never destroyed.
 
@@ -33,12 +33,12 @@ log accretes; the folded knowledge evolves by supersede-with-lineage. History is
 
 There is a real tension worth stating plainly. Two things are both wanted, and they pull apart:
 
-- **Lives inside the git host.** Memory and knowledge should be *attached to the actual objects the user
-  works with* — this commit, this PR — visible in GitHub/GitLab/Gitea, not hidden in a tool's private store.
+- **Lives inside the git host.** Memory and knowledge should be _attached to the actual objects the user
+  works with_ — this commit, this PR — visible in GitHub/GitLab/Gitea, not hidden in a tool's private store.
 - **Survives a bare clone.** The Atlas must reconstruct from git alone on another machine, with no API call
   to any host, or the re-spawn guarantee is a lie.
 
-These cannot both be the *source of truth*, because two facts of the host make it plain:
+These cannot both be the _source of truth_, because two facts of the host make it plain:
 
 1. `git push` does **not** push `refs/notes/*` by default — notes need an explicit refspec.
 2. Host-side PR data (comments, body sections) does **not** arrive with a bare `git clone` — it lives behind
@@ -46,7 +46,7 @@ These cannot both be the *source of truth*, because two facts of the host make i
 
 The resolution is a deliberate split. **The git-native store is the source of truth** — the tracked
 content-addressed objects plus `refs/notes/orchestra`, present in any clone/fork (the adapter configures the
-notes refspec so push actually carries them). **The PR surface is a first-class *projection*** — a host
+notes refspec so push actually carries them). **The PR surface is a first-class _projection_** — a host
 adapter renders the PR-memory, the orchestrator's logbook entry, and the ratified knowledge-delta onto the
 real PR, so it genuinely lives inside GitHub and is visible there. But the projection is reconstructable
 from the git-native source; it is never the only home of a datum. So the claim "it's on GitHub" is true
@@ -54,10 +54,10 @@ without becoming the trap where a re-spawn on a fresh clone finds the knowledge 
 
 ## Branches, merges, and rebases — the fold is over a set, not a line
 
-"Rewind a PR ⇒ the Atlas rewinds" is only obvious on a *linear* log. Real repos branch, merge, and rebase —
+"Rewind a PR ⇒ the Atlas rewinds" is only obvious on a _linear_ log. Real repos branch, merge, and rebase —
 and a positional `seq` would collide the instant two branches both appended, while a rebase rewrites every
 position outright. So the event log is not a line-ordered file; it is an **append-only, commutative set keyed
-by each event's content-hash** (`seq` is a local ordering *hint*, never identity — `reference/atlas-kernel.md`
+by each event's content-hash** (`seq` is a local ordering _hint_, never identity — `reference/atlas-kernel.md`
 KERNEL-9).
 
 Merging two branches is therefore a **set-union, then a re-fold** — the CRDT move, not a textual 3-way merge.

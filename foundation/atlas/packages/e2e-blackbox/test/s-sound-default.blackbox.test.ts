@@ -14,52 +14,52 @@
 // byte-identical to the old default) is proven separately — every other S-story pins its own arm, and the
 // `mine-arms` unit suite proves the render equivalence.
 
-import { rmSync } from 'node:fs';
-import { afterAll, describe, expect, it } from 'vitest';
+import { rmSync } from "node:fs"
+import { afterAll, describe, expect, it } from "vitest"
 
-import { makeFixtureRepo, runAtlas } from '../src/harness.js';
-import type { FixtureRepo } from '../src/harness.js';
+import { makeFixtureRepo, runAtlas } from "../src/harness.js"
+import type { FixtureRepo } from "../src/harness.js"
 
 // A bare repo with sources but NO index: the structural pass yields 0 sites, so each arm's why-empty names the
 // structural cause and points at `atlas doctor index` (the honesty leg this story guards).
 const FILES = {
-  'src/util.ts': 'export function greet(n: string): string {\n  return `hi ${n}`;\n}\n',
-  'src/app.ts': "import { greet } from './util';\n\nexport function main(): string {\n  return greet('world');\n}\n",
-};
+  "src/util.ts": "export function greet(n: string): string {\n  return `hi ${n}`;\n}\n",
+  "src/app.ts": "import { greet } from './util';\n\nexport function main(): string {\n  return greet('world');\n}\n",
+}
 
-let repo: FixtureRepo | undefined;
-const scratch: string[] = [];
+let repo: FixtureRepo | undefined
+const scratch: string[] = []
 function bareRepo(): FixtureRepo {
-  repo ??= makeFixtureRepo({ files: FILES });
-  return repo;
+  repo ??= makeFixtureRepo({ files: FILES })
+  return repo
 }
 
 afterAll(() => {
-  repo?.cleanup();
-  while (scratch.length > 0) rmSync(scratch.pop()!, { recursive: true, force: true });
-});
+  repo?.cleanup()
+  while (scratch.length > 0) rmSync(scratch.pop()!, { recursive: true, force: true })
+})
 
-describe('SOUND-DEFAULT-MINE — a default `atlas mine` mines advisory + dependency + count in ONE run', () => {
-  it('with NO ATLAS_MINE_SLOT the merged render names every arm (the ratified default flip is real)', () => {
-    const run = runAtlas(bareRepo().repoPath, ['mine', '.']); // deliberately NO ATLAS_MINE_SLOT
+describe("SOUND-DEFAULT-MINE — a default `atlas mine` mines advisory + dependency + count in ONE run", () => {
+  it("with NO ATLAS_MINE_SLOT the merged render names every arm (the ratified default flip is real)", () => {
+    const run = runAtlas(bareRepo().repoPath, ["mine", "."]) // deliberately NO ATLAS_MINE_SLOT
 
-    expect(run.exitCode).toBe(0);
+    expect(run.exitCode).toBe(0)
     // The per-arm exposure line — the union total plus what each arm produced (foldArms multi-arm path).
-    expect(run.stdout).toContain('mine: arms — advisory');
+    expect(run.stdout).toContain("mine: arms — advisory")
     // Each arm ran and printed its own FULL body under a slot heading — advisory PROSE alongside the two
     // SOUND arms, no env var required to reach them.
-    expect(run.stdout).toContain('arm: advisory');
-    expect(run.stdout).toContain('arm: dependency');
-    expect(run.stdout).toContain('arm: count');
+    expect(run.stdout).toContain("arm: advisory")
+    expect(run.stdout).toContain("arm: dependency")
+    expect(run.stdout).toContain("arm: count")
     // NOT the single-pass shape: the old default emitted exactly one un-suffixed genesis line and no `arm:`
     // headings, so this is the observable difference the flip introduces.
-    expect(run.stdout).toContain('[union]');
+    expect(run.stdout).toContain("[union]")
     // THE HONESTY LEG (#129/#163): a 0-site run must still point the operator at the next step, ONCE PER ARM —
     // never a dead-end `coverage CLOSES 0 sites` with no guidance. This repo has no `.atlas/index.scip`, so
     // every arm's why-empty names the structural cause and the command that produces the index.
-    const armHeadings = run.stdout.split('\n').filter((l) => l.startsWith('arm: '));
-    expect(armHeadings).toHaveLength(3);
-    const guidance = run.stdout.split('\n').filter((l) => l.includes('atlas doctor index'));
-    expect(guidance).toHaveLength(3); // the next-step is present under each of the three arms
-  });
-});
+    const armHeadings = run.stdout.split("\n").filter((l) => l.startsWith("arm: "))
+    expect(armHeadings).toHaveLength(3)
+    const guidance = run.stdout.split("\n").filter((l) => l.includes("atlas doctor index"))
+    expect(guidance).toHaveLength(3) // the next-step is present under each of the three arms
+  })
+})

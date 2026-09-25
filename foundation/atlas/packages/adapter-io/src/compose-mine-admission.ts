@@ -16,26 +16,26 @@
 // times and answered `no admission seam wired (mine default)` every time. Supplying the gate is WIRING, the
 // same kind as the store / drift source / history source already built next door, so it lands here.
 
-import type { StructRef } from '@atlas/contracts';
-import type { Axes, ScipOutput } from '@atlas/index';
-import { createUnitDeps } from '@atlas/index';
-import { driftDetect, ground } from '@atlas/grounding';
-import type { Grounding } from '@atlas/grounding';
-import type { AdmitDeps } from '@atlas/genesis';
-import { createVerifyFactLeg } from "./verify-fact-source.js";
+import type { StructRef } from "@atlas/contracts"
+import type { Axes, ScipOutput } from "@atlas/index"
+import { createUnitDeps } from "@atlas/index"
+import { driftDetect, ground } from "@atlas/grounding"
+import type { Grounding } from "@atlas/grounding"
+import type { AdmitDeps } from "@atlas/genesis"
+import { createVerifyFactLeg } from "./verify-fact-source.js"
 
 /** Re-derive a mined site's grounding receipt against the built index — the FROZEN GROUND-3 anchor builder
  *  (`ground`), never a hand-built receipt. Supplied to the driver so the anchor a staged row RECORDS is the
  *  content-committing spatial hash, which is the only anchor the freshness oracle can ever re-verify. */
-export type Reground = (site: StructRef) => Grounding;
+export type Reground = (site: StructRef) => Grounding
 
 /** What the composition root hands `atlas mine`: the frozen `admit` seams, plus the GROUND-3 re-grounding
  *  the proposal's receipt is built from. Both halves are needed — `admit` casts the verdict, but it casts it
  *  over the receipt the caller supplies, and a receipt built from the raw seed cannot pass the truth door
  *  (see `reground` below for the measurement). */
 export interface MineAdmission {
-  readonly deps: AdmitDeps;
-  readonly reground: Reground;
+  readonly deps: AdmitDeps
+  readonly reground: Reground
 }
 
 /**
@@ -73,18 +73,15 @@ export interface MineAdmission {
  * oracle expresses nothing, the teeth never flip, `K` is 0. A predicate path that DOES synthesize a check
  * (rather than reusing the dependency/count sound legs) must supply real ones.
  */
-export function buildMineAdmission(
-  axes: Axes,
-  scipOutput: ScipOutput,
-): MineAdmission {
-  const verifyDep = createVerifyFactLeg(scipOutput);
+export function buildMineAdmission(axes: Axes, scipOutput: ScipOutput): MineAdmission {
+  const verifyDep = createVerifyFactLeg(scipOutput)
   const deps: AdmitDeps = {
     doors: {
-      grounded: (grounding) => driftDetect(grounding, axes) === 'FRESH',
+      grounded: (grounding) => driftDetect(grounding, axes) === "FRESH",
       nonObvious: () => false,
     },
-    predicate: { synthesize: () => null, verify: () => 'NA', teeth: () => false },
-    typeOracle: { expressible: () => false, diagnose: () => 'NA' },
+    predicate: { synthesize: () => null, verify: () => "NA", teeth: () => false },
+    typeOracle: { expressible: () => false, diagnose: () => "NA" },
     // [#196a candidate-grounded] `target` is ALREADY the unit's own cross-unit dependency SYMBOL — the parser
     // resolved the picked name to it PER-UNIT (`makeDependencyClaimParser` over `UnitDepsApi.resolveDepFor`),
     // so the fact is bound to the unit's specific dependency (lucy BLOCKER: an index-wide name lookup here let an
@@ -92,9 +89,9 @@ export function buildMineAdmission(
     // scope via the sound oracle: `proven` iff it has a witnessed caller in `scope`, else `abstain`. A
     // `dependency` verdict is `proven`/`abstain` only (never `refuted`, the negation-only closed-world verdict).
     verifyDependency: (target, scope) =>
-      verifyDep({ kind: 'dependency', claim: { sourceScope: scope, target, worldScope: scope } }).verdict === 'proven'
-        ? 'proven'
-        : 'abstain',
+      verifyDep({ kind: "dependency", claim: { sourceScope: scope, target, worldScope: scope } }).verdict === "proven"
+        ? "proven"
+        : "abstain",
     // [#196c candidate-grounded] The CARDINALITY dual. `target` is the unit's OWN exported SYMBOL and `atLeast`
     // is the HARNESS-derived witnessed count (`makeCountClaimParser` over `UnitExportsApi.resolveExportFor`) —
     // the model never supplied the number. The gate RE-PROVES via the SAME sound leg: `verifyCount` counts the
@@ -102,18 +99,19 @@ export function buildMineAdmission(
     // bound, sound in ANY world — LOWER-BOUND mode, `exact` deliberately UNSET, since an equality is a
     // closed-world claim we are not making). `proven`/`abstain` only (never `refuted`).
     verifyCount: (target, scope, atLeast) =>
-      verifyDep({ kind: 'count', claim: { sourceScope: scope, target, worldScope: scope, atLeast } }).verdict === 'proven'
-        ? 'proven'
-        : 'abstain',
+      verifyDep({ kind: "count", claim: { sourceScope: scope, target, worldScope: scope, atLeast } }).verdict ===
+      "proven"
+        ? "proven"
+        : "abstain",
     // [#196d candidate-grounded] The DEFINITION dual. `target` is the unit's OWN defined SYMBOL (the parser
     // resolved the picked name to it PER-UNIT, `makeDefinitionClaimParser` over `UnitDefsApi.resolveDefFor`) and
     // `scope` is the unit's own directory. The gate RE-PROVES via the SAME sound leg: `verifyDefinition` proves
     // `proven` iff the symbol's def-occurrence lies UNDER `scope` — a witnessed existence, sound in ANY world.
     // `proven`/`abstain` only (never `refuted`).
     verifyDefinition: (target, scope) =>
-      verifyDep({ kind: 'definition', claim: { sourceScope: scope, target } }).verdict === 'proven'
-        ? 'proven'
-        : 'abstain',
+      verifyDep({ kind: "definition", claim: { sourceScope: scope, target } }).verdict === "proven"
+        ? "proven"
+        : "abstain",
     // [#99 sound relation, ADR-0018 — WP-R7] The DIRECTED-EDGE dual, wired over the SAME `createVerifyFactLeg`
     // sound oracle the three legs above ride (`verify-fact-source.ts`, `kind:'relation'` → `verifyRelation`).
     // All five legs are forwarded verbatim into the `RelationClaim`: `verifyRelation` binds BOTH endpoint FILES
@@ -125,13 +123,14 @@ export function buildMineAdmission(
     // `proven`-sealed relation rather than fall to advisory — without it a relation proposal admitted through
     // this same `AdmitDeps` has no oracle and `trySoundRelation` returns undefined (advisory, no seal).
     verifyRelation: (relationKind, target, sourceScope, endpointA, endpointB) =>
-      verifyDep({ kind: 'relation', claim: { relationKind, target, sourceScope, endpointA, endpointB } }).verdict === 'proven'
-        ? 'proven'
-        : 'abstain',
+      verifyDep({ kind: "relation", claim: { relationKind, target, sourceScope, endpointA, endpointB } }).verdict ===
+      "proven"
+        ? "proven"
+        : "abstain",
     refine: () => null,
     indexState: axes.spatial,
     K: 0,
-  };
+  }
   // GROUND-3, fact-level fail-closed: a site whose path does not resolve on a content-committing axis
   // yields `{ entries: [] }`, which `isGrounded` rejects and `driftDetect` reads DRIFTED ⇒ the truth door
   // drops it. Nothing is guessed.
@@ -146,6 +145,6 @@ export function buildMineAdmission(
   // different reason. Re-derived through `ground`, the receipt carries the SPATIAL content fold and the pass
   // admits. The seed's own `qualifiedPath` is the resolution key either way; only the oracle leg changes.
   const reground: Reground = (site) =>
-    ground({ citations: [{ kind: site.kind, qualifiedPath: site.qualifiedPath, path: site.qualifiedPath }] }, axes);
-  return { deps, reground };
+    ground({ citations: [{ kind: site.kind, qualifiedPath: site.qualifiedPath, path: site.qualifiedPath }] }, axes)
+  return { deps, reground }
 }

@@ -9,8 +9,8 @@
 // mirroring the #99a/#99b placement. Freshness lives elsewhere (the two rev-pair grounding entries, STAMPED at
 // emit and never re-checked — D-T2). See docs/design/234-transition-design.md.
 
-import { asNodeKey, canonicalForm, defaultEncoder } from '@atlas/kernel';
-import type { NodeKey } from '@atlas/contracts';
+import { asNodeKey, canonicalForm, defaultEncoder } from "@atlas/kernel"
+import type { NodeKey } from "@atlas/contracts"
 
 /**
  * THE REFUSAL a malformed transition earns — the 3-legged analogue of `MalformedRelationError`/
@@ -26,16 +26,16 @@ import type { NodeKey } from '@atlas/contracts';
  * transition's clothes. Refused so a transition always means what it says: one unit lineage, two DISTINCT revs.
  */
 export const MALFORMED_TRANSITION_REASON =
-  'malformed transition: a transition identity is the directed triple (unitKey, shaBefore, shaAfter), and one ' +
-  'of the three is not well-formed. unitKey must be a non-empty location-free unit key (a qualifiedPath), and ' +
-  'shaBefore/shaAfter must each be a non-empty rev content hash and must be DISTINCT (shaBefore === shaAfter ' +
-  'spans no interval — the unit did not change, so it is not a transition). Re-state the transition naming the ' +
-  'unit lineage and the two distinct revisions it spans';
+  "malformed transition: a transition identity is the directed triple (unitKey, shaBefore, shaAfter), and one " +
+  "of the three is not well-formed. unitKey must be a non-empty location-free unit key (a qualifiedPath), and " +
+  "shaBefore/shaAfter must each be a non-empty rev content hash and must be DISTINCT (shaBefore === shaAfter " +
+  "spans no interval — the unit did not change, so it is not a transition). Re-state the transition naming the " +
+  "unit lineage and the two distinct revisions it spans"
 
 export class MalformedTransitionError extends Error {
   constructor() {
-    super(MALFORMED_TRANSITION_REASON);
-    this.name = 'MalformedTransitionError';
+    super(MALFORMED_TRANSITION_REASON)
+    this.name = "MalformedTransitionError"
   }
 }
 
@@ -50,9 +50,9 @@ export class MalformedTransitionError extends Error {
  * LLM/clock/seq.
  */
 export function transitionKey(unitKey: unknown, shaBefore: unknown, shaAfter: unknown): NodeKey {
-  if (typeof unitKey !== 'string' || unitKey.length === 0) throw new MalformedTransitionError();
-  if (typeof shaBefore !== 'string' || shaBefore.length === 0) throw new MalformedTransitionError();
-  if (typeof shaAfter !== 'string' || shaAfter.length === 0) throw new MalformedTransitionError();
-  if (shaBefore === shaAfter) throw new MalformedTransitionError(); // no zero-interval — see MALFORMED_TRANSITION_REASON
-  return asNodeKey(defaultEncoder.hash(canonicalForm({ trn: unitKey, b: shaBefore, a: shaAfter })));
+  if (typeof unitKey !== "string" || unitKey.length === 0) throw new MalformedTransitionError()
+  if (typeof shaBefore !== "string" || shaBefore.length === 0) throw new MalformedTransitionError()
+  if (typeof shaAfter !== "string" || shaAfter.length === 0) throw new MalformedTransitionError()
+  if (shaBefore === shaAfter) throw new MalformedTransitionError() // no zero-interval — see MALFORMED_TRANSITION_REASON
+  return asNodeKey(defaultEncoder.hash(canonicalForm({ trn: unitKey, b: shaBefore, a: shaAfter })))
 }

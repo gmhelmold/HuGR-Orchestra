@@ -37,10 +37,10 @@
 // splice two records together, and a duplicate is deduped by content id on the fold. That is KERNEL-12b's
 // safe-degrade line merge, and it is why a fork inherits the whole log with 0 records lost.
 
-import { appendFileSync, existsSync, mkdirSync, readFileSync } from 'node:fs';
-import { dirname } from 'node:path';
-import { combine, createLog, isContentKeyed } from '@atlas/kernel';
-import type { Event, EventLog } from '@atlas/kernel';
+import { appendFileSync, existsSync, mkdirSync, readFileSync } from "node:fs"
+import { dirname } from "node:path"
+import { combine, createLog, isContentKeyed } from "@atlas/kernel"
+import type { Event, EventLog } from "@atlas/kernel"
 
 /**
  * What a read found. `rejected` is the load-bearing field: a line that failed to parse or failed its own
@@ -48,9 +48,9 @@ import type { Event, EventLog } from '@atlas/kernel';
  * there is.
  */
 export interface LogRead {
-  readonly log: EventLog;
+  readonly log: EventLog
   /** Lines that did not parse, or whose stored `id` is not their content hash. Never silently discarded. */
-  readonly rejected: number;
+  readonly rejected: number
 }
 
 /**
@@ -71,15 +71,15 @@ export interface LogRead {
  * than a defect in this file, and closing it means re-keying `orientEvent` on `eventId` and moving its
  * lineage onto `id` — a change to a frozen surface, tracked as its own work, not smuggled into a store.
  */
-export type LineKeyed = (event: Event) => boolean;
+export type LineKeyed = (event: Event) => boolean
 
 /** The primitive's surface. Deliberately two verbs: the log is appended and folded, never mutated. */
 export interface DurableLog {
-  readonly path: string;
+  readonly path: string
   /** Fold the tracked file into an event log. Total — a missing file is an empty log, not an error. */
-  read(): LogRead;
+  read(): LogRead
   /** Append one content-keyed event. Idempotent by content id: the same event twice folds to one. */
-  append(event: Event): void;
+  append(event: Event): void
 }
 
 /**
@@ -89,49 +89,49 @@ export interface DurableLog {
  * sidecar was rewritten to end.
  */
 function parseLine(line: string, keyed: LineKeyed): Event | undefined {
-  const trimmed = line.trim();
-  if (trimmed.length === 0) return undefined;
-  let parsed: unknown;
+  const trimmed = line.trim()
+  if (trimmed.length === 0) return undefined
+  let parsed: unknown
   try {
-    parsed = JSON.parse(trimmed);
+    parsed = JSON.parse(trimmed)
   } catch {
-    return undefined;
+    return undefined
   }
-  if (parsed === null || typeof parsed !== 'object') return undefined;
-  const ev = parsed as Event;
+  if (parsed === null || typeof parsed !== "object") return undefined
+  const ev = parsed as Event
   // The self-verification. A line whose id is not its own content hash was not written by this door — it
   // was torn, spliced, or edited — and is refused rather than folded in as a record.
-  if (typeof ev.id !== 'string' || !keyed(ev)) return undefined;
-  return ev;
+  if (typeof ev.id !== "string" || !keyed(ev)) return undefined
+  return ev
 }
 
 export function createDurableLog(path: string, keyed: LineKeyed = isContentKeyed): DurableLog {
   function read(): LogRead {
-    if (!existsSync(path)) return { log: new Map(), rejected: 0 };
-    let text: string;
+    if (!existsSync(path)) return { log: new Map(), rejected: 0 }
+    let text: string
     try {
-      text = readFileSync(path, 'utf8');
+      text = readFileSync(path, "utf8")
     } catch {
       // An unreadable file is NOT an empty log. Reporting it as one is precisely how the knowledge sidecar
       // turned a torn read into a total loss, so the whole file counts as one rejection and the caller sees
       // a non-zero count against an empty log.
-      return { log: new Map(), rejected: 1 };
+      return { log: new Map(), rejected: 1 }
     }
-    const appender = createLog();
-    let snapshot: EventLog = new Map();
-    let rejected = 0;
-    for (const line of text.split('\n')) {
-      if (line.trim().length === 0) continue;
-      const ev = parseLine(line, keyed);
+    const appender = createLog()
+    let snapshot: EventLog = new Map()
+    let rejected = 0
+    for (const line of text.split("\n")) {
+      if (line.trim().length === 0) continue
+      const ev = parseLine(line, keyed)
       if (ev === undefined) {
-        rejected += 1;
-        continue;
+        rejected += 1
+        continue
       }
       // `combine` is the content-keyed set-union (KERNEL-9): a duplicated line — which a git line-merge can
       // legitimately produce — folds to one record, first-seen-wins.
-      snapshot = combine(snapshot, appender.append(ev));
+      snapshot = combine(snapshot, appender.append(ev))
     }
-    return { log: snapshot, rejected };
+    return { log: snapshot, rejected }
   }
 
   function append(event: Event): void {
@@ -140,11 +140,11 @@ export function createDurableLog(path: string, keyed: LineKeyed = isContentKeyed
       // would mean writing data that can never be read back — a silent black hole with an exit code of 0.
       // Writing a line this log's own reader would reject means writing data that can never be read back
       // — a silent black hole with an exit code of 0.
-      throw new Error('durable-log: refusing to append a line its own reader would reject (KERNEL-12c)');
+      throw new Error("durable-log: refusing to append a line its own reader would reject (KERNEL-12c)")
     }
-    mkdirSync(dirname(path), { recursive: true });
-    appendFileSync(path, `${JSON.stringify(event)}\n`, { flag: 'a' });
+    mkdirSync(dirname(path), { recursive: true })
+    appendFileSync(path, `${JSON.stringify(event)}\n`, { flag: "a" })
   }
 
-  return { path, read, append };
+  return { path, read, append }
 }

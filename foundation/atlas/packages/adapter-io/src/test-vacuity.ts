@@ -49,39 +49,39 @@
 // the caller (the leg), exactly as `verify-negation.ts` takes an injected `SymbolReverseApi` rather than
 // reading the index itself.
 
-import type Parser from 'web-tree-sitter';
+import type Parser from "web-tree-sitter"
 
-type SyntaxNode = Parser.SyntaxNode;
+type SyntaxNode = Parser.SyntaxNode
 
 /** One proven `test-vacuity` fact: test `name` in the scanned unit has all its assertion-shaped calls inside
  *  `catch` clauses and no assertion-count guard. `row`/`col` are the 0-based start position of the `test(`/
  *  `it(` call — the witness span into the content-addressed bytes. */
 export interface TestVacuityFact {
-  readonly testName: string;
-  readonly shape: 'assertion-only-in-catch' | 'no-assertion-in-test' | 'assertion-never-invoked';
-  readonly row: number;
-  readonly col: number;
+  readonly testName: string
+  readonly shape: "assertion-only-in-catch" | "no-assertion-in-test" | "assertion-never-invoked"
+  readonly row: number
+  readonly col: number
 }
 
 const kids = (n: SyntaxNode): SyntaxNode[] => {
-  const out: SyntaxNode[] = [];
+  const out: SyntaxNode[] = []
   for (let i = 0; i < n.childCount; i++) {
-    const c = n.child(i);
-    if (c !== null) out.push(c);
+    const c = n.child(i)
+    if (c !== null) out.push(c)
   }
-  return out;
-};
+  return out
+}
 
 const walk = (n: SyntaxNode, f: (n: SyntaxNode) => void): void => {
-  f(n);
-  for (const c of kids(n)) walk(c, f);
-};
+  f(n)
+  for (const c of kids(n)) walk(c, f)
+}
 
 /** The trailing identifier of a callee (the segment after the final `.`, or the whole thing if bare):
  *  `strictEqual` → `strictEqual`, `assert.ok` → `ok`, `t.throws` → `throws`, `expect(e).toBe` → `toBe`. */
 function trailingName(callee: SyntaxNode): string {
-  const m = callee.text.match(/([A-Za-z_$][\w$]*)\s*$/);
-  return m === null ? '' : m[1]!;
+  const m = callee.text.match(/([A-Za-z_$][\w$]*)\s*$/)
+  return m === null ? "" : m[1]!
 }
 
 /** The CLOSED assertion vocabulary that carries no `expect`/`assert` token in its text, so the substring
@@ -92,21 +92,45 @@ function trailingName(callee: SyntaxNode): string {
  *  cost of recall on tests that happen to call an unrelated method of the same bare name. */
 const ASSERTION_NAMES = new Set<string>([
   // node:assert
-  'strictEqual', 'deepStrictEqual', 'notStrictEqual', 'notDeepStrictEqual', 'deepEqual', 'notDeepEqual',
-  'equal', 'notEqual', 'ok', 'match', 'doesNotMatch', 'throws', 'notThrows', 'doesNotThrow', 'rejects',
-  'doesNotReject', 'ifError', 'fail',
+  "strictEqual",
+  "deepStrictEqual",
+  "notStrictEqual",
+  "notDeepStrictEqual",
+  "deepEqual",
+  "notDeepEqual",
+  "equal",
+  "notEqual",
+  "ok",
+  "match",
+  "doesNotMatch",
+  "throws",
+  "notThrows",
+  "doesNotThrow",
+  "rejects",
+  "doesNotReject",
+  "ifError",
+  "fail",
   // ava / tap / node:test `t.*`
-  'is', 'not', 'true', 'false', 'truthy', 'falsy', 'pass', 'regex', 'notRegex', 'assert',
-]);
+  "is",
+  "not",
+  "true",
+  "false",
+  "truthy",
+  "falsy",
+  "pass",
+  "regex",
+  "notRegex",
+  "assert",
+])
 
 /** BROAD by design (soundness rail: over-detect). Matches `expect(...)`, `assert…(...)`, `assertEqual(...)`,
  *  `chai.assert.equal(...)`, `expect(x).toBe(...)`, `await expect(p).rejects…`, `x.should.equal(...)`, AND —
  *  via `ASSERTION_NAMES` on the callee's trailing identifier — the `node:assert`/ava vocabulary whose text
  *  carries no `expect`/`assert` token. The callee text of a `call_expression`. Over-matching only ABSTAINS. */
 function isAssertionShaped(callExpr: SyntaxNode): boolean {
-  const callee = callExpr.child(0);
-  if (callee === null) return false;
-  const t = callee.text;
+  const callee = callExpr.child(0)
+  if (callee === null) return false
+  const t = callee.text
   return (
     /(^|[.\s])expect\b/.test(t) ||
     /(^|[.\s])assert\w*\b/.test(t) ||
@@ -115,25 +139,25 @@ function isAssertionShaped(callExpr: SyntaxNode): boolean {
     ) ||
     /\.(should|must)\b/.test(t) ||
     ASSERTION_NAMES.has(trailingName(callee))
-  );
+  )
 }
 
 /** An assertion-count guard that DEFENDS the fragile shape: `expect.assertions(n)` / `expect.hasAssertions()`. */
 function isAssertionGuard(callExpr: SyntaxNode): boolean {
-  const callee = callExpr.child(0);
-  if (callee === null) return false;
-  return /^expect\s*\.\s*(assertions|hasAssertions)$/.test(callee.text.replace(/\s+/g, ''));
+  const callee = callExpr.child(0)
+  if (callee === null) return false
+  return /^expect\s*\.\s*(assertions|hasAssertions)$/.test(callee.text.replace(/\s+/g, ""))
 }
 
 /** Is `node` lexically inside a `catch_clause` that is itself within `stop` (the test body)? */
 function insideCatch(node: SyntaxNode, stop: SyntaxNode): boolean {
-  let p = node.parent;
+  let p = node.parent
   while (p !== null) {
-    if (p.type === 'catch_clause') return true;
-    if (p.id === stop.id) return false;
-    p = p.parent;
+    if (p.type === "catch_clause") return true
+    if (p.id === stop.id) return false
+    p = p.parent
   }
-  return false;
+  return false
 }
 
 /** The plain callback of a `test(name, fn)` / `it(name, fn)` call — a 2-arg call whose callee is the bare
@@ -141,47 +165,47 @@ function insideCatch(node: SyntaxNode, stop: SyntaxNode): boolean {
  *  else (member callee like `test.each`/`it.skip`, arg count ≠ 2, expression-bodied arrow) ⇒ `undefined`
  *  ⇒ ABSTAIN. */
 function plainTestBody(callExpr: SyntaxNode): { name: string; body: SyntaxNode } | undefined {
-  const callee = callExpr.child(0);
-  if (callee === null || callee.type !== 'identifier') return undefined;
-  if (callee.text !== 'test' && callee.text !== 'it') return undefined;
-  const args = kids(callExpr).find((c) => c.type === 'arguments');
-  if (args === undefined) return undefined;
-  const argNodes = kids(args).filter((c) => c.type !== '(' && c.type !== ')' && c.type !== ',');
-  if (argNodes.length !== 2) return undefined;
-  const nameNode = argNodes[0]!;
-  if (nameNode.type !== 'string' && nameNode.type !== 'template_string') return undefined;
-  const fn = argNodes[1]!;
-  if (fn.type !== 'arrow_function' && fn.type !== 'function' && fn.type !== 'function_expression') {
-    return undefined;
+  const callee = callExpr.child(0)
+  if (callee === null || callee.type !== "identifier") return undefined
+  if (callee.text !== "test" && callee.text !== "it") return undefined
+  const args = kids(callExpr).find((c) => c.type === "arguments")
+  if (args === undefined) return undefined
+  const argNodes = kids(args).filter((c) => c.type !== "(" && c.type !== ")" && c.type !== ",")
+  if (argNodes.length !== 2) return undefined
+  const nameNode = argNodes[0]!
+  if (nameNode.type !== "string" && nameNode.type !== "template_string") return undefined
+  const fn = argNodes[1]!
+  if (fn.type !== "arrow_function" && fn.type !== "function" && fn.type !== "function_expression") {
+    return undefined
   }
-  const body = kids(fn).find((c) => c.type === 'statement_block');
-  if (body === undefined) return undefined;
-  return { name: nameNode.text.replace(/^['"`]|['"`]$/g, ''), body };
+  const body = kids(fn).find((c) => c.type === "statement_block")
+  if (body === undefined) return undefined
+  return { name: nameNode.text.replace(/^['"`]|['"`]$/g, ""), body }
 }
 
 /** A `fail()`-shaped call: bare `fail(...)` or a `.fail(...)` member call (the manual-fail guard idiom). */
 function isFailCall(callExpr: SyntaxNode): boolean {
-  const callee = callExpr.child(0);
-  if (callee === null) return false;
-  return /(^|\.)fail$/.test(callee.text.replace(/\s+/g, ''));
+  const callee = callExpr.child(0)
+  if (callee === null) return false
+  return /(^|\.)fail$/.test(callee.text.replace(/\s+/g, ""))
 }
 
 /** Does any `try` BLOCK (not its `catch`) contain a `throw_statement` or a `fail()`-shaped call? Such a
  *  statement GUARDS the success path: if the operation does not throw, the manual throw/fail re-enters the
  *  `catch`, so the assertion always runs and the test is NOT vacuous. */
 function anyTryBlockGuards(body: SyntaxNode): boolean {
-  let guarded = false;
+  let guarded = false
   walk(body, (n) => {
-    if (n.type !== 'try_statement') return;
+    if (n.type !== "try_statement") return
     // the try block is the first `statement_block` child; `catch_clause`/`finally_clause` are siblings.
-    const tryBlock = kids(n).find((c) => c.type === 'statement_block');
-    if (tryBlock === undefined) return;
+    const tryBlock = kids(n).find((c) => c.type === "statement_block")
+    if (tryBlock === undefined) return
     walk(tryBlock, (m) => {
-      if (m.type === 'throw_statement') guarded = true;
-      if (m.type === 'call_expression' && isFailCall(m)) guarded = true;
-    });
-  });
-  return guarded;
+      if (m.type === "throw_statement") guarded = true
+      if (m.type === "call_expression" && isFailCall(m)) guarded = true
+    })
+  })
+  return guarded
 }
 
 /** PROVE / ABSTAIN the assertion-only-in-catch shape for ONE test body. Returns `true` only when EVERY
@@ -189,27 +213,27 @@ function anyTryBlockGuards(body: SyntaxNode): boolean {
  *  present, at least one `catch_clause` is present, AND no `try` block guards its own success path with a
  *  `throw`/`fail()`. Every other outcome ⇒ ABSTAIN (`false`). */
 function bodyIsCatchOnly(body: SyntaxNode): boolean {
-  let hasCatch = false;
-  let catchAssertions = 0;
-  let assertionOutsideCatch = false;
-  let hasGuard = false;
+  let hasCatch = false
+  let catchAssertions = 0
+  let assertionOutsideCatch = false
+  let hasGuard = false
   walk(body, (n) => {
-    if (n.type === 'catch_clause') hasCatch = true;
-    if (n.type !== 'call_expression') return;
+    if (n.type === "catch_clause") hasCatch = true
+    if (n.type !== "call_expression") return
     if (isAssertionGuard(n)) {
-      hasGuard = true;
-      return;
+      hasGuard = true
+      return
     }
     if (isAssertionShaped(n)) {
-      if (insideCatch(n, body)) catchAssertions += 1;
-      else assertionOutsideCatch = true;
+      if (insideCatch(n, body)) catchAssertions += 1
+      else assertionOutsideCatch = true
     }
-  });
-  if (hasGuard) return false;
-  if (!hasCatch) return false;
-  if (assertionOutsideCatch) return false;
-  if (anyTryBlockGuards(body)) return false;
-  return catchAssertions > 0;
+  })
+  if (hasGuard) return false
+  if (!hasCatch) return false
+  if (assertionOutsideCatch) return false
+  if (anyTryBlockGuards(body)) return false
+  return catchAssertions > 0
 }
 
 /**
@@ -227,11 +251,11 @@ function bodyIsCatchOnly(body: SyntaxNode): boolean {
  * this shape from PROVEN to ABSTAIN — the safe direction — so it cannot introduce a false admit.
  */
 function isCheckShaped(callExpr: SyntaxNode): boolean {
-  if (isAssertionShaped(callExpr)) return true;
-  const callee = callExpr.child(0);
-  if (callee === null) return false;
-  const name = trailingName(callee);
-  return /^(expect|assert|check|verify|ensure|should)/i.test(name);
+  if (isAssertionShaped(callExpr)) return true
+  const callee = callExpr.child(0)
+  if (callee === null) return false
+  const name = trailingName(callee)
+  return /^(expect|assert|check|verify|ensure|should)/i.test(name)
 }
 
 /**
@@ -245,8 +269,8 @@ function isCheckShaped(callExpr: SyntaxNode): boolean {
  * `expect`/`assert*` head. Over-matching only ever moves this shape from PROVEN to ABSTAIN.
  */
 function isCheckShapedChain(member: SyntaxNode): boolean {
-  const t = member.text;
-  return /(^|[.\s])(should|must)\b/.test(t) || /(^|[.\s])expect\b/.test(t) || /(^|[.\s])assert\w*\b/.test(t);
+  const t = member.text
+  return /(^|[.\s])(should|must)\b/.test(t) || /(^|[.\s])expect\b/.test(t) || /(^|[.\s])assert\w*\b/.test(t)
 }
 
 /**
@@ -256,25 +280,56 @@ function isCheckShapedChain(member: SyntaxNode): boolean {
  * predicate while contradicting the prose ("the body DOES work"). Dead code is not work.
  */
 function insideNestedFunction(node: SyntaxNode, body: SyntaxNode): boolean {
-  const NESTED = new Set(['function_declaration', 'function_expression', 'arrow_function', 'method_definition', 'generator_function_declaration']);
-  let cur = node.parent;
+  const NESTED = new Set([
+    "function_declaration",
+    "function_expression",
+    "arrow_function",
+    "method_definition",
+    "generator_function_declaration",
+  ])
+  let cur = node.parent
   while (cur !== null && cur.id !== body.id) {
-    if (NESTED.has(cur.type)) return true;
-    cur = cur.parent;
+    if (NESTED.has(cur.type)) return true
+    cur = cur.parent
   }
-  return false;
+  return false
 }
 
 /** The vitest/jest matcher vocabulary — FUNCTION-valued matchers. Accessing one without invoking it does
  *  NOTHING, which is the whole defect. Closed on purpose: a name outside this set ABSTAINS (recall loss,
  *  the safe direction), because the shape's soundness rests on the matcher being a function. */
 const INVOCABLE_MATCHERS = new Set<string>([
-  'toBe', 'toEqual', 'toStrictEqual', 'toBeNull', 'toBeUndefined', 'toBeDefined', 'toBeTruthy', 'toBeFalsy',
-  'toBeNaN', 'toContain', 'toContainEqual', 'toHaveLength', 'toMatch', 'toMatchObject', 'toMatchSnapshot',
-  'toMatchInlineSnapshot', 'toThrow', 'toThrowError', 'toBeInstanceOf', 'toBeGreaterThan', 'toBeLessThan',
-  'toBeGreaterThanOrEqual', 'toBeLessThanOrEqual', 'toBeCloseTo', 'toHaveProperty', 'toHaveBeenCalled',
-  'toHaveBeenCalledWith', 'toHaveBeenCalledTimes', 'toHaveReturned', 'toSatisfy',
-]);
+  "toBe",
+  "toEqual",
+  "toStrictEqual",
+  "toBeNull",
+  "toBeUndefined",
+  "toBeDefined",
+  "toBeTruthy",
+  "toBeFalsy",
+  "toBeNaN",
+  "toContain",
+  "toContainEqual",
+  "toHaveLength",
+  "toMatch",
+  "toMatchObject",
+  "toMatchSnapshot",
+  "toMatchInlineSnapshot",
+  "toThrow",
+  "toThrowError",
+  "toBeInstanceOf",
+  "toBeGreaterThan",
+  "toBeLessThan",
+  "toBeGreaterThanOrEqual",
+  "toBeLessThanOrEqual",
+  "toBeCloseTo",
+  "toHaveProperty",
+  "toHaveBeenCalled",
+  "toHaveBeenCalledWith",
+  "toHaveBeenCalledTimes",
+  "toHaveReturned",
+  "toSatisfy",
+])
 
 /**
  * Is this member chain rooted at the BARE global `expect(` — not `<anything>.expect(`?
@@ -290,16 +345,16 @@ const INVOCABLE_MATCHERS = new Set<string>([
  * links (`.not`, `.resolves`) are traversed on the way down; anything else roots elsewhere and ABSTAINS.
  */
 function rootedAtGlobalExpect(member: SyntaxNode): boolean {
-  let cur: SyntaxNode | null = member;
+  let cur: SyntaxNode | null = member
   while (cur !== null) {
-    if (cur.type === 'call_expression') {
-      const callee = cur.child(0);
-      return callee !== null && callee.type === 'identifier' && callee.text === 'expect';
+    if (cur.type === "call_expression") {
+      const callee = cur.child(0)
+      return callee !== null && callee.type === "identifier" && callee.text === "expect"
     }
-    if (cur.type !== 'member_expression') return false;
-    cur = cur.childForFieldName('object');
+    if (cur.type !== "member_expression") return false
+    cur = cur.childForFieldName("object")
   }
-  return false;
+  return false
 }
 
 /**
@@ -328,16 +383,16 @@ function rootedAtGlobalExpect(member: SyntaxNode): boolean {
  *     lose exactly the cases worth catching.
  */
 function bodyHasUninvokedMatcher(body: SyntaxNode): boolean {
-  let found = false;
+  let found = false
   walk(body, (n) => {
-    if (found || n.type !== 'expression_statement') return;
-    const expr = n.namedChild(0);
-    if (expr === null || expr.type !== 'member_expression') return;
-    if (!rootedAtGlobalExpect(expr)) return; // bare global `expect(` only — see the rail above
-    if (!INVOCABLE_MATCHERS.has(trailingName(expr))) return;
-    found = true;
-  });
-  return found;
+    if (found || n.type !== "expression_statement") return
+    const expr = n.namedChild(0)
+    if (expr === null || expr.type !== "member_expression") return
+    if (!rootedAtGlobalExpect(expr)) return // bare global `expect(` only — see the rail above
+    if (!INVOCABLE_MATCHERS.has(trailingName(expr))) return
+    found = true
+  })
+  return found
 }
 
 /**
@@ -389,26 +444,26 @@ function bodyHasUninvokedMatcher(body: SyntaxNode): boolean {
  *     shapes able to fire on one test would make the (unitKey, testName) identity ambiguous.
  */
 function bodyHasNoAssertion(body: SyntaxNode): boolean {
-  let anyAssertion = false;
-  let hasGuard = false;
-  let discarded = 0;
-  let checks = false; // a throw / fail() / valued return / catch — the body IS checking something
+  let anyAssertion = false
+  let hasGuard = false
+  let discarded = 0
+  let checks = false // a throw / fail() / valued return / catch — the body IS checking something
   walk(body, (n) => {
-    if (n.type === 'catch_clause' || n.type === 'throw_statement') checks = true;
-    if (n.type === 'return_statement' && n.namedChildCount > 0) checks = true;
-    if (n.type === 'expression_statement' && !insideNestedFunction(n, body)) discarded += 1;
+    if (n.type === "catch_clause" || n.type === "throw_statement") checks = true
+    if (n.type === "return_statement" && n.namedChildCount > 0) checks = true
+    if (n.type === "expression_statement" && !insideNestedFunction(n, body)) discarded += 1
     // A CHECK need not be a CALL: judge non-call member chains too (cold-review false admit).
-    if (n.type === 'member_expression' && isCheckShapedChain(n)) anyAssertion = true;
-    if (n.type !== 'call_expression') return;
+    if (n.type === "member_expression" && isCheckShapedChain(n)) anyAssertion = true
+    if (n.type !== "call_expression") return
     if (isAssertionGuard(n)) {
-      hasGuard = true;
-      return;
+      hasGuard = true
+      return
     }
-    if (isCheckShaped(n)) anyAssertion = true;
-    if (isFailCall(n)) checks = true;
-  });
-  if (anyAssertion || hasGuard || checks) return false;
-  return discarded > 0;
+    if (isCheckShaped(n)) anyAssertion = true
+    if (isFailCall(n)) checks = true
+  })
+  if (anyAssertion || hasGuard || checks) return false
+  return discarded > 0
 }
 
 /**
@@ -417,11 +472,11 @@ function bodyHasNoAssertion(body: SyntaxNode): boolean {
  * of a successfully-parsed TS doc; a doc the caller could not parse yields no facts (fail-closed at the leg).
  */
 export function scanTestVacuity(root: SyntaxNode): TestVacuityFact[] {
-  const facts: TestVacuityFact[] = [];
+  const facts: TestVacuityFact[] = []
   walk(root, (n) => {
-    if (n.type !== 'call_expression') return;
-    const t = plainTestBody(n);
-    if (t === undefined) return;
+    if (n.type !== "call_expression") return
+    const t = plainTestBody(n)
+    if (t === undefined) return
     // EXACTLY ONE shape per test — the (unitKey, testName) identity admits no second fact.
     //   · `assertion-never-invoked` is tried FIRST, by ORDERED PRECEDENCE not by construction: a body can
     //     hold BOTH a real catch-assertion and, elsewhere, a matcher that is never invoked. Both predicates
@@ -430,19 +485,19 @@ export function scanTestVacuity(root: SyntaxNode): TestVacuityFact[] {
     //   · The remaining two ARE disjoint by construction: `bodyIsCatchOnly` requires a catch-assertion,
     //     `bodyHasNoAssertion` refuses any check AND any catch.
     const shape = bodyHasUninvokedMatcher(t.body)
-      ? ('assertion-never-invoked' as const)
+      ? ("assertion-never-invoked" as const)
       : bodyIsCatchOnly(t.body)
-        ? ('assertion-only-in-catch' as const)
+        ? ("assertion-only-in-catch" as const)
         : bodyHasNoAssertion(t.body)
-          ? ('no-assertion-in-test' as const)
-          : undefined;
-    if (shape === undefined) return;
+          ? ("no-assertion-in-test" as const)
+          : undefined
+    if (shape === undefined) return
     facts.push({
       testName: t.name,
       shape,
       row: n.startPosition.row,
       col: n.startPosition.column,
-    });
-  });
-  return facts;
+    })
+  })
+  return facts
 }

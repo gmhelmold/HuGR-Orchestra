@@ -7,38 +7,38 @@
 // AFTER the status/next/invariant lines and ONLY for a known `ok` data shape — an unknown/absent `data`
 // yields NO block, so every pre-existing rendering stays byte-unchanged (back-compat).
 
-import type { Verdict } from '@atlas/tools';
-import { deriveStatus, EXIT } from './map.js';
-import type { Status } from './map.js';
+import type { Verdict } from "@atlas/tools"
+import { deriveStatus, EXIT } from "./map.js"
+import type { Status } from "./map.js"
 
 /** The CLI's process-level projection of one handler verdict (ring shape). */
 export interface CliVerdict {
-  readonly exitCode: number;
-  readonly stdout: string;
+  readonly exitCode: number
+  readonly stdout: string
 }
 
 /** A `PackInvariant`-shaped row inside a query pack (structural — never a prose blob). */
 interface InvRow {
-  readonly nodeId: string;
-  readonly tier: string;
-  readonly claim: string;
+  readonly nodeId: string
+  readonly tier: string
+  readonly claim: string
   /** The row's OWN freshness verdict (ADR-0013 clause 5). Typed optional HERE and only here, because this
    *  renderer reads an `unknown` verdict payload rather than a `Pack`: a shape guard that assumed the field
    *  would make a pack from an older door render nothing at all. Rendered as `?` when absent — never
    *  silently as `FRESH`, which is the one value that would read as a verification that did not happen. */
-  readonly freshness?: string;
+  readonly freshness?: string
 }
 
 /** A `broader ⊃ narrower` coverage edge inside the query envelope (Seam-3). */
 interface SubRow {
-  readonly broader: string;
-  readonly narrower: string;
+  readonly broader: string
+  readonly narrower: string
 }
 
 /** A `a ≡ b` human equivalence edge inside the query envelope (WP-SAMEAS). */
 interface SameRow {
-  readonly a: string;
-  readonly b: string;
+  readonly a: string
+  readonly b: string
 }
 
 /**
@@ -53,36 +53,36 @@ interface SameRow {
  *   - init `{ territories }` → `  territory: <name>` per territory, sorted by name.
  */
 function renderData(data: unknown): string {
-  if (typeof data !== 'object' || data === null) return '';
-  const d = data as Record<string, unknown>;
+  if (typeof data !== "object" || data === null) return ""
+  const d = data as Record<string, unknown>
 
   // query envelope { pack, subsumes } — the observability readback (Seam-1+3).
   const pack = d.pack as
     | {
-        invariants?: unknown;
-        advisory?: unknown;
-        advisoryDropped?: unknown;
-        stale?: unknown;
-        tokenEstimate?: unknown;
-        territory?: unknown;
-        axisHash?: unknown;
+        invariants?: unknown
+        advisory?: unknown
+        advisoryDropped?: unknown
+        stale?: unknown
+        tokenEstimate?: unknown
+        territory?: unknown
+        axisHash?: unknown
       }
-    | undefined;
-  if (pack && typeof pack === 'object' && Array.isArray(pack.invariants)) {
-    const invs = pack.invariants as readonly InvRow[];
-    const adv = Array.isArray(pack.advisory) ? (pack.advisory as readonly InvRow[]) : [];
-    const advDropped = typeof pack.advisoryDropped === 'number' ? pack.advisoryDropped : 0;
-    const subs = Array.isArray(d.subsumes) ? (d.subsumes as readonly SubRow[]) : [];
-    const sames = Array.isArray(d.sameAs) ? (d.sameAs as readonly SameRow[]) : [];
+    | undefined
+  if (pack && typeof pack === "object" && Array.isArray(pack.invariants)) {
+    const invs = pack.invariants as readonly InvRow[]
+    const adv = Array.isArray(pack.advisory) ? (pack.advisory as readonly InvRow[]) : []
+    const advDropped = typeof pack.advisoryDropped === "number" ? pack.advisoryDropped : 0
+    const subs = Array.isArray(d.subsumes) ? (d.subsumes as readonly SubRow[]) : []
+    const sames = Array.isArray(d.sameAs) ? (d.sameAs as readonly SameRow[]) : []
     // N12 CLI/MCP parity: surface `tokenEstimate` (the advisory pack size) on the CLI too — MCP already ships
     // it in the pack JSON, so dropping it here was a real CLI-vs-MCP asymmetry. Deterministic (a number field).
-    const tokenEstimate = typeof pack.tokenEstimate === 'number' ? pack.tokenEstimate : 0;
+    const tokenEstimate = typeof pack.tokenEstimate === "number" ? pack.tokenEstimate : 0
     const lines = [
       // ADR-0013 clause 3 — the GOVERNING band keeps the `inv` verb it has always had, now carrying the row's
       // own freshness verdict. The ADVISORY band below gets its OWN verb (`advisory`) and is never
       // interleaved: a reader must not have to parse a tier letter to know nobody ratified a claim.
-      ...invs.map((i) => `  inv ${i.tier} ${i.nodeId} [${i.freshness ?? '?'}]: ${i.claim}`),
-      ...adv.map((i) => `  advisory ${i.tier} ${i.nodeId} [${i.freshness ?? '?'}]: ${i.claim}`),
+      ...invs.map((i) => `  inv ${i.tier} ${i.nodeId} [${i.freshness ?? "?"}]: ${i.claim}`),
+      ...adv.map((i) => `  advisory ${i.tier} ${i.nodeId} [${i.freshness ?? "?"}]: ${i.claim}`),
       // The truncation ledger rides out BESIDE the data (#130) — a bounded set that was cut and does not say
       // so reads as "we covered everything". Printed unconditionally, so `0` is a measured fact and not a
       // line the reader has to notice is missing.
@@ -92,13 +92,13 @@ function renderData(data: unknown): string {
       ...subs.map((s) => `  subsumes ${s.broader} ⊃ ${s.narrower}`),
       // WP-SAMEAS: one line per (pre-sorted) human equivalence edge — surfaced like subsumes, never a merge.
       ...sames.map((s) => `  sameAs ${s.a} ≡ ${s.b}`),
-    ];
+    ]
     // [ENTRY-CLI-6] `territory` + `axisHash` are the two `Pack` fields (@atlas/contracts) this block used to
     // drop silently — a caller could see the invariants a query resolved but never which territory/axis they
     // were resolved AGAINST. APPENDED (never inserted earlier), so every pre-existing line stays in place.
-    if (typeof pack.territory === 'string') lines.push(`  territory: ${pack.territory}`);
-    if (typeof pack.axisHash === 'string') lines.push(`  axisHash: ${pack.axisHash}`);
-    return `data:\n${lines.join('\n')}\n`;
+    if (typeof pack.territory === "string") lines.push(`  territory: ${pack.territory}`)
+    if (typeof pack.axisHash === "string") lines.push(`  axisHash: ${pack.axisHash}`)
+    return `data:\n${lines.join("\n")}\n`
   }
 
   // relations { relations, unit, direction } — the grounded relation edges touching a unit (`atlas relations`,
@@ -108,14 +108,14 @@ function renderData(data: unknown): string {
   // edge renders `  relation <kind> <A> -> <B> (<nodeKey>)` in the fold's own deterministic order.
   if (Array.isArray(d.relations)) {
     const edges = d.relations as readonly {
-      nodeKey: string;
-      relationKind: string;
-      endpointA: string;
-      endpointB: string;
-      seal?: string;
-    }[];
-    const unit = typeof d.unit === 'string' ? d.unit : '';
-    const direction = typeof d.direction === 'string' ? d.direction : 'both';
+      nodeKey: string
+      relationKind: string
+      endpointA: string
+      endpointB: string
+      seal?: string
+    }[]
+    const unit = typeof d.unit === "string" ? d.unit : ""
+    const direction = typeof d.direction === "string" ? d.direction : "both"
     // #99 R6 (AR-12): each edge surfaces its two-seal provenance as a trailing `[<seal>]` — a sound-minted
     // proven `depends-on` and an advisory relation would otherwise read IDENTICALLY at the CLI. Printed ONLY
     // when the fold carried a seal (additive/absent-tolerant, the `seal`/`freshness` discipline elsewhere in
@@ -126,10 +126,10 @@ function renderData(data: unknown): string {
       ...edges.map(
         (e) =>
           `  relation ${e.relationKind} ${e.endpointA} -> ${e.endpointB} (${e.nodeKey})` +
-          (typeof e.seal === 'string' ? ` [${e.seal}]` : ''),
+          (typeof e.seal === "string" ? ` [${e.seal}]` : ""),
       ),
-    ];
-    return `data:\n${lines.join('\n')}\n`;
+    ]
+    return `data:\n${lines.join("\n")}\n`
   }
 
   // negations { negations, abstentions, scope, abstained } — the grounded negatives + honest abstentions under
@@ -142,24 +142,35 @@ function renderData(data: unknown): string {
   // data still carries both arrays, so parity + observability hold); the default shows negatives AND
   // abstentions, so a fired abstention is visible without any flag.
   if (Array.isArray(d.negations)) {
-    const negs = d.negations as readonly { nodeKey: string; relationKind: string; target: string; scope: string; freshness?: string }[];
-    const absts = d.abstentions as readonly { relationKind: string; target: string; scope: string; reason: string }[] | undefined;
-    const abstentions = Array.isArray(absts) ? absts : [];
-    const scope = typeof d.scope === 'string' ? d.scope : '';
-    const focus = d.abstained === true;
+    const negs = d.negations as readonly {
+      nodeKey: string
+      relationKind: string
+      target: string
+      scope: string
+      freshness?: string
+    }[]
+    const absts = d.abstentions as
+      | readonly { relationKind: string; target: string; scope: string; reason: string }[]
+      | undefined
+    const abstentions = Array.isArray(absts) ? absts : []
+    const scope = typeof d.scope === "string" ? d.scope : ""
+    const focus = d.abstained === true
     const abstainedLines = abstentions.map(
       (a) => `  abstained ${a.relationKind} ${a.target} in ${a.scope} — ${a.reason}`,
-    );
+    )
     // N4: each grounded negative renders its per-row §3 freshness verdict (FRESH/DRIFTED) — a re-opened scope
     // or an extractor-model bump reads DRIFTED, so "does this negative still hold" is legible on the surface.
     const lines = focus
       ? [`  negations: ${scope} — ${abstentions.length} abstention(s)`, ...abstainedLines]
       : [
           `  negations: ${scope} — ${negs.length} negation(s), ${abstentions.length} abstention(s)`,
-          ...negs.map((n) => `  negation ${n.relationKind} ${n.target} in ${n.scope} [${n.freshness ?? 'DRIFTED'}] (${n.nodeKey})`),
+          ...negs.map(
+            (n) =>
+              `  negation ${n.relationKind} ${n.target} in ${n.scope} [${n.freshness ?? "DRIFTED"}] (${n.nodeKey})`,
+          ),
           ...abstainedLines,
-        ];
-    return `data:\n${lines.join('\n')}\n`;
+        ]
+    return `data:\n${lines.join("\n")}\n`
   }
 
   // anchors { rev, units, holes, reason? } — the read-only DISCOVERY planner listing (`atlas anchors <path>`,
@@ -176,17 +187,17 @@ function renderData(data: unknown): string {
   // when present (the leg sets it iff `units` is empty), so a populated listing stays byte-clean and an
   // empty one is never silent about WHY.
   if (Array.isArray(d.units) && Array.isArray(d.holes)) {
-    const units = d.units as readonly { qualifiedPath: string; kind: string; subtreeHash: string; path: string }[];
-    const holes = d.holes as readonly { ext: string; fileCount: number; reason: string }[];
-    const rev = typeof d.rev === 'string' ? d.rev : '';
+    const units = d.units as readonly { qualifiedPath: string; kind: string; subtreeHash: string; path: string }[]
+    const holes = d.holes as readonly { ext: string; fileCount: number; reason: string }[]
+    const rev = typeof d.rev === "string" ? d.rev : ""
     const lines = [
       `  anchors: rev ${rev} — ${units.length} unit(s), ${holes.length} hole(s)`,
       ...units.map((u) => `  unit ${u.kind} ${u.qualifiedPath} [${u.subtreeHash}]`),
       ...units.map((u) => `  unit-path ${u.qualifiedPath}: ${u.path}`),
       ...holes.map((h) => `  hole ${h.ext} — ${h.fileCount} file(s): ${h.reason}`),
-    ];
-    if (typeof d.reason === 'string') lines.push(`  reason: ${d.reason}`);
-    return `data:\n${lines.join('\n')}\n`;
+    ]
+    if (typeof d.reason === "string") lines.push(`  reason: ${d.reason}`)
+    return `data:\n${lines.join("\n")}\n`
   }
 
   // slots { slots } — the closed PredicateSlot vocabulary listing (`atlas slots`, AUTHOR-5, WP-10.A2-a.CLI).
@@ -194,9 +205,9 @@ function renderData(data: unknown): string {
   // header line states the COUNT (a measured fact, never a hardcoded "13"); each row renders `  slot <name>:
   // <meaning>` in the mapping's own declaration order.
   if (Array.isArray(d.slots)) {
-    const rows = d.slots as readonly { slot: string; meaning: string }[];
-    const lines = [`  slots: ${rows.length} predicate slot(s)`, ...rows.map((s) => `  slot ${s.slot}: ${s.meaning}`)];
-    return `data:\n${lines.join('\n')}\n`;
+    const rows = d.slots as readonly { slot: string; meaning: string }[]
+    const lines = [`  slots: ${rows.length} predicate slot(s)`, ...rows.map((s) => `  slot ${s.slot}: ${s.meaning}`)]
+    return `data:\n${lines.join("\n")}\n`
   }
 
   // draft { fact, rev, operation, route, requires? } — the COMPOSITION planner's candidate payload (`atlas
@@ -205,8 +216,8 @@ function renderData(data: unknown): string {
   // its grounding was computed at (AUTHOR-7 — pair this with `--at` at emit time), the CREATE/UPDATE call
   // and the stated ratification route (AUTHOR-9/10); the authorizing channel renders ONLY when present
   // (additive/absent-tolerant, matching the `seal`/`witness` discipline above).
-  if (typeof d.operation === 'string' && typeof d.route === 'string' && typeof d.fact === 'object' && d.fact !== null) {
-    const fact = d.fact as Record<string, unknown>;
+  if (typeof d.operation === "string" && typeof d.route === "string" && typeof d.fact === "object" && d.fact !== null) {
+    const fact = d.fact as Record<string, unknown>
     const lines = [
       `  draft: ${String(fact.id)}`,
       `  tier: ${String(fact.tier)}`,
@@ -215,9 +226,9 @@ function renderData(data: unknown): string {
       `  rev: ${String(d.rev)}`,
       `  operation: ${d.operation}`,
       `  route: ${d.route}`,
-    ];
-    if (typeof d.requires === 'string') lines.push(`  requires: ${d.requires}`);
-    return `data:\n${lines.join('\n')}\n`;
+    ]
+    if (typeof d.requires === "string") lines.push(`  requires: ${d.requires}`)
+    return `data:\n${lines.join("\n")}\n`
   }
 
   // link { linked, a, b, retracted? } — the governed sameAs write door result (WP-SAMEAS). A SUCCESSFUL link
@@ -229,10 +240,8 @@ function renderData(data: unknown): string {
   // line. Both modes settle as `linked:true` (that field means "the act changed the stored relation"), so
   // rendering them alike would put "linked: a ≡ b" on a human's screen at the exact moment the equivalence
   // was withdrawn. Distinct verb, distinct symbol, no way to misread which act happened.
-  if (d.linked === true && typeof d.a === 'string' && typeof d.b === 'string') {
-    return d.retracted === true
-      ? `data:\n  retracted: ${d.a} ≢ ${d.b}\n`
-      : `data:\n  linked: ${d.a} ≡ ${d.b}\n`;
+  if (d.linked === true && typeof d.a === "string" && typeof d.b === "string") {
+    return d.retracted === true ? `data:\n  retracted: ${d.a} ≢ ${d.b}\n` : `data:\n  linked: ${d.a} ≡ ${d.b}\n`
   }
 
   // node (TEST-VACUITY) — a resolved `TestVacuityNode` (the `atlas node <addr>` read door) for the single-anchor
@@ -242,16 +251,16 @@ function renderData(data: unknown): string {
   // is what renders. The seal + witness render ONLY when present (additive/absent-tolerant, the `seal`/
   // `witness` discipline the relation/predicate branches use); the witness is a `TestVacuityWitness`
   // (shape/testName) — the re-runnable derivation `scanTestVacuity` re-proves at HEAD, never model prose.
-  if (d.kind === 'test-vacuity' && typeof d.grounding === 'object' && d.grounding !== null) {
+  if (d.kind === "test-vacuity" && typeof d.grounding === "object" && d.grounding !== null) {
     let out =
       `data:\n  node: ${String(d.id)}\n  tier: ${String(d.tier)}\n  kind: test-vacuity\n` +
-      `  test-vacuity: ${String(d.testName)} @ ${String(d.unitKey)} (${String(d.shape)})\n`;
-    if (typeof d.seal === 'string') out += `  seal: ${d.seal}\n`;
-    if (typeof d.witness === 'object' && d.witness !== null) {
-      const w = d.witness as Record<string, unknown>;
-      out += `  witness:\n    shape: ${String(w.shape)}\n    testName: ${String(w.testName)}\n`;
+      `  test-vacuity: ${String(d.testName)} @ ${String(d.unitKey)} (${String(d.shape)})\n`
+    if (typeof d.seal === "string") out += `  seal: ${d.seal}\n`
+    if (typeof d.witness === "object" && d.witness !== null) {
+      const w = d.witness as Record<string, unknown>
+      out += `  witness:\n    shape: ${String(w.shape)}\n    testName: ${String(w.testName)}\n`
     }
-    return out;
+    return out
   }
 
   // node (RELATION) — a resolved `RelationNode` (the `atlas node <addr>` read door) for the 2-ended family
@@ -262,46 +271,46 @@ function renderData(data: unknown): string {
   // advisory|predicate), so a proven `depends-on` was invisible at the user surface. The seal + witness render
   // ONLY when present (additive/absent-tolerant); the witness is a `RelationWitness` (relationKind/target/
   // sourceScope), NOT a `PredicateWitness` (slot/target/scope/atLeast) — a relation has no `PredicateSlot`.
-  if (d.kind === 'relation' && typeof d.grounding === 'object' && d.grounding !== null) {
+  if (d.kind === "relation" && typeof d.grounding === "object" && d.grounding !== null) {
     let out =
       `data:\n  node: ${String(d.id)}\n  tier: ${String(d.tier)}\n  kind: relation\n` +
-      `  relation: ${String(d.endpointA)} ${String(d.relationKind)} ${String(d.endpointB)}\n`;
-    if (typeof d.seal === 'string') out += `  seal: ${d.seal}\n`;
-    if (typeof d.witness === 'object' && d.witness !== null) {
-      const w = d.witness as Record<string, unknown>;
-      out += `  witness:\n    relationKind: ${String(w.relationKind)}\n    target: ${String(w.target)}\n    sourceScope: ${String(w.sourceScope)}\n`;
+      `  relation: ${String(d.endpointA)} ${String(d.relationKind)} ${String(d.endpointB)}\n`
+    if (typeof d.seal === "string") out += `  seal: ${d.seal}\n`
+    if (typeof d.witness === "object" && d.witness !== null) {
+      const w = d.witness as Record<string, unknown>
+      out += `  witness:\n    relationKind: ${String(w.relationKind)}\n    target: ${String(w.target)}\n    sourceScope: ${String(w.sourceScope)}\n`
     }
-    return out;
+    return out
   }
 
   // node — a resolved `GroundedFact` (the `atlas node <addr>` read door, N6). Recognised by its `kind`
   // (advisory|predicate) + a `grounding` object — the emit `{ id }` shape below has NEITHER, so it is never
   // shadowed. Renders the node's identity + tier + claim (advisory `claimNorm`, else the `claims` set-union).
-  if ((d.kind === 'advisory' || d.kind === 'predicate') && typeof d.grounding === 'object' && d.grounding !== null) {
+  if ((d.kind === "advisory" || d.kind === "predicate") && typeof d.grounding === "object" && d.grounding !== null) {
     const claim =
-      typeof d.claimNorm === 'string' && d.claimNorm.length > 0
+      typeof d.claimNorm === "string" && d.claimNorm.length > 0
         ? d.claimNorm
         : Array.isArray(d.claims)
-          ? (d.claims as readonly string[]).join('; ')
-          : '';
-    let out = `data:\n  node: ${String(d.id)}\n  tier: ${String(d.tier)}\n  kind: ${d.kind}\n  claim: ${claim}\n`;
+          ? (d.claims as readonly string[]).join("; ")
+          : ""
+    let out = `data:\n  node: ${String(d.id)}\n  tier: ${String(d.tier)}\n  kind: ${d.kind}\n  claim: ${claim}\n`
     // #239 — a `seal:'proven'` fact's own re-check derivation (SEAL-CARRIES-ITS-WITNESS, PR #195), the ONE
     // leg the original WP deliberately left un-rendered. Printed ONLY when present (additive/absent-
     // tolerant, matching `seal`/`obviousness`'s own discipline above) — an un-sealed node renders byte-
     // identically to before this change.
-    if (typeof d.seal === 'string') out += `  seal: ${d.seal}\n`;
-    if (typeof d.witness === 'object' && d.witness !== null) {
-      const w = d.witness as Record<string, unknown>;
+    if (typeof d.seal === "string") out += `  seal: ${d.seal}\n`
+    if (typeof d.witness === "object" && d.witness !== null) {
+      const w = d.witness as Record<string, unknown>
       // NESTED, deliberately, mirroring the stored shape: `d.scope` (the KNOW-11a AUTHZ scope, e.g.
       // 'atlas:mined') and `d.witness.scope` (the VERIFY-SCOPE directory the oracle ranged over, e.g.
       // 'src/pay') are DIFFERENT things — PR #195 nested them precisely so a reader could not misread one
       // for the other. Indenting `witness:`'s own `scope:` one level under it (rather than a flat
       // `witnessScope:` sibling of a top-level `scope:`) keeps that distinction visible in this render too:
       // the path to each field on the page matches the path to each field on the stored object.
-      out += `  witness:\n    slot: ${String(w.slot)}\n    target: ${String(w.target)}\n    scope: ${String(w.scope)}\n`;
-      if (typeof w.atLeast === 'number') out += `    atLeast: ${w.atLeast}\n`;
+      out += `  witness:\n    slot: ${String(w.slot)}\n    target: ${String(w.target)}\n    scope: ${String(w.scope)}\n`
+      if (typeof w.atLeast === "number") out += `    atLeast: ${w.atLeast}\n`
     }
-    return out;
+    return out
   }
 
   // memory-emit { admitted, owner?, kind? } — WP-11.W8, the governed MEMORY write door's receipt
@@ -310,23 +319,23 @@ function renderData(data: unknown): string {
   // is `ok:false` — its `reason:` line already carries the named MEM gate + human reason, mirroring
   // `EmitOut`/`LinkOut`). `MemoryRecord` carries no CAS `id` of its own (unlike a knowledge `GroundedFact`)
   // — `owner`/`kind` are its two structural fields, so those are what a receipt has to show.
-  if (typeof d.admitted === 'boolean') {
-    if (!d.admitted) return '';
-    const record = d.record as { owner?: unknown; kind?: unknown } | undefined;
-    let out = 'data:\n';
-    if (typeof record?.owner === 'string') out += `  owner: ${record.owner}\n`;
-    if (typeof record?.kind === 'string') out += `  kind: ${record.kind}\n`;
-    return out;
+  if (typeof d.admitted === "boolean") {
+    if (!d.admitted) return ""
+    const record = d.record as { owner?: unknown; kind?: unknown } | undefined
+    let out = "data:\n"
+    if (typeof record?.owner === "string") out += `  owner: ${record.owner}\n`
+    if (typeof record?.kind === "string") out += `  kind: ${record.kind}\n`
+    return out
   }
 
   // emit { id, nodeKey? } — the CAS id of the persisted fact. [ENTRY-CLI-6 / AUTHOR-14] `nodeKey` — the
   // SAME identity `atlas node <addr>` reads back — used to ride the `EmitOut` receipt completely unrendered;
   // it now gets its OWN trailing line, APPENDED after `id` (never replacing it), and ONLY when present
   // (additive/absent-tolerant — a pre-#… receipt with no `nodeKey` renders byte-identically to before).
-  if (typeof d.id === 'string') {
-    let out = `data:\n  id: ${d.id}\n`;
-    if (typeof d.nodeKey === 'string') out += `  nodeKey: ${d.nodeKey}\n`;
-    return out;
+  if (typeof d.id === "string") {
+    let out = `data:\n  id: ${d.id}\n`
+    if (typeof d.nodeKey === "string") out += `  nodeKey: ${d.nodeKey}\n`
+    return out
   }
 
   // init { territories, blastRadius, t0Candidates } — the structural move-in (`InitOut`, ENTRY-CLI-6 §
@@ -341,16 +350,16 @@ function renderData(data: unknown): string {
   if (Array.isArray(d.territories)) {
     const names = (d.territories as readonly { name: string }[])
       .map((t) => t.name)
-      .sort((a, b) => (a < b ? -1 : a > b ? 1 : 0));
-    const blastRadius = Array.isArray(d.blastRadius) ? (d.blastRadius as readonly string[]) : [];
-    const t0Candidates = Array.isArray(d.t0Candidates) ? (d.t0Candidates as readonly string[]) : [];
+      .sort((a, b) => (a < b ? -1 : a > b ? 1 : 0))
+    const blastRadius = Array.isArray(d.blastRadius) ? (d.blastRadius as readonly string[]) : []
+    const t0Candidates = Array.isArray(d.t0Candidates) ? (d.t0Candidates as readonly string[]) : []
     const lines = [
       ...names.map((n) => `  territory: ${n}`),
       ...blastRadius.map((b) => `  blastRadius: ${b}`),
       ...t0Candidates.map((c) => `  t0Candidate: ${c}`),
-    ];
-    if (lines.length === 0) return '';
-    return `data:\n${lines.join('\n')}\n`;
+    ]
+    if (lines.length === 0) return ""
+    return `data:\n${lines.join("\n")}\n`
   }
 
   // reconcile { drift, mechanical, semantic, regroundedCount, reauthorCount, exitCode } — the drift-review
@@ -363,14 +372,14 @@ function renderData(data: unknown): string {
   // exit code (a measured fact, matching what the process actually returns), then the two named-fact lists,
   // then the re-ground/re-author counts. `drift`'s richer `DriftItem` rows render their fact + class +
   // anchors so a reviewer sees WHAT moved, not just its name twice.
-  if (Array.isArray(d.mechanical) && Array.isArray(d.semantic) && typeof d.exitCode === 'number') {
+  if (Array.isArray(d.mechanical) && Array.isArray(d.semantic) && typeof d.exitCode === "number") {
     const drift = Array.isArray(d.drift)
       ? (d.drift as readonly { fact: string; class: string; anchorWas: unknown; anchorNow: unknown }[])
-      : [];
-    const mechanical = d.mechanical as readonly string[];
-    const semantic = d.semantic as readonly string[];
-    const regroundedCount = typeof d.regroundedCount === 'number' ? d.regroundedCount : 0;
-    const reauthorCount = typeof d.reauthorCount === 'number' ? d.reauthorCount : 0;
+      : []
+    const mechanical = d.mechanical as readonly string[]
+    const semantic = d.semantic as readonly string[]
+    const regroundedCount = typeof d.regroundedCount === "number" ? d.regroundedCount : 0
+    const reauthorCount = typeof d.reauthorCount === "number" ? d.reauthorCount : 0
     const lines = [
       `  reconcile: exitCode ${d.exitCode} — ${mechanical.length} mechanical, ${semantic.length} semantic`,
       ...drift.map((item) => `  drift ${item.class} ${item.fact}`),
@@ -378,8 +387,8 @@ function renderData(data: unknown): string {
       ...semantic.map((f) => `  semantic: ${f}`),
       `  regroundedCount: ${regroundedCount}`,
       `  reauthorCount: ${reauthorCount}`,
-    ];
-    return `data:\n${lines.join('\n')}\n`;
+    ]
+    return `data:\n${lines.join("\n")}\n`
   }
 
   // check { wouldEmit, gates } — the DRY-RUN planner's gate-chain verdict (`atlas check <anchor> <slot>
@@ -389,21 +398,21 @@ function renderData(data: unknown): string {
   // CLI shows the WHOLE chain the MCP `atlas-check` tool already returns, not just the first refusal the
   // top-level `next:` guidance names. Closes the CLI-vs-MCP asymmetry (mirrors the `draft` render's rule of
   // printing its whole payload, not a hand-picked subset).
-  if (typeof d.wouldEmit === 'boolean' && Array.isArray(d.gates)) {
-    const gates = d.gates as ReadonlyArray<Record<string, unknown>>;
+  if (typeof d.wouldEmit === "boolean" && Array.isArray(d.gates)) {
+    const gates = d.gates as ReadonlyArray<Record<string, unknown>>
     const lines = [
       `  wouldEmit: ${d.wouldEmit}`,
       ...gates.map((g) => {
-        const head = `  gate ${String(g.gate)}: ${g.pass === true ? 'pass' : 'refuse'}`;
-        const why = typeof g.reason === 'string' && g.reason.length > 0 ? ` — ${g.reason}` : '';
-        const fix = typeof g.remedy === 'string' && g.remedy.length > 0 ? ` [remedy: ${g.remedy}]` : '';
-        return `${head}${why}${fix}`;
+        const head = `  gate ${String(g.gate)}: ${g.pass === true ? "pass" : "refuse"}`
+        const why = typeof g.reason === "string" && g.reason.length > 0 ? ` — ${g.reason}` : ""
+        const fix = typeof g.remedy === "string" && g.remedy.length > 0 ? ` [remedy: ${g.remedy}]` : ""
+        return `${head}${why}${fix}`
       }),
-    ];
-    return `data:\n${lines.join('\n')}\n`;
+    ]
+    return `data:\n${lines.join("\n")}\n`
   }
 
-  return '';
+  return ""
 }
 
 /**
@@ -414,7 +423,7 @@ function renderData(data: unknown): string {
  * the Seam-2 `data:` block when the verdict is `ok` and carries a known data shape (else nothing appended).
  */
 export function renderVerdict(v: Verdict): CliVerdict {
-  return renderAs(v, deriveStatus(v));
+  return renderAs(v, deriveStatus(v))
 }
 
 /**
@@ -431,22 +440,22 @@ export function renderVerdict(v: Verdict): CliVerdict {
  * knows a gate refused — and the rendering stays one function.
  */
 export function renderRefusal(v: Verdict): CliVerdict {
-  return renderAs(v, 'rejected');
+  return renderAs(v, "rejected")
 }
 
 /** The shared body: identical bytes for a given verdict, with the status/exit supplied by the caller. */
 function renderAs(v: Verdict, status: Status): CliVerdict {
-  const dataBlock = v.ok && v.data !== undefined ? renderData(v.data) : '';
+  const dataBlock = v.ok && v.data !== undefined ? renderData(v.data) : ""
   // F5: on a fail-closed / rejected verdict (`ok:false` with a reason), render the REASON so the CLI door is
   // as legible as the MCP `isError` door — the governed refusal is never silent. DETERMINISTIC: a pure
   // function of `v.rejected`, appended after the status/guidance lines (mutually exclusive with `dataBlock`,
   // which renders only on `ok`). An `ok` verdict carries no reason ⇒ pre-existing output stays byte-identical.
-  const reasonBlock = !v.ok && v.rejected ? `reason: ${v.rejected}\n` : '';
+  const reasonBlock = !v.ok && v.rejected ? `reason: ${v.rejected}\n` : ""
   const stdout =
     `status: ${status}\n` +
     `next: ${v.guidance.next}\n` +
     `invariant: ${v.guidance.invariant}\n` +
     reasonBlock +
-    dataBlock;
-  return { exitCode: EXIT[status], stdout };
+    dataBlock
+  return { exitCode: EXIT[status], stdout }
 }

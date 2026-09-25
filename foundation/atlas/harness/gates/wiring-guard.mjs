@@ -48,30 +48,30 @@
 //
 // Run: `node harness/gates/wiring-guard.mjs` (no build needed — it reads source only).
 
-import { existsSync, readFileSync, readdirSync } from 'node:fs';
-import { join, dirname } from 'node:path';
-import { fileURLToPath } from 'node:url';
-import ts from 'typescript';
+import { existsSync, readFileSync, readdirSync } from "node:fs"
+import { join, dirname } from "node:path"
+import { fileURLToPath } from "node:url"
+import ts from "typescript"
 
-const ROOT = process.env.WIRING_GUARD_ROOT ?? join(dirname(fileURLToPath(import.meta.url)), '..', '..');
+const ROOT = process.env.WIRING_GUARD_ROOT ?? join(dirname(fileURLToPath(import.meta.url)), "..", "..")
 
-const PACKAGES_REL = 'packages';
-const README_REL = 'README.md';
-const PACKAGES = join(ROOT, PACKAGES_REL);
-const README = join(ROOT, README_REL);
+const PACKAGES_REL = "packages"
+const README_REL = "README.md"
+const PACKAGES = join(ROOT, PACKAGES_REL)
+const README = join(ROOT, README_REL)
 
 /** The delimiters of the checked region. Explicit, so the gate's scope cannot drift with the prose. */
-const BEGIN = '<!-- unreached:begin -->';
-const END = '<!-- unreached:end -->';
+const BEGIN = "<!-- unreached:begin -->"
+const END = "<!-- unreached:end -->"
 
 /** Every `.ts` under `dir`, recursively. */
 function sources(dir, out = []) {
   for (const e of readdirSync(dir, { withFileTypes: true })) {
-    const p = join(dir, e.name);
-    if (e.isDirectory()) sources(p, out);
-    else if (e.name.endsWith('.ts')) out.push(p);
+    const p = join(dir, e.name)
+    if (e.isDirectory()) sources(p, out)
+    else if (e.name.endsWith(".ts")) out.push(p)
   }
-  return out;
+  return out
 }
 
 /**
@@ -82,90 +82,100 @@ function sources(dir, out = []) {
  */
 function importGraph() {
   if (!existsSync(PACKAGES)) {
-    return { broken: `${PACKAGES_REL}/ does not exist, so there is no import graph to read.` };
+    return { broken: `${PACKAGES_REL}/ does not exist, so there is no import graph to read.` }
   }
   const names = readdirSync(PACKAGES, { withFileTypes: true })
-    .filter((e) => e.isDirectory() && existsSync(join(PACKAGES, e.name, 'src')))
+    .filter((e) => e.isDirectory() && existsSync(join(PACKAGES, e.name, "src")))
     .map((e) => e.name)
-    .sort();
+    .sort()
   if (names.length === 0) {
-    return { broken: `no package under ${PACKAGES_REL}/ has a src/ directory. Either the workspace moved or this gate's reading of it broke — and comparing two empty sets would print OK for a tree where nothing is wired to anything.` };
+    return {
+      broken: `no package under ${PACKAGES_REL}/ has a src/ directory. Either the workspace moved or this gate's reading of it broke — and comparing two empty sets would print OK for a tree where nothing is wired to anything.`,
+    }
   }
 
-  const importers = new Map(names.map((n) => [n, new Set()]));
+  const importers = new Map(names.map((n) => [n, new Set()]))
   for (const pkg of names) {
-    for (const file of sources(join(PACKAGES, pkg, 'src'))) {
-      const sf = ts.createSourceFile(file, readFileSync(file, 'utf8'), ts.ScriptTarget.Latest, false, ts.ScriptKind.TS);
+    for (const file of sources(join(PACKAGES, pkg, "src"))) {
+      const sf = ts.createSourceFile(file, readFileSync(file, "utf8"), ts.ScriptTarget.Latest, false, ts.ScriptKind.TS)
       for (const st of sf.statements) {
-        const isImport = ts.isImportDeclaration(st);
-        if (!isImport && !ts.isExportDeclaration(st)) continue;
-        const spec = st.moduleSpecifier;
-        if (spec === undefined || !ts.isStringLiteral(spec)) continue;
-        const m = /^@atlas\/([a-z][a-z0-9-]*)$/.exec(spec.text);
-        if (m === null) continue;
-        const target = m[1];
-        if (target === pkg || !importers.has(target)) continue;
+        const isImport = ts.isImportDeclaration(st)
+        if (!isImport && !ts.isExportDeclaration(st)) continue
+        const spec = st.moduleSpecifier
+        if (spec === undefined || !ts.isStringLiteral(spec)) continue
+        const m = /^@atlas\/([a-z][a-z0-9-]*)$/.exec(spec.text)
+        if (m === null) continue
+        const target = m[1]
+        if (target === pkg || !importers.has(target)) continue
         // Erased declarations are not references. Everything else counts — see the header on which way
         // this conservatism leans.
-        const typeOnly = isImport ? (st.importClause?.isTypeOnly ?? false) : (st.isTypeOnly ?? false);
-        if (!typeOnly) importers.get(target).add(pkg);
+        const typeOnly = isImport ? (st.importClause?.isTypeOnly ?? false) : (st.isTypeOnly ?? false)
+        if (!typeOnly) importers.get(target).add(pkg)
       }
     }
   }
-  return { names, importers };
+  return { names, importers }
 }
 
 /** The packages the README's delimited region declares unreached. Fail-closed exactly like the graph read. */
 function declaredUnreached(text) {
-  const b = text.indexOf(BEGIN);
-  const e = text.indexOf(END);
+  const b = text.indexOf(BEGIN)
+  const e = text.indexOf(END)
   if (b === -1 || e === -1) {
-    return { broken: `${README_REL} is missing the ${b === -1 ? BEGIN : END} marker. The gate cannot tell which lines are the ledger, and refuses to guess — a check whose scope is inferred from prose stops checking the moment the prose moves.` };
+    return {
+      broken: `${README_REL} is missing the ${b === -1 ? BEGIN : END} marker. The gate cannot tell which lines are the ledger, and refuses to guess — a check whose scope is inferred from prose stops checking the moment the prose moves.`,
+    }
   }
   if (e < b) {
-    return { broken: `${README_REL} has ${END} BEFORE ${BEGIN}. The region is inside-out, so it encloses nothing.` };
+    return { broken: `${README_REL} has ${END} BEFORE ${BEGIN}. The region is inside-out, so it encloses nothing.` }
   }
-  const found = [];
-  for (const line of text.slice(b + BEGIN.length, e).split('\n')) {
-    const m = /^\s*\|\s*`([a-z][a-z0-9-]*)`/.exec(line);
-    if (m !== null) found.push(m[1]);
+  const found = []
+  for (const line of text.slice(b + BEGIN.length, e).split("\n")) {
+    const m = /^\s*\|\s*`([a-z][a-z0-9-]*)`/.exec(line)
+    if (m !== null) found.push(m[1])
   }
   if (found.length === 0) {
-    return { broken: `the ${README_REL} unreached region extracted ZERO rows. It cannot legitimately be empty — the CLI entry point alone is imported by nothing — so either the ledger was emptied or its row shape changed, and an empty ledger would agree with a fully wired tree.` };
+    return {
+      broken: `the ${README_REL} unreached region extracted ZERO rows. It cannot legitimately be empty — the CLI entry point alone is imported by nothing — so either the ledger was emptied or its row shape changed, and an empty ledger would agree with a fully wired tree.`,
+    }
   }
-  const seen = new Set();
+  const seen = new Set()
   for (const n of found) {
     if (seen.has(n)) {
-      return { broken: `the ${README_REL} unreached ledger lists \`${n}\` TWICE. A duplicated row makes the ledger's own count meaningless.` };
+      return {
+        broken: `the ${README_REL} unreached ledger lists \`${n}\` TWICE. A duplicated row makes the ledger's own count meaningless.`,
+      }
     }
-    seen.add(n);
+    seen.add(n)
   }
-  return { names: found };
+  return { names: found }
 }
 
-const graph = importGraph();
+const graph = importGraph()
 if (graph.broken !== undefined) {
-  console.error(`wiring-guard: FAIL\n\n  ✗ EXTRACTION BROKEN — ${graph.broken}\n`);
-  console.error('The gate refuses to report on a graph it could not read. Fix the extraction, not the docs.');
-  process.exit(1);
+  console.error(`wiring-guard: FAIL\n\n  ✗ EXTRACTION BROKEN — ${graph.broken}\n`)
+  console.error("The gate refuses to report on a graph it could not read. Fix the extraction, not the docs.")
+  process.exit(1)
 }
 
 if (!existsSync(README)) {
-  console.error(`wiring-guard: FAIL\n\n  ✗ EXTRACTION BROKEN — ${README_REL} does not exist, so the unreached ledger cannot be checked.\n`);
-  process.exit(1);
+  console.error(
+    `wiring-guard: FAIL\n\n  ✗ EXTRACTION BROKEN — ${README_REL} does not exist, so the unreached ledger cannot be checked.\n`,
+  )
+  process.exit(1)
 }
 
-const readme = declaredUnreached(readFileSync(README, 'utf8'));
+const readme = declaredUnreached(readFileSync(README, "utf8"))
 if (readme.broken !== undefined) {
-  console.error(`wiring-guard: FAIL\n\n  ✗ EXTRACTION BROKEN — ${readme.broken}\n`);
-  console.error('The gate refuses to report on a ledger it could not read. Fix the extraction, not the docs.');
-  process.exit(1);
+  console.error(`wiring-guard: FAIL\n\n  ✗ EXTRACTION BROKEN — ${readme.broken}\n`)
+  console.error("The gate refuses to report on a ledger it could not read. Fix the extraction, not the docs.")
+  process.exit(1)
 }
 
-const unreached = graph.names.filter((n) => graph.importers.get(n).size === 0);
-const declared = new Set(readme.names);
-const actual = new Set(unreached);
-const fail = [];
+const unreached = graph.names.filter((n) => graph.importers.get(n).size === 0)
+const declared = new Set(readme.names)
+const actual = new Set(unreached)
+const fail = []
 
 for (const p of unreached) {
   if (!declared.has(p)) {
@@ -175,32 +185,32 @@ for (const p of unreached) {
         `      It is built, and as far as anything that RUNS is concerned it is not there. Either wire it,\n` +
         `      or add the row and say why it is unreached — silence is what let a dead package read as\n` +
         `      shipped surface for an entire campaign.`,
-    );
+    )
   }
 }
 for (const p of declared) {
   if (!actual.has(p)) {
-    const who = graph.importers.has(p) ? [...graph.importers.get(p)].sort().join(', ') : '(no such package)';
+    const who = graph.importers.has(p) ? [...graph.importers.get(p)].sort().join(", ") : "(no such package)"
     fail.push(
       `DECLARED BUT REACHED — \`${p}\`\n` +
         `      The ${README_REL} unreached ledger says nothing calls it; it is imported at runtime by: ${who}.\n` +
         `      The ledger understates the product. That is the safe direction and still false — delete the row.`,
-    );
+    )
   }
 }
 
 if (fail.length > 0) {
-  console.error('wiring-guard: FAIL\n');
-  for (const f of fail) console.error(`  ✗ ${f}\n`);
+  console.error("wiring-guard: FAIL\n")
+  for (const f of fail) console.error(`  ✗ ${f}\n`)
   console.error(
     `${fail.length} violation(s) over ${graph.names.length} package(s). The import graph is the oracle.\n` +
-      'Move the ledger to it — do not weaken this gate to the ledger.',
-  );
-  process.exit(1);
+      "Move the ledger to it — do not weaken this gate to the ledger.",
+  )
+  process.exit(1)
 }
 
 console.log(
   `wiring-guard: OK — ${graph.names.length} package(s); ${unreached.length} with no runtime importer ` +
-    `(${unreached.join(', ')}), each declared in the ${README_REL} ledger. ` +
-    'Membership only — WHY a package is unreached is a human job and is not claimed here.',
-);
+    `(${unreached.join(", ")}), each declared in the ${README_REL} ledger. ` +
+    "Membership only — WHY a package is unreached is a human job and is not claimed here.",
+)

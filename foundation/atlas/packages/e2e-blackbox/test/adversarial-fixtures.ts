@@ -18,12 +18,12 @@
 // Product LIBS are imported ONLY to construct these inputs; every EXECUTION and every ASSERTION in the
 // stories stays pure black-box (subprocess / stdio). No product code touches the assertions.
 
-import { build } from '@atlas/index';
-import type { Axes, IndexNode } from '@atlas/index';
-import { foldAstUnits, initAst, walkFileTree } from '@atlas/adapter-io';
-import { nodeKey, relationKey } from '@atlas/knowledge';
-import type { Candidate, GroundedFact, NegationNode, PredicateSlot, RelationKind, RelationNode } from '@atlas/knowledge';
-import type { SubtreeHash, Tier } from '@atlas/contracts';
+import { build } from "@atlas/index"
+import type { Axes, IndexNode } from "@atlas/index"
+import { foldAstUnits, initAst, walkFileTree } from "@atlas/adapter-io"
+import { nodeKey, relationKey } from "@atlas/knowledge"
+import type { Candidate, GroundedFact, NegationNode, PredicateSlot, RelationKind, RelationNode } from "@atlas/knowledge"
+import type { SubtreeHash, Tier } from "@atlas/contracts"
 
 // WARM UP the opt-in AST grammar at MODULE LOAD (top-level await) so this in-process authoring helper folds
 // the SAME `::` sub-file units the runtime does (F1). `composeRuntime` (driven by the spawned `atlas` bin,
@@ -32,67 +32,67 @@ import type { SubtreeHash, Tier } from '@atlas/contracts';
 // re-derives FRESH against that folded index, `axesOf` below MUST fold identically — hence the warmup here.
 // Because ESM finishes a module's top-level await before its importers evaluate, every story that imports
 // this helper gets warm grammars before its `beforeAll` runs, with NO change to the story files themselves.
-await initAst();
+await initAst()
 
 /** Build the SAME folded `Axes` the runtime composes over a repo (the fixture's SCIP is empty documents):
  *  `foldAstUnits(walkFileTree(repo))` → `build`, so a file node is a BRANCH over its `::` item/block units
  *  and a symbol path resolves. This is the identical transform `composeRuntime`/`assembleHandler` apply. */
 function axesOf(repoPath: string): Axes {
-  return build(foldAstUnits(walkFileTree(repoPath)), { documents: [] });
+  return build(foldAstUnits(walkFileTree(repoPath)), { documents: [] })
 }
 
 /** Brand a raw digest string as the drift-oracle `SubtreeHash` (runtime no-op — the brand is erased in
  *  JSON; the value written to the fact file is a plain string the emit gate re-derives against). */
-const asSubtree = (h: string): SubtreeHash => h as unknown as SubtreeHash;
+const asSubtree = (h: string): SubtreeHash => h as unknown as SubtreeHash
 
 /** Walk an axis hierarchy for the node whose `key` is `qualifiedPath`; return its `subtreeHash` (string). */
 function findByKey(node: IndexNode, key: string): string | undefined {
-  if (node.key === key) return String(node.subtreeHash);
+  if (node.key === key) return String(node.subtreeHash)
   for (const child of node.children) {
-    const hit = findByKey(child, key);
-    if (hit !== undefined) return hit;
+    const hit = findByKey(child, key)
+    if (hit !== undefined) return hit
   }
-  return undefined;
+  return undefined
 }
 
 /** The REAL `subtreeHash` the emit truth-gate will re-derive for `qualifiedPath` — computed by building the
  *  SAME `Axes` the runtime composes over the fixture repo. Throws if the path is not a real index unit
  *  (a genuine ceiling: only file/dir paths resolve — the index has no `::` symbol nodes). */
 export function subtreeHashOf(repoPath: string, qualifiedPath: string): string {
-  const axes = axesOf(repoPath);
+  const axes = axesOf(repoPath)
   for (const root of [axes.spatial, axes.territory, axes.dependency]) {
-    const hit = findByKey(root, qualifiedPath);
-    if (hit !== undefined) return hit;
+    const hit = findByKey(root, qualifiedPath)
+    if (hit !== undefined) return hit
   }
-  throw new Error(`author: no index unit for '${qualifiedPath}' — cannot ground (index has no such node)`);
+  throw new Error(`author: no index unit for '${qualifiedPath}' — cannot ground (index has no such node)`)
 }
 
 /** DFS for the `IndexNode` whose `key` equals `key` (a file path OR a `::` sub-file unit key). */
 function findNode(node: IndexNode, key: string): IndexNode | undefined {
-  if (node.key === key) return node;
+  if (node.key === key) return node
   for (const child of node.children) {
-    const hit = findNode(child, key);
-    if (hit !== undefined) return hit;
+    const hit = findNode(child, key)
+    if (hit !== undefined) return hit
   }
-  return undefined;
+  return undefined
 }
 
 /** The declared NAME of a folded unit key — the trailing `:`-field of its last `::` segment
  *  (`file::<start>:<kind>:<name>` ⇒ `<name>`, cf. adapter-io/src/ast.ts `unitPath`). */
 function unitLeafName(key: string): string {
-  const seg = key.split('::').at(-1) ?? '';
-  return seg.slice(seg.lastIndexOf(':') + 1);
+  const seg = key.split("::").at(-1) ?? ""
+  return seg.slice(seg.lastIndexOf(":") + 1)
 }
 
 /** The recipe for one grounded advisory fact anchored at a SUB-FILE symbol inside `filePath`. */
 export interface SymbolFactSpec {
-  readonly repoPath: string;
-  readonly filePath: string; // the file the symbol lives in (a real fixture file)
-  readonly symbolName: string; // the declared name of a top-level item in that file (e.g. `foo`)
-  readonly slot: PredicateSlot;
-  readonly claim: string;
-  readonly tier?: Tier; // default 'T1'
-  readonly scope?: string; // default 'src'
+  readonly repoPath: string
+  readonly filePath: string // the file the symbol lives in (a real fixture file)
+  readonly symbolName: string // the declared name of a top-level item in that file (e.g. `foo`)
+  readonly slot: PredicateSlot
+  readonly claim: string
+  readonly tier?: Tier // default 'T1'
+  readonly scope?: string // default 'src'
 }
 
 /**
@@ -104,77 +104,77 @@ export interface SymbolFactSpec {
  */
 export function groundedSymbolFact(spec: SymbolFactSpec): GroundedFact {
   // Default T1 — visible in the bounded read pack (tier≥T1); routes to full-ratify, driven under a token.
-  const tier: Tier = spec.tier ?? 'T1';
-  const axes = axesOf(spec.repoPath);
-  const fileNode = findNode(axes.spatial, spec.filePath);
-  if (fileNode === undefined) throw new Error(`author: no file node '${spec.filePath}'`);
-  const unit = fileNode.children.find((c) => unitLeafName(c.key) === spec.symbolName);
+  const tier: Tier = spec.tier ?? "T1"
+  const axes = axesOf(spec.repoPath)
+  const fileNode = findNode(axes.spatial, spec.filePath)
+  if (fileNode === undefined) throw new Error(`author: no file node '${spec.filePath}'`)
+  const unit = fileNode.children.find((c) => unitLeafName(c.key) === spec.symbolName)
   if (unit === undefined) {
-    throw new Error(`author: no symbol unit '${spec.symbolName}' under '${spec.filePath}' (index has no such AST node)`);
+    throw new Error(`author: no symbol unit '${spec.symbolName}' under '${spec.filePath}' (index has no such AST node)`)
   }
-  const grounding: GroundedFact['grounding'] = {
+  const grounding: GroundedFact["grounding"] = {
     entries: [
       {
-        anchor: { kind: 'symbol', qualifiedPath: unit.key, subtreeHash: asSubtree(String(unit.subtreeHash)) },
+        anchor: { kind: "symbol", qualifiedPath: unit.key, subtreeHash: asSubtree(String(unit.subtreeHash)) },
         path: spec.filePath,
       },
     ],
-  };
+  }
   const candidate: Candidate = {
     claimText: spec.claim,
     claimNorm: spec.claim,
     slot: spec.slot,
     grounding,
-    provenance: { source: 'e2e-blackbox', trusted: true },
+    provenance: { source: "e2e-blackbox", trusted: true },
     tier,
-  };
+  }
   return {
-    kind: 'advisory',
+    kind: "advisory",
     id: nodeKey(candidate),
     tier,
     claimNorm: spec.claim,
     grounding,
-    freshness: 'FRESH',
+    freshness: "FRESH",
     claims: [],
-    authoring: 'ADVISORY',
-    scope: spec.scope ?? 'src',
+    authoring: "ADVISORY",
+    scope: spec.scope ?? "src",
     predicateSlot: spec.slot,
-  };
+  }
 }
 
 /** An UNGROUNDED fact: same shape, but the anchor cites a `subtreeHash` NO index unit carries, so the truth
  *  gate re-derivation FAILS (DRIFTED → NA → rejected). Used by S2 to prove grounded-or-rejected. */
-export function ungroundedFact(claim: string, scope = 'src'): GroundedFact {
-  const grounding: GroundedFact['grounding'] = {
+export function ungroundedFact(claim: string, scope = "src"): GroundedFact {
+  const grounding: GroundedFact["grounding"] = {
     entries: [
       {
-        anchor: { kind: 'file', qualifiedPath: 'src/foo.ts', subtreeHash: asSubtree('deadbeefnotarealsubtreehash') },
-        path: 'src/foo.ts',
+        anchor: { kind: "file", qualifiedPath: "src/foo.ts", subtreeHash: asSubtree("deadbeefnotarealsubtreehash") },
+        path: "src/foo.ts",
       },
     ],
-  };
+  }
   return {
-    kind: 'advisory',
-    id: 'ungrounded-e2e-node' as unknown as GroundedFact['id'],
-    tier: 'T1',
+    kind: "advisory",
+    id: "ungrounded-e2e-node" as unknown as GroundedFact["id"],
+    tier: "T1",
     claimNorm: claim,
     grounding,
-    freshness: 'FRESH',
+    freshness: "FRESH",
     claims: [],
-    authoring: 'ADVISORY',
+    authoring: "ADVISORY",
     scope,
-    predicateSlot: 'invariant',
-  };
+    predicateSlot: "invariant",
+  }
 }
 
 /** The recipe for one advisory fact grounded at SEVERAL `::` sub-file symbols, possibly across files. */
 export interface MultiSymbolFactSpec {
-  readonly repoPath: string;
-  readonly sites: readonly (readonly [file: string, symbol: string])[]; // ≥1 (file, top-level symbol) pairs
-  readonly slot: PredicateSlot;
-  readonly claim: string;
-  readonly tier?: Tier; // default 'T1'
-  readonly scope?: string; // default 'src'
+  readonly repoPath: string
+  readonly sites: readonly (readonly [file: string, symbol: string])[] // ≥1 (file, top-level symbol) pairs
+  readonly slot: PredicateSlot
+  readonly claim: string
+  readonly tier?: Tier // default 'T1'
+  readonly scope?: string // default 'src'
 }
 
 /**
@@ -190,33 +190,45 @@ export interface MultiSymbolFactSpec {
  * could write by hand into a JSON file, and the door re-mints regardless.
  */
 export function groundedMultiSymbolFact(spec: MultiSymbolFactSpec): GroundedFact {
-  const tier: Tier = spec.tier ?? 'T1';
-  const axes = axesOf(spec.repoPath);
+  const tier: Tier = spec.tier ?? "T1"
+  const axes = axesOf(spec.repoPath)
   const entries = spec.sites.map(([filePath, symbolName]) => {
-    const fileNode = findNode(axes.spatial, filePath);
-    if (fileNode === undefined) throw new Error(`author: no file node '${filePath}'`);
-    const unit = fileNode.children.find((c) => unitLeafName(c.key) === symbolName);
-    if (unit === undefined) throw new Error(`author: no symbol unit '${symbolName}' under '${filePath}'`);
+    const fileNode = findNode(axes.spatial, filePath)
+    if (fileNode === undefined) throw new Error(`author: no file node '${filePath}'`)
+    const unit = fileNode.children.find((c) => unitLeafName(c.key) === symbolName)
+    if (unit === undefined) throw new Error(`author: no symbol unit '${symbolName}' under '${filePath}'`)
     return {
-      anchor: { kind: 'symbol' as const, qualifiedPath: unit.key, subtreeHash: asSubtree(String(unit.subtreeHash)) },
+      anchor: { kind: "symbol" as const, qualifiedPath: unit.key, subtreeHash: asSubtree(String(unit.subtreeHash)) },
       path: filePath,
-    };
-  });
-  const grounding = { entries } as unknown as GroundedFact['grounding'];
+    }
+  })
+  const grounding = { entries } as unknown as GroundedFact["grounding"]
   const candidate: Candidate = {
-    claimText: spec.claim, claimNorm: spec.claim, slot: spec.slot, grounding,
-    provenance: { source: 'e2e-blackbox', trusted: true }, tier,
-  };
-  let authoredId: GroundedFact['id'];
+    claimText: spec.claim,
+    claimNorm: spec.claim,
+    slot: spec.slot,
+    grounding,
+    provenance: { source: "e2e-blackbox", trusted: true },
+    tier,
+  }
+  let authoredId: GroundedFact["id"]
   try {
-    authoredId = nodeKey(candidate);
+    authoredId = nodeKey(candidate)
   } catch {
-    authoredId = 'author-could-not-mint' as unknown as GroundedFact['id'];
+    authoredId = "author-could-not-mint" as unknown as GroundedFact["id"]
   }
   return {
-    kind: 'advisory', id: authoredId, tier, claimNorm: spec.claim, grounding, freshness: 'FRESH',
-    claims: [], authoring: 'ADVISORY', scope: spec.scope ?? 'src', predicateSlot: spec.slot,
-  };
+    kind: "advisory",
+    id: authoredId,
+    tier,
+    claimNorm: spec.claim,
+    grounding,
+    freshness: "FRESH",
+    claims: [],
+    authoring: "ADVISORY",
+    scope: spec.scope ?? "src",
+    predicateSlot: spec.slot,
+  }
 }
 
 /** The recipe for one grounded RELATION fact (ADR-0015 D2 / #99a). `fileA`/`fileB` are REAL fixture files —
@@ -225,12 +237,12 @@ export function groundedMultiSymbolFact(spec: MultiSymbolFactSpec): GroundedFact
  *  THROWS `DegenerateAnchorError` (the #103 wildcard fix) — which is exactly why a relation cannot reuse it
  *  and mints its own `relationKey` instead. */
 export interface RelationFactSpec {
-  readonly repoPath: string;
-  readonly fileA: string; // endpointA — the directed SUBJECT (the scope-owned side, ADR-0015 §4a)
-  readonly fileB: string; // endpointB — the directed OBJECT
-  readonly relationKind: RelationKind;
-  readonly tier?: Tier; // default 'T1' — visible in the bounded read pack (tier≥T1)
-  readonly scope?: string; // default 'src' — the KNOW-11 authz scope (bound on endpointA)
+  readonly repoPath: string
+  readonly fileA: string // endpointA — the directed SUBJECT (the scope-owned side, ADR-0015 §4a)
+  readonly fileB: string // endpointB — the directed OBJECT
+  readonly relationKind: RelationKind
+  readonly tier?: Tier // default 'T1' — visible in the bounded read pack (tier≥T1)
+  readonly scope?: string // default 'src' — the KNOW-11 authz scope (bound on endpointA)
 }
 
 /**
@@ -242,37 +254,51 @@ export interface RelationFactSpec {
  * endpoint's bytes move). Directed: `(A, kind, B) ≠ (B, kind, A)`.
  */
 export function groundedRelationFact(spec: RelationFactSpec): GroundedFact {
-  const tier: Tier = spec.tier ?? 'T1';
-  const grounding: GroundedFact['grounding'] = {
+  const tier: Tier = spec.tier ?? "T1"
+  const grounding: GroundedFact["grounding"] = {
     entries: [
-      { anchor: { kind: 'file', qualifiedPath: spec.fileA, subtreeHash: asSubtree(subtreeHashOf(spec.repoPath, spec.fileA)) }, path: spec.fileA },
-      { anchor: { kind: 'file', qualifiedPath: spec.fileB, subtreeHash: asSubtree(subtreeHashOf(spec.repoPath, spec.fileB)) }, path: spec.fileB },
+      {
+        anchor: {
+          kind: "file",
+          qualifiedPath: spec.fileA,
+          subtreeHash: asSubtree(subtreeHashOf(spec.repoPath, spec.fileA)),
+        },
+        path: spec.fileA,
+      },
+      {
+        anchor: {
+          kind: "file",
+          qualifiedPath: spec.fileB,
+          subtreeHash: asSubtree(subtreeHashOf(spec.repoPath, spec.fileB)),
+        },
+        path: spec.fileB,
+      },
     ],
-  };
+  }
   const node: RelationNode = {
-    kind: 'relation',
+    kind: "relation",
     id: relationKey(spec.fileA, spec.relationKind, spec.fileB),
     tier,
     relationKind: spec.relationKind,
     endpointA: spec.fileA,
     endpointB: spec.fileB,
     grounding,
-    freshness: 'FRESH',
+    freshness: "FRESH",
     claims: [],
-    authoring: 'RELATED',
-    scope: spec.scope ?? 'src',
-  };
-  return node;
+    authoring: "RELATED",
+    scope: spec.scope ?? "src",
+  }
+  return node
 }
 
 /** The recipe for one SCOPED NEGATION payload (ADR-0015 D3 / #99b — "the honesty core"): the assertion
  *  `(¬relationKind, target, scope)` — "no `relationKind`-edge to the GLOBAL symbol `target` was found within
  *  the CLOSED directory `scope`". */
 export interface NegationFactSpec {
-  readonly target: string; // the location-free GLOBAL SCIP symbol X the negative is ABOUT (¬∃·→X)
-  readonly scope: string; //  the CLOSED directory scope S the witness ranges over (its own authz scope)
-  readonly relationKind?: RelationKind; // default 'calls'
-  readonly tier?: Tier; // default 'T2' — advisory-class, grounded ⇒ auto-accepts (no ratifier consulted)
+  readonly target: string // the location-free GLOBAL SCIP symbol X the negative is ABOUT (¬∃·→X)
+  readonly scope: string //  the CLOSED directory scope S the witness ranges over (its own authz scope)
+  readonly relationKind?: RelationKind // default 'calls'
+  readonly tier?: Tier // default 'T2' — advisory-class, grounded ⇒ auto-accepts (no ratifier consulted)
 }
 
 /**
@@ -285,19 +311,19 @@ export interface NegationFactSpec {
  * completeness feed it builds from the fixture's SCIP. This is the honest shape a user would write by hand.
  */
 export function negationPayload(spec: NegationFactSpec): GroundedFact {
-  const tier: Tier = spec.tier ?? 'T2';
+  const tier: Tier = spec.tier ?? "T2"
   const node: NegationNode = {
-    kind: 'negation',
-    id: 'author-placeholder-remint' as unknown as NegationNode['id'], // the door MINTS negationKey; never trusted
+    kind: "negation",
+    id: "author-placeholder-remint" as unknown as NegationNode["id"], // the door MINTS negationKey; never trusted
     tier,
-    relationKind: spec.relationKind ?? 'calls',
+    relationKind: spec.relationKind ?? "calls",
     target: spec.target,
     scope: spec.scope,
     grounding: { entries: [] }, // the door CONSTRUCTS the §3 directory grounding at admit
-    edgeModel: '', // the door STAMPS edgeModelVersion() at admit
-    freshness: 'FRESH',
+    edgeModel: "", // the door STAMPS edgeModelVersion() at admit
+    freshness: "FRESH",
     claims: [],
-    authoring: 'NEGATED',
-  };
-  return node;
+    authoring: "NEGATED",
+  }
+  return node
 }

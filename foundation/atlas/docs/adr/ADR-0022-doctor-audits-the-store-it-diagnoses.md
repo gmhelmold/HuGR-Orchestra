@@ -44,13 +44,13 @@ ADR than one motivated by symmetry.
 `DoctorApi` grows a fifth read leg, `casIntegrity()`, returning a `CasIntegrity` receipt on `DoctorOut`.
 It answers four disjoint questions about the on-disk CAS and the sidecars that reference it:
 
-| bucket | meaning | how it is decided |
-| --- | --- | --- |
-| `objects` | value files present under `<cas>/<h[0:2]>/<h>` | a walk of the CAS root |
-| `corrupt` | the bytes do NOT hash to the address they are filed under | re-canonicalize + `id()`, compare to the filename |
-| `unreadable` | the bytes are not parseable as a `CasObject` at all | `JSON.parse` failure |
-| `missing` | a hash a sidecar references with no value file on disk | referenced set minus present set |
-| `orphan` | a value file no sidecar references | present set minus referenced set |
+| bucket       | meaning                                                   | how it is decided                                 |
+| ------------ | --------------------------------------------------------- | ------------------------------------------------- |
+| `objects`    | value files present under `<cas>/<h[0:2]>/<h>`            | a walk of the CAS root                            |
+| `corrupt`    | the bytes do NOT hash to the address they are filed under | re-canonicalize + `id()`, compare to the filename |
+| `unreadable` | the bytes are not parseable as a `CasObject` at all       | `JSON.parse` failure                              |
+| `missing`    | a hash a sidecar references with no value file on disk    | referenced set minus present set                  |
+| `orphan`     | a value file no sidecar references                        | present set minus referenced set                  |
 
 **The verdict is derived, never stored.** `casIntegrity()` recomputes every address from the bytes it finds;
 it consults no manifest of "what should be there" other than the sidecars themselves. This is the same

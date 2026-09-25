@@ -17,13 +17,13 @@
 // then reads `Object.keys` off THAT object — so the returned set can never diverge from the mapping's own
 // key set, and the mapping's key set can never diverge from the union's members.
 
-import type { PredicateSlot } from '@atlas/knowledge';
-import type { SlotInfo, SlotsOut } from './types.js';
+import type { PredicateSlot } from "@atlas/knowledge"
+import type { SlotInfo, SlotsOut } from "./types.js"
 
 export interface SlotsApi {
   /** The closed predicate-slot vocabulary (AUTHOR-5) — every member of `PredicateSlot`, each with its
    *  meaning, in the mapping's declaration order. Pure + total, no input. */
-  slots(): SlotsOut;
+  slots(): SlotsOut
 }
 
 /**
@@ -35,27 +35,27 @@ export interface SlotsApi {
  * REQ-AUTH-5c asks for — see the file header.
  */
 const SLOT_MEANINGS: Record<PredicateSlot, string> = {
-  invariant: 'a property that must always hold',
-  contract: 'the interface / signature agreement',
-  precondition: 'what must hold on entry',
-  postcondition: 'what is guaranteed on exit',
-  sideeffect: 'observable effects (IO / mutation)',
-  ownership: 'owner / lifetime / concurrency ownership',
-  'perf-bound': 'complexity / latency / allocation bound',
-  'security-property': 'authz / crypto / taint property',
-  gotcha: 'a non-obvious pitfall / footgun',
-  rationale: 'why it is built this way (the WHY)',
-  dependency: 'a required relationship / ordering',
-  count: 'a witnessed lower-bound count over a structural set (e.g. distinct callers)',
-  definition: 'a term / ontology definition (feeds Awareness `ontology`)',
-};
+  invariant: "a property that must always hold",
+  contract: "the interface / signature agreement",
+  precondition: "what must hold on entry",
+  postcondition: "what is guaranteed on exit",
+  sideeffect: "observable effects (IO / mutation)",
+  ownership: "owner / lifetime / concurrency ownership",
+  "perf-bound": "complexity / latency / allocation bound",
+  "security-property": "authz / crypto / taint property",
+  gotcha: "a non-obvious pitfall / footgun",
+  rationale: "why it is built this way (the WHY)",
+  dependency: "a required relationship / ordering",
+  count: "a witnessed lower-bound count over a structural set (e.g. distinct callers)",
+  definition: "a term / ontology definition (feeds Awareness `ontology`)",
+}
 
 /** The mapping's OWN key set, typed as `PredicateSlot[]` — `Object.keys` widens to `string[]` at the type
  *  level, but every runtime key IS a `PredicateSlot` because `SLOT_MEANINGS` is total over exactly that
  *  union (no other key can exist on it). Declaration order is preserved (`Object.keys` on a
  *  string-keyed object literal with no integer-like keys — none of the 13 members parse as an array
  *  index — walks insertion order, which is the literal's own order above). */
-const SLOT_ORDER = Object.keys(SLOT_MEANINGS) as readonly PredicateSlot[];
+const SLOT_ORDER = Object.keys(SLOT_MEANINGS) as readonly PredicateSlot[]
 
 /**
  * Build the `slots` planner (AUTHOR-5). Pure + total, no injected port — unlike `anchors`/`draft` this leg
@@ -65,11 +65,11 @@ const SLOT_ORDER = Object.keys(SLOT_MEANINGS) as readonly PredicateSlot[];
 export function createSlots(): SlotsApi {
   const slots = (): SlotsOut => ({
     slots: SLOT_ORDER.map((slot): SlotInfo => ({ slot, meaning: SLOT_MEANINGS[slot] })),
-  });
-  return { slots };
+  })
+  return { slots }
 }
 
 // differential-vs-oracle (compile-time): the impl's `slots` conforms to the co-located frozen
 // `SlotsApi.slots` signature.
-const _slotsConforms: SlotsApi['slots'] = createSlots().slots;
-void _slotsConforms;
+const _slotsConforms: SlotsApi["slots"] = createSlots().slots
+void _slotsConforms

@@ -21,64 +21,64 @@
 // This is a test SUPPORT module (no `.test.ts` suffix — vitest does not collect it); the later epics import
 // `createWriteSpyStore` from here rather than re-deriving the harness.
 
-import { mkdtempSync, readFileSync, readdirSync, rmSync } from 'node:fs';
-import type { Dirent } from 'node:fs';
-import { tmpdir } from 'node:os';
-import { join, relative } from 'node:path';
-import { createDiskStore } from '@atlas/adapter-io';
-import type { DiskStore } from '@atlas/adapter-io';
-import type { Hash } from '@atlas/contracts';
-import type { CasObject } from '@atlas/kernel';
-import type { StoreProjection } from '@atlas/knowledge';
+import { mkdtempSync, readFileSync, readdirSync, rmSync } from "node:fs"
+import type { Dirent } from "node:fs"
+import { tmpdir } from "node:os"
+import { join, relative } from "node:path"
+import { createDiskStore } from "@atlas/adapter-io"
+import type { DiskStore } from "@atlas/adapter-io"
+import type { Hash } from "@atlas/contracts"
+import type { CasObject } from "@atlas/kernel"
+import type { StoreProjection } from "@atlas/knowledge"
 
 /** One recorded write attempt: the door name and the argument the planner tried to persist (for legibility in
  *  a failure message — a planner that DID write names exactly which door it reached). */
 export interface WriteCall {
-  readonly door: 'put' | 'persistProjection' | 'commitProjection' | 'commitStaging';
+  readonly door: "put" | "persistProjection" | "commitProjection" | "commitStaging"
 }
 
 /** The reusable write-spy harness (WP-10.A1.CLI). `spy` is the store to drive a planner over; `seed` arranges
  *  durable fixtures (bypasses the spy); `calls` are the recorded write attempts; `census` is the byte map of
  *  the WHOLE store root (CAS ∧ sidecars ∧ any cache memo). `dispose` removes the temp root. */
 export interface WriteSpyHarness {
-  readonly spy: DiskStore;
-  readonly seed: DiskStore;
-  readonly root: string;
-  calls(): readonly WriteCall[];
-  census(): ReadonlyMap<string, string>;
-  dispose(): void;
+  readonly spy: DiskStore
+  readonly seed: DiskStore
+  readonly root: string
+  calls(): readonly WriteCall[]
+  census(): ReadonlyMap<string, string>
+  dispose(): void
 }
 
 /** The error a spied write door throws — a planner that trips it is the failure PROP-AUTH-2 forbids, so the
  *  message is written to be found in a stack when a later leg regresses. */
 class PlannerWroteError extends Error {
-  constructor(door: WriteCall['door']) {
+  constructor(door: WriteCall["door"]) {
     super(
       `write-spy: a planner reached the '${door}' write door — a planner MUST persist NOTHING (AUTHOR-2 / PROP-AUTH-2, ADR-0004). This store throws on every write so the violation is loud, not silent.`,
-    );
-    this.name = 'PlannerWroteError';
+    )
+    this.name = "PlannerWroteError"
   }
 }
 
 /** Recursively read every file under `dir` into a `relative-path → bytes` map (sorted keys are irrelevant to a
  *  deep-equal, but the walk is deterministic). A missing dir yields an empty map. */
 function censusOf(dir: string): Map<string, string> {
-  const out = new Map<string, string>();
+  const out = new Map<string, string>()
   const walk = (abs: string): void => {
-    let entries: Dirent[];
+    let entries: Dirent[]
     try {
-      entries = readdirSync(abs, { withFileTypes: true });
+      entries = readdirSync(abs, { withFileTypes: true })
     } catch {
-      return; // a not-yet-created dir contributes nothing (an honest empty census leg)
+      return // a not-yet-created dir contributes nothing (an honest empty census leg)
     }
     for (const e of entries.sort((a, b) => a.name.localeCompare(b.name))) {
-      const child = join(abs, e.name);
-      if (e.isDirectory()) walk(child);
-      else out.set(relative(dir, child), readFileSync(child, 'utf8'));
+      const child = join(abs, e.name)
+      if (e.isDirectory()) walk(child)
+      else out.set(relative(dir, child), readFileSync(child, "utf8"))
     }
-  };
-  walk(dir);
-  return out;
+  }
+  walk(dir)
+  return out
 }
 
 /**
@@ -87,26 +87,26 @@ function censusOf(dir: string): Map<string, string> {
  * and torn down by `dispose`.
  */
 export function createWriteSpyStore(): WriteSpyHarness {
-  const root = mkdtempSync(join(tmpdir(), 'atlas-write-spy-'));
-  const casPath = join(root, 'cas');
-  const inner = createDiskStore(casPath);
-  const calls: WriteCall[] = [];
+  const root = mkdtempSync(join(tmpdir(), "atlas-write-spy-"))
+  const casPath = join(root, "cas")
+  const inner = createDiskStore(casPath)
+  const calls: WriteCall[] = []
 
-  const record = (door: WriteCall['door']): never => {
-    calls.push({ door });
-    throw new PlannerWroteError(door);
-  };
+  const record = (door: WriteCall["door"]): never => {
+    calls.push({ door })
+    throw new PlannerWroteError(door)
+  }
 
   const spy: DiskStore = {
     // READS delegate to the real inner store — a seeded fixture reads back through the spy unchanged.
     get: (h: Hash): CasObject | undefined => inner.get(h),
     loadProjection: (): StoreProjection | undefined => inner.loadProjection(),
     // WRITES record the attempt and throw — a planner MUST reach none of these (AUTHOR-2 / PROP-AUTH-2).
-    put: (_obj: CasObject): Hash => record('put'),
-    persistProjection: (_p: StoreProjection): void => record('persistProjection'),
-    commitProjection: (_d: (p: StoreProjection) => unknown): never => record('commitProjection'),
-    commitStaging: (_d: (p: StoreProjection) => unknown): never => record('commitStaging'),
-  } as DiskStore;
+    put: (_obj: CasObject): Hash => record("put"),
+    persistProjection: (_p: StoreProjection): void => record("persistProjection"),
+    commitProjection: (_d: (p: StoreProjection) => unknown): never => record("commitProjection"),
+    commitStaging: (_d: (p: StoreProjection) => unknown): never => record("commitStaging"),
+  } as DiskStore
 
   return {
     spy,
@@ -115,12 +115,12 @@ export function createWriteSpyStore(): WriteSpyHarness {
     calls: () => calls,
     census: () => censusOf(root),
     dispose: () => rmSync(root, { recursive: true, force: true }),
-  };
+  }
 }
 
 /** A minimal, well-formed `CasObject` to seed durable bytes with (the census must run over a NON-EMPTY store, or
  *  it would pass a planner that only ever writes to a populated one). Kept structural — the harness proves
  *  write-FREEDOM, so the seed's meaning does not matter, only that it lands real bytes on disk. */
 export function seedSomeBytes(seed: DiskStore): Hash {
-  return seed.put({ kind: 'seed', note: 'a durable fixture object for the census baseline' } as unknown as CasObject);
+  return seed.put({ kind: "seed", note: "a durable fixture object for the census baseline" } as unknown as CasObject)
 }

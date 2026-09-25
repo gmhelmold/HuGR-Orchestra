@@ -1,17 +1,17 @@
 # ADR-0010 — a gate-selecting field is derived from the resource, never chosen by the request
 
 - **Status:** Accepted (owner-ruled 2026-09-03). The two impose legs were Proposed (2026-08-01); the
-   CREATE-leg CREATE question and the ratifier-token question are now owner-decided (§"Owner ruling"), which
-   resolves the OPEN DEFINE that previously made the ADR a proposal. **Implementation** of item 1 (wire the
-   derived fast-path verdicts) shipped in #313; the in-process USE-OR-SEAL serving path shipped in #319/#321.
-   Item 3 (`scope`↔`primaryAnchor`) is **CLOSED in code** — shipped by WP-10.A3 (#251): the authz
+  CREATE-leg CREATE question and the ratifier-token question are now owner-decided (§"Owner ruling"), which
+  resolves the OPEN DEFINE that previously made the ADR a proposal. **Implementation** of item 1 (wire the
+  derived fast-path verdicts) shipped in #313; the in-process USE-OR-SEAL serving path shipped in #319/#321.
+  Item 3 (`scope`↔`primaryAnchor`) is **CLOSED in code** — shipped by WP-10.A3 (#251): the authz
   gate runs `scopeOwnsAnchor` backed by `authz.anchors` and refuses an anchor not owned by the declared
   scope.
 - **Spec author:** seat `RATIFY-AUTHORITY`, grounded against `572d391` (branch
   `governance-class-is-a-node-property`).
 - **Implements:** `ARCH-9` and `ARCH-10` (`docs/reference/atlas-architecture.md` §3.2), tracked as
   **ARCH-D3**. ARCH-D3a (the UPDATE leg at the emit door) was already closed by ADR-0007; this ADR closes
-  the same leg *at the reducer*, and opens — but does not close — the ARCH-D3b CREATE leg.
+  the same leg _at the reducer_, and opens — but does not close — the ARCH-D3b CREATE leg.
 - **Amends:** nothing frozen. `nodeKey` is UNTOUCHED, `GOVERNANCE_SURFACE` and `WRITE_PATHS` are untouched,
   `RatifyApi` / `RouterApi` / `FastpathApi.route` signatures are unchanged. `RatifyContext` gains ONE
   optional field; `@atlas/knowledge` gains one exported error class and its reason type.
@@ -37,10 +37,10 @@ second. That is the confused deputy. Because `atlas-query` bounds `T2` out of re
 `T0` invariant then stops appearing for its scope **with no refusal on any transport** — silent
 disappearance, which for a knowledge product is the worst available failure mode.
 
-**What was ALREADY closed, and must not be double-counted.** At the *emit door*, ADR-0007's incumbent guard
+**What was ALREADY closed, and must not be double-counted.** At the _emit door_, ADR-0007's incumbent guard
 (`governed-emit.ts` §2.25) refuses this exact write `governance-downgrade` before it reaches the reducer;
 `SCN-GE-I1` is green at `572d391` and was re-run to confirm. The transcript above is therefore not a
-door-level bypass. It is the state of the *reducer* the door protects, which knew nothing of the rule.
+door-level bypass. It is the state of the _reducer_ the door protects, which knew nothing of the rule.
 
 ## Decision 1 (ARCH-9) — derivation, and the alternative that was rejected
 
@@ -52,16 +52,16 @@ pins the gate SHUT rather than open.
 
 **The rejected alternative: folding `tier` into the identity envelope.** The brief for this work offered it
 as a free choice. It is not one — `ARCH-9` already considered and rejected exactly this, in writing, as
-formulation (i), and rejected the *disjunction* ("identity-inclusion OR derivation") as formulation (ii):
+formulation (i), and rejected the _disjunction_ ("identity-inclusion OR derivation") as formulation (ii):
 "Only derivation closes it. The clause is therefore a single requirement, not a choice." Three independent
 reasons, and each one alone is sufficient:
 
 1. **It does not close `scope` at all.** Authz is `actor === scope` on an author-supplied string while the
    read projection scopes on the derived `primaryAnchor`, with nothing binding them. Putting `scope` in the
    identity changes neither side of that.
-2. **This codebase has already ratified the opposite.** ADR-0007's carrier note: *"NEITHER FIELD ENTERS
+2. **This codebase has already ratified the opposite.** ADR-0007's carrier note: _"NEITHER FIELD ENTERS
    `nodeKey` … folding a governance value into it would silently re-address every stored fact and split a
-   node from its own history the first time its class was raised."* A `T0` node whose class is later raised
+   node from its own history the first time its class was raised."_ A `T0` node whose class is later raised
    would become a DIFFERENT node, orphaning its own lineage — and one `(anchor, slot)` would hold one node
    per class, which is precisely the proliferation the closed 13-member slot vocabulary exists to prevent.
 3. **It would move every stored hash, and the repo has no hash-version detection** (task #112). Under the
@@ -108,8 +108,8 @@ not self-asserted". **The T0→billy gate is self-asserted too.** `compose.ts:12
 `const ratifyToken = process.env.ATLAS_RATIFY_TOKEN` with no verification, so the `T0` gate is satisfied by
 `ATLAS_RATIFY_TOKEN=billy` by anyone who can invoke the CLI. This is not a new test's claim — the product's
 OWN black-box story already demonstrates it end-to-end through the real CLI subprocess
-(`s7-governance.blackbox.test.ts:210`, and `support.ts:26`: *"as `ATLAS_RATIFY_TOKEN`, it commits a T0
-fact"*). Every tier's gate is a string comparison against a caller-settable value.
+(`s7-governance.blackbox.test.ts:210`, and `support.ts:26`: _"as `ATLAS_RATIFY_TOKEN`, it commits a T0
+fact"_). Every tier's gate is a string comparison against a caller-settable value.
 
 This is a legitimate posture for a local developer tool and it is the SAME one `ARCH-12`/§3.3 already
 records for `actor` (`ATLAS_ACTOR ?? gitUserEmail`): an **anti-accident guardrail, not an adversarial
@@ -136,19 +136,19 @@ self-named ratifier is enough to put a SERVED invariant into a pack.
 2. **ARCH-D3b — the CREATE leg.** On a write that mints a node there is no incumbent to derive from. What
    un-choosable value names a NEW node's class? This is the OPEN DEFINE the architecture doc already
    records; ARCH-9 explicitly forbids answering it with "a constant that pins the gate open".
-   *[OWNER DECIDED 2026-09-03 — see ruling item 2: CREATE is T2-by-construction; growth is by USE-OR-SEAL,
-   neither mandatory.]*
+   _[OWNER DECIDED 2026-09-03 — see ruling item 2: CREATE is T2-by-construction; growth is by USE-OR-SEAL,
+   neither mandatory.]_
 3. **`scope` ↔ `primaryAnchor` binding — CLOSED in code (WP-10.A3, #251).** The write door's authz gate
    binds the declared `scope` to the derived `primaryAnchor`: `evalAuthzGate` (governed-emit-gates.ts) runs
    `actorInScope` then `scopeOwnsAnchor` (policy.ts, backed by `authz.anchors`) and refuses
    `REJECTED_UNAUTHORIZED_ANCHOR` when the scope does not own the fact's real anchor. A fact anchored in
    `src/payments` declared under `scope:'public'` is refused. The open-item wording below predates that
-   shipment; the code closed it. *[This ADR item is historical — see the architecture §3.4 for the current
-   statement.]*
+   shipment; the code closed it. _[This ADR item is historical — see the architecture §3.4 for the current
+   statement.]_
 4. **Whether the ratifier token becomes verifiable.** Doing so needs a verifier and a key-distribution story
    this product does not have. Until then, §3.3's posture stands and the prose must keep saying so.
-   *[OWNER DECIDED 2026-09-03 — see ruling item 3: the seal token is ONE of two growth evidences, not a
-   gate; verification stays advisory and the posture prose stands.]*
+   _[OWNER DECIDED 2026-09-03 — see ruling item 3: the seal token is ONE of two growth evidences, not a
+   gate; verification stays advisory and the posture prose stands.]_
 
 ## Owner ruling — 2026-09-03 (owner, after adversarial review)
 
@@ -171,29 +171,31 @@ Three commitments follow, each now owner-ratified:
    WRITTEN rule, not a consequence.
 2. **Growth is by USE-OR-SEAL, neither mandatory.** A node leaves the advisory class by ONE of two earned
    evidences, either sufficient, neither required:
-    - **USE** — a per-node usage COUNTER (in `packages/knowledge/src/lifecycle/hits.ts`) increments each time
-      the node is served in a completed decision. When it reaches a FIXED constant (`USE_THRESHOLD`, one
-      named constant in the code — no calibration, no context-dependent rule), the node rises implicitly,
-      auto-accepted by the growth path with no human and no further gate. The threshold is deliberately a
-      plain integer, tunable in one place. `[OWNER 2026-09-03: keep it a counter, no invented regime — 8 is
-      illustrative; the value is a named constant the owner can change.]` The current implementation records
-      an in-process served hit on composed query and returns the raised class on the next pack; it has no
-      completion signal or durable promotion event yet.
+   - **USE** — a per-node usage COUNTER (in `packages/knowledge/src/lifecycle/hits.ts`) increments each time
+     the node is served in a completed decision. When it reaches a FIXED constant (`USE_THRESHOLD`, one
+     named constant in the code — no calibration, no context-dependent rule), the node rises implicitly,
+     auto-accepted by the growth path with no human and no further gate. The threshold is deliberately a
+     plain integer, tunable in one place. `[OWNER 2026-09-03: keep it a counter, no invented regime — 8 is
+illustrative; the value is a named constant the owner can change.]` The current implementation records
+     an in-process served hit on composed query and returns the raised class on the next pack; it has no
+     completion signal or durable promotion event yet.
    - **SEAL** — a human ratify token records a deliberate endorsement; a named, evidence-carrying seal is
      also sufficient.
-   A node that earns neither stays advisory and decays by non-use (KNOW-17). There is NO required human
-   gate on the growth path — the human seal is a plus, never a precondition.
+     A node that earns neither stays advisory and decays by non-use (KNOW-17). There is NO required human
+     gate on the growth path — the human seal is a plus, never a precondition.
 3. **The ratify token is ONE evidence, not a gate, and its verification stays advisory.** The token remains
    what §3.3 says: an anti-accident guardrail against silent self-commit, not an authentication control.
    Making it verifiable is still not warranted under the local posture; the `service-gate-guard` tripwire
    (ARCH-12) re-opens the question the moment a remote/multi-tenant transport is attempted.
 
 **What this means for items 1 and 3 (implementation scope of ARCH-D3b):**
+
 - Item 1 = **CLOSED by #313**: the emit door consumes `deriveFastPathVerdicts`; no hardcoded
   `DOOR_RATIFY_CTX` remains. The current `contested:false` outcome is an honest absence of a veto source.
 - Item 3 = **CLOSED in code** (WP-10.A3, #251): `evalAuthzGate` runs `scopeOwnsAnchor` backed by
   `authz.anchors`, so authz cannot be claimed by declaration — a fact anchored in `src/payments` under
   `scope:'public'` is refused. No further implementation.
+
 5. **The architecture doc's decision table** still shows ARCH-D3b as OPEN (correct) but its ARCH-9 row
    predates this ADR. Updating `docs/reference/atlas-architecture.md` is deliberately NOT done here: three
    other seats are live on this base and that file is not this seat's to edit.

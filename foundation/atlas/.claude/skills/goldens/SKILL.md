@@ -10,9 +10,9 @@ description: >
 
 # /goldens — behavioral goldens (Specification by Example)
 
-> **Authority:** Gojko Adzic, *Specification by Example* (2011) — Given-When-Then as executable **living
+> **Authority:** Gojko Adzic, _Specification by Example_ (2011) — Given-When-Then as executable **living
 > documentation**; ShardStore/SOSP'21 — the reference model as oracle + reused as mock (anti-rot); the
-> TLA+→test literature (Modelator / Apalache) — traces generated *from* the model; property-based testing;
+> TLA+→test literature (Modelator / Apalache) — traces generated _from_ the model; property-based testing;
 > OpenSpec — requirement and scenario co-located as one object. Nothing here is invented.
 
 ## Scope — where it sits (S3)
@@ -29,15 +29,15 @@ the requirement's own testable projection, never a separate document.
 
 The v1 trap is authoring the golden as a third copy of the fact (after the EARS sentence and the formal
 property). Instead, **the golden's concrete cases come from the invariant's S2 `method-tag`** — you author the
-scenario *shape* once and let the generator produce the cases:
+scenario _shape_ once and let the generator produce the cases:
 
-| the INV's S2 method-tag | goldens come from | you author |
-|---|---|---|
+| the INV's S2 method-tag  | goldens come from                                                                                                                                                                                                     | you author                                               |
+| ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------- |
 | `formal` (`FSPEC-merge`) | **PBT on the properties by default** (the core is PBT-first); **model-traces only if S2 escalated to a model** (Apalache/Modelator → render each trace: initial state → Given, op → When, asserted post-state → Then) | the properties (or the model if built) — never the cases |
-| `exhaustive` | **the full enumeration** (every input in the finite space; existence + uniqueness asserted) | the input space + the assertion |
-| `PBT` | **cases the PBT engine generates** from the property/invariant (thousands, corner-biased) | the property once |
-| `reference-model` | **conformance / differential test** against the executable reference model as oracle (apply each op to model + impl, `compare_results`) | the op alphabet |
-| residue | **hand-written** — the tail where no generator applies | the scenario itself |
+| `exhaustive`             | **the full enumeration** (every input in the finite space; existence + uniqueness asserted)                                                                                                                           | the input space + the assertion                          |
+| `PBT`                    | **cases the PBT engine generates** from the property/invariant (thousands, corner-biased)                                                                                                                             | the property once                                        |
+| `reference-model`        | **conformance / differential test** against the executable reference model as oracle (apply each op to model + impl, `compare_results`)                                                                               | the op alphabet                                          |
+| residue                  | **hand-written** — the tail where no generator applies                                                                                                                                                                | the scenario itself                                      |
 
 Only the residue is hand-authored. For every generated tier you author the **generator input** once — the
 model, the property, the op-alphabet, or the input space — **never the cases**, and never a third copy of the
@@ -66,8 +66,8 @@ Then the head is the one with the lexicographically larger contentHash (max = th
 ## Coverage rule (what the set must contain)
 
 For each `REQ`: **one happy-path golden + one guard-golden per unwanted-behaviour clause** of its source
-invariant. A `REQ` whose golden is *writable* but never authored/generated still passes *Verifiable* (it is
-writable) — it fails the set's *Able-to-be-validated* (no `SCN` exists). (This is S3's `completeness` facet.)
+invariant. A `REQ` whose golden is _writable_ but never authored/generated still passes _Verifiable_ (it is
+writable) — it fails the set's _Able-to-be-validated_ (no `SCN` exists). (This is S3's `completeness` facet.)
 
 ## Teeth — every golden must be able to fail
 
@@ -75,9 +75,9 @@ A golden that **no** counterfactual mutant of its requirement can break is **vac
 most dangerous false-green). Author each golden so it **flips to BROKEN** on the mutant that violates its `REQ`
 (negate a guard, drop a case, weaken a bound, flip an output). This is the same teeth law as genesis `GEN-12`,
 and it is verified at the freeze by the [`completeness`](.claude/skills/completeness/SKILL.md) protocol (Gate 3).
-Author for failability; never emit a golden that cannot fail. *(At spec time this is a **discipline** — you
+Author for failability; never emit a golden that cannot fail. _(At spec time this is a **discipline** — you
 author the golden to be failable and name the violating mutant by judgment; it becomes a **mechanical** CI check
-only once executable code exists to mutate and run.)*
+only once executable code exists to mutate and run.)_
 
 ## Anti-rot (unconditional — ShardStore)
 

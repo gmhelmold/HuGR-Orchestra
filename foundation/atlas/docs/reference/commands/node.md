@@ -5,7 +5,7 @@ Read one fact back whole, by its content address. `query` gives you a bounded pa
 write path.
 
 This page describes the **CLI** command `atlas node`. The MCP tool is **`atlas-node`**, a
-`READ_SURFACE` member advertised over MCP — see *Transport differences*.
+`READ_SURFACE` member advertised over MCP — see _Transport differences_.
 
 ## Invocation
 
@@ -21,10 +21,10 @@ atlas node <addr>
 Atlas has two 64-hex identifiers for a fact and they are not interchangeable. Getting this wrong is the
 most likely reason a `node` lookup misses.
 
-| identifier | what prints it | what takes it |
-| --- | --- | --- |
-| **content address** | `atlas emit` → `data.id`; `atlas doctor archive` | `atlas node` |
-| **nodeKey** | `atlas query` → the `inv` lines; the `id` field inside a fact JSON file | `atlas link`, `atlas doctor why`, `atlas doctor reground` |
+| identifier          | what prints it                                                          | what takes it                                             |
+| ------------------- | ----------------------------------------------------------------------- | --------------------------------------------------------- |
+| **content address** | `atlas emit` → `data.id`; `atlas doctor archive`                        | `atlas node`                                              |
+| **nodeKey**         | `atlas query` → the `inv` lines; the `id` field inside a fact JSON file | `atlas link`, `atlas doctor why`, `atlas doctor reground` |
 
 ## Worked example
 
@@ -57,11 +57,11 @@ reason: no-such-node: no grounded node at content address 'f9517988f330a775ffc76
 
 ## Exit codes
 
-| code | meaning |
-| --- | --- |
-| `0` | the fact resolved |
-| `1` | no such node, a malformed address, or a runtime that is not composed |
-| `2` | a governance gate refused the read (the committed-store tripwire) |
+| code | meaning                                                              |
+| ---- | -------------------------------------------------------------------- |
+| `0`  | the fact resolved                                                    |
+| `1`  | no such node, a malformed address, or a runtime that is not composed |
+| `2`  | a governance gate refused the read (the committed-store tripwire)    |
 
 ## What it refuses, and why
 
@@ -69,7 +69,7 @@ reason: no-such-node: no grounded node at content address 'f9517988f330a775ffc76
 `no-such-node: …` with the address quoted and exits `1`.
 
 **Anything that is not 64 lowercase hex.** The address is attacker-controllable over other transports, so
-it is charset-checked *before* any filesystem read and the guard is re-applied in the store. A path
+it is charset-checked _before_ any filesystem read and the guard is re-applied in the store. A path
 traversal is simply a miss:
 
 ```

@@ -15,7 +15,7 @@ atlas link <a> <b> [--retract]
 ```
 
 - `<a>` `<b>` — required (arity 2). Two **nodeKeys** — the identifiers `atlas query` prints on its `inv`
-  lines, *not* the content addresses [`node`](./node.md) takes.
+  lines, _not_ the content addresses [`node`](./node.md) takes.
 - `--retract` — the only flag this door accepts. Bare `--retract` or `--retract=true`; anything else is
   refused (see below). To assert, omit it.
 - The same environment gates as `emit`: `ATLAS_ACTOR` for authorization, `ATLAS_RATIFY_TOKEN` for
@@ -65,11 +65,11 @@ After which the `sameAs` line is gone from the pack (the pack above, re-run, pri
 
 ## Exit codes
 
-| code | meaning |
-| --- | --- |
-| `0` | the relation changed — asserted or retracted |
-| `1` | usage error — too few positionals, an unknown flag, a bad `--retract` value |
-| `2` | a governance or pair-state gate refused the write. Nothing changed |
+| code | meaning                                                                     |
+| ---- | --------------------------------------------------------------------------- |
+| `0`  | the relation changed — asserted or retracted                                |
+| `1`  | usage error — too few positionals, an unknown flag, a bad `--retract` value |
+| `2`  | a governance or pair-state gate refused the write. Nothing changed          |
 
 ## What it refuses, and why
 
@@ -113,10 +113,10 @@ before concluding a scope is missing.
 # exit 2
 ```
 
-**Any flag it does not recognise.** This is the one command that does *not* inherit the parser's
+**Any flag it does not recognise.** This is the one command that does _not_ inherit the parser's
 "unknown flags fold in and are ignored" behaviour. `packages/cli/src/marshal.ts` records why, measured
 through the real parser before the strictness was added: `--retract=1`, `--retract=TRUE`, `--retract=false`
-and the typo `--retracted` each produced `retract: false` — i.e. an *assertion* — so an operator who asked
+and the typo `--retracted` each produced `retract: false` — i.e. an _assertion_ — so an operator who asked
 to withdraw an equivalence got `linked: a ≡ b` on screen. A governed write door does not silently discard an
 argument you supplied:
 
@@ -161,7 +161,7 @@ on both endpoints and the read fold already refuses to merge across it. Nothing 
 ## Things worth knowing before you rely on it
 
 - **An extra positional is still silently ignored.** `atlas link a b c` reads only the first two. The
-  parser enforces a *minimum* arity, and tightening that touches every command; it is recorded in
+  parser enforces a _minimum_ arity, and tightening that touches every command; it is recorded in
   `packages/cli/src/marshal.ts` as a follow-up rather than fixed.
 - **Retraction is an append.** The edge is not deleted; the class splits on the next read.
 

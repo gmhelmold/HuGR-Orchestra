@@ -37,24 +37,24 @@
 // unchanged. Recording it as `emitted:false` would put our own defect behind the caller's name — the exact
 // misattribution `fault.ts` exists to remove, committed in the opposite direction.
 
-import { id } from '@atlas/kernel';
-import type { CasObject } from '@atlas/kernel';
-import type { Hash } from '@atlas/contracts';
-import type { GroundedFact } from '@atlas/knowledge';
+import { id } from "@atlas/kernel"
+import type { CasObject } from "@atlas/kernel"
+import type { Hash } from "@atlas/contracts"
+import type { GroundedFact } from "@atlas/knowledge"
 // The KNOW-10/KNOW-15i closed-slot refusal `upsert` raises (#152) — recognised STRUCTURALLY; see below.
-import { isClosedSlotError } from '@atlas/knowledge';
-import { UnaddressableCasObjectError } from './sidecar-commit.js';
+import { isClosedSlotError } from "@atlas/knowledge"
+import { UnaddressableCasObjectError } from "./sidecar-commit.js"
 
 /** The canonicalizer's own name for every one of its refusals (`kernel/canonical.ts` — floats, unsupported
  *  value types, NFC key collisions all carry it). Matched as a DISCRIMINANT by EQUALITY, which is how this
  *  repo compares refusals everywhere: the name is the contract, the prose is commentary. */
-const CANONICAL_VIOLATION = 'canonical-form violation';
+const CANONICAL_VIOLATION = "canonical-form violation"
 
 /** The DISCRIMINANT of a message — everything before the first `:`. */
-const discriminantOf = (message: string): string => message.split(':')[0]!;
+const discriminantOf = (message: string): string => message.split(":")[0]!
 
 /** The addressability verdict: the minted content address, or the door's recorded refusal. */
-export type Addressed = { readonly hash: Hash; readonly rejected?: undefined } | { readonly rejected: string };
+export type Addressed = { readonly hash: Hash; readonly rejected?: undefined } | { readonly rejected: string }
 
 /**
  * Mint the content address of `node`, converting a canonical-form violation into a RECORDED refusal.
@@ -68,11 +68,11 @@ export type Addressed = { readonly hash: Hash; readonly rejected?: undefined } |
  */
 export function addressOf(node: GroundedFact): Addressed {
   try {
-    return { hash: id(node as CasObject) };
+    return { hash: id(node as CasObject) }
   } catch (e) {
-    const message = e instanceof Error ? e.message : String(e);
-    if (e instanceof Error && discriminantOf(message) === CANONICAL_VIOLATION) return { rejected: message };
-    throw e;
+    const message = e instanceof Error ? e.message : String(e)
+    if (e instanceof Error && discriminantOf(message) === CANONICAL_VIOLATION) return { rejected: message }
+    throw e
   }
 }
 
@@ -116,7 +116,7 @@ export function addressOf(node: GroundedFact): Addressed {
  * `tools/src/fault.ts` records the identical hazard for its own tag and resolves it the identical way.
  */
 export function commitRefusalOf(e: unknown): string {
-  if (e instanceof UnaddressableCasObjectError) return e.message;
-  if (isClosedSlotError(e)) return e.message;
-  throw e;
+  if (e instanceof UnaddressableCasObjectError) return e.message
+  if (isClosedSlotError(e)) return e.message
+  throw e
 }

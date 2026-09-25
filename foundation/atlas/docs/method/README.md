@@ -15,13 +15,13 @@
 
 Each is designed independently, researched independently, and fails independently.
 
-| layer | is | answers | example | lives in |
-|---|---|---|---|---|
-| **Protocol** | the normative *method* — axioms, rules, procedure, invariants, quality bar; deterministic, tool/model-agnostic | "what are the rules?" | the EARS protocol; a state's 7-facet contract | a spec, or a skill's body |
-| **Prompt** | the engineered *dispatch* that drives an executor agent to perform a step **per its protocol**, on specific inputs, emitting a specific artifact | "what exactly do I tell the agent so it does this step right?" | the S1 dispatch handing module X's invariants to an agent | `prompts/<state>.md` (versioned) |
-| **Skill** | the invocable *package* (`skill.md`) enveloping a protocol (+ its prompt template + references), discoverable & reusable across the fleet | "how is this capability packaged so any agent can pick it up?" | `.claude/skills/ears/SKILL.md` | `.claude/skills/<name>/` |
+| layer        | is                                                                                                                                               | answers                                                        | example                                                   | lives in                         |
+| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------- | --------------------------------------------------------- | -------------------------------- |
+| **Protocol** | the normative _method_ — axioms, rules, procedure, invariants, quality bar; deterministic, tool/model-agnostic                                   | "what are the rules?"                                          | the EARS protocol; a state's 7-facet contract             | a spec, or a skill's body        |
+| **Prompt**   | the engineered _dispatch_ that drives an executor agent to perform a step **per its protocol**, on specific inputs, emitting a specific artifact | "what exactly do I tell the agent so it does this step right?" | the S1 dispatch handing module X's invariants to an agent | `prompts/<state>.md` (versioned) |
+| **Skill**    | the invocable _package_ (`skill.md`) enveloping a protocol (+ its prompt template + references), discoverable & reusable across the fleet        | "how is this capability packaged so any agent can pick it up?" | `.claude/skills/ears/SKILL.md`                            | `.claude/skills/<name>/`         |
 
-**Composition:** a **state** is *governed by* a Protocol, *executed via* a Prompt, *drawing on* Skills.
+**Composition:** a **state** is _governed by_ a Protocol, _executed via_ a Prompt, _drawing on_ Skills.
 The prompt **operationalizes** the protocol (references it, never restates it — the no-triplication discipline
 at the prompt layer); the skill **packages** it. One skill per technique/protocol. Each built with research
 and care, **one at a time — never batched.**
@@ -30,36 +30,36 @@ and care, **one at a time — never batched.**
 
 State machine (spec: [`../DECOMPOSITION-PROTOCOL.md`](../DECOMPOSITION-PROTOCOL.md)):
 `S0 → S1 → S2 → S3 → C → S4` (then the per-WP execution machine BIND→SEAL), with a **two-half gate between each**: the **reconciler** (mechanical coverage —
-proves the artifact *well-formed*) and the **cold-review** (judgment — proves it *right*). Both halves are
+proves the artifact _well-formed_) and the **cold-review** (judgment — proves it _right_). Both halves are
 now specified: `reconciler` skill + `cold-review` skill (`prompts/review.md`, one dispatch, the producing
 state's contract loaded as the reference). Per state, three artifacts:
 
-| state | Protocol (contract) | Prompt (dispatch) | Skills it draws on |
-|---|---|---|---|
-| **S0** Invariant Register *(= the design-freeze; the Ratify phase of the design rubric)* | §S0 contract ✅ | `prompts/S0.md` ✅ (mechanical extraction; the DEFINE seat ratifies) | `ratification-gate` · `axiomatic-design` · `completeness` |
-| **S1** Requirements | §S1 contract ✅ | `prompts/S1.md` ✅ | `ears` · `atom-gate` · `completeness` |
-| **S2** Formal Spec | §S2 contract ✅ | `prompts/S2.md` ✅ | `formal-decision` |
-| **S3** Goldens | §S3 contract ✅ | `prompts/S3.md` ✅ | `goldens` · `completeness` |
-| **C** Roadmap (warp: epics + campaigns) | §C contract ✅ | `prompts/C.md` ✅ | `completeness` · `reconciler` (story-map · impact-map · carpaccio · SPIDR/INVEST · Now/Next/Later) |
-| **S4** Work Packages (weft: module within epic) | §S4 contract ✅ | `prompts/S4.md` ✅ + `wp-template.md` | `techlead` · `reconciler` |
-| **EXECUTION** per-WP loop BIND→RED→GREEN→REFACTOR*→GATE→SEAL | [`EXECUTION-PROTOCOL.md`](../EXECUTION-PROTOCOL.md) ✅ (SOTA-grounded) | `prompts/exec/{BIND,RED,GREEN,REFACTOR,GATE,SEAL}.md` ✅ | `reconciler` · `cold-review` (lucy GATE · frankie wave-close) |
+| state                                                                                    | Protocol (contract)                                                    | Prompt (dispatch)                                                    | Skills it draws on                                                                                 |
+| ---------------------------------------------------------------------------------------- | ---------------------------------------------------------------------- | -------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
+| **S0** Invariant Register _(= the design-freeze; the Ratify phase of the design rubric)_ | §S0 contract ✅                                                        | `prompts/S0.md` ✅ (mechanical extraction; the DEFINE seat ratifies) | `ratification-gate` · `axiomatic-design` · `completeness`                                          |
+| **S1** Requirements                                                                      | §S1 contract ✅                                                        | `prompts/S1.md` ✅                                                   | `ears` · `atom-gate` · `completeness`                                                              |
+| **S2** Formal Spec                                                                       | §S2 contract ✅                                                        | `prompts/S2.md` ✅                                                   | `formal-decision`                                                                                  |
+| **S3** Goldens                                                                           | §S3 contract ✅                                                        | `prompts/S3.md` ✅                                                   | `goldens` · `completeness`                                                                         |
+| **C** Roadmap (warp: epics + campaigns)                                                  | §C contract ✅                                                         | `prompts/C.md` ✅                                                    | `completeness` · `reconciler` (story-map · impact-map · carpaccio · SPIDR/INVEST · Now/Next/Later) |
+| **S4** Work Packages (weft: module within epic)                                          | §S4 contract ✅                                                        | `prompts/S4.md` ✅ + `wp-template.md`                                | `techlead` · `reconciler`                                                                          |
+| **EXECUTION** per-WP loop BIND→RED→GREEN→REFACTOR\*→GATE→SEAL                            | [`EXECUTION-PROTOCOL.md`](../EXECUTION-PROTOCOL.md) ✅ (SOTA-grounded) | `prompts/exec/{BIND,RED,GREEN,REFACTOR,GATE,SEAL}.md` ✅             | `reconciler` · `cold-review` (lucy GATE · frankie wave-close)                                      |
 
 ## Inventory — technique protocols → skills
 
-| technique / protocol | skill | status | authority |
-|---|---|---|---|
-| EARS (requirement syntax) | `ears` | ✅ cravado | Mavin RE'09 |
-| dispatch-prompt (the prompt layer, cross-cutting) | `dispatch-prompt` | ✅ cravado | Anthropic docs · Spec-Kit commands · DSPy |
-| atom-gate (requirement quality) | `atom-gate` | ✅ cravado (reviewed) | ISO/IEC/IEEE 29148 §5.2.5-6 |
-| goldens (SbE/BDD + generate-from-model) | `goldens` | ✅ cravado (reviewed) | Adzic; ShardStore; TLA+→test |
-| formal-decision (3-conjunct rule + tool-per-shape) | `formal-decision` | ✅ cravado (reviewed) | AWS-FM CACM'15; ShardStore SOSP'21; Shapiro'11; Gomes'17 |
-| reconciler (the mechanical half of the gate — coverage) | `reconciler` | ✅ cravado (reviewed) | Spec-Kit `/analyze` + `/clarify` |
-| cold-review (the judgment half of the gate — refute-first, grounded, toothed; `prompts/review.md`) | `cold-review` | ✅ cravado (3 decorrelated passes: bobby+lucy+frankie confirm; all findings integrated inc. the reconciler↔cold-review seam) | Fagan'76 · Porter/Votta/Basili'95 · PBR Basili'96 · Mills/Eick seeding · MT-Bench'23 · CriticGPT'24 · PoLL'24 |
-| completeness (is the decomposition COMPLETE — the layers beyond coverage) | `completeness` | ✅ cravado (reviewed) | Leveson FMSP'00 · SCR TOSEM'96 · PBR · Beer vacuity'01 · mutation'78 |
-| *— design-side (upstream, feeds S0) —* | | | |
-| ratification-gate (design freeze: ratified vs asserted, 5-gate; emits S0's row) | `ratification-gate` | ✅ cravado (reviewed) | ODI · ATAM · Suh · Nygard |
-| axiomatic-design (FR↔DP coupling matrix, lean) | `axiomatic-design` | ✅ cravado (reviewed) | Suh |
-| functional-surface (complete feature/story/use-case/manual catalog before requirements; L0–L3 + 6-lens sweep + closure predicates) | `functional-surface` | ✅ cravado + applied (Atlas catalog v3 converged, 4 iterations) | Cockburn use-cases · Patton story-map · Diátaxis · Brandolini event-storming |
+| technique / protocol                                                                                                               | skill                | status                                                                                                                        | authority                                                                                                     |
+| ---------------------------------------------------------------------------------------------------------------------------------- | -------------------- | ----------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| EARS (requirement syntax)                                                                                                          | `ears`               | ✅ cravado                                                                                                                    | Mavin RE'09                                                                                                   |
+| dispatch-prompt (the prompt layer, cross-cutting)                                                                                  | `dispatch-prompt`    | ✅ cravado                                                                                                                    | Anthropic docs · Spec-Kit commands · DSPy                                                                     |
+| atom-gate (requirement quality)                                                                                                    | `atom-gate`          | ✅ cravado (reviewed)                                                                                                         | ISO/IEC/IEEE 29148 §5.2.5-6                                                                                   |
+| goldens (SbE/BDD + generate-from-model)                                                                                            | `goldens`            | ✅ cravado (reviewed)                                                                                                         | Adzic; ShardStore; TLA+→test                                                                                  |
+| formal-decision (3-conjunct rule + tool-per-shape)                                                                                 | `formal-decision`    | ✅ cravado (reviewed)                                                                                                         | AWS-FM CACM'15; ShardStore SOSP'21; Shapiro'11; Gomes'17                                                      |
+| reconciler (the mechanical half of the gate — coverage)                                                                            | `reconciler`         | ✅ cravado (reviewed)                                                                                                         | Spec-Kit `/analyze` + `/clarify`                                                                              |
+| cold-review (the judgment half of the gate — refute-first, grounded, toothed; `prompts/review.md`)                                 | `cold-review`        | ✅ cravado (3 decorrelated passes: bobby+lucy+frankie confirm; all findings integrated inc. the reconciler↔cold-review seam) | Fagan'76 · Porter/Votta/Basili'95 · PBR Basili'96 · Mills/Eick seeding · MT-Bench'23 · CriticGPT'24 · PoLL'24 |
+| completeness (is the decomposition COMPLETE — the layers beyond coverage)                                                          | `completeness`       | ✅ cravado (reviewed)                                                                                                         | Leveson FMSP'00 · SCR TOSEM'96 · PBR · Beer vacuity'01 · mutation'78                                          |
+| _— design-side (upstream, feeds S0) —_                                                                                             |                      |                                                                                                                               |                                                                                                               |
+| ratification-gate (design freeze: ratified vs asserted, 5-gate; emits S0's row)                                                    | `ratification-gate`  | ✅ cravado (reviewed)                                                                                                         | ODI · ATAM · Suh · Nygard                                                                                     |
+| axiomatic-design (FR↔DP coupling matrix, lean)                                                                                    | `axiomatic-design`   | ✅ cravado (reviewed)                                                                                                         | Suh                                                                                                           |
+| functional-surface (complete feature/story/use-case/manual catalog before requirements; L0–L3 + 6-lens sweep + closure predicates) | `functional-surface` | ✅ cravado + applied (Atlas catalog v3 converged, 4 iterations)                                                               | Cockburn use-cases · Patton story-map · Diátaxis · Brandolini event-storming                                  |
 
 ## Backlog & status (updated every step)
 
@@ -133,8 +133,8 @@ state's contract loaded as the reference). Per state, three artifacts:
   Four predicates: **GROUNDED** (every finding cites the violated clause — CriticGPT's precision guard) ·
   **DERIVED** (re-derive obligations from the contract, then diff — PBR: passive checklist ≯ ad-hoc) ·
   **COMPLETE** (every contract facet verdicted) · **TOOTHED** (clean verdict creditable only if it catches
-  seeded defects — Mills/Eick). Detection≠rework (Fagan). Panel = 1 default, 2–3 *decorrelated* for
-  high-risk, never >3 (*Nine Judges, Two Effective Votes*). Dimensions from the **producing contract**, not
+  seeded defects — Mills/Eick). Detection≠rework (Fagan). Panel = 1 default, 2–3 _decorrelated_ for
+  high-risk, never >3 (_Nine Judges, Two Effective Votes_). Dimensions from the **producing contract**, not
   ODC. Lean by design (cut-list honored).
 - **2026-07-17** — **Completeness has layers** (owner: "need a methodology to know a decomposition is
   complete"). We had only L1 coverage (the `reconciler`). Layers: L1 coverage (mechanical) · L2 capture

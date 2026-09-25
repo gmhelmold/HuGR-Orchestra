@@ -7,7 +7,7 @@
 The persistence layer makes the Atlas **git-native**: knowledge, memory, and per-agent provenance are a
 living part of the repo's version control, not a sidecar database. They travel with every
 commit/PR/branch/fork/merge by construction. State is a fold over an append-only event log; the source of
-truth is the tracked git-native store; the git host's PR surface is a *projection* rendered by a host
+truth is the tracked git-native store; the git host's PR surface is a _projection_ rendered by a host
 adapter. Nothing is ever deleted — superseded/decayed/closed entries are archived and re-spawnable.
 
 ## Data model

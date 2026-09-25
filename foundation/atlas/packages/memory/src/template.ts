@@ -6,7 +6,7 @@
 // a FIXED field skeleton (structured, never a prose blob), so this file is the per-type VALIDATOR + the
 // canonical STRUCTURED render (a `key=<json>` block over the template keys in fixed order, byte-stable).
 
-import type { MemoryEntry, MemoryKind } from './types.js';
+import type { MemoryEntry, MemoryKind } from "./types.js"
 
 // ── frozen templated-write surface, co-located here (was ref/template.ts) ──────────────────────────────────
 
@@ -18,14 +18,14 @@ import type { MemoryEntry, MemoryKind } from './types.js';
  * (the failed checks), NOT an invented diagnostic record.
  */
 export interface TemplateVerdict {
-  readonly valid: boolean;
-  readonly reasons: readonly string[]; // failed checks (missing field / over cap / out-of-section) — empty iff valid
+  readonly valid: boolean
+  readonly reasons: readonly string[] // failed checks (missing field / over cap / out-of-section) — empty iff valid
 }
 
 export interface TemplateApi {
   /** Validate a write against its per-type required-field set + section bounds; rejects fail-closed on
    *  any missing field / over cap / out-of-section prose (MEM-5). Pure + total. (method-tags-mem:53) */
-  validate(kind: MemoryKind, entry: MemoryEntry): TemplateVerdict;
+  validate(kind: MemoryKind, entry: MemoryEntry): TemplateVerdict
 
   /** The canonical STRUCTURED render of a templated entry — never a prose blob, byte-stable for equal
    *  input (the driftless discipline mirrored from the pack/invariant render).
@@ -33,7 +33,7 @@ export interface TemplateApi {
    *  [PINNED —exact render format not frozen] The reference pins "structured, never prose" but freezes
    *  no concrete serialization; transcribed as `string` (a canonical structured line/block), NOT an
    *  invented layout. */
-  render(kind: MemoryKind, entry: MemoryEntry): string;
+  render(kind: MemoryKind, entry: MemoryEntry): string
 }
 
 // re-export the entry vocabulary the tests build fixtures over (barrel wired at SEAL — test imports src).
@@ -48,52 +48,52 @@ export type {
   MemoryStore,
   MemberId,
   Ref,
-} from './types.js';
+} from "./types.js"
 
 // ── the per-type templates (the frozen entry field skeletons — types.ts) ──────────────────────────────────
 
 /** The REQUIRED fields per Memory type — a write missing any is rejected fail-closed (MEM-5). */
 const REQUIRED: Record<MemoryKind, readonly string[]> = {
-  project: ['rule', 'scope', 'frecency'],
-  task: ['taskId', 'attempted', 'failedWith', 'stoppedAt', 'lesson'],
-  pr: ['prId', 'decisions', 'reviewOutcomes', 'knowledgeDelta'],
-  logbook: ['prId', 'at', 'territories', 'shipped', 'decisions', 'tradeoffs', 'risks', 'openThreads', 'links'],
-};
+  project: ["rule", "scope", "frecency"],
+  task: ["taskId", "attempted", "failedWith", "stoppedAt", "lesson"],
+  pr: ["prId", "decisions", "reviewOutcomes", "knowledgeDelta"],
+  logbook: ["prId", "at", "territories", "shipped", "decisions", "tradeoffs", "risks", "openThreads", "links"],
+}
 
 /** The OPTIONAL fields per type — present in the template, never required. */
 const OPTIONAL: Record<MemoryKind, readonly string[]> = {
-  project: ['grounding'],
-  task: ['ref'],
-  pr: ['ref'],
+  project: ["grounding"],
+  task: ["ref"],
+  pr: ["ref"],
   logbook: [],
-};
+}
 
 /** The full closed key set of a type's template = required ∪ optional. A key outside it is out-of-section. */
 function templateKeys(kind: MemoryKind): ReadonlySet<string> {
-  return new Set([...REQUIRED[kind], ...OPTIONAL[kind]]);
+  return new Set([...REQUIRED[kind], ...OPTIONAL[kind]])
 }
 
 // ── the DERIVED MemoryKind (ARCH-9 applied one layer down) ───────────────────────────────────────────────
 
 /** The four types, in a fixed order so an ambiguous entry reports its candidates deterministically. */
-const KINDS: readonly MemoryKind[] = ['project', 'task', 'pr', 'logbook'];
+const KINDS: readonly MemoryKind[] = ["project", "task", "pr", "logbook"]
 
 /**
  * Raised when an entry's shape does not identify exactly one template — no candidate, or more than one.
  * Fail-closed: an entry the discriminator cannot name is never written under a guessed type.
  */
 export class UndeterminedKindError extends Error {
-  readonly candidates: readonly MemoryKind[];
+  readonly candidates: readonly MemoryKind[]
   constructor(candidates: readonly MemoryKind[]) {
     super(
       candidates.length === 0
-        ? 'MEM-5 kind derivation: no template matches this entry (it satisfies no type\u2019s required keys, ' +
-          'or carries keys outside every template) \u2014 rejected, never written under a guessed type'
-        : `MEM-5 kind derivation: entry matches MORE THAN ONE template (${candidates.join(', ')}) — the ` +
-          'templates are no longer mutually exclusive, so the derivation is not sound; rejected',
-    );
-    this.name = 'UndeterminedKindError';
-    this.candidates = candidates;
+        ? "MEM-5 kind derivation: no template matches this entry (it satisfies no type\u2019s required keys, " +
+            "or carries keys outside every template) \u2014 rejected, never written under a guessed type"
+        : `MEM-5 kind derivation: entry matches MORE THAN ONE template (${candidates.join(", ")}) — the ` +
+            "templates are no longer mutually exclusive, so the derivation is not sound; rejected",
+    )
+    this.name = "UndeterminedKindError"
+    this.candidates = candidates
   }
 }
 
@@ -120,16 +120,16 @@ export class UndeterminedKindError extends Error {
 export function memoryKindOf(entry: MemoryEntry): MemoryKind {
   // `Object.keys(null)` THROWS a TypeError, so totality is not free here — an explicit non-object guard is
   // what makes the sentence above true. A test asserted the null case and passed on the WRONG throw.
-  if (entry === null || typeof entry !== 'object') throw new UndeterminedKindError([]);
-  const rec = entry as unknown as Record<string, unknown>;
-  const keys = Object.keys(rec);
+  if (entry === null || typeof entry !== "object") throw new UndeterminedKindError([])
+  const rec = entry as unknown as Record<string, unknown>
+  const keys = Object.keys(rec)
   const candidates = KINDS.filter((k) => {
-    if (REQUIRED[k].some((r) => rec[r] === undefined)) return false;
-    const allowed = templateKeys(k);
-    return keys.every((key) => allowed.has(key));
-  });
-  if (candidates.length !== 1) throw new UndeterminedKindError(candidates);
-  return candidates[0] as MemoryKind;
+    if (REQUIRED[k].some((r) => rec[r] === undefined)) return false
+    const allowed = templateKeys(k)
+    return keys.every((key) => allowed.has(key))
+  })
+  if (candidates.length !== 1) throw new UndeterminedKindError(candidates)
+  return candidates[0] as MemoryKind
 }
 
 // ── MEM-5: the fail-closed validator ─────────────────────────────────────────────────────────────────────
@@ -146,17 +146,10 @@ export function memoryKindOf(entry: MemoryEntry): MemoryKind {
  *   - `ref` / `ref[]` — the `Ref = StructRef | string` union of types.ts, checked STRUCTURALLY (below).
  *   - `object[]` — an array of non-null objects. See the STATED BOUND on `knowledgeDelta`.
  */
-type FieldType = 'string' | 'finite-number' | 'string[]' | 'ref' | 'ref[]' | 'object[]';
+type FieldType = "string" | "finite-number" | "string[]" | "ref" | "ref[]" | "object[]"
 
 /** The frozen `kind`s of a `StructRef` (@atlas/contracts `struct.ts`), transcribed — not widened. */
-const STRUCT_REF_KINDS: ReadonlySet<string> = new Set([
-  'symbol',
-  'block',
-  'file',
-  'repo',
-  'project',
-  'directory',
-]);
+const STRUCT_REF_KINDS: ReadonlySet<string> = new Set(["symbol", "block", "file", "repo", "project", "directory"])
 
 /**
  * `Ref = StructRef | string` (types.ts). A bare pointer string satisfies it; so does a StructRef-shaped
@@ -165,32 +158,32 @@ const STRUCT_REF_KINDS: ReadonlySet<string> = new Set([
  * Anything else — a number, `null`, an array, an object missing a leg — is NOT a `Ref`.
  */
 function isRef(v: unknown): boolean {
-  if (typeof v === 'string') return true;
-  if (v === null || typeof v !== 'object' || Array.isArray(v)) return false;
-  const r = v as Record<string, unknown>;
+  if (typeof v === "string") return true
+  if (v === null || typeof v !== "object" || Array.isArray(v)) return false
+  const r = v as Record<string, unknown>
   return (
-    typeof r['kind'] === 'string' &&
-    STRUCT_REF_KINDS.has(r['kind']) &&
-    typeof r['qualifiedPath'] === 'string' &&
-    typeof r['subtreeHash'] === 'string'
-  );
+    typeof r["kind"] === "string" &&
+    STRUCT_REF_KINDS.has(r["kind"]) &&
+    typeof r["qualifiedPath"] === "string" &&
+    typeof r["subtreeHash"] === "string"
+  )
 }
 
 /** The one predicate per `FieldType`. Total over any input — nothing here throws on a hostile value. */
 function matchesFieldType(t: FieldType, v: unknown): boolean {
   switch (t) {
-    case 'string':
-      return typeof v === 'string';
-    case 'finite-number':
-      return typeof v === 'number' && Number.isFinite(v);
-    case 'string[]':
-      return Array.isArray(v) && v.every((e) => typeof e === 'string');
-    case 'ref':
-      return isRef(v);
-    case 'ref[]':
-      return Array.isArray(v) && v.every((e) => isRef(e));
-    case 'object[]':
-      return Array.isArray(v) && v.every((e) => e !== null && typeof e === 'object' && !Array.isArray(e));
+    case "string":
+      return typeof v === "string"
+    case "finite-number":
+      return typeof v === "number" && Number.isFinite(v)
+    case "string[]":
+      return Array.isArray(v) && v.every((e) => typeof e === "string")
+    case "ref":
+      return isRef(v)
+    case "ref[]":
+      return Array.isArray(v) && v.every((e) => isRef(e))
+    case "object[]":
+      return Array.isArray(v) && v.every((e) => e !== null && typeof e === "object" && !Array.isArray(e))
   }
 }
 
@@ -208,34 +201,34 @@ function matchesFieldType(t: FieldType, v: unknown): boolean {
  * The same bound applies to `links: readonly Ref[]`, which IS fully decidable and therefore IS decided.
  */
 const FIELD_TYPES: Record<MemoryKind, Readonly<Record<string, FieldType>>> = {
-  project: { rule: 'string', scope: 'string', grounding: 'ref', frecency: 'finite-number' },
+  project: { rule: "string", scope: "string", grounding: "ref", frecency: "finite-number" },
   task: {
-    taskId: 'string',
-    attempted: 'string[]',
-    failedWith: 'string[]',
-    stoppedAt: 'string',
-    lesson: 'string',
-    ref: 'ref',
+    taskId: "string",
+    attempted: "string[]",
+    failedWith: "string[]",
+    stoppedAt: "string",
+    lesson: "string",
+    ref: "ref",
   },
   pr: {
-    prId: 'string',
-    decisions: 'string[]',
-    reviewOutcomes: 'string[]',
-    knowledgeDelta: 'object[]',
-    ref: 'ref',
+    prId: "string",
+    decisions: "string[]",
+    reviewOutcomes: "string[]",
+    knowledgeDelta: "object[]",
+    ref: "ref",
   },
   logbook: {
-    prId: 'string',
-    at: 'string',
-    territories: 'string[]',
-    shipped: 'string',
-    decisions: 'string',
-    tradeoffs: 'string',
-    risks: 'string',
-    openThreads: 'string',
-    links: 'ref[]',
+    prId: "string",
+    at: "string",
+    territories: "string[]",
+    shipped: "string",
+    decisions: "string",
+    tradeoffs: "string",
+    risks: "string",
+    openThreads: "string",
+    links: "ref[]",
   },
-};
+}
 
 /**
  * Every template key carries a declared type, and every declared type names a real template key. Checked
@@ -244,12 +237,12 @@ const FIELD_TYPES: Record<MemoryKind, Readonly<Record<string, FieldType>>> = {
  * table exists to close. A drift makes the module fail to load, so it cannot ship half-applied.
  */
 for (const kind of KINDS) {
-  const declared = new Set(Object.keys(FIELD_TYPES[kind]));
+  const declared = new Set(Object.keys(FIELD_TYPES[kind]))
   for (const key of templateKeys(kind)) {
-    if (!declared.has(key)) throw new Error(`template.ts: '${kind}.${key}' has no declared FIELD_TYPES row`);
+    if (!declared.has(key)) throw new Error(`template.ts: '${kind}.${key}' has no declared FIELD_TYPES row`)
   }
   for (const key of declared) {
-    if (!templateKeys(kind).has(key)) throw new Error(`template.ts: FIELD_TYPES '${kind}.${key}' is not a template key`);
+    if (!templateKeys(kind).has(key)) throw new Error(`template.ts: FIELD_TYPES '${kind}.${key}' is not a template key`)
   }
 }
 
@@ -279,31 +272,31 @@ for (const kind of KINDS) {
 export function validate(kind: MemoryKind, entry: MemoryEntry): TemplateVerdict {
   // `Object.keys(null)` throws, and this gate is documented as total; the same explicit non-object guard
   // `memoryKindOf` carries is what makes that sentence true when `validate` is called directly.
-  if (entry === null || typeof entry !== 'object') {
-    return { valid: false, reasons: ['not an object: a template cannot be filled by a non-object value'] };
+  if (entry === null || typeof entry !== "object") {
+    return { valid: false, reasons: ["not an object: a template cannot be filled by a non-object value"] }
   }
-  const rec = entry as unknown as Record<string, unknown>;
-  const reasons: string[] = [];
+  const rec = entry as unknown as Record<string, unknown>
+  const reasons: string[] = []
 
   for (const key of REQUIRED[kind]) {
-    if (rec[key] === undefined) reasons.push(`missing field: ${key}`);
+    if (rec[key] === undefined) reasons.push(`missing field: ${key}`)
   }
-  const allowed = templateKeys(kind);
+  const allowed = templateKeys(kind)
   for (const key of Object.keys(rec)) {
-    if (!allowed.has(key)) reasons.push(`out-of-section prose: ${key}`);
+    if (!allowed.has(key)) reasons.push(`out-of-section prose: ${key}`)
   }
   // (c) — types, over the keys that are BOTH present and in-template. An out-of-template key was already
   // reported above and has no declared type; a missing required key was too, and re-reporting it as a type
   // failure would name one defect twice.
-  const types = FIELD_TYPES[kind];
+  const types = FIELD_TYPES[kind]
   for (const key of Object.keys(rec)) {
-    const declared = types[key];
-    if (declared === undefined || rec[key] === undefined) continue;
+    const declared = types[key]
+    if (declared === undefined || rec[key] === undefined) continue
     if (!matchesFieldType(declared, rec[key])) {
-      reasons.push(`wrong type: ${key} must be ${declared}`);
+      reasons.push(`wrong type: ${key} must be ${declared}`)
     }
   }
-  return { valid: reasons.length === 0, reasons };
+  return { valid: reasons.length === 0, reasons }
 }
 
 // ── MEM-5: the canonical STRUCTURED render (never a prose blob) ───────────────────────────────────────────
@@ -314,20 +307,20 @@ export function validate(kind: MemoryKind, entry: MemoryEntry): TemplateVerdict 
  * mirrored from the pack/invariant render), and structured — never a free-form prose blob.
  */
 export function render(kind: MemoryKind, entry: MemoryEntry): string {
-  const rec = entry as unknown as Record<string, unknown>;
-  const keys = [...REQUIRED[kind], ...OPTIONAL[kind]];
+  const rec = entry as unknown as Record<string, unknown>
+  const keys = [...REQUIRED[kind], ...OPTIONAL[kind]]
   return keys
     .filter((k) => rec[k] !== undefined)
     .map((k) => `${k}=${JSON.stringify(rec[k])}`)
-    .join('\n');
+    .join("\n")
 }
 
 // ── frozen-oracle conformance (compile-time differential-vs-oracle) ──────────────────────────────────────
 
 /** Bind the built surface to the FROZEN `TemplateApi` (`validate` + `render`). */
 export function makeTemplateApi(): TemplateApi {
-  return { validate, render };
+  return { validate, render }
 }
 
-const _templateCheck: () => TemplateApi = makeTemplateApi;
-void _templateCheck;
+const _templateCheck: () => TemplateApi = makeTemplateApi
+void _templateCheck

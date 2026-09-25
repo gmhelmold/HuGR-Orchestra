@@ -5,8 +5,8 @@
 // here. `VersionDelta`/`VersionDeltaEntry` live here (co-located above their DiffApi impl would break the
 // host-adapter ↔ diff sharing) since both diff.ts and host-adapter.ts consume them.
 
-import type { Hash } from '@atlas/contracts';
-import type { EventLog } from '@atlas/kernel';
+import type { Hash } from "@atlas/contracts"
+import type { EventLog } from "@atlas/kernel"
 
 /**
  * The CANONICAL per-commit provenance block. RFC-822-ish `Key: value` block committed INTO the commit
@@ -21,11 +21,11 @@ import type { EventLog } from '@atlas/kernel';
  * the structured `Metering.gates`/`Metering.verdict` below).
  */
 export interface Trailer {
-  readonly WP: string;
-  readonly Model: string;
-  readonly Gates: string;
-  readonly Verdict: string;
-  readonly TranscriptSha: Hash;
+  readonly WP: string
+  readonly Model: string
+  readonly Gates: string
+  readonly Verdict: string
+  readonly TranscriptSha: Hash
 }
 
 /**
@@ -34,7 +34,7 @@ export interface Trailer {
  * may change after commit and is perimeter-conditional. The note's payload IS the JSON `Dossier`.
  * (atlas-persist:17)
  */
-export type Note = Dossier;
+export type Note = Dossier
 
 /**
  * The per-commit provenance dossier round-tripped by `attachToCommit` / `readCommit` through
@@ -47,9 +47,9 @@ export type Note = Dossier;
  * NOT an upward knowledge-layer import (no DAG inversion).
  */
 export interface Dossier {
-  readonly trailer: Trailer;
-  readonly metering?: Metering;
-  readonly knowledgeDelta?: VersionDelta;
+  readonly trailer: Trailer
+  readonly metering?: Metering
+  readonly knowledgeDelta?: VersionDelta
 }
 
 /**
@@ -57,8 +57,8 @@ export interface Dossier {
  * (PERSIST-10). `sha` is the content hash of the object. (atlas-persist:18)
  */
 export interface TranscriptRef {
-  readonly sha: Hash;
-  readonly store: 'lfs' | 'partial-clone' | 'cas';
+  readonly sha: Hash
+  readonly store: "lfs" | "partial-clone" | "cas"
 }
 
 /**
@@ -69,9 +69,9 @@ export interface TranscriptRef {
  * strings — `seatBrief` a text brief, `llmOutputs`/`toolIO` recorded I/O lines for faithful replay.
  */
 export interface Checkpoint {
-  readonly seatBrief: string;
-  readonly llmOutputs: readonly string[];
-  readonly toolIO: readonly string[];
+  readonly seatBrief: string
+  readonly llmOutputs: readonly string[]
+  readonly toolIO: readonly string[]
 }
 
 /**
@@ -85,17 +85,17 @@ export interface Checkpoint {
  * vs. the `Trailer` RFC-822 text form above).
  */
 export interface Metering {
-  readonly model: string;
-  readonly tokensIn: number;
-  readonly tokensOut: number;
-  readonly tokensCache: number;
-  readonly toolUses: number;
-  readonly wallTime: number;
-  readonly retries: number;
-  readonly reworks: number;
-  readonly gates: readonly string[];
-  readonly verdict: string;
-  readonly transcriptSha: Hash;
+  readonly model: string
+  readonly tokensIn: number
+  readonly tokensOut: number
+  readonly tokensCache: number
+  readonly toolUses: number
+  readonly wallTime: number
+  readonly retries: number
+  readonly reworks: number
+  readonly gates: readonly string[]
+  readonly verdict: string
+  readonly transcriptSha: Hash
 }
 
 /**
@@ -107,10 +107,10 @@ export interface Metering {
  * this layer. No reference/golden/consumer freezes their shapes — left honestly opaque.
  */
 export interface PrAttach {
-  readonly prId: string;
-  readonly prMemory: unknown;
-  readonly logbookEntry: unknown;
-  readonly knowledgeDelta: unknown;
+  readonly prId: string
+  readonly prMemory: unknown
+  readonly logbookEntry: unknown
+  readonly knowledgeDelta: unknown
 }
 
 /**
@@ -120,10 +120,10 @@ export interface PrAttach {
  * typed `string`.
  */
 export interface HostAdapter {
-  attachToCommit(sha: string, dossier: Dossier): void;
-  readCommit(sha: string): Dossier | null;
-  attachToPR(prId: string, prAttach: PrAttach): void;
-  readPR(prId: string): PrAttach | null;
+  attachToCommit(sha: string, dossier: Dossier): void
+  readCommit(sha: string): Dossier | null
+  attachToPR(prId: string, prAttach: PrAttach): void
+  readPR(prId: string): PrAttach | null
 }
 
 /**
@@ -133,8 +133,8 @@ export interface HostAdapter {
  * kernel `fold` — it lives in `src/`, not here.
  */
 export interface MergeDriver {
-  readonly name: 'orchestra-atlas';
-  merge(ours: EventLog, theirs: EventLog, base: EventLog): EventLog;
+  readonly name: "orchestra-atlas"
+  merge(ours: EventLog, theirs: EventLog, base: EventLog): EventLog
 }
 
 // ── version-delta data model (was ref/diff.ts) ────────────────────────────────────────────────────────
@@ -148,16 +148,16 @@ export interface MergeDriver {
  * `provenance`-carrying membership requirement is the only frozen part.
  */
 export interface VersionDeltaEntry {
-  readonly fact: unknown;
-  readonly provenance: unknown;
+  readonly fact: unknown
+  readonly provenance: unknown
 }
 
 /**
  * The read-only fold-diff result: a total, disjoint partition of the facts (method-tags-pst:125).
  */
 export interface VersionDelta {
-  readonly added: readonly VersionDeltaEntry[];
-  readonly edited: readonly VersionDeltaEntry[];
-  readonly superseded: readonly VersionDeltaEntry[];
-  readonly decayed: readonly VersionDeltaEntry[];
+  readonly added: readonly VersionDeltaEntry[]
+  readonly edited: readonly VersionDeltaEntry[]
+  readonly superseded: readonly VersionDeltaEntry[]
+  readonly decayed: readonly VersionDeltaEntry[]
 }

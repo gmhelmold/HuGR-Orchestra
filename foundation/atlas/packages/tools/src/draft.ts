@@ -42,12 +42,12 @@
 // of `'ADVISORY'`. No new write door is opened; a supersede is persisted through the SAME `atlas-emit` gate
 // chain any other draft is (AUTHOR-13b/d) — this facet still PERSISTS NOTHING (AUTHOR-2).
 
-import { nodeKey, route } from '@atlas/knowledge';
-import type { Candidate, ClaimProvenance, CurrentNode, GroundedFact, RatifyContext } from '@atlas/knowledge';
-import type { NodeKey, Tier } from '@atlas/contracts';
-import type { Grounding } from '@atlas/grounding';
-import type { DraftOut } from './types.js';
-import type { GroundingCandidate, GroundingComputer } from './anchors.js';
+import { nodeKey, route } from "@atlas/knowledge"
+import type { Candidate, ClaimProvenance, CurrentNode, GroundedFact, RatifyContext } from "@atlas/knowledge"
+import type { NodeKey, Tier } from "@atlas/contracts"
+import type { Grounding } from "@atlas/grounding"
+import type { DraftOut } from "./types.js"
+import type { GroundingCandidate, GroundingComputer } from "./anchors.js"
 
 /**
  * The STORE-derived seam `draft`/`draftSupersede` need and `@atlas/tools` MUST NOT reach for directly
@@ -59,12 +59,12 @@ export interface IncumbentPort {
   /** Look up the CURRENT node at `key` — the SAME `nodeKey` this planner mints (AUTHOR-10). Occupancy is
    *  keyed on the `nodeKey`, NEVER on the CAS `contentHash` (SCN-AUTH-10c-1's teeth). `undefined` ⇒ no
    *  current node at that identity ⇒ CREATE; a defined result ⇒ UPDATE. Read-only — no write, no throw. */
-  incumbentAt(key: NodeKey): CurrentNode | undefined;
+  incumbentAt(key: NodeKey): CurrentNode | undefined
   /** Build the `RatifyContext` (`@atlas/knowledge` `ratify/fastpath.ts`) `route` needs for a write DERIVING
    *  `derivedTier` from the resolved incumbent (ARCH-9 — `undefined` on a CREATE) — the SAME store/threshold
    *  -derived defaults + door-derived class the real governed emit door computes its own context from,
    *  never re-invented here (AUTHOR-9's "never discover by refusal" clause depends on this NOT diverging). */
-  ratifyContextFor(derivedTier: Tier | undefined): RatifyContext;
+  ratifyContextFor(derivedTier: Tier | undefined): RatifyContext
 }
 
 export interface DraftApi {
@@ -73,30 +73,30 @@ export interface DraftApi {
    *  injected `GroundingComputer`/`IncumbentPort`; never throws on a candidate the computer can ground — an
    *  unresolvable anchor yields the computer's own empty `subtreeHash` (fail-closed at the emit gate, not
    *  here). */
-  draft(candidate: GroundingCandidate): DraftOut;
+  draft(candidate: GroundingCandidate): DraftOut
   /** AUTHOR-13 — express a retire/supersede as a DRAFT VARIANT, never a new write door. IDENTICAL
    *  composition to {@link DraftApi.draft}; the drafted fact's `authoring` is `'SUPERSEDED'` instead of
    *  `'ADVISORY'`. Persists NOTHING here — a supersede reaches the store only through the SAME `atlas-emit`
    *  gate chain any other draft does (AUTHOR-13b/d). */
-  draftSupersede(candidate: GroundingCandidate): DraftOut;
+  draftSupersede(candidate: GroundingCandidate): DraftOut
 }
 
 /** KNOW-6's move-in default — every territory ships `T2/advisory` "by construction" (`ratify/init.ts`).
  *  A hand-authored draft inherits the same honest default: nothing here has been reviewed, so it starts
  *  at the LEAST-privileged governance class, never a class the author merely typed. */
-const DRAFT_TIER: Tier = 'T2';
+const DRAFT_TIER: Tier = "T2"
 
 /** The claim's receipt (KNOW-14 — every claim MUST carry a provenance). `source` names THIS planner (not
  *  a person/commit — a draft is a session-internal value, never persisted by itself) and `trusted: false`
  *  because nothing here has been reviewed; an untrusted claim is excluded from the KNOW-17 confidence
  *  gate by construction (the fast-path's `lowRisk` conjunct), which is consistent with the conservative
  *  `route` this facet always reports (see file header). */
-const DRAFT_PROVENANCE: ClaimProvenance = { source: 'atlas-draft', trusted: false };
+const DRAFT_PROVENANCE: ClaimProvenance = { source: "atlas-draft", trusted: false }
 
 /** AUTHOR-9's "name the channel" clause — the REAL env channel `composeRuntime` (`adapter-io/src/
  *  compose.ts`) sources a KNOW-8 ratify token from (`ATLAS_RATIFY_TOKEN`), transcribed here so a draft
  *  names the SAME channel the door will actually consult, never an invented one. */
-const RATIFY_CHANNEL = 'ATLAS_RATIFY_TOKEN';
+const RATIFY_CHANNEL = "ATLAS_RATIFY_TOKEN"
 
 /**
  * Build the `draft`/`draftSupersede` planners over an injected `GroundingComputer` (AUTHOR-1) — the SAME
@@ -105,15 +105,15 @@ const RATIFY_CHANNEL = 'ATLAS_RATIFY_TOKEN';
  * for the occupancy lookup + `route` call. Pure + total and READ-ONLY: it persists NOTHING (AUTHOR-2).
  */
 export function createDraft(computer: GroundingComputer, incumbent: IncumbentPort): DraftApi {
-  const build = (input: GroundingCandidate, authoring: 'ADVISORY' | 'SUPERSEDED'): DraftOut => {
+  const build = (input: GroundingCandidate, authoring: "ADVISORY" | "SUPERSEDED"): DraftOut => {
     // (a) GROUNDING — the ONE computer, never a second derivation (AUTHOR-1/6c).
-    const anchor = computer.groundingFor(input);
-    const grounding: Grounding = { entries: [{ anchor, path: anchor.qualifiedPath }] };
+    const anchor = computer.groundingFor(input)
+    const grounding: Grounding = { entries: [{ anchor, path: anchor.qualifiedPath }] }
     // (b) REV — the same seam's `rev` leg (AUTHOR-7). `anchorsUnder` reports the SAME `rev` for every
     //     path (it is a constant of the built axes, not a per-path value); querying it AT the drafted
     //     anchor — rather than an arbitrary root path — keeps this a read OF the cited unit, not a second,
     //     unrelated call. Only `.rev` is read; `.units`/`.holes` are discarded (this is not a listing).
-    const { rev } = computer.anchorsUnder(input.anchor);
+    const { rev } = computer.anchorsUnder(input.anchor)
 
     // THE CANDIDATE VIEW — the minimal `Candidate` `nodeKey`/`primaryAnchorId` read (`.grounding`, `.slot`,
     // absent `.check` ⇒ advisory). `claimText`/`provenance`/`tier` are NOT read by the identity formula but
@@ -126,7 +126,7 @@ export function createDraft(computer: GroundingComputer, incumbent: IncumbentPor
       grounding,
       provenance: DRAFT_PROVENANCE,
       tier: DRAFT_TIER,
-    };
+    }
     // IDENTITY IS MINTED, NEVER INVENTED (AUTHOR-6b) — the SAME `nodeKey` formula the governed emit door
     // recomputes from content at write time (`governed-emit.ts`: "the author-supplied payload `node.id` is
     // NEVER used for routing"). A draft that invented its own `id` would still emit correctly (the door
@@ -134,19 +134,19 @@ export function createDraft(computer: GroundingComputer, incumbent: IncumbentPor
     // round-trip through emit. This SAME `id` is the occupancy key AUTHOR-10 reads below — NEVER the CAS
     // `contentHash`, so a reworded claim at the same `(anchor, slot)` — same `id`, different `claimNorm` —
     // still resolves an incumbent and reports UPDATE (SCN-AUTH-10c-1).
-    const id = nodeKey(candidateView);
+    const id = nodeKey(candidateView)
 
     // AUTHOR-10 — CREATE vs UPDATE by an INCUMBENT LOOKUP keyed on `id` (the minted `nodeKey`), through the
     // injected port — never a store handle held here, never a lookup keyed on content.
-    const currentNode = incumbent.incumbentAt(id);
-    const operation: 'CREATE' | 'UPDATE' = currentNode === undefined ? 'CREATE' : 'UPDATE';
+    const currentNode = incumbent.incumbentAt(id)
+    const operation: "CREATE" | "UPDATE" = currentNode === undefined ? "CREATE" : "UPDATE"
 
     // AUTHOR-9 — CALL the existing `route` function (`@atlas/knowledge` `ratify/fastpath.ts`), never
     // re-derive its policy here. `ctx` is built by the injected port from the SAME incumbent just resolved
     // (ARCH-9's `derivedTier`, `undefined` on a CREATE) — the identical shape the real governed emit door
     // computes its own context from, so a drafted route cannot diverge from the door's on the SAME state.
-    const ctx = incumbent.ratifyContextFor(currentNode?.tier);
-    const routeVerdict = route(candidateView, ctx);
+    const ctx = incumbent.ratifyContextFor(currentNode?.tier)
+    const routeVerdict = route(candidateView, ctx)
 
     // THE DRAFTED FACT — every field the emit door destructures (`governed-emit.ts` gate 0 / familyOf /
     // claimNormOf / candidateView) is present and well-formed: `tier` (a real `Tier`), `scope` (a
@@ -158,17 +158,17 @@ export function createDraft(computer: GroundingComputer, incumbent: IncumbentPor
     // AUTHOR-13 variant selector: `'ADVISORY'` for `draft`, `'SUPERSEDED'` for `draftSupersede` — the ONE
     // field that differs between the two legs.
     const fact: GroundedFact = {
-      kind: 'advisory',
+      kind: "advisory",
       id,
       tier: DRAFT_TIER,
       claimNorm: input.claim,
       grounding,
-      freshness: 'FRESH',
+      freshness: "FRESH",
       claims: [],
       authoring,
       scope: scopeOf(input.anchor),
       predicateSlot: input.slot,
-    };
+    }
 
     return {
       fact,
@@ -178,13 +178,13 @@ export function createDraft(computer: GroundingComputer, incumbent: IncumbentPor
       // AUTHOR-9b — the authorizing channel is named ONLY when it is actually owed (`exactOptionalPropertyTypes`:
       // absent on `auto-accept`, present on `full-ratify`), so a caller reading `requires` on the fast path
       // does not see a channel nothing will ask it for.
-      ...(routeVerdict === 'full-ratify' ? { requires: RATIFY_CHANNEL } : {}),
-    };
-  };
+      ...(routeVerdict === "full-ratify" ? { requires: RATIFY_CHANNEL } : {}),
+    }
+  }
   return {
-    draft: (input) => build(input, 'ADVISORY'),
-    draftSupersede: (input) => build(input, 'SUPERSEDED'),
-  };
+    draft: (input) => build(input, "ADVISORY"),
+    draftSupersede: (input) => build(input, "SUPERSEDED"),
+  }
 }
 
 /** The FIRST path segment of an anchor's `qualifiedPath` (e.g. `packages/tools/src/foo.ts::bar` →
@@ -196,9 +196,9 @@ export function createDraft(computer: GroundingComputer, incumbent: IncumbentPor
  *  policy names a different owning scope for this anchor MUST override the field before `atlas emit`.
  *  Never throws: an anchor with no `/` yields itself, whole. */
 function scopeOf(anchor: string): string {
-  const i = anchor.indexOf('/');
-  const first = i < 0 ? anchor : anchor.slice(0, i);
-  return first.length > 0 ? first : 'root';
+  const i = anchor.indexOf("/")
+  const first = i < 0 ? anchor : anchor.slice(0, i)
+  return first.length > 0 ? first : "root"
 }
 
 // differential-vs-oracle (compile-time): the impl's `draft`/`draftSupersede` conform to the co-located
@@ -206,15 +206,15 @@ function scopeOf(anchor: string): string {
 // declared above — BOTH stay UNIMPLEMENTED here, satisfied by injection.
 const _draftApi: DraftApi = createDraft(
   {
-    anchorsUnder: () => ({ rev: '', units: [], holes: [] }),
-    groundingFor: () => ({ kind: 'file', qualifiedPath: '', subtreeHash: '' as never }),
+    anchorsUnder: () => ({ rev: "", units: [], holes: [] }),
+    groundingFor: () => ({ kind: "file", qualifiedPath: "", subtreeHash: "" as never }),
   },
   {
     incumbentAt: () => undefined,
     ratifyContextFor: () => ({ contested: false, lowRisk: true }),
   },
-);
-const _draftConforms: DraftApi['draft'] = _draftApi.draft;
-const _draftSupersedeConforms: DraftApi['draftSupersede'] = _draftApi.draftSupersede;
-void _draftConforms;
-void _draftSupersedeConforms;
+)
+const _draftConforms: DraftApi["draft"] = _draftApi.draft
+const _draftSupersedeConforms: DraftApi["draftSupersede"] = _draftApi.draftSupersede
+void _draftConforms
+void _draftSupersedeConforms

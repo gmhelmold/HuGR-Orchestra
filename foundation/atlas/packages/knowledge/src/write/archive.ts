@@ -12,9 +12,9 @@
 // surface a `supersededBy` field on `PredicateNode`, so it is NOT mutated onto the node (no old bytes are
 // inlined into the superseder), exactly as the archive.ts FLAG models it.
 
-import type { Hash } from '@atlas/contracts';
-import type { CasObject, StoreApi } from '@atlas/kernel';
-import type { PredicateNode } from '../types.js';
+import type { Hash } from "@atlas/contracts"
+import type { CasObject, StoreApi } from "@atlas/kernel"
+import type { PredicateNode } from "../types.js"
 
 /** The honest-empty content handle `StoreApi.put` answers for an object the CAS cannot address
  *  (`kernel/store.ts` `asHash('')` — the sole EMPTY sentinel). Matched by EQUALITY on that one value and
@@ -22,7 +22,7 @@ import type { PredicateNode } from '../types.js';
  *  answer anything else it likes, and narrowing further would turn this guard into a shape check on a seam
  *  whose shape is the caller's business. A local constant rather than an import for the same reason that
  *  file gives — the sentinel is one character, and a cross-package edge to carry it is not worth its cost. */
-const CAS_EMPTY = '';
+const CAS_EMPTY = ""
 
 /**
  * A prior the CAS REFUSED to address (task #136). A NAMED `Error` carrying the discriminant
@@ -41,12 +41,12 @@ const CAS_EMPTY = '';
 export class UnaddressablePriorError extends Error {
   constructor() {
     super(
-      'unaddressable-cas-object: refusing to supersede — the CAS could not address the PRIOR node (its ' +
-        'canonical form or its JSON serialization does not exist), so the `supersededBy` pointer would name ' +
-        'bytes that were never written. KNOW-12 retains every prior; a link to nothing is not retention. ' +
-        'Nothing was written and nothing was superseded.',
-    );
-    this.name = 'UnaddressablePriorError';
+      "unaddressable-cas-object: refusing to supersede — the CAS could not address the PRIOR node (its " +
+        "canonical form or its JSON serialization does not exist), so the `supersededBy` pointer would name " +
+        "bytes that were never written. KNOW-12 retains every prior; a link to nothing is not retention. " +
+        "Nothing was written and nothing was superseded.",
+    )
+    this.name = "UnaddressablePriorError"
   }
 }
 
@@ -57,12 +57,12 @@ export interface ArchiveApi {
    *  POINTER into CAS to the old, and RETAIN the old (never remove). Returns the superseding node. Pure.
    *  The pointer is modeled as the `Hash` return-leg (the frozen `PredicateNode` has no `supersededBy`
    *  field — flagged for the data model to surface `supersededBy?: Hash`). */
-  supersede(old: PredicateNode, next: PredicateNode): { readonly node: PredicateNode; readonly supersededBy: Hash };
+  supersede(old: PredicateNode, next: PredicateNode): { readonly node: PredicateNode; readonly supersededBy: Hash }
 
   /** Re-spawnable resolve: `get(oldId)` MUST resolve post-supersede — the old bytes persist in CAS as a
    *  content-addressed object (dedup by content-address identity). 0 API deletes (method-tags-knw:99).
    *  The resolved shape reuses the kernel `CasObject`. */
-  resolve(oldId: Hash): CasObject;
+  resolve(oldId: Hash): CasObject
 }
 
 /** Bind the CAS-retention archive over the sealed kernel store (`createStore()`). The store is the single
@@ -73,17 +73,17 @@ export function bindArchive(store: StoreApi): ArchiveApi {
      *  collapse to one address), RETAIN it, and return the superseder + the `supersededBy` pointer. The
      *  superseder is `next` UNCHANGED — the prior's bytes are never inlined (only the pointer links them). */
     supersede(old: PredicateNode, next: PredicateNode): { readonly node: PredicateNode; readonly supersededBy: Hash } {
-      const supersededBy = store.put(old); // sealed CAS: content-address → dedup, never byte-copy
+      const supersededBy = store.put(old) // sealed CAS: content-address → dedup, never byte-copy
       // The answer is CHECKED, not assumed. `put` is deliberately TOTAL over a value it cannot address — it
       // writes nothing and answers the EMPTY sentinel rather than throwing — so an unchecked read of it is
       // how a pointer to nothing gets minted and reported as a retained prior. See UnaddressablePriorError.
-      if (supersededBy === CAS_EMPTY) throw new UnaddressablePriorError();
-      return { node: next, supersededBy };
+      if (supersededBy === CAS_EMPTY) throw new UnaddressablePriorError()
+      return { node: next, supersededBy }
     },
     /** Re-spawnable resolve: the prior persists in CAS as a content-addressed object; `get(oldId)` resolves
      *  it post-supersede. 0 API deletes — nothing dies. */
     resolve(oldId: Hash): CasObject {
-      return store.get(oldId);
+      return store.get(oldId)
     },
-  };
+  }
 }

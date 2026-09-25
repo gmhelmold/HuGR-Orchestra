@@ -15,17 +15,17 @@
 // is written to `out[slot]`. Completion order is therefore not merely ignored — it is never represented
 // anywhere, so there is no ordering for a later edit to accidentally start honouring.
 
-import { existsSync } from 'node:fs';
-import { fileURLToPath } from 'node:url';
-import { MessageChannel, receiveMessageOnPort, Worker } from 'node:worker_threads';
-import type { MessagePort } from 'node:worker_threads';
-import { POOL_WIDTH } from '@atlas/genesis';
-import type { Candidate, ExtractResult, SeedProposal, SiteProposer, VisitAttempt } from '@atlas/genesis';
-import type { PoolAnswer } from './mine-worker.js';
+import { existsSync } from "node:fs"
+import { fileURLToPath } from "node:url"
+import { MessageChannel, receiveMessageOnPort, Worker } from "node:worker_threads"
+import type { MessagePort } from "node:worker_threads"
+import { POOL_WIDTH } from "@atlas/genesis"
+import type { Candidate, ExtractResult, SeedProposal, SiteProposer, VisitAttempt } from "@atlas/genesis"
+import type { PoolAnswer } from "./mine-worker.js"
 
 /** The compiled worker entry, resolved RELATIVE TO THIS MODULE so it is correct from `dist/` without any
  *  knowledge of the install layout. */
-const WORKER_ENTRY = new URL('./mine-worker.js', import.meta.url);
+const WORKER_ENTRY = new URL("./mine-worker.js", import.meta.url)
 
 /**
  * Is the pool actually usable here? A worker thread loads a FILE, so this capability exists only where the
@@ -41,41 +41,41 @@ const WORKER_ENTRY = new URL('./mine-worker.js', import.meta.url);
  * sequential path, which is not a degraded mode but the exact behaviour that shipped before.
  */
 export function proposerPoolAvailable(): boolean {
-  return existsSync(fileURLToPath(WORKER_ENTRY));
+  return existsSync(fileURLToPath(WORKER_ENTRY))
 }
 
 /** How long a single `Atomics.wait` slice may block before re-checking the counter. A bound rather than an
  *  infinite wait so a worker that dies without answering cannot wedge the pass forever — the loop re-reads
  *  liveness each slice and gives up if a worker has gone. */
-const WAIT_SLICE_MS = 250;
+const WAIT_SLICE_MS = 250
 
 /** The pool's answer for one site — the proposer's seed, or the fault that stopped it. */
 export type PoolResult =
   // [#195c] `{ abstain }` rides alongside `SeedProposal | null` (see `PoolAnswer`, mine-worker.ts): a
   // malformed-answer abstention must reach the main-thread admit loop DISTINCT from a plain model-abstain.
   | { readonly ok: true; readonly seed: SeedProposal | { readonly abstain: string } | null }
-  | { readonly ok: false; readonly error: Error };
+  | { readonly ok: false; readonly error: Error }
 
 export interface ProposerPool {
   /** Propose at every candidate, in parallel, returning one result per candidate POSITIONALLY ALIGNED with
    *  the input. Never throws: a fault is an `ok: false` result for the site it belongs to. */
-  proposeAll(cands: readonly Candidate[]): readonly PoolResult[];
+  proposeAll(cands: readonly Candidate[]): readonly PoolResult[]
   /** Terminate every worker. Idempotent. Must be called or the process will not exit. */
-  close(): void;
+  close(): void
 }
 
 /** Rebuild an Error carrying the worker's ORIGINAL `name`. The name is what `mine.ts` classifies on
  *  (`ModelCommandError` ⇒ a wiring fault, not a mining outcome), and it does not survive a structured clone
  *  of a custom subclass — so it is carried as a field and reattached here. */
 function rehydrate(a: Extract<PoolAnswer, { ok: false }>): Error {
-  const e = new Error(a.message);
-  e.name = a.name;
-  return e;
+  const e = new Error(a.message)
+  e.name = a.name
+  return e
 }
 
 interface Seat {
-  readonly worker: Worker;
-  readonly port: MessagePort;
+  readonly worker: Worker
+  readonly port: MessagePort
 }
 
 /**
@@ -85,75 +85,75 @@ interface Seat {
  * so the startup cost is paid once, in parallel, rather than once per site.
  */
 export function createProposerPool(repoPath: string, env: NodeJS.ProcessEnv, width: number = POOL_WIDTH): ProposerPool {
-  const sab = new SharedArrayBuffer(4);
-  const done = new Int32Array(sab);
-  const seats: Seat[] = [];
+  const sab = new SharedArrayBuffer(4)
+  const done = new Int32Array(sab)
+  const seats: Seat[] = []
   for (let k = 0; k < width; k++) {
-    const { port1, port2 } = new MessageChannel();
+    const { port1, port2 } = new MessageChannel()
     const worker = new Worker(WORKER_ENTRY, {
       workerData: { sab, port: port2, repoPath, env },
       transferList: [port2],
-    });
+    })
     // Neither the thread nor the channel may keep the CLI alive; `close()` is what ends them.
-    worker.unref();
-    port1.unref();
-    seats.push({ worker, port: port1 });
+    worker.unref()
+    port1.unref()
+    seats.push({ worker, port: port1 })
   }
-  let closed = false;
-  let died = 0;
+  let closed = false
+  let died = 0
   // BOTH events count as death. Without the `error` leg a worker that fails to load is never counted, the
   // wait bound is never short-circuited, and an unhandled `error` on a Worker is thrown into the parent.
   for (const s of seats) {
-    s.worker.on('exit', () => void (died += 1));
-    s.worker.on('error', () => void (died += 1));
+    s.worker.on("exit", () => void (died += 1))
+    s.worker.on("error", () => void (died += 1))
   }
 
   const proposeAll = (cands: readonly Candidate[]): readonly PoolResult[] => {
-    const n = cands.length;
-    const out = new Array<PoolResult | undefined>(n);
-    if (n === 0) return [];
-    if (closed) return cands.map(() => ({ ok: false, error: new Error('the proposer pool is closed') }));
+    const n = cands.length
+    const out = new Array<PoolResult | undefined>(n)
+    if (n === 0) return []
+    if (closed) return cands.map(() => ({ ok: false, error: new Error("the proposer pool is closed") }))
 
-    Atomics.store(done, 0, 0);
-    cands.forEach((cand, slot) => seats[slot % seats.length]!.port.postMessage({ slot, cand }));
+    Atomics.store(done, 0, 0)
+    cands.forEach((cand, slot) => seats[slot % seats.length]!.port.postMessage({ slot, cand }))
 
     // BLOCK until every job has answered. `Atomics.wait` is the only primitive that lets a synchronous
     // function wait on work happening on other threads; the timeout slice is what keeps a dead worker from
     // turning a pass into a hang.
-    let landed = 0;
+    let landed = 0
     while (landed < n) {
-      const seen = Atomics.load(done, 0);
-      if (seen >= n) break;
-      Atomics.wait(done, 0, seen, WAIT_SLICE_MS);
-      landed = Atomics.load(done, 0);
-      if (landed < n && died > 0) break; // a worker exited without answering — stop waiting, fault below
+      const seen = Atomics.load(done, 0)
+      if (seen >= n) break
+      Atomics.wait(done, 0, seen, WAIT_SLICE_MS)
+      landed = Atomics.load(done, 0)
+      if (landed < n && died > 0) break // a worker exited without answering — stop waiting, fault below
     }
 
     // Drain every port. A message names its own slot, so this is order-insensitive by construction.
     for (const s of seats) {
-      let m: { message: { slot: number; answer: PoolAnswer } } | undefined;
+      let m: { message: { slot: number; answer: PoolAnswer } } | undefined
       while ((m = receiveMessageOnPort(s.port) as typeof m) !== undefined) {
-        const { slot, answer } = m.message;
-        out[slot] = answer.ok ? { ok: true, seed: answer.seed } : { ok: false, error: rehydrate(answer) };
+        const { slot, answer } = m.message
+        out[slot] = answer.ok ? { ok: true, seed: answer.seed } : { ok: false, error: rehydrate(answer) }
       }
     }
     // A slot with no answer is a fault for THAT SITE — never a silently dropped site, and never an
     // abstention: "the model said nothing" and "the worker never answered" are different claims and only
     // one of them is a fact about the repository.
-    return out.map((r) => r ?? { ok: false, error: new Error('the proposer pool returned no answer for this site') });
-  };
+    return out.map((r) => r ?? { ok: false, error: new Error("the proposer pool returned no answer for this site") })
+  }
 
   return {
     proposeAll,
     close: (): void => {
-      if (closed) return;
-      closed = true;
+      if (closed) return
+      closed = true
       for (const s of seats) {
-        s.port.close();
-        void s.worker.terminate();
+        s.port.close()
+        void s.worker.terminate()
       }
     },
-  };
+  }
 }
 
 /**
@@ -165,7 +165,7 @@ export function createProposerPool(repoPath: string, env: NodeJS.ProcessEnv, wid
  * budget and one gate in the process — so the two paths cannot drift apart while both stay green, which is
  * exactly what would happen if this file rebuilt the call itself from the same ingredients.
  */
-export type SiteVisit = (cand: Candidate, proposer: SiteProposer) => ExtractResult;
+export type SiteVisit = (cand: Candidate, proposer: SiteProposer) => ExtractResult
 
 /**
  * Build the `ControllerDeps.visitAll` port over a pool.
@@ -187,15 +187,15 @@ export function makeVisitAll(
   onFault?: (e: Error) => void,
 ): (cands: readonly Candidate[]) => readonly VisitAttempt[] {
   return (cands) => {
-    const seeds = pool.proposeAll(cands);
-    const attempts: VisitAttempt[] = [];
+    const seeds = pool.proposeAll(cands)
+    const attempts: VisitAttempt[] = []
     cands.forEach((cand, k) => {
-      const r = seeds[k];
+      const r = seeds[k]
       if (r === undefined || !r.ok) {
-        const error = r?.error ?? new Error('the proposer pool returned no answer for this site');
-        if (error.name === 'ModelCommandError') onFault?.(error);
-        attempts.push({ ok: false, error });
-        return;
+        const error = r?.error ?? new Error("the proposer pool returned no answer for this site")
+        if (error.name === "ModelCommandError") onFault?.(error)
+        attempts.push({ ok: false, error })
+        return
       }
       // The seed is rebuilt around the LOCAL `cand`. A structured clone is value-equal but not
       // identity-equal, and the gate receives both the seed and the candidate — so handing it a cloned
@@ -204,14 +204,14 @@ export function makeVisitAll(
       // A `{ abstain }` seed carries no candidate, so it is passed THROUGH untouched; only a real
       // `SeedProposal` is rebuilt around the LOCAL `cand` (the identity-equality reason above).
       const held: SiteProposer = {
-        propose: () => (r.seed === null || 'abstain' in r.seed ? r.seed : { ...r.seed, cand }),
-      };
-      try {
-        attempts.push({ ok: true, value: visitWith(cand, held) });
-      } catch (error) {
-        attempts.push({ ok: false, error });
+        propose: () => (r.seed === null || "abstain" in r.seed ? r.seed : { ...r.seed, cand }),
       }
-    });
-    return attempts;
-  };
+      try {
+        attempts.push({ ok: true, value: visitWith(cand, held) })
+      } catch (error) {
+        attempts.push({ ok: false, error })
+      }
+    })
+    return attempts
+  }
 }

@@ -6,4 +6,4 @@
 // (`cli.ts`) is byte-unchanged. The builder is a READ-ONLY DISCOVERY PLANNER (ADR-0004, AUTHOR-5): it returns
 // EXACTLY the closed `PredicateSlot` vocabulary and persists NOTHING; TOTAL — no input, never a throw.
 
-export { slotsVerdict } from '@atlas/adapter-io';
+export { slotsVerdict } from "@atlas/adapter-io"

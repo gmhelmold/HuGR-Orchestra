@@ -7,8 +7,8 @@
 // they return SOLELY via an explicit `recall` (the MEM-13 re-spawn push lives in respawn.ts). The shared
 // Awareness / Orientation slabs are CONSUMED (bound once at `makeInject`), never authored here.
 
-import type { Budget } from '@atlas/contracts';
-import type { OwnPack, Pack, Poke } from '@atlas/retrieval';
+import type { Budget } from "@atlas/contracts"
+import type { OwnPack, Pack, Poke } from "@atlas/retrieval"
 import type {
   Awareness,
   Orientation,
@@ -17,7 +17,7 @@ import type {
   MemoryRecord,
   MemoryStore,
   ProjectMemoryEntry,
-} from './types.js';
+} from "./types.js"
 
 // ── frozen injection surface, co-located here (was ref/inject.ts) ──────────────────────────────────────────
 
@@ -28,16 +28,16 @@ import type {
  * (MEM-4).
  */
 export interface TurnHeader {
-  readonly awareness: Awareness; // slab 1 — derived rollup (MEM-11)
-  readonly orientation: Orientation; // slab 2 — derived fold (MEM-6)
-  readonly rules: readonly ProjectMemoryEntry[]; // slab 3 — the member's own written rules, scope-matched
+  readonly awareness: Awareness // slab 1 — derived rollup (MEM-11)
+  readonly orientation: Orientation // slab 2 — derived fold (MEM-6)
+  readonly rules: readonly ProjectMemoryEntry[] // slab 3 — the member's own written rules, scope-matched
 }
 
 /**
  * A co-injected retrieval surface (the `own` / `pack` / `poke` `InjectionKind`s). Owned by
  * @atlas/retrieval, IMPORTED here (the allowed memory→retrieval edge), NEVER redefined.
  */
-export type RetrievalSurface = OwnPack | Pack | Poke;
+export type RetrievalSurface = OwnPack | Pack | Poke
 
 /**
  * The full per-seat auto-injection payload: the memory header + the co-injected retrieval surfaces, under
@@ -48,31 +48,31 @@ export type RetrievalSurface = OwnPack | Pack | Poke;
  * per-surface ledger, `retrieval` the surfaces retrieval owns — no invented merged shape.
  */
 export interface InjectionPayload {
-  readonly header: TurnHeader;
-  readonly retrieval: readonly RetrievalSurface[]; // [FLAG] retrieval-owned surfaces, co-injected under budget
-  readonly budgets: readonly Budget[]; // per-InjectionKind cap + hit-rate — the drop-order ledger
+  readonly header: TurnHeader
+  readonly retrieval: readonly RetrievalSurface[] // [FLAG] retrieval-owned surfaces, co-injected under budget
+  readonly budgets: readonly Budget[] // per-InjectionKind cap + hit-rate — the drop-order ledger
 }
 
 export interface InjectApi {
   /** Owner-scoped filter: a member's own Memory ONLY — `{ e ∈ store | e.owner == seat }`, 0 cross-seat
    *  (MEM-1, injection-SCOPING not access-control). Pure + total. (method-tags-mem:25) */
-  injectFor(store: MemoryStore, seat: MemberId): readonly MemoryRecord[];
+  injectFor(store: MemoryStore, seat: MemberId): readonly MemoryRecord[]
 
   /** Assemble the running-turn header (the three slabs) for a seat; the CONSULTABLE kinds
    *  (`task`/`pr`/`logbook`) are EXCLUDED (running-turn header ∩ consultable == ∅ — MEM-4).
    *  (method-tags-mem:46) */
-  assembleHeader(store: MemoryStore, seat: MemberId): TurnHeader;
+  assembleHeader(store: MemoryStore, seat: MemberId): TurnHeader
 
   /** Compose the full budget-capped auto-injection payload: the memory header + co-injected retrieval
    *  surfaces (own/pack/poke) under the shared `InjectionKind` ceiling. The memory→retrieval edge. */
-  compose(store: MemoryStore, seat: MemberId, surfaces: readonly RetrievalSurface[]): InjectionPayload;
+  compose(store: MemoryStore, seat: MemberId, surfaces: readonly RetrievalSurface[]): InjectionPayload
 
   /** The ONLY path that returns consultable `task` / `pr` / `logbook` memory — an explicit
    *  `memory-recall`, never auto-injected on a running turn (MEM-4). (method-tags-mem:46)
    *
    *  [OPAQUE-BY-DESIGN — `query` shape not frozen] `memory-recall` is queried by taskId / prId / date / territory;
    *  no concrete query record is frozen → `unknown`, NOT invented. */
-  recall(query: unknown): readonly MemoryRecord[];
+  recall(query: unknown): readonly MemoryRecord[]
 }
 
 // ── MEM-1: owner-scoped injection (a SCOPING predicate, not access-control) ───────────────────────────────
@@ -83,7 +83,7 @@ export interface InjectApi {
  * shared store and NOT confidentiality (see `readRepoBytes`).
  */
 export function injectFor(store: MemoryStore, seat: MemberId): readonly MemoryRecord[] {
-  return store.filter((r) => r.owner === seat);
+  return store.filter((r) => r.owner === seat)
 }
 
 /**
@@ -93,7 +93,7 @@ export function injectFor(store: MemoryStore, seat: MemberId): readonly MemoryRe
  * would add a confidentiality property the design explicitly disclaims. Readability is the design.
  */
 export function readRepoBytes(store: MemoryStore, _reader: MemberId): MemoryStore {
-  return store;
+  return store
 }
 
 // ── MEM-4: the running-turn header excludes consultable kinds ─────────────────────────────────────────────
@@ -103,8 +103,8 @@ export function readRepoBytes(store: MemoryStore, _reader: MemberId): MemoryStor
  *  (MEM-3/7, WP-6.25-a) composes ON TOP of this owner-scoped set and is out of this facet. */
 function ownProjectRules(store: MemoryStore, seat: MemberId): readonly ProjectMemoryEntry[] {
   return injectFor(store, seat)
-    .filter((r) => r.kind === 'project')
-    .map((r) => r.entry as ProjectMemoryEntry);
+    .filter((r) => r.kind === "project")
+    .map((r) => r.entry as ProjectMemoryEntry)
 }
 
 /**
@@ -118,7 +118,7 @@ export function assembleHeader(
   awareness: Awareness,
   orientation: Orientation,
 ): TurnHeader {
-  return { awareness, orientation, rules: ownProjectRules(store, seat) };
+  return { awareness, orientation, rules: ownProjectRules(store, seat) }
 }
 
 /**
@@ -138,7 +138,7 @@ export function compose(
     header: assembleHeader(store, seat, awareness, orientation),
     retrieval: surfaces,
     budgets: [],
-  };
+  }
 }
 
 // ── MEM-4 · the single explicit-recall handler (D2 CLI-floor) ─────────────────────────────────────────────
@@ -146,30 +146,30 @@ export function compose(
 /** The runtime narrowing of the OPAQUE `recall` query (`InjectApi` pins `query: unknown` — it is queried
  *  by owner / kind / taskId / prId, no concrete record frozen). Narrowed defensively behind `unknown`. */
 interface RecallFilter {
-  readonly owner?: MemberId;
-  readonly kind?: MemoryKind;
-  readonly taskId?: string;
-  readonly prId?: string;
+  readonly owner?: MemberId
+  readonly kind?: MemoryKind
+  readonly taskId?: string
+  readonly prId?: string
 }
 
 function asRecallFilter(query: unknown): RecallFilter {
-  if (typeof query !== 'object' || query === null) return {};
-  const q = query as Record<string, unknown>;
-  const f: { owner?: MemberId; kind?: MemoryKind; taskId?: string; prId?: string } = {};
-  if (typeof q.owner === 'string') f.owner = q.owner;
-  if (q.kind === 'task' || q.kind === 'pr' || q.kind === 'project' || q.kind === 'logbook') f.kind = q.kind;
-  if (typeof q.taskId === 'string') f.taskId = q.taskId;
-  if (typeof q.prId === 'string') f.prId = q.prId;
-  return f;
+  if (typeof query !== "object" || query === null) return {}
+  const q = query as Record<string, unknown>
+  const f: { owner?: MemberId; kind?: MemoryKind; taskId?: string; prId?: string } = {}
+  if (typeof q.owner === "string") f.owner = q.owner
+  if (q.kind === "task" || q.kind === "pr" || q.kind === "project" || q.kind === "logbook") f.kind = q.kind
+  if (typeof q.taskId === "string") f.taskId = q.taskId
+  if (typeof q.prId === "string") f.prId = q.prId
+  return f
 }
 
 function matchesRecall(r: MemoryRecord, f: RecallFilter): boolean {
-  if (f.owner !== undefined && r.owner !== f.owner) return false;
-  if (f.kind !== undefined && r.kind !== f.kind) return false;
-  const e = r.entry as unknown as Record<string, unknown>;
-  if (f.taskId !== undefined && e.taskId !== f.taskId) return false;
-  if (f.prId !== undefined && e.prId !== f.prId) return false;
-  return true;
+  if (f.owner !== undefined && r.owner !== f.owner) return false
+  if (f.kind !== undefined && r.kind !== f.kind) return false
+  const e = r.entry as unknown as Record<string, unknown>
+  if (f.taskId !== undefined && e.taskId !== f.taskId) return false
+  if (f.prId !== undefined && e.prId !== f.prId) return false
+  return true
 }
 
 /**
@@ -179,11 +179,11 @@ function matchesRecall(r: MemoryRecord, f: RecallFilter): boolean {
  * running-turn header, so this is their sole general read path (the MEM-13 re-spawn push is separate).
  */
 export function recall(store: MemoryStore, query: unknown): readonly MemoryRecord[] {
-  const f = asRecallFilter(query);
+  const f = asRecallFilter(query)
   if (f.owner === undefined && f.kind === undefined && f.taskId === undefined && f.prId === undefined) {
-    return [];
+    return []
   }
-  return store.filter((r) => matchesRecall(r, f));
+  return store.filter((r) => matchesRecall(r, f))
 }
 
 // ── the frozen-`InjectApi` binding (shared slabs bound once, byte-identical) ───────────────────────────────
@@ -199,9 +199,9 @@ export function makeInject(store: MemoryStore, awareness: Awareness, orientation
     assembleHeader: (s, seat) => assembleHeader(s, seat, awareness, orientation),
     compose: (s, seat, surfaces) => compose(s, seat, surfaces, awareness, orientation),
     recall: (query) => recall(store, query),
-  };
+  }
 }
 
 // differential-vs-oracle (compile-time): the built surface conforms EXACTLY to the FROZEN `InjectApi`.
-const _inject: (s: MemoryStore, a: Awareness, o: Orientation) => InjectApi = makeInject;
-void _inject;
+const _inject: (s: MemoryStore, a: Awareness, o: Orientation) => InjectApi = makeInject
+void _inject

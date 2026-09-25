@@ -9,9 +9,9 @@
 **Genesis** is how the Atlas is seeded onto an **already-existing (brownfield) repo** — the one-time
 bootstrap that turns a codebase with no Atlas into one with a grounded Knowledge base + territory map.
 Thesis: **deterministic skeleton, rationed intelligence** — ~90% is a `$0`-LLM mechanical build, LLM is
-spent *only* at a ranked frontier, git-history is the free seed, the human ratifies only the contested.
+spent _only_ at a ranked frontier, git-history is the free seed, the human ratifies only the contested.
 
-> **Cost scales with the codebase's *importance-surface*, not its size**, and it is **cheaper than
+> **Cost scales with the codebase's _importance-surface_, not its size**, and it is **cheaper than
 > embedding the repo**, because nothing is vectorized and no model touches un-ranked code.
 
 > **Why explicit-structural, not embeddings; the S2 reasoning loop; the cost model & honest limits** are in
@@ -34,10 +34,10 @@ S4 handoff   —               → born-from-work: one-time seeding ends; increm
   mechanism Aider's repo-map uses) → the `spatial` axis and the raw symbol def/ref edges.
 - **Precise cross-file / cross-language resolution** for the `dependency` axis via a **SCIP** indexer
   (Sourcegraph; Protobuf; already emitted by `rust-analyzer`, `scip-typescript`, `scip-python`) or
-  **stack-graphs** (GitHub, incremental). tree-sitter alone is a *parser*, not a name-resolver — it cannot
+  **stack-graphs** (GitHub, incremental). tree-sitter alone is a _parser_, not a name-resolver — it cannot
   resolve re-exports / barrels / dynamic dispatch; those become explicit `unresolved` edges (INDEX-13).
 - Content-address every `CodeNode` into the BLAKE3 CAS. **Ships zero facts** — territories at `T2/advisory`,
-  T0 only *flagged* (KNOW-6/7). The addressable substrate, nothing more.
+  T0 only _flagged_ (KNOW-6/7). The addressable substrate, nothing more.
 
 ### S1 — git-history mining (`$0`, mechanical) — each signal a named technique
 
@@ -47,7 +47,7 @@ The log is a free, high-signal corpus. Each signal below is a **ranking heuristi
   behavioral code analysis**. Seeds a `tier` candidate.
 - **Fragility / bug-introducing sites** = the **SZZ algorithm** (Śliwerski–Zimmermann–Zeller, MSR 2005; OSS
   **SZZUnleashed**): from bug-fixing commits, `git blame` the removed lines back to the introducing commit.
-  The **highest-value** frontier — fragile code is where invariants hide. (SZZ is heuristic → a *ranking*
+  The **highest-value** frontier — fragile code is where invariants hide. (SZZ is heuristic → a _ranking_
   signal, not truth.)
 - **Temporal / logical coupling** = association-rule mining over commit baskets (co-change support &
   confidence) → hidden dependencies + territory boundaries the static import graph misses.
@@ -63,10 +63,10 @@ The log is a free, high-signal corpus. Each signal below is a **ranking heuristi
   one mega-commit → everything looks equally cold, or generated files look like hotspots). A cheap
   **pre-check** (commit count below threshold, shallow clone, blame concentrated in one commit) MUST detect
   this and **fall back the personalization vector to structural signals** — PPR **without** history seeding
-  + **type/API-surface density** (public exports, trait/interface count, `unsafe`/FFI density) — so genesis
-  degrades to structural centrality instead of ranking noise. History is a *booster*, never a dependency.
+  - **type/API-surface density** (public exports, trait/interface count, `unsafe`/FFI density) — so genesis
+    degrades to structural centrality instead of ranking noise. History is a _booster_, never a dependency.
 
-### S2 — LLM extraction, rationed by rank (the *only* LLM spend)
+### S2 — LLM extraction, rationed by rank (the _only_ LLM spend)
 
 - Visit candidates **highest-PPR-first**; **one bounded call per site**, scoped to a single structural unit
   (small context). Output = a **grounded candidate fact** (anchored by `subtreeHash`).
@@ -87,8 +87,8 @@ The log is a free, high-signal corpus. Each signal below is a **ranking heuristi
 ### S3 — align with the user (batched, ranked)
 
 What S1+S2 cannot resolve — territory **owner/tier**, a **T0** assignment, a **contested** invariant,
-*intentional-or-bug* — is batched into a **short, ranked ratification interview** (highest blast/tier first,
-**never one question at a time**; active-learning-style — ask only where signal is ambiguous *and* stakes are
+_intentional-or-bug_ — is batched into a **short, ranked ratification interview** (highest blast/tier first,
+**never one question at a time**; active-learning-style — ask only where signal is ambiguous _and_ stakes are
 high). It is **capped at the top `20` questions per session** (ranked by blast×tier); the remainder is
 **deferred to the next session or defaulted to `T0-strict deny`** (the uncovered-path rule) — human time per
 genesis is bounded. Human answers become `human-ratified` facts (KNOW-8).
@@ -145,14 +145,14 @@ unratified), `constitution` from the **ratified T0 manifest** the S3 interview p
 - **GEN-11 Reproducible ranking.** The candidate ranking MUST be a deterministic function of the repo@rev
   (SZZ + hotspots + temporal-coupling feeding a **personalized PageRank** with pinned damping/seed); it MUST
   carry no model and no randomness, and MUST reproduce byte-identically across runs and machines.
-- **GEN-12 Proposer-in-a-harness, never an oracle.** In S2 the LLM MUST only *propose* typed candidates;
+- **GEN-12 Proposer-in-a-harness, never an oracle.** In S2 the LLM MUST only _propose_ typed candidates;
   admission MUST be mechanical. A **predicate** candidate MUST be admitted only if its synthesized `check`
   **compiles and returns `HOLDS` on the current code** (a failing check is a counterexample → REFINE ≤K,
   then drop — never force); an **advisory** candidate MUST pass grounding (the truth door) and MUST carry a
   harness-computed obviousness score — obviousness never blocks it (ADR-0012).
   Chain-of-thought MUST be scratch — never persisted as a fact. **Abstention MUST be a valid outcome** (a
   grounded why-not); the model MUST NOT be pressured to emit a fact. A predicate MUST be labeled a
-  *machine-checked likely invariant*, never a proof. **Teeth (anti-vacuity):** a synthesized `check` MUST
+  _machine-checked likely invariant_, never a proof. **Teeth (anti-vacuity):** a synthesized `check` MUST
   be admitted only if it returns `HOLDS` on current code **and flips to `BROKEN` on a mechanically-mutated
   counterfactual** of the anchored subtree — a check no mutant can break is vacuous (a tautology / matches
   nothing) and MUST be dropped. **Sound oracle first:** for a type-expressible slot (`contract`,
@@ -179,7 +179,7 @@ unratified), `constitution` from the **ratified T0 manifest** the S3 interview p
 - **GEN-15 History-thin fallback.** A cheap pre-check (commit count below threshold / shallow clone / blame
   concentrated in one commit) MUST detect degenerate history and **fall the personalization vector back to
   structural signals** (PPR without history seeding + type/API-surface density). History MUST be a ranking
-  *booster*, never a dependency — genesis MUST degrade to structural centrality, never rank noise.
+  _booster_, never a dependency — genesis MUST degrade to structural centrality, never rank noise.
 - **GEN-16 Usefulness is graded a-posteriori, not at admission.** The one non-mechanical gate — "non-obvious
   ∧ actionable" — MUST NOT rest on the proposer's self-assessment (UNAMENDED by ADR-0012, and load-bearing under
   it: the obviousness score is computed by the **harness's** predicate over the source bytes, never read off a
@@ -245,7 +245,7 @@ GenesisReport = { seeded, ratified, open, llmCalls, budgetSpent, resumeToken? }
 14. **GEN-14** — With all deepening loops off, genesis cost equals the single-pass baseline; each loop
     terminates at its fixpoint/marginal-value/dry stop and never exceeds its budget.
 15. **GEN-15** — On a squashed/shallow repo (blame in one commit), `mine` detects it and ranks by structural
-    + type-surface centrality (not SZZ/hotspots), producing a non-degenerate frontier — never random noise.
+    - type-surface centrality (not SZZ/hotspots), producing a non-degenerate frontier — never random noise.
 16. **GEN-16** — A seeded fact that no wave consults over its window decays out of the served set (archived,
     re-enterable); admission is graded by observed `hits` (KNOW-17), never by the proposer's self-assessment.
 

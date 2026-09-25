@@ -79,15 +79,15 @@ issue IDs, timestamp, and result. Only `VALID` yields approval eligibility for t
 
 ## Tools and Guards
 
-| Capability | Purpose | Boundary |
-|---|---|---|
-| `plan-revision-read` | read immutable proposed revision | Maestro durable evidence read |
-| `context-record-read` | verify exact grounding binding | Maestro durable evidence read |
-| `validation-policy-read` | load pinned deterministic policy | Maestro configuration read |
-| `plan-validation-record-write` | persist checks and verdict | Maestro durable evidence write |
-| `validation-input-guard` | require exact links/status/policy version | before evaluation |
-| `approval-eligibility-guard` | expose only current VALID revision to request-approval | approval boundary |
-| `no-governed-task-before-approval` | deny Task/child Session without approved revision identity | Session/Task boundary |
+| Capability                         | Purpose                                                    | Boundary                       |
+| ---------------------------------- | ---------------------------------------------------------- | ------------------------------ |
+| `plan-revision-read`               | read immutable proposed revision                           | Maestro durable evidence read  |
+| `context-record-read`              | verify exact grounding binding                             | Maestro durable evidence read  |
+| `validation-policy-read`           | load pinned deterministic policy                           | Maestro configuration read     |
+| `plan-validation-record-write`     | persist checks and verdict                                 | Maestro durable evidence write |
+| `validation-input-guard`           | require exact links/status/policy version                  | before evaluation              |
+| `approval-eligibility-guard`       | expose only current VALID revision to request-approval     | approval boundary              |
+| `no-governed-task-before-approval` | deny Task/child Session without approved revision identity | Session/Task boundary          |
 
 No model skill, Atlas read/write, shell, product edit, external network, member tool, plan mutation, approval
 write, or task creation is granted.
@@ -109,21 +109,21 @@ overwrite prior decision evidence.
 
 ## Refusal and Recovery
 
-| Condition | Result |
-|---|---|
-| Missing/empty/malformed policy or check list | `HOLD`, named validation-instrument failure |
-| Missing/unresolvable revision/context evidence | `HOLD`, preserve input identity/reason |
-| Failed required/provenance/lineage/freshness/conflict rule | `INVALID`, durable issue list; no approval/task |
-| Unknown semantic product conflict | remain `VALID` mechanically, rendered as stakeholder-visible uncertainty; never hidden auto-approval |
-| Duplicate trigger | return stored validation record |
-| New revision/context/policy | require new linked validation record |
+| Condition                                                  | Result                                                                                               |
+| ---------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| Missing/empty/malformed policy or check list               | `HOLD`, named validation-instrument failure                                                          |
+| Missing/unresolvable revision/context evidence             | `HOLD`, preserve input identity/reason                                                               |
+| Failed required/provenance/lineage/freshness/conflict rule | `INVALID`, durable issue list; no approval/task                                                      |
+| Unknown semantic product conflict                          | remain `VALID` mechanically, rendered as stakeholder-visible uncertainty; never hidden auto-approval |
+| Duplicate trigger                                          | return stored validation record                                                                      |
+| New revision/context/policy                                | require new linked validation record                                                                 |
 
 ## Runtime Seams
 
-| System | Seam |
-|---|---|
+| System   | Seam                                                                                               |
+| -------- | -------------------------------------------------------------------------------------------------- |
 | OpenCode | durable proposed-plan and validation records; approval-eligible UI state; Task/child-Session fence |
-| Atlas | no live call; validates addresses/freshness already bound in ContextRecord |
+| Atlas    | no live call; validates addresses/freshness already bound in ContextRecord                         |
 
 ## Acceptance
 

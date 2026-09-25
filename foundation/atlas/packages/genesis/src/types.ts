@@ -7,30 +7,30 @@
 // `StructRef` (contracts) and `GroundedFact` (knowledge) are IMPORTED, NEVER redefined; `Candidate`/`WhyNot`
 // are GENESIS-HOME (distinct from the @atlas/knowledge staging `Candidate`, which is a fact-in-waiting).
 
-import type { StructRef } from '@atlas/contracts';
-import type { GroundedFact } from '@atlas/knowledge';
-import type { Axes, Manifest } from '@atlas/index';
+import type { StructRef } from "@atlas/contracts"
+import type { GroundedFact } from "@atlas/knowledge"
+import type { Axes, Manifest } from "@atlas/index"
 // `GenesisBudget` lives in `budget-types.ts` (extracted below at the LOC ceiling) but is USED here by
 // `ExtractApi.extract` — imported for local use in ADDITION to the re-export, since `export type {...}
 // from` does not bring a name into this file's own scope.
-import type { GenesisBudget } from './budget-types.js';
+import type { GenesisBudget } from "./budget-types.js"
 
 /**
  * A seeded fact. Genesis does NOT mint a competing node record — a fact it seeds IS the steady-state
  * @atlas/knowledge `GroundedFact` (KNOW-13, the kind genesis hands off to). Re-exported as `Fact` so
  * consumers can read the genesis dialect from one place; owned by @atlas/knowledge, NOT redefined.
  */
-export type Fact = GroundedFact;
+export type Fact = GroundedFact
 
 /**
  * A human-ratified fact (KNOW-8, GEN-5). The S3 interview's output: `T0` / contested facts reach
  * `ratified` ONLY through the batched, ranked interview. Reuses the @atlas/knowledge `GroundedFact`
  * (a ratified fact is a grounded node) — NOT a distinct invented record.
  */
-export type Ratified = GroundedFact;
+export type Ratified = GroundedFact
 
 /** The five pipeline stages (§The pipeline S0→S4) — used to key the per-stage cost report (GEN-13). */
-export type PipelineStage = 'S0' | 'S1' | 'S2' | 'S3' | 'S4';
+export type PipelineStage = "S0" | "S1" | "S2" | "S3" | "S4"
 
 /**
  * The S1 mined ranking signals for one site (GEN-6 — these feed only the candidate `rank`, NEVER the fact
@@ -47,11 +47,11 @@ export type PipelineStage = 'S0' | 'S1' | 'S2' | 'S3' | 'S4';
  * (the honest scalar form), NOT invented as a record. Flagged for the owning WP to confirm the carrier.
  */
 export interface MinedSignals {
-  readonly hotspot: number; // [FLAG] reference untyped; change-freq × complexity scalar (§S1)
-  readonly szzBugCommits: number; // SZZ bug-introducing commits blamed to this site
-  readonly coChanged: readonly StructRef[]; // temporal/logical-coupling co-change basket
-  readonly owners: readonly string[]; // git-blame ownership / bus-factor map
-  readonly messages: readonly string[]; // commit-message corpus for this site
+  readonly hotspot: number // [FLAG] reference untyped; change-freq × complexity scalar (§S1)
+  readonly szzBugCommits: number // SZZ bug-introducing commits blamed to this site
+  readonly coChanged: readonly StructRef[] // temporal/logical-coupling co-change basket
+  readonly owners: readonly string[] // git-blame ownership / bus-factor map
+  readonly messages: readonly string[] // commit-message corpus for this site
 }
 
 /**
@@ -66,10 +66,10 @@ export interface MinedSignals {
  *   - `rank`    — the total order position (stable, ties broken deterministically — GEN-11).
  */
 export interface Candidate {
-  readonly site: StructRef;
-  readonly signals: MinedSignals;
-  readonly ppr: number;
-  readonly rank: number;
+  readonly site: StructRef
+  readonly signals: MinedSignals
+  readonly ppr: number
+  readonly rank: number
 }
 
 /**
@@ -82,8 +82,8 @@ export interface Candidate {
  * speculative fields. NOT an invented record.
  */
 export interface WhyNot {
-  readonly site: StructRef; // the anchored site the model abstained on (grounded)
-  readonly reason: string; // the why-not body — honest justification text (GEN-12)
+  readonly site: StructRef // the anchored site the model abstained on (grounded)
+  readonly reason: string // the why-not body — honest justification text (GEN-12)
 }
 
 /**
@@ -97,10 +97,10 @@ export interface WhyNot {
  * (atlas-genesis:194 surface literal) → `string`. NOT a record.
  */
 export interface OpenQ {
-  readonly kind: 'owner' | 'tier' | 'contested' | 'intent';
-  readonly site: StructRef; // [FLAG] reference untyped — the anchored site under question
-  readonly options?: readonly string[];
-  readonly rankReason: string; // justification text — blast×tier rank reason (atlas-genesis:194)
+  readonly kind: "owner" | "tier" | "contested" | "intent"
+  readonly site: StructRef // [FLAG] reference untyped — the anchored site under question
+  readonly options?: readonly string[]
+  readonly rankReason: string // justification text — blast×tier rank reason (atlas-genesis:194)
 }
 
 /**
@@ -111,12 +111,12 @@ export interface OpenQ {
  * reference-grounded `PipelineStage` (§The pipeline S0→S4) — a stricter transcription of the `string` floor.
  */
 export interface StageCost {
-  readonly stage: PipelineStage;
-  readonly llmCalls: number; // the GEN-3 cost oracle — a function of the frontier, never of size
+  readonly stage: PipelineStage
+  readonly llmCalls: number // the GEN-3 cost oracle — a function of the frontier, never of size
 }
 
 /** The whole-run per-stage cost report (GEN-13). One `StageCost` per pipeline stage. */
-export type CostReport = readonly StageCost[];
+export type CostReport = readonly StageCost[]
 
 /**
  * The resume cursor (GEN-8). An interrupted run resumes from the LAST COMPLETED RANKED SITE; a malformed
@@ -127,7 +127,7 @@ export type CostReport = readonly StageCost[];
  * skeleton hash, spent budget) are NOT invented.
  */
 export interface ResumeToken {
-  readonly lastCompletedRank: number; // resume from the last completed ranked site (GEN-8)
+  readonly lastCompletedRank: number // resume from the last completed ranked site (GEN-8)
 }
 
 /**
@@ -147,36 +147,36 @@ export interface ResumeToken {
  */
 export type SiteOutcome =
   | {
-      readonly outcome: 'seeded';
-      readonly rank: number; //          the GEN-2/11 rank position this site was driven at
-      readonly site: StructRef; //       the anchored site (grounded — the same ref the Candidate carried)
-      readonly facts: readonly string[]; // the seeded facts, by their own `id` — WITH WHAT, not just how many
+      readonly outcome: "seeded"
+      readonly rank: number //          the GEN-2/11 rank position this site was driven at
+      readonly site: StructRef //       the anchored site (grounded — the same ref the Candidate carried)
+      readonly facts: readonly string[] // the seeded facts, by their own `id` — WITH WHAT, not just how many
     }
   | {
-      readonly outcome: 'abstained';
-      readonly rank: number;
-      readonly site: StructRef;
-      readonly whyNot: WhyNot; //        the grounded GEN-12 abstention, kept — not re-derived, not invented
+      readonly outcome: "abstained"
+      readonly rank: number
+      readonly site: StructRef
+      readonly whyNot: WhyNot //        the grounded GEN-12 abstention, kept — not re-derived, not invented
     }
   | {
-      readonly outcome: 'unrecorded';
-      readonly rank: number;
-      readonly site: StructRef;
-      readonly note: string; //          WHY the outcome could not be recorded — about the port, not the site
+      readonly outcome: "unrecorded"
+      readonly rank: number
+      readonly site: StructRef
+      readonly note: string //          WHY the outcome could not be recorded — about the port, not the site
     }
   | {
-      readonly outcome: 'interrupted';
-      readonly rank: number;
-      readonly site: StructRef; //       `visit` threw (GEN-8c catches it WITHOUT a cause) — the site is not done
+      readonly outcome: "interrupted"
+      readonly rank: number
+      readonly site: StructRef //       `visit` threw (GEN-8c catches it WITHOUT a cause) — the site is not done
     }
   | {
-      readonly outcome: 'unvisited';
-      readonly rank: number;
-      readonly site: StructRef;
+      readonly outcome: "unvisited"
+      readonly rank: number
+      readonly site: StructRef
       /** WHY no call was spent: the GEN-2 hard ceiling was already reached (the cold tail born-from-work
        *  inherits), or the run stopped at an earlier interrupted site and never got here. */
-      readonly cause: 'ceiling' | 'after-interrupt';
-    };
+      readonly cause: "ceiling" | "after-interrupt"
+    }
 
 /**
  * The RUN LEDGER (GEN-8 + GEN-12g): one `SiteOutcome` per PLANNED site, so a run's coverage of its own
@@ -194,12 +194,12 @@ export interface RunCoverage {
   /** Where the row set came from. `'planned'` — `plan` returned a frontier and every row below accounts for
    *  one of its sites. `'unavailable'` — planning itself failed (GEN-8b/8c), so the run never HAD a frontier:
    *  this ledger claims no coverage, and in particular does not claim the repository was empty. */
-  readonly frontier: 'planned' | 'unavailable';
+  readonly frontier: "planned" | "unavailable"
   /** Sites the run was handed by `plan`. Compared against `sites.length`, this is the check itself: a gap
    *  means the controller drove a frontier it did not account for. */
-  readonly planned: number;
+  readonly planned: number
   /** One row per planned site — the ledger. Ordered by the GEN-2/11 rank the run drove them in. */
-  readonly sites: readonly SiteOutcome[];
+  readonly sites: readonly SiteOutcome[]
 }
 
 /**
@@ -219,11 +219,11 @@ export interface RunCoverage {
  * Flagged for the two references to reconcile whether per-stage cost is a first-class report field.
  */
 export interface GenesisReport {
-  readonly seeded: readonly Fact[];
-  readonly ratified: readonly Ratified[];
-  readonly open: readonly OpenQ[];
-  readonly llmCalls: number;
-  readonly budgetSpent: number;
+  readonly seeded: readonly Fact[]
+  readonly ratified: readonly Ratified[]
+  readonly open: readonly OpenQ[]
+  readonly llmCalls: number
+  readonly budgetSpent: number
   /** MODEL CALLS ACTUALLY MADE — including the ones whose results were DISCARDED (task #158).
    *
    *  It is a SECOND counter rather than a correction to `llmCalls`, because the two answer different
@@ -241,7 +241,7 @@ export interface GenesisReport {
    *  OPTIONAL in the TYPE only because `GenesisReport` literals are constructed in frozen test fixtures
    *  this change may not edit. Every path in the run controller SETS IT, ALWAYS, INCLUDING ZERO — a field
    *  that appeared only when non-zero would read as "this never happens". */
-  readonly modelCalls?: number;
+  readonly modelCalls?: number
   /** [#210] WHICH model produced this run's answers — "which CLI + version", NOT a cost basis
    *  (`captureModelIdentity`, mine-proposer.ts; ADR-0011). Wired ⇒ the captured identity string (cmd+args
    *  plus a best-effort `--version` probe); unwired ⇒ the sentinel `'unwired:no-model-configured'` (the SAME
@@ -252,7 +252,7 @@ export interface GenesisReport {
    *  OPTIONAL in the TYPE only, for the `modelCalls` frozen-fixture reason above; every path in the run
    *  controller SETS IT, including the unwired sentinel — a field that appeared only when a real model ran
    *  would make "which model" unreadable on exactly the runs an operator most needs to ask that about. */
-  readonly modelIdentity?: string;
+  readonly modelIdentity?: string
   /** [#209] THE WITNESS, part 1: a count of the admitted facts that carry an answer-provenance receipt
    *  (`answerRef`, #195 leg b — the CAS id of the model's answer bytes as actually STORED; a content-address,
    *  so `answerRef` itself already IS the digest of that stored content — no separate per-fact digest field
@@ -266,7 +266,7 @@ export interface GenesisReport {
    *  by a stale-but-valid `answerRef` substituted at the same rank — nothing on the ISSUED side is
    *  fingerprinted at emission time, so a full issued-vs-stored equivalence proof is a FURTHER step this
    *  field does not claim. */
-  readonly answersStored?: number;
+  readonly answersStored?: number
   /** [#209] THE WITNESS, part 2: a stable digest (the kernel's default BLAKE3 encoder, KERNEL-2) over the
    *  SORTED `answerRef`s counted by `answersStored`. Two runs whose STORED answer SETS differ produce a
    *  DIFFERENT digest even when every other report field (including `modelCalls`) agrees — the property the
@@ -276,14 +276,14 @@ export interface GenesisReport {
    *  DIFFERENT set never do. Present iff `answersStored` is (same optionality reason); the digest over the
    *  EMPTY set (no admitted fact carries a receipt) is still a real, present value — "no receipts" is a fact
    *  this field records honestly, never an excuse to omit it. */
-  readonly answersDigest?: string;
-  readonly cost?: CostReport; // [FLAG] GEN-13/A-13 require per-stage cost; §Surface literal omits it
-  readonly resumeToken?: ResumeToken; // present only on a partial/interrupted run (GEN-8)
+  readonly answersDigest?: string
+  readonly cost?: CostReport // [FLAG] GEN-13/A-13 require per-stage cost; §Surface literal omits it
+  readonly resumeToken?: ResumeToken // present only on a partial/interrupted run (GEN-8)
   /** The per-site run ledger (GEN-8/12g). OPTIONAL for the same reason `cost` is: the §Surface literal
    *  (:195) lists six fields and none of them is a site ledger, while GEN-12g requires abstention to be a
    *  valid RECORDED outcome — which, dropped, it was not. Absent ⇒ this run recorded no coverage (an
    *  artifact from before the ledger); it never means the run covered nothing. */
-  readonly coverage?: RunCoverage;
+  readonly coverage?: RunCoverage
 }
 
 // ── GEN-13 / GEN-14 cost-discipline surface — EXTRACTED to `budget-types.ts` at the 400-LOC godfile
@@ -298,7 +298,7 @@ export type {
   Mechanism,
   EscalationDecision,
   BudgetApi,
-} from './budget-types.js';
+} from "./budget-types.js"
 
 // ── S2 extract surface, co-located here (was ref/extract.ts) ──────────────────────────────────────────
 // Consumed by extract.ts + loops.ts (≥2), so housed here beside the shared model. S2 is the ONLY LLM entry
@@ -313,8 +313,8 @@ export type {
  * that yields no fact yields a `WhyNot`, never a forced fact.
  */
 export interface ExtractResult {
-  readonly facts: readonly Fact[];
-  readonly abstained: readonly WhyNot[];
+  readonly facts: readonly Fact[]
+  readonly abstained: readonly WhyNot[]
 }
 
 export interface ExtractApi {
@@ -328,7 +328,7 @@ export interface ExtractApi {
    *  untyped; transcribed as the `GenesisBudget` policy — it carries the hard site ceiling
    *  (`min(frontier_size, 200)`, GEN-2) plus the GEN-13/14 escalation + deepening dials. A bare numeric
    *  `--budget N` maps to `GenesisBudget.ceiling`. */
-  extract(cands: readonly Candidate[], budget: GenesisBudget): ExtractResult;
+  extract(cands: readonly Candidate[], budget: GenesisBudget): ExtractResult
 }
 
 // ── S0 scan surface, co-located here (was ref/scan.ts) ────────────────────────────────────────────────
@@ -350,8 +350,8 @@ export interface ExtractApi {
  * unresolved-edge ledger (`Axes.edges`) and per-node CAS ids ride inside `Axes`. NOT invented beyond this.
  */
 export interface Skeleton {
-  readonly axes: Axes; // the ≥3 content-addressed axis hierarchies (INDEX-10)
-  readonly manifest: Manifest; // territories at T2/advisory, ZERO invariants, T0 flagged (KNOW-6/7)
+  readonly axes: Axes // the ≥3 content-addressed axis hierarchies (INDEX-10)
+  readonly manifest: Manifest // territories at T2/advisory, ZERO invariants, T0 flagged (KNOW-6/7)
 }
 
 export interface ScanApi {
@@ -363,5 +363,5 @@ export interface ScanApi {
    *  transcribed as `string` (a repo path/handle); `rev` transcribed as `string` (a free-form git rev —
    *  deliberately NOT `Hash`, since GEN-8 requires a MALFORMED rev yield a partial skeleton, never a
    *  throw — a malformable input is a raw string, not a branded digest). Flagged for the WP. */
-  scan(repo: string, rev: string): Skeleton;
+  scan(repo: string, rev: string): Skeleton
 }

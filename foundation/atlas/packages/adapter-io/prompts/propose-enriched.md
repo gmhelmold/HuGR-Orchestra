@@ -51,6 +51,7 @@ justification travels with the prompt without being sent to it.
     passed. GEN-6 forbids a signal from minting a fact; withholding the signals makes that violation
     structurally impossible instead of merely instructed against. They already did their work in ranking.
 -->
+
 You are shown ONE anchored TARGET unit from a real codebase, and the RELATED units it references as CONTEXT.
 
 {{RELATED}}
@@ -65,13 +66,14 @@ steps.
 
 STEP 1 — REASON FREELY (scratch, never stored). Read the bytes closely. Draft a candidate fact about the
 TARGET, then actively try to REFUTE it against the source:
+
 - Is it about the TARGET (not a related unit), and derivable from the bytes shown (the target plus the related
   context) — or are you leaning on what you know about a library, framework or convention not visible here, or
   on a stale/past-tense COMMENT the current code may contradict? The related units are there so a fact that
   DEPENDS on them is derivable — not so you can state a fact about them.
 - Is it more than a restatement of the name, the signature or the types, or a summary of what the code
   plainly does?
-Discard any candidate that does not survive. This reasoning is scratch: it is parsed away and never persisted.
+  Discard any candidate that does not survive. This reasoning is scratch: it is parsed away and never persisted.
 
 STEP 2 — EMIT THE RESULT. If a fact about the TARGET survived, emit it as EXACTLY ONE fenced block tagged
 `atlas-fact`, holding a JSON object with a single `claim` field — one sentence of plain prose:

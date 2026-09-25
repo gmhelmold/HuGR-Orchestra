@@ -35,22 +35,22 @@
 // integration level in `packages/adapter-io/test/negation-edgemodel-freshness.test.ts` (real door, real read
 // leg, the conjunct-drop mutant killed) — stated here rather than faked in-subprocess.
 
-import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { existsSync, readFileSync } from 'node:fs';
-import { join } from 'node:path';
-import { makeFixtureRepo, runAtlas } from '../src/harness.js';
-import type { FixtureRepo } from '../src/harness.js';
-import { negationPayload } from './adversarial-fixtures.js';
-import { ACTOR, RATIFIER, emitFact } from './support.js';
+import { afterAll, beforeAll, describe, expect, it } from "vitest"
+import { existsSync, readFileSync } from "node:fs"
+import { join } from "node:path"
+import { makeFixtureRepo, runAtlas } from "../src/harness.js"
+import type { FixtureRepo } from "../src/harness.js"
+import { negationPayload } from "./adversarial-fixtures.js"
+import { ACTOR, RATIFIER, emitFact } from "./support.js"
 
 // The CLOSED scope: X has no caller and no unresolved reference under it. `keep.ts` exists on disk so the
 // directory resolves on the spatial rail; it carries no SCIP reference, so `src/pay` has no hole.
-const PAY = 'src/pay';
+const PAY = "src/pay"
 // The OPEN scope: `uses.ts` REFERENCES a symbol no document defines ⇒ a real `unresolved` edge ⇒ a hole in S.
-const OPEN = 'src/open';
+const OPEN = "src/open"
 
 // Where the DEFINED-but-uncalled target lives — outside the negated scope, so it resolves without being a caller.
-const LIB = 'src/lib';
+const LIB = "src/lib"
 
 // GLOBAL SCIP symbols (NOT `local ` — the honest, groundable case). X is the negation's target over the closed
 // scope; it is DEFINED in `src/lib` (so it RESOLVES — #220) yet has no caller in `src/pay` (the honest,
@@ -58,16 +58,16 @@ const LIB = 'src/lib';
 // is the (irrelevant) target over the open scope — the abstention fires on scope-openness before Y is consulted.
 // PHANTOM is a GLOBAL symbol NO document defines: `(¬calls, PHANTOM, src/pay)` is VACUOUSLY true, and #220 makes
 // the door ABSTAIN `target-unresolvable` rather than ground a negative about a symbol Atlas cannot see.
-const X = 'scip . . `X`#';
-const Y = 'scip . . `Y`#';
-const UNDEFINED = 'scip . . `Undefined`#';
-const PHANTOM = 'scip . . `Phantom`#';
+const X = "scip . . `X`#"
+const Y = "scip . . `Y`#"
+const UNDEFINED = "scip . . `Undefined`#"
+const PHANTOM = "scip . . `Phantom`#"
 
 const FILES = {
-  [`${PAY}/keep.ts`]: 'export function keep() { return 1; }\n',
-  [`${OPEN}/uses.ts`]: 'export function uses() { return 2; }\n',
-  [`${LIB}/def.ts`]: 'export function X() { return 0; }\n',
-};
+  [`${PAY}/keep.ts`]: "export function keep() { return 1; }\n",
+  [`${OPEN}/uses.ts`]: "export function uses() { return 2; }\n",
+  [`${LIB}/def.ts`]: "export function X() { return 0; }\n",
+}
 
 // The real SCIP the product reads: `src/lib/def.ts` DEFINES `X` (so X RESOLVES — #220 — while having no caller
 // in `src/pay`); `src/open/uses.ts` REFERENCES `UNDEFINED`, which NO document DEFINES ⇒ the product classifies
@@ -75,7 +75,7 @@ const FILES = {
 const INDEX = [
   { path: `${LIB}/def.ts`, defines: [X] },
   { path: `${OPEN}/uses.ts`, references: [UNDEFINED] },
-];
+]
 
 // Authorize the ACTOR to write BOTH scopes (KNOW-11). The abstention gate fires BEFORE authz, but a real
 // operator owns the scope it asserts over, so the policy is honest.
@@ -83,129 +83,136 @@ const POLICY = JSON.stringify({
   nearDup: { claimNormThreshold: 1 },
   t0Heuristic: { keywords: [] },
   authz: { scopes: { [PAY]: [ACTOR], [OPEN]: [ACTOR] } },
-});
+})
 
-let repo: FixtureRepo;
-let priorActor: string | undefined;
-let priorRatify: string | undefined;
+let repo: FixtureRepo
+let priorActor: string | undefined
+let priorRatify: string | undefined
 
 /** The durable projection sidecar as RAW BYTES — absent ⇒ nothing ever landed. */
 function projectionBytes(): string {
-  const p = join(repo.repoPath, '.atlas', 'projection.json');
-  return existsSync(p) ? readFileSync(p, 'utf8') : '<<ABSENT>>';
+  const p = join(repo.repoPath, ".atlas", "projection.json")
+  return existsSync(p) ? readFileSync(p, "utf8") : "<<ABSENT>>"
 }
 
 /** The rendered `  negation <kind> <target> in <scope> [<freshness>] (<nodeKey>)` lines of a verdict. */
 function negationLines(stdout: string): string[] {
-  return stdout.split('\n').filter((l) => l.trimStart().startsWith('negation '));
+  return stdout.split("\n").filter((l) => l.trimStart().startsWith("negation "))
 }
 /** The rendered `  abstained <kind> <target> in <scope> — <reason>` lines of a verdict. */
 function abstainedLines(stdout: string): string[] {
-  return stdout.split('\n').filter((l) => l.trimStart().startsWith('abstained '));
+  return stdout.split("\n").filter((l) => l.trimStart().startsWith("abstained "))
 }
 
 beforeAll(() => {
-  priorActor = process.env.ATLAS_ACTOR;
-  priorRatify = process.env.ATLAS_RATIFY_TOKEN;
-  process.env.ATLAS_ACTOR = ACTOR;
-  process.env.ATLAS_RATIFY_TOKEN = RATIFIER; // a non-T0 grounded negation auto-accepts; token is a safe default
-  repo = makeFixtureRepo({ files: FILES, policy: POLICY, index: INDEX });
-});
+  priorActor = process.env.ATLAS_ACTOR
+  priorRatify = process.env.ATLAS_RATIFY_TOKEN
+  process.env.ATLAS_ACTOR = ACTOR
+  process.env.ATLAS_RATIFY_TOKEN = RATIFIER // a non-T0 grounded negation auto-accepts; token is a safe default
+  repo = makeFixtureRepo({ files: FILES, policy: POLICY, index: INDEX })
+})
 
 afterAll(() => {
-  repo?.cleanup();
-  if (priorActor === undefined) delete process.env.ATLAS_ACTOR;
-  else process.env.ATLAS_ACTOR = priorActor;
-  if (priorRatify === undefined) delete process.env.ATLAS_RATIFY_TOKEN;
-  else process.env.ATLAS_RATIFY_TOKEN = priorRatify;
-});
+  repo?.cleanup()
+  if (priorActor === undefined) delete process.env.ATLAS_ACTOR
+  else process.env.ATLAS_ACTOR = priorActor
+  if (priorRatify === undefined) delete process.env.ATLAS_RATIFY_TOKEN
+  else process.env.ATLAS_RATIFY_TOKEN = priorRatify
+})
 
-describe('S31 — a negation grounds over a CLOSED scope and is read back FRESH', () => {
-  it('THE ADMIT: `(¬calls, X, src/pay)` over a closed+empty scope EMITS (exit 0) — the door proved S closed', () => {
-    const run = emitFact(repo, negationPayload({ target: X, scope: PAY, relationKind: 'calls' }));
-    expect(run.exitCode).toBe(0);
-    expect(run.stdout).toContain('status: ok');
-    expect(run.stderr).toBe('');
+describe("S31 — a negation grounds over a CLOSED scope and is read back FRESH", () => {
+  it("THE ADMIT: `(¬calls, X, src/pay)` over a closed+empty scope EMITS (exit 0) — the door proved S closed", () => {
+    const run = emitFact(repo, negationPayload({ target: X, scope: PAY, relationKind: "calls" }))
+    expect(run.exitCode).toBe(0)
+    expect(run.stdout).toContain("status: ok")
+    expect(run.stderr).toBe("")
     // it is DURABLE — one negation row landed (family:negation).
-    const proj = JSON.parse(projectionBytes()) as { current: readonly [string, { family?: string }][] };
-    expect(proj.current).toHaveLength(1);
-    expect(proj.current[0]![1].family).toBe('negation');
-  });
+    const proj = JSON.parse(projectionBytes()) as { current: readonly [string, { family?: string }][] }
+    expect(proj.current).toHaveLength(1)
+    expect(proj.current[0]![1].family).toBe("negation")
+  })
 
-  it('THE READ: `atlas negations src/pay` finds the grounded negative, surfacing [FRESH] (N4 §3 verdict)', () => {
-    const r = runAtlas(repo.repoPath, ['negations', PAY]);
-    expect(r.exitCode).toBe(0);
-    const lines = negationLines(r.stdout);
-    expect(lines).toHaveLength(1);
-    expect(lines[0]).toContain(`negation calls ${X} in ${PAY}`);
-    expect(lines[0]).toContain('[FRESH]'); // the scope hash matches AND the edge model matches ⇒ FRESH
-  });
-});
+  it("THE READ: `atlas negations src/pay` finds the grounded negative, surfacing [FRESH] (N4 §3 verdict)", () => {
+    const r = runAtlas(repo.repoPath, ["negations", PAY])
+    expect(r.exitCode).toBe(0)
+    const lines = negationLines(r.stdout)
+    expect(lines).toHaveLength(1)
+    expect(lines[0]).toContain(`negation calls ${X} in ${PAY}`)
+    expect(lines[0]).toContain("[FRESH]") // the scope hash matches AND the edge model matches ⇒ FRESH
+  })
+})
 
-describe('S31 — DRIFT ON INSERTION: a new caller entering the scope drifts the directory Merkle (§3)', () => {
-  it('inserting a file INTO src/pay makes the negation read [DRIFTED] — insertion-sensitivity a per-unit hash lacks', () => {
+describe("S31 — DRIFT ON INSERTION: a new caller entering the scope drifts the directory Merkle (§3)", () => {
+  it("inserting a file INTO src/pay makes the negation read [DRIFTED] — insertion-sensitivity a per-unit hash lacks", () => {
     // A brand-new unit ENTERS the scope directory. A per-FILE subtreeHash would be monotone-blind to this; the
     // per-DIRECTORY hash is a branch over the NAMED child set, so it moves ⇒ the negation's grounding drifts.
-    repo.commit({ [`${PAY}/newcaller.ts`]: 'export function nc() { return 3; }\n' });
-    const r = runAtlas(repo.repoPath, ['negations', PAY]);
-    expect(r.exitCode).toBe(0);
-    const lines = negationLines(r.stdout);
-    expect(lines).toHaveLength(1); // IDENTITY SURVIVES — target/scope did not move, so it is no false orphan
-    expect(lines[0]).toContain(`negation calls ${X} in ${PAY}`);
-    expect(lines[0]).toContain('[DRIFTED]'); // the scope Merkle moved ⇒ re-verify the negative (honest trigger)
-  });
-});
+    repo.commit({ [`${PAY}/newcaller.ts`]: "export function nc() { return 3; }\n" })
+    const r = runAtlas(repo.repoPath, ["negations", PAY])
+    expect(r.exitCode).toBe(0)
+    const lines = negationLines(r.stdout)
+    expect(lines).toHaveLength(1) // IDENTITY SURVIVES — target/scope did not move, so it is no false orphan
+    expect(lines[0]).toContain(`negation calls ${X} in ${PAY}`)
+    expect(lines[0]).toContain("[DRIFTED]") // the scope Merkle moved ⇒ re-verify the negative (honest trigger)
+  })
+})
 
-describe('S31 — #220: a PHANTOM target (defined nowhere) ABSTAINS, never a vacuous admit', () => {
-  it('emitting `(¬calls, PHANTOM, src/pay)` over a CLOSED scope ABSTAINS target-unresolvable (exit 2)', () => {
+describe("S31 — #220: a PHANTOM target (defined nowhere) ABSTAINS, never a vacuous admit", () => {
+  it("emitting `(¬calls, PHANTOM, src/pay)` over a CLOSED scope ABSTAINS target-unresolvable (exit 2)", () => {
     // `src/pay` is closed+empty (same as the X admit), but PHANTOM is a GLOBAL symbol NO document defines, so
     // `reverseCallers(PHANTOM)` is [] BY CONSTRUCTION — indistinguishable from a genuinely-uncalled symbol. The
     // pre-#220 door reached the closed-empty ADMIT and ground "PHANTOM is not called in src/pay" — a negative
     // about a symbol Atlas cannot see. The fixed door ABSTAINS: it cannot prove the negative is MEANINGFUL.
-    const run = emitFact(repo, negationPayload({ target: PHANTOM, scope: PAY, relationKind: 'calls' }));
-    expect(run.exitCode).toBe(2); // an abstention travels as a REFUSAL at the emit door, never a false success
-    expect(run.stdout).toContain('abstained (target-unresolvable)');
-    expect(run.stderr).toBe(''); // fail-CLOSED refusal, never an uncaught throw
-  });
+    const run = emitFact(repo, negationPayload({ target: PHANTOM, scope: PAY, relationKind: "calls" }))
+    expect(run.exitCode).toBe(2) // an abstention travels as a REFUSAL at the emit door, never a false success
+    expect(run.stdout).toContain("abstained (target-unresolvable)")
+    expect(run.stderr).toBe("") // fail-CLOSED refusal, never an uncaught throw
+  })
 
-  it('THE PROOF: `atlas negations src/pay --abstained` shows the durable target-unresolvable record', () => {
-    const r = runAtlas(repo.repoPath, ['negations', PAY, '--abstained']);
-    expect(r.exitCode).toBe(0);
-    const lines = abstainedLines(r.stdout);
-    expect(lines.some((l) => l.includes(`abstained calls ${PHANTOM} in ${PAY} — target-unresolvable`))).toBe(true);
-  });
-});
+  it("THE PROOF: `atlas negations src/pay --abstained` shows the durable target-unresolvable record", () => {
+    const r = runAtlas(repo.repoPath, ["negations", PAY, "--abstained"])
+    expect(r.exitCode).toBe(0)
+    const lines = abstainedLines(r.stdout)
+    expect(lines.some((l) => l.includes(`abstained calls ${PHANTOM} in ${PAY} — target-unresolvable`))).toBe(true)
+  })
+})
 
-describe('S31 — THE #202 CLOSE: abstention FIRES over a genuinely OPEN scope', () => {
-  it('emitting `(¬calls, Y, src/open)` over an OPEN scope ABSTAINS at the door (rejected, exit 2)', () => {
+describe("S31 — THE #202 CLOSE: abstention FIRES over a genuinely OPEN scope", () => {
+  it("emitting `(¬calls, Y, src/open)` over an OPEN scope ABSTAINS at the door (rejected, exit 2)", () => {
     // `src/open/uses.ts` carries a SCIP reference to a symbol no document defines ⇒ a REAL unresolved edge ⇒
     // the scope is UNDER-approximated ⇒ the door cannot prove absence ⇒ it ABSTAINS (not a silent drop).
-    const run = emitFact(repo, negationPayload({ target: Y, scope: OPEN, relationKind: 'calls' }));
-    expect(run.exitCode).toBe(2); // an abstention travels as a REFUSAL at the emit door, never a false success
-    expect(run.stdout).toContain('abstained (scope-open)');
-    expect(run.stderr).toBe(''); // fail-CLOSED refusal, never an uncaught throw
-  });
+    const run = emitFact(repo, negationPayload({ target: Y, scope: OPEN, relationKind: "calls" }))
+    expect(run.exitCode).toBe(2) // an abstention travels as a REFUSAL at the emit door, never a false success
+    expect(run.stdout).toContain("abstained (scope-open)")
+    expect(run.stderr).toBe("") // fail-CLOSED refusal, never an uncaught throw
+  })
 
-  it('THE PROOF: `atlas negations src/open --abstained` shows the durable AbstainedRecord + reason (#202)', () => {
-    const r = runAtlas(repo.repoPath, ['negations', OPEN, '--abstained']);
-    expect(r.exitCode).toBe(0);
-    const lines = abstainedLines(r.stdout);
-    expect(lines).toHaveLength(1);
-    expect(lines[0]).toContain(`abstained calls ${Y} in ${OPEN} — scope-open`); // READABLE, not a silent refuse
-  });
+  it("THE PROOF: `atlas negations src/open --abstained` shows the durable AbstainedRecord + reason (#202)", () => {
+    const r = runAtlas(repo.repoPath, ["negations", OPEN, "--abstained"])
+    expect(r.exitCode).toBe(0)
+    const lines = abstainedLines(r.stdout)
+    expect(lines).toHaveLength(1)
+    expect(lines[0]).toContain(`abstained calls ${Y} in ${OPEN} — scope-open`) // READABLE, not a silent refuse
+  })
 
-  it('the AbstainedRecord is DURABLE with a populated WITNESS — the unresolved edge that opened the scope', () => {
+  it("the AbstainedRecord is DURABLE with a populated WITNESS — the unresolved edge that opened the scope", () => {
     // Read the sidecar bytes directly: the abstention round-trips through the WireProjection `abstained` ledger
     // (sidecar-abstained.ts), carrying its reason and the witness docHashes that opened the scope. This is what
     // makes "the door declined to decide, and here is why" observable end to end (the exact 0/300 #202 close).
-    const bytes = projectionBytes();
-    const wire = JSON.parse(bytes) as { abstained?: readonly [string, {
-      reason: string; scope: string; witness: { underApproxSources: readonly string[] };
-    }][] };
-    expect(wire.abstained).toBeDefined();
-    const rec = wire.abstained!.find(([, r]) => r.scope === OPEN)?.[1];
-    expect(rec).toBeDefined();
-    expect(rec!.reason).toBe('scope-open');
-    expect(rec!.witness.underApproxSources.length).toBeGreaterThan(0); // the offending unresolved edge(s) ∩ S
-  });
-});
+    const bytes = projectionBytes()
+    const wire = JSON.parse(bytes) as {
+      abstained?: readonly [
+        string,
+        {
+          reason: string
+          scope: string
+          witness: { underApproxSources: readonly string[] }
+        },
+      ][]
+    }
+    expect(wire.abstained).toBeDefined()
+    const rec = wire.abstained!.find(([, r]) => r.scope === OPEN)?.[1]
+    expect(rec).toBeDefined()
+    expect(rec!.reason).toBe("scope-open")
+    expect(rec!.witness.underApproxSources.length).toBeGreaterThan(0) // the offending unresolved edge(s) ∩ S
+  })
+})

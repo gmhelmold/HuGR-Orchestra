@@ -33,30 +33,30 @@
 // family). `pathOfHash` and `isLocal` are supplied by the CALLER, as `verifyDependency` requires them (see
 // `packages/adapter-io/src/verify-fact-source.ts`, `createVerifyFactLeg`).
 
-import type { Hash } from '@atlas/contracts';
-import type { SymbolReverseApi } from '@atlas/index';
-import { anyInScope } from './scope-predicate.js';
+import type { Hash } from "@atlas/contracts"
+import type { SymbolReverseApi } from "@atlas/index"
+import { anyInScope } from "./scope-predicate.js"
 
 /** One "NO unit under `scope` references global symbol `target`" claim. A SINGLE scope: the region the
  *  negation ranges over is exactly the region whose completeness (hole-freeness) must be checked to prove it —
  *  matching the shipped door's single-scope gate. No separate `worldScope` (which could be under-sized and
  *  admit a false `proven` — lucy cold-review). */
 export type NegationClaim = {
-  readonly scope: string;
-  readonly target: string;
-};
+  readonly scope: string
+  readonly target: string
+}
 
 /** PROVE / REFUTE / ABSTAIN — the negation oracle's verdict. Unlike the dependency oracle's `FactVerdict`
  *  (which has NO `refuted`, because there a refute would be the unsound closed-world direction), THIS oracle
  *  emits `refuted` as its SOUND, any-world direction (a witnessed counterexample caller). `oracle` stays
  *  `'symbol-reverse'`: it is the same feed answering an absence question, not a second decision-maker. */
 export type NegationVerdict = {
-  readonly verdict: 'proven' | 'refuted' | 'abstain';
-  readonly reason?: string;
-  readonly oracle: 'symbol-reverse';
-};
+  readonly verdict: "proven" | "refuted" | "abstain"
+  readonly reason?: string
+  readonly oracle: "symbol-reverse"
+}
 
-const abstain = (reason: string): NegationVerdict => ({ verdict: 'abstain', reason, oracle: 'symbol-reverse' });
+const abstain = (reason: string): NegationVerdict => ({ verdict: "abstain", reason, oracle: "symbol-reverse" })
 
 /**
  * PROVE / REFUTE / ABSTAIN on the negation `claim`, over the live `reverse` feed (`SymbolReverseApi`,
@@ -79,15 +79,15 @@ export function verifyNegation(
   pathOfHash: (h: Hash) => string | undefined,
   isLocal: (sym: string) => boolean,
 ): NegationVerdict {
-  const { scope, target } = claim;
-  if (target.length === 0 || scope.length === 0) return abstain('malformed');
-  if (isLocal(target)) return abstain('target-not-global');
-  if (!reverse.resolves(target)) return abstain('target-unresolvable');
+  const { scope, target } = claim
+  if (target.length === 0 || scope.length === 0) return abstain("malformed")
+  if (isLocal(target)) return abstain("target-not-global")
+  if (!reverse.resolves(target)) return abstain("target-unresolvable")
 
   // REFUTE: a witnessed caller under scope is a positive existence — sound in ANY world, no closed-world
   // test. The negation is false.
   if (anyInScope(reverse.reverseCallers(target), pathOfHash, scope)) {
-    return { verdict: 'refuted', oracle: 'symbol-reverse' };
+    return { verdict: "refuted", oracle: "symbol-reverse" }
   }
 
   // No caller witnessed under scope. PROVING the absence is closed-world OVER THAT SAME SCOPE: a hole under S
@@ -101,7 +101,7 @@ export function verifyNegation(
     anyInScope(reverse.holeSources(), pathOfHash, scope) ||
     anyInScope(reverse.opaqueRefSources(), pathOfHash, scope)
   ) {
-    return abstain('scope-open');
+    return abstain("scope-open")
   }
-  return { verdict: 'proven', oracle: 'symbol-reverse' };
+  return { verdict: "proven", oracle: "symbol-reverse" }
 }

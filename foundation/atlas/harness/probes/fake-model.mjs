@@ -24,42 +24,42 @@
 //
 // Harness invariant (harness/README.md): no `@atlas/*` import.
 
-import { readFileSync, writeSync } from 'node:fs';
+import { readFileSync, writeSync } from "node:fs"
 
 /** A fixed, obviously-synthetic claim. It is not a real assertion about any repository and must never be
  *  promoted; it is here so the product's admission gate has a non-empty string to reject or admit. */
-export const DEFAULT_CLAIM = 'FAKE MODEL OUTPUT — this stand-in makes no claim about this repository';
+export const DEFAULT_CLAIM = "FAKE MODEL OUTPUT — this stand-in makes no claim about this repository"
 
 /** Burn wall-clock SYNCHRONOUSLY, without a busy loop. `Atomics.wait` on a private buffer parks the thread,
  *  so the process consumes no CPU while it waits — which matters when eight of these run at once and a
  *  spin loop would turn a concurrency measurement into a measurement of the host's core count. */
 export function sleepSync(ms) {
-  if (!(ms > 0)) return;
-  Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, ms);
+  if (!(ms > 0)) return
+  Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, ms)
 }
 
 export function main() {
   try {
-    readFileSync(0); // drain the piped prompt — a model that never reads stdin puts the caller in an EPIPE race
+    readFileSync(0) // drain the piped prompt — a model that never reads stdin puts the caller in an EPIPE race
   } catch {
     /* no stdin attached (a bare hand-run) — nothing to drain */
   }
 
-  const ms = Number(process.env.ATLAS_FAKE_MODEL_SLEEP_MS ?? 1000);
-  sleepSync(Number.isFinite(ms) ? ms : 1000);
+  const ms = Number(process.env.ATLAS_FAKE_MODEL_SLEEP_MS ?? 1000)
+  sleepSync(Number.isFinite(ms) ? ms : 1000)
 
-  if (process.env.ATLAS_FAKE_MODEL_ABSTAIN !== '1') {
-    const claim = `${process.env.ATLAS_FAKE_MODEL_CLAIM ?? DEFAULT_CLAIM}\n`;
-    const buf = Buffer.from(claim, 'utf8');
-    let off = 0;
-    while (off < buf.length) off += writeSync(1, buf, off, buf.length - off);
+  if (process.env.ATLAS_FAKE_MODEL_ABSTAIN !== "1") {
+    const claim = `${process.env.ATLAS_FAKE_MODEL_CLAIM ?? DEFAULT_CLAIM}\n`
+    const buf = Buffer.from(claim, "utf8")
+    let off = 0
+    while (off < buf.length) off += writeSync(1, buf, off, buf.length - off)
   }
 
-  const exit = Number(process.env.ATLAS_FAKE_MODEL_EXIT ?? 0);
-  process.exit(Number.isInteger(exit) ? exit : 0);
+  const exit = Number(process.env.ATLAS_FAKE_MODEL_EXIT ?? 0)
+  process.exit(Number.isInteger(exit) ? exit : 0)
 }
 
 // No entry-point guard: this file is a COMMAND, nothing imports it, and the guard's failure mode is silence
 // — an exit 0 with empty stdout, which the product reads as an abstention. See `model-call-shim.mjs` for the
 // measurement (`argv[1]` and `import.meta.url` differ by percent-encoding AND by symlink resolution).
-main();
+main()

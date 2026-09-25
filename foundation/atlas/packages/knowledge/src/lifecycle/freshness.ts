@@ -27,17 +27,17 @@
 // A Knowledge fact carries the 2-state `KnowledgeFreshness` (FRESH | DRIFTED — no STALE, types.ts):
 // the structural verdict is FRESH iff the oracle says FRESH, else DRIFTED (fail-closed narrowing).
 
-import type { DriftApi } from '@atlas/grounding';
-import type { Freshness as GroundingFreshness } from '@atlas/contracts';
-import type { Axes } from '@atlas/index';
-import type { GroundedFact, KnowledgeFreshness } from '../types.js';
+import type { DriftApi } from "@atlas/grounding"
+import type { Freshness as GroundingFreshness } from "@atlas/contracts"
+import type { Axes } from "@atlas/index"
+import type { GroundedFact, KnowledgeFreshness } from "../types.js"
 
 /**
  * The bound Knowledge drift-verdict function: `freshness(fact, tree)` (KNOW-3a/3b/3c). Given a built-
  * index snapshot `tree` (`@atlas/index` `Axes` — the GROUND-pinned drift source-of-truth carrier), it
  * returns the fact's 2-state `KnowledgeFreshness`.
  */
-export type Freshness = (fact: GroundedFact, tree: Axes) => KnowledgeFreshness;
+export type Freshness = (fact: GroundedFact, tree: Axes) => KnowledgeFreshness
 
 /**
  * Bind the Knowledge drift-verdict to GROUND's drift oracle.
@@ -55,18 +55,18 @@ export type Freshness = (fact: GroundedFact, tree: Axes) => KnowledgeFreshness;
  */
 export function bindFreshness(oracle: DriftApi): Freshness {
   return (fact: GroundedFact, tree: Axes): KnowledgeFreshness => {
-    const verdict = oracle.driftDetect(fact.grounding, tree);
-    return verdict === 'FRESH' ? 'FRESH' : 'DRIFTED';
-  };
+    const verdict = oracle.driftDetect(fact.grounding, tree)
+    return verdict === "FRESH" ? "FRESH" : "DRIFTED"
+  }
 }
 
 /** Route structural drift by fact kind. Unknown runtime kinds fail closed to predicate drift. */
 export function resolveFactFreshness(
-  kind: 'advisory' | 'predicate',
+  kind: "advisory" | "predicate",
   structural: GroundingFreshness,
 ): GroundingFreshness {
-  if (kind !== 'advisory' && kind !== 'predicate') return 'DRIFTED';
-  if (structural === 'FRESH') return 'FRESH';
-  if (kind === 'advisory') return 'STALE';
-  return 'DRIFTED';
+  if (kind !== "advisory" && kind !== "predicate") return "DRIFTED"
+  if (structural === "FRESH") return "FRESH"
+  if (kind === "advisory") return "STALE"
+  return "DRIFTED"
 }

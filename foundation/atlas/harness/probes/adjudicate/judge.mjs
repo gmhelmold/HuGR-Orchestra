@@ -19,35 +19,35 @@
 //
 // Harness invariant (harness/README.md): no `@atlas/*` import.
 
-import { execFileSync } from 'node:child_process';
-import { readFileSync, writeSync } from 'node:fs';
+import { execFileSync } from "node:child_process"
+import { readFileSync, writeSync } from "node:fs"
 
-const MODEL = process.env.JUDGE_MODEL || 'claude-sonnet-4-6';
-const BIN = process.env.JUDGE_BIN || 'claude';
-const TIMEOUT_MS = Number(process.env.JUDGE_TIMEOUT_MS || 180_000);
+const MODEL = process.env.JUDGE_MODEL || "claude-sonnet-4-6"
+const BIN = process.env.JUDGE_BIN || "claude"
+const TIMEOUT_MS = Number(process.env.JUDGE_TIMEOUT_MS || 180_000)
 
-let extraArgs = [];
+let extraArgs = []
 try {
-  extraArgs = process.env.JUDGE_ARGS ? JSON.parse(process.env.JUDGE_ARGS) : [];
+  extraArgs = process.env.JUDGE_ARGS ? JSON.parse(process.env.JUDGE_ARGS) : []
 } catch {
-  writeSync(2, 'judge: JUDGE_ARGS must be a JSON array of strings\n');
-  process.exit(2);
+  writeSync(2, "judge: JUDGE_ARGS must be a JSON array of strings\n")
+  process.exit(2)
 }
 
-const prompt = readFileSync(0);
+const prompt = readFileSync(0)
 
-let out;
+let out
 try {
-  out = execFileSync(BIN, ['-p', '--model', MODEL, '--output-format', 'text', ...extraArgs], {
+  out = execFileSync(BIN, ["-p", "--model", MODEL, "--output-format", "text", ...extraArgs], {
     input: prompt,
     timeout: TIMEOUT_MS,
     maxBuffer: 64 * 1024 * 1024,
-    stdio: ['pipe', 'pipe', 'inherit'],
-  });
+    stdio: ["pipe", "pipe", "inherit"],
+  })
 } catch (err) {
-  writeSync(2, `judge: model call failed: ${String(err?.message ?? err)}\n`);
-  process.exit(1);
+  writeSync(2, `judge: model call failed: ${String(err?.message ?? err)}\n`)
+  process.exit(1)
 }
 
-writeSync(1, out);
-process.exit(0);
+writeSync(1, out)
+process.exit(0)

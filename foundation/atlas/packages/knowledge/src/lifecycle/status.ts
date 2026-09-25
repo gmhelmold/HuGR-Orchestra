@@ -26,10 +26,10 @@
 // [FLAG — simulated seal] the card `content_hash: <filled-at-freeze>` was never filled; this binding is
 // written against the VISIBLE frozen `StatusApi` text + SCN-KNOW-1-1, flagged simulated.
 
-import type { Status } from '@atlas/contracts';
-import type { Axes } from '@atlas/index';
-import type { GateApi } from '@atlas/grounding';
-import type { GroundedFact } from '../types.js';
+import type { Status } from "@atlas/contracts"
+import type { Axes } from "@atlas/index"
+import type { GateApi } from "@atlas/grounding"
+import type { GroundedFact } from "../types.js"
 
 // ── frozen StatusApi surface, co-located here (was ref/status.ts) ─────────────────────────────────────
 
@@ -39,7 +39,7 @@ export interface StatusApi {
    *  Pure + total; `Status` is out of identity (never in the `nodeKey`). Signature pinned to
    *  `recompute(node: GroundedFact): Status`; the {drift, evaluator-verdict} inputs thread as INJECTED
    *  DEPS (the `bindStatus` closure), NOT as new call-args. */
-  recompute(node: GroundedFact): Status;
+  recompute(node: GroundedFact): Status
 }
 
 /**
@@ -51,12 +51,12 @@ export interface StatusApi {
 export interface StatusDeps {
   /** GROUND-4 truth-gate: `HOLDS` only if grounded ∧ FRESH, else `NA`; downgrade-only, idempotent. The
    *  single gate the recompute defers to (no second copy). */
-  readonly gate: GateApi;
+  readonly gate: GateApi
   /** KNOW-16 evaluator verdict for a node's check against index state — the RECOMPUTED side-index leg,
    *  NEVER the node's self-declared `status`. Consumed as a pure function (consume-only). */
-  readonly evaluate: (node: GroundedFact) => Status;
+  readonly evaluate: (node: GroundedFact) => Status
   /** The built-index snapshot the gate re-checks drift/grounding against (Owner-DEFINE pin: `Axes`). */
-  readonly src: Axes;
+  readonly src: Axes
 }
 
 /**
@@ -72,7 +72,7 @@ export interface StatusDeps {
  * `NA`. A fact is truth ONLY if grounded ∧ FRESH (fail-closed) — never on its own say-so.
  */
 export function bindStatus(deps: StatusDeps): StatusApi {
-  const recompute: StatusApi['recompute'] = (node: GroundedFact) =>
-    deps.gate.gateHolds(deps.evaluate(node), node.grounding, deps.src);
-  return { recompute };
+  const recompute: StatusApi["recompute"] = (node: GroundedFact) =>
+    deps.gate.gateHolds(deps.evaluate(node), node.grounding, deps.src)
+  return { recompute }
 }

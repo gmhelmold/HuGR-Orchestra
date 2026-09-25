@@ -29,23 +29,23 @@
 // three classes and passes a refusal's reason through VERBATIM, so this discriminant survives to every
 // transport intact and `faultOf(v)` answers `refused` rather than `malformed-args`.
 
-import type { SidecarTrust } from './store-provenance.js';
+import type { SidecarTrust } from "./store-provenance.js"
 
 /** The refusal's machine-readable DISCRIMINANT. One member today; a union so a second read-side provenance
  *  refusal cannot be added as a bare string. Asserted on for EQUALITY — never a substring of the prose. */
-export type ReadProvenanceReason = 'untrusted-store';
+export type ReadProvenanceReason = "untrusted-store"
 
 /** THE read-side provenance refusal. The text before the first `:` is the discriminant `reasonOf` compares,
  *  and it is deliberately NOT a name any other refusal constant in this package mentions. */
 export const REJECTED_UNTRUSTED_STORE =
-  'untrusted-store: the durable Atlas store under `.atlas/` is TRACKED BY GIT, so it arrived by COMMIT ' +
-  'rather than through a governed door. Nothing in it can be shown to have passed the truth gate, the ' +
-  'authz gate or the ratification gate, so NOTHING is served and NOTHING is written — refusing is the only ' +
-  'honest answer, because content-addressing authenticates integrity and says nothing about provenance. ' +
-  'This is almost always an accident: a `git add -A` after an emit. To repair it, stop tracking the store ' +
-  'and keep it out of the index — `git rm -r --cached .atlas/projection*.json .atlas/staging*.json ' +
-  '.atlas/cas` then commit, and add `.atlas/` (with a `!.atlas/policy.json` exception) to `.gitignore`; ' +
-  '`atlas init` writes that rule for you. `.atlas/policy.json` is admin-owned source and SHOULD stay tracked';
+  "untrusted-store: the durable Atlas store under `.atlas/` is TRACKED BY GIT, so it arrived by COMMIT " +
+  "rather than through a governed door. Nothing in it can be shown to have passed the truth gate, the " +
+  "authz gate or the ratification gate, so NOTHING is served and NOTHING is written — refusing is the only " +
+  "honest answer, because content-addressing authenticates integrity and says nothing about provenance. " +
+  "This is almost always an accident: a `git add -A` after an emit. To repair it, stop tracking the store " +
+  "and keep it out of the index — `git rm -r --cached .atlas/projection*.json .atlas/staging*.json " +
+  ".atlas/cas` then commit, and add `.atlas/` (with a `!.atlas/policy.json` exception) to `.gitignore`; " +
+  "`atlas init` writes that rule for you. `.atlas/policy.json` is admin-owned source and SHOULD stay tracked"
 
 /**
  * The read-door refusal, as a THROWN value carrying the {@link ReadProvenanceReason} discriminant.
@@ -54,10 +54,10 @@ export const REJECTED_UNTRUSTED_STORE =
  * door converts into a structured fail-closed verdict, never a bare `Error` and never a raw `TypeError`.
  */
 export class UntrustedStoreError extends Error {
-  readonly reason: ReadProvenanceReason = 'untrusted-store';
+  readonly reason: ReadProvenanceReason = "untrusted-store"
   constructor() {
-    super(REJECTED_UNTRUSTED_STORE);
-    this.name = 'UntrustedStoreError';
+    super(REJECTED_UNTRUSTED_STORE)
+    this.name = "UntrustedStoreError"
   }
 }
 
@@ -75,16 +75,16 @@ export class UntrustedStoreError extends Error {
  * behaves exactly as it did before, which is the property that keeps all of this additive.
  */
 export function isUntrustedStore(trusted: SidecarTrust | undefined): boolean {
-  return trusted !== undefined && !trusted();
+  return trusted !== undefined && !trusted()
 }
 
 /** Refuse a READ over a committed store. Throws {@link UntrustedStoreError}; otherwise returns. */
 export function refuseUntrustedRead(trusted: SidecarTrust | undefined): void {
-  if (isUntrustedStore(trusted)) throw new UntrustedStoreError();
+  if (isUntrustedStore(trusted)) throw new UntrustedStoreError()
 }
 
 /** The refusal a CLI-level door renders BEFORE dispatching, or `undefined` when the store is trustworthy.
  *  Returned rather than thrown because the CLI's contract is a structured verdict, never an exception. */
 export function readProvenanceRefusal(trusted: SidecarTrust | undefined): string | undefined {
-  return isUntrustedStore(trusted) ? REJECTED_UNTRUSTED_STORE : undefined;
+  return isUntrustedStore(trusted) ? REJECTED_UNTRUSTED_STORE : undefined
 }

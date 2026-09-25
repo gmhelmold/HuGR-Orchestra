@@ -66,7 +66,7 @@ The pool never touches the store. Concurrency buys the model calls, which is whe
 and buys nothing near the sidecar, which is where a lost update would live (task #108 is that door and
 this WP leaves it exactly as it found it).
 
-*Measured on the real binary:* the sidecar published generations 197→200 sequentially and 397→400 under
+_Measured on the real binary:_ the sidecar published generations 197→200 sequentially and 397→400 under
 the pool — one publish per site on both paths, i.e. the write cadence is unchanged.
 
 **REQ-GEN-CONC-5 — the report states what was PAID FOR, separately from what was USED**
@@ -85,22 +85,22 @@ product is trying to win. Byte-identity therefore binds every field describing t
 run's progress; `modelCalls` describes spend and is required to differ when spend differed. On a run
 with no fault the two are identical anyway.
 
-This also fixes a pre-existing understatement: a *sequential* run already discarded its own faulting
+This also fixes a pre-existing understatement: a _sequential_ run already discarded its own faulting
 call without counting it.
 
 ---
 
 ## Scenarios
 
-| id | scenario |
-|---|---|
-| SCN-GEN-CONC-1 | 37 sites (ragged final batch): concurrent report is byte-identical to sequential, and `modelCalls == llmCalls == 37` |
-| SCN-GEN-CONC-2 | **TEETH** — a pool that lets ARRIVAL order leak into its returned array makes the identity assertion FAIL, and the seeded facts come back in a different order |
-| SCN-GEN-CONC-3 | ceiling 22 over 30 sites (22 not a multiple of 8): byte-identical, `budgetSpent == modelCalls == 22`, zero overshoot, cold tail recorded as `ceiling` |
+| id             | scenario                                                                                                                                                                      |
+| -------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| SCN-GEN-CONC-1 | 37 sites (ragged final batch): concurrent report is byte-identical to sequential, and `modelCalls == llmCalls == 37`                                                          |
+| SCN-GEN-CONC-2 | **TEETH** — a pool that lets ARRIVAL order leak into its returned array makes the identity assertion FAIL, and the seeded facts come back in a different order                |
+| SCN-GEN-CONC-3 | ceiling 22 over 30 sites (22 not a multiple of 8): byte-identical, `budgetSpent == modelCalls == 22`, zero overshoot, cold tail recorded as `ceiling`                         |
 | SCN-GEN-CONC-4 | ranks 3 and 6 both fault in ONE batch: identical modulo spend, `lastCompletedRank == 2`, rank 3 is the interruption; `modelCalls` 8 vs 4 — the overshoot is real and reported |
-| SCN-GEN-CONC-5 | resume after a concurrent interruption is identical to resume after a sequential one; spend accumulates across legs (16→24 concurrent, 11 sequential) |
-| SCN-GEN-CONC-6 | `modelCalls` is present and `0` on a malformed run and on an empty frontier |
-| SCN-GEN-CONC-7 | the GEN-2e marginal-value halt is not pass-level on this path, so a pool cannot skew it |
+| SCN-GEN-CONC-5 | resume after a concurrent interruption is identical to resume after a sequential one; spend accumulates across legs (16→24 concurrent, 11 sequential)                         |
+| SCN-GEN-CONC-6 | `modelCalls` is present and `0` on a malformed run and on an empty frontier                                                                                                   |
+| SCN-GEN-CONC-7 | the GEN-2e marginal-value halt is not pass-level on this path, so a pool cannot skew it                                                                                       |
 
 ### On SCN-GEN-CONC-7 — a worry that turned out to be structurally impossible
 
@@ -159,11 +159,11 @@ for a paid provider. Every run below: `seeded 200 · llmCalls 200 · budgetSpent
 
 **Matched pair at 3s per site, measured on the REBASED tree (`2cbc5cc` vs this branch):**
 
-| | wall-clock |
-|---|---|
+|                                | wall-clock  |
+| ------------------------------ | ----------- |
 | before (`2cbc5cc`, sequential) | **641.58s** |
-| after (pool of 8) | **101.45s** |
-| | **6.32×** |
+| after (pool of 8)              | **101.45s** |
+|                                | **6.32×**   |
 
 Re-measured rather than carried over, because the rebase moved three files on the S2 path:
 `adapter-io/src/compose.ts` (the admission gate `mine` composes), `adapter-io/src/sidecar.ts` (the staging
@@ -191,19 +191,20 @@ Two measurement caveats recorded rather than smoothed:
 ## Traceability
 
 work-package: WP-FIX-CONCURRENCY
-source_reqs:                                   # ptr+digest
-  - source: ../req-gen.md#REQ-GEN-CONC-1   # ptr+digest
-  - source: ../req-gen.md#REQ-GEN-CONC-2   # ptr+digest
-  - source: ../req-gen.md#REQ-GEN-CONC-3   # ptr+digest
-  - source: ../req-gen.md#REQ-GEN-CONC-4   # ptr+digest
-  - source: ../req-gen.md#REQ-GEN-CONC-5   # ptr+digest
-  - source: ../req-gen.md#REQ-GEN-CONC-6   # ptr+digest
-acceptance:                                    # ptr+digest
-  - source: ../goldens-gen.md#SCN-GEN-CONC-1   # ptr+digest
-  - source: ../goldens-gen.md#SCN-GEN-CONC-2   # ptr+digest
-  - source: ../goldens-gen.md#SCN-GEN-CONC-3   # ptr+digest
-  - source: ../goldens-gen.md#SCN-GEN-CONC-4   # ptr+digest
-  - source: ../goldens-gen.md#SCN-GEN-CONC-5   # ptr+digest
-  - source: ../goldens-gen.md#SCN-GEN-CONC-6   # ptr+digest
-  - source: ../goldens-gen.md#SCN-GEN-CONC-7   # ptr+digest
-seam-freezes: [ "ControllerDeps.visitAll — owned-by genesis/drive.ts, consumed-by cli/mine.ts" ]
+source_reqs: # ptr+digest
+
+- source: ../req-gen.md#REQ-GEN-CONC-1 # ptr+digest
+- source: ../req-gen.md#REQ-GEN-CONC-2 # ptr+digest
+- source: ../req-gen.md#REQ-GEN-CONC-3 # ptr+digest
+- source: ../req-gen.md#REQ-GEN-CONC-4 # ptr+digest
+- source: ../req-gen.md#REQ-GEN-CONC-5 # ptr+digest
+- source: ../req-gen.md#REQ-GEN-CONC-6 # ptr+digest
+  acceptance: # ptr+digest
+- source: ../goldens-gen.md#SCN-GEN-CONC-1 # ptr+digest
+- source: ../goldens-gen.md#SCN-GEN-CONC-2 # ptr+digest
+- source: ../goldens-gen.md#SCN-GEN-CONC-3 # ptr+digest
+- source: ../goldens-gen.md#SCN-GEN-CONC-4 # ptr+digest
+- source: ../goldens-gen.md#SCN-GEN-CONC-5 # ptr+digest
+- source: ../goldens-gen.md#SCN-GEN-CONC-6 # ptr+digest
+- source: ../goldens-gen.md#SCN-GEN-CONC-7 # ptr+digest
+  seam-freezes: [ "ControllerDeps.visitAll — owned-by genesis/drive.ts, consumed-by cli/mine.ts" ]

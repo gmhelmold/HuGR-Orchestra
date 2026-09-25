@@ -5,12 +5,12 @@
 // `underApprox: true` and ONLY then unions the correlational `coChanged` band (labeled, never a static
 // edge). The closure is a sorted `Hash[]` so a rebuild is byte-identical.
 
-import type { Hash } from '@atlas/contracts';
-import type { DepEdge } from './types.js';
+import type { Hash } from "@atlas/contracts"
+import type { DepEdge } from "./types.js"
 
 /** An edge's resolution class — defined in `./types.ts`, re-exported here for depgraph consumers.
  *  (atlas-index:185-188; method-tags-idx:108) */
-export type { EdgeKind } from './types.js';
+export type { EdgeKind } from "./types.js"
 
 /**
  * The result of a reverse (transpose) closure = blast radius. Transcribed from the reference model
@@ -21,9 +21,9 @@ export type { EdgeKind } from './types.js';
  *     (labeled correlational, never a static edge). Empty otherwise.
  */
 export interface ReverseClosure {
-  readonly closure: readonly Hash[];
-  readonly underApprox: boolean;
-  readonly coChanged: readonly Hash[];
+  readonly closure: readonly Hash[]
+  readonly underApprox: boolean
+  readonly coChanged: readonly Hash[]
 }
 
 export interface DepgraphApi {
@@ -34,7 +34,7 @@ export interface DepgraphApi {
    *  The reference names `reverseClosure(node)` with no concrete type for `node`; CONFIRMED as the
    *  node's CAS `Hash` — the dependency axis keys structural units by hash (atlas-index:105) and the
    *  closure node set is referenced by hash (method-tags-idx:108). Finalized `Hash`, not `IndexNode`. */
-  reverseClosure(node: Hash): ReverseClosure;
+  reverseClosure(node: Hash): ReverseClosure
 }
 
 /**
@@ -47,49 +47,49 @@ export function createDepgraph(
   edges: readonly DepEdge[],
   coChanged: ReadonlyMap<Hash, readonly Hash[]> = new Map(),
 ): DepgraphApi {
-  const reverse = new Map<string, Hash[]>();
-  const unresolvedSources = new Set<string>();
+  const reverse = new Map<string, Hash[]>()
+  const unresolvedSources = new Set<string>()
   for (const e of edges) {
-    if (e.kind === 'resolved' && e.to !== null) {
-      const k = String(e.to);
-      const bucket = reverse.get(k) ?? [];
-      bucket.push(e.from);
-      reverse.set(k, bucket);
+    if (e.kind === "resolved" && e.to !== null) {
+      const k = String(e.to)
+      const bucket = reverse.get(k) ?? []
+      bucket.push(e.from)
+      reverse.set(k, bucket)
     } else {
-      unresolvedSources.add(String(e.from)); // `unresolved` / `dynamic` — a statically-incomplete hole
+      unresolvedSources.add(String(e.from)) // `unresolved` / `dynamic` — a statically-incomplete hole
     }
   }
 
   return {
     reverseClosure(node: Hash): ReverseClosure {
       // BFS over reverse edges; the origin is never part of its own blast radius.
-      const seen = new Set<string>();
-      const queue: string[] = [String(node)];
+      const seen = new Set<string>()
+      const queue: string[] = [String(node)]
       while (queue.length > 0) {
-        const cur = queue.shift()!;
+        const cur = queue.shift()!
         for (const dep of reverse.get(cur) ?? []) {
-          const k = String(dep);
+          const k = String(dep)
           if (!seen.has(k)) {
-            seen.add(k);
-            queue.push(k);
+            seen.add(k)
+            queue.push(k)
           }
         }
       }
-      seen.delete(String(node)); // a node is never part of its own blast radius (even under a cycle)
+      seen.delete(String(node)) // a node is never part of its own blast radius (even under a cycle)
       // scope = the origin + everything in its closure; an unresolved edge sourcing from ANY of these makes
       // the closure honestly under-approximate.
-      const scope = new Set<string>([String(node), ...seen]);
-      let underApprox = false;
-      const band = new Set<string>();
+      const scope = new Set<string>([String(node), ...seen])
+      let underApprox = false
+      const band = new Set<string>()
       for (const s of scope) {
-        if (!unresolvedSources.has(s)) continue;
-        underApprox = true;
-        for (const h of coChanged.get(s as Hash) ?? []) band.add(String(h));
+        if (!unresolvedSources.has(s)) continue
+        underApprox = true
+        for (const h of coChanged.get(s as Hash) ?? []) band.add(String(h))
       }
-      const closure = [...seen].sort() as unknown as Hash[];
+      const closure = [...seen].sort() as unknown as Hash[]
       // coChanged rides in ONLY when underApprox (labeled correlational via its own field), else empty.
-      const coChangedOut = (underApprox ? [...band].sort() : []) as unknown as Hash[];
-      return { closure, underApprox, coChanged: coChangedOut };
+      const coChangedOut = (underApprox ? [...band].sort() : []) as unknown as Hash[]
+      return { closure, underApprox, coChanged: coChangedOut }
     },
-  };
+  }
 }

@@ -2,7 +2,7 @@
 
 - **Status: FRAMING REFUTED by cold review (2026-08-11) — corrected direction in §Review findings; NOT for ratification as written.** Two seats (billy T0, lucy conformance) proved the "fill stubs behind frozen interfaces, Track 1 needs no ratification" framing false: the crux (model typed-args → harness `synthesize` → `Check`) CANNOT be wired without changing the frozen `PredicateApi.synthesize` signature (`admit-harness.ts:48`) + its call site (`:252`) + the proposal/seed shape — all GEN-12 ratified surface. And teeth proves byte-sensitivity, NOT claim-encoding (the ADR-0016 F1 residual), so a site-derived check is a content-free fingerprint that passes teeth trivially. The design below is retained as the anchor; the corrected, correctly-scoped design is in §Review findings.
 - **Status (original draft):** Proposed (2026-08-11). Grounded against master `4bb54a5`. The design that turns the shipped
-  `atlas mine` from an *aboutness* door (grounding ≠ truth, 22.5% hallucination measured) into a *truth* gate
+  `atlas mine` from an _aboutness_ door (grounding ≠ truth, 22.5% hallucination measured) into a _truth_ gate
   (admit iff a harness-synthesized check compiles, HOLDS, and flips BROKEN under mutation). Needs owner
   ratification of the ONE ratified-surface amendment (Track 2, KNOW-16 `Check` leg) + green `gate`. The lead
   does not self-ratify a ratified surface.
@@ -11,7 +11,7 @@
   (`genesis/src/admit-harness.ts` — `admit`/`admitPredicate`/`attest`/`runSite`, refine≤K, the teeth ordering
   gate) is REAL and tested (`wp-8.28-b-gen.test.ts`). The frozen `PredicateApi` (synthesize/verify/teeth),
   the `Check` carrier (KNOW-16), the `EvaluatorApi`+`evaluator.ts` interpreter, and relation/negation
-  admission all EXIST. What is absent is every *load-bearing port impl*: the sole production wiring
+  admission all EXIST. What is absent is every _load-bearing port impl_: the sole production wiring
   (`compose-mine-admission.ts:68-96`, `buildMineAdmission`) is fail-closed no-ops
   (`synthesize:()=>null, verify:()=>'NA', teeth:()=>false, typeOracle.expressible:()=>false, K:0`), and no
   producer emits a predicate seed, so `admitPredicate` is never even entered. This is the
@@ -25,7 +25,7 @@
 `synthesize` (NL claim → formal check) is the non-mechanizable step **only if the model hands over a free
 sentence**. It becomes mechanical when the **constrained proposer emits TYPED ARGS** `{op, unit, args}` from
 a closed vocabulary, and the **harness deterministically compiles args → Check** (`PredicateApi.synthesize`,
-zero-model). The check encodes the claim *by construction* (the harness built it to mean `op(args)`), which is
+zero-model). The check encodes the claim _by construction_ (the harness built it to mean `op(args)`), which is
 why the model never supplies the Check — killing the ADR-0016 self-certification T0. Measured prototype:
 `scratchpad/s2-sound` — constrained proposer + AST gate, 260/313 admitted (HOLDS+teeth), ~10 useful-proven
 facts/file.
@@ -33,10 +33,12 @@ facts/file.
 ## Two tracks (the honest split — richness needs a governed amendment)
 
 ### Track 1 — first real predicate on shipped `mine`, NO ratified-surface change
+
 Fills the four stubbed legs so `atlas mine` admits a real, harness-verified predicate. **Constraint:** today's
 `Check = {index-query | assertion}` reaches only the INDEX tree (exists / has-object / child-count /
 subtree-hash over `IndexNode`), so Track 1's predicates are **structural/index-level** (a unit exists, a
 child-count, a subtree-hash equality) — sound but THIN. Legs:
+
 1. **Predicate-seed producer** — emit `{kind:'predicate', slot, ...}` seeds with index-expressible typed args
    (`extract.ts:66-70` shape exists; emitter absent). The hardest-blocking gap: without it `admitPredicate` is
    unreachable.
@@ -51,23 +53,24 @@ child-count, a subtree-hash equality) — sound but THIN. Legs:
    DROPPED — on the shipped path, not a harness unit (the D5/#155 gate).
 
 ### Track 2 — the RICH body-predicate lens, RATIFIED-SURFACE amendment (owner ratifies)
+
 The measured richness (~10 useful-proven facts/file) lives in the **intra-function-body** class ("decay's body
 reads cfg.window", "F calls g") — which today's `Check` **cannot express** (the interpreter reaches only index
-nodes; `subtree-hash` detects *that a body changed*, never *what it asserts*). Track 2 adds:
-6. **An ADDITIVE `Check` leg** `{kind:'ast-body', ...}` + its interpreter (the proven `scratchpad/s2-stageB/
-   astq.mjs`, web-tree-sitter body-predicate) + a `cv` (contract-version) bump — a **KNOW-16 amendment**.
-7. **Body-class `synthesize` + `teeth`** — args → ast-body Check; mutate the function body, re-evaluate, flip.
+nodes; `subtree-hash` detects _that a body changed_, never _what it asserts_). Track 2 adds: 6. **An ADDITIVE `Check` leg** `{kind:'ast-body', ...}` + its interpreter (the proven `scratchpad/s2-stageB/
+   astq.mjs`, web-tree-sitter body-predicate) + a `cv` (contract-version) bump — a **KNOW-16 amendment**. 7. **Body-class `synthesize` + `teeth`** — args → ast-body Check; mutate the function body, re-evaluate, flip.
 
 **Without Track 2 the gate is sound but thin; the whole richness payoff is Track 2.** Track 2 amends the
 frozen `Check` type (KNOW-16) — a ratified surface — so it is the owner's to ratify. The lead does not
 self-amend KNOW-16/GEN-12.
 
 ## What is explicitly OUT of the first predicate (bobby-confirmed)
+
 `typeOracle` (its sound arm emits an ADVISORY, not a predicate — `buildSound`), `refine`/`K` (K:0 is a valid
 budget), and relation/negation as separate families (their admission is DONE but needs their own seed
 producers). These are follow-on, not blockers for a first verified predicate.
 
 ## Consequences / honesty
+
 - **Truth becomes mechanical**, not prompt-hoped: admission = proven predicate, not aboutness. The 22.5%
   cannot enter (an unproven claim abstains).
 - **Freshness bonus** — a stored predicate carries its own re-runnable Check ⇒ staleness = re-run at the new
@@ -80,6 +83,7 @@ producers). These are follow-on, not blockers for a first verified predicate.
   constrained proposer emit good typed args.
 
 ## Definition of Done
+
 - **Track 1:** blackbox `atlas mine` admits ≥1 real predicate (HOLDS+teeth-flip on the shipped path); a
   planted false structural claim is DROPPED; verify wired to the real evaluator; teeth mutant engine flips on
   a real mutant + is anti-vacuity tested; the four `buildMineAdmission` no-op legs replaced, each mutation-
@@ -89,9 +93,10 @@ producers). These are follow-on, not blockers for a first verified predicate.
 - Each WP cold-reviewed; no ratified invariant self-amended.
 
 ## What the owner ratifies
+
 1. **Track 2 only:** the KNOW-16 `Check`-type amendment — an additive `{kind:'ast-body'}` leg + `cv` bump.
    (Track 1 fills stubs behind frozen interfaces and needs no ratification.)
-Nothing merges on a ratified surface until owner-ratified and `gate` green.
+   Nothing merges on a ratified surface until owner-ratified and `gate` green.
 
 ## §Review findings (cold review 2026-08-11 — billy T0, lucy conformance) + the CORRECTED design
 
@@ -112,7 +117,7 @@ What is WRONG and must be corrected:
 - **T0 (billy) — teeth proves byte-SENSITIVITY, not claim-ENCODING (the ADR-0016 F1 residual, still open).**
   With site-only synth, the only constructible check is a `subtree-hash` fingerprint that flips on ANY byte
   change ⇒ `teeth()` always true ⇒ `DROP_VACUOUS` never fires ⇒ a content-free check passes the "truth" gate.
-  For the body class, an over-broad query ("body has *a* call" vs "calls `g`") HOLDS + flips while testing a
+  For the body class, an over-broad query ("body has _a_ call" vs "calls `g`") HOLDS + flips while testing a
   WEAKER fact than the claim. **Fix: SPECIFICITY teeth — a mutant that changes the NAMED ENTITY but not the
   surrounding bytes (`cfg.window`→`cfg.other`) MUST flip; a pure fingerprint that survives entity-swap is
   vacuous ⇒ DROP.** And the closed vocabulary MUST exclude pure `subtree-hash` fingerprints as admissible
@@ -127,6 +132,7 @@ What is WRONG and must be corrected:
   `LIKELY_INVARIANT` machine-checked claim for the first time — acknowledge it even though no type changes.
 
 ### The corrected design (one amendment, correctly scoped — for a v2/ADR-0019)
+
 ONE owner-ratified amendment, not two tracks: **(a)** widen `PredicateSeed`/`PredicateProposal` with a typed
 `{op, unit, args}` field + widen `PredicateApi.synthesize` to receive it (GEN-12 surface); **(b)** the harness
 synthesizes the `Check` FROM the typed args (zero-model) AND RENDERS the human-facing claim FROM `op(args)` —

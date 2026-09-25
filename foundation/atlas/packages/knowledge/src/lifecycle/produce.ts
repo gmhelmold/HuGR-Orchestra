@@ -17,7 +17,7 @@
 // SCOPE (card exclusions): NOT the wave-close write DRIVER on the tool side (WP-5.17.TOOLS, consumes this);
 // NOT ratification routing (WP-5.15.KNOW); NOT the write-decision route (WP-5.13-a.KNOW).
 
-import type { Candidate, GroundedFact } from '../types.js';
+import type { Candidate, GroundedFact } from "../types.js"
 
 // ── frozen ProduceApi surface, co-located here (was ref/produce.ts) ───────────────────────────────────
 
@@ -25,19 +25,19 @@ import type { Candidate, GroundedFact } from '../types.js';
  * The three — and ONLY three — production moments (KNOW-13, atlas-knowledge:63). Facts produced outside
  * these (a repo-wide sweep) MUST yield 0 facts (method-tags-knw:106). The list is closed.
  */
-export type ProductionMoment = 'init-skeleton' | 'enrich-by-blast-radius' | 'wave-close-write';
+export type ProductionMoment = "init-skeleton" | "enrich-by-blast-radius" | "wave-close-write"
 
 export interface ProduceApi {
   /** Moment-gated producer (KNOW-13): a production event is ACCEPTED only if tagged one of the three
    *  `ProductionMoment`s; a repo-wide sweep produces 0 facts. Pure + total. The production event carries
    *  the proposed `Candidate` facts; the accepted-facts return is the produced `GroundedFact`s
    *  (a sweep / off-moment event ⇒ `[]`). */
-  produce(moment: ProductionMoment, event: readonly Candidate[]): readonly GroundedFact[];
+  produce(moment: ProductionMoment, event: readonly Candidate[]): readonly GroundedFact[]
 
   /** Seal probe (KNOW-13): a sealing wave that neither fed the Atlas (`absorb`) nor emitted a grounded
    *  why-not records a VIOLATION. `violation:true` on a bare seal. Pure + total. The wave/seal input is
    *  not frozen → `unknown`; `violation` is the reference-implied leg. */
-  sealProbe(seal: unknown): { readonly violation: boolean };
+  sealProbe(seal: unknown): { readonly violation: boolean }
 }
 
 /**
@@ -46,23 +46,23 @@ export interface ProduceApi {
  * spec revision, not a code change.
  */
 const PRODUCTION_MOMENTS: ReadonlySet<ProductionMoment> = new Set<ProductionMoment>([
-  'init-skeleton',
-  'enrich-by-blast-radius',
-  'wave-close-write',
-]);
+  "init-skeleton",
+  "enrich-by-blast-radius",
+  "wave-close-write",
+])
 
 /**
  * The injected DOWNSTREAM ratification transform (OWNER-DEFINE — WP-5.13-a/WP-5.15). Mints a `GroundedFact`
  * from an admitted `Candidate`. This module NEVER defines the transform body; it is consumed, build-ahead.
  */
-export type Mint = (candidate: Candidate) => GroundedFact;
+export type Mint = (candidate: Candidate) => GroundedFact
 
 /**
  * The injected reader of ONE leg of the (SIG-TBD, unfrozen) sealing wave — did the wave feed the Atlas
  * (`absorb`) / carry a grounded why-not? The seal SHAPE is not frozen (ProduceApi), so each leg is read
  * upstream/downstream and consumed here — never invented.
  */
-export type SealLeg = (seal: unknown) => boolean;
+export type SealLeg = (seal: unknown) => boolean
 
 /**
  * Bind the moment-gated producer + fed-or-why-not seal probe — implements the FROZEN `ProduceApi`.
@@ -75,12 +75,12 @@ export type SealLeg = (seal: unknown) => boolean;
 export function bindProduce(mint: Mint, absorbed: SealLeg, hasWhyNot: SealLeg): ProduceApi {
   return {
     produce(moment: ProductionMoment, event: readonly Candidate[]): readonly GroundedFact[] {
-      if (!PRODUCTION_MOMENTS.has(moment)) return []; // off-moment (sweep) ⇒ 0 facts (KNOW-13a)
-      return event.map(mint);
+      if (!PRODUCTION_MOMENTS.has(moment)) return [] // off-moment (sweep) ⇒ 0 facts (KNOW-13a)
+      return event.map(mint)
     },
     sealProbe(seal: unknown): { readonly violation: boolean } {
-      const fedOrWhyNot = absorbed(seal) || hasWhyNot(seal); // the owned fed-or-why-not disjunction
-      return { violation: !fedOrWhyNot }; // bare seal (neither leg) ⇒ violation (KNOW-13b)
+      const fedOrWhyNot = absorbed(seal) || hasWhyNot(seal) // the owned fed-or-why-not disjunction
+      return { violation: !fedOrWhyNot } // bare seal (neither leg) ⇒ violation (KNOW-13b)
     },
-  };
+  }
 }

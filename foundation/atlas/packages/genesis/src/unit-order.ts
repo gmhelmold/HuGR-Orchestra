@@ -9,25 +9,25 @@
 // which is why `cmp`, `filePartOf` and `isUnitSite` live here and are re-exported from `seeds.ts` for the
 // callers that already import them from there.
 
-import { nodeHashOfPath, unescapeKeyComponent } from '@atlas/index';
-import type { IndexNode } from '@atlas/index';
-import type { StructRef } from '@atlas/contracts';
+import { nodeHashOfPath, unescapeKeyComponent } from "@atlas/index"
+import type { IndexNode } from "@atlas/index"
+import type { StructRef } from "@atlas/contracts"
 
 /** The ONE string order used by every sort in this package — here and in `seeds.ts`, which re-exports it.
  *  Sorted pairs + first-wins makes each map built from it a function of the SET of nodes, never of the walk
  *  order (GEN-1 byte-identity). */
-export const cmp = (a: string, b: string): number => (a < b ? -1 : a > b ? 1 : 0);
+export const cmp = (a: string, b: string): number => (a < b ? -1 : a > b ? 1 : 0)
 
 /** The FILE portion of a `StructRef.qualifiedPath` — the prefix up to the FIRST `::` (contracts/struct.ts
  *  states exactly this rule, and `adapter-io/src/prompt.ts` `filePathOf` applies it on the read side). A
  *  bare path is its own file part. */
 export const filePartOf = (qualifiedPath: string): string => {
-  const at = qualifiedPath.indexOf('::');
-  return at === -1 ? qualifiedPath : qualifiedPath.slice(0, at);
-};
+  const at = qualifiedPath.indexOf("::")
+  return at === -1 ? qualifiedPath : qualifiedPath.slice(0, at)
+}
 
 /** Whether a site addresses a SUB-FILE unit (`file::item[::block]`) rather than a whole file. */
-export const isUnitSite = (qualifiedPath: string): boolean => qualifiedPath.includes('::');
+export const isUnitSite = (qualifiedPath: string): boolean => qualifiedPath.includes("::")
 
 /**
  * The two NON-HASH ordering priors for ONE sub-file unit (#182). Both are PRIORS and neither is a measured
@@ -41,13 +41,13 @@ export const isUnitSite = (qualifiedPath: string): boolean => qualifiedPath.incl
  * this card, so the fact travels beside the tree instead of on it.
  */
 export interface UnitPrior {
-  readonly exported: boolean; // the declaration was written under an `export` / `export default` wrapper
-  readonly bytes: number; //    UTF-8 byte length of the unit's own slice
+  readonly exported: boolean // the declaration was written under an `export` / `export default` wrapper
+  readonly bytes: number //    UTF-8 byte length of the unit's own slice
 }
 
 /** Look one unit's prior up by its `file::item[::block]` address. `undefined` means UNKNOWN — never
  *  "zero as a fact" — and the comparator degrades to address order, which is stated, not hidden. */
-export type UnitPriorSource = (qualifiedPath: string) => UnitPrior | undefined;
+export type UnitPriorSource = (qualifiedPath: string) => UnitPrior | undefined
 
 // ── #182 — the SUB-FILE seeds, and the PRIOR that decides which of them a budget buys ────────────────
 // `foldAstUnits` already parses, keys and Merkle-hashes every item/block on the production path (measured
@@ -57,11 +57,11 @@ export type UnitPriorSource = (qualifiedPath: string) => UnitPrior | undefined;
 /** One sub-file unit, as the frontier sees it in the SPATIAL axis: its address, its grounding leg, and the
  *  two NON-HASH priors the injected `UnitPriorSource` supplies for it (#182). */
 export interface UnitNode {
-  readonly kind: 'symbol' | 'block';
-  readonly qualifiedPath: string;
-  readonly subtreeHash: string;
-  readonly exported: boolean;
-  readonly bytes: number;
+  readonly kind: "symbol" | "block"
+  readonly qualifiedPath: string
+  readonly subtreeHash: string
+  readonly exported: boolean
+  readonly bytes: number
 }
 
 /**
@@ -80,35 +80,35 @@ export function unitsOfAxis(
   root: IndexNode,
   prior: UnitPriorSource | undefined,
 ): {
-  readonly byPath: ReadonlyMap<string, UnitNode>;
-  readonly byFile: ReadonlyMap<string, readonly UnitNode[]>;
+  readonly byPath: ReadonlyMap<string, UnitNode>
+  readonly byFile: ReadonlyMap<string, readonly UnitNode[]>
 } {
-  const byPath = new Map<string, UnitNode>();
-  const byFile = new Map<string, UnitNode[]>();
+  const byPath = new Map<string, UnitNode>()
+  const byFile = new Map<string, UnitNode[]>()
   const collect = (n: IndexNode): void => {
-    const at = n.key.indexOf('::');
+    const at = n.key.indexOf("::")
     if (at !== -1) {
-      const file = n.key.slice(0, at).split('/').map(unescapeKeyComponent).join('/');
-      const tail = n.key.slice(at); // leading '::' included
-      const qualifiedPath = `${file}${tail}`;
-      const p = prior?.(qualifiedPath);
+      const file = n.key.slice(0, at).split("/").map(unescapeKeyComponent).join("/")
+      const tail = n.key.slice(at) // leading '::' included
+      const qualifiedPath = `${file}${tail}`
+      const p = prior?.(qualifiedPath)
       const unit: UnitNode = {
-        kind: tail.split('::').length - 1 === 1 ? 'symbol' : 'block',
+        kind: tail.split("::").length - 1 === 1 ? "symbol" : "block",
         qualifiedPath,
         subtreeHash: n.subtreeHash,
         exported: p?.exported ?? false, // NO supplier / unknown unit ⇒ not claimed as surface
         bytes: p?.bytes ?? 0, //          NO supplier / unknown unit ⇒ the weakest possible prior
-      };
-      if (!byPath.has(qualifiedPath)) byPath.set(qualifiedPath, unit);
-      const group = byFile.get(file);
-      if (group) group.push(unit);
-      else byFile.set(file, [unit]);
+      }
+      if (!byPath.has(qualifiedPath)) byPath.set(qualifiedPath, unit)
+      const group = byFile.get(file)
+      if (group) group.push(unit)
+      else byFile.set(file, [unit])
     }
-    n.children.forEach(collect);
-  };
-  collect(root);
-  for (const group of byFile.values()) group.sort(byUnitPrior);
-  return { byPath, byFile };
+    n.children.forEach(collect)
+  }
+  collect(root)
+  for (const group of byFile.values()) group.sort(byUnitPrior)
+  return { byPath, byFile }
 }
 
 /**
@@ -145,7 +145,7 @@ function byUnitPrior(a: UnitNode, b: UnitNode): number {
     b.bytes - a.bytes ||
     cmp(a.qualifiedPath, b.qualifiedPath) ||
     cmp(a.subtreeHash, b.subtreeHash)
-  );
+  )
 }
 
 // ── #182 — the TOTAL ORDER `rank` breaks PPR ties by ─────────────────────────────────────────────────
@@ -154,12 +154,12 @@ function byUnitPrior(a: UnitNode, b: UnitNode): number {
  *  strict REFINEMENT of the shipped order rather than a replacement: for two FILE sites it reduces to
  *  `cmp(subtreeHash)` exactly, so a file-only frontier ranks byte-identically to master. */
 export interface SiteOrderKey {
-  readonly group: string; //     the file seed's subtreeHash — the shipped file-vs-file tie-break, verbatim
-  readonly sub: boolean; //      a file sorts before its own units
-  readonly exported: boolean; // prior 1 (surface)
-  readonly bytes: number; //     prior 2 (weak, mechanical)
-  readonly path: string; //      total among the units of one file
-  readonly hash: string; //      LAST resort only — reaching it means every prior above discriminated nothing
+  readonly group: string //     the file seed's subtreeHash — the shipped file-vs-file tie-break, verbatim
+  readonly sub: boolean //      a file sorts before its own units
+  readonly exported: boolean // prior 1 (surface)
+  readonly bytes: number //     prior 2 (weak, mechanical)
+  readonly path: string //      total among the units of one file
+  readonly hash: string //      LAST resort only — reaching it means every prior above discriminated nothing
 }
 
 /** Order two ranked sites once their PPR scores are equal. Pure, total, and INDEPENDENT OF THE ORDER THE
@@ -173,5 +173,5 @@ export function compareSiteOrder(a: SiteOrderKey, b: SiteOrderKey): number {
     b.bytes - a.bytes ||
     cmp(a.path, b.path) ||
     cmp(a.hash, b.hash)
-  );
+  )
 }

@@ -6,8 +6,8 @@
 ## Purpose
 
 The index is the Atlas's **addressing subsystem** — the hard part. A **content-addressed store (CAS)** where
-*every* object is keyed by its BLAKE3 hash, plus **several hierarchies ("axes")** over that store — each a
-Merkle rollup — doing two jobs at once: **drift detection** and **discovery**. It is *not* one tree: the same
+_every_ object is keyed by its BLAKE3 hash, plus **several hierarchies ("axes")** over that store — each a
+Merkle rollup — doing two jobs at once: **drift detection** and **discovery**. It is _not_ one tree: the same
 object is reachable by structure, territory, or dependency, each axis rolling up independently. Retrieval is
 deterministic — **no embeddings, no RAG, ever**.
 
@@ -56,7 +56,7 @@ An object is cross-indexed on every applicable axis but stored **once** in the C
   match arm, a closure) — the finest anchor a `StructRef` can point at.
 - **Derived from:** the file tree + an AST parse; each unit's `subtreeHash` is taken over its **raw source
   slice** (comments and whitespace are NOT stripped — there is no normalizer).
-  `$0`-LLM, deterministic, reconstructable.   <!-- AMENDED 2026-08-02 (HONESTY-TAPROOT) -->
+  `$0`-LLM, deterministic, reconstructable. <!-- AMENDED 2026-08-02 (HONESTY-TAPROOT) -->
 - **Hangs off it — Knowledge:** `GroundedFact`s anchored by `StructRef` at exactly this node — the primary
   grounding surface ("this fn MUST hold invariant X"). **Memory:** a seat's task/pr memory cross-indexed by
   the structural units it touched ("what did I learn last time I was in `cas.ts`").
@@ -71,7 +71,7 @@ An object is cross-indexed on every applicable axis but stored **once** in the C
 - **Levels:** `project → territory (owner + tier T0/T1/T2) → region`. A **territory** is the atomic unit of
   governance — `{ owner: seat, tier: T0|T1|T2, members: StructRef[] }` — and MAY span files/crates. A
   **region** is a named coherent sub-zone inside a big territory (`cas`, `grounding` in the atlas territory).
-- **`territories` manifest (normative schema).** Authored *or generated* (see below), hashed like any object:
+- **`territories` manifest (normative schema).** Authored _or generated_ (see below), hashed like any object:
 
   ```
   Territory = { name, owner: seat, tier: 'T0'|'T1'|'T2', globs: Glob[] }
@@ -79,8 +79,9 @@ An object is cross-indexed on every applicable axis but stored **once** in the C
   ```
 
   Globs **MAY overlap**. Ownership is a partition **only after overlap resolution**: each structural unit
-  is assigned to exactly one territory by the deterministic rule below, so the *result* is a partition
+  is assigned to exactly one territory by the deterministic rule below, so the _result_ is a partition
   even though the globs are not.
+
 - **Ownership is GENERATED, not hand-authored (anti-CODEOWNERS-rot).** A hand-authored manifest rots like a
   hand-authored CODEOWNERS — it drifts the moment code moves. The manifest is a richer CODEOWNERS, and the
   design already holds the signals to compile it: the **structural graph** + **git-blame authorship**. So
@@ -90,7 +91,7 @@ An object is cross-indexed on every applicable axis but stored **once** in the C
 - **Overlap resolution (deterministic).** For a path matched by ≥2 globs: (1) **longest path-match wins**
   (most specific glob — longest literal prefix / most matched segments); (2) **manifest declaration order**
   is the sole tiebreak (earliest wins). No other signal; byte-identical across rebuilds.
-- **Uncovered paths.** A path matched by **no** glob is flagged `uncovered` — a *verdict*, never a silent
+- **Uncovered paths.** A path matched by **no** glob is flagged `uncovered` — a _verdict_, never a silent
   pass. An `uncovered` path **T0-adjacent** (sharing a region/parent with a `T0` member) **defaults to deny**
   until an owner assigns it. Reconciliation against the real spatial tree is data, not a model call.
 - **Hangs off it — Knowledge:** tier-scoped, symbol-free rules ("T0: no unbounded alloc"); T0 = human-only
@@ -107,7 +108,7 @@ An object is cross-indexed on every applicable axis but stored **once** in the C
   closures — **forward** (what a node needs) and **reverse** / transpose (what needs it = **blast
   radius**). "Rollup" here is reachability, not a parent chain.
 - **Derived from:** a per-language **SCIP indexer** doing semantic name resolution — tree-sitter alone is a
-  *parser*, not a name-resolver, so it cannot resolve re-exports, barrels, dynamic dispatch, or DI wiring.
+  _parser_, not a name-resolver, so it cannot resolve re-exports, barrels, dynamic dispatch, or DI wiring.
   The backend is **SCIP-primary**: each language ships a **separate installed, version-pinned SCIP binary**
   (`scip-java` / `scip-typescript` / `scip-python` / `rust-analyzer` / `scip-clang` / …). `stack-graphs` is
   **archived (2025-09)** and **LSIF is legacy/deprecated in favor of SCIP** — prior art, **not** backend
@@ -117,7 +118,7 @@ An object is cross-indexed on every applicable axis but stored **once** in the C
   cannot resolve (dynamic dispatch, reflection, runtime wiring), MUST be recorded `unresolved` (INDEX-13).
 - **Hangs off it — Knowledge:** contract/interface facts propagating along edges — change a signature and
   every dependent's grounded assumption is suspect. **Memory:** "last time this API changed, N callers broke."
-- **Rolls up:** a node's `rState` folds in the `rState` of its forward closure — so if a *dependency*
+- **Rolls up:** a node's `rState` folds in the `rState` of its forward closure — so if a _dependency_
   drifted, YOUR `rState` flips even though your own bytes did not. This is the axis that catches
   **transitive** drift. The fold is **bounded, never O(blast-radius)** (INDEX-12): a cheap drift dirty-bit
   propagates eagerly across the reverse closure, the `rState` hash is recomputed lazily / on-read, eager
@@ -136,14 +137,14 @@ An object is cross-indexed on every applicable axis but stored **once** in the C
   correlational**, never a static edge — backstopping the worst-covered nodes (DI / reflection / event-bus
   hubs; the convention-coupled blind spot). Reuses a signal already in the design; no model call.
 - **Honest caveat.** Until the `functional` axis exists, the `dependency` axis **under-approximates runtime
-  coupling** (dynamic-dispatch / event edges invisible statically). The ratio + T0 gate make it *measured
-  and enforced* and the `coChanged` union *backstopped* — but that band is correlational, so a guarantee is
+  coupling** (dynamic-dispatch / event edges invisible statically). The ratio + T0 gate make it _measured
+  and enforced_ and the `coChanged` union _backstopped_ — but that band is correlational, so a guarantee is
   only as strong as the static graph plus a labeled band.
 
 ### Shared rollup mechanics
 
-- **Dual rollup (v1 graph-v1 §3).** `rId` captures *shape* (node added / removed / moved); `rState` captures
-  *state* (a status flip or drift). A `Delta` says which changed and where — re-checks are **bounded to the
+- **Dual rollup (v1 graph-v1 §3).** `rId` captures _shape_ (node added / removed / moved); `rState` captures
+  _state_ (a status flip or drift). A `Delta` says which changed and where — re-checks are **bounded to the
   changed buckets**, never the whole store. A change re-hashes only the affected leaf→root path **on the
   relevant axis**; unaffected subtrees keep both hashes, so facts anchored there stay FRESH. **The
   dependency axis is the exception to this paragraph** — see INDEX-17.
@@ -162,7 +163,7 @@ An object is cross-indexed on every applicable axis but stored **once** in the C
   per-language **SCIP indexer** (SCIP-primary; a separate installed, version-pinned binary per language),
   `$0`-LLM. It MUST NOT depend on a model, and MUST NOT rely on `stack-graphs` (archived 2025-09) or LSIF
   (legacy/deprecated in favor of SCIP) as a backend. The graph MUST be reconstructable **given that indexer**
-  — *not* "trivially at any time": edges it cannot statically resolve, **and every cross-language edge
+  — _not_ "trivially at any time": edges it cannot statically resolve, **and every cross-language edge
   (unseeable by any single-language indexer),** MUST be **declared `unresolved`, never guessed** (INDEX-13).
 - **INDEX-4 Path resolution & roll-up.** Resolving a `path` MUST return the covering node and roll up the
   hierarchy: a file query MUST also surface its module's and crate's invariants.
@@ -253,8 +254,8 @@ put(object): Hash                                // content-address ANY object (
     longest-path-match then declaration order; a path covered by no glob is flagged `uncovered` and, when
     T0-adjacent, defaults to deny; rebuilding twice yields identical assignment.
 11. **INDEX-15** — With an empty/partial manifest, territory `owner` is generated from the structural graph
-    + git-blame and reconciled deterministically ($0-LLM); an explicit manifest `owner` override wins over
-    the generated one; `tier` is never generated (stays human-ratified).
+    - git-blame and reconciled deterministically ($0-LLM); an explicit manifest `owner` override wins over
+      the generated one; `tier` is never generated (stays human-ratified).
 12. **INDEX-16** — A T0 territory whose `unresolved/total` crosses 15% fails the standing coverage gate at
     build time (not deferred to a later axis); the ratio is readable on the territory rollup.
 13. **INDEX-17** — Editing a file's content changes its `spatial`-axis `subtreeHash` but leaves its

@@ -20,8 +20,8 @@
 // interface-level `rState` are computed UPSTREAM (the kernel encoder seam / INDEX-12); this module only
 // COMPARES already-derived branded values (own hash + closure INTERFACE), never a callee body (INV).
 
-import type { Freshness, Hash, SubtreeHash } from '@atlas/contracts';
-import type { InterfaceRState } from './types.js';
+import type { Freshness, Hash, SubtreeHash } from "@atlas/contracts"
+import type { InterfaceRState } from "./types.js"
 
 /**
  * One member of a fact's forward closure (a dependency-axis callee), as seen at a single snapshot.
@@ -34,9 +34,9 @@ import type { InterfaceRState } from './types.js';
  *                          leave callers FRESH (GROUND-11b/11d).
  */
 export interface ClosureMember {
-  readonly node: Hash;
-  readonly interfaceRState: InterfaceRState;
-  readonly bodySubtreeHash: SubtreeHash;
+  readonly node: Hash
+  readonly interfaceRState: InterfaceRState
+  readonly bodySubtreeHash: SubtreeHash
 }
 
 /**
@@ -46,13 +46,13 @@ export interface ClosureMember {
  *   - `closure`          — the fact's forward closure (GROUND-11b), interface-level only.
  */
 export interface FreshnessSnapshot {
-  readonly ownSubtreeHashes: readonly SubtreeHash[];
-  readonly closure: readonly ClosureMember[];
+  readonly ownSubtreeHashes: readonly SubtreeHash[]
+  readonly closure: readonly ClosureMember[]
 }
 
 /** Ordered equality over the fact's own grounding-set subtreeHashes (GROUND-11a). */
 function ownUnchanged(pinned: readonly SubtreeHash[], current: readonly SubtreeHash[]): boolean {
-  return pinned.length === current.length && pinned.every((h, i) => h === current[i]);
+  return pinned.length === current.length && pinned.every((h, i) => h === current[i])
 }
 
 /** The multiset key for one closure member (GROUND-11b): `node` + `interfaceRState`, joined by a NUL
@@ -60,7 +60,7 @@ function ownUnchanged(pinned: readonly SubtreeHash[], current: readonly SubtreeH
  *  `bodySubtreeHash` is DELIBERATELY excluded from the key — a body-only refactor MUST NOT drift a
  *  caller. */
 function memberKey(m: ClosureMember): string {
-  return `${m.node}\u0000${m.interfaceRState}`;
+  return `${m.node}\u0000${m.interfaceRState}`
 }
 
 /**
@@ -74,23 +74,20 @@ function memberKey(m: ClosureMember): string {
  * a caller. A dependency appearing, vanishing, or being replaced (even under a repeated `node`) is
  * itself structural drift.
  */
-function closureInterfaceUnchanged(
-  pinned: readonly ClosureMember[],
-  current: readonly ClosureMember[],
-): boolean {
-  if (pinned.length !== current.length) return false;
-  const remaining = new Map<string, number>();
+function closureInterfaceUnchanged(pinned: readonly ClosureMember[], current: readonly ClosureMember[]): boolean {
+  if (pinned.length !== current.length) return false
+  const remaining = new Map<string, number>()
   for (const member of current) {
-    const key = memberKey(member);
-    remaining.set(key, (remaining.get(key) ?? 0) + 1);
+    const key = memberKey(member)
+    remaining.set(key, (remaining.get(key) ?? 0) + 1)
   }
   for (const member of pinned) {
-    const key = memberKey(member);
-    const count = remaining.get(key) ?? 0;
-    if (count === 0) return false;
-    remaining.set(key, count - 1);
+    const key = memberKey(member)
+    const count = remaining.get(key) ?? 0
+    if (count === 0) return false
+    remaining.set(key, count - 1)
   }
-  return true;
+  return true
 }
 
 /**
@@ -103,8 +100,8 @@ function closureInterfaceUnchanged(
 export function freshness(pinned: FreshnessSnapshot, current: FreshnessSnapshot): Freshness {
   const structurallyUnchanged =
     ownUnchanged(pinned.ownSubtreeHashes, current.ownSubtreeHashes) &&
-    closureInterfaceUnchanged(pinned.closure, current.closure);
-  return structurallyUnchanged ? 'FRESH' : 'DRIFTED';
+    closureInterfaceUnchanged(pinned.closure, current.closure)
+  return structurallyUnchanged ? "FRESH" : "DRIFTED"
 }
 
 /**
@@ -114,11 +111,11 @@ export function freshness(pinned: FreshnessSnapshot, current: FreshnessSnapshot)
  */
 export function describeFreshness(verdict: Freshness): string {
   switch (verdict) {
-    case 'FRESH':
-      return "the cited unit and its dependencies' interfaces are structurally unchanged";
-    case 'DRIFTED':
-      return "the cited unit or a dependency's interface changed structurally";
-    case 'STALE':
-      return 'an advisory fact’s grounding drifted structurally — served with flag, non-blocking';
+    case "FRESH":
+      return "the cited unit and its dependencies' interfaces are structurally unchanged"
+    case "DRIFTED":
+      return "the cited unit or a dependency's interface changed structurally"
+    case "STALE":
+      return "an advisory fact’s grounding drifted structurally — served with flag, non-blocking"
   }
 }

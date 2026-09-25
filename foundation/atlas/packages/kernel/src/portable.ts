@@ -4,11 +4,11 @@
 // replays 1:1 into a FRESH store — no proprietary encoding, no host dependency (A-8). INVARIANT: keys
 // emitted sorted (deterministic); `import` re-mints keys via `asHash` and FAILS CLOSED on a malformed bundle.
 
-import type { Hash } from '@atlas/contracts';
-import type { Cas, CasObject } from './types.js';
-import { asHash } from './brand.js';
-import { id } from './canonical.js';
-import { eventId } from './log.js';
+import type { Hash } from "@atlas/contracts"
+import type { Cas, CasObject } from "./types.js"
+import { asHash } from "./brand.js"
+import { id } from "./canonical.js"
+import { eventId } from "./log.js"
 
 /**
  * Portability / no lock-in (frozen, KERNEL-6): the CAS exports to open JSON that replays 1:1 into a fresh
@@ -16,20 +16,20 @@ import { eventId } from './log.js';
  */
 export interface PortableApi {
   /** Open-JSON CAS dump (A-8). (atlas-kernel:104) */
-  export(): string;
+  export(): string
   /** Replays 1:1 into a fresh store. (atlas-kernel:105) */
-  import(json: string): Cas;
+  import(json: string): Cas
 }
 
 /** OKF envelope tag + version — the ONLY literals the serializer adds (both host-independent). */
-const OKF_FORMAT = 'atlas-okf';
-const OKF_VERSION = 1;
+const OKF_FORMAT = "atlas-okf"
+const OKF_VERSION = 1
 
 /** The on-the-wire shape of an OKF dump: a self-describing open-JSON envelope over the CAS entries. */
 interface OkfBundle {
-  readonly format: string;
-  readonly version: number;
-  readonly objects: Record<string, CasObject>;
+  readonly format: string
+  readonly version: number
+  readonly objects: Record<string, CasObject>
 }
 
 /**
@@ -38,12 +38,12 @@ interface OkfBundle {
  * carried verbatim — nothing is dropped, no host path / external ref / proprietary encoding is introduced.
  */
 export function exportCas(cas: Cas): string {
-  const objects: Record<string, CasObject> = {};
+  const objects: Record<string, CasObject> = {}
   for (const key of [...cas.keys()].sort()) {
-    objects[key] = cas.get(key) as CasObject;
+    objects[key] = cas.get(key) as CasObject
   }
-  const bundle: OkfBundle = { format: OKF_FORMAT, version: OKF_VERSION, objects };
-  return JSON.stringify(bundle);
+  const bundle: OkfBundle = { format: OKF_FORMAT, version: OKF_VERSION, objects }
+  return JSON.stringify(bundle)
 }
 
 /**
@@ -65,20 +65,20 @@ export function exportCas(cas: Cas): string {
  * gate files and two packages outside this one. That is a ratified-amendment decision, not a local one; it
  * is escalated, not absorbed here.
  */
-const HASH_SHAPE = /^[0-9a-f]{64}$/;
+const HASH_SHAPE = /^[0-9a-f]{64}$/
 
 /** Structural predicate for an EventLog entry (mirrors `isEvent` in log.ts, which is module-private). */
 function isEventEntry(v: unknown): v is { id: string; seq: number } {
-  if (v === null || typeof v !== 'object') return false;
-  const e = v as Record<string, unknown>;
+  if (v === null || typeof v !== "object") return false
+  const e = v as Record<string, unknown>
   return (
-    typeof e['id'] === 'string' &&
-    typeof e['seq'] === 'number' &&
-    Number.isFinite(e['seq']) &&
-    typeof e['contentHash'] === 'string' &&
-    typeof e['fresh'] === 'boolean' &&
-    Array.isArray(e['supersedes'])
-  );
+    typeof e["id"] === "string" &&
+    typeof e["seq"] === "number" &&
+    Number.isFinite(e["seq"]) &&
+    typeof e["contentHash"] === "string" &&
+    typeof e["fresh"] === "boolean" &&
+    Array.isArray(e["supersedes"])
+  )
 }
 
 /**
@@ -102,10 +102,10 @@ function isEventEntry(v: unknown): v is { id: string; seq: number } {
  */
 function addresses(key: string, value: unknown): boolean {
   try {
-    if (id(value as CasObject) === key) return true;
-    return isEventEntry(value) && value.id === key && eventId(value as never) === key;
+    if (id(value as CasObject) === key) return true
+    return isEventEntry(value) && value.id === key && eventId(value as never) === key
   } catch {
-    return false; // uncanonicalizable body ⇒ it addresses nothing ⇒ reject
+    return false // uncanonicalizable body ⇒ it addresses nothing ⇒ reject
   }
 }
 
@@ -140,43 +140,43 @@ function addresses(key: string, value: unknown): boolean {
  * is a bundle-level door that already throws on every other malformed input, so it throws here too.)
  */
 export function importCas(json: string): Cas {
-  let parsed: unknown;
+  let parsed: unknown
   try {
-    parsed = JSON.parse(json);
+    parsed = JSON.parse(json)
   } catch {
-    throw new Error('malformed OKF bundle: not valid JSON');
+    throw new Error("malformed OKF bundle: not valid JSON")
   }
   if (!isOkfBundle(parsed)) {
-    throw new Error('malformed OKF bundle: missing or invalid OKF envelope');
+    throw new Error("malformed OKF bundle: missing or invalid OKF envelope")
   }
-  const cas: Cas = new Map<Hash, CasObject>();
+  const cas: Cas = new Map<Hash, CasObject>()
   for (const key of Object.keys(parsed.objects)) {
-    const value = parsed.objects[key] as CasObject;
+    const value = parsed.objects[key] as CasObject
     // A key that PRESENTS as a content address MUST BE one. A non-hash-shaped key resolves no hash lookup,
     // so it cannot impersonate a stored fact; it is carried verbatim (see HASH_SHAPE for why, and for the
     // stricter reading that is escalated rather than taken here).
     if (HASH_SHAPE.test(key) && !addresses(key, value)) {
       throw new Error(
         `malformed OKF bundle: entry ${key} is not addressed by its content — the stored key is not the ` +
-          'digest of the stored value (tampered or corrupt dump)',
-      );
+          "digest of the stored value (tampered or corrupt dump)",
+      )
     }
-    cas.set(asHash(key), value);
+    cas.set(asHash(key), value)
   }
-  return cas;
+  return cas
 }
 
 /** Structural guard for the OKF envelope — the fail-closed predicate `import` gates on. */
 function isOkfBundle(v: unknown): v is OkfBundle {
-  if (typeof v !== 'object' || v === null) return false;
-  const b = v as Record<string, unknown>;
+  if (typeof v !== "object" || v === null) return false
+  const b = v as Record<string, unknown>
   return (
     b.format === OKF_FORMAT &&
-    typeof b.version === 'number' &&
-    typeof b.objects === 'object' &&
+    typeof b.version === "number" &&
+    typeof b.objects === "object" &&
     b.objects !== null &&
     !Array.isArray(b.objects)
-  );
+  )
 }
 
 /**
@@ -187,5 +187,5 @@ export function makePortable(cas: Cas): PortableApi {
   return {
     export: (): string => exportCas(cas),
     import: (json: string): Cas => importCas(json),
-  };
+  }
 }

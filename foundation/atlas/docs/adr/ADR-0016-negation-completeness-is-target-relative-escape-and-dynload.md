@@ -21,7 +21,7 @@ hole-free**. The door is sound by universal abstention — 0 recall. That is the
 (`spike-negation-a1.mjs`: admit=0, refute=2078, abstain=59900, all `scope-open`).
 
 The scope-blanket test is **too coarse**: a `import {readFile} from 'node:fs'` hole in S cannot possibly be a
-hidden reference to an atlas symbol X — `node:fs` does not define X. Blanketing on *any* hole throws away every
+hidden reference to an atlas symbol X — `node:fs` does not define X. Blanketing on _any_ hole throws away every
 negative to guard against holes that were never a channel to the target.
 
 ## The decision — the completeness test is a function of the TARGET X, not of the scope alone
@@ -54,7 +54,7 @@ for a module load with a non-literal specifier (implementation seam — lead's c
 
 **Why this is not a loosening of D3.** D3's law is "admit only a negative you can PROVE complete." This ADR does
 not admit any negative D3 would call a lie — it PROVES completeness by a tighter, sound argument (below) that
-happens to hold far more often than the scope-blanket proxy. The honesty law is unchanged; the *proof* got sharper.
+happens to hold far more often than the scope-blanket proxy. The honesty law is unchanged; the _proof_ got sharper.
 
 ## Soundness argument (proven against the code + measured, not asserted)
 
@@ -63,10 +63,10 @@ The claim: for a resolvable X, if `¬escape(X)` and S has no dynamic-module-load
 DROPPED. Three ways S could reach X without a counted `reverseCaller`, each closed:
 
 1. **A static reference to X that the index filed as a HOLE.** IMPOSSIBLE by construction.
-   `symbol-reverse.ts` (lines 85–96) classifies every reference occurrence into *exactly one* of: RESOLVED (its
+   `symbol-reverse.ts` (lines 85–96) classifies every reference occurrence into _exactly one_ of: RESOLVED (its
    symbol, or its `canonicalizeSymbol` src-form, is in `defs`) → bucketed as a caller; or UNRESOLVED → its doc
    becomes a hole source. `resolves(X) ≡ X ∈ defs`. So any reference to a resolvable X resolves to X and is a
-   counted caller — it is NEVER a hole. A hole is a reference to some *other*, undefined symbol; it cannot be a
+   counted caller — it is NEVER a hole. A hole is a reference to some _other_, undefined symbol; it cannot be a
    disguised reference to X. **Disjointness is code-proven, not assumed.**
 
 2. **X's VALUE escapes into shared state** (a global/registry/DI container/prototype) that a scope not naming X
@@ -94,7 +94,7 @@ DROPPED. Three ways S could reach X without a counted `reverseCaller`, each clos
 **The one glossed premise, surfaced and measured — canon completeness.** Point 1's disjointness assumes the
 index RESOLVES every static reference to a resolvable X (directly or via `canonicalizeSymbol`, #189). If a
 future SCIP form emitted a static reference to X under a symbol string that neither equals X nor canon-maps to
-it, that reference would be misfiled as a hole *about X*, and dropping `holeSources` would false-admit. Measured
+it, that reference would be misfiled as a hole _about X_, and dropping `holeSources` would false-admit. Measured
 on Atlas: the residual — a hole in a `src/` doc whose symbol is an `@atlas/*` GLOBAL top-level export that
 canon missed — is **~0** (the 65 raw candidates are all nested type-literal member navigations, e.g.
 `DepClaim#typeLiteral43:target`, which are runtime-erased type members, not value references; the broader
@@ -103,7 +103,7 @@ resolvable target). Canon is complete for the `scip-typescript` indexer. **This 
 boundary: it MUST be re-measured per indexer** — a non-TS indexer with a different symbol scheme could reopen it,
 so the gate carries a per-indexer canon-completeness check, and abstains for an indexer that has not passed it.
 
-*A second, direction-opposite canon risk (cold review):* `canonicalizeSymbol` (`build.ts:190-193`) could in
+_A second, direction-opposite canon risk (cold review):_ `canonicalizeSymbol` (`build.ts:190-193`) could in
 principle map a bundled/flattened `.d.ts` reference onto a WRONG-but-real src symbol X′≠X. Then a real caller of
 X is bucketed under X′, `reverseCallers(X)` misses it, and the gate false-admits "X uncalled." This is the same
 soundy boundary (canon correctness), not a new one — the per-indexer canon check MUST verify canon is
@@ -117,7 +117,7 @@ recomputes): **86.2 %** — 73.6 % of value targets are non-escaping (a conserva
 over-approximates) + 623 pure types (48 %, the always-sound path) — vs **0 %** shipped. The remaining ~26.5 % of values that escape abstain
 honestly (they would need a real points-to analysis, deferred). The `dynamic-reach` leg subtracts scopes with
 an opaque-dispatch construct — measured **0 of 14 (0 %)** on Atlas, so it costs no recall here; a
-reflection-heavy codebase pays more, correctly. M3 measures the *net* admit rate + the 0-false-admit property
+reflection-heavy codebase pays more, correctly. M3 measures the _net_ admit rate + the 0-false-admit property
 against the independent tsc reference oracle (INCLUDING the reproduced namespace-computed-access case) before
 this ships enabled.
 
@@ -144,6 +144,7 @@ tree-sitter, over **canonicalized** symbols) and `escape/dynamic-reach.ts` (door
 at both `createGovernedEmit` sites (`compose.ts`, `wire.ts`), both-or-neither. The cold review found five
 false-admit paths against the "any codebase" spec (none reachable on atlas today — TS-only, tracked src,
 scip-typescript, scopes under `packages/*/src`); all closed in one round:
+
 - **Indexer gate (ADR item 2, mechanized):** `buildTargetEscapes` builds ONLY when the SCIP `metadata.toolInfo.name`
   is `scip-typescript` (the scheme `canonicalizeSymbol` is proven on); any other indexer ⇒ `undefined` ⇒ blanket
   fallback. This is the per-indexer canon-completeness enablement, in code (not just prose).
@@ -239,11 +240,13 @@ node), authz made permissive so a gate-1 ADMIT surfaces as `emitted:true`. Re-ru
 `scip-typescript index`).
 
 **Headline (the soundness claim, SOTA — soundy generate-and-check):**
+
 - **0 FALSE-ADMITS over 8 622 admits — admit-precision 100.00 %.** Every negation the gate admitted is TRUE per
   the independent tsc oracle. This is the whole point of the gate; a single false-admit would break it.
 - 0 over-refute (every REFUTE corresponds to a real tsc reference).
 
 **Net-recall (the #99 win, 0 % floor → measured):**
+
 - SHIPPED (sound) recall: **37.4 %** (8 622 / 23 031 true scoped-negatives admitted) — vs the #99b blanket's
   ~0 %. Verdict split: admit 37.2 %, `scope-dynamic` 38.8 %, `escape-open` 23.5 %, refute 0.4 %.
 - `escape-open` 23.5 % ≈ the predicted ~26.5 % target-escape rate — the escape analysis behaves as designed.

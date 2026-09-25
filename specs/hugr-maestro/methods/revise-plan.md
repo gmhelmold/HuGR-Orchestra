@@ -70,20 +70,20 @@ atomically. Pass vN+1 to `assemble-context`.
 
 ## Skills
 
-| Skill | Stage | Output | Stop condition |
-|---|---|---|---|
+| Skill                  | Stage                        | Output                                          | Stop condition                                                            |
+| ---------------------- | ---------------------------- | ----------------------------------------------- | ------------------------------------------------------------------------- |
 | `frame-revision-delta` | identify bounded field delta | successor `PlanRevision` or `ClarificationNeed` | all delta fields source-labeled, or one material decision blocks proposal |
 
 ## Tools and Guards
 
-| Capability | Purpose | Boundary |
-|---|---|---|
-| `plan-revision-read` | read immutable parent revision | Maestro durable evidence read |
-| `change-record-read` | read stakeholder/validation change evidence | Maestro durable evidence read |
-| `scope-proposal-read` | read immutable catalog-backed successor scope | Maestro durable evidence read |
-| `plan-revision-write` | persist successor revision and diff | Maestro durable evidence write |
-| `revision-lineage-guard` | require parent/delta/provenance and invalidate old execution eligibility | before persistence |
-| `no-governed-task-before-approval` | deny Task/child Session without current approved revision identity | Session/Task boundary |
+| Capability                         | Purpose                                                                  | Boundary                       |
+| ---------------------------------- | ------------------------------------------------------------------------ | ------------------------------ |
+| `plan-revision-read`               | read immutable parent revision                                           | Maestro durable evidence read  |
+| `change-record-read`               | read stakeholder/validation change evidence                              | Maestro durable evidence read  |
+| `scope-proposal-read`              | read immutable catalog-backed successor scope                            | Maestro durable evidence read  |
+| `plan-revision-write`              | persist successor revision and diff                                      | Maestro durable evidence write |
+| `revision-lineage-guard`           | require parent/delta/provenance and invalidate old execution eligibility | before persistence             |
+| `no-governed-task-before-approval` | deny Task/child Session without current approved revision identity       | Session/Task boundary          |
 
 No live Atlas read/write, shell, product edit, external network, member tool, approval write, Task creation, or
 dispatch is granted.
@@ -103,20 +103,20 @@ selects one, never auto-merge.
 
 ## Refusal and Recovery
 
-| Condition | Result |
-|---|---|
-| Ambiguous material delta | `CLARIFY`; no successor/task |
-| Missing/mismatched parent, change, or ScopeProposal evidence | `HOLD`; require linked admission recovery |
-| Non-monotonic/altered lineage or approval transfer | `HOLD`; preserve audit evidence |
-| Concurrent successors | `HOLD`; stakeholder selects/reconciles explicitly |
-| Duplicate trigger | return stored successor/question |
+| Condition                                                    | Result                                            |
+| ------------------------------------------------------------ | ------------------------------------------------- |
+| Ambiguous material delta                                     | `CLARIFY`; no successor/task                      |
+| Missing/mismatched parent, change, or ScopeProposal evidence | `HOLD`; require linked admission recovery         |
+| Non-monotonic/altered lineage or approval transfer           | `HOLD`; preserve audit evidence                   |
+| Concurrent successors                                        | `HOLD`; stakeholder selects/reconciles explicitly |
+| Duplicate trigger                                            | return stored successor/question                  |
 
 ## Runtime Seams
 
-| System | Seam |
-|---|---|
+| System   | Seam                                                                                           |
+| -------- | ---------------------------------------------------------------------------------------------- |
 | OpenCode | immutable revision/diff/projection records; visible superseded state; Task/child-Session fence |
-| Atlas | no direct call/write; successor requires later assemble-context binding |
+| Atlas    | no direct call/write; successor requires later assemble-context binding                        |
 
 ## Acceptance
 

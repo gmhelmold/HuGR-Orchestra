@@ -43,7 +43,7 @@ export: 0 CAS object(s) dumped — located, not copied
 The bundle itself is one self-describing JSON document:
 
 ```json
-{"format":"atlas-okf","version":1,"objects":{}}
+{ "format": "atlas-okf", "version": 1, "objects": {} }
 ```
 
 For a repository whose store holds facts, `objects` carries **every** CAS object, keyed by its content
@@ -52,11 +52,11 @@ a projection — no tier filter, no freshness filter, nothing served that is not
 
 ## Exit codes
 
-| code | meaning |
-| --- | --- |
-| `0` | the bundle was written — including the honest empty bundle of an empty store |
-| `1` | a missing `<outDir>`, an unwritable output directory, or an unreadable store root |
-| `2` | a governance gate refused (the committed-store tripwire, applied at the entrypoint before this command) |
+| code | meaning                                                                                                 |
+| ---- | ------------------------------------------------------------------------------------------------------- |
+| `0`  | the bundle was written — including the honest empty bundle of an empty store                            |
+| `1`  | a missing `<outDir>`, an unwritable output directory, or an unreadable store root                       |
+| `2`  | a governance gate refused (the committed-store tripwire, applied at the entrypoint before this command) |
 
 ## What it refuses, and why
 
@@ -76,5 +76,5 @@ self-contained text). The receiver replays it with [`atlas import`](./import.md)
 
 - [`atlas import`](./import.md) — the 1:1 replay half: same OKF bundle, a fresh empty target, CAS bytes
   only, never the guarded projection.
-- [`atlas query`](./query.md) — the *served* projection of the same store, the thing you read rather than migrate.
+- [`atlas query`](./query.md) — the _served_ projection of the same store, the thing you read rather than migrate.
 - [`atlas doctor archive`](./doctor.md) — a read-only integrity audit over the same CAS root.

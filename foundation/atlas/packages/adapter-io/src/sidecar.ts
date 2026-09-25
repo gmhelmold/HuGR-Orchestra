@@ -56,18 +56,18 @@
 // loses the race would otherwise have their pre-gate decision applied to a projection that acquired a T0
 // incumbent in between.
 
-import { existsSync, readFileSync, readdirSync } from 'node:fs';
-import { join } from 'node:path';
-import type { CurrentNode, StoreProjection } from '@atlas/knowledge';
-import { abstainedFromWire } from './sidecar-abstained.js';
-import type { AbstainedWire } from './sidecar-abstained.js';
-import type { SidecarTrust } from './store-provenance.js';
-import { classifyIdentity } from './identity-schema.js';
-import type { IdentityVerdict } from './identity-schema.js';
+import { existsSync, readFileSync, readdirSync } from "node:fs"
+import { join } from "node:path"
+import type { CurrentNode, StoreProjection } from "@atlas/knowledge"
+import { abstainedFromWire } from "./sidecar-abstained.js"
+import type { AbstainedWire } from "./sidecar-abstained.js"
+import type { SidecarTrust } from "./store-provenance.js"
+import { classifyIdentity } from "./identity-schema.js"
+import type { IdentityVerdict } from "./identity-schema.js"
 
 /** The two mutable sidecars (ADR-0008): governed knowledge, and the explorer's CANDIDATE store. They share
  *  ONE implementation so their totality AND their atomicity cannot drift apart; they differ ONLY here. */
-export type SidecarBase = 'projection' | 'staging';
+export type SidecarBase = "projection" | "staging"
 
 /**
  * The durable wire shape: the `current` Map as entry-array, the `cas` Set as array — the single source of
@@ -81,21 +81,21 @@ export type SidecarBase = 'projection' | 'staging';
  * removed by hand, so the sequence stays monotone instead of restarting at 1 over live data.
  */
 export interface WireProjection {
-  readonly current: ReadonlyArray<readonly [string, CurrentNode]>;
-  readonly cas: readonly string[];
+  readonly current: ReadonlyArray<readonly [string, CurrentNode]>
+  readonly cas: readonly string[]
   /** ADR-0015 D3 / #99b — the durable honest-ABSTENTION ledger (`StoreProjection.abstained`), Map as an
    *  entry-array exactly like `current`, keyed by `negationKey`. The N2 door's round-trip obligation (the
    *  frozen seam header names it): without it an abstention does not survive restart and #202 stays open.
    *  ADDITIVE — absent ⇒ no abstentions, a pre-#99b sidecar round-trips unrewritten; never a fact, never CAS.
    *  The (de)serialization lives in `sidecar-abstained.ts` so the read + write halves cannot drift. */
-  readonly abstained?: AbstainedWire;
+  readonly abstained?: AbstainedWire
   /** N11 PROJECTION-level freshness watermark (HEAD sha at persist); absent ⇒ unknown (old sidecars).
    *  NO LONGER THE LOAD-BEARING SIGNAL — the watermark is per ROW (`CurrentNode.derivedAt`, which rides
    *  inside `current` and needs no line here). This field survives as the reader's back-compat FALLBACK for a
    *  row carrying no stamp of its own, which is every row of every store written before that. As the only
    *  signal it was laundered by any write at all — see `freshness-watermark.ts` for the measured repro. */
-  readonly builtAt?: string;
-  readonly gen?: number; // the generation these bytes were published as; absent ⇒ 0 (pre-protocol sidecars)
+  readonly builtAt?: string
+  readonly gen?: number // the generation these bytes were published as; absent ⇒ 0 (pre-protocol sidecars)
   /**
    * #112 — the IDENTITY SCHEMA these bytes' hashes and anchor keys were minted under (`identity-schema.ts`
    * `IDENTITY_SCHEMA`). Stamped by `publish`; ABSENT means the schema is UNKNOWN.
@@ -108,7 +108,7 @@ export interface WireProjection {
    * absent is `unstamped` ⇒ refused on the write doors, never assumed-current (see `identity-schema.ts` for
    * why an untagged past cannot honestly be given a version number).
    */
-  readonly identity?: string;
+  readonly identity?: string
 }
 
 /** The outcome of ONE `decide` pass. `next` ABSENT ⇒ the decision writes NOTHING (a governed refusal): no
@@ -116,9 +116,9 @@ export interface WireProjection {
  *  that MUST be durable BEFORE the projection referencing them is published (the driftFacts/doctor read-back
  *  invariant: the sidecar can never point at a contentHash whose bytes are absent). */
 export interface CommitDecision<T> {
-  readonly out: T;
-  readonly next?: StoreProjection;
-  readonly put?: readonly unknown[];
+  readonly out: T
+  readonly next?: StoreProjection
+  readonly put?: readonly unknown[]
 }
 
 /** Why a commit did not settle. All three are VISIBLE refusals the door reports — never a silent no-op.
@@ -131,32 +131,32 @@ export interface CommitDecision<T> {
  *                 (`store-provenance.ts`). Distinct from `unreadable` on purpose: unreadable is a storage
  *                 fault that may heal, this is a governance fault that will not, and reporting one as the
  *                 other would send an operator to fsck instead of to `git rm --cached`. */
-export type CommitRefusal = 'contended' | 'unreadable' | 'untrusted';
+export type CommitRefusal = "contended" | "unreadable" | "untrusted"
 
 /** A decision that SETTLED (it may still be a governed refusal — see `CommitDecision.next`), or one that
  *  could not be durably resolved at all. */
 export type CommitResult<T> =
   | { readonly settled: true; readonly out: T }
-  | { readonly settled: false; readonly refusal: CommitRefusal };
+  | { readonly settled: false; readonly refusal: CommitRefusal }
 
 /** What a commit needs from its owner: where the sidecar lives, which one it is, the N11 watermark seam,
  *  and the CAS write door (invoked before publication — see `CommitDecision.put`). */
 export interface SidecarCtx {
-  readonly dir: string;
-  readonly base: SidecarBase;
-  readonly headSha?: (() => string | undefined) | undefined;
-  readonly put: (obj: unknown) => unknown;
+  readonly dir: string
+  readonly base: SidecarBase
+  readonly headSha?: (() => string | undefined) | undefined
+  readonly put: (obj: unknown) => unknown
   /** The provenance seam (`store-provenance.ts`), injected by the composition root exactly as `headSha` is.
    *  ABSENT ⇒ never consulted ⇒ the pre-existing behaviour (tests, non-git trees). */
-  readonly trusted?: SidecarTrust | undefined;
+  readonly trusted?: SidecarTrust | undefined
 }
 
 /** The compat mirror: the fixed, pre-protocol name. NEVER the compare-and-swap target — it is republished
  *  by `rename` from the winning temp inode purely so tools and tests that know `.atlas/projection.json`
  *  keep finding a COMPLETE file there. Under concurrency it may lag the true head by one generation, which
  *  is why every read below prefers a generation file and only falls back here. */
-export const mirrorPath = (dir: string, base: SidecarBase): string => join(dir, `${base}.json`);
-export const genPath = (dir: string, base: SidecarBase, g: number): string => join(dir, `${base}.${g}.json`);
+export const mirrorPath = (dir: string, base: SidecarBase): string => join(dir, `${base}.json`)
+export const genPath = (dir: string, base: SidecarBase, g: number): string => join(dir, `${base}.${g}.json`)
 
 /** One published generation NAME matched on disk, carrying BOTH the parsed number (for ordering/pruning) and
  *  the exact filename the regex matched (for opening). Kept together on purpose: `genPath(dir, base, g)` is
@@ -166,8 +166,8 @@ export const genPath = (dir: string, base: SidecarBase, g: number): string => jo
  *  generation). {@link listGenerations} exists so `readSidecarSet` below opens the name it actually matched,
  *  never a name it recomputed — one derivation, so listing and opening cannot disagree. */
 interface GenEntry {
-  readonly g: number;
-  readonly name: string;
+  readonly g: number
+  readonly name: string
 }
 
 /** The one implementation behind both {@link generations} and the read path: every `<base>.<digits>.json`
@@ -183,19 +183,19 @@ interface GenEntry {
  *  `name`, same shape as `git-history.ts`'s `byPath`, makes the answer a pure function of the bytes on disk
  *  again; it is NOT a claim that one name is more authoritative than the other. */
 function listGenerations(dir: string, base: SidecarBase): GenEntry[] {
-  let names: string[];
+  let names: string[]
   try {
-    names = readdirSync(dir);
+    names = readdirSync(dir)
   } catch {
-    return [];
+    return []
   }
-  const re = new RegExp(`^${base}\\.(\\d{1,15})\\.json$`);
-  const out: GenEntry[] = [];
+  const re = new RegExp(`^${base}\\.(\\d{1,15})\\.json$`)
+  const out: GenEntry[] = []
   for (const name of names) {
-    const m = re.exec(name);
-    if (m !== null) out.push({ g: Number(m[1]), name });
+    const m = re.exec(name)
+    if (m !== null) out.push({ g: Number(m[1]), name })
   }
-  return out.sort((a, b) => b.g - a.g || (a.name < b.name ? -1 : a.name > b.name ? 1 : 0));
+  return out.sort((a, b) => b.g - a.g || (a.name < b.name ? -1 : a.name > b.name ? 1 : 0))
 }
 
 /** Every published generation NUMBER present on disk, descending — including ones that fail to parse (a
@@ -209,7 +209,7 @@ function listGenerations(dir: string, base: SidecarBase): GenEntry[] {
  *  did not name (a hand copy, a restore, a padded rename) — see {@link listGenerations}, which the read path
  *  uses instead so it never re-derives a second path from a number this function already discarded. */
 export function generations(dir: string, base: SidecarBase): number[] {
-  return listGenerations(dir, base).map((e) => e.g);
+  return listGenerations(dir, base).map((e) => e.g)
 }
 
 // THE GOVERNANCE CARRIER (ADR-0007: `CurrentNode.scope` / `.tier`) NEEDS NO LINE HERE, and that is worth
@@ -250,12 +250,12 @@ export function generations(dir: string, base: SidecarBase): number[] {
  * sentence; the same reasoning covers every other field the projection carries, `nodeKey` included.
  */
 function isKeyedEntry(e: unknown): e is readonly [string, CurrentNode] {
-  if (!Array.isArray(e) || e.length !== 2) return false;
-  const [key, row] = e as readonly unknown[];
-  if (typeof key !== 'string' || row === null || typeof row !== 'object') return false;
+  if (!Array.isArray(e) || e.length !== 2) return false
+  const [key, row] = e as readonly unknown[]
+  if (typeof key !== "string" || row === null || typeof row !== "object") return false
   // `nodeKey === key` also settles its TYPE (`key` is a string) — no separate typeof needed, and no coercion:
   // `===` is byte-exact, so no case-folding, no trimming, no Unicode normalization can smuggle a mismatch.
-  return (row as { readonly nodeKey?: unknown }).nodeKey === key;
+  return (row as { readonly nodeKey?: unknown }).nodeKey === key
 }
 
 /**
@@ -274,40 +274,44 @@ function isKeyedEntry(e: unknown): e is readonly [string, CurrentNode] {
  * caller below tries the PREVIOUS generation, and a write refuses outright rather than starting from empty.
  */
 function readOne(path: string): { projection: StoreProjection; gen: number; identity: unknown } | undefined {
-  let raw: string;
+  let raw: string
   try {
-    raw = readFileSync(path, 'utf8');
+    raw = readFileSync(path, "utf8")
   } catch {
-    return undefined; // ENOENT / none persisted yet
+    return undefined // ENOENT / none persisted yet
   }
-  let wire: WireProjection;
+  let wire: WireProjection
   try {
-    wire = JSON.parse(raw) as WireProjection;
+    wire = JSON.parse(raw) as WireProjection
   } catch {
-    return undefined; // corrupt / truncated bytes
+    return undefined // corrupt / truncated bytes
   }
   // shape guard: the entry-array and value-array must be arrays before Map/Set construction, else a
   // valid-JSON-but-wrong-shape sidecar (e.g. `{}`, `[]`, `{current:5}`) throws in `new Map(...)`.
-  if (!wire || !Array.isArray(wire.current) || !Array.isArray(wire.cas)) return undefined;
+  if (!wire || !Array.isArray(wire.current) || !Array.isArray(wire.cas)) return undefined
   // INTEGRITY guard (a TOOTH, not defence-in-depth): every entry must be a `[key, row]` pair whose key IS
   // `row.nodeKey`. `new Map(wire.current)` accepts ANY entry array, so without this the disk round-trip is
   // the one producer in the system that can mint a `StoreProjection` violating its own representation
   // invariant. See `isKeyedEntry` for the measured bypass.
-  if (!wire.current.every(isKeyedEntry)) return undefined;
+  if (!wire.current.every(isKeyedEntry)) return undefined
   try {
     // N11: carry the watermark back only when a STRING was persisted (a non-string wire value ⇒ omit ⇒
     // "unknown", the conservative reader default). Same discipline for `gen`: a non-finite/negative value
     // is untrusted input from a file anyone with write access can forge, so it reads as 0.
-    const builtAt = typeof wire.builtAt === 'string' ? { builtAt: wire.builtAt } : {};
-    const gen = typeof wire.gen === 'number' && Number.isSafeInteger(wire.gen) && wire.gen >= 0 ? wire.gen : 0;
+    const builtAt = typeof wire.builtAt === "string" ? { builtAt: wire.builtAt } : {}
+    const gen = typeof wire.gen === "number" && Number.isSafeInteger(wire.gen) && wire.gen >= 0 ? wire.gen : 0
     // #99b — the ABSTENTION ledger, rehydrated only from a well-shaped entry-array (sidecar-abstained.ts).
-    const abstained = abstainedFromWire(wire.abstained);
+    const abstained = abstainedFromWire(wire.abstained)
     // #112: the raw stamp is carried out UNJUDGED and UNCOERCED. Classification is `classifyIdentity`'s job
     // (it is total over `unknown`), and keeping the raw value means a `foreign` refusal can quote the tag it
     // actually found rather than "something else" — the one concrete thing such a store can say about itself.
-    return { projection: { current: new Map(wire.current), cas: new Set(wire.cas), ...builtAt, ...abstained }, gen, identity: wire.identity };
+    return {
+      projection: { current: new Map(wire.current), cas: new Set(wire.cas), ...builtAt, ...abstained },
+      gen,
+      identity: wire.identity,
+    }
   } catch {
-    return undefined; // malformed entries (e.g. a non-[k,v] element)
+    return undefined // malformed entries (e.g. a non-[k,v] element)
   }
 }
 
@@ -318,12 +322,12 @@ function readOne(path: string): { projection: StoreProjection; gen: number; iden
  *  `unreadable` — a sidecar file exists but nothing parsed. Reads ignore this (degrade to empty); writes
  *                 must not (leg 2). */
 export interface SidecarRead {
-  readonly projection: StoreProjection | undefined;
-  readonly top: number;
-  readonly unreadable: boolean;
+  readonly projection: StoreProjection | undefined
+  readonly top: number
+  readonly unreadable: boolean
   /** The durable store is COMMITTED (`store-provenance.ts`). `projection` is forced to `undefined`, so a
    *  read serves nothing; a WRITE must refuse rather than persist over it (see `commitLoop`). */
-  readonly untrusted: boolean;
+  readonly untrusted: boolean
   /**
    * #112 — which IDENTITY SCHEMA minted the hashes and anchor keys in the state above
    * (`identity-schema.ts`). `current` for a store this build wrote AND for a store that does not exist yet
@@ -340,10 +344,10 @@ export interface SidecarRead {
    * (Not an ERASURE: the rows ARE carried forward, since `decide` reads them. It is a LAUNDERING, which is
    * the same shape `store-provenance.ts` refuses for a committed store and for the same reason.)
    */
-  readonly identity: IdentityVerdict;
+  readonly identity: IdentityVerdict
   /** The raw stamp string found on disk when {@link SidecarRead.identity} is `foreign`; `undefined`
    *  otherwise (including `unstamped`, where the whole point is that there is nothing to report). */
-  readonly identityFound?: string | undefined;
+  readonly identityFound?: string | undefined
 }
 
 /**
@@ -356,8 +360,8 @@ export interface SidecarRead {
  * it, which is exactly one governed write behind rather than a total loss.
  */
 export function readSidecarSet(dir: string, base: SidecarBase, trusted?: SidecarTrust): SidecarRead {
-  const gens = listGenerations(dir, base);
-  const top = gens.length > 0 ? gens[0]!.g : undefined;
+  const gens = listGenerations(dir, base)
+  const top = gens.length > 0 ? gens[0]!.g : undefined
   // PROVENANCE FIRST — before a single byte of the store is parsed. A committed store must not be able to
   // influence anything, including which error the caller sees, so this returns BEFORE `readOne`. `top` is
   // still reported honestly (it is a directory listing, not store content) so no caller has to special-case
@@ -366,7 +370,7 @@ export function readSidecarSet(dir: string, base: SidecarBase, trusted?: Sidecar
     // PROVENANCE STRICTLY PRECEDES SCHEMA, and `identity: 'current'` here is a statement about WHICH GATE
     // SPOKE, not a claim about the bytes: a committed store's stamp is attacker-chosen, so it must not be
     // able to influence which refusal a caller sees. The provenance answer is the only one on offer.
-    return { projection: undefined, top: top ?? 0, unreadable: false, untrusted: true, identity: 'current' };
+    return { projection: undefined, top: top ?? 0, unreadable: false, untrusted: true, identity: "current" }
   }
   for (const entry of gens) {
     // OPEN THE NAME JUST MATCHED, not a name re-derived from its number: `join(dir, entry.name)`, never
@@ -374,26 +378,39 @@ export function readSidecarSet(dir: string, base: SidecarBase, trusted?: Sidecar
     // same `7`) round-trips through `Number()` but not back through `genPath` — re-deriving would ENOENT on a
     // generation file whose every byte is intact. One derivation (the regex match above), so listing and
     // opening can never disagree.
-    const hit = readOne(join(dir, entry.name));
-    if (hit !== undefined) return { ...withIdentity(hit.identity), projection: hit.projection, top: top!, unreadable: false, untrusted: false };
+    const hit = readOne(join(dir, entry.name))
+    if (hit !== undefined)
+      return {
+        ...withIdentity(hit.identity),
+        projection: hit.projection,
+        top: top!,
+        unreadable: false,
+        untrusted: false,
+      }
   }
-  const legacy = readOne(mirrorPath(dir, base));
+  const legacy = readOne(mirrorPath(dir, base))
   if (legacy !== undefined) {
     // No readable generation: the mirror's own counter keeps the sequence monotone over a store whose
     // generation files were pruned or hand-deleted, so a successor never reuses a name that once held
     // different bytes.
-    return { ...withIdentity(legacy.identity), projection: legacy.projection, top: Math.max(top ?? 0, legacy.gen), unreadable: false, untrusted: false };
+    return {
+      ...withIdentity(legacy.identity),
+      projection: legacy.projection,
+      top: Math.max(top ?? 0, legacy.gen),
+      unreadable: false,
+      untrusted: false,
+    }
   }
-  const anyFile = top !== undefined || existsSync(mirrorPath(dir, base));
+  const anyFile = top !== undefined || existsSync(mirrorPath(dir, base))
   // NOTHING PERSISTED ⇒ `current`. There are no stored hashes, so there is no schema to be wrong about, and
   // any other answer would refuse every write in every fresh repo — bricking the product on install.
-  return { projection: undefined, top: top ?? 0, unreadable: anyFile, untrusted: false, identity: 'current' };
+  return { projection: undefined, top: top ?? 0, unreadable: anyFile, untrusted: false, identity: "current" }
 }
 
 /** The identity fields for one raw stamp. `identityFound` is reported ONLY for `foreign`: `unstamped` has
  *  nothing to report by definition, and `exactOptionalPropertyTypes` makes the difference between "absent"
  *  and "present but undefined" load-bearing, so the key is spread in rather than set to `undefined`. */
 function withIdentity(stamp: unknown): { identity: IdentityVerdict; identityFound?: string } {
-  const identity = classifyIdentity(stamp);
-  return identity === 'foreign' ? { identity, identityFound: String(stamp) } : { identity };
+  const identity = classifyIdentity(stamp)
+  return identity === "foreign" ? { identity, identityFound: String(stamp) } : { identity }
 }

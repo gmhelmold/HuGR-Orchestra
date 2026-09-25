@@ -10,12 +10,12 @@
 // the truth door admitted — each with its own identity, tier, provenance and freshness. One is what the code
 // structurally is; the other is what Atlas has been told, on the record, about it.
 
-import type { StoreProjection } from '../write/router.js';
+import type { StoreProjection } from "../write/router.js"
 
 /** Which end of the directed relation the queried unit sits at. `out` = the unit is the SUBJECT
  *  (`endpointA <kind> ?`); `in` = the OBJECT (`? <kind> endpointA`... i.e. `endpointB === unit`); `both` = the
  *  union. Directed on purpose — a relation reads left-to-right (contract §1), so direction is meaningful. */
-export type RelationDirection = 'out' | 'in' | 'both';
+export type RelationDirection = "out" | "in" | "both"
 
 /** One grounded relation edge touching the queried unit. `nodeKey` is the relation's identity (`relationKey`,
  *  the row's key); the endpoints + kind are the carriers stamped at write time. `seal` is the two-seal
@@ -27,16 +27,16 @@ export type RelationDirection = 'out' | 'in' | 'both';
  *  the projection row (`CurrentNode`) has no witness carrier, so the re-runnable derivation is surfaced by the
  *  single-fact `atlas node` door (which reads the durable `RelationNode.witness`), not by this list fold. */
 export interface RelationEdge {
-  readonly nodeKey: string;
-  readonly relationKind: string;
-  readonly endpointA: string; // subject
-  readonly endpointB: string; // object
-  readonly seal?: string; //     ADR-0017 two-seal provenance — 'proven' | 'justified' | absent (unsealed)
+  readonly nodeKey: string
+  readonly relationKind: string
+  readonly endpointA: string // subject
+  readonly endpointB: string // object
+  readonly seal?: string //     ADR-0017 two-seal provenance — 'proven' | 'justified' | absent (unsealed)
 }
 
 /** Lexicographic string comparator — total, no locale (the one the sibling read folds sort by). */
 function cmp(x: string, y: string): number {
-  return x < y ? -1 : x > y ? 1 : 0;
+  return x < y ? -1 : x > y ? 1 : 0
 }
 
 /**
@@ -52,19 +52,19 @@ function cmp(x: string, y: string): number {
 export function relationsOf(
   projection: StoreProjection,
   unitKey: string,
-  direction: RelationDirection = 'both',
+  direction: RelationDirection = "both",
 ): readonly RelationEdge[] {
-  if (typeof unitKey !== 'string' || unitKey.length === 0) return [];
-  const out: RelationEdge[] = [];
+  if (typeof unitKey !== "string" || unitKey.length === 0) return []
+  const out: RelationEdge[] = []
   for (const node of projection.current.values()) {
-    if (node.family !== 'relation') continue;
-    const a = node.endpointA;
-    const b = node.endpointB;
-    const k = node.relationKind;
-    if (typeof a !== 'string' || typeof b !== 'string' || typeof k !== 'string') continue; // malformed row ⇒ skip
-    const isSubject = a === unitKey; // `out`: the unit points AT something
-    const isObject = b === unitKey; //  `in`: something points AT the unit
-    const keep = direction === 'out' ? isSubject : direction === 'in' ? isObject : isSubject || isObject;
+    if (node.family !== "relation") continue
+    const a = node.endpointA
+    const b = node.endpointB
+    const k = node.relationKind
+    if (typeof a !== "string" || typeof b !== "string" || typeof k !== "string") continue // malformed row ⇒ skip
+    const isSubject = a === unitKey // `out`: the unit points AT something
+    const isObject = b === unitKey //  `in`: something points AT the unit
+    const keep = direction === "out" ? isSubject : direction === "in" ? isObject : isSubject || isObject
     if (keep)
       out.push({
         nodeKey: node.nodeKey,
@@ -73,8 +73,8 @@ export function relationsOf(
         endpointB: b,
         // SEAL carrier — from the projection row's own `seal` (ADR-0017); omitted ⇒ absent (exactOptional),
         // never a fabricated 'proven'. Rides whichever direction reaches this edge (AR-26).
-        ...(typeof node.seal === 'string' ? { seal: node.seal } : {}),
-      });
+        ...(typeof node.seal === "string" ? { seal: node.seal } : {}),
+      })
   }
   return out.sort(
     (x, y) =>
@@ -82,5 +82,5 @@ export function relationsOf(
       cmp(x.endpointA, y.endpointA) ||
       cmp(x.endpointB, y.endpointB) ||
       cmp(x.nodeKey, y.nodeKey),
-  );
+  )
 }

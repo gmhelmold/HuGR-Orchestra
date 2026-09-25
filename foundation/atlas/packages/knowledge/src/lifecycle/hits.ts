@@ -34,7 +34,7 @@
 // SCOPE (card exclusions): does NOT own the RETR per-kind hitRate ledger (RETR-8) nor the RETR off-atlas
 // ledger (RETR-13); does NOT define the pack cap/drop order. GEN/RETR CONSUME this contract downstream.
 
-import type { NodeKey } from '@atlas/contracts';
+import type { NodeKey } from "@atlas/contracts"
 
 // ── frozen HitsApi surface, co-located here (was ref/hits.ts) ─────────────────────────────────────────
 
@@ -46,8 +46,8 @@ import type { NodeKey } from '@atlas/contracts';
  */
 export interface DecayConfig {
   /** logical ledger position (monotone event-count), never wall-clock. */
-  readonly window: number; // PINNED → number (ledger event-count)
-  readonly threshold: number; // [OPEN DEFINE] door-2 threshold == f(hits) — parametric, value unpinned
+  readonly window: number // PINNED → number (ledger event-count)
+  readonly threshold: number // [OPEN DEFINE] door-2 threshold == f(hits) — parametric, value unpinned
 }
 
 /**
@@ -55,20 +55,20 @@ export interface DecayConfig {
  * `{nodeKey, hits, window}`: the node cited, its observed hit-count, and the ledger `window` position.
  */
 export interface LedgerEntry {
-  readonly nodeKey: NodeKey;
-  readonly hits: number;
-  readonly window: number; // logical ledger position (monotone event-count), never wall-clock
+  readonly nodeKey: NodeKey
+  readonly hits: number
+  readonly window: number // logical ledger position (monotone event-count), never wall-clock
 }
 
 export interface HitsApi {
   /** Log a `hit` citing a served fact's node-id (a fact governed a decision — KNOW-17). Append-only
    *  ledger event. Returns the minimal honest per-node ledger record `{nodeKey, hits, window}`. */
-  logHit(nodeId: NodeKey): LedgerEntry;
+  logHit(nodeId: NodeKey): LedgerEntry
 
   /** Decay pass (parametric — `cfg`): a fact with 0 hits in the window is archived to CAS (never
    *  deleted — KNOW-12) and may re-enter on a later hit. The door-2 threshold is `f(hits)`, never a
    *  self-score (method-tags-knw:135). Pure + total. The result is the decayed/retained node-id sets. */
-  decay(cfg: DecayConfig): { readonly decayed: readonly NodeKey[]; readonly retained: readonly NodeKey[] };
+  decay(cfg: DecayConfig): { readonly decayed: readonly NodeKey[]; readonly retained: readonly NodeKey[] }
 }
 
 /**
@@ -80,7 +80,7 @@ export interface HitsApi {
  * THIS one is the USE-OR-SEAL rise trigger, a plain named integer in exactly one place. The `seal` leg
  * (REQ-AUTH-16c) is the alternative sufficient evidence, independent of this counter.
  */
-export const USE_THRESHOLD = 8;
+export const USE_THRESHOLD = 8
 
 /**
  * The served class of an advisory node under the USE-OR-SEAL growth path (INV-AUTH-16): the node rises to
@@ -88,7 +88,7 @@ export const USE_THRESHOLD = 8;
  * human ratify-token SEAL — and NEVER by default (REQ-AUTH-16d). The `serve` path serves the node at this
  * class; `decay` (KNOW-17) remains the only way a node neither grew is handled after non-use.
  */
-export type ServedClass = 'advisory' | 'governing';
+export type ServedClass = "advisory" | "governing"
 
 /**
  * The DEFINE-supplied Door-2 admission threshold as a FUNCTION of observed hits (`threshold==f(hits)`,
@@ -96,7 +96,7 @@ export type ServedClass = 'advisory' | 'governing';
  * constant; the VALUE is not frozen (it calibrates on observed downstream hits, not the proposer's
  * score). This module applies it to the ledger's OBSERVED hit-count, never to a self-assessment.
  */
-export type Calibrate = (observedHits: number) => number;
+export type Calibrate = (observedHits: number) => number
 
 /**
  * The injected lower-layer seams (build-ahead). None is recomputed here.
@@ -105,9 +105,9 @@ export type Calibrate = (observedHits: number) => number;
  *   - `calibrate`  — the parametric door-2 `f(hits)` (OPEN-DEFINE); applied to observed hits.
  */
 export interface HitsDeps {
-  readonly servedSet: () => Iterable<NodeKey>;
-  readonly archive: (nodeKey: NodeKey) => void;
-  readonly calibrate: Calibrate;
+  readonly servedSet: () => Iterable<NodeKey>
+  readonly archive: (nodeKey: NodeKey) => void
+  readonly calibrate: Calibrate
 }
 
 /**
@@ -118,20 +118,20 @@ export interface HitsDeps {
 export interface BoundHits extends HitsApi {
   /** The Door-2 admission threshold for `nodeId` = `calibrate(observed hits)` (KNOW-17b). A pure
    *  function of the ledger's observed hit-count — NEVER the proposer's self-assessment. */
-  door2Threshold(nodeId: NodeKey): number;
+  door2Threshold(nodeId: NodeKey): number
 
   /** USE-OR-SEAL (INV-AUTH-16c): a human ratify-token ENDORSEMENT recorded for `nodeId`. Alternative
    *  sufficient evidence, INDEPENDENT of the usage counter (REQ-AUTH-16c — a seal alone rises the node).
    *  A seal is evidence, not a ledger event — it does NOT advance the `window` (that stays the KNOW-17
    *  logical event-count, untouched by a seal). Deliberately no signature beyond the node: the LEDGER has
    *  no opinion on ratify-token validity — the caller (a governed ratify door) attests that first. */
-  seal(nodeId: NodeKey): void;
+  seal(nodeId: NodeKey): void
 
   /** USE-OR-SEAL (INV-AUTH-16): the class an advisory node is SERVED at — 'governing' iff the counter
    *  reached `USE_THRESHOLD` (REQ-AUTH-16b) OR the node is sealed (REQ-AUTH-16c), else 'advisory'. NEVER
    *  a default rise (REQ-AUTH-16d — a node earning neither is served advisory and decays by KNOW-17). The
    *  grow path serves the node at this class. Pure + total over the ledger. */
-  servedClass(nodeId: NodeKey): ServedClass;
+  servedClass(nodeId: NodeKey): ServedClass
 }
 
 /**
@@ -149,62 +149,62 @@ export interface BoundHits extends HitsApi {
  * Deterministic: the `window` is a logical event-count (no clock); no IO, no hashing here.
  */
 export function bindHits(deps: HitsDeps): BoundHits {
-  const ledger = new Map<NodeKey, number>(); // nodeKey → observed hits in the current window
-  const decayed = new Set<NodeKey>();         // decayed node-ids, archived in CAS, re-spawnable
-  const sealed = new Set<NodeKey>();          // USE-OR-SEAL: human ratify-token endorsements (INV-AUTH-16c)
-  let window = 0;                             // logical ledger event-count (monotone), never wall-clock
+  const ledger = new Map<NodeKey, number>() // nodeKey → observed hits in the current window
+  const decayed = new Set<NodeKey>() // decayed node-ids, archived in CAS, re-spawnable
+  const sealed = new Set<NodeKey>() // USE-OR-SEAL: human ratify-token endorsements (INV-AUTH-16c)
+  let window = 0 // logical ledger event-count (monotone), never wall-clock
 
-  const observedHits = (nodeId: NodeKey): number => ledger.get(nodeId) ?? 0;
+  const observedHits = (nodeId: NodeKey): number => ledger.get(nodeId) ?? 0
 
   const logHit = (nodeId: NodeKey): LedgerEntry => {
-    if (typeof nodeId !== 'string' || nodeId.length === 0) {
-      throw new TypeError('hits.logHit: malformed node-id'); // fail-closed on malformed input
+    if (typeof nodeId !== "string" || nodeId.length === 0) {
+      throw new TypeError("hits.logHit: malformed node-id") // fail-closed on malformed input
     }
-    window += 1; // append-only ledger event advances the window position
+    window += 1 // append-only ledger event advances the window position
     // KNOW-17d re-entry: a decayed (archived) fact re-enters the served set on a later hit.
-    decayed.delete(nodeId);
-    const hits = observedHits(nodeId) + 1;
-    ledger.set(nodeId, hits);
-    return { nodeKey: nodeId, hits, window };
-  };
+    decayed.delete(nodeId)
+    const hits = observedHits(nodeId) + 1
+    ledger.set(nodeId, hits)
+    return { nodeKey: nodeId, hits, window }
+  }
 
   const seal = (nodeId: NodeKey): void => {
-    if (typeof nodeId !== 'string' || nodeId.length === 0) {
-      throw new TypeError('hits.seal: malformed node-id'); // fail-closed on malformed input
+    if (typeof nodeId !== "string" || nodeId.length === 0) {
+      throw new TypeError("hits.seal: malformed node-id") // fail-closed on malformed input
     }
-    sealed.add(nodeId); // a seal is evidence, not a ledger event — the window does NOT advance
-  };
+    sealed.add(nodeId) // a seal is evidence, not a ledger event — the window does NOT advance
+  }
 
   const servedClass = (nodeId: NodeKey): ServedClass => {
-    if (typeof nodeId !== 'string' || nodeId.length === 0) {
-      throw new TypeError('hits.servedClass: malformed node-id'); // fail-closed on malformed input
+    if (typeof nodeId !== "string" || nodeId.length === 0) {
+      throw new TypeError("hits.servedClass: malformed node-id") // fail-closed on malformed input
     }
     // ONE of two sufficient evidences rises the node (INV-AUTH-16): the fixed counter (REQ-AUTH-16b)
     // reaching `USE_THRESHOLD`, or a human seal (REQ-AUTH-16c). Anything else stays advisory (REQ-16d).
-    if (sealed.has(nodeId)) return 'governing';
-    return observedHits(nodeId) >= USE_THRESHOLD ? 'governing' : 'advisory';
-  };
+    if (sealed.has(nodeId)) return "governing"
+    return observedHits(nodeId) >= USE_THRESHOLD ? "governing" : "advisory"
+  }
 
   const decay = (cfg: DecayConfig): { readonly decayed: readonly NodeKey[]; readonly retained: readonly NodeKey[] } => {
     if (!Number.isFinite(cfg.window) || cfg.window < 0) {
-      throw new TypeError('hits.decay: malformed decay window'); // fail-closed on malformed config
+      throw new TypeError("hits.decay: malformed decay window") // fail-closed on malformed config
     }
-    const out: NodeKey[] = [];
-    const kept: NodeKey[] = [];
+    const out: NodeKey[] = []
+    const kept: NodeKey[] = []
     for (const nodeId of deps.servedSet()) {
       if (observedHits(nodeId) === 0) {
         // KNOW-17c: 0 hits in window ⇒ archived to CAS (never deleted), dropped from the served set.
-        deps.archive(nodeId);
-        decayed.add(nodeId);
-        out.push(nodeId);
+        deps.archive(nodeId)
+        decayed.add(nodeId)
+        out.push(nodeId)
       } else {
-        kept.push(nodeId);
+        kept.push(nodeId)
       }
     }
-    return { decayed: out, retained: kept };
-  };
+    return { decayed: out, retained: kept }
+  }
 
-  const door2Threshold = (nodeId: NodeKey): number => deps.calibrate(observedHits(nodeId));
+  const door2Threshold = (nodeId: NodeKey): number => deps.calibrate(observedHits(nodeId))
 
-  return { logHit, decay, door2Threshold, seal, servedClass };
+  return { logHit, decay, door2Threshold, seal, servedClass }
 }

@@ -5,9 +5,9 @@
 // `T2` under its own cap, ADR-0013), stale-flagged (a stale pack is a re-ground SIGNAL, not served truth)
 // AND per-fact freshness-flagged. Pure + total; the concrete index resolution is @atlas/index.
 
-import type { Hash, Pack, PackInvariant } from '@atlas/contracts';
-import { packTokens, splitBands } from './bands.js';
-import type { QueryOut } from './types.js';
+import type { Hash, Pack, PackInvariant } from "@atlas/contracts"
+import { packTokens, splitBands } from "./bands.js"
+import type { QueryOut } from "./types.js"
 
 export interface QueryApi {
   /** Resolve any scope (file/folder/module/crate) → the merged covering bounded `Pack`: the GOVERNING band
@@ -19,7 +19,7 @@ export interface QueryApi {
    *  frozen at this seam (cf retrieval `Path = string`). Pinned to `string`, NOT a brand.
    *  ([NOTE] the `≤ ~2K` token bound is an ADVISORY size bound verified by a size test, not a type
    *  constraint — method-tags-tls:59.) */
-  query(scope: string): QueryOut;
+  query(scope: string): QueryOut
 }
 
 /**
@@ -31,11 +31,11 @@ export interface QueryIndex {
   /** Resolve a scope to its covering territory skeleton. MAY throw on a malformed (non-string) scope — the
    *  handler wrapper converts that throw to a rejected `Verdict` (TOOLS-2 totality boundary). */
   cover(scope: string): {
-    readonly territory: string;
-    readonly axisHash: Hash;
-    readonly invariants: readonly PackInvariant[];
-    readonly stale: boolean;
-  };
+    readonly territory: string
+    readonly axisHash: Hash
+    readonly invariants: readonly PackInvariant[]
+    readonly stale: boolean
+  }
 }
 
 /**
@@ -52,8 +52,8 @@ export interface QueryIndex {
  */
 export function createQuery(index: QueryIndex): QueryApi {
   const query = (scope: string): QueryOut => {
-    const cover = index.cover(scope); // resolve the scope → its covering territory (may throw on malformed)
-    const { governing, advisory, advisoryDropped } = splitBands(cover.invariants);
+    const cover = index.cover(scope) // resolve the scope → its covering territory (may throw on malformed)
+    const { governing, advisory, advisoryDropped } = splitBands(cover.invariants)
     const pack: Pack = {
       territory: cover.territory,
       axisHash: cover.axisHash,
@@ -65,15 +65,15 @@ export function createQuery(index: QueryIndex): QueryApi {
       // the caller did not receive.
       tokenEstimate: packTokens(governing) + packTokens(advisory),
       stale: cover.stale, // a stale pack is surfaced, NOT served as fresh truth (TOOLS-6c)
-    };
-    return pack;
-  };
-  return { query };
+    }
+    return pack
+  }
+  return { query }
 }
 
 // differential-vs-oracle (compile-time): the impl's `query` conforms to the frozen `QueryApi.query(scope)`
 // signature (co-located `QueryApi`). The concrete index axis-resolution is a DISTINCT, out-of-facet port.
 const _queryConforms: QueryApi = createQuery({
-  cover: () => ({ territory: '', axisHash: '' as Hash, invariants: [], stale: false }),
-});
-void _queryConforms;
+  cover: () => ({ territory: "", axisHash: "" as Hash, invariants: [], stale: false }),
+})
+void _queryConforms

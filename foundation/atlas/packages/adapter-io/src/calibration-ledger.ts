@@ -34,9 +34,9 @@
 // named-single-place discipline the WP asked for; nothing downstream re-derives it. It is an OPEN-DEFINE
 // placeholder, not a ratified measurement: the golden binds it at 0.3 only once DEFINE supplies the number.
 
-import { ledgerFrom, offAtlasFrom } from '@atlas/retrieval';
-import type { OffAtlasThreshold, OffatlasApi, RetrLedger } from '@atlas/retrieval';
-import type { AtlasPolicy } from './policy.js';
+import { ledgerFrom, offAtlasFrom } from "@atlas/retrieval"
+import type { OffAtlasThreshold, OffatlasApi, RetrLedger } from "@atlas/retrieval"
+import type { AtlasPolicy } from "./policy.js"
 
 /**
  * [OPEN DEFINE — RETR-13b] The off-atlas rate at which a territory's missed reads raise a calibration
@@ -45,20 +45,20 @@ import type { AtlasPolicy } from './policy.js';
  * `offAtlasRate > θ` stays parametric underneath and S3's golden replaces this value once DEFINE supplies it.
  * Mirrors the `USE_THRESHOLD` single-binding discipline in `@atlas/knowledge` `src/lifecycle/hits.ts`.
  */
-export const OFF_ATLAS_THRESHOLD: OffAtlasThreshold = 0.3;
+export const OFF_ATLAS_THRESHOLD: OffAtlasThreshold = 0.3
 
 /** The RETR-8 budget REPORT: the frozen ledger built over the served-injection record set + how many
  *  records that set held (the CLI renders the honest-zero feed note from the count, never a guess). */
 export interface BudgetReport {
-  readonly ledger: RetrLedger;
-  readonly servedRecords: number;
+  readonly ledger: RetrLedger
+  readonly servedRecords: number
 }
 
 /** The composition-root RETR-8 leg: `atlas budget` renders this. THUNK — re-derived per call. */
-export type BudgetLeg = () => BudgetReport;
+export type BudgetLeg = () => BudgetReport
 
 /** The composition-root RETR-13 leg: `atlas territories` renders this. THUNK — re-derived per call. */
-export type TerritoriesLeg = () => OffatlasApi;
+export type TerritoriesLeg = () => OffatlasApi
 
 /**
  * THE RETR-8 production leg. The served-injection record set is the honest zero `[]`, for the reason in the
@@ -68,7 +68,7 @@ export type TerritoriesLeg = () => OffatlasApi;
  * RETR-8 writer, the next work-package; the seam exists to receive it.
  */
 export function budgetLeg(): BudgetLeg {
-  return (): BudgetReport => ({ ledger: ledgerFrom([]), servedRecords: 0 });
+  return (): BudgetReport => ({ ledger: ledgerFrom([]), servedRecords: 0 })
 }
 
 /**
@@ -78,6 +78,6 @@ export function budgetLeg(): BudgetLeg {
  * registered territory (SCN-RETR-13d/e), never a throw.
  */
 export function territoriesLeg(policy: AtlasPolicy): TerritoriesLeg {
-  const known: readonly string[] = Object.keys(policy.authz.scopes).sort();
-  return (): OffatlasApi => offAtlasFrom([], known);
+  const known: readonly string[] = Object.keys(policy.authz.scopes).sort()
+  return (): OffatlasApi => offAtlasFrom([], known)
 }

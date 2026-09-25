@@ -15,7 +15,7 @@ atlas init <path>
 
 - `<path>` — required (the parser refuses a bare `atlas init`). **Repo-relative**, and it selects what is
   walked: `.` is the whole repository, `src` is that subtree, `src/greet.ts` is that one file. A path that
-  names nothing in the tree is refused (see *Refusals*).
+  names nothing in the tree is refused (see _Refusals_).
 - No flags. Any flag you pass is folded into the argument bag and ignored (`packages/cli/src/parse.ts`).
 
 ## Worked example
@@ -101,11 +101,11 @@ separate governed write through [`emit`](./emit.md).
 
 ## Exit codes
 
-| code | meaning |
-| --- | --- |
-| `0` | the move-in ran |
-| `1` | usage error — no `<path>`, or the runtime is not composed |
-| `2` | a governance gate refused the invocation |
+| code | meaning                                                   |
+| ---- | --------------------------------------------------------- |
+| `0`  | the move-in ran                                           |
+| `1`  | usage error — no `<path>`, or the runtime is not composed |
+| `2`  | a governance gate refused the invocation                  |
 
 ## What it refuses, and why
 
@@ -126,6 +126,7 @@ separate governed write through [`emit`](./emit.md).
   (One long `reason:` line, wrapped here.) It used to exit `0` and print the repository's full top-level
   territory block for any path at all, which read as a successful move-in of a directory that does not
   exist. An empty list would be no better — it is indistinguishable from an empty repository.
+
 - **Nothing else, by design.** `init` is the one command **exempt** from the committed-store refusal below
   (`packages/cli/src/cli.ts`): it touches no durable state and it writes the very `.gitignore` rule that
   repairs that state, so refusing it would leave a user with a disabled Atlas and no supported way back on.
@@ -141,7 +142,7 @@ separate governed write through [`emit`](./emit.md).
   the index records the dependency edges and the dependent facts exist; it is empty in the fixture above.
   Over MCP the whole `InitOut` comes back as JSON either way, so nothing the CLI omits is lost to an agent.
 - **The `.gitignore` write is CLI-only.** It happens at the CLI entrypoint, not behind the `atlas-init`
-  tool, so an MCP `atlas-init` call moves in *without* installing the ignore rule. It is also attempted on
+  tool, so an MCP `atlas-init` call moves in _without_ installing the ignore rule. It is also attempted on
   the refusal path above, so a refused `init` can still print a `gitignore:` line.
 - **A failed ignore-rule write does not change the exit code.** It is reported as one extra line; the
   move-in itself is still a valid structural result.

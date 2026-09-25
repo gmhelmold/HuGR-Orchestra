@@ -74,34 +74,34 @@
 // Harness invariant (harness/README.md): no `@atlas/*` import. This module links no product code — it only
 // stands in front of a command the product runs.
 
-import { spawnSync } from 'node:child_process';
-import { randomUUID } from 'node:crypto';
-import { closeSync, mkdirSync, openSync, readFileSync, writeFileSync, writeSync } from 'node:fs';
-import { join } from 'node:path';
+import { spawnSync } from "node:child_process"
+import { randomUUID } from "node:crypto"
+import { closeSync, mkdirSync, openSync, readFileSync, writeFileSync, writeSync } from "node:fs"
+import { join } from "node:path"
 
 /** The exit status this shim uses for its OWN misconfiguration, chosen not to collide with a plausible
  *  model exit. It is loud on purpose: a shim that cannot record must not quietly proxy, or the run's
  *  measurement silently becomes a guess. */
-const SHIM_CONFIG_EXIT = 70;
+const SHIM_CONFIG_EXIT = 70
 
 /** A wall-clock reading in float milliseconds since the epoch, sub-millisecond resolution. WALL clock, not
  *  `hrtime`: the intervals are compared ACROSS processes and a per-process monotonic origin cannot be. */
-export const nowMs = () => performance.timeOrigin + performance.now();
+export const nowMs = () => performance.timeOrigin + performance.now()
 
 /** Read the whole prompt from stdin before anything else runs. The product pipes it (`llm.ts` `input:`) and
  *  a shim that spawned the inner command first would leave the parent's write racing a child that is not
  *  reading yet — the EPIPE window `salvageEarlyExit` exists to paper over. Draining first closes it. */
 function readStdin() {
   try {
-    return readFileSync(0);
+    return readFileSync(0)
   } catch {
-    return Buffer.alloc(0); // no stdin attached (a bare hand-run) — an empty prompt, never a crash
+    return Buffer.alloc(0) // no stdin attached (a bare hand-run) — an empty prompt, never a crash
   }
 }
 
 function fail(message) {
-  process.stderr.write(`model-call-shim: ${message}\n`);
-  process.exit(SHIM_CONFIG_EXIT);
+  process.stderr.write(`model-call-shim: ${message}\n`)
+  process.exit(SHIM_CONFIG_EXIT)
 }
 
 /**
@@ -113,62 +113,65 @@ function fail(message) {
  */
 function openRecord(logDir) {
   for (let attempt = 0; attempt < 8; attempt++) {
-    const id = randomUUID();
+    const id = randomUUID()
     try {
-      return { id, fd: openSync(join(logDir, `${id}.jsonl`), 'wx'), path: join(logDir, `${id}.jsonl`) };
+      return { id, fd: openSync(join(logDir, `${id}.jsonl`), "wx"), path: join(logDir, `${id}.jsonl`) }
     } catch (e) {
-      if (e?.code !== 'EEXIST') throw e;
+      if (e?.code !== "EEXIST") throw e
     }
   }
-  return null;
+  return null
 }
 
 export function main() {
-  const logDir = process.env.ATLAS_PROBE_LOG;
-  const cmd = process.env.ATLAS_PROBE_CMD;
-  if (logDir === undefined || logDir === '') fail('$ATLAS_PROBE_LOG must name the directory to record into');
-  if (cmd === undefined || cmd === '') fail('$ATLAS_PROBE_CMD must name the model command to run underneath');
+  const logDir = process.env.ATLAS_PROBE_LOG
+  const cmd = process.env.ATLAS_PROBE_CMD
+  if (logDir === undefined || logDir === "") fail("$ATLAS_PROBE_LOG must name the directory to record into")
+  if (cmd === undefined || cmd === "") fail("$ATLAS_PROBE_CMD must name the model command to run underneath")
 
-  let args;
+  let args
   try {
-    args = process.env.ATLAS_PROBE_ARGS === undefined ? [] : JSON.parse(process.env.ATLAS_PROBE_ARGS);
+    args = process.env.ATLAS_PROBE_ARGS === undefined ? [] : JSON.parse(process.env.ATLAS_PROBE_ARGS)
   } catch {
-    fail('$ATLAS_PROBE_ARGS must be a JSON array of strings');
+    fail("$ATLAS_PROBE_ARGS must be a JSON array of strings")
   }
-  if (!Array.isArray(args) || args.some((a) => typeof a !== 'string')) {
-    fail('$ATLAS_PROBE_ARGS must be a JSON array of strings');
+  if (!Array.isArray(args) || args.some((a) => typeof a !== "string")) {
+    fail("$ATLAS_PROBE_ARGS must be a JSON array of strings")
   }
 
-  mkdirSync(logDir, { recursive: true });
-  const rec = openRecord(logDir);
-  if (rec === null) fail('could not create a unique record file — the log directory is not writable');
+  mkdirSync(logDir, { recursive: true })
+  const rec = openRecord(logDir)
+  if (rec === null) fail("could not create a unique record file — the log directory is not writable")
 
-  const prompt = readStdin();
-  writeFileSync(join(logDir, `${rec.id}.prompt`), prompt);
+  const prompt = readStdin()
+  writeFileSync(join(logDir, `${rec.id}.prompt`), prompt)
 
   // The START line is written and FLUSHED before the inner command is spawned, so a run that is killed
   // mid-flight still leaves evidence that this call had begun. `concurrency-report.mjs` names such records
   // as unfinished rather than dropping them — a dropped in-flight call is exactly how a measurement
   // understates its own peak.
-  const startedAt = nowMs();
-  writeSync(rec.fd, `${JSON.stringify({ ev: 'start', id: rec.id, pid: process.pid, at: startedAt, promptBytes: prompt.length })}\n`);
+  const startedAt = nowMs()
+  writeSync(
+    rec.fd,
+    `${JSON.stringify({ ev: "start", id: rec.id, pid: process.pid, at: startedAt, promptBytes: prompt.length })}\n`,
+  )
 
-  const r = spawnSync(cmd, args, { input: prompt, maxBuffer: 1024 * 1024 * 256 });
-  const endedAt = nowMs();
+  const r = spawnSync(cmd, args, { input: prompt, maxBuffer: 1024 * 1024 * 256 })
+  const endedAt = nowMs()
 
-  const stdout = r.stdout ?? Buffer.alloc(0);
-  const stderr = r.stderr ?? Buffer.alloc(0);
-  writeFileSync(join(logDir, `${rec.id}.out`), stdout);
-  writeFileSync(join(logDir, `${rec.id}.err`), stderr);
+  const stdout = r.stdout ?? Buffer.alloc(0)
+  const stderr = r.stderr ?? Buffer.alloc(0)
+  writeFileSync(join(logDir, `${rec.id}.out`), stdout)
+  writeFileSync(join(logDir, `${rec.id}.err`), stderr)
 
   // `spawnSync` reports a spawn failure (a missing command) as `error` with `status === null`. That is not
   // a model that said nothing — it is a broken configuration, and it must reach the product as a non-zero
   // exit so `llm.ts` raises `ModelCommandError` rather than recording an abstention.
-  const status = r.status === null || r.status === undefined ? SHIM_CONFIG_EXIT : r.status;
+  const status = r.status === null || r.status === undefined ? SHIM_CONFIG_EXIT : r.status
   writeSync(
     rec.fd,
     `${JSON.stringify({
-      ev: 'end',
+      ev: "end",
       id: rec.id,
       pid: process.pid,
       at: endedAt,
@@ -179,18 +182,18 @@ export function main() {
       stderrBytes: stderr.length,
       spawnError: r.error === undefined ? null : String(r.error.message ?? r.error),
     })}\n`,
-  );
-  closeSync(rec.fd);
+  )
+  closeSync(rec.fd)
 
   // PASSTHROUGH, byte for byte. `writeSync` on fd 1 rather than `process.stdout.write` so nothing is left
   // buffered when this process exits — a truncated answer would read to the product as a different claim.
-  let off = 0;
-  while (off < stdout.length) off += writeSync(1, stdout, off, stdout.length - off);
+  let off = 0
+  while (off < stdout.length) off += writeSync(1, stdout, off, stdout.length - off)
   if (stderr.length > 0) {
-    let e = 0;
-    while (e < stderr.length) e += writeSync(2, stderr, e, stderr.length - e);
+    let e = 0
+    while (e < stderr.length) e += writeSync(2, stderr, e, stderr.length - e)
   }
-  process.exit(status);
+  process.exit(status)
 }
 
 // ── NO `is this the entry point?` GUARD, AND THAT IS THE FIX ─────────────────────────────────────────────
@@ -210,4 +213,4 @@ export function main() {
 //
 // Correct guards exist (`realpathSync` + `pathToFileURL`, or `import.meta.filename` on new enough Node).
 // None of them is worth a silent-abstention risk in a file whose only job is to be executed.
-main();
+main()

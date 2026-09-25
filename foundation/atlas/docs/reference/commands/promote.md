@@ -7,7 +7,7 @@ unchanged and in the same order.
 
 This page describes the **CLI** command `atlas promote`. There is **no `atlas-promote` MCP tool**, and there
 is no third write door: `WRITE_PATHS` is still `{atlas-emit, atlas-link}` and the governance surface is still
-five tools. Promotion is an *ordinary use* of `atlas-emit` (ADR-0008), so an MCP client cannot promote.
+five tools. Promotion is an _ordinary use_ of `atlas-emit` (ADR-0008), so an MCP client cannot promote.
 
 ## Invocation
 
@@ -73,6 +73,7 @@ load-bearing:
    takes, with the same `atlas:mined` scope and `T2` class), because this page's example needs ONE known
    candidate with known bytes rather than whatever a proposer answered. Nothing about the promotion is
    faked, and a mined candidate now reaches this door for real.
+
 2. `.atlas/policy.json` grants `atlas:mined` to `seat:orchestrator`. Without that grant every promotion is
    correctly refused — the last refusal block below is that state.
 
@@ -142,7 +143,7 @@ data:
 # exit 0
 ```
 
-So promotion makes a mined fact **addressable, durable and readable** — but readable as a *proposal*, never
+So promotion makes a mined fact **addressable, durable and readable** — but readable as a _proposal_, never
 as ratified knowledge. What has **not** changed is the thing the two bands exist to keep apart: no mined
 candidate reaches the **governing** band. Promoting a fact into `inv` still means a fact at `T1` or stricter,
 which no mined candidate is; that is a re-classification, it has no door (ADR-0009 / task #88), and the
@@ -150,7 +151,7 @@ which no mined candidate is; that is a re-classification, it has no door (ADR-00
 
 > **The shipped binary still says otherwise, and it is recorded here rather than papered over.**
 > `atlas promote`'s guidance line — visible in every `promote` transcript on this page — still ends
-> *"(a T2 fact is bounded OUT of the `atlas query` pack, TOOLS-6)"*. That was true before ADR-0013 and is not
+> _"(a T2 fact is bounded OUT of the `atlas query` pack, TOOLS-6)"_. That was true before ADR-0013 and is not
 > true now. It is a string in the shipped binary, so it is a code fix and not a documentation one, and it is
 > not made here. Believe the transcript above it, not the sentence.
 >
@@ -190,13 +191,13 @@ just because the node already exists.
 
 ## Exit codes
 
-| code | meaning |
-| --- | --- |
-| `0` | every candidate found was made durable — including the honest empty case (nothing staged, nothing to do) |
-| `1` | the runtime is not composed. Not reachable from the shipped binary; it is the injected-handler seam tests use |
-| `2` | a **governed refusal**: at least one row a gate declined, or a staging read that refused |
+| code | meaning                                                                                                       |
+| ---- | ------------------------------------------------------------------------------------------------------------- |
+| `0`  | every candidate found was made durable — including the honest empty case (nothing staged, nothing to do)      |
+| `1`  | the runtime is not composed. Not reachable from the shipped binary; it is the injected-handler seam tests use |
+| `2`  | a **governed refusal**: at least one row a gate declined, or a staging read that refused                      |
 
-`2` is the code that matters. It means the invocation was well-formed and a *gate* said no, so re-running it
+`2` is the code that matters. It means the invocation was well-formed and a _gate_ said no, so re-running it
 with different arguments will not help — grant a scope, name a ratifier, or repair the store. Every `2` on
 this page names the row and the reason.
 
@@ -205,7 +206,7 @@ this page names the row and the reason.
 **No ratifier named — `unratified`.** Shown above, and it is the gate this door exists for. A staged
 candidate is `T2`, advisory and grounded, which is exactly the shape the confidence fast path auto-accepts;
 if promotion took that path, a machine-proposed fact no human has read would reach the durable store with no
-ratifier consulted. It does not: the door derives *where the write came from* and the fast path does not
+ratifier consulted. It does not: the door derives _where the write came from_ and the fast path does not
 apply to a promotion. `ATLAS_RATIFY_TOKEN` is therefore genuinely required here, unlike an ordinary `T2`
 advisory `emit`.
 
@@ -224,7 +225,7 @@ promote: 0 of 1 staged candidate(s) promoted; 1 refused
 ```
 
 Mining has no actor, so a mined node is owned by **nobody** until an admin grants `atlas:mined` — granting
-it *appoints a curator*. An unset `ATLAS_ACTOR` produces the same refusal for the same reason: the empty
+it _appoints a curator_. An unset `ATLAS_ACTOR` produces the same refusal for the same reason: the empty
 actor is in no scope.
 
 **A staged row whose bytes are gone from the CAS.** `mine` writes the bytes before it publishes the row, so
@@ -235,7 +236,7 @@ would make the row vanish from the report, and not a throw, which would take the
   refused 802f2bcde25d0ab2211a10d639bdde37ffbbe2c3b8251c7ea3b85f7fc5522f6a: candidate bytes absent from CAS — the staged row names a contentHash the store cannot return, so there is no fact to promote
 ```
 
-**A staging sidecar that will not parse.** This is a refusal, and it is *not* "0 candidates" — the
+**A staging sidecar that will not parse.** This is a refusal, and it is _not_ "0 candidates" — the
 distinction is the whole point of the message, because reporting a clean, complete promotion of nothing over
 candidates that are still on disk is the failure mode this door was built to avoid:
 

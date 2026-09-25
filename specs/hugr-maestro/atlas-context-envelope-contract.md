@@ -65,16 +65,16 @@ its materialized ownership state is complete enough for approved plan:
 
 ## Fail-Closed Mapping
 
-| Condition | Result |
-|---|---|
-| Missing/malformed/cross-project actor, revision, snapshot, or unit | `HOLD` before skill load |
-| Guessed/ambiguous skill name or duplicate canonical unit | `HOLD` before skill load |
-| Unit absent from verified Own availability/drill surface | `HOLD`; no nearest match |
-| Missing/malformed ownership artifact | `HOLD`; never `UN-SEEDED` |
-| Stale ownership artifact or cited fact | `HOLD` with receipt |
-| `UNDER_APPROX` impact coverage | `HOLD` with graph evidence |
-| Ownership cap/tail cannot satisfy approved plan | `HOLD` with exact drill pointers |
-| Snapshot changed after plan | `HOLD`; regenerate ContextToolPlan and Own artifacts |
+| Condition                                                          | Result                                               |
+| ------------------------------------------------------------------ | ---------------------------------------------------- |
+| Missing/malformed/cross-project actor, revision, snapshot, or unit | `HOLD` before skill load                             |
+| Guessed/ambiguous skill name or duplicate canonical unit           | `HOLD` before skill load                             |
+| Unit absent from verified Own availability/drill surface           | `HOLD`; no nearest match                             |
+| Missing/malformed ownership artifact                               | `HOLD`; never `UN-SEEDED`                            |
+| Stale ownership artifact or cited fact                             | `HOLD` with receipt                                  |
+| `UNDER_APPROX` impact coverage                                     | `HOLD` with graph evidence                           |
+| Ownership cap/tail cannot satisfy approved plan                    | `HOLD` with exact drill pointers                     |
+| Snapshot changed after plan                                        | `HOLD`; regenerate ContextToolPlan and Own artifacts |
 
 ## Boundary
 

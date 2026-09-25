@@ -35,10 +35,10 @@ invariant: MEM-6: atlas-memory-orientation is the DERIVED, SHARED, byte-identica
 
 ## Exit codes
 
-| code | meaning |
-| --- | --- |
-| `0` | the slab was assembled (an empty/absent tracked log folds to an empty slab, not an error) |
-| `1` | an uncomposed runtime — the composition root failed to stand up, never a throw |
+| code | meaning                                                                                   |
+| ---- | ----------------------------------------------------------------------------------------- |
+| `0`  | the slab was assembled (an empty/absent tracked log folds to an empty slab, not an error) |
+| `1`  | an uncomposed runtime — the composition root failed to stand up, never a throw            |
 
 There is no `2` (rejected) outcome: this door opens no governed token and persists nothing.
 

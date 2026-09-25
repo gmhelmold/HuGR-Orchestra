@@ -65,11 +65,11 @@ The graph was mined from Atlas at `8ada771b`; the read tree was moved to `origin
 runs go through the built binary and the built `dist/` modules, never `src/`. Independent label:
 `git diff --name-only` marks **14** of the 199 facts as anchored at a file that changed and 185 as not.
 
-| tree state | pack-level `stale` (shipped) | per-fact `driftDetect` over the same 199 facts |
-| --- | --- | --- |
-| **A** — at the mine sha `8ada771b` | `false` | 199 FRESH · 0 DRIFTED |
-| **B** — at `origin/master` `44026ae` | `true` for all 199 rows | 185 FRESH · **14 DRIFTED** — TP 14, FP 0, FN 0 |
-| **C** — A + one commit touching only `README.md` | `true` for all 199 rows | **0 DRIFTED** |
+| tree state                                       | pack-level `stale` (shipped) | per-fact `driftDetect` over the same 199 facts |
+| ------------------------------------------------ | ---------------------------- | ---------------------------------------------- |
+| **A** — at the mine sha `8ada771b`               | `false`                      | 199 FRESH · 0 DRIFTED                          |
+| **B** — at `origin/master` `44026ae`             | `true` for all 199 rows      | 185 FRESH · **14 DRIFTED** — TP 14, FP 0, FN 0 |
+| **C** — A + one commit touching only `README.md` | `true` for all 199 rows      | **0 DRIFTED**                                  |
 
 Row C is the point, and it is not a defect report about `stale`: `stale: true` there is CORRECT — the view
 really is behind HEAD, which is exactly what clause 2 promises and what the Consequences call an
@@ -80,7 +80,7 @@ really is behind HEAD, which is exactly what clause 2 promises and what the Cons
 
 The rejection above is stated against a **git** mechanism twice, in these words: "puts a git-worktree
 checkout — the exact `#73` contention surface — on **every** query", and "a per-query HEAD-vs-`builtAt` tree
-diff on the read path". Both are costs of consulting *git* per query.
+diff on the read path". Both are costs of consulting _git_ per query.
 
 What ships is neither. `driftDetect` (`packages/grounding/src/drift.ts`) compares a recorded `subtreeHash`
 against the **built-index `Axes` the composition root already builds once per process** — the same axes, and
@@ -90,7 +90,7 @@ first call in a fresh process** (what a CLI invocation pays) and **~11 ms warm-m
 an axes build that is already paid. End-to-end `atlas query packages` over that graph measured 4.9-5.6 s
 before and 5.0-6.2 s after, on the same box with the same harness — the added pass is inside the noise of a
 command whose cost is the AST fold and the axes build. The CQRS separation the rejection protects is also intact: the authoritative
-*arbitrary-rev* oracle stays `atlas reconcile` / `atlas doctor`, which answer at a **sha the read path never
+_arbitrary-rev_ oracle stays `atlas reconcile` / `atlas doctor`, which answer at a **sha the read path never
 builds**. This is a re-derivation against the snapshot the reader is already holding, not a second oracle.
 
 ### What changed, precisely
@@ -99,7 +99,7 @@ builds**. This is a re-derivation against the snapshot the reader is already hol
    `driftDetect` declares. No parallel enum was minted. The local structural oracle produces `FRESH`/`DRIFTED`
    only; `STALE` (GROUND-13 advisory drift) is carried through unchanged if a producer supplies it.
 2. `Pack` gains `advisory` + `advisoryDropped` (ADR-0013). `stale` is untouched, and `packages/adapter-io/src/
-   projection-query-index.ts` computes it from exactly the two legs it computed it from before — the stored
+projection-query-index.ts` computes it from exactly the two legs it computed it from before — the stored
    `DRIFTED` fold and the N11 per-row watermark. No line of `stale` reads the per-fact verdict, pinned by
    `SCN-TOOLS-6e-3`.
 3. `REQ-TOOLS-6d`'s prohibition clause is narrowed from "shall NOT re-derive per-fact drift on the read path"
@@ -121,8 +121,8 @@ records that the amendment one section up shipped to ONE read door and had to be
 
 `atlas query` and `atlas own` read the same durable store. The amendment above changed `query`; `own`'s feed
 (`packages/adapter-io/src/own-source.ts`) kept applying `atLeastT1` to both of its fact sections, on this
-stated rationale: *"the alternative is a read door that serves a `T2` … that `atlas query` is correctly
-declining to show. A second read door with a laxer bound is a route around the first one."* After this ADR,
+stated rationale: _"the alternative is a read door that serves a `T2` … that `atlas query` is correctly
+declining to show. A second read door with a laxer bound is a route around the first one."_ After this ADR,
 `query` declines nothing of the sort — the rationale described a behaviour that had just been deleted, and
 `REQ-TOOLS-6f` as landed says "The `atlas-query` pack shall…", so the amendment never reached the other door.
 `wp-per-fact-freshness.md` recorded that as a deliberate exclusion ("`atlas own` is NOT widened").

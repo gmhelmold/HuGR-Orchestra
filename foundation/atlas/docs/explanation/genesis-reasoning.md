@@ -1,7 +1,7 @@
 # Genesis — the reasoning (why & how it thinks)
 
 > Explanation companion to [`reference/atlas-genesis.md`](../reference/atlas-genesis.md). The reference is
-> the normative spec (pipeline, invariants `GEN-1..16`, surface, acceptance); this doc is the *why* — the
+> the normative spec (pipeline, invariants `GEN-1..16`, surface, acceptance); this doc is the _why_ — the
 > design rationale, the S2 reasoning loop in depth, the cost model, and the honest limits. Nothing here is
 > normative on its own; it grounds the reference's `GEN-*` invariants.
 
@@ -10,13 +10,13 @@
 Two families exist for "make sense of an existing repo". Genesis commits **entirely to the first** (A-14
 forbids the second), and every step is a **named member** of it — not a bespoke heuristic.
 
-| | **Explicit-structural** (chosen) | **Dense-vector / GraphRAG** (rejected) |
-|---|---|---|
-| retrieval | graph/query over a fact index | ANN similarity over embeddings |
-| determinism | byte-reproducible | probabilistic, model-versioned |
-| cost | ∝ importance-surface | ∝ repo size (embed everything) |
-| output | a **checkable fact** | an opaque vector |
-| prior art | **SCIP** (index; LSIF/stack-graphs = legacy/archived), **Glean**, **Kythe**, **CodeQL/Semgrep**, **Aider repo-map**, **SZZ**, **CodeScene** | VoyageCode2 + vector store, GraphRAG |
+|             | **Explicit-structural** (chosen)                                                                                                            | **Dense-vector / GraphRAG** (rejected) |
+| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------- |
+| retrieval   | graph/query over a fact index                                                                                                               | ANN similarity over embeddings         |
+| determinism | byte-reproducible                                                                                                                           | probabilistic, model-versioned         |
+| cost        | ∝ importance-surface                                                                                                                        | ∝ repo size (embed everything)         |
+| output      | a **checkable fact**                                                                                                                        | an opaque vector                       |
+| prior art   | **SCIP** (index; LSIF/stack-graphs = legacy/archived), **Glean**, **Kythe**, **CodeQL/Semgrep**, **Aider repo-map**, **SZZ**, **CodeScene** | VoyageCode2 + vector store, GraphRAG   |
 
 The Atlas's own fact-over-schema model descends from **Glean** (Meta) and **Kythe** (Google) — code fact
 databases keyed by a user-defined schema; genesis is how that DB is first populated. (Backend reality, 2025:
@@ -27,7 +27,7 @@ indexers; see [`atlas-index.md`](../reference/atlas-index.md) INDEX-3/13.)
 
 The LLM is **never an oracle** here; it is a **candidate proposer inside a mechanical verification harness**.
 Genesis is the **static + LLM analog of Daikon** (dynamic likely-invariant detection): where Daikon must
-*observe* invariants from a thorough test-suite, genesis reads structure and *proposes* them, then
+_observe_ invariants from a thorough test-suite, genesis reads structure and _proposes_ them, then
 machine-checks each — no test-execution dependency. The kernel idea: **a claim is admitted only when the
 model's own synthesized `check` passes on the real code** — the model cannot lie, because its assertion is
 executable and gets executed. (Normative form: `GEN-12`.)
@@ -45,11 +45,11 @@ PROPOSE → VERIFY(ground · check · SCORE obviousness) → [counterexample?] R
 
 1. **PROPOSE.** Draft typed candidate(s) `{ slot∈closed-vocab, primaryAnchor, claim, check?, tierHint }`.
    Chain-of-thought is **scratch — discarded**; only the typed candidate persists. **Bug-primed:** the SZZ
-   scar tissue aims the model at the *fragile* invariant — the property whose violation caused a past fix.
+   scar tissue aims the model at the _fragile_ invariant — the property whose violation caused a past fix.
    (Mine the bugs to find the invariant.) NB: `primaryAnchor` is **computed mechanically** from the referenced
    symbols, not LLM-chosen (KNOW-15) — only the claim body / slot / check are proposed.
 2. **VERIFY — three mechanical gates.** **ground:** `primaryAnchor` re-derives at `@sha`, else drop
-   (KNOW-2). **check** *(the crux)*: for a predicate, **compile & run** the synthesized CodeQL/Semgrep
+   (KNOW-2). **check** _(the crux)_: for a predicate, **compile & run** the synthesized CodeQL/Semgrep
    `check` on current code — it MUST return `HOLDS`; a failing check is a **counterexample**, not a warning.
    **teeth:** it MUST also **flip to `BROKEN` on a mutated counterfactual** of the subtree — a check no mutant
    breaks is vacuous and dropped. **obviousness:** a claim entailed by the signature/types alone is **scored at
@@ -68,7 +68,7 @@ PROPOSE → VERIFY(ground · check · SCORE obviousness) → [counterexample?] R
 **The honest limit.** A passing `check` proves the property holds on **current** code and is re-checked on
 drift — it is **not** a proof for all future inputs (that needs a theorem prover, out of scope). Like
 Daikon's "likely invariants," genesis facts are **machine-checked likely invariants**, not proofs. And
-because usefulness (non-obvious ∧ actionable) is the *one* judgment no mechanism can prove a-priori, the
+because usefulness (non-obvious ∧ actionable) is the _one_ judgment no mechanism can prove a-priori, the
 **decision** is taken **a-posteriori by downstream use** (`GEN-16` / KNOW-17): seed loose-but-thin, let unused
 facts decay. The obviousness **score**, by contrast, is computed a-priori at mine time — the one moment the
 source bytes and the model are both in hand — and the two **compose** rather than replace each other: genesis
@@ -92,36 +92,36 @@ sophisticated parts are **dormant**, switched on only when a cheap signal says a
 **high-value** (tier/blast) and **uncertain**. The common path is **one LLM call + two mechanical gates**;
 the expensive path is the rare exception.
 
-| mechanism | **default (cheap path)** | escalate only when | why this is the sweet spot |
-|---|---|---|---|
-| LLM calls | top-PPR frontier only | — | cost ∝ importance-surface (GEN-2/3) |
-| fact family | **advisory** — grounded claim, **no check** | checkable **and** `tier≥T1` → predicate | synthesizing + running a check is the pricey part; most facts don't need it |
-| CEGIS refine | `K=1` (one repair) | never beyond `K` | abstain fast beats forcing |
-| corroborate | **OFF** (`N=1`) | `T0`-candidate or high-blast **and** uncertain | rare, not per-site |
-| refuter | **OFF** | `T0`-candidates only, **small** model | only the tail, cheapest model |
-| check engine | **type-checker / LSP** (sound, `$0`) → **Semgrep** (cheap AST) | **CodeQL** only when dataflow is required | the compiler already ran; the heavy DB is built **once**, amortized |
-| coverage | seed the **hot frontier only** | — | the cold tail is seeded **free** by born-from-work |
+| mechanism    | **default (cheap path)**                                       | escalate only when                             | why this is the sweet spot                                                  |
+| ------------ | -------------------------------------------------------------- | ---------------------------------------------- | --------------------------------------------------------------------------- |
+| LLM calls    | top-PPR frontier only                                          | —                                              | cost ∝ importance-surface (GEN-2/3)                                         |
+| fact family  | **advisory** — grounded claim, **no check**                    | checkable **and** `tier≥T1` → predicate        | synthesizing + running a check is the pricey part; most facts don't need it |
+| CEGIS refine | `K=1` (one repair)                                             | never beyond `K`                               | abstain fast beats forcing                                                  |
+| corroborate  | **OFF** (`N=1`)                                                | `T0`-candidate or high-blast **and** uncertain | rare, not per-site                                                          |
+| refuter      | **OFF**                                                        | `T0`-candidates only, **small** model          | only the tail, cheapest model                                               |
+| check engine | **type-checker / LSP** (sound, `$0`) → **Semgrep** (cheap AST) | **CodeQL** only when dataflow is required      | the compiler already ran; the heavy DB is built **once**, amortized         |
+| coverage     | seed the **hot frontier only**                                 | —                                              | the cold tail is seeded **free** by born-from-work                          |
 
 The last row is the biggest lever: **genesis is scopable and need not run whole-repo.** Seed the hot
 territories; **cold code nobody works on never pays a genesis pass** — born-from-work (KNOW-13) covers it
-for free, only when a wave enters it. So real cost ≈ *importance-surface ∩ what-you-actually-work-on*.
+for free, only when a wave enters it. So real cost ≈ _importance-surface ∩ what-you-actually-work-on_.
 
 ## Optional deepening loops — genesis is iterative, not single-pass
 
-The first S2 pass is a *shallow* seed. Three **optional** loops can deepen it — each the **depth dial of
+The first S2 pass is a _shallow_ seed. Three **optional** loops can deepen it — each the **depth dial of
 GEN-13/GEN-14**: off-or-shallow by default, budget-gated, with a **diminishing-returns / fixpoint stop**.
-They add loop *structure* over existing machinery (propose→verify, `relate()`) — **no new subsystem**. Why
-iterative is smarter: the first extraction reveals *where the important unknowns are*, so the frontier is
+They add loop _structure_ over existing machinery (propose→verify, `relate()`) — **no new subsystem**. Why
+iterative is smarter: the first extraction reveals _where the important unknowns are_, so the frontier is
 **refined by what you learn**, not fixed upfront.
 
-| loop | what it does | reuses | stop (anti-runaway) | default |
-|---|---|---|---|---|
-| **REVIEW** (quality) | an independent cold pass over the just-seeded *set* — drops contradictions, redundancy, obvious-that-slipped, mis-tiering (cross-fact, vs S2's per-fact check) | the refuter | a round that revises nothing (fixpoint), or `N` rounds | on for `tier≥T1` only |
-| **ENRICH** (depth) | deepen an admitted fact — promote advisory→predicate if it now earns a `check`, link related facts, adjust tier | `relate()` + the predicate path | marginal value `< ε` | off |
-| **EXPAND** (breadth) | follow the graph — a seeded fact's dependency edges surface **new** sites off the static PPR frontier; re-rank + extract | the dependency axis + PPR | **loop-until-dry** + budget + max-hops | off |
+| loop                 | what it does                                                                                                                                                   | reuses                          | stop (anti-runaway)                                    | default               |
+| -------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------- | ------------------------------------------------------ | --------------------- |
+| **REVIEW** (quality) | an independent cold pass over the just-seeded _set_ — drops contradictions, redundancy, obvious-that-slipped, mis-tiering (cross-fact, vs S2's per-fact check) | the refuter                     | a round that revises nothing (fixpoint), or `N` rounds | on for `tier≥T1` only |
+| **ENRICH** (depth)   | deepen an admitted fact — promote advisory→predicate if it now earns a `check`, link related facts, adjust tier                                                | `relate()` + the predicate path | marginal value `< ε`                                   | off                   |
+| **EXPAND** (breadth) | follow the graph — a seeded fact's dependency edges surface **new** sites off the static PPR frontier; re-rank + extract                                       | the dependency axis + PPR       | **loop-until-dry** + budget + max-hops                 | off                   |
 
 **These do not replace born-from-work.** Born-from-work is the **free** steady-state enrichment (lazy, as a
-wave touches code); the genesis loops are **eager** enrichment paid upfront for a richer *initial* seed. Use
+wave touches code); the genesis loops are **eager** enrichment paid upfront for a richer _initial_ seed. Use
 them only where an upfront-rich seed earns the spend.
 
 ## Determinism boundary (honest)
@@ -132,7 +132,7 @@ Not end-to-end deterministic — and it says so:
   damping + seed pinned).
 - **S2 is LLM** (content non-deterministic), but its **selection** (which sites, what order) is deterministic
   and **every output is grounding-gated** — an ungrounded seed never lands.
-- **S3 is human** — the *question set* is derived mechanically; only the *answers* are the human's.
+- **S3 is human** — the _question set_ is derived mechanically; only the _answers_ are the human's.
 
-The parts that decide *what enters the store* (ranking + grounding + ratification) are deterministic; only
-the *drafting* is model-driven, and always gated.
+The parts that decide _what enters the store_ (ranking + grounding + ratification) are deterministic; only
+the _drafting_ is model-driven, and always gated.

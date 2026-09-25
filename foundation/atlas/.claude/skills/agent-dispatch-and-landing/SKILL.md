@@ -12,7 +12,7 @@ description: >
 ## Isolation is not optional
 
 **One worktree per dispatched agent.** Worktrees of the same clone share the index and the stash, so an
-agent working in the shared checkout will commit onto *your* active branch and its work will ride into a
+agent working in the shared checkout will commit onto _your_ active branch and its work will ride into a
 merge that never gated it. Measured: a background task committed onto the lead's branch; the squash carried
 **three files when one was intended**, caught only by reading `git show --stat`.
 
@@ -26,7 +26,7 @@ own worktree and had already pushed a PR. Nothing was in its head.
 Two peer sessions the same day died with work inside and left no branch. The loss was not the time — it was
 **counting on a deliverable that did not exist**, discovered hours later.
 
-So the dispatch contract carries: *push the branch at the first commit that compiles, even incomplete.*
+So the dispatch contract carries: _push the branch at the first commit that compiles, even incomplete._
 Costs one push; buys every future rate limit.
 
 ## What a brief must carry
@@ -40,9 +40,9 @@ Costs one push; buys every future rate limit.
   `git show --stat` before pushing.
 - **The mutation-probe requirement:** the agent must break its own implementation, confirm the test goes
   red, restore, and **report the measured before/after**.
-- **The stop line:** *"open the PR, wait for CI, stop at 'PR green, waiting for the lead'. You do not
-  merge."*
-- **One question back:** *"what did my framing of this get wrong?"* This is where the best findings come
+- **The stop line:** _"open the PR, wait for CI, stop at 'PR green, waiting for the lead'. You do not
+  merge."_
+- **One question back:** _"what did my framing of this get wrong?"_ This is where the best findings come
   from — an agent told me my write door should fold into an existing one, then read the ADR and found the
   reasoning only applied to the same store.
 
@@ -53,7 +53,7 @@ whether a thing was already done. The report is a lead, not evidence.
 
 The landing sequence:
 
-1. **Read the diff for guard changes first.** A diff that touches gate *logic* deserves more scrutiny than
+1. **Read the diff for guard changes first.** A diff that touches gate _logic_ deserves more scrutiny than
    everything else in the PR combined — see `gate-authoring`, "prove it is a strengthening".
 2. **Verify every citation.** When an agent justifies a decision by citing a ratified document, open the
    document. (It cited an ADR licensing a surface change; the citation was accurate — but that is a fact I

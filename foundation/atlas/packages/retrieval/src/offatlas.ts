@@ -7,14 +7,14 @@
 // history ⇒ rate `0`, never a throw. [FLAG] the trigger threshold θ is an OPEN DEFINE dependency — taken
 // as an explicit parameter (`offAtlasRate > θ`), never a baked constant.
 
-import type { OffAtlas } from './types.js';
+import type { OffAtlas } from "./types.js"
 
 /**
  * [OPEN DEFINE — RETR-13] The off-atlas rate value that triggers a calibration prompt. The reference is
  * SILENT on this number (an open DEFINE reconciliation); transcribed as a parameter — a `number` —
  * NEVER a baked constant. S3's golden binds the concrete value once DEFINE supplies it.
  */
-export type OffAtlasThreshold = number;
+export type OffAtlasThreshold = number
 
 /**
  * The MISS-oracle — off-atlas coverage per territory (RETR-13). Logs, per territory, an OFF-ATLAS RATE =
@@ -29,7 +29,7 @@ export interface OffatlasApi {
   /** Per-territory coverage ledger (the MISS-oracle, RETR-13): each territory's `served` /
    *  `offAtlasReads` / `offAtlasRate`. Deterministic; a territory with no served history reports rate
    *  `0`, never a throw. (atlas-retrieval:174) */
-  offAtlas(): readonly OffAtlas[];
+  offAtlas(): readonly OffAtlas[]
 
   /** The threshold-crossing predicate (RETR-13), written PARAMETRIC over the OPEN-DEFINE threshold: a
    *  territory whose off-atlas rate crosses `threshold` MUST raise a calibration prompt to author the
@@ -39,13 +39,13 @@ export interface OffatlasApi {
    *
    *  [FLAG — `territory` arg type] transcribed as `string` (the territory name / governance key),
    *  matching `OffAtlas.territory`. */
-  crossesThreshold(territory: string, threshold: OffAtlasThreshold): boolean;
+  crossesThreshold(territory: string, threshold: OffAtlasThreshold): boolean
 }
 
 /** One served turn for a territory + whether the seat had to `Read`/`Grep` OUTSIDE the surfaced scope-set. */
 export interface TurnRecord {
-  readonly territory: string;
-  readonly offAtlas: boolean;
+  readonly territory: string
+  readonly offAtlas: boolean
 }
 
 /**
@@ -57,18 +57,18 @@ export interface TurnRecord {
  *   - `crossesThreshold`  — `offAtlasRate > threshold` (θ is a PARAMETER, an OPEN DEFINE dependency).
  */
 export function offAtlasFrom(turns: readonly TurnRecord[], known: readonly string[] = []): OffatlasApi {
-  const served = new Map<string, number>();
-  const offReads = new Map<string, number>();
+  const served = new Map<string, number>()
+  const offReads = new Map<string, number>()
   for (const t of turns) {
-    served.set(t.territory, (served.get(t.territory) ?? 0) + 1);
-    if (t.offAtlas) offReads.set(t.territory, (offReads.get(t.territory) ?? 0) + 1);
+    served.set(t.territory, (served.get(t.territory) ?? 0) + 1)
+    if (t.offAtlas) offReads.set(t.territory, (offReads.get(t.territory) ?? 0) + 1)
   }
-  for (const k of known) if (!served.has(k)) served.set(k, 0); // registered-but-unserved ⇒ served 0
+  for (const k of known) if (!served.has(k)) served.set(k, 0) // registered-but-unserved ⇒ served 0
 
   const rateOf = (territory: string): number => {
-    const s = served.get(territory) ?? 0;
-    return s === 0 ? 0 : (offReads.get(territory) ?? 0) / s; // no served history ⇒ 0, never NaN / throw
-  };
+    const s = served.get(territory) ?? 0
+    return s === 0 ? 0 : (offReads.get(territory) ?? 0) / s // no served history ⇒ 0, never NaN / throw
+  }
 
   const offAtlas = (): readonly OffAtlas[] =>
     [...served.keys()].sort().map((territory) => ({
@@ -76,10 +76,9 @@ export function offAtlasFrom(turns: readonly TurnRecord[], known: readonly strin
       served: served.get(territory) ?? 0,
       offAtlasReads: offReads.get(territory) ?? 0,
       offAtlasRate: rateOf(territory),
-    }));
+    }))
 
-  const crossesThreshold = (territory: string, threshold: OffAtlasThreshold): boolean =>
-    rateOf(territory) > threshold; // parametric over the OPEN-DEFINE θ; total (unknown territory ⇒ rate 0)
+  const crossesThreshold = (territory: string, threshold: OffAtlasThreshold): boolean => rateOf(territory) > threshold // parametric over the OPEN-DEFINE θ; total (unknown territory ⇒ rate 0)
 
-  return { offAtlas, crossesThreshold };
+  return { offAtlas, crossesThreshold }
 }

@@ -85,14 +85,14 @@ freeze, not foundation source evidence.
 
 ## Tools and Guards
 
-| Capability | Purpose | Boundary |
-|---|---|---|
-| `plan-revision-read` | read exact proposed revision and canonical scope | Maestro durable evidence read |
-| `atlas-context-envelope-read` | frozen adapter over measured current Atlas seam | Atlas read only |
-| `context-record-write` | persist immutable bound result | Maestro durable evidence write |
-| `context-request-schema-guard` | reject prose, broad, or uncanonical scope | before Atlas read |
-| `context-envelope-guard` | require measured adapter/version and envelope evidence | before persistence |
-| `no-governed-task-before-approval` | deny Task/child Session without approved revision identity | Session/Task boundary |
+| Capability                         | Purpose                                                    | Boundary                       |
+| ---------------------------------- | ---------------------------------------------------------- | ------------------------------ |
+| `plan-revision-read`               | read exact proposed revision and canonical scope           | Maestro durable evidence read  |
+| `atlas-context-envelope-read`      | frozen adapter over measured current Atlas seam            | Atlas read only                |
+| `context-record-write`             | persist immutable bound result                             | Maestro durable evidence write |
+| `context-request-schema-guard`     | reject prose, broad, or uncanonical scope                  | before Atlas read              |
+| `context-envelope-guard`           | require measured adapter/version and envelope evidence     | before persistence             |
+| `no-governed-task-before-approval` | deny Task/child Session without approved revision identity | Session/Task boundary          |
 
 No model skill, shell, product edit, Atlas write, member tool, approval, or task creation is granted.
 
@@ -111,14 +111,14 @@ new Atlas evidence creates linked result and never replaces prior plan evidence.
 
 ## Refusal and Recovery
 
-| Condition | Result |
-|---|---|
-| Non-canonical/empty scope | `HOLD`; no broad lookup or plan/task |
-| Atlas adapter unratified | `HOLD`; no direct foundation import from Maestro runtime |
-| Empty/uncovered/malformed current Atlas pack | `HOLD`; never mislabel as unseeded |
-| Stale, mismatched, provenance-free, or receipt-free envelope | `HOLD`; preserve reason/evidence |
-| Explicit future Atlas unseeded declaration | `UN-SEEDED`; preserve declaration identity |
-| Duplicate trigger | return stored record |
+| Condition                                                    | Result                                                   |
+| ------------------------------------------------------------ | -------------------------------------------------------- |
+| Non-canonical/empty scope                                    | `HOLD`; no broad lookup or plan/task                     |
+| Atlas adapter unratified                                     | `HOLD`; no direct foundation import from Maestro runtime |
+| Empty/uncovered/malformed current Atlas pack                 | `HOLD`; never mislabel as unseeded                       |
+| Stale, mismatched, provenance-free, or receipt-free envelope | `HOLD`; preserve reason/evidence                         |
+| Explicit future Atlas unseeded declaration                   | `UN-SEEDED`; preserve declaration identity               |
+| Duplicate trigger                                            | return stored record                                     |
 
 ## Acceptance After Ratification
 

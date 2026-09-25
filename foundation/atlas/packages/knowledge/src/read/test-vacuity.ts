@@ -37,7 +37,7 @@
 // SCOPE/LINEAGE FILTER (#153 lesson): the optional `unit` filter keeps only rows on that exact unit lineage
 // (`unitKey === unit`) — exact-match, not a raw prefix — since a test-vacuity fact's identity anchors one unit.
 
-import type { StoreProjection } from '../write/router.js';
+import type { StoreProjection } from "../write/router.js"
 
 /** One grounded TEST-VACUITY fact the admit door admitted (ADR-0015 D5). `nodeKey` is the fact's identity
  *  (`testVacuityKey`, the row's key); `unitKey`/`testName` are the identity legs and `shape` the proven
@@ -48,16 +48,16 @@ import type { StoreProjection } from '../write/router.js';
  *  (single-anchor, no lineage — see the file header) and NO freshness leg (re-derivable at HEAD by the adapter's
  *  tree-sitter oracle, which this pure fold cannot reach — never faked). */
 export interface GroundedTestVacuity {
-  readonly nodeKey: string;
-  readonly unitKey: string;
-  readonly testName: string;
-  readonly shape: string; // the proven TestVacuityShape VALUE, string form at this read seam (mirror relationKind)
-  readonly seal?: string; // ADR-0017 two-seal provenance — 'proven' | absent (unsealed); never fabricated
+  readonly nodeKey: string
+  readonly unitKey: string
+  readonly testName: string
+  readonly shape: string // the proven TestVacuityShape VALUE, string form at this read seam (mirror relationKind)
+  readonly seal?: string // ADR-0017 two-seal provenance — 'proven' | absent (unsealed); never fabricated
 }
 
 /** Lexicographic string comparator — total, no locale (the one the sibling read folds sort by). */
 function cmp(x: string, y: string): number {
-  return x < y ? -1 : x > y ? 1 : 0;
+  return x < y ? -1 : x > y ? 1 : 0
 }
 
 /**
@@ -74,14 +74,16 @@ function cmp(x: string, y: string): number {
  * each admitted fact reads back as itself, so this is strictly a filter-and-project fold.
  */
 export function testVacuitiesOf(projection: StoreProjection, unit?: string): readonly GroundedTestVacuity[] {
-  const filter = typeof unit === 'string' && unit.length > 0 ? unit : undefined;
+  const filter = typeof unit === "string" && unit.length > 0 ? unit : undefined
 
-  const out: GroundedTestVacuity[] = [];
+  const out: GroundedTestVacuity[] = []
   for (const node of projection.current.values()) {
-    if (node.family !== 'test-vacuity') continue;
-    const u = node.unitKey, t = node.testName, s = node.shape;
-    if (typeof u !== 'string' || typeof t !== 'string' || typeof s !== 'string') continue; // malformed row ⇒ skip
-    if (filter !== undefined && u !== filter) continue;
+    if (node.family !== "test-vacuity") continue
+    const u = node.unitKey,
+      t = node.testName,
+      s = node.shape
+    if (typeof u !== "string" || typeof t !== "string" || typeof s !== "string") continue // malformed row ⇒ skip
+    if (filter !== undefined && u !== filter) continue
     out.push({
       nodeKey: node.nodeKey,
       unitKey: u,
@@ -89,9 +91,9 @@ export function testVacuitiesOf(projection: StoreProjection, unit?: string): rea
       shape: s,
       // SEAL carrier — from the projection row's own `seal` (ADR-0017); omitted ⇒ absent (exactOptional),
       // never a fabricated 'proven'. Mirror relationsOf's seal discipline exactly.
-      ...(typeof node.seal === 'string' ? { seal: node.seal } : {}),
-    });
+      ...(typeof node.seal === "string" ? { seal: node.seal } : {}),
+    })
   }
 
-  return out.sort((x, y) => cmp(x.unitKey, y.unitKey) || cmp(x.testName, y.testName) || cmp(x.nodeKey, y.nodeKey));
+  return out.sort((x, y) => cmp(x.unitKey, y.unitKey) || cmp(x.testName, y.testName) || cmp(x.nodeKey, y.nodeKey))
 }

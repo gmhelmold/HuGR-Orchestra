@@ -49,17 +49,13 @@ describe("janitor scan parsers", () => {
   })
 
   test("parses Windows disk, process, and port scanner output", () => {
-    expect(parseWindowsDiskJson('{"DeviceID":"C:","Size":100,"FreeSpace":10}')).toEqual([
-      { mount: "C:", use: 0.9 },
-    ])
+    expect(parseWindowsDiskJson('{"DeviceID":"C:","Size":100,"FreeSpace":10}')).toEqual([{ mount: "C:", use: 0.9 }])
     expect(
       parseWindowsProcessJson(
         '{"Id":42,"Name":"bun","CPU":600,"StartTime":"2026-09-09T00:00:00.000Z"}',
         Date.parse("2026-09-09T01:00:00.000Z"),
       ),
-    ).toEqual([
-      expect.objectContaining({ pid: 42, comm: "bun", ageMinutes: 60, pcpu: 16.666666666666664 }),
-    ])
+    ).toEqual([expect.objectContaining({ pid: 42, comm: "bun", ageMinutes: 60, pcpu: 16.666666666666664 })])
     expect(parseWindowsPortJson('{"LocalAddress":"0.0.0.0","LocalPort":3000,"OwningProcess":42}')).toEqual([
       { address: "0.0.0.0", port: 3000, pid: 42, evidence: expect.any(String) },
     ])

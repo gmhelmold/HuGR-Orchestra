@@ -28,28 +28,28 @@
 // be a fabricated structural claim. The operator-visible consequence is that `atlas mine` seeds candidates
 // only once the repo has been indexed.
 
-import { join } from 'node:path';
-import { id } from '@atlas/kernel';
-import { build, createResolve, createDepgraph, createSymbolReverse } from '@atlas/index';
-import type { Axes, FileTree, ScipOutput } from '@atlas/index';
-import { createInit } from '@atlas/tools';
-import type { Skeleton, SkeletonSource, UnitPrior, UnitPriorSource } from '@atlas/genesis';
-import { walkFileTree } from './fs.js';
-import { foldAstUnitsWithPriors } from './ast.js';
-import { readScipOrEmpty } from './scip.js';
-import { createIndexAdapter } from './index-adapter.js';
-import { createRevIndex } from './rev-index.js';
-import type { RevIndex } from './rev-index.js';
-import { headSha } from './run-git.js';
+import { join } from "node:path"
+import { id } from "@atlas/kernel"
+import { build, createResolve, createDepgraph, createSymbolReverse } from "@atlas/index"
+import type { Axes, FileTree, ScipOutput } from "@atlas/index"
+import { createInit } from "@atlas/tools"
+import type { Skeleton, SkeletonSource, UnitPrior, UnitPriorSource } from "@atlas/genesis"
+import { walkFileTree } from "./fs.js"
+import { foldAstUnitsWithPriors } from "./ast.js"
+import { readScipOrEmpty } from "./scip.js"
+import { createIndexAdapter } from "./index-adapter.js"
+import { createRevIndex } from "./rev-index.js"
+import type { RevIndex } from "./rev-index.js"
+import { headSha } from "./run-git.js"
 
 /** Where the optional SCIP dump lives under a repo — the SAME location `composeRuntime` reads (compose.ts:49),
  *  so the skeleton genesis mines over and the index the truth-gate re-derives against cannot diverge. */
-const SCIP_REL = join('.atlas', 'index.scip');
+const SCIP_REL = join(".atlas", "index.scip")
 
 /** The empty structural inputs used when only the already-built `Axes` are available (the non-HEAD rev leg).
  *  They are never folded: the adapter's `build` is overridden with the pre-built axes below. */
-const NO_TREE: FileTree = { path: '.', children: [] };
-const NO_SCIP: ScipOutput = { documents: [] };
+const NO_TREE: FileTree = { path: ".", children: [] }
+const NO_SCIP: ScipOutput = { documents: [] }
 
 /**
  * The injectable seams (testability only — every one defaults to the real frozen adapter). A test can drive
@@ -64,14 +64,14 @@ const NO_SCIP: ScipOutput = { documents: [] };
  * to be recovered by a SECOND whole-repo parse. They ride on the object that already did the first one.
  */
 export interface ProductionSkeletonSource extends SkeletonSource {
-  readonly unitPrior: UnitPriorSource;
+  readonly unitPrior: UnitPriorSource
 }
 
 export interface SkeletonSourceDeps {
-  readonly walkFileTree?: (repoPath: string) => FileTree;
-  readonly readScip?: (scipPath: string) => ScipOutput;
-  readonly headSha?: (repoPath: string) => string | undefined;
-  readonly revIndex?: RevIndex;
+  readonly walkFileTree?: (repoPath: string) => FileTree
+  readonly readScip?: (scipPath: string) => ScipOutput
+  readonly headSha?: (repoPath: string) => string | undefined
+  readonly revIndex?: RevIndex
 }
 
 /**
@@ -88,7 +88,7 @@ export interface SkeletonSourceDeps {
  * "rebuild twice ⇒ identical trees"), so handing back the axes already built from the SAME (tree, scip) is
  * byte-identical to letting the adapter rebuild them — it only avoids re-hashing the whole tree twice.
  */
-function manifestOf(axes: Axes): Skeleton['manifest'] {
+function manifestOf(axes: Axes): Skeleton["manifest"] {
   const index = createIndexAdapter({
     fileTree: NO_TREE,
     scipOutput: NO_SCIP,
@@ -97,30 +97,26 @@ function manifestOf(axes: Axes): Skeleton['manifest'] {
     createDepgraph,
     createSymbolReverse,
     nodeHashOfPath: (p: string) => id({ file: p }),
-  });
+  })
   // `'.'` — the WHOLE repo, spelled the way the index names it. This used to pass the absolute `repoPath`,
   // which worked only because `territories()` discarded its argument and always returned the top-level
   // territories; now that the path is READ (index-adapter.ts), the argument has to say what was always
   // meant. The index is keyed by repo-RELATIVE paths (`build.ts` keys every node by its tree path), so an
   // absolute path names nothing in it and never could — the manifest is the whole repo's, not a subtree's.
-  return { territories: createInit(index, { isCandidate: () => false }).init('.').territories };
+  return { territories: createInit(index, { isCandidate: () => false }).init(".").territories }
 }
 
 /** The WORKING-TREE axes: the frozen walk + the optional SCIP dump, folded exactly as `composeRuntime` folds
  *  them (`foldAstUnits` before `build`, so the skeleton carries the same `::` sub-file nodes the truth-gate
  *  re-derives freshness against once `initAst()` has been awaited; a no-op warm-up-free). Total by
  *  inheritance: an unwalkable tree ⇒ empty tracked set, an absent/corrupt dump ⇒ `{documents: []}`. */
-function workingTreeAxes(
-  repoPath: string,
-  deps: SkeletonSourceDeps,
-  priors: Map<string, UnitPrior>,
-): Axes {
-  const walk = deps.walkFileTree ?? walkFileTree;
-  const scip = deps.readScip ?? readScipOrEmpty;
+function workingTreeAxes(repoPath: string, deps: SkeletonSourceDeps, priors: Map<string, UnitPrior>): Axes {
+  const walk = deps.walkFileTree ?? walkFileTree
+  const scip = deps.readScip ?? readScipOrEmpty
   // ONE fold, TWO outputs (#182). The `::` units and their ordering priors come from the same parse, so a
   // unit the frontier can seed and a unit the frontier can rank are the same set by construction — there
   // is no second walk to fall out of step with this one, and no re-parse to pay for.
-  const folded = foldAstUnitsWithPriors(walk(repoPath));
+  const folded = foldAstUnitsWithPriors(walk(repoPath))
   // #197 — RESET the instance-global priors to EXACTLY this fold's set before repopulating. The map is
   // path-keyed and instance-lived; without the clear it is `.set()`-only, so a `(repo, rev)` folded EARLIER
   // on the same source leaks its priors at any path THIS fold does not re-state. On the shipped path this is
@@ -128,9 +124,9 @@ function workingTreeAxes(
   // per-fold view, not an accumulator, so a future multi-repo/multi-rev reuser of one instance must read
   // THIS fold's priors, not a stale peer's. UNKNOWN (a path this fold lacks) must read `undefined` so the
   // frontier comparator degrades to address order, never asserts a prior from a DIFFERENT tree.
-  priors.clear();
-  for (const [path, p] of folded.priors) priors.set(path, p);
-  return build(folded.tree, scip(join(repoPath, SCIP_REL)));
+  priors.clear()
+  for (const [path, p] of folded.priors) priors.set(path, p)
+  return build(folded.tree, scip(join(repoPath, SCIP_REL)))
 }
 
 /**
@@ -154,27 +150,27 @@ function workingTreeAxes(
  * lives on the source instance (one mine pass), never module-global.
  */
 export function createSkeletonSource(repoPath: string, deps: SkeletonSourceDeps = {}): ProductionSkeletonSource {
-  const head = deps.headSha ?? headSha;
-  const memo = new Map<string, Skeleton>();
+  const head = deps.headSha ?? headSha
+  const memo = new Map<string, Skeleton>()
   // The #182 ordering priors, accumulated by the SAME fold that produces the working-tree axes above. It
   // is a cache, never an oracle: a path it does not hold reads `undefined` = UNKNOWN, and the frontier
   // comparator degrades to address order rather than asserting a prior it does not have. The non-HEAD rev
   // leg genuinely has none (`axesAt` builds from a throwaway worktree, not through this fold) and that is
   // the honest answer for it.
-  const priors = new Map<string, UnitPrior>();
+  const priors = new Map<string, UnitPrior>()
   // The arbitrary-rev index is built LAZILY: constructing it is cheap, but the HEAD leg must never pay for
   // a capability it does not use, and a caller that only ever mines HEAD must never touch `git worktree`.
-  let rev0: RevIndex | undefined = deps.revIndex;
-  const revIndex = (): RevIndex => (rev0 ??= createRevIndex(repoPath));
+  let rev0: RevIndex | undefined = deps.revIndex
+  const revIndex = (): RevIndex => (rev0 ??= createRevIndex(repoPath))
 
   const axesFor = (repo: string, rev: string): Axes => {
-    if (rev === '' || rev === 'HEAD') return workingTreeAxes(repo, deps, priors);
-    const at = head(repo);
+    if (rev === "" || rev === "HEAD") return workingTreeAxes(repo, deps, priors)
+    const at = head(repo)
     // `rev` is compared against the resolved HEAD sha, so `atlas mine --rev <headSha>` takes the same
     // (SCIP-bearing) leg as `HEAD` instead of paying for a redundant worktree checkout of HEAD itself.
-    if (at !== undefined && rev === at) return workingTreeAxes(repo, deps, priors);
-    return revIndex().axesAt(rev);
-  };
+    if (at !== undefined && rev === at) return workingTreeAxes(repo, deps, priors)
+    return revIndex().axesAt(rev)
+  }
 
   return {
     unitPrior: (qualifiedPath: string): UnitPrior | undefined => priors.get(qualifiedPath),
@@ -187,21 +183,21 @@ export function createSkeletonSource(repoPath: string, deps: SkeletonSourceDeps 
       // runtime bytes — `@atlas/index` build.ts `edgeKey` already spells the identical separator this way.
       // NOT `\\0`: that is a two-character backslash-zero, which a repo path can contain, and the join
       // stops being injective the moment it can (`skeleton-memo-key.test.ts` pins exactly that collision).
-      const key = `${repo}\0${rev}`;
-      const hit = memo.get(key);
-      if (hit !== undefined) return hit;
-      const axes = axesFor(repo, rev);
+      const key = `${repo}\0${rev}`
+      const hit = memo.get(key)
+      if (hit !== undefined) return hit
+      const axes = axesFor(repo, rev)
       // `canonicalizeSkeleton` (rank.ts) is applied by the genesis side (`createScan` / `createMine`) on
       // everything this port returns, so sorting is NOT duplicated here — this source is the structural
       // producer, canonicalisation is the consumer's law.
-      const sk: Skeleton = { axes, manifest: manifestOf(axes) };
-      memo.set(key, sk);
-      return sk;
+      const sk: Skeleton = { axes, manifest: manifestOf(axes) }
+      memo.set(key, sk)
+      return sk
     },
-  };
+  }
 }
 
 // differential-vs-oracle (compile-time): the factory's return conforms to the frozen genesis `SkeletonSource`
 // port — an S0 seam that stopped satisfying `skeleton(repo, rev): Skeleton` would fail the build here.
-const _conforms: (repo: string) => SkeletonSource = createSkeletonSource;
-void _conforms;
+const _conforms: (repo: string) => SkeletonSource = createSkeletonSource
+void _conforms

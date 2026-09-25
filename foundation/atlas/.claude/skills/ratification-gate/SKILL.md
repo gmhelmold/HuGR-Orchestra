@@ -18,37 +18,38 @@ description: >
 
 This decides, **per invariant, ratified vs merely asserted**, and it runs at the **design freeze — which IS
 decomposition state S0**. Our case is **brownfield**: the design already exists (ad-hoc, in `spec/atlas.md` §4
-+ its §8 checks + §9 open questions), so ratification **recovers** it — each existing invariant either clears
-the 5 gates (→ *ratified*) or fails one (→ a `[NEEDS RECONCILIATION]` design defect routed to the DEFINE seat,
-which is exactly the freeze-gate backlog). Its output row conforms to **S0's input schema** (the S0 fields
-exactly, plus a delimited provenance block S0 ignores); its set-level exit **reuses S0's completeness
-predicates** — so the design-freeze and S0 are one freeze, not two.
+
+- its §8 checks + §9 open questions), so ratification **recovers** it — each existing invariant either clears
+  the 5 gates (→ _ratified_) or fails one (→ a `[NEEDS RECONCILIATION]` design defect routed to the DEFINE seat,
+  which is exactly the freeze-gate backlog). Its output row conforms to **S0's input schema** (the S0 fields
+  exactly, plus a delimited provenance block S0 ignores); its set-level exit **reuses S0's completeness
+  predicates** — so the design-freeze and S0 are one freeze, not two.
 
 Each check is tagged **GATE** (mechanical) or **REVIEW** (judgment) — the same split the method's guard uses.
 
 ## Writing a measurable invariant (the constructive side of gate 2)
 
-An invariant must be *written* measurably before it can be gated. One law, two composable forms:
+An invariant must be _written_ measurably before it can be gated. One law, two composable forms:
 
 - **ODI outcome grammar** (the intent, solution-agnostic): `[minimize|maximize] + [metric] + [object of
-  control] + [context]` — e.g. *"minimize the time to retrieve the grounded fact for the current task."*
+control] + [context]` — e.g. _"minimize the time to retrieve the grounded fact for the current task."_
 - **ATAM scenario** (the testable form): `stimulus · environment · response-measure-with-a-number` — e.g.
-  *"when an agent requests a grounded fact (stimulus) on the benchmark corpus (env), p95 retrieval < X ms."*
+  _"when an agent requests a grounded fact (stimulus) on the benchmark corpus (env), p95 retrieval < X ms."_
 
 **The scenario's number IS the future golden's assertion.** An invariant with no number is not yet testable and
 fails gate 2 — the single biggest fix an ad-hoc design needs. **Author the fact once:** the ODI outcome
-statement is the invariant's **FR** (gate 1's grounding); the ATAM scenario only *adds the number* (gate 2) —
+statement is the invariant's **FR** (gate 1's grounding); the ATAM scenario only _adds the number_ (gate 2) —
 never re-author the fact across the two forms.
 
 ## The 5 gates (ALL pass = ratified)
 
-| # | gate | means | by |
-|---|---|---|---|
-| 1 | **Grounded** | traces to a named FR/need, not a preference | GATE (cites an FR id) · REVIEW (it is a real need) |
-| 2 | **Testable** | a measurable ATAM scenario (response-measure with a number) | GATE (a number is present) · REVIEW (it is the right measure) |
-| 3 | **Independent** | not coupled with a sibling — its cell in the `axiomatic-design` coupling matrix is on-diagonal, or the coupling is a *declared, ordered* decoupling | GATE (the matrix says so) |
-| 4 | **Justified** | an ADR (Nygard: context · decision · consequences · status, immutable + supersede), **extended (MADR/IBIS) to list the rejected alternatives and why** | GATE (an ADR with a non-empty alternatives field exists) · REVIEW (the reasoning holds) |
-| 5 | **Tradeoff-resolved** | if it sits on an ATAM tradeoff point, the record names the **sacrificed attribute** + the **non-risk assumption** it rests on | REVIEW |
+| #   | gate                  | means                                                                                                                                                  | by                                                                                      |
+| --- | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------- |
+| 1   | **Grounded**          | traces to a named FR/need, not a preference                                                                                                            | GATE (cites an FR id) · REVIEW (it is a real need)                                      |
+| 2   | **Testable**          | a measurable ATAM scenario (response-measure with a number)                                                                                            | GATE (a number is present) · REVIEW (it is the right measure)                           |
+| 3   | **Independent**       | not coupled with a sibling — its cell in the `axiomatic-design` coupling matrix is on-diagonal, or the coupling is a _declared, ordered_ decoupling    | GATE (the matrix says so)                                                               |
+| 4   | **Justified**         | an ADR (Nygard: context · decision · consequences · status, immutable + supersede), **extended (MADR/IBIS) to list the rejected alternatives and why** | GATE (an ADR with a non-empty alternatives field exists) · REVIEW (the reasoning holds) |
+| 5   | **Tradeoff-resolved** | if it sits on an ATAM tradeoff point, the record names the **sacrificed attribute** + the **non-risk assumption** it rests on                          | REVIEW                                                                                  |
 
 Clears all 5 = **ratified**. Missing gate 2 (no number) or gate 4 (no rejected alternative) = **asserted** — the
 exact two gaps an ad-hoc design carries.

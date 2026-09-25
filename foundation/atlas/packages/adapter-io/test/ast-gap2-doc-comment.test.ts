@@ -23,98 +23,111 @@
 //   • G-GAP2-7   a comment between two decls binds to the FOLLOWING one (deterministic; pinned choice)
 //   • G-GAP2-8   a doc-comment above `export default` and above a decorated class is attached
 
-import { describe, it, expect, beforeAll } from 'vitest';
-import { build } from '@atlas/index';
-import type { Axes } from '@atlas/index';
-import { foldAstUnits, initAst } from '../src/ast.js';
+import { describe, it, expect, beforeAll } from "vitest"
+import { build } from "@atlas/index"
+import type { Axes } from "@atlas/index"
+import { foldAstUnits, initAst } from "../src/ast.js"
 
-const NO_SCIP = { documents: [] };
+const NO_SCIP = { documents: [] }
 const axesOf = (src: string): Axes =>
-  build(foldAstUnits({ path: '.', children: [{ path: 'src', children: [{ path: 'src/u.ts', children: [], content: src }] }] }), NO_SCIP);
+  build(
+    foldAstUnits({
+      path: ".",
+      children: [{ path: "src", children: [{ path: "src/u.ts", children: [], content: src }] }],
+    }),
+    NO_SCIP,
+  )
 
 const keys = (n: { key: string; children: readonly unknown[] }, out: string[] = []): string[] => {
-  out.push(n.key);
-  for (const c of n.children as { key: string; children: readonly unknown[] }[]) keys(c, out);
-  return out;
-};
-const nodeAt = (n: { key: string; subtreeHash?: string; children: readonly unknown[] }, key: string): { subtreeHash?: string } | undefined => {
-  if (n.key === key) return n;
+  out.push(n.key)
+  for (const c of n.children as { key: string; children: readonly unknown[] }[]) keys(c, out)
+  return out
+}
+const nodeAt = (
+  n: { key: string; subtreeHash?: string; children: readonly unknown[] },
+  key: string,
+): { subtreeHash?: string } | undefined => {
+  if (n.key === key) return n
   for (const c of n.children as { key: string; subtreeHash?: string; children: readonly unknown[] }[]) {
-    const h = nodeAt(c, key);
-    if (h) return h;
+    const h = nodeAt(c, key)
+    if (h) return h
   }
-  return undefined;
-};
+  return undefined
+}
 /** The subtreeHash of the FIRST unit key containing `needle` (a `::`-qualified unit), or undefined. */
 const unitHash = (src: string, needle: string): string | undefined => {
-  const ax = axesOf(src);
-  const key = keys(ax.spatial as { key: string; children: readonly unknown[] }).find((k) => k.includes('::') && k.includes(needle));
-  return key ? nodeAt(ax.spatial as { key: string; subtreeHash?: string; children: readonly unknown[] }, key)?.subtreeHash : undefined;
-};
+  const ax = axesOf(src)
+  const key = keys(ax.spatial as { key: string; children: readonly unknown[] }).find(
+    (k) => k.includes("::") && k.includes(needle),
+  )
+  return key
+    ? nodeAt(ax.spatial as { key: string; subtreeHash?: string; children: readonly unknown[] }, key)?.subtreeHash
+    : undefined
+}
 /** DRIFTED ≡ the anchored unit's subtreeHash changed between `a` and `b`; both must resolve. */
 const drifts = (needle: string, a: string, b: string): boolean => {
-  const ha = unitHash(a, needle);
-  const hb = unitHash(b, needle);
-  expect(ha, `unit ${needle} must resolve in original`).toBeTruthy();
-  expect(hb, `unit ${needle} must resolve in mutated`).toBeTruthy();
-  return ha !== hb;
-};
+  const ha = unitHash(a, needle)
+  const hb = unitHash(b, needle)
+  expect(ha, `unit ${needle} must resolve in original`).toBeTruthy()
+  expect(hb, `unit ${needle} must resolve in mutated`).toBeTruthy()
+  return ha !== hb
+}
 
-describe('ADR-0014 — a unit is grounded WITH its bound leading doc-comment', () => {
+describe("ADR-0014 — a unit is grounded WITH its bound leading doc-comment", () => {
   beforeAll(async () => {
-    await initAst();
-  });
+    await initAst()
+  })
 
-  it('G-GAP2-1 (item): editing the bound leading doc-comment DRIFTS the item', () => {
-    const original = '/** returns one */\nexport function foo() { return 1; }';
-    const mutated = '/** returns two, was one */\nexport function foo() { return 1; }';
-    expect(drifts('foo', original, mutated)).toBe(true);
-  });
+  it("G-GAP2-1 (item): editing the bound leading doc-comment DRIFTS the item", () => {
+    const original = "/** returns one */\nexport function foo() { return 1; }"
+    const mutated = "/** returns two, was one */\nexport function foo() { return 1; }"
+    expect(drifts("foo", original, mutated)).toBe(true)
+  })
 
-  it('G-GAP2-1b (block): editing a method’s own leading JSDoc DRIFTS the block', () => {
-    const original = 'export class Bar {\n  /** greets in English */\n  greet() { return "hi"; }\n}';
-    const mutated = 'export class Bar {\n  /** greets in French now */\n  greet() { return "hi"; }\n}';
-    expect(drifts('method_definition:0:greet', original, mutated)).toBe(true);
-  });
+  it("G-GAP2-1b (block): editing a method’s own leading JSDoc DRIFTS the block", () => {
+    const original = 'export class Bar {\n  /** greets in English */\n  greet() { return "hi"; }\n}'
+    const mutated = 'export class Bar {\n  /** greets in French now */\n  greet() { return "hi"; }\n}'
+    expect(drifts("method_definition:0:greet", original, mutated)).toBe(true)
+  })
 
-  it('G-GAP2-2 (header, blank-line-separated): editing it stays FRESH', () => {
-    const original = '/** file header */\n\nexport function foo() { return 1; }';
-    const mutated = '/** file header, edited */\n\nexport function foo() { return 1; }';
-    expect(drifts('foo', original, mutated)).toBe(false);
-  });
+  it("G-GAP2-2 (header, blank-line-separated): editing it stays FRESH", () => {
+    const original = "/** file header */\n\nexport function foo() { return 1; }"
+    const mutated = "/** file header, edited */\n\nexport function foo() { return 1; }"
+    expect(drifts("foo", original, mutated)).toBe(false)
+  })
 
-  it('G-GAP2-2b (contiguous file-top comment): editing it DRIFTS the first unit — no file-position exception', () => {
-    const original = '/** @module first */\nexport function first() { return 1; }';
-    const mutated = '/** @module first, edited */\nexport function first() { return 1; }';
-    expect(drifts('first', original, mutated)).toBe(true);
-  });
+  it("G-GAP2-2b (contiguous file-top comment): editing it DRIFTS the first unit — no file-position exception", () => {
+    const original = "/** @module first */\nexport function first() { return 1; }"
+    const mutated = "/** @module first, edited */\nexport function first() { return 1; }"
+    expect(drifts("first", original, mutated)).toBe(true)
+  })
 
-  it('G-GAP2-3 (import above, blank-line-separated): stays FRESH (not a comment; SCN-GROUND-5b)', () => {
-    const original = "export function foo() { return 1; }";
-    const mutated = "import { z } from 'zod';\n\nexport function foo() { return 1; }";
-    expect(drifts('foo', original, mutated)).toBe(false);
-  });
+  it("G-GAP2-3 (import above, blank-line-separated): stays FRESH (not a comment; SCN-GROUND-5b)", () => {
+    const original = "export function foo() { return 1; }"
+    const mutated = "import { z } from 'zod';\n\nexport function foo() { return 1; }"
+    expect(drifts("foo", original, mutated)).toBe(false)
+  })
 
-  it('G-GAP2-4 (blank-line boundary): a comment separated by a blank line is not bound — editing it stays FRESH', () => {
-    const original = '/** distant note */\n\nexport function foo() { return 1; }';
-    const mutated = '/** distant note, changed */\n\nexport function foo() { return 1; }';
-    expect(drifts('foo', original, mutated)).toBe(false);
-  });
+  it("G-GAP2-4 (blank-line boundary): a comment separated by a blank line is not bound — editing it stays FRESH", () => {
+    const original = "/** distant note */\n\nexport function foo() { return 1; }"
+    const mutated = "/** distant note, changed */\n\nexport function foo() { return 1; }"
+    expect(drifts("foo", original, mutated)).toBe(false)
+  })
 
-  it('G-GAP2-7 (following-decl binding): a between-decls comment binds to the FOLLOWING declaration', () => {
+  it("G-GAP2-7 (following-decl binding): a between-decls comment binds to the FOLLOWING declaration", () => {
     // Editing `// note` must drift `b` (it binds forward) and NOT `a`.
-    const original = 'export function a() { return 1; }\n// note\nexport function b() { return 2; }';
-    const mutated = 'export function a() { return 1; }\n// note changed\nexport function b() { return 2; }';
-    expect(drifts('function_declaration:0:b', original, mutated), 'binds to following b').toBe(true);
-    expect(drifts('function_declaration:0:a', original, mutated), 'does not bind to preceding a').toBe(false);
-  });
+    const original = "export function a() { return 1; }\n// note\nexport function b() { return 2; }"
+    const mutated = "export function a() { return 1; }\n// note changed\nexport function b() { return 2; }"
+    expect(drifts("function_declaration:0:b", original, mutated), "binds to following b").toBe(true)
+    expect(drifts("function_declaration:0:a", original, mutated), "does not bind to preceding a").toBe(false)
+  })
 
-  it('G-GAP2-8 (export default / decorator): a leading doc-comment is attached through the outer wrapper', () => {
-    const ed0 = '/** default export */\nexport default function foo() { return 1; }';
-    const ed1 = '/** default export, edited */\nexport default function foo() { return 1; }';
-    expect(drifts('foo', ed0, ed1), 'export default').toBe(true);
-    const dc0 = '/** the widget */\n@Component()\nexport class Foo {}';
-    const dc1 = '/** the widget, edited */\n@Component()\nexport class Foo {}';
-    expect(drifts('Foo', dc0, dc1), 'decorated class').toBe(true);
-  });
-});
+  it("G-GAP2-8 (export default / decorator): a leading doc-comment is attached through the outer wrapper", () => {
+    const ed0 = "/** default export */\nexport default function foo() { return 1; }"
+    const ed1 = "/** default export, edited */\nexport default function foo() { return 1; }"
+    expect(drifts("foo", ed0, ed1), "export default").toBe(true)
+    const dc0 = "/** the widget */\n@Component()\nexport class Foo {}"
+    const dc1 = "/** the widget, edited */\n@Component()\nexport class Foo {}"
+    expect(drifts("Foo", dc0, dc1), "decorated class").toBe(true)
+  })
+})

@@ -8,17 +8,17 @@
 // no behaviour and cli.ts imports them back unchanged in shape. See cli.ts's own header for the command
 // dispatch this module is a sibling of.
 
-import type { Guidance, Verdict } from '@atlas/tools';
-import { renderVerdict } from './render.js';
-import type { CliVerdict } from './render.js';
+import type { Guidance, Verdict } from "@atlas/tools"
+import { renderVerdict } from "./render.js"
+import type { CliVerdict } from "./render.js"
 
 /** A structured error verdict for a CLI-layer failure (parse / unwired command) — guidance always present. */
 export function errorVerdict(message: string): Verdict {
   const guidance: Guidance = {
     next: message,
-    invariant: 'CLI-1b: a malformed invocation yields a structured error + guidance + non-zero exit, never a crash',
-  };
-  return { ok: false, rejected: message, guidance };
+    invariant: "CLI-1b: a malformed invocation yields a structured error + guidance + non-zero exit, never a crash",
+  }
+  return { ok: false, rejected: message, guidance }
 }
 
 /**
@@ -33,25 +33,25 @@ export function refusalVerdict(message: string): Verdict {
   const guidance: Guidance = {
     next: message,
     invariant:
-      'CLI-3b: a governed refusal exits 2 — the invocation was well-formed and a gate declined it, so re-running it with different arguments will not help; exit 1 is reserved for a usage/wiring error',
-  };
-  return { ok: false, rejected: message, guidance };
+      "CLI-3b: a governed refusal exits 2 — the invocation was well-formed and a gate declined it, so re-running it with different arguments will not help; exit 1 is reserved for a usage/wiring error",
+  }
+  return { ok: false, rejected: message, guidance }
 }
 
 /** Append one advisory line to a rendered outcome, or return it unchanged. Pure. */
 export function withNote(cv: CliVerdict, note: string | undefined): CliVerdict {
-  return note === undefined ? cv : { exitCode: cv.exitCode, stdout: `${cv.stdout}${note}\n` };
+  return note === undefined ? cv : { exitCode: cv.exitCode, stdout: `${cv.stdout}${note}\n` }
 }
 
 /** The ONE process-outcome path: write a `CliVerdict`'s stdout and return its exit code (uniform bytes —
  *  every command's outcome, whether a rendered handler `Verdict` or a `mine`/`doctor` `CliVerdict`, exits
  *  through here). */
 export function emitCli(cv: CliVerdict): number {
-  process.stdout.write(cv.stdout);
-  return cv.exitCode;
+  process.stdout.write(cv.stdout)
+  return cv.exitCode
 }
 
 /** Render a verdict to a `CliVerdict`, then emit it over the one process-outcome path. */
 export function emit(verdict: Verdict): number {
-  return emitCli(renderVerdict(verdict));
+  return emitCli(renderVerdict(verdict))
 }

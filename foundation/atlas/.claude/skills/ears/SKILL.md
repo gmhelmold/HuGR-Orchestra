@@ -31,20 +31,20 @@ one-or-many responses**, with clauses in this fixed temporal order:
 [While <precondition>,] [When <trigger>,] the <system> shall <response>.
 ```
 
-- Exactly **one `shall`**. Two responses joined by "and/or" that are *independent* guarantees ⇒ **split**.
+- Exactly **one `shall`**. Two responses joined by "and/or" that are _independent_ guarantees ⇒ **split**.
 - `<system>` is a **named actor** ("the kernel", "the grounding gate") — never a bare "it"/"the system".
 - Clauses never reorder: precondition before trigger before system before response.
 
 ## 2. The six patterns + selection decision tree
 
-| # | pattern | template | use when |
-|---|---|---|---|
-| 1 | Ubiquitous | `The <sys> shall <resp>.` | always active — no precondition, no trigger |
-| 2 | State-driven | `While <precond>, the <sys> shall <resp>.` | active only during a persisting state |
-| 3 | Event-driven | `When <trigger>, the <sys> shall <resp>.` | a response to a discrete event / detected input |
-| 4 | Unwanted-behaviour | `If <trigger>, then the <sys> shall <resp>.` | a guard against an error / abuse / illegal condition |
-| 5 | Optional-feature | `Where <feature is present>, the <sys> shall <resp>.` | only when an opt-in feature is included |
-| 6 | Complex | `While <precond>, When <trigger>, the <sys> shall <resp>.` | a precondition **and** a trigger are both needed |
+| #   | pattern            | template                                                   | use when                                             |
+| --- | ------------------ | ---------------------------------------------------------- | ---------------------------------------------------- |
+| 1   | Ubiquitous         | `The <sys> shall <resp>.`                                  | always active — no precondition, no trigger          |
+| 2   | State-driven       | `While <precond>, the <sys> shall <resp>.`                 | active only during a persisting state                |
+| 3   | Event-driven       | `When <trigger>, the <sys> shall <resp>.`                  | a response to a discrete event / detected input      |
+| 4   | Unwanted-behaviour | `If <trigger>, then the <sys> shall <resp>.`               | a guard against an error / abuse / illegal condition |
+| 5   | Optional-feature   | `Where <feature is present>, the <sys> shall <resp>.`      | only when an opt-in feature is included              |
+| 6   | Complex            | `While <precond>, When <trigger>, the <sys> shall <resp>.` | a precondition **and** a trigger are both needed     |
 
 **Selection tree (deterministic — take the first that matches):**
 
@@ -104,17 +104,18 @@ Reject the REQ if it shows any of these; fix before it leaves S1:
 2. **Vagueness** — "fast", "robust", "appropriate", "~N" — no measurable criterion.
 3. **Complexity** — compound / interrelated sub-clauses → split (this is the source of most `shall`-count violations).
 4. **Omission** — a missing requirement, **especially an unhandled unwanted-behaviour path**. For each invariant
-   ask: *what event would violate it?* That guard is a required `If-then` REQ. (This is the pattern the RE'09
+   ask: _what event would violate it?_ That guard is a required `If-then` REQ. (This is the pattern the RE'09
    paper most warns you to enumerate.)
 5. **Duplication** — the same need restated elsewhere.
 6. **Wordiness** — words that carry no constraint.
 7. **Inappropriate implementation** — states HOW, not WHAT. **Brownfield exception:** a mechanism that the
-   invariant already made normative is a *ratified decision*, not an implementation leak — it stays.
+   invariant already made normative is a _ratified decision_, not an implementation leak — it stays.
 8. **Untestability** — cannot be proven true/false once built ⇒ you cannot write its golden ⇒ reject.
 
 ## 6. Worked examples (real Atlas invariants)
 
 **Ubiquitous** — INV-KERNEL-1 (content-addressed identity):
+
 ```
 ### REQ-KERNEL-1a — content-addressed object identity
 source: INV-KERNEL-1 @ reference/atlas-kernel.md#kernel-1
@@ -124,6 +125,7 @@ normative-clause: "An object's id MUST be `Encoder.hash(canonicalForm(object))`"
 
 **Event-driven + its Unwanted-behaviour guard (one INV → two REQs, the split + omission-catch)** —
 INV-KERNEL-10 (set-union collision; contentHash tie-break):
+
 ```
 ### REQ-KERNEL-10a — collision resolves by set-union
 source: INV-KERNEL-10 @ reference/atlas-kernel.md#kernel-10
@@ -138,6 +140,7 @@ normative-clause: "the tie-break MUST be **`contentHash` alone**"
 ```
 
 **State-driven** — INV-GROUND (FRESH while anchored):
+
 ```
 ### REQ-GROUND-4 — serve FRESH while the anchor holds
 While a fact's subtreeHash equals its anchored subtreeHash,

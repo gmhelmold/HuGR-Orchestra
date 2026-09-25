@@ -7,13 +7,13 @@
 // Budget) is @atlas/contracts-owned — re-exported here, NEVER redefined. [LEAD-RATIFIED] memory→retrieval
 // is the ALLOWED edge (the RET⟷MEM cycle is broken by memory importing retrieval, NOT the reverse).
 
-import type { StructRef, Hash } from '@atlas/contracts';
-import type { GroundedFact } from '@atlas/knowledge';
-import type { EventLog, Node } from '@atlas/kernel';
+import type { StructRef, Hash } from "@atlas/contracts"
+import type { GroundedFact } from "@atlas/knowledge"
+import type { EventLog, Node } from "@atlas/kernel"
 
 // Re-export the contracts-owned injection vocabulary so consumers can pull the whole dialect from the
 // bare package root. Owned by @atlas/contracts — re-exported, NOT redefined.
-export type { InjectionKind, Budget, Pack, PackInvariant } from '@atlas/contracts';
+export type { InjectionKind, Budget, Pack, PackInvariant } from "@atlas/contracts"
 
 /**
  * A member identity — a seat (`charlie` / `lucy` / `jimmy` / …) OR the orchestrator. Every member owns
@@ -21,7 +21,7 @@ export type { InjectionKind, Budget, Pack, PackInvariant } from '@atlas/contract
  * reference names members by seat-string; no contracts brand exists, so transcribed as `string`, NOT
  * invented as a new brand. Flagged for a `MemberId` brand to be sourced if one is ratified.
  */
-export type MemberId = string;
+export type MemberId = string
 
 /**
  * The four Memory types (atlas-memory:17-25). The load-bearing axis is HOW each is accessed:
@@ -29,7 +29,7 @@ export type MemberId = string;
  * MEM-4). `logbook` is orchestrator-only (v0). This is the per-ENTRY discriminant; the store-partition
  * discriminant (Memory vs Knowledge, MEM-2) is `AtlasKind` in kinds.ts — a distinct axis.
  */
-export type MemoryKind = 'task' | 'pr' | 'project' | 'logbook';
+export type MemoryKind = "task" | "pr" | "project" | "logbook"
 
 /**
  * A grounding / provenance pointer (atlas-memory:76, 104; spec/memory:104). The reference names this
@@ -41,7 +41,7 @@ export type MemoryKind = 'task' | 'pr' | 'project' | 'logbook';
  * `Ref` is thus the honest superset: a structured grounding anchor OR a bare pointer string. NOT invented
  * as a new exported brand; flagged for a `Ref` type to be sourced if one is ratified.
  */
-export type Ref = StructRef | string;
+export type Ref = StructRef | string
 
 /**
  * `project` memory — the STRICTEST template because it is INJECTED on every turn (atlas-memory:72-80,
@@ -56,10 +56,10 @@ export type Ref = StructRef | string;
  * separate window. Transcribed as `frecency` per the drift-checked canonical reference.
  */
 export interface ProjectMemoryEntry {
-  readonly rule: string;
-  readonly scope: string;
-  readonly grounding?: Ref; // OPTIONAL pointer (path@subtreeHash / PR / commit) — earns the rule its place
-  readonly frecency: number; // [FLAG] one time-decayed cited-hit score (MEM-7), supersedes spec `hits`
+  readonly rule: string
+  readonly scope: string
+  readonly grounding?: Ref // OPTIONAL pointer (path@subtreeHash / PR / commit) — earns the rule its place
+  readonly frecency: number // [FLAG] one time-decayed cited-hit score (MEM-7), supersedes spec `hits`
 }
 
 /**
@@ -73,12 +73,12 @@ export interface ProjectMemoryEntry {
  * concrete record. `taskId` / `stoppedAt` / `lesson` transcribed as `string`.
  */
 export interface TaskMemoryEntry {
-  readonly taskId: string;
-  readonly attempted: readonly string[]; // [PINNED] element type not frozen — terse lines
-  readonly failedWith: readonly string[]; // [PINNED] element type not frozen — terse lines
-  readonly stoppedAt: string;
-  readonly lesson: string;
-  readonly ref?: Ref;
+  readonly taskId: string
+  readonly attempted: readonly string[] // [PINNED] element type not frozen — terse lines
+  readonly failedWith: readonly string[] // [PINNED] element type not frozen — terse lines
+  readonly stoppedAt: string
+  readonly lesson: string
+  readonly ref?: Ref
 }
 
 /**
@@ -94,11 +94,11 @@ export interface TaskMemoryEntry {
  * [PINNED —`decisions` / `reviewOutcomes` element types] no element type frozen → `readonly string[]`.
  */
 export interface PrMemoryEntry {
-  readonly prId: string;
-  readonly decisions: readonly string[]; // [PINNED] element type not frozen — terse lines
-  readonly reviewOutcomes: readonly string[]; // [PINNED] element type not frozen — terse lines
-  readonly knowledgeDelta: readonly GroundedFact[]; // [FLAG] the Knowledge delta — knowledge facts
-  readonly ref?: Ref;
+  readonly prId: string
+  readonly decisions: readonly string[] // [PINNED] element type not frozen — terse lines
+  readonly reviewOutcomes: readonly string[] // [PINNED] element type not frozen — terse lines
+  readonly knowledgeDelta: readonly GroundedFact[] // [FLAG] the Knowledge delta — knowledge facts
+  readonly ref?: Ref
 }
 
 /**
@@ -111,19 +111,19 @@ export interface PrMemoryEntry {
  * The five prose sections are `string` (prose confined WITHIN its fixed section — MEM-8).
  */
 export interface LogbookEntry {
-  readonly prId: string;
-  readonly at: string; // [PINNED] ordering/timestamp key — no frozen type
-  readonly territories: readonly string[]; // structured index field — keeps it navigable
-  readonly shipped: string; // prose within section
-  readonly decisions: string; // prose within section — the key decisions AND WHY (the core)
-  readonly tradeoffs: string; // prose within section
-  readonly risks: string; // prose within section
-  readonly openThreads: string; // prose within section
-  readonly links: readonly Ref[]; // PR, ratified facts, ADRs, superseded prior entries
+  readonly prId: string
+  readonly at: string // [PINNED] ordering/timestamp key — no frozen type
+  readonly territories: readonly string[] // structured index field — keeps it navigable
+  readonly shipped: string // prose within section
+  readonly decisions: string // prose within section — the key decisions AND WHY (the core)
+  readonly tradeoffs: string // prose within section
+  readonly risks: string // prose within section
+  readonly openThreads: string // prose within section
+  readonly links: readonly Ref[] // PR, ratified facts, ADRs, superseded prior entries
 }
 
 /** The templated-write union — every Memory write fills exactly one of these (MEM-5). */
-export type MemoryEntry = ProjectMemoryEntry | TaskMemoryEntry | PrMemoryEntry | LogbookEntry;
+export type MemoryEntry = ProjectMemoryEntry | TaskMemoryEntry | PrMemoryEntry | LogbookEntry
 
 /**
  * The owner-tagged store envelope over the ONE Atlas store. `owner` is the frozen scoping key MEM-1's
@@ -135,13 +135,13 @@ export type MemoryEntry = ProjectMemoryEntry | TaskMemoryEntry | PrMemoryEntry |
  * envelope carries only the three grounded fields; extra state is NOT invented.
  */
 export interface MemoryRecord {
-  readonly owner: MemberId; // MEM-1 scoping key — `injectFor` filters by owner
-  readonly kind: MemoryKind; // MEM-2 discriminant
-  readonly entry: MemoryEntry;
+  readonly owner: MemberId // MEM-1 scoping key — `injectFor` filters by owner
+  readonly kind: MemoryKind // MEM-2 discriminant
+  readonly entry: MemoryEntry
 }
 
 /** The member's Memory as a flat owner-scoped collection over the single store (MEM-9/10 git-native). */
-export type MemoryStore = readonly MemoryRecord[];
+export type MemoryStore = readonly MemoryRecord[]
 
 // ── co-located slab interfaces (was ref/orient.ts · ref/awareness.ts · ref/memoize.ts) ────────────────────
 // These carry zero runtime; they live with the shared model because each is consumed by ≥2 src files:
@@ -155,10 +155,10 @@ export type MemoryStore = readonly MemoryRecord[];
  * `last/current/state` are a FOLD over the event log (reuses KERNEL-5 `fold.ts`).
  */
 export interface Orientation {
-  readonly goal: string; // from the ratified DEFINE artifact
-  readonly last: string; // fold over the event log
-  readonly current: string; // fold over the event log
-  readonly state: string; // fold over the event log
+  readonly goal: string // from the ratified DEFINE artifact
+  readonly last: string // fold over the event log
+  readonly current: string // fold over the event log
+  readonly state: string // fold over the event log
 }
 
 export interface OrientApi {
@@ -168,7 +168,7 @@ export interface OrientApi {
    *
    *  [OPAQUE-BY-DESIGN — `define` type] the ratified DEFINE artifact has no frozen type at this layer (it is a
    *  genesis GEN-9 artifact); transcribed as `unknown` rather than invented/imported. Flagged. */
-  orient(define: unknown, log: EventLog): Orientation;
+  orient(define: unknown, log: EventLog): Orientation
 }
 
 /**
@@ -176,7 +176,7 @@ export interface OrientApi {
  * = source absent → the labeled sentinel (never fabricated); `drifted` = source moved → the facet is
  * SERVE-FLAGGED (flagged, not served stale).
  */
-export type FacetState = 'seeded' | 'UN-SEEDED' | 'drifted';
+export type FacetState = "seeded" | "UN-SEEDED" | "drifted"
 
 /**
  * One Awareness facet — a top-tier rollup grounded to its Atlas source(s) (MEM-11).
@@ -187,9 +187,9 @@ export type FacetState = 'seeded' | 'UN-SEEDED' | 'drifted';
  * `StructRef` grounding anchor (`path@subtreeHash`, the drift oracle).
  */
 export interface AwarenessFacet {
-  readonly content: string; // [PINNED] top-tier rendered rollup under ~400 tok — exact format not frozen
-  readonly grounding: readonly StructRef[]; // the node@sha anchors — grounded + drift-checked
-  readonly state: FacetState; // seeded / UN-SEEDED sentinel / drift flag
+  readonly content: string // [PINNED] top-tier rendered rollup under ~400 tok — exact format not frozen
+  readonly grounding: readonly StructRef[] // the node@sha anchors — grounded + drift-checked
+  readonly state: FacetState // seeded / UN-SEEDED sentinel / drift flag
 }
 
 /**
@@ -203,18 +203,18 @@ export interface AwarenessFacet {
  *   - `taste`        — what "good"/"rejected" looks like here. Source: `CONVENTIONS.md@sha` + gate config.
  */
 export interface Awareness {
-  readonly mission: AwarenessFacet;
-  readonly constitution: AwarenessFacet;
-  readonly terrain: AwarenessFacet;
-  readonly ontology: AwarenessFacet;
-  readonly taste: AwarenessFacet;
+  readonly mission: AwarenessFacet
+  readonly constitution: AwarenessFacet
+  readonly terrain: AwarenessFacet
+  readonly ontology: AwarenessFacet
+  readonly taste: AwarenessFacet
 }
 
 export interface AwarenessApi {
   /** Assemble Awareness as a PURE rollup of the Atlas root — deterministic (same root ⇒ byte-identical
    *  across seats and re-runs), top-tier under `≤ ~400 tok`, tail pull-reachable (MEM-11).
    *  (method-tags-mem:95) */
-  rollup(root: Node): Awareness;
+  rollup(root: Node): Awareness
 
   /** A single facet's rollup from ITS OWN source — absent source ⇒ `UN-SEEDED`, moved source ⇒ drift-flag
    *  (served flagged, not stale) (MEM-11).
@@ -222,7 +222,7 @@ export interface AwarenessApi {
    *  [OPAQUE-BY-DESIGN — `source` type] each facet's source differs (DEFINE artifact / T0 manifest / territory-axis
    *  top / `slot='definition'` nodes / `CONVENTIONS.md@sha`) and has no single frozen type; transcribed as
    *  `unknown` rather than invented. Flagged. */
-  facet(source: unknown): AwarenessFacet;
+  facet(source: unknown): AwarenessFacet
 }
 
 /**
@@ -232,24 +232,24 @@ export interface AwarenessApi {
  * the moved facet. A call-counter correctness check (NOT a timing/latency measure — Refuse-to-model).
  */
 export interface AssemblyReceipt {
-  readonly key: Hash; // the memo key — the composed briefing's content hash
-  readonly reRolls: number; // facet re-rolls performed (0 on a cache hit)
-  readonly driftChecks: number; // per-node@sha drift-checks performed (0 on a cache hit)
+  readonly key: Hash // the memo key — the composed briefing's content hash
+  readonly reRolls: number // facet re-rolls performed (0 on a cache hit)
+  readonly driftChecks: number // per-node@sha drift-checks performed (0 on a cache hit)
 }
 
 /** A memoized assembly = the byte-stable output + its instrumented receipt. */
 export interface Memoized<T> {
-  readonly value: T;
-  readonly receipt: AssemblyReceipt;
+  readonly value: T
+  readonly receipt: AssemblyReceipt
 }
 
 export interface MemoizeApi {
   /** Assemble Awareness ONCE per root-state, shared across seats, with each facet cached on ITS OWN
    *  source subtree hash — 0 re-rolls + 0 drift-checks on an unchanged root (cache hit), a re-roll only
    *  for a moved facet (MEM-12). (method-tags-mem:102) */
-  assembleAwareness(root: Node): Memoized<Awareness>;
+  assembleAwareness(root: Node): Memoized<Awareness>
 
   /** Fold Orientation INCREMENTALLY over only the newly-appended event-log `tail`, never a whole-log
    *  replay (MEM-12). Pure. (method-tags-mem:102) */
-  foldOrientation(prev: Orientation, tail: EventLog): Orientation;
+  foldOrientation(prev: Orientation, tail: EventLog): Orientation
 }

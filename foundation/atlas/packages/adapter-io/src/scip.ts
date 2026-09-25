@@ -3,12 +3,12 @@
 // The raw scip adapter: read an external `scip.proto` dump into the frozen `ScipOutput` projection
 // (@atlas/index) and plan which indexer to run per language. Implemented — WP-9.1.1-b.SCIP (tests: scip.test.ts).
 
-import { existsSync, readFileSync, statSync } from 'node:fs';
-import { deserializeSCIP, SymbolRole } from '@c4312/scip';
-import type { ScipOutput } from '@atlas/index';
+import { existsSync, readFileSync, statSync } from "node:fs"
+import { deserializeSCIP, SymbolRole } from "@c4312/scip"
+import type { ScipOutput } from "@atlas/index"
 
 /** The languages the indexer planner knows about (ring shape — constitution D2). */
-export type LangId = 'ts' | 'py' | 'go' | 'java' | 'rust' | 'rb';
+export type LangId = "ts" | "py" | "go" | "java" | "rust" | "rb"
 
 /**
  * One planned per-language SCIP indexer invocation (ring shape — constitution D2).
@@ -20,12 +20,12 @@ export type LangId = 'ts' | 'py' | 'go' | 'java' | 'rust' | 'rb';
  * against. Both are now carried, so `atlas doctor index` can print a line an operator pastes verbatim.
  */
 export interface IndexerPlan {
-  readonly lang: LangId;
-  readonly tool: string;
-  readonly args: readonly string[];
+  readonly lang: LangId
+  readonly tool: string
+  readonly args: readonly string[]
   /** The PINNED release of `tool` this plan was written against and MEASURED with. ABSENT for the
    *  `honest-hole` sentinel, which names no binary and therefore pins no version. */
-  readonly version?: string;
+  readonly version?: string
 }
 
 /**
@@ -84,40 +84,43 @@ export interface IndexerPlan {
  * REGULAR file is still read whole. That case is self-limiting and visible — the bytes have to exist in
  * the repository — whereas the device symlink costs 9 bytes and is unbounded.
  */
-const scipRawMemo = new Map<string, { readonly mtimeMs: number; readonly size: number; readonly raw: ReturnType<typeof deserializeSCIP> }>();
+const scipRawMemo = new Map<
+  string,
+  { readonly mtimeMs: number; readonly size: number; readonly raw: ReturnType<typeof deserializeSCIP> }
+>()
 
 /** Exported ONLY so `escape/target-escapes.ts` can ride the SAME memo instead of its own independent
  *  `deserializeSCIP(readFileSync(...))` — see the doc block above. Not a general-purpose export: every
  *  other reader in the ring goes through `readScip`/`readScipOrEmpty`/`readScipIndexerName` below. */
 export function decodeScipCached(scipPath: string): ReturnType<typeof deserializeSCIP> {
-  const stat = statSync(scipPath); // throws ENOENT etc — mirrors `scipBytes`, callers absorb via catch
+  const stat = statSync(scipPath) // throws ENOENT etc — mirrors `scipBytes`, callers absorb via catch
   if (!stat.isFile()) {
     throw new Error(
       `scip: '${scipPath}' is not a regular file — a device, FIFO, socket or directory is not an indexer ` +
-        'dump, and reading one can block forever (a git-tracked symlink to /dev/zero bricks both bins at boot)',
-    );
+        "dump, and reading one can block forever (a git-tracked symlink to /dev/zero bricks both bins at boot)",
+    )
   }
-  const cached = scipRawMemo.get(scipPath);
+  const cached = scipRawMemo.get(scipPath)
   if (cached !== undefined && cached.mtimeMs === stat.mtimeMs && cached.size === stat.size) {
-    return cached.raw;
+    return cached.raw
   }
-  const raw = deserializeSCIP(readFileSync(scipPath));
-  scipRawMemo.set(scipPath, { mtimeMs: stat.mtimeMs, size: stat.size, raw });
-  return raw;
+  const raw = deserializeSCIP(readFileSync(scipPath))
+  scipRawMemo.set(scipPath, { mtimeMs: stat.mtimeMs, size: stat.size, raw })
+  return raw
 }
 
 /** Read a per-language SCIP indexer dump into the minimal frozen `ScipOutput` projection (ADAPT-SCIP-1). */
 export function readScip(scipPath: string): ScipOutput {
-  const index = decodeScipCached(scipPath);
+  const index = decodeScipCached(scipPath)
   return {
     documents: index.documents.map((doc) => ({
       relativePath: doc.relativePath,
       occurrences: doc.occurrences.map((occ) => ({
         symbol: occ.symbol,
-        role: (occ.symbolRoles & SymbolRole.Definition) !== 0 ? 'definition' : 'reference',
+        role: (occ.symbolRoles & SymbolRole.Definition) !== 0 ? "definition" : "reference",
       })),
     })),
-  };
+  }
 }
 
 /**
@@ -135,11 +138,11 @@ export function readScip(scipPath: string): ScipOutput {
  * The valid-SCIP happy path is byte-identical to `readScip` (only the throwing paths are absorbed).
  */
 export function readScipOrEmpty(scipPath: string): ScipOutput {
-  if (!existsSync(scipPath)) return { documents: [] };
+  if (!existsSync(scipPath)) return { documents: [] }
   try {
-    return readScip(scipPath);
+    return readScip(scipPath)
   } catch {
-    return { documents: [] };
+    return { documents: [] }
   }
 }
 
@@ -156,9 +159,9 @@ export function readScipOrEmpty(scipPath: string): ScipOutput {
  */
 export function readScipIndexerName(scipPath: string): string | undefined {
   try {
-    return decodeScipCached(scipPath).metadata?.toolInfo?.name;
+    return decodeScipCached(scipPath).metadata?.toolInfo?.name
   } catch {
-    return undefined;
+    return undefined
   }
 }
 
@@ -169,15 +172,15 @@ export function readScipIndexerName(scipPath: string): string | undefined {
  * opens, and a planned command that writes the dump anywhere else is worse than no plan at all: the
  * indexer succeeds, the operator believes the repository is indexed, and `axes.edges` stays empty.
  */
-export const SCIP_INDEX_REL = '.atlas/index.scip';
+export const SCIP_INDEX_REL = ".atlas/index.scip"
 
 /** One CONFIGURED per-language indexer: the binary, the release it is pinned to, and the arguments that
  *  make it a runnable command. ONE row per language — the tool, its pin and its arguments cannot drift
  *  apart because there is nowhere for them to drift to. */
 interface ConfiguredIndexer {
-  readonly tool: string;
-  readonly version: string;
-  readonly args: readonly string[];
+  readonly tool: string
+  readonly version: string
+  readonly args: readonly string[]
 }
 
 /**
@@ -197,14 +200,14 @@ interface ConfiguredIndexer {
  * code path in this repository spawns an indexer, deliberately (see `docs/reference/commands/doctor.md`).
  */
 const REAL_INDEXER: Partial<Record<LangId, ConfiguredIndexer>> = {
-  ts: { tool: 'scip-typescript', version: '0.4.0', args: ['index', '--output', SCIP_INDEX_REL] },
-  py: { tool: 'scip-python', version: '0.6.6', args: ['index', '--output', SCIP_INDEX_REL] },
-};
+  ts: { tool: "scip-typescript", version: "0.4.0", args: ["index", "--output", SCIP_INDEX_REL] },
+  py: { tool: "scip-python", version: "0.6.6", args: ["index", "--output", SCIP_INDEX_REL] },
+}
 
 /** The sentinel tool for a language with no configured indexer: it contributes its files to the
  *  `FileTree` only (an honest structural hole), never routed to another language's indexer. Exported so a
  *  caller can split a plan list on the DISCRIMINANT rather than on a substring of a rendered line. */
-export const HONEST_HOLE = 'honest-hole';
+export const HONEST_HOLE = "honest-hole"
 
 /**
  * Plan which indexer to run for each requested language (ADAPT-SCIP-2). TOTAL dispatch: every input
@@ -214,11 +217,11 @@ export const HONEST_HOLE = 'honest-hole';
  */
 export function planIndexers(langs: LangId[]): IndexerPlan[] {
   return langs.map((lang) => {
-    const configured = REAL_INDEXER[lang];
+    const configured = REAL_INDEXER[lang]
     return configured === undefined
       ? { lang, tool: HONEST_HOLE, args: [] }
-      : { lang, tool: configured.tool, args: configured.args, version: configured.version };
-  });
+      : { lang, tool: configured.tool, args: configured.args, version: configured.version }
+  })
 }
 
 /**
@@ -229,5 +232,5 @@ export function planIndexers(langs: LangId[]): IndexerPlan[] {
  * files are still in the `FileTree`), and no other language's occurrences are altered.
  */
 export function mergeScip(outputs: readonly ScipOutput[]): ScipOutput {
-  return { documents: outputs.flatMap((o) => o.documents) };
+  return { documents: outputs.flatMap((o) => o.documents) }
 }

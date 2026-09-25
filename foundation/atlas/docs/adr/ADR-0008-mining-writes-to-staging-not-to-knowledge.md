@@ -6,23 +6,23 @@
   by it and DELETED in task #83 after a probe measured zero production callers — see step 1 below), and
   `packages/cli/src/mine.ts` uses staging exclusively — its header
   asserts, and a test pins, that `persistProjection` appears nowhere in the file.
-  *(This header previously said implementation "is task #87 and is sequenced after the branch integrates".
+  _(This header previously said implementation "is task #87 and is sequenced after the branch integrates".
   That was written before the work landed and was left stale — a false status claim inside a canonical
   decision record, found by a cold architectural review. A repo that ships a guard against exactly this
-  class of overclaim must not carry one in its own ADRs.)*
+  class of overclaim must not carry one in its own ADRs.)_
 - **Owner-authorized:** the owner granted the lead full ownership of this repo and direct responsibility for
   the SOTA bar, and has restated that no debt or loose end is acceptable. This ADR exists so #87 is a
-  *decided, sequenced* item rather than an open question — an open question is the debt.
+  _decided, sequenced_ item rather than an open question — an open question is the debt.
 - **Supersedes in part:** the partial remediation in `b415eab`, which stopped `mine` from MUTATING governed
   nodes and stamped its reserved scope onto the CAS BYTES. That was a containment, not the answer.
-  *(CORRECTED 2026-08-02: this bullet previously said the remediation "stamped its ROWS with a reserved
+  _(CORRECTED 2026-08-02: this bullet previously said the remediation "stamped its ROWS with a reserved
   scope". It did not. `mine`'s `WriteRequest` omitted both governance halves, so every staged row recorded
   `scope: undefined` / `tier: undefined`, while `mine.ts` claimed the stamp made the bytes and the row
   agree. Only the bytes were stamped. Fixed in `8a78120`: the row now carries `MINED_SCOPE` and `T2` from
   constants — never forwarded from the gate's `f.tier`, so an injected gate cannot mint a staged row
   DECLARING `T0`. Recorded rather than quietly amended, because this is the SECOND false status claim found
   in this ADR, and the note above already says a repo shipping a guard against overclaim must not carry
-  one.)*
+  one.)_
 - **Relates:** ADR-0007 (governance class is a property of the node), KNOW-8, GEN-4/12.
 
 ## Context
@@ -45,27 +45,27 @@ Three separate defects came out of that single fact, and each fix exposed the ne
    doors refuse a node whose class they cannot read — at which point those rows became **permanently
    unwritable by anyone, billy included**.
 
-Every one of these is a symptom of the same thing: *a candidate and a fact were being kept in one place.*
+Every one of these is a symptom of the same thing: _a candidate and a fact were being kept in one place._
 
 ## Decision
 
 **Mining writes to a staging sidecar. It never writes the knowledge projection.**
 
-KNOW-8 already says this in words — *"the explorer MAY write only CANDIDATES (staging); ratification is the
-reconcile/lead's; the explorer never self-commits"* — and `stage()` exists in
+KNOW-8 already says this in words — _"the explorer MAY write only CANDIDATES (staging); ratification is the
+reconcile/lead's; the explorer never self-commits"_ — and `stage()` exists in
 `packages/knowledge/src/ratify/ratify.ts`. What was missing is that staging had **nowhere to live**, so the
 explorer wrote the only durable place there was.
 
 Concretely:
 
 1. `DiskStore` gains a staging door over a sidecar distinct from `projection.json`. Same shape, different
-   file — staging is a projection of *candidates*, not of facts.
-   *(As shipped this was `persistStaging`/`loadStaging`. Both were replaced by the atomic `commitStaging`
+   file — staging is a projection of _candidates_, not of facts.
+   _(As shipped this was `persistStaging`/`loadStaging`. Both were replaced by the atomic `commitStaging`
    and then DELETED in task #83: the unconditional persist was last-writer-wins by definition — measured at
    8 processes × 5 sites, 40 candidates reported committed and 5 durable — and a probe showed neither had a
    production caller left. `commitStaging` is now the only staging door, which `mine-projection-surface.test.ts`
    pins mechanically against the live `DiskStore` surface. The ADR's decision is unchanged; only the member
-   names are.)*
+   names are.)_
 2. `buildControllerDeps` in `packages/cli/src/mine.ts` targets staging. Its rehydrate, its `store.put`, and
    its put-before-persist ordering all stay; only the destination changes.
 3. A candidate is promoted into knowledge **only** by passing a governed door, like anything else.
@@ -86,13 +86,13 @@ Concretely:
   caller, which is how a human sees what was mined. A curator door that promotes staged candidates in bulk
   is NOT part of this decision and is not needed until a proposer is wired; when it is needed it is an
   ordinary use of the existing emit door, not new surface.
-  *(BUILT since, as WP-PROMOTE, and this clause is exactly what it was built to: `atlas promote` publishes
+  _(BUILT since, as WP-PROMOTE, and this clause is exactly what it was built to: `atlas promote` publishes
   through `createGovernedEmit` — the same leg `atlas-emit` binds — so `GOVERNANCE_SURFACE` stayed 5 and
   `WRITE_PATHS` stayed `{atlas-emit, atlas-link}`. One thing this decision could not foresee: because a mined
   candidate is `T2` ∧ advisory ∧ grounded, "an ordinary use of the emit door" would have AUTO-ACCEPTED under
   the KNOW-18 fast path and never consulted the ratifier. The promotion leg therefore supplies a
   door-derived `origin:'promoted'` that removes the fast path — the door is ordinary, the ratification
-  context is not.)*
+  context is not.)_
 
 ## Alternatives rejected
 

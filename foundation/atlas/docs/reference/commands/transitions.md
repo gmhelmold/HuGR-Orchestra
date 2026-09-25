@@ -1,7 +1,7 @@
 # `atlas transitions`
 
 List the **grounded transitions** on a unit lineage. A transition (ADR-0015 **D4** / #234) is an **immutable
-advisory historical record** — *unit `unitKey` returned A at rev `shaBefore`, returns B at rev `shaAfter`* — a
+advisory historical record** — _unit `unitKey` returned A at rev `shaBefore`, returns B at rev `shaAfter`_ — a
 2-rev fact the producer admitted, spanning a closed valid-time interval. It is sealed **`justified`**, never
 `proven` (there is no mechanical HEAD oracle for a historical claim — D-T1), and it is **superseded, not
 falsified**: a later transition on the same unit lineage takes over as the current head, and the earlier record

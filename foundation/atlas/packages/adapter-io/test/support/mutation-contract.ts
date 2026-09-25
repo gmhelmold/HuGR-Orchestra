@@ -12,27 +12,27 @@
 // into a typed `Proposal`, drives the shipped `admit`, and hands the outcome to the SCORER. Two disjoint halves.
 
 /** The four measured arms — each a distinct fact SHAPE with its own gate (co-primary, never blended). */
-export type Arm = 'count' | 'relation' | 'dependency' | 'negation';
+export type Arm = "count" | "relation" | "dependency" | "negation"
 
 /** The ground-truth label. FALSE is PLANTED by a mutation; TRUE is the un-mutated base. Never a gate verdict. */
-export type Label = 'TRUE' | 'FALSE';
+export type Label = "TRUE" | "FALSE"
 
 /** The enumerated per-arm mutation kinds (AC-1). `base` is the un-mutated TRUE row. Each FALSE kind is tagged
  *  with the arm it targets and is an edit-distance-1 edit of the base (AC-9m). */
 export type MutationKind =
-  | 'base'
-  | 'count-boundary-flip' //          count:      atLeast → beyond the witnessed lower bound (quantifier flip)
-  | 'relation-direction-reversal' //  relation:   (A calls B) → (B calls A) — the ordered pair reversed
-  | 'dependency-assert-absent' //     dependency: assert the call in a scope where the tsc witness sees none
-  | 'negation-flip'; //               negation:   "X not called in S" pinned to a scope where X IS called
+  | "base"
+  | "count-boundary-flip" //          count:      atLeast → beyond the witnessed lower bound (quantifier flip)
+  | "relation-direction-reversal" //  relation:   (A calls B) → (B calls A) — the ordered pair reversed
+  | "dependency-assert-absent" //     dependency: assert the call in a scope where the tsc witness sees none
+  | "negation-flip" //               negation:   "X not called in S" pinned to a scope where X IS called
 
 /** The arm each FALSE mutation kind targets — a total map, so a mutation can never be mis-attributed. */
-export const KIND_ARM: Readonly<Record<Exclude<MutationKind, 'base'>, Arm>> = {
-  'count-boundary-flip': 'count',
-  'relation-direction-reversal': 'relation',
-  'dependency-assert-absent': 'dependency',
-  'negation-flip': 'negation',
-};
+export const KIND_ARM: Readonly<Record<Exclude<MutationKind, "base">, Arm>> = {
+  "count-boundary-flip": "count",
+  "relation-direction-reversal": "relation",
+  "dependency-assert-absent": "dependency",
+  "negation-flip": "negation",
+}
 
 /**
  * A neutral CLAIM payload — the fact the arm asserts, stripped of any admission machinery. `endpoints` is a
@@ -40,26 +40,26 @@ export const KIND_ARM: Readonly<Record<Exclude<MutationKind, 'base'>, Arm>> = {
  * field (AC-9m), not two. Only the fields an arm uses are present.
  */
 export interface Claim {
-  readonly arm: Arm;
-  readonly target: string; //          canonical SCIP symbol (count/dependency/negation) — the fact is ABOUT it
-  readonly scope: string; //           the directory the claim ranges over
-  readonly atLeast?: number; //        count arm — the asserted lower bound N
-  readonly endpoints?: readonly [string, string]; // relation arm — the ordered pair [A, B] (ONE identity field)
+  readonly arm: Arm
+  readonly target: string //          canonical SCIP symbol (count/dependency/negation) — the fact is ABOUT it
+  readonly scope: string //           the directory the claim ranges over
+  readonly atLeast?: number //        count arm — the asserted lower bound N
+  readonly endpoints?: readonly [string, string] // relation arm — the ordered pair [A, B] (ONE identity field)
 }
 
 /** A planted row — a claim, its PLANTED label (from the mutation record), the kind that produced it, its arm. */
 export interface Row {
-  readonly claim: Claim;
-  readonly label: Label;
-  readonly kind: MutationKind;
-  readonly arm: Arm;
+  readonly claim: Claim
+  readonly label: Label
+  readonly kind: MutationKind
+  readonly arm: Arm
 }
 
 /** The tsc witness a label is derived from — a PURE predicate `(claim) → is-the-positive-true?`. Supplied by
  *  the caller from `buildOracle` (a `ts.createProgram`), NEVER the gate. For count/dependency it answers "is X
  *  called in S?"; for negation the positive is the negative-of, so the caller inverts; for relation it answers
  *  "does A call B?" for the ordered endpoints. Kept abstract so this module imports no oracle at all. */
-export type TscWitness = (claim: Claim) => boolean;
+export type TscWitness = (claim: Claim) => boolean
 
 /**
  * DERIVE the label from the edit + the tsc witness ALONE (AC-1). This is the ground-truth function: it calls
@@ -71,25 +71,26 @@ export type TscWitness = (claim: Claim) => boolean;
  *   · relation    — TRUE iff A calls B for the ordered endpoints (the tsc predicate reads `endpoints`).
  */
 export function deriveLabel(claim: Claim, tsc: TscWitness): Label {
-  const positiveHolds = claim.arm === 'negation' ? !tsc(claim) : tsc(claim);
-  return positiveHolds ? 'TRUE' : 'FALSE';
+  const positiveHolds = claim.arm === "negation" ? !tsc(claim) : tsc(claim)
+  return positiveHolds ? "TRUE" : "FALSE"
 }
 
 /** The fields that make up a claim's identity, for the edit-distance check (AC-9m). `endpoints` is ONE field. */
 function fieldMap(c: Claim): Record<string, string> {
-  const m: Record<string, string> = { arm: c.arm, target: c.target, scope: c.scope };
-  if (c.atLeast !== undefined) m['atLeast'] = String(c.atLeast);
-  if (c.endpoints !== undefined) m['endpoints'] = JSON.stringify(c.endpoints);
-  return m;
+  const m: Record<string, string> = { arm: c.arm, target: c.target, scope: c.scope }
+  if (c.atLeast !== undefined) m["atLeast"] = String(c.atLeast)
+  if (c.endpoints !== undefined) m["endpoints"] = JSON.stringify(c.endpoints)
+  return m
 }
 
 /** The number of identity fields in which two claims differ (AC-9m: a fair mutant differs by exactly one). */
 export function editDistance(a: Claim, b: Claim): number {
-  const fa = fieldMap(a), fb = fieldMap(b);
-  const keys = new Set([...Object.keys(fa), ...Object.keys(fb)]);
-  let d = 0;
-  for (const k of keys) if (fa[k] !== fb[k]) d += 1;
-  return d;
+  const fa = fieldMap(a),
+    fb = fieldMap(b)
+  const keys = new Set([...Object.keys(fa), ...Object.keys(fb)])
+  let d = 0
+  for (const k of keys) if (fa[k] !== fb[k]) d += 1
+  return d
 }
 
 /**
@@ -101,28 +102,30 @@ export function editDistance(a: Claim, b: Claim): number {
  */
 export function mutate(
   base: Row,
-  kind: Exclude<MutationKind, 'base'>,
+  kind: Exclude<MutationKind, "base">,
   edit: { flipScope?: string; beyond?: number },
 ): Row {
-  if (base.label !== 'TRUE' || base.kind !== 'base') throw new Error('mutate: base must be an un-mutated TRUE row');
-  if (KIND_ARM[kind] !== base.arm) throw new Error(`mutate: kind ${kind} targets ${KIND_ARM[kind]}, not ${base.arm}`);
-  const c = base.claim;
-  let claim: Claim;
+  if (base.label !== "TRUE" || base.kind !== "base") throw new Error("mutate: base must be an un-mutated TRUE row")
+  if (KIND_ARM[kind] !== base.arm) throw new Error(`mutate: kind ${kind} targets ${KIND_ARM[kind]}, not ${base.arm}`)
+  const c = base.claim
+  let claim: Claim
   switch (kind) {
-    case 'count-boundary-flip':
-      if (edit.beyond === undefined) throw new Error('count-boundary-flip needs edit.beyond (a bound above the witnessed count)');
-      claim = { ...c, atLeast: edit.beyond };
-      break;
-    case 'dependency-assert-absent':
-    case 'negation-flip':
-      if (edit.flipScope === undefined) throw new Error(`${kind} needs edit.flipScope (a scope where the tsc witness differs)`);
-      claim = { ...c, scope: edit.flipScope };
-      break;
-    case 'relation-direction-reversal': {
-      if (c.endpoints === undefined) throw new Error('relation-direction-reversal needs endpoints on the base claim');
-      claim = { ...c, endpoints: [c.endpoints[1], c.endpoints[0]] };
-      break;
+    case "count-boundary-flip":
+      if (edit.beyond === undefined)
+        throw new Error("count-boundary-flip needs edit.beyond (a bound above the witnessed count)")
+      claim = { ...c, atLeast: edit.beyond }
+      break
+    case "dependency-assert-absent":
+    case "negation-flip":
+      if (edit.flipScope === undefined)
+        throw new Error(`${kind} needs edit.flipScope (a scope where the tsc witness differs)`)
+      claim = { ...c, scope: edit.flipScope }
+      break
+    case "relation-direction-reversal": {
+      if (c.endpoints === undefined) throw new Error("relation-direction-reversal needs endpoints on the base claim")
+      claim = { ...c, endpoints: [c.endpoints[1], c.endpoints[0]] }
+      break
     }
   }
-  return { claim, label: 'FALSE', kind, arm: base.arm };
+  return { claim, label: "FALSE", kind, arm: base.arm }
 }

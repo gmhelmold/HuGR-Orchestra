@@ -13,29 +13,29 @@
 > that existed only as prose**.
 >
 > **Enforcement status — stated per clause, not claimed globally.** A second review round found that an earlier
-> version of this header claimed *"every clause here is enforced by a gate"* while five clauses had no gate at
+> version of this header claimed _"every clause here is enforced by a gate"_ while five clauses had no gate at
 > all. That was exactly the overclaim this document was written to end. The honest position:
 >
-> | clauses | enforcement |
-> |---|---|
-> | **ARCH-1..3, 5..7** | **gated** — `harness/gates/layer-guard.mjs`, in CI, mutation-tested (§1.4) |
-> | **ARCH-4** | self-referential (it *is* the requirement to gate) |
-> | **ARCH-8** (growth path) | **prose** — no gate; triggered by ARCH-7 failing |
-> | **ARCH-10** | **IMPLEMENTED and mutation-tested** — the incumbent guard, `packages/adapter-io/src/governed-emit.ts` §2.25, ratified by `ADR-0007`. Its checker is a **test**, not `layer-guard.mjs`: `SCN-GE-I1`/`I2`/`I5` in `packages/adapter-io/test/governed-emit-incumbent.test.ts` (deleting the guard block turns all three red). |
+> | clauses                                                        | enforcement                                                                                                                                                                                                                                                                                                                                                                                                        |
+> | -------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+> | **ARCH-1..3, 5..7**                                            | **gated** — `harness/gates/layer-guard.mjs`, in CI, mutation-tested (§1.4)                                                                                                                                                                                                                                                                                                                                         |
+> | **ARCH-4**                                                     | self-referential (it _is_ the requirement to gate)                                                                                                                                                                                                                                                                                                                                                                 |
+> | **ARCH-8** (growth path)                                       | **prose** — no gate; triggered by ARCH-7 failing                                                                                                                                                                                                                                                                                                                                                                   |
+> | **ARCH-10**                                                    | **IMPLEMENTED and mutation-tested** — the incumbent guard, `packages/adapter-io/src/governed-emit.ts` §2.25, ratified by `ADR-0007`. Its checker is a **test**, not `layer-guard.mjs`: `SCN-GE-I1`/`I2`/`I5` in `packages/adapter-io/test/governed-emit-incumbent.test.ts` (deleting the guard block turns all three red).                                                                                         |
 > | **ARCH-9, ARCH-11, ARCH-12** (the rest of the AUTHORITY model) | **ratified as rules (§3.4), with ARCH-9's current implementation delivered in part.** The UPDATE leg is shipped (ARCH-10); on CREATE, the `tier` conjunct is closed by the one-way lattice join, `scope`↔`primaryAnchor` is closed by #251, and derived fast-path verdicts are wired by #313. `contested` remains false because no veto source exists. ARCH-11/12 remain specified rather than fully implemented. |
 >
 > **The bar.** Each of the three models below is grounded in named prior art and, where the state of the art
-> gives a *measured* threshold, the measurement is cited rather than a number being invented.
+> gives a _measured_ threshold, the measurement is cited rather than a number being invented.
 
 ---
 
 ## 0. The three models, and the failure each one prevents
 
-| § | model | prevents | prior art |
-|---|---|---|---|
-| **1** | **Hierarchy** — who may depend on whom | a package cycle; a seam frozen by the wrong side | Hexagonal / ports-and-adapters (Cockburn); Dependency Inversion (Martin); **architecture fitness functions** (Ford/Parsons/Kua; ArchUnit → ArchUnitTS) |
-| **2** | **Exposure** — what may be published as a tool | tool-catalog overload; advertised ≠ invocable | measured tool-selection degradation (see §2.2); MCP progressive disclosure |
-| **3** | **Authority** — what may decide a gate | the confused deputy; ratification bypass | object-capability model (Miller, *Robust Composition*; KeyKOS/EROS/Capsicum/CHERI); "capability gates are not authorization" |
+| §     | model                                          | prevents                                         | prior art                                                                                                                                              |
+| ----- | ---------------------------------------------- | ------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **1** | **Hierarchy** — who may depend on whom         | a package cycle; a seam frozen by the wrong side | Hexagonal / ports-and-adapters (Cockburn); Dependency Inversion (Martin); **architecture fitness functions** (Ford/Parsons/Kua; ArchUnit → ArchUnitTS) |
+| **2** | **Exposure** — what may be published as a tool | tool-catalog overload; advertised ≠ invocable    | measured tool-selection degradation (see §2.2); MCP progressive disclosure                                                                             |
+| **3** | **Authority** — what may decide a gate         | the confused deputy; ratification bypass         | object-capability model (Miller, _Robust Composition_; KeyKOS/EROS/Capsicum/CHERI); "capability gates are not authorization"                           |
 
 ---
 
@@ -44,14 +44,14 @@
 ### 1.1 The rule
 
 > <a id="arch-1"></a>**ARCH-1 Ports point inward; adapters point outward.** An **interface (port)** MUST be
-> declared in the layer that *consumes* it. Its **implementation (adapter)** MUST live in the layer that
+> declared in the layer that _consumes_ it. Its **implementation (adapter)** MUST live in the layer that
 > owns the outside resource. Dependencies MUST flow in exactly one direction — **outer depends on inner,
 > never the reverse** — and the package dependency graph MUST be **acyclic**.
 
 The repo already applies this correctly in three places, and those are the pattern to copy, not to argue
 with: `TruthGate`, `DoctorSource`, `T0Heuristic` and `NodeSource` are declared in **`@atlas/tools`** and
 implemented in **`@atlas/adapter-io`**, injected at `assembleHandler`. `adapter-io` imports `TruthGate`
-*from* `tools`; `tools` imports nothing from `adapter-io`.
+_from_ `tools`; `tools` imports nothing from `adapter-io`.
 
 ### 1.2 The layer order (normative)
 
@@ -80,9 +80,9 @@ cycle. Both are **ports** — declared in `tools`, implemented in `adapter-io`. 
 > fail the build. **Every work package that introduces a tool MUST name this site in its edit surface** — a
 > door that is typed, rendered and tested but never bound is not a feature, it is a hole.
 
-*(This clause exists because CAMPAIGN-10's 16 WP cards mention `wire.ts` exactly zero times, so all four new
+_(This clause exists because CAMPAIGN-10's 16 WP cards mention `wire.ts` exactly zero times, so all four new
 doors would have been built and never made reachable — the same "the loop didn't close" failure the E2E
-wave already paid for once.)*
+wave already paid for once.)_
 
 ### 1.4 Enforcement — a fitness function, not a review
 
@@ -100,10 +100,10 @@ Implementation: `harness/gates/layer-guard.mjs`, wired into `ci.yml` beside `god
 
 ### 2.1 What replaces the count
 
-The old rule — *"the MCP server publishes exactly the five governed tools"* (INV-MCP-1) — is **superseded**
+The old rule — _"the MCP server publishes exactly the five governed tools"_ (INV-MCP-1) — is **superseded**
 (owner-ratified 2026-07-25; recorded in `ADR-0006`). The count was never the property; it was the mechanism
-available when there were five legs, exactly as INV-TOOLS-1's "exactly four" was (ADR-0003: *"the count was
-the accidental part; the governance property is the essential part"*).
+available when there were five legs, exactly as INV-TOOLS-1's "exactly four" was (ADR-0003: _"the count was
+the accidental part; the governance property is the essential part"_).
 
 > <a id="arch-5"></a>**ARCH-5 One closed union; both surfaces are DERIVED from it.** There MUST be exactly
 > one closed `Tool` union. The **advertised** set and the **invocable** set MUST both be derived from it, and
@@ -113,9 +113,9 @@ the accidental part; the governance property is the essential part"*).
 > `GOVERNANCE_SURFACE` (governed doors, of which `WRITE_PATHS` is the write subset) and `READ_SURFACE`
 > (zero write authority). The partition MUST be total and disjoint, and MUST be pinned in CI.
 
-*(ARCH-5 closes a hole that exists today and predates this work: `callTool` dispatches on `legs[tool]` with
+_(ARCH-5 closes a hole that exists today and predates this work: `callTool` dispatches on `legs[tool]` with
 no membership check against the advertised list, so "advertised" and "invocable" have always been two
-independently-maintained sets that merely happen to coincide.)*
+independently-maintained sets that merely happen to coincide.)_
 
 ### 2.2 The budget — measured, not invented
 
@@ -139,8 +139,8 @@ memory-read doors — `packages/mcp-server/src/server.ts`). **CAMPAIGN-10 shippe
 are built (`anchors`/`slots`/`draft`/`check`), the ADR-0005 read doors are wired (`doctor`/`node`), and the
 CAMPAIGN-11 memory ring added the four memory reads + `atlas-memory-emit`. The numbers sit inside the
 surface budget.
-*(An earlier revision stated the current surface as 12. It was 5, and the gate said so on the same day —
-a document whose stated bar is that numbers are cited rather than invented had exactly one invented number.)*
+_(An earlier revision stated the current surface as 12. It was 5, and the gate said so on the same day —
+a document whose stated bar is that numbers are cited rather than invented had exactly one invented number.)_
 
 ### 2.3 Growth path — progressive disclosure, which this product already specified
 
@@ -148,9 +148,9 @@ The scaling answer in the literature is not a bigger catalog; it is **loading on
 treating tool selection as retrieval rather than reasoning.
 
 Atlas already specified exactly this, and ratified it, for a different surface: `spec/atlas.md` §6.2 —
-*"Only the current scope's nodes are exposed as tools at once; on leaving the scope they retract. Exposing
+_"Only the current scope's nodes are exposed as tools at once; on leaving the scope they retract. Exposing
 the whole graph as tools at once would flood the context with schemas and is forbidden — the tool surface is
-**dynamic**, following where the navigator is."*
+**dynamic**, following where the navigator is."_
 
 > <a id="arch-8"></a>**ARCH-8 Static core, dynamic tail.** The governance + read surface is the **static
 > core**: small, bounded by ARCH-7, always present. Anything that scales with the repository — node-tools,
@@ -165,7 +165,7 @@ The product invented the right pattern and did not apply it to itself. §2.3 app
 ### 3.1 The failure this prevents (reproduced, not hypothesized)
 
 **Reproduced against the built packages on `master` @ `5de122e`, before the ADR-0007 incumbent guard existed.**
-This transcript is the *historical evidence* that motivated ARCH-9 and ARCH-10; it is not a description of the
+This transcript is the _historical evidence_ that motivated ARCH-9 and ARCH-10; it is not a description of the
 door as it stands. Its last line no longer reproduces — the emit door now refuses that write
 `governance-downgrade` (ARCH-10; `SCN-GE-I1`). The first three lines still hold on both sides of the fix, which
 is why ARCH-9 is still open.
@@ -187,7 +187,7 @@ slot)` is an unratified proposal wearing the `advisory` verb.
 
 The mechanism has a name: **`tier` is an author-supplied argument that selects which gate runs.** In the
 literature this is the confused deputy, and the current framing of it for agent systems is precise —
-*capability gating* answers which tools are exposed; *per-call authorization* answers whether a concrete
+_capability gating_ answers which tools are exposed; _per-call authorization_ answers whether a concrete
 call with specific argument values is allowed. Atlas has the first and, at this field, now has the second
 **only where there is an incumbent to derive it from**: a write landing on an EXISTING node is gated by that
 node's own stored class (ARCH-10 / ADR-0007). On a CREATE there is no incumbent, `route` still reads the
@@ -198,16 +198,16 @@ the lattice — not that the author may claim it. That half is ARCH-9, and it is
 
 > <a id="arch-9"></a>**ARCH-9 A gate-selecting field is derived, never chosen.** Any field whose value
 > determines **which** governance gate runs MUST be **derived by the door from a value the author cannot
-> choose**. The derivation MUST be *sound* — a constant that pins the gate open does not satisfy this clause.
+> choose**. The derivation MUST be _sound_ — a constant that pins the gate open does not satisfy this clause.
 > In scope by name: `tier` and `kind` (which select the ratification route), `scope` (which selects the authz
 > check), and the door-local `contested` / `lowRisk` context, **two conjuncts of the fast-path predicate that
 > `governed-emit.ts` currently hardcodes to their permissive values**.
 >
-> *Two earlier formulations are rejected and recorded so they are not re-proposed.* **(i) "inside the identity
+> _Two earlier formulations are rejected and recorded so they are not re-proposed._ **(i) "inside the identity
 > envelope"** — ambiguous and already vacuously true: this codebase has two identities, and `contentHash`
 > covers the whole fact including `tier`, so the clause would certify the reproduced bypass as compliant. Only
 > `nodeKey` routes, and `nodeKey` is the one that omits `tier`. **(ii) a disjunction offering identity-inclusion
-> *or* door-derivation** — unsound for `scope`: putting `scope` in the identity changes nothing, because authz
+> _or_ door-derivation** — unsound for `scope`: putting `scope` in the identity changes nothing, because authz
 > is `actor === scope` on an author-supplied string while the read projection scopes on the derived
 > `primaryAnchor`, with nothing binding them. Only derivation closes it. The clause is therefore a single
 > requirement, not a choice.
@@ -218,18 +218,18 @@ the lattice — not that the author may claim it. That half is ARCH-9, and it is
 > ratified act.
 >
 > <a id="arch-11"></a>**ARCH-11 Read-only means the write handle is not REACHABLE.** A leg with no write
-> authority MUST NOT be able to *reach* a mutator — not through its parameters and **not through its
+> authority MUST NOT be able to _reach_ a mutator — not through its parameters and **not through its
 > enclosing scope**. Legs MUST therefore be built by a per-leg factory in a module where the wide store
 > handle is never in scope, receiving only a narrow read port. Write-freedom MUST be a property of what the
 > leg can reach, not of a reviewer noticing and not of a runtime spy.
 >
-> *Stated precisely, because the obvious wording is satisfied by the exact defect it targets:* "must not be
+> _Stated precisely, because the obvious wording is satisfied by the exact defect it targets:_ "must not be
 > **given** a handle" is already true today — `wire.ts` builds every leg as an arrow closure in the same
 > lexical scope as `const store = createDiskStore(…)`, so the legs receive only `args` and can still call
 > `store.put`. **Closure capture is the leak; parameter typing does not close it.** And in TypeScript the
 > narrow port is **not unforgeable** — structural types are erased at runtime, so the attenuation must be a
 > real wrapper object (`{ read: (k) => store.read(k) }`), never a cast. The ocap literature
-> (Miller; KeyKOS/EROS/Capsicum/CHERI) is the *source of the discipline*, not a claim that this codebase
+> (Miller; KeyKOS/EROS/Capsicum/CHERI) is the _source of the discipline_, not a claim that this codebase
 > achieves kernel-grade unforgeability: here the guarantee is compile-time narrowing plus a runtime wrapper.
 
 The repo already has the correct idiom to copy: `packages/tools/src/guard.ts` declares `ReadProjection`
@@ -247,8 +247,8 @@ dry-run door (`check`) discloses nothing an attacker could not already read.
 > **STATED LIMITATION, NOT A SETTLED POSITION (2026-08-30).** The destination is now named: Atlas is to
 > become an open-source product AND a hosted service. Under that destination the paragraph above is a
 > LIMITATION with an expiry, not a resting place — and ARCH-12's revisit condition has FIRED.
-> Specifically, the `check`-discloses-nothing argument holds *because the attacker can already read the
-> disk*; a remote caller cannot, so that justification does not survive the transport and every read
+> Specifically, the `check`-discloses-nothing argument holds _because the attacker can already read the
+> disk_; a remote caller cannot, so that justification does not survive the transport and every read
 > door must be re-judged, not just `check`.
 >
 > This paragraph stays, deliberately. It is a precise, self-authored map of the two things that become
@@ -257,7 +257,7 @@ dry-run door (`check`) discloses nothing an attacker could not already read.
 > it implies is now enforced mechanically rather than by prose: `harness/gates/service-gate-guard.mjs`
 > turns CI red on any non-stdio transport until four named blockers — identity, isolation,
 > policy-integrity and resource-limits — are declared closed in a ledger. **Stated precisely, because the
-> loose reading is an overclaim:** the gate enforces *those four*, by name, and it checks that the ledger
+> loose reading is an overclaim:** the gate enforces _those four_, by name, and it checks that the ledger
 > mentions them, not that they are true. Hardening that is not on that list — disclosure redaction, abuse
 > control, renderer escaping, supply chain — is unprotected by it. The gate buys ordering, not coverage.
 
@@ -300,9 +300,9 @@ The question was posed as though `tier` were the open field. Read against the co
    `REJECTED_UNAUTHORIZED_ANCHOR` when the declared scope does not own the fact's real anchor — a fact
    anchored in `src/payments` declared under `scope:'public'` is refused, the exact exfiltration §policy.ts
    warns about. Shipped with WP-10.A3 (#251); pinned by `arch9-door-derivation.test.ts` and the
-   governed-emit authz tests. *[The ADR-0010 "open item 3" predates this; the code closed it.]*
+   governed-emit authz tests. _[The ADR-0010 "open item 3" predates this; the code closed it.]_
 
-**Residual, stated rather than hidden.** A cheap CREATE can still *occupy* a `(anchor, slot)` with an
+**Residual, stated rather than hidden.** A cheap CREATE can still _occupy_ a `(anchor, slot)` with an
 advisory fact. That is slot squatting, not an authority bypass: raising the occupant to `T0` is an UPDATE,
 routes to full ratification on the declared class, and still demands the token. Under the current local
 posture (§3.3) this is an anti-accident concern; it must be re-judged if the transport goes remote, which
@@ -314,25 +314,25 @@ is already SHIPPED in the authz gate, #251); the derived verdict wiring shipped 
 USE-OR-SEAL serving path shipped in #319/#321. Durable promotion/completion semantics are not claimed here.
 
 **Owner ruling 2026-09-03 — the growth path and the ratifier question (resolves ARCH-D3b).** The owner
-decided, in product terms: *"who approves is the ORCHESTRATOR, approving only with evidence, clear
+decided, in product terms: _"who approves is the ORCHESTRATOR, approving only with evidence, clear
 protocol; both [use-and-success and human seal] coexist; neither is mandatory; human-in-the-loop kills the
-purpose, this serves LLMs not humans."* Three commitments follow (full text in ADR-0010 §"Owner ruling"):
+purpose, this serves LLMs not humans."_ Three commitments follow (full text in ADR-0010 §"Owner ruling"):
 
 1. **T2-by-construction on CREATE** — a new node is born advisory; the one-way join already makes a
    self-declared higher class cost more than it buys, and this makes T2 the written rule, not a
    consequence.
 2. **Growth is USE-OR-SEAL, neither mandatory.** A node leaves the advisory class by ONE of two earned
-  evidences, either sufficient, neither required: **USE** (served in a decision whose completion was
-  recorded — the `hits` ledger is the foundation) or **SEAL** (a human ratify token recording a deliberate
-  endorsement). A node earning neither stays advisory and decays (KNOW-17). No human gate is required on
-  the growth path. The current implementation records in-process served hits and raises the returned class
-  on the next pack; durable promotion and a completion signal remain unimplemented.
+   evidences, either sufficient, neither required: **USE** (served in a decision whose completion was
+   recorded — the `hits` ledger is the foundation) or **SEAL** (a human ratify token recording a deliberate
+   endorsement). A node earning neither stays advisory and decays (KNOW-17). No human gate is required on
+   the growth path. The current implementation records in-process served hits and raises the returned class
+   on the next pack; durable promotion and a completion signal remain unimplemented.
 3. **The ratify token is ONE evidence, not a gate; verification stays advisory.** §3.3's anti-accident
    posture stands; the `service-gate-guard` tripwire (ARCH-12) re-opens verification the moment a
    remote/multi-tenant transport is attempted.
 
 **What the ruling does to the residual.** Slot squatting is no longer a terminal state: an advisory fact
-that *occupies* a `(anchor, slot)` can now GROW by use or seal, so "raise the occupant" is no longer the
+that _occupies_ a `(anchor, slot)` can now GROW by use or seal, so "raise the occupant" is no longer the
 only exit — it becomes one of the two earned paths. The residual's re-judge condition (ARCH-12, transport
 remote) is unchanged.
 
@@ -343,40 +343,40 @@ remote) is unchanged.
 > **Enforcement column, not a uniform claim.** ✅ = shipped and mutation-tested — in `layer-guard.mjs` for
 > checks 1–7, and in the test suite for check 9; ⬜ = specified, no checker yet. A second review round found
 > four of these presented as uniformly falsifiable when they were not — #4 was false as written (the gate read
-> manifests only, so a planted *import* passed), #8 was satisfiable with no code change, #9 conflicted with
+> manifests only, so a planted _import_ passed), #8 was satisfiable with no code change, #9 conflicted with
 > ARCH-10's own wording, and #10 was satisfied by the code it targets. #4 is now true (checks 1–7 below are
 > gated by `layer-guard.mjs`); **#9 is now shipped and mutation-tested too, by a test rather than by the gate**
 > (ADR-0007); #8 and #10 remain ⬜ and belong to the still-unimplemented remainder of the AUTHORITY model.
 
-1. The package dependency graph is acyclic, and no inner layer imports an outer one. *(ARCH-1, ARCH-2)*
-2. `@atlas/tools` has zero import edges to `adapter-io` / `cli` / `mcp-server`. *(ARCH-2)*
+1. The package dependency graph is acyclic, and no inner layer imports an outer one. _(ARCH-1, ARCH-2)_
+2. `@atlas/tools` has zero import edges to `adapter-io` / `cli` / `mcp-server`. _(ARCH-2)_
 3. Every member of the `Tool` union has a bound leg at the composition root, and every bound leg's token is a
-   member of the union — checked in both directions. *(ARCH-3)*
-4. The gate fails on a planted inward import, a planted cycle, and a planted unbound tool. *(ARCH-4)*
-5. `advertised ≡ invocable ≡ Tool`, asserted by set-equality, not by inspection. *(ARCH-5)*
+   member of the union — checked in both directions. _(ARCH-3)_
+4. The gate fails on a planted inward import, a planted cycle, and a planted unbound tool. _(ARCH-4)_
+5. `advertised ≡ invocable ≡ Tool`, asserted by set-equality, not by inspection. _(ARCH-5)_
 6. `GOVERNANCE_SURFACE ⊎ READ_SURFACE == Tool`, total and disjoint; `WRITE_PATHS ⊆ GOVERNANCE_SURFACE`.
-   *(ARCH-6)*
-7. `|Tool| ≤ 30`, and the gate fails at 31 with a message naming ARCH-8 as the remedy. *(ARCH-7)*
+   _(ARCH-6)_
+7. `|Tool| ≤ 30`, and the gate fails at 31 with a message naming ARCH-8 as the remedy. _(ARCH-7)_
 8. No field that selects a governance gate is both author-supplied and outside the identity envelope.
-   *(ARCH-9)*
+   _(ARCH-9)_
 9. Emitting a `T2` advisory at the `(anchor, slot)` of a ratified `T0` fact is **refused**, not silently
-   applied as an UPDATE. *(ARCH-10 — the §3.1 reproduction, now a GREEN test: `SCN-GE-I1`,
+   applied as an UPDATE. _(ARCH-10 — the §3.1 reproduction, now a GREEN test: `SCN-GE-I1`,
    `packages/adapter-io/test/governed-emit-incumbent.test.ts`; mutation-verified, deleting the incumbent-guard
-   block in `governed-emit.ts` turns it red. ADR-0007.)*
+   block in `governed-emit.ts` turns it red. ADR-0007.)_
 10. A planner leg cannot be constructed over a store handle that exposes a mutator — enforced by the type,
-    demonstrated by a compile failure, not by a spy. *(ARCH-11)*
+    demonstrated by a compile failure, not by a spy. _(ARCH-11)_
 
 ---
 
 ## 5. Decisions
 
-| # | decision | status |
-|---|---|---|
-| **ARCH-D1** | Ports declared inward, adapters outward; `tools` never depends on `adapter-io` | **proposed** — ADR-0006 §hierarchy |
-| **ARCH-D2** | INV-MCP-1's "exactly five tools" is superseded by the derived-surface property + a measured budget | **OWNER-RATIFIED 2026-07-25** — ADR-0006 |
-| **ARCH-D3a** (UPDATE leg) | On a write that lands on an EXISTING node, `tier` and `scope` stop being author-supplied gate selectors: the required class and the authorized scope are read off the incumbent's own stored fact | **CLOSED 2026-07-25 — ADR-0007.** `governed-emit.ts` §2.25 refuses `governance-downgrade` / `unauthorized for target` (which, per the F1 amendment to ADR-0007, is ALSO the refusal for an incumbent whose stored fact is unreadable — a distinct reason there was a CAS-health oracle) / `governance-relocation`; pinned by `SCN-GE-I1`/`I2`/`I5`/`I15` |
-| **ARCH-D3b** (CREATE leg) | The same for a write that mints a node, where there is no incumbent to derive from | **OWNER-DECIDED 2026-08-30 §3.4 + 2026-09-03 §3.4 ruling; current implementation delivered in part.** The `tier` conjunct is closed by the one-way join at `packages/knowledge/src/ratify/fastpath.ts:143` and by the 2026-09-03 T2-by-construction ruling. The `scope`↔`primaryAnchor` half is **CLOSED — shipped** (`evalAuthzGate` runs `scopeOwnsAnchor`, WP-10.A3 #251). Derived fast-path verdicts are **CLOSED — shipped by #313**; the old `DOOR_RATIFY_CTX` constant is gone. The in-process USE-OR-SEAL serving path is **CLOSED — #319/#321**; `contested` has no current veto source, and durable promotion/completion semantics remain open. |
-| **ARCH-D4** | Planner legs take an unforgeable read-only port (ocap), replacing the write-spy as the guarantee | **proposed** — supersedes ADR-0004's "property of the type" claim, which is currently overstated |
+| #                         | decision                                                                                                                                                                                          | status                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **ARCH-D1**               | Ports declared inward, adapters outward; `tools` never depends on `adapter-io`                                                                                                                    | **proposed** — ADR-0006 §hierarchy                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| **ARCH-D2**               | INV-MCP-1's "exactly five tools" is superseded by the derived-surface property + a measured budget                                                                                                | **OWNER-RATIFIED 2026-07-25** — ADR-0006                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| **ARCH-D3a** (UPDATE leg) | On a write that lands on an EXISTING node, `tier` and `scope` stop being author-supplied gate selectors: the required class and the authorized scope are read off the incumbent's own stored fact | **CLOSED 2026-07-25 — ADR-0007.** `governed-emit.ts` §2.25 refuses `governance-downgrade` / `unauthorized for target` (which, per the F1 amendment to ADR-0007, is ALSO the refusal for an incumbent whose stored fact is unreadable — a distinct reason there was a CAS-health oracle) / `governance-relocation`; pinned by `SCN-GE-I1`/`I2`/`I5`/`I15`                                                                                                                                                                                                                                                                                                   |
+| **ARCH-D3b** (CREATE leg) | The same for a write that mints a node, where there is no incumbent to derive from                                                                                                                | **OWNER-DECIDED 2026-08-30 §3.4 + 2026-09-03 §3.4 ruling; current implementation delivered in part.** The `tier` conjunct is closed by the one-way join at `packages/knowledge/src/ratify/fastpath.ts:143` and by the 2026-09-03 T2-by-construction ruling. The `scope`↔`primaryAnchor` half is **CLOSED — shipped** (`evalAuthzGate` runs `scopeOwnsAnchor`, WP-10.A3 #251). Derived fast-path verdicts are **CLOSED — shipped by #313**; the old `DOOR_RATIFY_CTX` constant is gone. The in-process USE-OR-SEAL serving path is **CLOSED — #319/#321**; `contested` has no current veto source, and durable promotion/completion semantics remain open. |
+| **ARCH-D4**               | Planner legs take an unforgeable read-only port (ocap), replacing the write-spy as the guarantee                                                                                                  | **proposed** — supersedes ADR-0004's "property of the type" claim, which is currently overstated                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
 
 ## Sources
 

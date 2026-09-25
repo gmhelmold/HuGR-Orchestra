@@ -3,7 +3,13 @@
     "wp": "WP-C3",
     "date": "2026-08-18",
     "summary": "Table-2 false-admit figures (dependency 1.30%, count 5.52%) are reported under two named definitions, not a bare rate. Definition A (gate's own documented predicate, witnessed reference-existence): all three structural arms 0-false-admit (dependency 0/23702, count 0/163, negation 0/163). Definition B (bench's stricter, undocumented CALL-only label): dependency 309/23702=1.30%, count 9/163=5.52%, negation 0/163=0%, relation 452/452=100%. Line-by-line adjudication of all 318 Definition-B rows found 0/318 genuine unsoundness -- every one is a labelling gap between the bench's isCallee check and the gate's reference-existence predicate, not an unwitnessed admit. Recall figures are unaffected and unchanged. No bench run was repeated; all figures trace to the artifact already committed at 99575cd plus code read at the cited file:line locations.",
-    "did_not_change": ["recall figures", "reproduction recipe", "both build-state tables' existence", "the fixture-pin drift finding", "Table 1 (dist-absent) raw numbers -- not row-level adjudicated in this pass, flagged unconfirmed, not reclassified"]
+    "did_not_change": [
+      "recall figures",
+      "reproduction recipe",
+      "both build-state tables' existence",
+      "the fixture-pin drift finding",
+      "Table 1 (dist-absent) raw numbers -- not row-level adjudicated in this pass, flagged unconfirmed, not reclassified"
+    ]
   },
   "kind": "a4-planted-recall (196b sound mutation-bench)",
   "method_doc": "docs/design/95-benchmark-methodology.md",
@@ -44,10 +50,26 @@
       "targets": 1333,
       "scopes": 19,
       "perArm": {
-        "count":      { "falseAdmit": { "num": 0,   "den": 163,   "rate": 0.0 },      "recallTrue": { "num": 7,   "den": 163,  "rate": 0.04294 }, "n": 326 },
-        "relation":   { "falseAdmit": { "num": 452, "den": 452,   "rate": 1.0 },      "recallTrue": { "num": 452, "den": 452,  "rate": 1.0 },     "n": 904 },
-        "dependency": { "falseAdmit": { "num": 18,  "den": 23702, "rate": 0.00076 },  "recallTrue": { "num": 7,   "den": 163,  "rate": 0.04294 }, "n": 23865 },
-        "negation":   { "falseAdmit": { "num": 0,   "den": 163,   "rate": 0.0 },      "recallTrue": { "num": 51,  "den": 1200, "rate": 0.0425 },  "n": 1363 }
+        "count": {
+          "falseAdmit": { "num": 0, "den": 163, "rate": 0.0 },
+          "recallTrue": { "num": 7, "den": 163, "rate": 0.04294 },
+          "n": 326
+        },
+        "relation": {
+          "falseAdmit": { "num": 452, "den": 452, "rate": 1.0 },
+          "recallTrue": { "num": 452, "den": 452, "rate": 1.0 },
+          "n": 904
+        },
+        "dependency": {
+          "falseAdmit": { "num": 18, "den": 23702, "rate": 0.00076 },
+          "recallTrue": { "num": 7, "den": 163, "rate": 0.04294 },
+          "n": 23865
+        },
+        "negation": {
+          "falseAdmit": { "num": 0, "den": 163, "rate": 0.0 },
+          "recallTrue": { "num": 51, "den": 1200, "rate": 0.0425 },
+          "n": 1363
+        }
       },
       "negation_teeth_gate_off": { "falseAdmit": { "num": 132, "den": 163, "rate": 0.8098 } },
       "dependency_false_admits_call_eligible": "not separately re-checked in this state (the shipped assertion loop stops at first violation; the doc's committed comment for this regime cites 0.07% on an earlier, smaller population, all oracle-definition-gap type/reference symbols, no fabricated caller)",
@@ -64,10 +86,30 @@
         "adjudication": "all 318 Def-B rows (309 dependency + 9 count) adjudicated line-by-line, cold-seat-verified, spot-cold-checked against source: 0/318 genuine unsoundness. dependency: 309/309 have a real non-definition SCIP reference occurrence of the target in scope, corroborated by tsc's own refFiles; 0/309 have a call in scope. Of these, 2 also trip the bench's separate whole-program call-eligibility proxy (callFiles>0 anywhere, not necessarily in-scope): isGrounded (witness: import at packages/adapter-io/src/compose.ts:24) and DegenerateAnchorError (witness: import at packages/adapter-io/src/governed-promote.ts:54, instanceof operand at :111) -- both witnesses are references, never calls, same gap class as the other 307. count: 9/9 are boundary cases where atLeast == in-scope-call-count + 1 while in-scope references (the gate's actual witness set) >= atLeast."
       },
       "perArm": {
-        "count":      { "falseAdmitDefA": { "num": 0,   "den": 163,   "rate": 0.0 },     "falseAdmitDefB": { "num": 9,   "den": 163,   "rate": 0.05521 }, "recallTrue": { "num": 163, "den": 163,  "rate": 1.0 },     "n": 326 },
-        "relation":   { "falseAdmitDefA": "n/a -- admitRelation states no truth/direction predicate; nothing to be unsound against", "falseAdmitDefB": { "num": 452, "den": 452,   "rate": 1.0 },     "recallTrue": { "num": 452, "den": 452,  "rate": 1.0 },     "n": 904 },
-        "dependency": { "falseAdmitDefA": { "num": 0,   "den": 23702, "rate": 0.0 },     "falseAdmitDefB": { "num": 309, "den": 23702, "rate": 0.01304 }, "recallTrue": { "num": 163, "den": 163,  "rate": 1.0 },     "n": 23865 },
-        "negation":   { "falseAdmitDefA": { "num": 0,   "den": 163,   "rate": 0.0 },     "falseAdmitDefB": { "num": 0,   "den": 163,   "rate": 0.0 },     "recallTrue": { "num": 428, "den": 1200, "rate": 0.35667 }, "n": 1363 }
+        "count": {
+          "falseAdmitDefA": { "num": 0, "den": 163, "rate": 0.0 },
+          "falseAdmitDefB": { "num": 9, "den": 163, "rate": 0.05521 },
+          "recallTrue": { "num": 163, "den": 163, "rate": 1.0 },
+          "n": 326
+        },
+        "relation": {
+          "falseAdmitDefA": "n/a -- admitRelation states no truth/direction predicate; nothing to be unsound against",
+          "falseAdmitDefB": { "num": 452, "den": 452, "rate": 1.0 },
+          "recallTrue": { "num": 452, "den": 452, "rate": 1.0 },
+          "n": 904
+        },
+        "dependency": {
+          "falseAdmitDefA": { "num": 0, "den": 23702, "rate": 0.0 },
+          "falseAdmitDefB": { "num": 309, "den": 23702, "rate": 0.01304 },
+          "recallTrue": { "num": 163, "den": 163, "rate": 1.0 },
+          "n": 23865
+        },
+        "negation": {
+          "falseAdmitDefA": { "num": 0, "den": 163, "rate": 0.0 },
+          "falseAdmitDefB": { "num": 0, "den": 163, "rate": 0.0 },
+          "recallTrue": { "num": 428, "den": 1200, "rate": 0.35667 },
+          "n": 1363
+        }
       },
       "negation_teeth_gate_off": { "falseAdmit": { "num": 0, "den": 163, "rate": 0.0 } },
       "negation_teeth_open_finding": "NOT FIXED HERE, flagged for the code owner (another seat triaging): on this build+index, negation_teeth_gate_off equals s.negation.falseAdmit (both 0/163), so the shipped non-vacuity assertion at packages/adapter-io/test/semantic-bench.test.ts:252 ('expect(teeth.negation.falseAdmit!).toBeGreaterThan(s.negation.falseAdmit!)') reduces to expect(0).toBeGreaterThan(0) on this exact operating-index state. Negation's 0-false-admit is proven non-vacuous only on the dist-absent misbuild (Table 1, gate-off 132/163), not on the dist-form/operating index measured here.",

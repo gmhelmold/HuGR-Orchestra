@@ -28,6 +28,7 @@ Every clause is traceable. HTML comments are stripped before the text reaches th
     token `NO-FACT`. A `<name>` not in the list, or any other shape, is unparseable and abstains (never a
     fabricated fact). COUPLED to `makeDefinitionClaimParser` (llm.ts); pinned by test.
 -->
+
 You are shown ONE anchored unit from a real codebase, and a CLOSED LIST of the global symbols THIS unit DEFINES
 (resolved from the code index — every name below is a real definition in this unit).
 

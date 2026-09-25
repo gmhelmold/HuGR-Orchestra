@@ -80,11 +80,11 @@
 // change — only a caller that asks the richer question can tell `tracked-staging` apart from
 // `tracked-provable`, and today only `compose.ts` does.
 
-import { runGit } from './run-git.js';
+import { runGit } from "./run-git.js"
 
 /** "May the durable sidecar be trusted?" — `false` iff it demonstrably arrived by COMMIT rather than through
  *  a door. Absent (tests, non-git trees) ⇒ never consulted ⇒ the pre-existing behaviour. */
-export type SidecarTrust = () => boolean;
+export type SidecarTrust = () => boolean
 
 /** Is `p` (a repo-relative, forward-slash git path) part of the DURABLE STORE — the sidecar families and the
  *  CAS? Deliberately NOT "anything under `.atlas/`": `policy.json` is admin-owned source and MUST stay in
@@ -92,23 +92,23 @@ export type SidecarTrust = () => boolean;
  *  turned off within a day. Matches the two sidecar FAMILIES by their generation-naming (`sidecar.ts`
  *  `genPath`/`mirrorPath`) and the whole CAS subtree. */
 export function isDurableStorePath(p: string): boolean {
-  if (p.startsWith('.atlas/cas/')) return true;
-  const m = /^\.atlas\/(projection|staging)(\.\d{1,15})?\.json$/.exec(p);
-  return m !== null;
+  if (p.startsWith(".atlas/cas/")) return true
+  const m = /^\.atlas\/(projection|staging)(\.\d{1,15})?\.json$/.exec(p)
+  return m !== null
 }
 
 /** Is `p` the ADR-0008 candidate sidecar family — unratified LLM-proposed material that never passed a
  *  door and carries no replayable witness. Narrower than {@link isDurableStorePath}: matches `staging`
  *  ONLY, never `cas/` or `projection`, so the two families can be told apart without a second file walk. */
 function isStagingPath(p: string): boolean {
-  return /^\.atlas\/staging(\.\d{1,15})?\.json$/.test(p);
+  return /^\.atlas\/staging(\.\d{1,15})?\.json$/.test(p)
 }
 
 /** Is `p` the RE-PROVABLE half of the durable store — `projection` rows or the CAS blobs they cite. Every
  *  fact this covers CAN carry a `witness` (`reverify-store.ts`); staging cannot, which is why it is excluded
  *  here and matched only by {@link isStagingPath}. */
 function isProvableStorePath(p: string): boolean {
-  return p.startsWith('.atlas/cas/') || /^\.atlas\/projection(\.\d{1,15})?\.json$/.test(p);
+  return p.startsWith(".atlas/cas/") || /^\.atlas\/projection(\.\d{1,15})?\.json$/.test(p)
 }
 
 /**
@@ -122,12 +122,12 @@ function isProvableStorePath(p: string): boolean {
  * refusal, never the filtered serve, because staging's presence alone is disqualifying regardless of what
  * else rode along with it.
  */
-export type StoreProvenance = 'trusted' | 'tracked-staging' | 'tracked-provable';
+export type StoreProvenance = "trusted" | "tracked-staging" | "tracked-provable"
 
 function classify(tracked: readonly string[]): StoreProvenance {
-  if (tracked.some(isStagingPath)) return 'tracked-staging';
-  if (tracked.some(isProvableStorePath)) return 'tracked-provable';
-  return 'trusted';
+  if (tracked.some(isStagingPath)) return "tracked-staging"
+  if (tracked.some(isProvableStorePath)) return "tracked-provable"
+  return "trusted"
 }
 
 /**
@@ -141,20 +141,20 @@ function classify(tracked: readonly string[]): StoreProvenance {
  * reads as "no evidence of a commit" ⇒ `trusted`.
  */
 export function gitStoreProvenance(repoPath: string): () => StoreProvenance {
-  let cached: StoreProvenance | undefined;
+  let cached: StoreProvenance | undefined
   return () => {
-    if (cached !== undefined) return cached;
-    let out: string;
+    if (cached !== undefined) return cached
+    let out: string
     try {
-      out = runGit(repoPath, ['ls-files', '-z', '--', '.atlas']);
+      out = runGit(repoPath, ["ls-files", "-z", "--", ".atlas"])
     } catch {
-      cached = 'trusted';
-      return cached;
+      cached = "trusted"
+      return cached
     }
-    const tracked = out.split('\0').filter((p) => p.length > 0);
-    cached = classify(tracked);
-    return cached;
-  };
+    const tracked = out.split("\0").filter((p) => p.length > 0)
+    cached = classify(tracked)
+    return cached
+  }
 }
 
 /**
@@ -178,6 +178,6 @@ export function gitStoreProvenance(repoPath: string): () => StoreProvenance {
  * {@link gitStoreProvenance} directly instead of reconstructing it from this boolean.
  */
 export function gitSidecarTrust(repoPath: string): SidecarTrust {
-  const provenance = gitStoreProvenance(repoPath);
-  return () => provenance() === 'trusted';
+  const provenance = gitStoreProvenance(repoPath)
+  return () => provenance() === "trusted"
 }

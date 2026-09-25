@@ -4,7 +4,7 @@
 
 ## Purpose
 
-The retrieval layer decides *what knowledge reaches a worker, and when*. It has no embeddings and no
+The retrieval layer decides _what knowledge reaches a worker, and when_. It has no embeddings and no
 RAG (A-14): relevance is resolved by the deterministic hashed structural index (§3.6) over three keys —
 scope (path), dependency (`depends-on`), and trigger (tag). It packages a territory's invariants into a
 **pack**, **pokes** that pack when a navigator enters the scope, and projects the covering nodes into a
@@ -47,9 +47,9 @@ Budget        = { kind: InjectionKind, capTokens, hits, hitRate }   // per-type 
 OffAtlas      = { territory, served, offAtlasReads, offAtlasRate }    // MISS-oracle: per-territory coverage ledger (RETR-13)
 ```
 
-- **Retrieval keys (all deterministic, §3.6):** (1) *scope* — resolve a path to its node(s) in the tree
+- **Retrieval keys (all deterministic, §3.6):** (1) _scope_ — resolve a path to its node(s) in the tree
   and roll facts up the hierarchy (a file query surfaces its module's and crate's invariants); (2)
-  *dependency* — follow `depends-on` / blast radius; (3) *trigger* — protocols matched by territory/pattern.
+  _dependency_ — follow `depends-on` / blast radius; (3) _trigger_ — protocols matched by territory/pattern.
 - A `Pack` carries every `tier≥T1` invariant of its territory, `≤ ~2K` (cap measure below); `stale` is
   `true` iff any grounding backing it drifted (the index is itself the drift oracle, so staleness is
   visible at query time).
@@ -85,7 +85,7 @@ OffAtlas      = { territory, served, offAtlasReads, offAtlasRate }    // MISS-or
   not a location) and MUST NOT infer scope. Only a resolved single-file navigation signal MAY drive a
   scope-change. Crossing into a new scope MUST fire a poke
   injecting a compact notice + that scope's pack, unasked. To prevent poke-storms on rapid file-hopping
-  the hook MUST apply **scope-change hysteresis / debounce**: a scope change MUST *settle* (remain the
+  the hook MUST apply **scope-change hysteresis / debounce**: a scope change MUST _settle_ (remain the
   current scope across a debounce window of **`N = 2` consecutive tool calls**) before its poke fires, and transient
   in-and-out crossings MUST NOT poke. A poke MUST fire **at most once per scope per session** — re-entering
   an already-poked scope, or a seat merely reasoning over an already-injected pack (which emits no new
@@ -99,7 +99,7 @@ OffAtlas      = { territory, served, offAtlasReads, offAtlasRate }    // MISS-or
   an undefined or purely-hardcoded order. **Two kinds are exempt and MUST NOT drop, ever:**
   `Awareness.constitution` (T0) and `protocols.safetyCritical` (T0-adjacent). The documented **cold-start
   default** — used only until the ledger has data, highest-priority first, dropped from the bottom — is:
-  `Awareness.constitution(T0)` *[pin]* → `protocols.safetyCritical` *[pin]* → `Orientation` → `project-Rules`
+  `Awareness.constitution(T0)` _[pin]_ → `protocols.safetyCritical` _[pin]_ → `Orientation` → `project-Rules`
   → `own (curated briefing)` → `pack (T0 in full, then T1 by rank)` → `related (dependents by rank)` →
   `protocols.advisory` → `poke notice` → `Awareness tail`. Once the ledger has data, every kind except the two
   pins MUST reorder by observed hit-rate (drop the least-used first). A drop-counter per kind MUST be ledgered
@@ -154,7 +154,7 @@ OffAtlas      = { territory, served, offAtlasReads, offAtlasRate }    // MISS-or
 - **RETR-13 MISS-oracle — off-atlas coverage per territory.** The ledger MUST log, per territory, an
   **off-atlas rate**: the fraction of served turns in which a seat had to `Read`/`Grep` **outside the
   surfaced scope-set** to finish (the served pack under-covered the work). Where `hits` (RETR-8) measure the
-  *precision* of what was served, the off-atlas rate measures *coverage* — the one silent failure the
+  _precision_ of what was served, the off-atlas rate measures _coverage_ — the one silent failure the
   drift-oracle (RETR-3) cannot see, because unanchored knowledge has no grounding to drift. A territory whose
   off-atlas rate crosses a threshold MUST raise a **calibration prompt to author the missing tag/edge** (its
   structural keys under-cover that territory), turning invisible misses into a visible signal. The off-atlas

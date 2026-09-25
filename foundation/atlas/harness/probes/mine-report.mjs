@@ -26,26 +26,26 @@
 // such, never silently read as zeroes or as an empty ledger.
 
 /** The `atlas mine` header line — the report's own count of what it seeded. */
-const SEEDED = /^genesis: seeded (\d+) candidate fact\(s\); ratified (\d+)$/m;
+const SEEDED = /^genesis: seeded (\d+) candidate fact\(s\); ratified (\d+)$/m
 /** The GEN-13 cost line. `budgetSpent` counts SITES, one unit per completed site (`run-controller.ts`). */
-const COST = /^cost: llmCalls (\d+) · budgetSpent (\d+)$/m;
+const COST = /^cost: llmCalls (\d+) · budgetSpent (\d+)$/m
 /** The `mineWhyEmpty` branch where the structural pass yielded no site at all. */
-const ZERO_SITES = /^mine: (\d+) candidate facts — 0 sites visited\b/m;
+const ZERO_SITES = /^mine: (\d+) candidate facts — 0 sites visited\b/m
 /** Every other branch: `mine: <k> candidate facts — <m> site(s) visited …`. */
-const VISITED = /^mine: (\d+) candidate facts — (\d+) site\(s\) visited\b/m;
+const VISITED = /^mine: (\d+) candidate facts — (\d+) site\(s\) visited\b/m
 /** The ONE branch whose prose accounts for the abstentions — the only place the residual is attributable. */
-const ALL_ABSTAINED = /site\(s\) visited and every one abstained/;
+const ALL_ABSTAINED = /site\(s\) visited and every one abstained/
 /** The `coverageLines` verdict line (`reconcile(...).why`), always present when `mine-render.ts` prints. */
-const COVERAGE_VERDICT = /^coverage: (.*)$/m;
+const COVERAGE_VERDICT = /^coverage: (.*)$/m
 /** One `siteLine` row: a fixed `site: ` prefix, then single-line JSON (`mine-render.ts` `siteLine`). Anchored
  *  to line start/end so a `whyNot`/`note` string that happens to embed the literal text `site: {` cannot be
  *  mistaken for a second row — `siteLine` always emits exactly one JSON object per printed line. */
-const SITE_ROW = /^site: (\{.*\})$/gm;
+const SITE_ROW = /^site: (\{.*\})$/gm
 
 /** The `SiteOutcome.outcome` vocabulary, transcribed from `packages/genesis/src/types.ts:148-179` — a row
  *  whose `outcome` is outside this set was not written by `siteLine` and is reported as malformed, not
  *  silently accepted. */
-const OUTCOMES = new Set(['seeded', 'abstained', 'unrecorded', 'interrupted', 'unvisited']);
+const OUTCOMES = new Set(["seeded", "abstained", "unrecorded", "interrupted", "unvisited"])
 
 /**
  * Parse a captured `atlas mine` stdout — the AGGREGATE legs (unchanged RETURN SHAPE; existing callers, e.g.
@@ -68,14 +68,14 @@ const OUTCOMES = new Set(['seeded', 'abstained', 'unrecorded', 'interrupted', 'u
  * door over.
  */
 export function parseMineReport(text) {
-  const seededLine = SEEDED.exec(text);
-  const cost = COST.exec(text);
-  if (seededLine === null || cost === null) return undefined;
-  const seeded = Number(seededLine[1]);
-  const zero = ZERO_SITES.exec(text);
-  const visited = VISITED.exec(text);
+  const seededLine = SEEDED.exec(text)
+  const cost = COST.exec(text)
+  if (seededLine === null || cost === null) return undefined
+  const seeded = Number(seededLine[1])
+  const zero = ZERO_SITES.exec(text)
+  const visited = VISITED.exec(text)
   if (zero === null && visited === null) {
-    if (seeded === 0) return undefined; // no "mine:" line AND nothing seeded — genuinely unparseable
+    if (seeded === 0) return undefined // no "mine:" line AND nothing seeded — genuinely unparseable
     return {
       seeded,
       ratified: Number(seededLine[2]),
@@ -84,7 +84,7 @@ export function parseMineReport(text) {
       sites: Number(cost[2]), //     the "mine:" line's own site count IS `budgetSpent` on every branch
       candidates: seeded, //         the "mine:" line's own candidate count IS `r.seeded.length` == `seeded`
       allAbstained: false, //        a seeded pass is definitionally not "every site abstained"
-    };
+    }
   }
   return {
     seeded,
@@ -95,7 +95,7 @@ export function parseMineReport(text) {
     candidates: Number(zero !== null ? zero[1] : visited[1]),
     /** Did the run's own prose account for every visited site as an abstention? */
     allAbstained: ALL_ABSTAINED.test(text),
-  };
+  }
 }
 
 /**
@@ -104,8 +104,8 @@ export function parseMineReport(text) {
  * is UNEVALUABLE, never read as "coverage closed" or "coverage failed".
  */
 export function parseCoverageVerdict(text) {
-  const m = COVERAGE_VERDICT.exec(text);
-  return m === null ? undefined : m[1];
+  const m = COVERAGE_VERDICT.exec(text)
+  return m === null ? undefined : m[1]
 }
 
 /**
@@ -121,32 +121,32 @@ export function parseCoverageVerdict(text) {
  * @returns {{ rows: object[], malformed: string[] }}
  */
 export function parseSiteRows(text) {
-  const rows = [];
-  const malformed = [];
+  const rows = []
+  const malformed = []
   for (const m of text.matchAll(SITE_ROW)) {
-    const raw = m[1];
-    let parsed;
+    const raw = m[1]
+    let parsed
     try {
-      parsed = JSON.parse(raw);
+      parsed = JSON.parse(raw)
     } catch {
-      malformed.push(m[0]);
-      continue;
+      malformed.push(m[0])
+      continue
     }
     if (
       parsed === null ||
-      typeof parsed !== 'object' ||
-      typeof parsed.rank !== 'number' ||
-      typeof parsed.outcome !== 'string' ||
+      typeof parsed !== "object" ||
+      typeof parsed.rank !== "number" ||
+      typeof parsed.outcome !== "string" ||
       !OUTCOMES.has(parsed.outcome) ||
-      typeof parsed.kind !== 'string' ||
-      typeof parsed.path !== 'string'
+      typeof parsed.kind !== "string" ||
+      typeof parsed.path !== "string"
     ) {
-      malformed.push(m[0]);
-      continue;
+      malformed.push(m[0])
+      continue
     }
-    rows.push(parsed);
+    rows.push(parsed)
   }
-  return { rows, malformed };
+  return { rows, malformed }
 }
 
 /**
@@ -158,9 +158,9 @@ export function parseSiteRows(text) {
  * "no ledger", never as "0 sites").
  */
 export function parseFullMineReport(text) {
-  const agg = parseMineReport(text);
-  if (agg === undefined) return undefined;
-  const coverageVerdict = parseCoverageVerdict(text);
-  const { rows: siteRows, malformed: malformedSiteRows } = parseSiteRows(text);
-  return { ...agg, coverageVerdict, siteRows, malformedSiteRows };
+  const agg = parseMineReport(text)
+  if (agg === undefined) return undefined
+  const coverageVerdict = parseCoverageVerdict(text)
+  const { rows: siteRows, malformed: malformedSiteRows } = parseSiteRows(text)
+  return { ...agg, coverageVerdict, siteRows, malformedSiteRows }
 }

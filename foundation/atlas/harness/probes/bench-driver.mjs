@@ -63,54 +63,54 @@
 // (`<repo>` is currently ignored; the entrypoint calls `runMine(process.cwd())`), so scoping one run to one
 // unit means running it FROM that unit's directory. A "13 packages" corpus is 13 separate invocations.
 
-import { execFileSync } from 'node:child_process';
-import { mkdtempSync, mkdirSync, readFileSync, realpathSync, statSync, writeFileSync } from 'node:fs';
-import { tmpdir } from 'node:os';
-import { dirname, join, resolve } from 'node:path';
-import { fileURLToPath, pathToFileURL } from 'node:url';
+import { execFileSync } from "node:child_process"
+import { mkdtempSync, mkdirSync, readFileSync, realpathSync, statSync, writeFileSync } from "node:fs"
+import { tmpdir } from "node:os"
+import { dirname, join, resolve } from "node:path"
+import { fileURLToPath, pathToFileURL } from "node:url"
 
-import { casGet, readSidecar } from './atlas-store-read.mjs';
-import { parseFullMineReport } from './mine-report.mjs';
+import { casGet, readSidecar } from "./atlas-store-read.mjs"
+import { parseFullMineReport } from "./mine-report.mjs"
 
-const HERE = dirname(fileURLToPath(import.meta.url));
+const HERE = dirname(fileURLToPath(import.meta.url))
 
 /** Read + validate a corpus spec: a JSON array of `{ repo: string, label?: string }`. Every `repo` is
  *  resolved to an absolute path relative to the CWD it was invoked from (not this file's directory) — a
  *  corpus file is a caller artifact, not a harness one. Throws with the offending index named; a corpus this
  *  cannot read is not a run this driver should silently run zero sites over. */
 export function readCorpus(path) {
-  let raw;
+  let raw
   try {
-    raw = JSON.parse(readFileSync(path, 'utf8'));
+    raw = JSON.parse(readFileSync(path, "utf8"))
   } catch (e) {
-    throw new Error(`bench-driver: corpus ${path} is not valid JSON: ${(e && e.message) || e}`);
+    throw new Error(`bench-driver: corpus ${path} is not valid JSON: ${(e && e.message) || e}`)
   }
   if (!Array.isArray(raw) || raw.length === 0) {
-    throw new Error(`bench-driver: corpus ${path} must be a non-empty JSON array of { repo, label? }`);
+    throw new Error(`bench-driver: corpus ${path} must be a non-empty JSON array of { repo, label? }`)
   }
   return raw.map((entry, i) => {
-    if (entry === null || typeof entry !== 'object' || typeof entry.repo !== 'string' || entry.repo.trim() === '') {
-      throw new Error(`bench-driver: corpus[${i}] must be an object carrying a non-empty string \`repo\``);
+    if (entry === null || typeof entry !== "object" || typeof entry.repo !== "string" || entry.repo.trim() === "") {
+      throw new Error(`bench-driver: corpus[${i}] must be an object carrying a non-empty string \`repo\``)
     }
-    return { repo: resolve(entry.repo), label: typeof entry.label === 'string' ? entry.label : entry.repo };
-  });
+    return { repo: resolve(entry.repo), label: typeof entry.label === "string" ? entry.label : entry.repo }
+  })
 }
 
 /** Build the `$ATLAS_MODEL_CONFIG` JSON `loadModelConfig` reads — `roles.propose.cmd/args` only; every other
  *  field takes the product's own default. `modelCmd` is the metering wrapper's own path (not the underlying
  *  `claude`/fake binary — that is `$METERED_CLAUDE_BIN`, an env knob `metered-claude.mjs` reads itself). */
 export function buildModelConfig(modelCmd) {
-  return { roles: { propose: { cmd: 'node', args: [modelCmd] } } };
+  return { roles: { propose: { cmd: "node", args: [modelCmd] } } }
 }
 
 /** Write a model config OUTSIDE every corpus repo (`configDir` is the caller's job to keep clear of them) —
  *  `loadModelConfig` refuses a config read from inside the repository under analysis (`docs/reference/commands/mine.md`
  *  §"What it refuses"), so a config planted inside a corpus repo would make every run in that repo exit 2. */
 export function writeModelConfig(configDir, modelCmd) {
-  mkdirSync(configDir, { recursive: true });
-  const path = join(configDir, 'model.json');
-  writeFileSync(path, JSON.stringify(buildModelConfig(modelCmd)));
-  return path;
+  mkdirSync(configDir, { recursive: true })
+  const path = join(configDir, "model.json")
+  writeFileSync(path, JSON.stringify(buildModelConfig(modelCmd)))
+  return path
 }
 
 /** Run `atlas mine .` once, in `repo`, under the given model config + metering env. Returns the raw
@@ -126,52 +126,52 @@ export function runMineOnce({ repo, cliBin, modelConfigPath, model, sidecarPath,
     // The bench measures ONE axis per run, and that axis is now EXPLICIT: the default `atlas mine` unions all
     // arms (advisory + dependency + count), so a per-site manifest join needs the single-arm render. Advisory
     // reproduces the prior single-axis measurement byte-for-byte; a future per-axis sweep parameterizes this.
-    ATLAS_MINE_SLOT: 'advisory',
+    ATLAS_MINE_SLOT: "advisory",
     ...(claudeBin !== undefined ? { METERED_CLAUDE_BIN: claudeBin } : {}),
     ...extraEnv,
-  };
-  let status = 0;
-  let out = '';
+  }
+  let status = 0
+  let out = ""
   try {
-    out = execFileSync('node', [cliBin, 'mine', '.'], {
+    out = execFileSync("node", [cliBin, "mine", "."], {
       cwd: repo,
       env,
-      encoding: 'utf8',
+      encoding: "utf8",
       maxBuffer: 64 * 1024 * 1024,
-    });
+    })
   } catch (e) {
     // A non-zero `mine` exit lands here (`execFileSync` throws on any non-zero status) — that is a real run
     // outcome (partial / governed refusal), not a driver failure, so it is folded into the return value
     // rather than re-thrown. `e.status === null` (spawn never happened — e.g. `node` itself missing) is the
     // one case that IS a driver misconfiguration, and that alone is re-thrown.
     if (e.status === null || e.status === undefined) {
-      throw new Error(`bench-driver: could not spawn \`node ${cliBin} mine .\` in ${repo}: ${(e && e.message) || e}`);
+      throw new Error(`bench-driver: could not spawn \`node ${cliBin} mine .\` in ${repo}: ${(e && e.message) || e}`)
     }
-    status = e.status;
-    out = (e.stdout ?? '') + (e.stderr ?? '');
+    status = e.status
+    out = (e.stdout ?? "") + (e.stderr ?? "")
   }
-  return { stdout: out, exitCode: status };
+  return { stdout: out, exitCode: status }
 }
 
 /** Look up every staging row anchored at `path`, by `primaryAnchor` (see the header note on why NOT by the
  *  ledger's own fact id). Returns `[]` when the staging sidecar could not be read at all (`unreadable`) OR
  *  simply carries no such row — both cases are reported by the caller as an explicit note, never silently. */
 function stagingRowsAt(repo, path) {
-  const staging = readSidecar(repo, 'staging');
-  if (!staging.present) return [];
+  const staging = readSidecar(repo, "staging")
+  if (!staging.present) return []
   return staging.entries
-    .filter((e) => Array.isArray(e) && e.length === 2 && e[1] !== null && typeof e[1] === 'object')
+    .filter((e) => Array.isArray(e) && e.length === 2 && e[1] !== null && typeof e[1] === "object")
     .map(([nodeKey, row]) => ({ nodeKey, ...row }))
-    .filter((row) => row.primaryAnchor === path);
+    .filter((row) => row.primaryAnchor === path)
 }
 
 /** The CAS-addressed answer receipt for one staging row, read back through `atlas-store-read.mjs`
  *  (`answerRef` is the CAS id of the scrubbed answer text — `mine-answer.ts`). `undefined` when the row
  *  carries no `answerRef` (a pre-#195 row) or the CAS object could not be read — never fabricated. */
 function answerFor(repo, row) {
-  if (typeof row.answerRef !== 'string') return undefined;
-  const obj = casGet(repo, row.answerRef);
-  return { answerRef: row.answerRef, answerText: typeof obj === 'string' ? obj : undefined };
+  if (typeof row.answerRef !== "string") return undefined
+  const obj = casGet(repo, row.answerRef)
+  return { answerRef: row.answerRef, answerText: typeof obj === "string" ? obj : undefined }
 }
 
 /** The metering sidecar row(s) for one site, joined by the SAME qualifiedPath string `metered-claude.mjs`
@@ -179,7 +179,7 @@ function answerFor(repo, row) {
  *  `sidecarLines` MUST already be scoped to the ONE unit being joined (this unit's own byte-offset slice —
  *  see `readSidecarSince` / "CROSS-UNIT COST ISOLATION" above), never the whole multi-unit sidecar. */
 function costRowsAt(sidecarLines, path) {
-  return sidecarLines.filter((r) => r.site === path);
+  return sidecarLines.filter((r) => r.site === path)
 }
 
 /** The sidecar's current byte length — the CHECKPOINT `runCorpus` takes immediately before a unit's
@@ -188,10 +188,10 @@ function costRowsAt(sidecarLines, path) {
  *  let a later checkpoint under-count and pull an EARLIER unit's rows into its own slice. */
 function sidecarByteLength(sidecarPath) {
   try {
-    return statSync(sidecarPath).size;
+    return statSync(sidecarPath).size
   } catch (e) {
-    if (e && e.code === 'ENOENT') return 0;
-    throw new Error(`bench-driver: could not stat sidecar ${sidecarPath} to checkpoint it: ${(e && e.message) || e}`);
+    if (e && e.code === "ENOENT") return 0
+    throw new Error(`bench-driver: could not stat sidecar ${sidecarPath} to checkpoint it: ${(e && e.message) || e}`)
   }
 }
 
@@ -206,33 +206,33 @@ function sidecarByteLength(sidecarPath) {
  * `malformed` names any appended line that is not valid JSON (offset-scoped).
  */
 function readSidecarSince(sidecarPath, fromByte) {
-  let text;
+  let text
   try {
-    text = readFileSync(sidecarPath, 'utf8');
+    text = readFileSync(sidecarPath, "utf8")
   } catch (e) {
-    if (e && e.code === 'ENOENT') return { rows: [], malformed: [], error: undefined };
-    return { rows: [], malformed: [], error: `sidecar ${sidecarPath} could not be read: ${(e && e.message) || e}` };
+    if (e && e.code === "ENOENT") return { rows: [], malformed: [], error: undefined }
+    return { rows: [], malformed: [], error: `sidecar ${sidecarPath} could not be read: ${(e && e.message) || e}` }
   }
-  const buf = Buffer.from(text, 'utf8');
+  const buf = Buffer.from(text, "utf8")
   if (buf.length < fromByte) {
     return {
       rows: [],
       malformed: [],
       error: `sidecar ${sidecarPath} is ${buf.length} byte(s), SHORTER than the ${fromByte}-byte checkpoint taken before this unit ran — it was truncated or replaced mid-run, so this unit's slice cannot be trusted`,
-    };
-  }
-  const appended = buf.subarray(fromByte).toString('utf8');
-  const rows = [];
-  const malformed = [];
-  for (const line of appended.split('\n')) {
-    if (line.trim() === '') continue;
-    try {
-      rows.push(JSON.parse(line));
-    } catch {
-      malformed.push(line);
     }
   }
-  return { rows, malformed, error: undefined };
+  const appended = buf.subarray(fromByte).toString("utf8")
+  const rows = []
+  const malformed = []
+  for (const line of appended.split("\n")) {
+    if (line.trim() === "") continue
+    try {
+      rows.push(JSON.parse(line))
+    } catch {
+      malformed.push(line)
+    }
+  }
+  return { rows, malformed, error: undefined }
 }
 
 /**
@@ -247,22 +247,23 @@ function readSidecarSince(sidecarPath, fromByte) {
  * false` a silently-empty read would produce.
  */
 export function buildUnitManifest({ repo, label, model, stdout, sidecarLines, costError }) {
-  const parsed = parseFullMineReport(stdout);
+  const parsed = parseFullMineReport(stdout)
   if (parsed === undefined) {
     return {
       repo,
       label,
       model,
-      parseError: 'stdout did not carry the three lines `atlas mine` pins (genesis/cost/mine) — not a run this driver can join',
+      parseError:
+        "stdout did not carry the three lines `atlas mine` pins (genesis/cost/mine) — not a run this driver can join",
       sites: [],
-    };
+    }
   }
   const sites = parsed.siteRows.map((row) => {
     // `costStatus`: 'error' — this unit's sidecar slice could not be trusted (`costError` set); 'joined' —
     // ≥1 cost row matched within this unit's own slice; 'none' — the slice was readable but held no row for
     // this site. 'none' and 'error' are NEVER conflated — that conflation is the silent-false finding this fixes.
-    const cost = costError === undefined ? costRowsAt(sidecarLines, row.path) : [];
-    const costStatus = costError !== undefined ? 'error' : cost.length > 0 ? 'joined' : 'none';
+    const cost = costError === undefined ? costRowsAt(sidecarLines, row.path) : []
+    const costStatus = costError !== undefined ? "error" : cost.length > 0 ? "joined" : "none"
     const base = {
       repo,
       label,
@@ -272,12 +273,12 @@ export function buildUnitManifest({ repo, label, model, stdout, sidecarLines, co
       path: row.path,
       outcome: row.outcome,
       cost: cost.length > 0 ? cost : null,
-      costJoined: costStatus === 'joined', // kept for existing callers; `costStatus` is the honest tri-state
+      costJoined: costStatus === "joined", // kept for existing callers; `costStatus` is the honest tri-state
       costStatus,
       ...(costError !== undefined ? { costError } : {}),
-    };
-    if (row.outcome === 'seeded') {
-      const staged = stagingRowsAt(repo, row.path);
+    }
+    if (row.outcome === "seeded") {
+      const staged = stagingRowsAt(repo, row.path)
       return {
         ...base,
         ledgerFactIds: row.facts, // the pre-write-door ids the ledger itself names — carried, not discarded
@@ -289,23 +290,28 @@ export function buildUnitManifest({ repo, label, model, stdout, sidecarLines, co
           contentHash: s.contentHash,
           ...answerFor(repo, s),
         })),
-        factLookup: 'by-primary-anchor',
-      };
+        factLookup: "by-primary-anchor",
+      }
     }
-    if (row.outcome === 'abstained') return { ...base, whyNot: row.whyNot };
-    if (row.outcome === 'unrecorded') return { ...base, note: row.note };
-    if (row.outcome === 'unvisited') return { ...base, cause: row.cause };
-    return base; // 'interrupted' carries only the base shape
-  });
+    if (row.outcome === "abstained") return { ...base, whyNot: row.whyNot }
+    if (row.outcome === "unrecorded") return { ...base, note: row.note }
+    if (row.outcome === "unvisited") return { ...base, cause: row.cause }
+    return base // 'interrupted' carries only the base shape
+  })
   return {
     repo,
     label,
     model,
     coverageVerdict: parsed.coverageVerdict,
     malformedSiteRows: parsed.malformedSiteRows,
-    aggregate: { seeded: parsed.seeded, ratified: parsed.ratified, llmCalls: parsed.llmCalls, budgetSpent: parsed.budgetSpent },
+    aggregate: {
+      seeded: parsed.seeded,
+      ratified: parsed.ratified,
+      llmCalls: parsed.llmCalls,
+      budgetSpent: parsed.budgetSpent,
+    },
     sites,
-  };
+  }
 }
 
 /**
@@ -319,16 +325,20 @@ export function buildUnitManifest({ repo, label, model, stdout, sidecarLines, co
  * safe: the two slices are never looked up together.
  */
 export function runCorpus({ corpus, cliBin, model, modelConfigPath, sidecarPath, claudeBin, extraEnv, deps = {} }) {
-  const run = deps.runMineOnce ?? runMineOnce;
-  const checkpoint = deps.sidecarByteLength ?? sidecarByteLength;
-  const readSince = deps.readSidecarSince ?? readSidecarSince;
+  const run = deps.runMineOnce ?? runMineOnce
+  const checkpoint = deps.sidecarByteLength ?? sidecarByteLength
+  const readSince = deps.readSidecarSince ?? readSidecarSince
   const units = corpus.map(({ repo, label }) => {
-    const offsetBefore = checkpoint(sidecarPath);
-    const { stdout, exitCode } = run({ repo, cliBin, modelConfigPath, model, sidecarPath, claudeBin, extraEnv });
-    const { rows: sidecarLines, malformed: malformedSidecarLines, error: costError } = readSince(sidecarPath, offsetBefore);
-    const unit = buildUnitManifest({ repo, label, model, stdout, sidecarLines, costError });
-    return { ...unit, exitCode, malformedSidecarLines, ...(costError !== undefined ? { costError } : {}) };
-  });
+    const offsetBefore = checkpoint(sidecarPath)
+    const { stdout, exitCode } = run({ repo, cliBin, modelConfigPath, model, sidecarPath, claudeBin, extraEnv })
+    const {
+      rows: sidecarLines,
+      malformed: malformedSidecarLines,
+      error: costError,
+    } = readSince(sidecarPath, offsetBefore)
+    const unit = buildUnitManifest({ repo, label, model, stdout, sidecarLines, costError })
+    return { ...unit, exitCode, malformedSidecarLines, ...(costError !== undefined ? { costError } : {}) }
+  })
   return {
     generatedAt: new Date().toISOString(),
     model,
@@ -336,38 +346,42 @@ export function runCorpus({ corpus, cliBin, model, modelConfigPath, sidecarPath,
     sidecarPath,
     modelConfigPath,
     units,
-  };
+  }
 }
 
 // ── CLI ──────────────────────────────────────────────────────────────────────────────────────────────────
 function parseArgv(argv) {
-  const out = {};
+  const out = {}
   for (let i = 0; i < argv.length; i++) {
-    const a = argv[i];
-    if (!a.startsWith('--')) continue;
-    out[a.slice(2)] = argv[++i];
+    const a = argv[i]
+    if (!a.startsWith("--")) continue
+    out[a.slice(2)] = argv[++i]
   }
-  return out;
+  return out
 }
 
 function main(argv) {
-  const args = parseArgv(argv);
-  const required = ['corpus', 'cli', 'model', 'manifest'];
-  const missing = required.filter((k) => args[k] === undefined);
+  const args = parseArgv(argv)
+  const required = ["corpus", "cli", "model", "manifest"]
+  const missing = required.filter((k) => args[k] === undefined)
   if (missing.length > 0) {
     process.stderr.write(
-      `bench-driver: missing --${missing.join(', --')}\n` +
-        'usage: node bench-driver.mjs --corpus <file.json> --cli <bin.js> --model <id> --manifest <out.json> ' +
-        '[--model-cmd <path>] [--claude-bin <bin>] [--sidecar <path>] [--config-dir <dir>]\n',
-    );
-    process.exit(2);
+      `bench-driver: missing --${missing.join(", --")}\n` +
+        "usage: node bench-driver.mjs --corpus <file.json> --cli <bin.js> --model <id> --manifest <out.json> " +
+        "[--model-cmd <path>] [--claude-bin <bin>] [--sidecar <path>] [--config-dir <dir>]\n",
+    )
+    process.exit(2)
   }
-  const corpus = readCorpus(resolve(args.corpus));
-  const cliBin = resolve(args.cli);
-  const modelCmd = resolve(args['model-cmd'] ?? join(HERE, 'metered-claude.mjs'));
-  const configDir = args['config-dir'] !== undefined ? resolve(args['config-dir']) : mkdtempSync(join(tmpdir(), 'atlas-bench-config-'));
-  const sidecarPath = args.sidecar !== undefined ? resolve(args.sidecar) : join(mkdtempSync(join(tmpdir(), 'atlas-bench-sidecar-')), 'sidecar.jsonl');
-  const modelConfigPath = writeModelConfig(configDir, modelCmd);
+  const corpus = readCorpus(resolve(args.corpus))
+  const cliBin = resolve(args.cli)
+  const modelCmd = resolve(args["model-cmd"] ?? join(HERE, "metered-claude.mjs"))
+  const configDir =
+    args["config-dir"] !== undefined ? resolve(args["config-dir"]) : mkdtempSync(join(tmpdir(), "atlas-bench-config-"))
+  const sidecarPath =
+    args.sidecar !== undefined
+      ? resolve(args.sidecar)
+      : join(mkdtempSync(join(tmpdir(), "atlas-bench-sidecar-")), "sidecar.jsonl")
+  const modelConfigPath = writeModelConfig(configDir, modelCmd)
 
   const manifest = runCorpus({
     corpus,
@@ -375,15 +389,15 @@ function main(argv) {
     model: args.model,
     modelConfigPath,
     sidecarPath,
-    claudeBin: args['claude-bin'],
-  });
-  writeFileSync(resolve(args.manifest), JSON.stringify(manifest, null, 2));
+    claudeBin: args["claude-bin"],
+  })
+  writeFileSync(resolve(args.manifest), JSON.stringify(manifest, null, 2))
 
-  const totalSites = manifest.units.reduce((n, u) => n + u.sites.length, 0);
-  const seeded = manifest.units.reduce((n, u) => n + u.sites.filter((s) => s.outcome === 'seeded').length, 0);
+  const totalSites = manifest.units.reduce((n, u) => n + u.sites.length, 0)
+  const seeded = manifest.units.reduce((n, u) => n + u.sites.filter((s) => s.outcome === "seeded").length, 0)
   process.stdout.write(
     `bench-driver: ${manifest.units.length} unit(s), ${totalSites} planned site(s), ${seeded} seeded — manifest at ${args.manifest}\n`,
-  );
+  )
 }
 
 // ── entry-point guard ────────────────────────────────────────────────────────────────────────────────────
@@ -392,12 +406,12 @@ function main(argv) {
 // for the measured `/tmp`/spaced-path divergence). `realpathSync` + `pathToFileURL` fixes it; a missing/stale
 // `argv[1]` answers "not the entry point" — the safe direction for an imported module.
 function isEntryPoint(url) {
-  if (process.argv[1] === undefined) return false;
+  if (process.argv[1] === undefined) return false
   try {
-    return pathToFileURL(realpathSync(process.argv[1])).href === url;
+    return pathToFileURL(realpathSync(process.argv[1])).href === url
   } catch {
-    return false;
+    return false
   }
 }
 
-if (isEntryPoint(import.meta.url)) main(process.argv.slice(2));
+if (isEntryPoint(import.meta.url)) main(process.argv.slice(2))

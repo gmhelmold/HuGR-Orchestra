@@ -15,32 +15,32 @@
 // TEETH: reorder `bin.ts` so `composeRuntime`/`main` runs before `await initAst()` (or delete the await) and
 // this goes red.
 
-import { describe, expect, it } from 'vitest';
-import { readFileSync } from 'node:fs';
-import { fileURLToPath } from 'node:url';
-import { dirname, join } from 'node:path';
-import { astWarmed } from '@atlas/adapter-io';
+import { describe, expect, it } from "vitest"
+import { readFileSync } from "node:fs"
+import { fileURLToPath } from "node:url"
+import { dirname, join } from "node:path"
+import { astWarmed } from "@atlas/adapter-io"
 
-const HERE = dirname(fileURLToPath(import.meta.url));
-const BIN_SRC_RAW = readFileSync(join(HERE, '..', 'src', 'bin.ts'), 'utf8');
+const HERE = dirname(fileURLToPath(import.meta.url))
+const BIN_SRC_RAW = readFileSync(join(HERE, "..", "src", "bin.ts"), "utf8")
 // Strip `//` line-comments — the module header PROSE names both `composeRuntime(process.cwd())` and
 // `initAst()` before either appears as real code, which would otherwise satisfy an index-order check for
 // the wrong reason (prose, not control flow).
-const BIN_SRC = BIN_SRC_RAW.split('\n')
-  .map((line) => line.replace(/\/\/.*$/, ''))
-  .join('\n');
+const BIN_SRC = BIN_SRC_RAW.split("\n")
+  .map((line) => line.replace(/\/\/.*$/, ""))
+  .join("\n")
 
-describe('#243 — cold-grammar footgun: bin.ts awaits initAst() before composing anything', () => {
-  it('`await initAst()` appears in the source, textually BEFORE `composeRuntime(` — the ordering that makes mine/promote agree', () => {
-    const awaitIdx = BIN_SRC.indexOf('await initAst()');
+describe("#243 — cold-grammar footgun: bin.ts awaits initAst() before composing anything", () => {
+  it("`await initAst()` appears in the source, textually BEFORE `composeRuntime(` — the ordering that makes mine/promote agree", () => {
+    const awaitIdx = BIN_SRC.indexOf("await initAst()")
     // The CALL, not the import line — `composeRuntime(process.cwd())` is the actual composition.
-    const composeIdx = BIN_SRC.indexOf('composeRuntime(process.cwd())');
-    expect(awaitIdx).toBeGreaterThan(-1);
-    expect(composeIdx).toBeGreaterThan(-1);
-    expect(awaitIdx).toBeLessThan(composeIdx);
-  });
+    const composeIdx = BIN_SRC.indexOf("composeRuntime(process.cwd())")
+    expect(awaitIdx).toBeGreaterThan(-1)
+    expect(composeIdx).toBeGreaterThan(-1)
+    expect(awaitIdx).toBeLessThan(composeIdx)
+  })
 
-  it('`astWarmed()` is exported off the public @atlas/adapter-io surface — the self-check any DIRECT (non-bin.ts) caller of `mine`/`promote` can run for itself', () => {
-    expect(typeof astWarmed).toBe('function');
-  });
-});
+  it("`astWarmed()` is exported off the public @atlas/adapter-io surface — the self-check any DIRECT (non-bin.ts) caller of `mine`/`promote` can run for itself", () => {
+    expect(typeof astWarmed).toBe("function")
+  })
+})

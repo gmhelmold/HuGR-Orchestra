@@ -28,28 +28,28 @@
 // and arrives as a `RangeError`, which `fault.ts` files as `internal-fault` ("a defect in Atlas, not in your
 // arguments"). It is re-thrown unchanged, and that boundary is pinned below.
 
-import { describe, it, expect, afterEach } from 'vitest';
-import { existsSync, readdirSync } from 'node:fs';
-import { dirname } from 'node:path';
-import { createGovernedEmit } from '../src/governed-emit.js';
-import { AT, HOLDS, advisoryFact, freshWorkspace, policyOf, reasonOf } from './door-regression-support.js';
-import type { Workspace } from './door-regression-support.js';
-import { SHAPES, assertPremise } from './uncanonicalizable-shapes.js';
+import { describe, it, expect, afterEach } from "vitest"
+import { existsSync, readdirSync } from "node:fs"
+import { dirname } from "node:path"
+import { createGovernedEmit } from "../src/governed-emit.js"
+import { AT, HOLDS, advisoryFact, freshWorkspace, policyOf, reasonOf } from "./door-regression-support.js"
+import type { Workspace } from "./door-regression-support.js"
+import { SHAPES, assertPremise } from "./uncanonicalizable-shapes.js"
 
-const ACTOR = 'alice';
-const SCOPE = 'core';
-const ANCHOR = 'src/a.ts::f';
+const ACTOR = "alice"
+const SCOPE = "core"
+const ANCHOR = "src/a.ts::f"
 
 /** The canonicalizer's own name for every one of its refusals (`kernel/canonical.ts`). */
-const CANONICAL_VIOLATION = 'canonical-form violation';
+const CANONICAL_VIOLATION = "canonical-form violation"
 /** The name the CAS gives bytes it cannot store — shared with `sidecar-commit.ts`, `archive.ts`, `attach.ts`. */
-const UNADDRESSABLE = 'unaddressable-cas-object';
+const UNADDRESSABLE = "unaddressable-cas-object"
 
-let ws: Workspace | undefined;
+let ws: Workspace | undefined
 afterEach(() => {
-  ws?.dispose();
-  ws = undefined;
-});
+  ws?.dispose()
+  ws = undefined
+})
 
 function doorOver(w: Workspace): ReturnType<typeof createGovernedEmit> {
   return createGovernedEmit({
@@ -57,85 +57,94 @@ function doorOver(w: Workspace): ReturnType<typeof createGovernedEmit> {
     gate: HOLDS,
     policy: policyOf({ [SCOPE]: [ACTOR] }),
     actor: ACTOR,
-    ratifyToken: 'billy',
-  });
+    ratifyToken: "billy",
+  })
 }
 
 /** Every durable artefact of a write, read off the FILESYSTEM — nothing here trusts a return value. */
 function durableState(w: Workspace): { cas: number; generations: string[] } {
-  const casDir = w.casPath;
+  const casDir = w.casPath
   const cas = existsSync(casDir)
-    ? readdirSync(casDir, { recursive: true, encoding: 'utf8' }).filter((f) => f.includes('/')).length
-    : 0;
+    ? readdirSync(casDir, { recursive: true, encoding: "utf8" }).filter((f) => f.includes("/")).length
+    : 0
   const generations = existsSync(dirname(casDir))
-    ? readdirSync(dirname(casDir)).filter((f) => /^projection\.\d+\.json$/.test(f)).sort()
-    : [];
-  return { cas, generations };
+    ? readdirSync(dirname(casDir))
+        .filter((f) => /^projection\.\d+\.json$/.test(f))
+        .sort()
+    : []
+  return { cas, generations }
 }
 
-describe('the emit door RECORDS a canonical-form refusal instead of throwing out of its own decision', () => {
-  it('PREMISE: the shapes are ones the sealed `id` genuinely refuses', () => {
-    assertPremise();
-  });
+describe("the emit door RECORDS a canonical-form refusal instead of throwing out of its own decision", () => {
+  it("PREMISE: the shapes are ones the sealed `id` genuinely refuses", () => {
+    assertPremise()
+  })
 
-  it('CONTROL: a clean fact is still admitted, durably', () => {
-    ws = freshWorkspace();
-    expect(doorOver(ws).emit(advisoryFact({ anchor: ANCHOR, scope: SCOPE, claimNorm: 'a clean claim' }), AT).emitted).toBe(true);
-    expect(durableState(ws)).toStrictEqual({ cas: 1, generations: ['projection.1.json'] });
-  });
+  it("CONTROL: a clean fact is still admitted, durably", () => {
+    ws = freshWorkspace()
+    expect(
+      doorOver(ws).emit(advisoryFact({ anchor: ANCHOR, scope: SCOPE, claimNorm: "a clean claim" }), AT).emitted,
+    ).toBe(true)
+    expect(durableState(ws)).toStrictEqual({ cas: 1, generations: ["projection.1.json"] })
+  })
 
   // The seven shapes the CANONICALIZER decides on. `cyclic` is excluded here and pinned separately below —
   // it is an engine `RangeError`, i.e. not a decision at all.
-  for (const shape of SHAPES.filter((s) => s.name !== 'cyclic')) {
+  for (const shape of SHAPES.filter((s) => s.name !== "cyclic")) {
     it(`'${shape.name}' comes back as a RECORDED refusal (emitted:false), not as a throw`, () => {
-      ws = freshWorkspace();
-      const door = doorOver(ws);
+      ws = freshWorkspace()
+      const door = doorOver(ws)
       const poisoned = shape.inject(
-        advisoryFact({ anchor: ANCHOR, scope: SCOPE, claimNorm: 'the poisoned write' }) as unknown as Record<string, unknown>,
-      ) as unknown as Parameters<typeof door.emit>[0];
+        advisoryFact({ anchor: ANCHOR, scope: SCOPE, claimNorm: "the poisoned write" }) as unknown as Record<
+          string,
+          unknown
+        >,
+      ) as unknown as Parameters<typeof door.emit>[0]
 
       // A RECORD, not an exception: this is what makes `deriveStatus` answer `rejected` (exit 2) rather than
       // fall through to the `ok:false` ⇒ `error` (exit 1) branch, with no change to `deriveStatus` itself.
-      const out = door.emit(poisoned, AT);
-      expect(out.emitted).toBe(false);
-      expect(reasonOf(out.rejected)).toBe(CANONICAL_VIOLATION);
+      const out = door.emit(poisoned, AT)
+      expect(out.emitted).toBe(false)
+      expect(reasonOf(out.rejected)).toBe(CANONICAL_VIOLATION)
       // and it is still fail-CLOSED: nothing durable, exactly as when it threw.
-      expect(durableState(ws)).toStrictEqual({ cas: 0, generations: [] });
-    });
+      expect(durableState(ws)).toStrictEqual({ cas: 0, generations: [] })
+    })
   }
 
-  it('a violation parked in a KERNEL-8 SIDE-INDEX is recorded too — the leg `id(node)` alone cannot see', () => {
+  it("a violation parked in a KERNEL-8 SIDE-INDEX is recorded too — the leg `id(node)` alone cannot see", () => {
     // MEASURED (task #136): `sidecar-commit.ts` states "No product caller reaches it today — both governed
     // doors compute `id(node)` themselves before handing the same object over, so an unaddressable object
     // never gets this far". That is FALSE. `canonicalForm` EXCLUDES `grounding`/`status`/`freshness` at every
     // level (KERNEL-8), so a bigint parked in `grounding` — a field on EVERY `GroundedFact` — canonicalizes
     // fine, clears every gate, and reaches the commit's CAS door, which answers the EMPTY sentinel. The guard
     // there fired correctly (nothing durable) but as an ESCAPING THROW, i.e. exit 1 again.
-    ws = freshWorkspace();
-    const door = doorOver(ws);
-    const base = advisoryFact({ anchor: ANCHOR, scope: SCOPE, claimNorm: 'c' });
-    const poisoned = { ...base, grounding: { ...base.grounding, seq: BigInt(10) } } as unknown as Parameters<typeof door.emit>[0];
-    const out = door.emit(poisoned, AT);
-    expect(out.emitted).toBe(false);
-    expect(reasonOf(out.rejected)).toBe(UNADDRESSABLE);
-    expect(durableState(ws)).toStrictEqual({ cas: 0, generations: [] });
-  });
+    ws = freshWorkspace()
+    const door = doorOver(ws)
+    const base = advisoryFact({ anchor: ANCHOR, scope: SCOPE, claimNorm: "c" })
+    const poisoned = { ...base, grounding: { ...base.grounding, seq: BigInt(10) } } as unknown as Parameters<
+      typeof door.emit
+    >[0]
+    const out = door.emit(poisoned, AT)
+    expect(out.emitted).toBe(false)
+    expect(reasonOf(out.rejected)).toBe(UNADDRESSABLE)
+    expect(durableState(ws)).toStrictEqual({ cas: 0, generations: [] })
+  })
 
-  it('an ENGINE fault is NOT laundered into a governance refusal — `cyclic` still throws a RangeError', () => {
-    ws = freshWorkspace();
-    const door = doorOver(ws);
-    const base = advisoryFact({ anchor: ANCHOR, scope: SCOPE, claimNorm: 'c' }) as unknown as Record<string, unknown>;
-    const cyc: Record<string, unknown> = { ...base };
-    cyc['atlasProbeSelf'] = cyc;
-    let thrown: unknown;
+  it("an ENGINE fault is NOT laundered into a governance refusal — `cyclic` still throws a RangeError", () => {
+    ws = freshWorkspace()
+    const door = doorOver(ws)
+    const base = advisoryFact({ anchor: ANCHOR, scope: SCOPE, claimNorm: "c" }) as unknown as Record<string, unknown>
+    const cyc: Record<string, unknown> = { ...base }
+    cyc["atlasProbeSelf"] = cyc
+    let thrown: unknown
     try {
-      door.emit(cyc as unknown as Parameters<typeof door.emit>[0], AT);
+      door.emit(cyc as unknown as Parameters<typeof door.emit>[0], AT)
     } catch (e) {
-      thrown = e;
+      thrown = e
     }
     // `fault.ts` files a `RangeError` as `internal-fault`, and it is right to: a stack exhaustion is not a
     // decision the door made. Recording it as `emitted:false` would put OUR defect behind the caller's name.
-    expect(thrown).toBeInstanceOf(RangeError);
-    expect(durableState(ws)).toStrictEqual({ cas: 0, generations: [] });
-  });
-});
+    expect(thrown).toBeInstanceOf(RangeError)
+    expect(durableState(ws)).toStrictEqual({ cas: 0, generations: [] })
+  })
+})

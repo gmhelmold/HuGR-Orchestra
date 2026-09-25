@@ -69,12 +69,12 @@
 // Until it lands, this gate protects the door a human or agent authors through (`atlas emit`, MCP), where
 // the slot IS supplied and where an unrecognised one was previously accepted in silence.
 
-import { PREDICATE_SLOTS } from './router.js';
+import { PREDICATE_SLOTS } from "./router.js"
 
 /** The refusal's DISCRIMINANT — the text before the first `:` of the reason, which is the one channel every
  *  transport reproduces byte-for-byte (CLI `reason:` line, MCP `rejected`, in-process `Verdict.rejected`).
  *  Exported so a door or a test compares a VALUE for equality instead of matching prose. */
-export const CLOSED_SLOT_DISCRIMINANT = 'closed-slot-violation';
+export const CLOSED_SLOT_DISCRIMINANT = "closed-slot-violation"
 
 /** The refusal text for an out-of-vocabulary `predicateSlot`. Names the OFFENDING VALUE, the closed
  *  vocabulary in full, and the door — the three things a caller needs and none of which it had. Carries the
@@ -85,17 +85,17 @@ export function closedSlotRefusalText(slot: unknown): string {
   // as a slot NAME the author could go and look for, and `{toString:() => 'invariant'}` would print as the
   // very slot it is impersonating. The article agrees with the kind — `an array`, not `a array`, which is
   // what the first revision shipped and what the test caught.
-  const kind = Array.isArray(slot) ? 'array' : slot === null ? 'null' : typeof slot;
-  const shown = typeof slot === 'string' ? `'${slot}'` : `${/^[aeiou]/.test(kind) ? 'an' : 'a'} ${kind} value`;
+  const kind = Array.isArray(slot) ? "array" : slot === null ? "null" : typeof slot
+  const shown = typeof slot === "string" ? `'${slot}'` : `${/^[aeiou]/.test(kind) ? "an" : "a"} ${kind} value`
   return (
     `${CLOSED_SLOT_DISCRIMINANT}: this write declares predicateSlot ${shown}, which is not one of the closed 13. ` +
-    `The vocabulary is CLOSED (KNOW-10 / KNOW-15i): ${PREDICATE_SLOTS.map((s) => `'${s}'`).join(', ')}. ` +
-    'It is closed because node identity is hash(primaryAnchorId + predicateSlot), so an unrecognised slot ' +
-    'does not collide with anything — it silently mints a NEW address at the same anchor and the store ' +
-    'proliferates parallel nodes that never merge. Re-state the claim under one of the 13; adding a ' +
-    'fourteenth is a contract-version (`cv`) bump, not a write. Refused by the governed write door ' +
-    '(atlas-emit / atlas-link) before anything was persisted'
-  );
+    `The vocabulary is CLOSED (KNOW-10 / KNOW-15i): ${PREDICATE_SLOTS.map((s) => `'${s}'`).join(", ")}. ` +
+    "It is closed because node identity is hash(primaryAnchorId + predicateSlot), so an unrecognised slot " +
+    "does not collide with anything — it silently mints a NEW address at the same anchor and the store " +
+    "proliferates parallel nodes that never merge. Re-state the claim under one of the 13; adding a " +
+    "fourteenth is a contract-version (`cv`) bump, not a write. Refused by the governed write door " +
+    "(atlas-emit / atlas-link) before anything was persisted"
+  )
 }
 
 /** The refusal, as a THROWN value carrying the offending slot for a caller that wants to inspect it rather
@@ -103,12 +103,12 @@ export function closedSlotRefusalText(slot: unknown): string {
  *  decline) and never as an internal fault — the same contract `DegenerateAnchorError` (router.ts) and
  *  `GovernanceAuthorityError` (upsert.ts) already rely on. */
 export class ClosedSlotError extends Error {
-  readonly reason: typeof CLOSED_SLOT_DISCRIMINANT = CLOSED_SLOT_DISCRIMINANT;
-  readonly slot: unknown;
+  readonly reason: typeof CLOSED_SLOT_DISCRIMINANT = CLOSED_SLOT_DISCRIMINANT
+  readonly slot: unknown
   constructor(slot: unknown) {
-    super(closedSlotRefusalText(slot));
-    this.name = 'ClosedSlotError';
-    this.slot = slot;
+    super(closedSlotRefusalText(slot))
+    this.name = "ClosedSlotError"
+    this.slot = slot
   }
 }
 
@@ -122,5 +122,5 @@ export class ClosedSlotError extends Error {
  * reproduces byte-for-byte and the one a caller is told to compare.
  */
 export function isClosedSlotError(e: unknown): e is ClosedSlotError {
-  return (e as { reason?: unknown } | null | undefined)?.reason === CLOSED_SLOT_DISCRIMINANT;
+  return (e as { reason?: unknown } | null | undefined)?.reason === CLOSED_SLOT_DISCRIMINANT
 }

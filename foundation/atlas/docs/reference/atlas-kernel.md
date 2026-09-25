@@ -7,7 +7,7 @@
 The kernel is the Atlas's storage substrate: a content-addressed store (CAS), the swappable
 BLAKE3 encoder seam that keys it, and the append-only event log that all Atlas state folds from.
 Everything above it — grounding, the structural index, Knowledge, Memory — is an object in the CAS
-or a projection of the fold. The kernel decides *how bytes become identity*; it holds no policy.
+or a projection of the fold. The kernel decides _how bytes become identity_; it holds no policy.
 
 ## Data model
 
@@ -52,7 +52,7 @@ AtlasState    = fold(EventLog)                       // convergent fold; order-i
   entry — MUST be keyed by its hash in the single CAS. There MUST NOT be a second, non-content-addressed
   store for any object kind.
 - **KERNEL-4 Append-only log.** The event log MUST be append-only: an existing event MUST NOT be
-  mutated or deleted in place. Correcting state is a *new* event, never an edit of an old one.
+  mutated or deleted in place. Correcting state is a _new_ event, never an edit of an old one.
 - **KERNEL-5 State is a fold.** The Atlas state MUST be reconstructable by folding the event log from
   empty; no capability may depend on a mutable in-place snapshot (A-11). Replaying the log MUST rebuild
   a byte-identical Atlas.
@@ -71,7 +71,7 @@ AtlasState    = fold(EventLog)                       // convergent fold; order-i
   `nodeKey`, the fold MUST resolve them **order-independently by set-union** — **one rule for both families**,
   never a clock and never a positional proxy. A collision is the **same subject re-evidenced on two
   branches**: identity already includes `normalize(claimNorm)` (advisory) or `normalize(check)` (predicate),
-  so the colliding events assert the *same* claim / re-run the *same* `check` → freshness is identical and
+  so the colliding events assert the _same_ claim / re-run the _same_ `check` → freshness is identical and
   there is **no real "last writer"**. The fold therefore **unions** them into **one** node: an OR-Set of
   `ClaimEntry`/lineage keyed by `contentHash` (grow-only — KNOW-4/KNOW-12), keeping **all**, dropping none;
   the pack surfaces the **FRESH** head. If a single current head is genuinely required, the tie-break MUST be
@@ -125,7 +125,7 @@ import(json: string): Cas                    // replays 1:1 into a fresh store
 8. **KERNEL-8** — Recomputing grounding/status/freshness on a stored object does not change its `Hash`.
 9. **KERNEL-9** — Appending a byte-identical event twice is a no-op; `merge` of two logs dedups by id;
    reassigning `seq` alone leaves the keyset (and the fold) unchanged.
-10. **KERNEL-10** — Two seats emit on one `nodeKey` in one wave (advisory *or* predicate) ⇒ the fold yields
+10. **KERNEL-10** — Two seats emit on one `nodeKey` in one wave (advisory _or_ predicate) ⇒ the fold yields
     **one** node whose claim-set/lineage is the **union** of both events (an OR-Set keyed by `contentHash`);
     nothing is dropped, and the result is identical under either event order. Where a single head is forced,
     it is the `contentHash` tie-break — never a `seq`/clock proxy.

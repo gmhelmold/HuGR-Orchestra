@@ -29,49 +29,52 @@ id: WP-SEC-2.KNOW
 title: Fold an `isOwner` guard into `packages/knowledge/src/write/authz.ts`'s `authz()` write branch
 
 intent: >
-  REQ-KNOW-11a requires every fact to carry `owner` + `scope`. `scope` was genuinely enforced
-  (`isScope`/`inScope`, fail-closed on absent/malformed scope). `owner` was enforced by NOTHING, and two
-  files each pointed at the other as the enforcer: `template.ts:12-13` said owner/scope were "enforced
-  fail-closed by the sibling authz facet, NOT re-checked here"; `authz.ts:11-13` said `owner` "is NOT part
-  of the frozen `inScope(actor, fact.scope)` predicate … so it is not re-checked here". Both statements
-  were true about the OTHER file and false about the write decision as a whole: `owner?: string` (R3,
-  types.ts) was optional on the type AND unchecked at runtime, so `authz('write', actor, fact)` returned
-  `true` for a well-formed-scope fact with `owner` absent, empty, or of any non-string shape. This directly
-  contradicts REQ-KNOW-11a's normative clause ("Every fact MUST carry an `owner` + `scope`") and the R3
-  data-model note (types.ts:105-110) that the MUST "stays enforced BEHAVIORALLY by the WP-5.14 emit/authz
-  facet" — a promise this WP is the first to actually deliver, for `authz.ts`'s own write decision.
+REQ-KNOW-11a requires every fact to carry `owner` + `scope`. `scope` was genuinely enforced
+(`isScope`/`inScope`, fail-closed on absent/malformed scope). `owner` was enforced by NOTHING, and two
+files each pointed at the other as the enforcer: `template.ts:12-13` said owner/scope were "enforced
+fail-closed by the sibling authz facet, NOT re-checked here"; `authz.ts:11-13` said `owner` "is NOT part
+of the frozen `inScope(actor, fact.scope)` predicate … so it is not re-checked here". Both statements
+were true about the OTHER file and false about the write decision as a whole: `owner?: string` (R3,
+types.ts) was optional on the type AND unchecked at runtime, so `authz('write', actor, fact)` returned
+`true` for a well-formed-scope fact with `owner` absent, empty, or of any non-string shape. This directly
+contradicts REQ-KNOW-11a's normative clause ("Every fact MUST carry an `owner` + `scope`") and the R3
+data-model note (types.ts:105-110) that the MUST "stays enforced BEHAVIORALLY by the WP-5.14 emit/authz
+facet" — a promise this WP is the first to actually deliver, for `authz.ts`'s own write decision.
 
-source_reqs:                             # ptr+digest — motivating requirements this fix restores compliance with
-  - source: ../req-knw.md#REQ-KNOW-11a  # ptr+digest — "every fact carries owner and scope" (the leg this fix closes)
-  - source: ../req-knw.md#REQ-KNOW-11b  # ptr+digest — "read is universal"; the leg this fix must NOT touch (pinned by a new test)
-  - source: ../req-knw.md#REQ-KNOW-11c  # ptr+digest — "out-of-scope write rejected"; the pre-existing leg this fix must not weaken or bypass
+source_reqs: # ptr+digest — motivating requirements this fix restores compliance with
 
-seam-freezes: [ ]   (single-facet fix inside `packages/knowledge/src/write/`, no cross-module obligation created)
+- source: ../req-knw.md#REQ-KNOW-11a # ptr+digest — "every fact carries owner and scope" (the leg this fix closes)
+- source: ../req-knw.md#REQ-KNOW-11b # ptr+digest — "read is universal"; the leg this fix must NOT touch (pinned by a new test)
+- source: ../req-knw.md#REQ-KNOW-11c # ptr+digest — "out-of-scope write rejected"; the pre-existing leg this fix must not weaken or bypass
+
+seam-freezes: [ ] (single-facet fix inside `packages/knowledge/src/write/`, no cross-module obligation created)
 
 anchor: `packages/knowledge/src/write/authz.ts:44-73` (new `isOwner` guard + the `authz()` write branch it
-  is folded into) and `packages/knowledge/src/write/template.ts:10-18` (the false-comment repair)
+is folded into) and `packages/knowledge/src/write/template.ts:10-18` (the false-comment repair)
 
-interface_contract:                      # free-form (unchecked, per repo convention — see id-integrity gate header)
-  - source: ../method-tags-knw.md#KNOW-11   (owner-scoped write, universal read)
+interface_contract: # free-form (unchecked, per repo convention — see id-integrity gate header)
+
+- source: ../method-tags-knw.md#KNOW-11 (owner-scoped write, universal read)
 
 exclusions (all FROZEN by the dispatching brief, not re-decided here):
-  - `packages/knowledge/src/types.ts` — `owner?: string` stays OPTIONAL on the frozen `GroundedFact`; the
-    2026-07-19 owner-authorized R3 data-model reconciliation is not reopened.
-  - `inScope(actor, scope)` — its FROZEN signature stays scope-only; `owner` is folded into `authz()`
-    directly, as a SEPARATE leg, never merged into `inScope`.
-  - the READ leg of `authz()` — untouched; a read never inspects `owner`/`scope` (KNOW-11b, pinned by a
-    new test: an owner-less, scope-less fact still reads successfully for any actor, including `''`).
-  - `packages/knowledge/test/wp-5.14-know.lifecycle.test.ts` — the sibling frozen-golden suite; not edited
-    (another seat may own it). All new coverage lives in a NEW file.
-  - `packages/adapter-io/**`, `packages/cli/**` — see the MEASUREMENT finding below; explicitly NOT wired
-    into the live write door by this WP (doing so would trip the dispatching brief's own stop condition —
-    see "What the framing got wrong", reported alongside this WP, not actioned here).
+
+- `packages/knowledge/src/types.ts` — `owner?: string` stays OPTIONAL on the frozen `GroundedFact`; the
+  2026-07-19 owner-authorized R3 data-model reconciliation is not reopened.
+- `inScope(actor, scope)` — its FROZEN signature stays scope-only; `owner` is folded into `authz()`
+  directly, as a SEPARATE leg, never merged into `inScope`.
+- the READ leg of `authz()` — untouched; a read never inspects `owner`/`scope` (KNOW-11b, pinned by a
+  new test: an owner-less, scope-less fact still reads successfully for any actor, including `''`).
+- `packages/knowledge/test/wp-5.14-know.lifecycle.test.ts` — the sibling frozen-golden suite; not edited
+  (another seat may own it). All new coverage lives in a NEW file.
+- `packages/adapter-io/**`, `packages/cli/**` — see the MEASUREMENT finding below; explicitly NOT wired
+  into the live write door by this WP (doing so would trip the dispatching brief's own stop condition —
+  see "What the framing got wrong", reported alongside this WP, not actioned here).
 
 action: add `isOwner(v): v is string` to `authz.ts`, byte-for-byte mirroring `isScope`'s discipline
-  (`typeof v === 'string' && v.length > 0`, checked BEFORE any coercion); fold it into `authz()`'s write
-  branch as `isOwner(fact.owner) && inScope(actor, fact.scope)`; correct the header comment (which claimed
-  owner was "not re-checked here") and `template.ts`'s comment (which claimed authz already enforced it) to
-  say precisely where each half of the KNOW-11a fence now lives.
+(`typeof v === 'string' && v.length > 0`, checked BEFORE any coercion); fold it into `authz()`'s write
+branch as `isOwner(fact.owner) && inScope(actor, fact.scope)`; correct the header comment (which claimed
+owner was "not re-checked here") and `template.ts`'s comment (which claimed authz already enforced it) to
+say precisely where each half of the KNOW-11a fence now lives.
 
 action_surface: `[ read(packages/knowledge/**), edit(packages/knowledge/src/write/authz.ts),
   edit(packages/knowledge/src/write/template.ts), edit(packages/knowledge/test/**, new file only),
@@ -79,69 +82,67 @@ action_surface: `[ read(packages/knowledge/**), edit(packages/knowledge/src/writ
   run(gates) ]`
 
 guardrails: writes confined to `packages/knowledge/src/write/authz.ts` (in-place edit, no signature
-  change to the exported `AuthzApi`/`authz`/`inScope`/`isScope`), `packages/knowledge/src/write/template.ts`
-  (comment-only edit), one new test file under `packages/knowledge/test/`, and this card; `inScope`'s and
-  `AuthzApi.authz`'s signatures byte-for-byte unchanged; `types.ts` untouched; forbidden zones =
-  `packages/knowledge/src/types.ts`, `packages/adapter-io/**`, `packages/cli/**`, every other
-  `work-packages/*.md`, `wp-5.14-know.lifecycle.test.ts`.
+change to the exported `AuthzApi`/`authz`/`inScope`/`isScope`), `packages/knowledge/src/write/template.ts`
+(comment-only edit), one new test file under `packages/knowledge/test/`, and this card; `inScope`'s and
+`AuthzApi.authz`'s signatures byte-for-byte unchanged; `types.ts` untouched; forbidden zones =
+`packages/knowledge/src/types.ts`, `packages/adapter-io/**`, `packages/cli/**`, every other
+`work-packages/*.md`, `wp-5.14-know.lifecycle.test.ts`.
 
 acceptance:
-  Golden coverage — pre-existing, cited (never invented): SCN-KNOW-11a-1 ("a fact emitted through
-  `knowledge/ref/authz.ts` … carries both an `owner` and a `scope`") is the golden this WP is the first
-  change to make LOAD-BEARING for the `owner` half — before this fix `authz()`'s write branch never
-  inspected `fact.owner` at all, so a scope-only fact satisfied the write gate despite the golden's own
-  "carries both" clause. SCN-KNOW-11b-1 (universal read) and SCN-KNOW-11c-1 (out-of-scope write rejected)
-  are the two legs this fix must NOT regress — both re-asserted by the new test file below.
-  Purpose-built regression/fitness test: `packages/knowledge/test/wp-fix-enforce-owner.test.ts` — 16
-  assertions:
-    - a printed coercion table for `isOwner` over
-      `{undefined, null, '', 0, false, {}, [], ['seat/forge'], {toString:()=>'seat/forge'}, <valid string>}`
-      — only the valid non-empty string passes;
-    - `authz('write', …)` with well-formed owner AND scope still succeeds (not a refuse-everything guard);
-    - THE GAP: `authz('write', …)` with well-formed scope, actor genuinely in scope, but `owner` ABSENT now
-      fails closed (was `true` pre-fix — this is the RED→GREEN assertion);
-    - `owner: ''` (present but malformed) also fails closed;
-    - READ STAYS UNIVERSAL: `authz('read', …)` on an owner-less AND scope-less fact still succeeds, for a
-      named actor and for `''`;
-    - a well-formed owner does not override the scope leg — a wrong-scope actor is still denied.
-  Proof of teeth: `authz.ts` was reverted to the exact pre-fix byte sequence (`cp` from a byte-verified
-  backup of `origin/master`'s copy, `diff -q` confirming identical), the new test file was run and went RED
-  (13/16 failing — 10 `isOwner is not a function` + the GAP/malformed-owner assertions asserting `true`
-  where `false` was expected), then the fix was restored (`cp` from a byte-verified backup of the FIXED
-  file, `diff -q` confirming byte-identical) and the suite went green again (16/16).
+Golden coverage — pre-existing, cited (never invented): SCN-KNOW-11a-1 ("a fact emitted through
+`knowledge/ref/authz.ts` … carries both an `owner` and a `scope`") is the golden this WP is the first
+change to make LOAD-BEARING for the `owner` half — before this fix `authz()`'s write branch never
+inspected `fact.owner` at all, so a scope-only fact satisfied the write gate despite the golden's own
+"carries both" clause. SCN-KNOW-11b-1 (universal read) and SCN-KNOW-11c-1 (out-of-scope write rejected)
+are the two legs this fix must NOT regress — both re-asserted by the new test file below.
+Purpose-built regression/fitness test: `packages/knowledge/test/wp-fix-enforce-owner.test.ts` — 16
+assertions: - a printed coercion table for `isOwner` over
+`{undefined, null, '', 0, false, {}, [], ['seat/forge'], {toString:()=>'seat/forge'}, <valid string>}`
+— only the valid non-empty string passes; - `authz('write', …)` with well-formed owner AND scope still succeeds (not a refuse-everything guard); - THE GAP: `authz('write', …)` with well-formed scope, actor genuinely in scope, but `owner` ABSENT now
+fails closed (was `true` pre-fix — this is the RED→GREEN assertion); - `owner: ''` (present but malformed) also fails closed; - READ STAYS UNIVERSAL: `authz('read', …)` on an owner-less AND scope-less fact still succeeds, for a
+named actor and for `''`; - a well-formed owner does not override the scope leg — a wrong-scope actor is still denied.
+Proof of teeth: `authz.ts` was reverted to the exact pre-fix byte sequence (`cp` from a byte-verified
+backup of `origin/master`'s copy, `diff -q` confirming identical), the new test file was run and went RED
+(13/16 failing — 10 `isOwner is not a function` + the GAP/malformed-owner assertions asserting `true`
+where `false` was expected), then the fix was restored (`cp` from a byte-verified backup of the FIXED
+file, `diff -q` confirming byte-identical) and the suite went green again (16/16).
 
-deps: [ ]   parallel_group: [P] (single-facet, no dependency on any concurrent seat's WP)
+deps: [ ] parallel_group: [P] (single-facet, no dependency on any concurrent seat's WP)
 
 exit_predicate: `wp-fix-enforce-owner.test.ts` green (16/16) ∧ full `npx vitest run` green (302 files /
-  2397 passed + 1 pre-existing todo, 0 failures) ∧ `npx tsc -b` exit 0 ∧ all six named `harness/gates/*`
-  exit 0 (godfile-guard, layer-guard, reference-model-guard, spec-conformance-guard, id-integrity,
-  command-doc-guard).
+2397 passed + 1 pre-existing todo, 0 failures) ∧ `npx tsc -b` exit 0 ∧ all six named `harness/gates/*`
+exit 0 (godfile-guard, layer-guard, reference-model-guard, spec-conformance-guard, id-integrity,
+command-doc-guard).
 
-context_refs:                            # closed list
-  - source: ../req-knw.md
-  - source: ../method-tags-knw.md
-  - source: ../goldens-knw.md
+context_refs: # closed list
+
+- source: ../req-knw.md
+- source: ../method-tags-knw.md
+- source: ../goldens-knw.md
 
 owner: KNOW territory · builder_id `charlie` (dispatched by the lead for a frozen-decision defect fix, #178)
 
 outputs:
-  - `packages/knowledge/src/write/authz.ts` — `isOwner` guard added + folded into `authz()`'s write branch;
-    header/interface comments corrected (89 LOC total, well under the 400-LOC cap)
-  - `packages/knowledge/src/write/template.ts` — comment-only repair, precisely locating both halves of the
-    KNOW-11a fence (118 LOC total, well under the cap)
-  - `packages/knowledge/test/wp-fix-enforce-owner.test.ts` — new file, the fitness function above
+
+- `packages/knowledge/src/write/authz.ts` — `isOwner` guard added + folded into `authz()`'s write branch;
+  header/interface comments corrected (89 LOC total, well under the 400-LOC cap)
+- `packages/knowledge/src/write/template.ts` — comment-only repair, precisely locating both halves of the
+  KNOW-11a fence (118 LOC total, well under the cap)
+- `packages/knowledge/test/wp-fix-enforce-owner.test.ts` — new file, the fitness function above
 
 provenance:
-  - branch `fix/enforce-owner`, forked from `origin/master` at `56f0440` (worktree HEAD at checkout)
-  - worktree-local commit (see the lead's own `git log` on the branch for the final sha — this WP does not
-    self-report a commit sha it did not mint)
+
+- branch `fix/enforce-owner`, forked from `origin/master` at `56f0440` (worktree HEAD at checkout)
+- worktree-local commit (see the lead's own `git log` on the branch for the final sha — this WP does not
+  self-report a commit sha it did not mint)
 
 trace_ref: manual — cold-review brief (#178, frozen decisions from the tech lead) → this WP card + the
-  three file changes under `outputs`; no automated S0–S4 trace exists for an out-of-band hotfix
+three file changes under `outputs`; no automated S0–S4 trace exists for an out-of-band hotfix
 
 rationale:
-  - source: ../req-knw.md#REQ-KNOW-11a
-  - source: ../goldens-knw.md   (SCN-KNOW-11a-1)
+
+- source: ../req-knw.md#REQ-KNOW-11a
+- source: ../goldens-knw.md (SCN-KNOW-11a-1)
 
 ---
 

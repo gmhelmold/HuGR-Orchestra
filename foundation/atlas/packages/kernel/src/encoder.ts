@@ -4,14 +4,14 @@
 // (swapping it changes only the id bytes). The sole place a raw digest primitive is imported; the
 // `Encoder` shape is owned upstream in @atlas/contracts — the kernel supplies only the default instance.
 
-import { blake3 } from '@noble/hashes/blake3';
-import { bytesToHex } from '@noble/hashes/utils';
-import type { Encoder, Hash } from '@atlas/contracts';
-import { asHash } from './brand.js';
+import { blake3 } from "@noble/hashes/blake3"
+import { bytesToHex } from "@noble/hashes/utils"
+import type { Encoder, Hash } from "@atlas/contracts"
+import { asHash } from "./brand.js"
 
 /** Re-export of the seam contract (owned by @atlas/contracts). Kernel is the only site that mints
  *  `Hash` values through this seam; the interface shape is owned upstream. (KERNEL-2) */
-export type { Encoder };
+export type { Encoder }
 
 /**
  * What the kernel adds beyond the contract `Encoder` (frozen): the default encoder INSTANCE. Per KERNEL-2
@@ -19,7 +19,7 @@ export type { Encoder };
  */
 export interface EncoderApi {
   /** The kernel's default encoder (BLAKE3). (atlas-kernel:16, KERNEL-2 lines 46-50) */
-  readonly encoder: Encoder;
+  readonly encoder: Encoder
 }
 
 /**
@@ -29,6 +29,6 @@ export interface EncoderApi {
  */
 export const defaultEncoder: Encoder = {
   hash(bytes: Uint8Array): Hash {
-    return asHash(bytesToHex(blake3(bytes)));
+    return asHash(bytesToHex(blake3(bytes)))
   },
-};
+}

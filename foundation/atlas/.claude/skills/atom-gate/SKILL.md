@@ -9,8 +9,8 @@ description: >
 
 # /atom-gate — the requirement quality gate (ISO/IEC/IEEE 29148)
 
-> **Authority:** ISO/IEC/IEEE 29148:2018 — **§5.2.5** (the 9 characteristics of an *individual* requirement)
-> and **§5.2.6** (the **5** characteristics of a requirement *set*). Those 14 are the standard, verbatim. One
+> **Authority:** ISO/IEC/IEEE 29148:2018 — **§5.2.5** (the 9 characteristics of an _individual_ requirement)
+> and **§5.2.6** (the **5** characteristics of a requirement _set_). Those 14 are the standard, verbatim. One
 > extra set item — **Bounded** — is a deliberate **method-specific** scope-guard (from the 29148:**2011**
 > stakeholder-needs list / INCOSE GtWR), flagged as such below; it is **not** from §5.2.6.
 
@@ -30,31 +30,31 @@ cold reviewer runs it). This is exactly the method's GATE/COLD-REVIEW split; the
 
 ## The individual gate — 9 characteristics (ALL must pass)
 
-| # | characteristic | means | check | by |
-|---|---|---|---|---|
-| 1 | **Necessary** | traces to a real need; removing it loses something | cites ≥1 `INV`; the INV is real | GATE (cite) · REVIEW (real need) |
-| 2 | **Appropriate** | right level of abstraction; not implementation | no named lib/product unless already normative in the INV | REVIEW |
-| 3 | **Unambiguous** | exactly one reading | no vague adjective / `~`; one referent for each noun | GATE (lint) · REVIEW |
-| 4 | **Complete** | trigger + precondition + response all present; nothing dangling | the EARS clauses are all filled | REVIEW |
-| 5 | **Singular** *(the atomicity law)* | ONE capability / constraint | exactly one `SHALL`; no `and`/`or` joining independent guarantees → else split (`-a/-b`) | GATE (one SHALL) · REVIEW (independence) |
-| 6 | **Feasible** | implementable under the constraints (esp. `A-14` no-embeddings) | no INV constraint makes it unbuildable; `A-14` respected | REVIEW |
-| 7 | **Verifiable** | a pass/fail check (a golden) can be written | "can you write the golden?" — if no, it is **not an atom** | REVIEW |
-| 8 | **Correct** | faithfully projects its `INV` clause (no spec-echo) | `normative-clause:` quotes the clause verbatim | GATE (quote present) · REVIEW (fidelity) |
-| 9 | **Conforming** | follows the template + `ears` standard | matches the REQ template + one EARS pattern | GATE |
+| #   | characteristic                     | means                                                           | check                                                                                    | by                                       |
+| --- | ---------------------------------- | --------------------------------------------------------------- | ---------------------------------------------------------------------------------------- | ---------------------------------------- |
+| 1   | **Necessary**                      | traces to a real need; removing it loses something              | cites ≥1 `INV`; the INV is real                                                          | GATE (cite) · REVIEW (real need)         |
+| 2   | **Appropriate**                    | right level of abstraction; not implementation                  | no named lib/product unless already normative in the INV                                 | REVIEW                                   |
+| 3   | **Unambiguous**                    | exactly one reading                                             | no vague adjective / `~`; one referent for each noun                                     | GATE (lint) · REVIEW                     |
+| 4   | **Complete**                       | trigger + precondition + response all present; nothing dangling | the EARS clauses are all filled                                                          | REVIEW                                   |
+| 5   | **Singular** _(the atomicity law)_ | ONE capability / constraint                                     | exactly one `SHALL`; no `and`/`or` joining independent guarantees → else split (`-a/-b`) | GATE (one SHALL) · REVIEW (independence) |
+| 6   | **Feasible**                       | implementable under the constraints (esp. `A-14` no-embeddings) | no INV constraint makes it unbuildable; `A-14` respected                                 | REVIEW                                   |
+| 7   | **Verifiable**                     | a pass/fail check (a golden) can be written                     | "can you write the golden?" — if no, it is **not an atom**                               | REVIEW                                   |
+| 8   | **Correct**                        | faithfully projects its `INV` clause (no spec-echo)             | `normative-clause:` quotes the clause verbatim                                           | GATE (quote present) · REVIEW (fidelity) |
+| 9   | **Conforming**                     | follows the template + `ears` standard                          | matches the REQ template + one EARS pattern                                              | GATE                                     |
 
 Any fail → **fix or reject**; never wave (the rigor compact). #5 Singular and #7 Verifiable are the two that
 most often force a split or a rejection — they are the atomicity backbone.
 
 ## The set gate — 5 (ISO 29148 §5.2.6) + 1 method scope-guard (checked at the S1 freeze)
 
-| # | characteristic | means | by |
-|---|---|---|---|
-| 1 | **Complete** | every behavioural `INV` is covered; no gaps | GATE (the coverage matrix = 100%) |
-| 2 | **Consistent** | no two `REQ`s contradict | REVIEW |
-| 3 | **Feasible** | the whole set is buildable within constraints | REVIEW |
-| 4 | **Comprehensible** | the set is understandable as a whole | REVIEW |
-| 5 | **Able-to-be-validated** | every `REQ` can be checked (has ≥1 golden — confirmed in S3) | GATE (≥1 `SCN`/REQ) · REVIEW |
-| + | **Bounded** *(method-specific, not §5.2.6)* | the set stays in scope — brownfield: **nothing beyond the 132 `INV`** | GATE (no orphan REQ) · REVIEW |
+| #   | characteristic                              | means                                                                 | by                                |
+| --- | ------------------------------------------- | --------------------------------------------------------------------- | --------------------------------- |
+| 1   | **Complete**                                | every behavioural `INV` is covered; no gaps                           | GATE (the coverage matrix = 100%) |
+| 2   | **Consistent**                              | no two `REQ`s contradict                                              | REVIEW                            |
+| 3   | **Feasible**                                | the whole set is buildable within constraints                         | REVIEW                            |
+| 4   | **Comprehensible**                          | the set is understandable as a whole                                  | REVIEW                            |
+| 5   | **Able-to-be-validated**                    | every `REQ` can be checked (has ≥1 golden — confirmed in S3)          | GATE (≥1 `SCN`/REQ) · REVIEW      |
+| +   | **Bounded** _(method-specific, not §5.2.6)_ | the set stays in scope — brownfield: **nothing beyond the 132 `INV`** | GATE (no orphan REQ) · REVIEW     |
 
 ## Procedure
 

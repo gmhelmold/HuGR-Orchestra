@@ -1,7 +1,7 @@
 # The genesis output contract — what a run over a repository must have produced
 
-> **Status:** design contract, written before Atlas mines itself. It answers one question — *what should the
-> run have produced?* — so that a benchmark measures a run against a bar instead of describing whatever came
+> **Status:** design contract, written before Atlas mines itself. It answers one question — _what should the
+> run have produced?_ — so that a benchmark measures a run against a bar instead of describing whatever came
 > out. Every clause is either checkable by the probe below or is declared, in this document, as not checkable
 > and why.
 >
@@ -21,11 +21,11 @@
 out of staging into governed knowledge, and it is an ordinary use of the `atlas-emit` door. So the OUTPUT of
 a genesis run is three artifacts and no others:
 
-| artifact | on disk | type of its contents |
-| --- | --- | --- |
-| the CAS objects — **the facts themselves** | `.atlas/cas/<h[0:2]>/<h>` | `GroundedFact` (`packages/knowledge/src/types.ts`) |
-| the staging sidecar — the **candidate rows** | `.atlas/staging.<g>.json` | `WireProjection` of `CurrentNode` (`packages/adapter-io/src/sidecar.ts`) |
-| the knowledge projection — the **promoted rows** | `.atlas/projection.<g>.json` | the same `WireProjection` at a different file |
+| artifact                                         | on disk                      | type of its contents                                                     |
+| ------------------------------------------------ | ---------------------------- | ------------------------------------------------------------------------ |
+| the CAS objects — **the facts themselves**       | `.atlas/cas/<h[0:2]>/<h>`    | `GroundedFact` (`packages/knowledge/src/types.ts`)                       |
+| the staging sidecar — the **candidate rows**     | `.atlas/staging.<g>.json`    | `WireProjection` of `CurrentNode` (`packages/adapter-io/src/sidecar.ts`) |
+| the knowledge projection — the **promoted rows** | `.atlas/projection.<g>.json` | the same `WireProjection` at a different file                            |
 
 There is no fourth **facts** artifact on disk. There **is** a run ledger, but it rides on the run's
 `GenesisReport` rather than in the store: `GenesisReport`
@@ -47,38 +47,51 @@ is always the `AdvisoryNode` arm: the mine admission gate constructs an `Advisor
 `packages/cli/src/mine.ts` adds no predicate. This is the whole of one, as it lands in the CAS:
 
 ```json
-{"kind":"advisory","id":"802f2b…","tier":"T2","claimNorm":"greet() returns a greeting for the supplied name",
- "grounding":{"entries":[{"anchor":{"kind":"file","qualifiedPath":"src/util.ts","subtreeHash":"8b5bee…"},"path":"src/util.ts"}]},
- "freshness":"FRESH","claims":[],"authoring":"ADVISORY","scope":"atlas:mined","predicateSlot":"definition"}
+{
+  "kind": "advisory",
+  "id": "802f2b…",
+  "tier": "T2",
+  "claimNorm": "greet() returns a greeting for the supplied name",
+  "grounding": {
+    "entries": [
+      { "anchor": { "kind": "file", "qualifiedPath": "src/util.ts", "subtreeHash": "8b5bee…" }, "path": "src/util.ts" }
+    ]
+  },
+  "freshness": "FRESH",
+  "claims": [],
+  "authoring": "ADVISORY",
+  "scope": "atlas:mined",
+  "predicateSlot": "definition"
+}
 ```
 
-| field | type | supplied or derived | by whom |
-| --- | --- | --- | --- |
-| `kind` | `'advisory'` | derived | the admission gate's `AdvisoryProposal`; `mine` authors no predicate |
-| `id` | `NodeKey` (`packages/contracts/src/hash.ts`) | **derived** | `nodeKey(view)` — see §2. Minted from content, **never** read off the payload |
-| `tier` | `Tier` | **supplied from a constant** | `MINED_TIER = 'T2'` in `packages/cli/src/mine.ts`, stamped, never forwarded from the proposal |
-| `claimNorm` | `string` | **supplied by the model** | the **only** thing a proposer contributes (GEN-12: the LLM proposes, admission is mechanical) |
-| `grounding` | `Grounding` (`packages/grounding/src/types.ts`) | derived | from the ranked `Candidate.site`, a `StructRef` — see §4 |
-| `freshness` | `KnowledgeFreshness` | derived | the admission gate, at admit time |
-| `claims` | `readonly ClaimEntry[]` | derived | empty on a mined advisory. **Not** the row's `claims` — see §2 |
-| `authoring` | `'ADVISORY' \| 'SUPERSEDED'` | derived | `'ADVISORY'` on birth |
-| `scope` | `string` | **supplied from a constant** | `MINED_SCOPE = 'atlas:mined'`, same file, same discipline as `tier` |
-| `predicateSlot` | `PredicateSlot` | supplied | from the **closed** 13-member vocabulary; it is folded into `id` |
-| `check`, `status` | `Check`, `Status` | — | **absent**. Present only on the `PredicateNode` arm |
+| field             | type                                            | supplied or derived          | by whom                                                                                       |
+| ----------------- | ----------------------------------------------- | ---------------------------- | --------------------------------------------------------------------------------------------- |
+| `kind`            | `'advisory'`                                    | derived                      | the admission gate's `AdvisoryProposal`; `mine` authors no predicate                          |
+| `id`              | `NodeKey` (`packages/contracts/src/hash.ts`)    | **derived**                  | `nodeKey(view)` — see §2. Minted from content, **never** read off the payload                 |
+| `tier`            | `Tier`                                          | **supplied from a constant** | `MINED_TIER = 'T2'` in `packages/cli/src/mine.ts`, stamped, never forwarded from the proposal |
+| `claimNorm`       | `string`                                        | **supplied by the model**    | the **only** thing a proposer contributes (GEN-12: the LLM proposes, admission is mechanical) |
+| `grounding`       | `Grounding` (`packages/grounding/src/types.ts`) | derived                      | from the ranked `Candidate.site`, a `StructRef` — see §4                                      |
+| `freshness`       | `KnowledgeFreshness`                            | derived                      | the admission gate, at admit time                                                             |
+| `claims`          | `readonly ClaimEntry[]`                         | derived                      | empty on a mined advisory. **Not** the row's `claims` — see §2                                |
+| `authoring`       | `'ADVISORY' \| 'SUPERSEDED'`                    | derived                      | `'ADVISORY'` on birth                                                                         |
+| `scope`           | `string`                                        | **supplied from a constant** | `MINED_SCOPE = 'atlas:mined'`, same file, same discipline as `tier`                           |
+| `predicateSlot`   | `PredicateSlot`                                 | supplied                     | from the **closed** 13-member vocabulary; it is folded into `id`                              |
+| `check`, `status` | `Check`, `Status`                               | —                            | **absent**. Present only on the `PredicateNode` arm                                           |
 
 Promotion adds a **row** — a `CurrentNode` (`packages/knowledge/src/write/upsert.ts`) — in the projection,
 keyed by the fact's `nodeKey`:
 
-| row field | type | supplied or derived |
-| --- | --- | --- |
-| `nodeKey` | `string` (a `NodeKey` value) | derived — the map key **is** this value (KNOW-4g) |
-| `family` | `NodeFamily` | derived from `check` PRESENCE, cross-checked against `kind` (`familyOf`, `governed-emit.ts`) |
-| `contentHash` | `string` (a `Hash` value) | derived — `id(fact)`, the CAS address |
-| `claims` | `readonly string[]` | derived — the `claimNorm` **set-union** set (KNOW-4c) |
-| `primaryAnchor` | `string` | derived — `primaryAnchorId(view)`, the deepest common unit |
-| `slot`, `scope`, `tier` | `PredicateSlot`, `string`, `Tier` | carried from the `WriteRequest`, stamped by the governed door |
-| `derivedAt` | `string` | derived — the git HEAD sha this row's stored freshness was produced at (N11, per-ROW) |
-| `supersededBy`, `sameAs`, `sameAsRetracted` | `string`, `string[]`, `string[]` | absent on a freshly promoted mined advisory |
+| row field                                   | type                              | supplied or derived                                                                          |
+| ------------------------------------------- | --------------------------------- | -------------------------------------------------------------------------------------------- |
+| `nodeKey`                                   | `string` (a `NodeKey` value)      | derived — the map key **is** this value (KNOW-4g)                                            |
+| `family`                                    | `NodeFamily`                      | derived from `check` PRESENCE, cross-checked against `kind` (`familyOf`, `governed-emit.ts`) |
+| `contentHash`                               | `string` (a `Hash` value)         | derived — `id(fact)`, the CAS address                                                        |
+| `claims`                                    | `readonly string[]`               | derived — the `claimNorm` **set-union** set (KNOW-4c)                                        |
+| `primaryAnchor`                             | `string`                          | derived — `primaryAnchorId(view)`, the deepest common unit                                   |
+| `slot`, `scope`, `tier`                     | `PredicateSlot`, `string`, `Tier` | carried from the `WriteRequest`, stamped by the governed door                                |
+| `derivedAt`                                 | `string`                          | derived — the git HEAD sha this row's stored freshness was produced at (N11, per-ROW)        |
+| `supersededBy`, `sameAs`, `sameAsRetracted` | `string`, `string[]`, `string[]`  | absent on a freshly promoted mined advisory                                                  |
 
 **The row and the bytes must corroborate.** The projection sidecar is unauthenticated mutable state; CAS
 bytes are content-addressed. The emit door therefore requires `fact.id === row.nodeKey`,
@@ -94,14 +107,14 @@ A stored fact has **two** 64-lowercase-hex identifiers and they are not intercha
 most repeated mistake against this product, and until [`node`](../reference/commands/node.md) was written
 nothing said so.
 
-| | `nodeKey` (`NodeKey`) | content address (`Hash`) |
-| --- | --- | --- |
-| formula | `hash(primaryAnchorId ‖ predicateSlot [‖ normalize(check)])` | `id(fact) = hash(canonicalForm(fact))` |
-| answers | **WHICH node** — one per (anchor, slot) | **WHAT bytes** — the CAS dedup leg |
-| stable across | a re-worded claim body | nothing; new bytes, new address |
-| stored as | the projection map KEY, `CurrentNode.nodeKey`, **and the fact's own `id` field** | `CurrentNode.contentHash`, and the CAS file NAME |
-| printed by | `atlas query` (`inv` lines) · `atlas promote` (left of `->`) · `atlas node`'s `node:` line | `atlas emit` (`data.id`) · `atlas doctor archive` · `atlas promote` (right of `->`) |
-| **taken by** | `atlas link`, `atlas doctor why`, `atlas doctor reground` | **`atlas node <addr>`** |
+|               | `nodeKey` (`NodeKey`)                                                                      | content address (`Hash`)                                                            |
+| ------------- | ------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------- |
+| formula       | `hash(primaryAnchorId ‖ predicateSlot [‖ normalize(check)])`                               | `id(fact) = hash(canonicalForm(fact))`                                              |
+| answers       | **WHICH node** — one per (anchor, slot)                                                    | **WHAT bytes** — the CAS dedup leg                                                  |
+| stable across | a re-worded claim body                                                                     | nothing; new bytes, new address                                                     |
+| stored as     | the projection map KEY, `CurrentNode.nodeKey`, **and the fact's own `id` field**           | `CurrentNode.contentHash`, and the CAS file NAME                                    |
+| printed by    | `atlas query` (`inv` lines) · `atlas promote` (left of `->`) · `atlas node`'s `node:` line | `atlas emit` (`data.id`) · `atlas doctor archive` · `atlas promote` (right of `->`) |
+| **taken by**  | `atlas link`, `atlas doctor why`, `atlas doctor reground`                                  | **`atlas node <addr>`**                                                             |
 
 Three consequences a run's output must satisfy, all mechanical:
 
@@ -124,7 +137,7 @@ A mined fact's governance pair is **`scope: 'atlas:mined'`, `tier: 'T2'`**, both
 `packages/cli/src/mine.ts` and never forwarded from the proposal, so an injected gate cannot mint a staged
 row declaring `T0`.
 
-- **`atlas:mined` is a namespace, not an owner.** Mining has no actor, so a mined node is owned by *nobody*
+- **`atlas:mined` is a namespace, not an owner.** Mining has no actor, so a mined node is owned by _nobody_
   until `.atlas/policy.json` grants that scope — granting it **appoints a curator**. Until then
   `actorInScope` denies, and every promotion is correctly refused `unauthorized`.
 - **`T2` is the candidate class, and it is bounded out of the GOVERNING band only.** This bullet used to say
@@ -152,11 +165,11 @@ nothing, and a probe that stays silent about that invites exactly the wrong read
 
 A `Grounding` is `{ entries: GroundingEntry[] }`. Each `GroundingEntry` carries:
 
-| field | type | role |
-| --- | --- | --- |
-| `anchor` | `StructRef` (`packages/contracts/src/struct.ts`) | **the drift oracle** |
-| `path` | `string` | repo-relative, for humans and navigation |
-| `displayLines?` | `string` | an OPTIONAL nav hint — **never** the oracle |
+| field           | type                                             | role                                        |
+| --------------- | ------------------------------------------------ | ------------------------------------------- |
+| `anchor`        | `StructRef` (`packages/contracts/src/struct.ts`) | **the drift oracle**                        |
+| `path`          | `string`                                         | repo-relative, for humans and navigation    |
+| `displayLines?` | `string`                                         | an OPTIONAL nav hint — **never** the oracle |
 
 and the `StructRef` itself is `{ kind: 'symbol'|'block'|'file'|'repo'|'project', qualifiedPath, subtreeHash }`.
 
@@ -171,7 +184,7 @@ that predicate, plus the shape of what surrounds it (`qualifiedPath` non-empty, 
 union, `path` present).
 
 **What makes it DRIFTED later.** `driftDetect(grounding, src)` is FRESH iff **every anchor's `subtreeHash`
-matches at `src`** *and* the forward closure's **interface-level `rState`** is unchanged (GROUND-11) — so a
+matches at `src`** _and_ the forward closure's **interface-level `rState`** is unchanged (GROUND-11) — so a
 callee's signature change drifts its callers while a behaviour-preserving body refactor drifts none. There
 is no normalizer in this product, so a **reformat of the cited unit drifts it** (`packages/contracts/src/struct.ts`
 records the 2026-08-02 amendment). An unresolvable citation — unit gone, path absent — is dropped by
@@ -182,7 +195,7 @@ takes. Freshness is a **structural** predicate and never a truth claim: FRESH �
 > **MEASURED, and it is the reason GOC-4 exists as its own leg.** The CAS re-hash-on-read guard **cannot see
 > a tampered grounding.** KERNEL-8 excludes the mutable side-indexes `grounding`/`status`/`freshness` from the
 > canonical preimage, so blanking an `anchor.subtreeHash` leaves `id(parsed)` unchanged and `atlas node
-> <addr>` returns the fact `status: ok`, exit 0. Tampering `tier` — which *is* in the preimage — is caught
+<addr>` returns the fact `status: ok`, exit 0. Tampering `tier` — which _is_ in the preimage — is caught
 > and answers `no-such-node`, exit 1. Both runs executed against the built binary at `e993e14`. So a fact
 > whose drift oracle has been destroyed reads back perfectly through the shipped door, and **nothing except
 > an explicit grounding check will notice**.
@@ -195,16 +208,16 @@ This is the part that makes the document a contract rather than a description. F
 frontier ranks `N` sites, the following must be true **of the output set**, not of any one fact. Each is a
 named check in `harness/probes/genesis-output-probe.mjs`.
 
-| id | expectation | how it can fail |
-| --- | --- | --- |
-| **GOC-1** | **STORE** — the projection is present, readable and `identity`-stamped, and the store arrived through a **door** rather than by a git commit | an `unreadable` sidecar reported as "0 facts"; a missing schema stamp (writes are refused, `identity-schema.ts`); a `.atlas/` tracked by git, which reads as EMPTY and refuses every write |
-| **GOC-2** | **ADDRESS** — one current node per `nodeKey` (KNOW-4g), no duplicate address, every `contentHash` retained in the `cas` set, `nodeKey ≠ contentHash` | a disk round-trip is the one producer that can key a row by something other than its own `nodeKey`; two nodeKeys on one content address |
-| **GOC-3** | **SHAPE** — every row's bytes are a whole `GroundedFact` **and corroborate the row** on `id`, `scope`, `tier` | a row whose bytes are absent; an advisory carrying a `check` (or a predicate without one); a forged row |
-| **GOC-4** | **GROUND** — **no fact without grounding**: `isGrounded` holds for every stored fact | a blanked `subtreeHash`, an empty `entries`, an entry with no `path` or a non-`StructRef` `kind` |
-| **GOC-5** | **CLASS** — every row carries a usable `(scope, tier)`, every `atlas:mined` row is `T2`, and the TOOLS-6 consequence is **reported** | an absent carrier (authority UNCONFIRMABLE); an off-lattice class; a mined row raised above the candidate class |
-| **GOC-6** | **PROVENANCE** — every `atlas:mined` fact in governed knowledge still has its **staged origin**, at the same identity and the same address | staging has no delete and a promoted row is never removed, so a mined row in knowledge with no staged twin means something reached knowledge without passing staging |
-| **GOC-7** | **READBACK** — every fact **resolves through a shipped command**: `atlas node <contentHash>` exits 0 and prints back that row's `nodeKey` | a pruned CAS object; a fact whose two identities have been swapped (the address taken and the identity printed are checked in one call) |
-| **GOC-8** | **TOTALITY** — the run's own counters close over the store: sites visited == budget spent, the two candidate counts agree, and **no candidate is counted that is not durable** | the measured failure the staging commit door exists for — 8 processes × 5 sites reported 40 candidates committed with **5 durable**, every process exiting 0 |
+| id        | expectation                                                                                                                                                                    | how it can fail                                                                                                                                                                            |
+| --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **GOC-1** | **STORE** — the projection is present, readable and `identity`-stamped, and the store arrived through a **door** rather than by a git commit                                   | an `unreadable` sidecar reported as "0 facts"; a missing schema stamp (writes are refused, `identity-schema.ts`); a `.atlas/` tracked by git, which reads as EMPTY and refuses every write |
+| **GOC-2** | **ADDRESS** — one current node per `nodeKey` (KNOW-4g), no duplicate address, every `contentHash` retained in the `cas` set, `nodeKey ≠ contentHash`                           | a disk round-trip is the one producer that can key a row by something other than its own `nodeKey`; two nodeKeys on one content address                                                    |
+| **GOC-3** | **SHAPE** — every row's bytes are a whole `GroundedFact` **and corroborate the row** on `id`, `scope`, `tier`                                                                  | a row whose bytes are absent; an advisory carrying a `check` (or a predicate without one); a forged row                                                                                    |
+| **GOC-4** | **GROUND** — **no fact without grounding**: `isGrounded` holds for every stored fact                                                                                           | a blanked `subtreeHash`, an empty `entries`, an entry with no `path` or a non-`StructRef` `kind`                                                                                           |
+| **GOC-5** | **CLASS** — every row carries a usable `(scope, tier)`, every `atlas:mined` row is `T2`, and the TOOLS-6 consequence is **reported**                                           | an absent carrier (authority UNCONFIRMABLE); an off-lattice class; a mined row raised above the candidate class                                                                            |
+| **GOC-6** | **PROVENANCE** — every `atlas:mined` fact in governed knowledge still has its **staged origin**, at the same identity and the same address                                     | staging has no delete and a promoted row is never removed, so a mined row in knowledge with no staged twin means something reached knowledge without passing staging                       |
+| **GOC-7** | **READBACK** — every fact **resolves through a shipped command**: `atlas node <contentHash>` exits 0 and prints back that row's `nodeKey`                                      | a pruned CAS object; a fact whose two identities have been swapped (the address taken and the identity printed are checked in one call)                                                    |
+| **GOC-8** | **TOTALITY** — the run's own counters close over the store: sites visited == budget spent, the two candidate counts agree, and **no candidate is counted that is not durable** | the measured failure the staging commit door exists for — 8 processes × 5 sites reported 40 candidates committed with **5 durable**, every process exiting 0                               |
 
 Read as one paragraph: **no site is silently dropped, abstention is accounted for, no fact exists without
 grounding, no address is claimed twice, and every fact is readable back through a shipped command.**
@@ -225,7 +238,7 @@ grounding, no address is claimed twice, and every fact is readable back through 
    one fact, so `sites − candidates` is not a residual.
 3. **That the store agrees with `@atlas/kernel`.** The probe holds no `@atlas/*` import (the harness
    invariant), so it never re-derives a `nodeKey` or a `contentHash`. It can prove a store agrees with
-   *itself*; the shipped `atlas node` re-hashes on read, which is what `--cli` reaches for — and §4 records
+   _itself_; the shipped `atlas node` re-hashes on read, which is what `--cli` reaches for — and §4 records
    exactly how far that guard extends.
 4. **Whether a claim is TRUE.** Nothing here grades a claim. Truth is the truth gate's question, re-derived
    mechanically at the emit door; grounding is structural and FRESH is not a truth claim.
@@ -240,11 +253,11 @@ grounding, no address is claimed twice, and every fact is readable back through 
 node harness/probes/genesis-output-probe.mjs <repo> [--report <file>] [--cli <bin>]
 ```
 
-| exit | meaning |
-| --- | --- |
-| `0` | every expectation was **evaluated** and every one held |
-| `1` | at least one expectation **FAILED** |
-| `2` | nothing failed, but at least one could not be evaluated |
+| exit | meaning                                                 |
+| ---- | ------------------------------------------------------- |
+| `0`  | every expectation was **evaluated** and every one held  |
+| `1`  | at least one expectation **FAILED**                     |
+| `2`  | nothing failed, but at least one could not be evaluated |
 
 `2` is a real outcome, not a rounding of `0`. An unevaluated expectation is not a passing one: without
 `--report` there is no site ledger (GOC-8), and without `--cli` no shipped command was actually run, so
@@ -275,16 +288,16 @@ ranked frontier, three candidates placed through the product's own staging door
 (`packages/e2e-blackbox/test/stage.ts`) and carried into knowledge by the real `atlas promote` binary.
 Every damage was KILLED (exit `1`):
 
-| damage applied to the good store | GOC ids that fired |
-| --- | --- |
-| strip the `identity` schema stamp from the projection | GOC-1 |
-| re-key one row so the map key is not its own `nodeKey` | GOC-2, GOC-3, GOC-6, GOC-7 |
-| make the stored bytes contradict the row (`tier`) | GOC-3, GOC-7 |
-| blank one `anchor.subtreeHash` | **GOC-4 alone** |
-| raise a mined row above the candidate class (`T2`→`T1`) | GOC-3, GOC-5 |
-| drop one staged row | GOC-6 |
-| prune one fact from the CAS | GOC-3, GOC-4, GOC-7 |
-| a report claiming 40 candidates over a 2-row staging | GOC-8 |
+| damage applied to the good store                        | GOC ids that fired         |
+| ------------------------------------------------------- | -------------------------- |
+| strip the `identity` schema stamp from the projection   | GOC-1                      |
+| re-key one row so the map key is not its own `nodeKey`  | GOC-2, GOC-3, GOC-6, GOC-7 |
+| make the stored bytes contradict the row (`tier`)       | GOC-3, GOC-7               |
+| blank one `anchor.subtreeHash`                          | **GOC-4 alone**            |
+| raise a mined row above the candidate class (`T2`→`T1`) | GOC-3, GOC-5               |
+| drop one staged row                                     | GOC-6                      |
+| prune one fact from the CAS                             | GOC-3, GOC-4, GOC-7        |
+| a report claiming 40 candidates over a 2-row staging    | GOC-8                      |
 
 **Read row 4 next to row 3.** Tampering `tier` also trips GOC-7, because `tier` is in the canonical preimage
 so the CAS re-hash-on-read refuses the object. Blanking a `subtreeHash` trips **nothing but GOC-4** — the

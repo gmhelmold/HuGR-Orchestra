@@ -9,11 +9,11 @@
 // This suite drives the SAME composition root (`driveMinePass`) production uses, over a WIRED and an
 // UNWIRED proposer, and asserts the ports are actually REACHED — not merely present on the type.
 
-import { describe, it, expect } from 'vitest';
-import type { EmitGate, Fact, SeedProposal, SiteProposer } from '@atlas/genesis';
-import { NO_MODEL_IDENTITY } from '../src/mine-proposer.js';
-import { driveMinePass } from '../src/mine.js';
-import { skeletonSource, injectedHistory, factFor, idOf, stagingFake } from './mine-fixtures.js';
+import { describe, it, expect } from "vitest"
+import type { EmitGate, Fact, SeedProposal, SiteProposer } from "@atlas/genesis"
+import { NO_MODEL_IDENTITY } from "../src/mine-proposer.js"
+import { driveMinePass } from "../src/mine.js"
+import { skeletonSource, injectedHistory, factFor, idOf, stagingFake } from "./mine-fixtures.js"
 
 // A gate that mirrors `mine-gate.ts`'s own #195(b) transport: an admitted seed's `rawAnswer`, if present,
 // rides through onto the fact UNCHANGED — the exact seam `mine-decide.ts` scrubs-then-CAS's.
@@ -24,85 +24,87 @@ const gateEmitAllWithAnswer = (): EmitGate => ({
       ? { ...factFor(c, seed.claim), rawAnswer: seed.rawAnswer }
       : factFor(c, seed.claim)) as unknown as Fact,
   }),
-});
+})
 
 // A WIRED proposer: every site proposes a claim AND the raw answer bytes it was "produced" from.
 const wiredProposer = (): SiteProposer => ({
   propose: (c): SeedProposal => ({ cand: c, claim: `answer for ${idOf(c)}`, rawAnswer: `raw answer for ${idOf(c)}` }),
-});
+})
 
 // The honest fail-closed default: no model, so every site abstains (mirrors `mine-proposer.ts defaultProposer`).
-const unwiredProposer = (): SiteProposer => ({ propose: () => null });
+const unwiredProposer = (): SiteProposer => ({ propose: () => null })
 
-const REPO = 'fix-repo';
+const REPO = "fix-repo"
 
-describe('#210 — a real pass STAMPS the wired model identity on the report', () => {
-  it('a WIRED proposer + a supplied modelIdentity lands on GenesisReport.modelIdentity, never the sentinel', () => {
+describe("#210 — a real pass STAMPS the wired model identity on the report", () => {
+  it("a WIRED proposer + a supplied modelIdentity lands on GenesisReport.modelIdentity, never the sentinel", () => {
     const pass = driveMinePass(REPO, {
       skeleton: skeletonSource,
       history: injectedHistory,
       proposer: wiredProposer(),
       gate: gateEmitAllWithAnswer(),
       store: stagingFake().store,
-      modelIdentity: 'test-model --flag @ 1.0.0',
-    });
-    expect(pass.report.modelIdentity).toBe('test-model --flag @ 1.0.0');
-  });
+      modelIdentity: "test-model --flag @ 1.0.0",
+    })
+    expect(pass.report.modelIdentity).toBe("test-model --flag @ 1.0.0")
+  })
 
-  it('an UNWIRED pass (no model, no override) carries the honest NO_MODEL_IDENTITY sentinel — never undefined', () => {
+  it("an UNWIRED pass (no model, no override) carries the honest NO_MODEL_IDENTITY sentinel — never undefined", () => {
     const pass = driveMinePass(REPO, {
       skeleton: skeletonSource,
       history: injectedHistory,
       proposer: unwiredProposer(),
       gate: gateEmitAllWithAnswer(),
       store: stagingFake().store,
-    });
-    expect(pass.report.modelIdentity).toBe(NO_MODEL_IDENTITY);
-  });
-});
+    })
+    expect(pass.report.modelIdentity).toBe(NO_MODEL_IDENTITY)
+  })
+})
 
-describe('#209 — a real pass FOLDS the admitted answer receipts into the report witness', () => {
-  it('every admitted fact that carried a rawAnswer is counted in answersStored, and answersDigest is set', () => {
+describe("#209 — a real pass FOLDS the admitted answer receipts into the report witness", () => {
+  it("every admitted fact that carried a rawAnswer is counted in answersStored, and answersDigest is set", () => {
     const pass = driveMinePass(REPO, {
       skeleton: skeletonSource,
       history: injectedHistory,
       proposer: wiredProposer(),
       gate: gateEmitAllWithAnswer(),
       store: stagingFake().store,
-      modelIdentity: 'test-model @ 1.0.0',
-    });
+      modelIdentity: "test-model @ 1.0.0",
+    })
     // teeth (breaks-on "answerReceipts is not wired into ControllerDeps"): with the port unreached the
     // controller's own fallback (`deps.answerReceipts?.()` — absent) folds to `answersStored: 0` regardless
     // of how many facts actually minted a receipt, which is exactly the dormant state this WP closes.
-    expect(pass.report.seeded.length).toBeGreaterThan(0);
-    expect(pass.report.answersStored).toBe(pass.report.seeded.length);
-    expect(pass.report.answersDigest?.length ?? 0).toBeGreaterThan(0);
-  });
+    expect(pass.report.seeded.length).toBeGreaterThan(0)
+    expect(pass.report.answersStored).toBe(pass.report.seeded.length)
+    expect(pass.report.answersDigest?.length ?? 0).toBeGreaterThan(0)
+  })
 
-  it('an UNWIRED pass admits nothing (no rawAnswer ever produced), so answersStored is honestly 0', () => {
+  it("an UNWIRED pass admits nothing (no rawAnswer ever produced), so answersStored is honestly 0", () => {
     const pass = driveMinePass(REPO, {
       skeleton: skeletonSource,
       history: injectedHistory,
       proposer: unwiredProposer(),
       gate: gateEmitAllWithAnswer(),
       store: stagingFake().store,
-    });
-    expect(pass.report.seeded.length).toBe(0);
-    expect(pass.report.answersStored).toBe(0);
-  });
+    })
+    expect(pass.report.seeded.length).toBe(0)
+    expect(pass.report.answersStored).toBe(0)
+  })
 
-  it('a fact admitted WITHOUT a rawAnswer (human/non-mine shape) contributes nothing to the count', () => {
+  it("a fact admitted WITHOUT a rawAnswer (human/non-mine shape) contributes nothing to the count", () => {
     // The gate here still emits (so `seeded` is non-empty) but the proposer never supplies `rawAnswer`, so
     // no receipt is ever minted — fail-closed: absence of the transport field must never be counted.
-    const noAnswerProposer: SiteProposer = { propose: (c): SeedProposal => ({ cand: c, claim: `claim for ${idOf(c)}` }) };
+    const noAnswerProposer: SiteProposer = {
+      propose: (c): SeedProposal => ({ cand: c, claim: `claim for ${idOf(c)}` }),
+    }
     const pass = driveMinePass(REPO, {
       skeleton: skeletonSource,
       history: injectedHistory,
       proposer: noAnswerProposer,
       gate: gateEmitAllWithAnswer(),
       store: stagingFake().store,
-    });
-    expect(pass.report.seeded.length).toBeGreaterThan(0);
-    expect(pass.report.answersStored).toBe(0);
-  });
-});
+    })
+    expect(pass.report.seeded.length).toBeGreaterThan(0)
+    expect(pass.report.answersStored).toBe(0)
+  })
+})

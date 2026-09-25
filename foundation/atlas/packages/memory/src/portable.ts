@@ -7,32 +7,32 @@
 // DETECTION completeness is DELEGATED (a conformance gate against the real binary, FR-12) — consumed here as
 // an injected `NamedScanner` seam; these residue goldens assert only pipeline wiring + fail-closed.
 
-import type { MemoryStore, MemoryRecord } from './types.js';
+import type { MemoryStore, MemoryRecord } from "./types.js"
 
 // ── frozen portable surface, co-located here (was ref/portable.ts) ─────────────────────────────────────────
 
 export interface PortableApi {
   /** Open-JSON dump of the member's Memory — replays 1:1, no proprietary encoding, no host dependency
    *  (MEM-9). Reuses KERNEL-6 `portable.ts`. (method-tags-mem:81) */
-  export(): string;
+  export(): string
 
   /** Replay an open-JSON dump 1:1 into a fresh store — `deepEqual(mem, import(export(mem)))` (MEM-9).
    *  (method-tags-mem:81) */
-  import(json: string): MemoryStore;
+  import(json: string): MemoryStore
 }
 
 // ── MEM-9a: open-JSON export / import round-trip ──────────────────────────────────────────────────
 
 /** OKF envelope tag + version — the ONLY literals the serializer adds; both are host-independent, so a
  *  grep of the dump finds 0 host/external refs (no lock-in). Mirrors KERNEL-6 `portable.ts`. */
-const OKF_MEM_FORMAT = 'atlas-okf-mem';
-const OKF_MEM_VERSION = 1;
+const OKF_MEM_FORMAT = "atlas-okf-mem"
+const OKF_MEM_VERSION = 1
 
 /** The on-the-wire shape of a memory dump: a self-describing open-JSON envelope over the store records. */
 interface OkfMemBundle {
-  readonly format: string;
-  readonly version: number;
-  readonly records: MemoryStore;
+  readonly format: string
+  readonly version: number
+  readonly records: MemoryStore
 }
 
 /**
@@ -41,8 +41,8 @@ interface OkfMemBundle {
  * introduced. The dump replays 1:1 through `importMemory`.
  */
 export function exportMemory(mem: MemoryStore): string {
-  const bundle: OkfMemBundle = { format: OKF_MEM_FORMAT, version: OKF_MEM_VERSION, records: mem };
-  return JSON.stringify(bundle);
+  const bundle: OkfMemBundle = { format: OKF_MEM_FORMAT, version: OKF_MEM_VERSION, records: mem }
+  return JSON.stringify(bundle)
 }
 
 /**
@@ -51,27 +51,23 @@ export function exportMemory(mem: MemoryStore): string {
  * than returning a partial or fabricated store.
  */
 export function importMemory(json: string): MemoryStore {
-  let parsed: unknown;
+  let parsed: unknown
   try {
-    parsed = JSON.parse(json);
+    parsed = JSON.parse(json)
   } catch {
-    throw new Error('malformed OKF memory bundle: not valid JSON');
+    throw new Error("malformed OKF memory bundle: not valid JSON")
   }
   if (!isOkfMemBundle(parsed)) {
-    throw new Error('malformed OKF memory bundle: missing or invalid OKF envelope');
+    throw new Error("malformed OKF memory bundle: missing or invalid OKF envelope")
   }
-  return parsed.records;
+  return parsed.records
 }
 
 /** Structural guard for the memory OKF envelope — the fail-closed predicate `importMemory` gates on. */
 function isOkfMemBundle(v: unknown): v is OkfMemBundle {
-  if (typeof v !== 'object' || v === null) return false;
-  const b = v as Record<string, unknown>;
-  return (
-    b.format === OKF_MEM_FORMAT &&
-    typeof b.version === 'number' &&
-    Array.isArray(b.records)
-  );
+  if (typeof v !== "object" || v === null) return false
+  const b = v as Record<string, unknown>
+  return b.format === OKF_MEM_FORMAT && typeof b.version === "number" && Array.isArray(b.records)
 }
 
 /**
@@ -82,7 +78,7 @@ export function makePortableMemory(mem: MemoryStore): PortableApi {
   return {
     export: (): string => exportMemory(mem),
     import: (json: string): MemoryStore => importMemory(json),
-  };
+  }
 }
 
 // ── MEM-9b / MEM-9c: pre-write named-scanner fail-closed gate ─────────────────────────────────────
@@ -93,8 +89,8 @@ export function makePortableMemory(mem: MemoryStore): PortableApi {
  * DETECTION quality is delegated to FR-12 (billy) — the boolean is the delegated input, not authored here.
  */
 export interface NamedScanner {
-  readonly name: string;
-  scan(record: MemoryRecord): boolean;
+  readonly name: string
+  scan(record: MemoryRecord): boolean
 }
 
 /**
@@ -102,11 +98,11 @@ export interface NamedScanner {
  * scanner name so the block is attributable; it is NOT a redaction and NOT a pass-through.
  */
 export class ScannerBlockedError extends Error {
-  readonly scannerName: string;
+  readonly scannerName: string
   constructor(scannerName: string) {
-    super(`memory write blocked (fail-closed) by named scanner '${scannerName}': secret detected`);
-    this.name = 'ScannerBlockedError';
-    this.scannerName = scannerName;
+    super(`memory write blocked (fail-closed) by named scanner '${scannerName}': secret detected`)
+    this.name = "ScannerBlockedError"
+    this.scannerName = scannerName
   }
 }
 
@@ -118,24 +114,20 @@ export class ScannerBlockedError extends Error {
  * @throws {Error}                on an unnamed scanner — the pre-write stage MUST be a NAMED scanner.
  * @throws {ScannerBlockedError}  on a scanner hit — the fail-closed gate blocks the write.
  */
-export function writeWithScanner(
-  store: MemoryStore,
-  record: MemoryRecord,
-  scanner: NamedScanner,
-): MemoryStore {
+export function writeWithScanner(store: MemoryStore, record: MemoryRecord, scanner: NamedScanner): MemoryStore {
   if (!scanner.name) {
-    throw new Error('pre-write scanner stage requires a NAMED scanner (gitleaks / trufflehog)');
+    throw new Error("pre-write scanner stage requires a NAMED scanner (gitleaks / trufflehog)")
   }
   // The named scanner runs in the pre-write path — BEFORE any record is persisted.
-  const hit = scanner.scan(record);
+  const hit = scanner.scan(record)
   if (hit) {
     // Fail-closed: a hit BLOCKS the write. The record never reaches the store.
-    throw new ScannerBlockedError(scanner.name);
+    throw new ScannerBlockedError(scanner.name)
   }
   // Clean → persist. Append-only, non-mutating.
-  return [...store, record];
+  return [...store, record]
 }
 
 // differential-vs-oracle (compile-time): `makePortableMemory` conforms to the frozen PortableApi.
-const _portable: (mem: MemoryStore) => PortableApi = makePortableMemory;
-void _portable;
+const _portable: (mem: MemoryStore) => PortableApi = makePortableMemory
+void _portable

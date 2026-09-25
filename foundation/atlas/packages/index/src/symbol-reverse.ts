@@ -6,27 +6,27 @@
 // sibling view — it does NOT touch `deriveEdges` or the doc-level `dependencyAxis`. Pure, $0-LLM, no I/O, no
 // clock, deterministic (sorted + deduped ⇒ a rebuild is byte-identical, exactly as `deriveEdges` sorts).
 
-import type { Hash } from '@atlas/contracts';
-import { canonicalizeSymbol, isLocalSymbol, nodeHashOfPath } from './build.js';
-import type { ScipOutput } from './types.js';
+import type { Hash } from "@atlas/contracts"
+import { canonicalizeSymbol, isLocalSymbol, nodeHashOfPath } from "./build.js"
+import type { ScipOutput } from "./types.js"
 
 /** The ONE indexer whose `local ` scheme (and the `canonicalizeSymbol` dist→src regex, #189) is proven. The
  *  collapsed-local heuristic in `createSymbolReverse` (`opaqueRefSources`) is trusted ONLY for this indexer —
  *  a byte-identical MIRROR of the escape leg's gate (adapter-io/src/escape/target-escapes.ts `SUPPORTED_INDEXER`),
  *  duplicated here because @atlas/index sits BELOW adapter-io and cannot import it. */
-const SUPPORTED_INDEXER = 'scip-typescript';
+const SUPPORTED_INDEXER = "scip-typescript"
 
 /** The reverse-caller query for a GLOBAL symbol, one granularity below the doc-level `depgraph`. Pure + total. */
 export interface SymbolReverseApi {
   /** The units (docHash) that carry a `reference` occurrence of the GLOBAL symbol `symbol` — i.e. the files
    *  that reference/call it. A `local ` symbol (SCIP document-scoped) or a symbol with no reference ⇒ `[]`.
    *  Deterministic, sorted, deduped. TOTAL: never throws. */
-  reverseCallers(symbol: string): readonly Hash[];
+  reverseCallers(symbol: string): readonly Hash[]
   /** The units (docHash) carrying ANY `unresolved`/`dynamic` reference — the honest holes whose target the
    *  index cannot see (an FFI/reflective/cross-language ref that COULD reach any symbol). Symbol-INDEPENDENT;
    *  returned so a caller can intersect it with a declared scope S to decide `underApprox` for a negation over
    *  that scope. Deterministic, sorted, deduped. Mirrors `createDepgraph`'s `unresolvedSources`, one level down. */
-  holeSources(): readonly Hash[];
+  holeSources(): readonly Hash[]
   /** The units (docHash) carrying a CLASS-2 COLLAPSED cross-package reference — a `reference`-role `local `
    *  symbol with NO matching `local ` DEFINITION in that SAME document. SCIP document-scopes a `local N`, so a
    *  local ref with no local def is NOT a genuine intra-doc local: it is a cross-package call the indexer
@@ -37,7 +37,7 @@ export interface SymbolReverseApi {
    *  index was built by the supported indexer (`scip-typescript`) — for an unknown indexer the `local ` scheme
    *  is not proven, so this heuristic is OFF (fail-closed, empty). Per-document (a def in doc A never vouches
    *  for doc B). Deterministic, sorted, deduped. TOTAL: never throws. */
-  opaqueRefSources(): readonly Hash[];
+  opaqueRefSources(): readonly Hash[]
   /** Does the GLOBAL symbol `symbol` have an in-index DEFINITION — i.e. can Atlas SEE it defined at all?
    *  `true` iff `symbol` is non-`local` and appears as a `definition` occurrence somewhere in this index.
    *
@@ -46,7 +46,7 @@ export interface SymbolReverseApi {
    *  Without it, `reverseCallers(phantom) === []` is indistinguishable from a genuinely uncalled symbol, and
    *  the negation door would ground "phantom is not called in S" for a target that does not resolve at all.
    *  A `local ` symbol is document-scoped (#189) and never resolves here. Total: never throws. */
-  resolves(symbol: string): boolean;
+  resolves(symbol: string): boolean
   /** The unit (docHash) where the GLOBAL symbol `symbol` is DEFINED — the FIRST-definition-wins document
    *  the `defs` map retained (byte-for-byte `deriveEdges`'s `defs`, build.ts). `undefined` for a `local `
    *  symbol (document-scoped, #189) or a symbol with no in-index definition (a phantom). This is the POSITIVE
@@ -55,17 +55,17 @@ export interface SymbolReverseApi {
    *  by checking this def-doc's path lies under S (a witnessed existence, sound in any world). First-def-wins
    *  under-witnesses overloads (a second def in another unit is not seen), which costs recall, never
    *  soundness. Total: never throws. */
-  definesAt(symbol: string): Hash | undefined;
+  definesAt(symbol: string): Hash | undefined
 }
 
 /** Deterministic, deduped, `String`-sorted `Hash[]` — the exact discipline `deriveEdges`/`dependencyAxis` use
  *  so a rebuild is byte-identical. `Hash` is a same-string brand (contracts/hash.ts), so a `String`-keyed set is
  *  its own dedup and a lexical sort on `String(hash)` is total. */
 const sortedDeduped = (hashes: Iterable<Hash>): readonly Hash[] => {
-  const seen = new Set<string>();
-  for (const h of hashes) seen.add(String(h));
-  return [...seen].sort() as unknown as readonly Hash[];
-};
+  const seen = new Set<string>()
+  for (const h of hashes) seen.add(String(h))
+  return [...seen].sort() as unknown as readonly Hash[]
+}
 
 /**
  * Build the symbol-reverse view over one SCIP output. Reads the SAME occurrences `deriveEdges` reads and reuses
@@ -97,40 +97,40 @@ export function createSymbolReverse(
   // told these are safe). The identity is passed in by the composition root (which reads the raw dump's
   // `metadata.toolInfo.name`); the frozen `ScipOutput` projection deliberately carries no metadata, so absent
   // ⇒ untrusted (never a default that TRUSTS the heuristic).
-  const trustCollapsedLocal = opts?.indexerName === SUPPORTED_INDEXER;
+  const trustCollapsedLocal = opts?.indexerName === SUPPORTED_INDEXER
 
   // defs: the SAME map `deriveEdges` builds — non-local `definition` occurrences, first-definition-wins,
   // RETAINING the defining doc (build.ts:217 keeps `h` identically). The membership set `resolves` /
   // `reverseCallers` / the reference-resolution loop read is exactly `defs.keys()`; retaining the value costs
   // nothing there (a Map answers `.has` the same) and gives `definesAt` (#196d) the location a Set discarded.
-  const defs = new Map<string, Hash>();
+  const defs = new Map<string, Hash>()
   for (const doc of scip.documents) {
-    const h = nodeHashOfPath(doc.relativePath);
+    const h = nodeHashOfPath(doc.relativePath)
     for (const occ of doc.occurrences) {
-      if (occ.role === 'definition' && !isLocalSymbol(occ.symbol) && !defs.has(occ.symbol)) defs.set(occ.symbol, h);
+      if (occ.role === "definition" && !isLocalSymbol(occ.symbol) && !defs.has(occ.symbol)) defs.set(occ.symbol, h)
     }
   }
 
   // callersBySymbol: for each RESOLVED (in-index-defined) global symbol, the docHashes carrying a `reference`
   // to it. holeSourceSet: docHashes carrying a `reference` to a non-local symbol with NO in-index definition
   // (the `unresolved` branch). Both walk the SAME reference occurrences `deriveEdges`'s reference loop walks.
-  const callersBySymbol = new Map<string, Hash[]>();
-  const holeSourceSet = new Set<string>();
-  const opaqueRefSet = new Set<string>();
+  const callersBySymbol = new Map<string, Hash[]>()
+  const holeSourceSet = new Set<string>()
+  const opaqueRefSet = new Set<string>()
   for (const doc of scip.documents) {
-    const from = nodeHashOfPath(doc.relativePath);
+    const from = nodeHashOfPath(doc.relativePath)
     // F1 step 1 — PER-DOCUMENT pre-scan of this doc's `local ` DEFINITIONS. A `local N` string is meaningless
     // ACROSS documents (SCIP document-scopes it), so a def in doc A must NOT vouch for doc B: `localDefs` is
     // rebuilt per doc and read only for THIS doc's local refs. Skipped entirely on an untrusted indexer (the
     // heuristic is off, so the set is never consulted).
-    const localDefs = new Set<string>();
+    const localDefs = new Set<string>()
     if (trustCollapsedLocal) {
       for (const occ of doc.occurrences) {
-        if (occ.role === 'definition' && isLocalSymbol(occ.symbol)) localDefs.add(occ.symbol);
+        if (occ.role === "definition" && isLocalSymbol(occ.symbol)) localDefs.add(occ.symbol)
       }
     }
     for (const occ of doc.occurrences) {
-      if (occ.role !== 'reference') continue;
+      if (occ.role !== "reference") continue
       if (isLocalSymbol(occ.symbol)) {
         // F1 step 2 — a `reference`-role `local ` symbol. Under the supported indexer, a local ref with NO
         // matching `local ` DEFINITION in THIS doc is a CLASS-2 COLLAPSED cross-package ref (the real caller the
@@ -138,8 +138,8 @@ export function createSymbolReverse(
         // scope containing it. A local ref WITH a local def is a genuine intra-doc local — UNCHANGED behavior
         // (`continue`, contributes nothing). On an untrusted indexer `trustCollapsedLocal` is false, so every
         // local ref is simply dropped exactly as before (`localDefs` empty, guard skipped).
-        if (trustCollapsedLocal && !localDefs.has(occ.symbol)) opaqueRefSet.add(String(from));
-        continue;
+        if (trustCollapsedLocal && !localDefs.has(occ.symbol)) opaqueRefSet.add(String(from))
+        continue
       }
       // CANON-AND-VERIFY (#189): resolve a same-package hit as-is, else the src-form of a published-types
       // (`dist/…d.ts`) descriptor — but ONLY if it lands on a real in-index definition. The caller is then
@@ -150,44 +150,44 @@ export function createSymbolReverse(
         ? occ.symbol
         : defs.has(canonicalizeSymbol(occ.symbol))
           ? canonicalizeSymbol(occ.symbol)
-          : undefined;
+          : undefined
       if (resolved !== undefined) {
-        const bucket = callersBySymbol.get(resolved) ?? [];
-        bucket.push(from);
-        callersBySymbol.set(resolved, bucket);
+        const bucket = callersBySymbol.get(resolved) ?? []
+        bucket.push(from)
+        callersBySymbol.set(resolved, bucket)
       } else {
-        holeSourceSet.add(String(from)); // `unresolved` (or, in a richer projection, `dynamic`) — a hole source
+        holeSourceSet.add(String(from)) // `unresolved` (or, in a richer projection, `dynamic`) — a hole source
       }
     }
   }
 
-  const holes = sortedDeduped([...holeSourceSet] as unknown as Hash[]);
-  const opaqueRefs = sortedDeduped([...opaqueRefSet] as unknown as Hash[]);
+  const holes = sortedDeduped([...holeSourceSet] as unknown as Hash[])
+  const opaqueRefs = sortedDeduped([...opaqueRefSet] as unknown as Hash[])
 
   return {
     reverseCallers(symbol: string): readonly Hash[] {
       // A `local ` symbol is document-scoped (its callers are intra-doc, out of #99b v1 scope) and a symbol
       // with no in-index definition has only unresolved references (holes, not resolved callers) ⇒ `[]`.
-      if (isLocalSymbol(symbol) || !defs.has(symbol)) return [];
-      return sortedDeduped(callersBySymbol.get(symbol) ?? []);
+      if (isLocalSymbol(symbol) || !defs.has(symbol)) return []
+      return sortedDeduped(callersBySymbol.get(symbol) ?? [])
     },
     holeSources(): readonly Hash[] {
-      return holes;
+      return holes
     },
     opaqueRefSources(): readonly Hash[] {
-      return opaqueRefs;
+      return opaqueRefs
     },
     resolves(symbol: string): boolean {
       // The SAME predicate the two loops above use to admit a symbol at all: non-`local` AND carrying an
       // in-index `definition`. `defs` is exactly that set, so a phantom (referenced-only, or absent) is `false`
       // and its `reverseCallers` is `[]` HONESTLY — the caller must abstain rather than ground a vacuous negative.
-      return !isLocalSymbol(symbol) && defs.has(symbol);
+      return !isLocalSymbol(symbol) && defs.has(symbol)
     },
     definesAt(symbol: string): Hash | undefined {
       // The location `resolves` throws away: the first-definition-wins def-doc of a NON-`local` symbol. A
       // `local ` symbol is document-scoped (#189) and never resolves, so it has no global def-site here.
-      if (isLocalSymbol(symbol)) return undefined;
-      return defs.get(symbol);
+      if (isLocalSymbol(symbol)) return undefined
+      return defs.get(symbol)
     },
-  };
+  }
 }

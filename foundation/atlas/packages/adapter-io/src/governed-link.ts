@@ -93,23 +93,35 @@
 // core (`@atlas/knowledge` linkSameAs, the `@atlas/tools` `LinkOut` result, the authz seam) — re-implements
 // none. DAG: adapter-io depends on knowledge + tools; `LinkOut` is imported FROM tools (never the reverse).
 
-import type { Hash, Tier } from '@atlas/contracts';
-import { isScope, linkSameAs, ratify, sameAsClassOf, sameAsEdgeState, stage, strictestTier, unlinkSameAs } from '@atlas/knowledge';
-import type { Candidate, CurrentNode, GroundedFact } from '@atlas/knowledge';
-import type { LinkOut } from '@atlas/tools';
-import { actorInScope } from './policy.js';
-import type { AtlasPolicy } from './policy.js';
-import type { DiskStore } from './store.js';
-import { REJECTED_CONTENDED as COMMIT_CONTENDED, REJECTED_UNREADABLE_STORE as COMMIT_UNREADABLE_STORE } from './governed-emit-reasons.js';
+import type { Hash, Tier } from "@atlas/contracts"
+import {
+  isScope,
+  linkSameAs,
+  ratify,
+  sameAsClassOf,
+  sameAsEdgeState,
+  stage,
+  strictestTier,
+  unlinkSameAs,
+} from "@atlas/knowledge"
+import type { Candidate, CurrentNode, GroundedFact } from "@atlas/knowledge"
+import type { LinkOut } from "@atlas/tools"
+import { actorInScope } from "./policy.js"
+import type { AtlasPolicy } from "./policy.js"
+import type { DiskStore } from "./store.js"
+import {
+  REJECTED_CONTENDED as COMMIT_CONTENDED,
+  REJECTED_UNREADABLE_STORE as COMMIT_UNREADABLE_STORE,
+} from "./governed-emit-reasons.js"
 // The PROVENANCE refusal — the THIRD `CommitRefusal` member, which BOTH doors used to collapse into
 // `unreadable store` (a storage fault whose remediation text sends an operator to restore from backup).
-import { REJECTED_UNTRUSTED_STORE as COMMIT_UNTRUSTED } from './read-provenance.js';
+import { REJECTED_UNTRUSTED_STORE as COMMIT_UNTRUSTED } from "./read-provenance.js"
 // A-D3 / task #83 — the RETRACTION MODE's three refusals (see that module for the mode-vs-sixth-tool decision).
-import { ALREADY_RETRACTED_REASON, NOT_LINKED_REASON, RETRACTED_PAIR_REASON } from './governed-link-retract.js';
+import { ALREADY_RETRACTED_REASON, NOT_LINKED_REASON, RETRACTED_PAIR_REASON } from "./governed-link-retract.js"
 
 /** The structured fail-closed reasons — a non-distinct, unknown-endpoint, unauthorized, OR unratified link
  *  never lands. */
-const REJECTED_SAME = 'sameAs requires two distinct nodes';
+const REJECTED_SAME = "sameAs requires two distinct nodes"
 /**
  * The ONE refusal for a bad endpoint, whatever is bad about it [task #144].
  *
@@ -129,24 +141,24 @@ const REJECTED_SAME = 'sameAs requires two distinct nodes';
  * file's header for why pointing at that leg is not a contradiction.
  */
 const REJECTED_UNAUTHORIZED =
-  'unauthorized: the actor must be in the scope of BOTH endpoints AND of every node in the equivalence ' +
-  'class this link merges — the sameAs relation is transitive, so the boundary is the class, not the edge ' +
-  '(KNOW-11). An endpoint that is not a current node is refused with this SAME string, deliberately: a ' +
-  'nodeKey with no row carries no scope, so no authority over it can be established, and reporting the two ' +
-  'apart would let any caller probe which nodeKeys exist. If a nodeKey here may simply be wrong, list the ' +
-  "territory with `atlas query <scope>` and check it against that before concluding a scope is missing.";
+  "unauthorized: the actor must be in the scope of BOTH endpoints AND of every node in the equivalence " +
+  "class this link merges — the sameAs relation is transitive, so the boundary is the class, not the edge " +
+  "(KNOW-11). An endpoint that is not a current node is refused with this SAME string, deliberately: a " +
+  "nodeKey with no row carries no scope, so no authority over it can be established, and reporting the two " +
+  "apart would let any caller probe which nodeKeys exist. If a nodeKey here may simply be wrong, list the " +
+  "territory with `atlas query <scope>` and check it against that before concluding a scope is missing."
 const REJECTED_UNRATIFIED =
-  'unratified: a sameAs link requires a ratifier, and the billy token when either endpoint is T0 (KNOW-8)';
+  "unratified: a sameAs link requires a ratifier, and the billy token when either endpoint is T0 (KNOW-8)"
 const REJECTED_UNVERIFIABLE =
-  'unverifiable endpoint: the stored fact of an endpoint — or of a node in the equivalence class this link ' +
-  'merges — is not readable from CAS, so its governance class and its scope cannot be confirmed; refused ' +
-  'fail-closed rather than defaulted';
+  "unverifiable endpoint: the stored fact of an endpoint — or of a node in the equivalence class this link " +
+  "merges — is not readable from CAS, so its governance class and its scope cannot be confirmed; refused " +
+  "fail-closed rather than defaulted"
 /** The COMMIT refusals — the SAME two the emit door reports, imported from the one place they are defined
  *  so the two doors cannot drift into two vocabularies for one protocol. `unreadable store` on this door
  *  means the equivalence class this link merges — and therefore its authority set and its ratify tier —
  *  cannot be read, so the link is refused rather than asserted over a projection that only LOOKED empty. */
-const REJECTED_CONTENDED = COMMIT_CONTENDED;
-const REJECTED_UNREADABLE = COMMIT_UNREADABLE_STORE;
+const REJECTED_CONTENDED = COMMIT_CONTENDED
+const REJECTED_UNREADABLE = COMMIT_UNREADABLE_STORE
 
 // [task #144] `unknownNode(key)` — `unknown node: ${key} not in the current projection` — USED TO LIVE HERE
 // and is deliberately GONE, not merely unreferenced. It was a distinct refusal for an absent endpoint, and
@@ -159,21 +171,21 @@ const REJECTED_UNREADABLE = COMMIT_UNREADABLE_STORE;
 /** What the governed link leg is composed over: the durable CAS store (fact read-back + persist), the admin
  *  policy (authz scopes), the actor identity, and the env-sourced ratify token — the SAME channels as emit. */
 export interface GovernedLinkDeps {
-  readonly store: DiskStore;
-  readonly policy: AtlasPolicy;
-  readonly actor: string;
+  readonly store: DiskStore
+  readonly policy: AtlasPolicy
+  readonly actor: string
   /** The ratify token authorizing a governed sameAs assertion. Env-sourced by the composition root
    *  (`ATLAS_RATIFY_TOKEN`), threaded EXACTLY like `actor` — NEVER read from a payload. ABSENT ⇒ `''` ⇒ the
    *  link fails closed (unratified). It runs the SAME KNOW-8 `ratify` law emit runs, over the JOIN of the two
    *  endpoints' tiers — so a link touching a `T0` node requires `billy` exactly as a `T0` emit does. */
-  readonly ratifyToken?: string;
+  readonly ratifyToken?: string
 }
 
 /** The stored fact behind a current node — read back from CAS by content address (the CAS bytes ARE the
  *  fact). `undefined` when the bytes are absent (pruned CAS / partial restore), which every caller treats
  *  as fail-closed: an endpoint whose governance class cannot be READ is never linked on trust. */
 function storedFact(deps: GovernedLinkDeps, node: CurrentNode): GroundedFact | undefined {
-  return deps.store.get(node.contentHash as unknown as Hash) as GroundedFact | undefined;
+  return deps.store.get(node.contentHash as unknown as Hash) as GroundedFact | undefined
 }
 
 /**
@@ -197,14 +209,14 @@ function storedFact(deps: GovernedLinkDeps, node: CurrentNode): GroundedFact | u
  * time it is EMITTED to, not the first time it is linked. Recorded, not silently relied upon.
  */
 function rowAuthorized(deps: GovernedLinkDeps, node: CurrentNode, fact: GroundedFact | undefined): boolean {
-  const authorityScope = node.scope === undefined ? fact?.scope : node.scope;
-  return isScope(authorityScope) && actorInScope(deps.policy, deps.actor, authorityScope);
+  const authorityScope = node.scope === undefined ? fact?.scope : node.scope
+  return isScope(authorityScope) && actorInScope(deps.policy, deps.actor, authorityScope)
 }
 
 /** Do a node's stored bytes CONTRADICT the governance its row advertises? Only meaningful for a CARRIED row
  *  — a carrier-less row advertises nothing to contradict, and its authority came from the bytes already. */
 function rowContradicted(node: CurrentNode, fact: GroundedFact): boolean {
-  return node.scope !== undefined && fact.scope !== node.scope;
+  return node.scope !== undefined && fact.scope !== node.scope
 }
 
 /**
@@ -215,7 +227,7 @@ function rowContradicted(node: CurrentNode, fact: GroundedFact): boolean {
  * clock/random given a pure store/policy.
  */
 export function createGovernedLink(deps: GovernedLinkDeps): {
-  readonly link: (a: string, b: string, retract?: boolean) => LinkOut;
+  readonly link: (a: string, b: string, retract?: boolean) => LinkOut
 } {
   /**
    * `retract` selects the MODE (A-D3 / task #83). ONE function, ONE gate ladder: the mode is read only at
@@ -227,7 +239,7 @@ export function createGovernedLink(deps: GovernedLinkDeps): {
    */
   const link = (a: string, b: string, retract = false): LinkOut => {
     // 1. DISTINCT — a node never names itself (and there is no self-edge to withdraw either).
-    if (a === b) return { linked: false, rejected: REJECTED_SAME };
+    if (a === b) return { linked: false, rejected: REJECTED_SAME }
 
     // ── THE ATOMIC COMMIT (stages 2 → 5) ────────────────────────────────────────────────────────────────
     // Every gate below is priced against ONE snapshot of the projection, and the edge is published against
@@ -264,17 +276,17 @@ export function createGovernedLink(deps: GovernedLinkDeps): {
       //    over nodes the caller cannot touch, at keys it can name freely. SCN-GL-14 pinned exactly this
       //    precedence for the CLASS walk and could not pin it here, because the gate physically could not run
       //    before the read it depended on. With `scope` on the row it can, so it does.
-      const nodeA = proj.current.get(a);
-      const nodeB = proj.current.get(b);
-      const factA = nodeA === undefined ? undefined : storedFact(deps, nodeA);
-      const factB = nodeB === undefined ? undefined : storedFact(deps, nodeB);
+      const nodeA = proj.current.get(a)
+      const nodeB = proj.current.get(b)
+      const factA = nodeA === undefined ? undefined : storedFact(deps, nodeA)
+      const factB = nodeB === undefined ? undefined : storedFact(deps, nodeB)
       if (
         nodeA === undefined ||
         nodeB === undefined ||
         !rowAuthorized(deps, nodeA, factA) ||
         !rowAuthorized(deps, nodeB, factB)
       ) {
-        return { out: { linked: false, rejected: REJECTED_UNAUTHORIZED } };
+        return { out: { linked: false, rejected: REJECTED_UNAUTHORIZED } }
       }
 
       // 3.25 CLASS READ-BACK — both endpoints' stored facts, the source of the tier gate below. An endpoint
@@ -284,8 +296,13 @@ export function createGovernedLink(deps: GovernedLinkDeps): {
       //     `unverifiable endpoint` stays a DISTINCT reason (SCN-GL-7) — a pruned CAS is not a policy gap an
       //     admin should try to fix by granting a scope — and it is now reached ONLY by a caller already shown
       //     to hold authority over both endpoints, so it discloses nothing it has not earned.
-      if (factA === undefined || factB === undefined || rowContradicted(nodeA, factA) || rowContradicted(nodeB, factB)) {
-        return { out: { linked: false, rejected: REJECTED_UNVERIFIABLE } };
+      if (
+        factA === undefined ||
+        factB === undefined ||
+        rowContradicted(nodeA, factA) ||
+        rowContradicted(nodeB, factB)
+      ) {
+        return { out: { linked: false, rejected: REJECTED_UNVERIFIABLE } }
       }
 
       // 3.5 THE MERGED CLASS — resolved ONCE and consumed by BOTH remaining gates.
@@ -318,16 +335,16 @@ export function createGovernedLink(deps: GovernedLinkDeps): {
       //    AUTHZ FIRST, BYTES SECOND — the same ordering as the endpoint gate above, for the same reason: a
       //    caller who cannot be shown to hold authority over every member must not be told which member's
       //    bytes are missing. The rows answer the authority question without any read at all.
-      const merged = [...new Set([...sameAsClassOf(proj, a), ...sameAsClassOf(proj, b)])];
-      const members = merged.map((key) => proj.current.get(key)).filter((m): m is CurrentNode => m !== undefined);
-      const memberFacts = members.map((m) => storedFact(deps, m));
+      const merged = [...new Set([...sameAsClassOf(proj, a), ...sameAsClassOf(proj, b)])]
+      const members = merged.map((key) => proj.current.get(key)).filter((m): m is CurrentNode => m !== undefined)
+      const memberFacts = members.map((m) => storedFact(deps, m))
       if (!members.every((m, i) => rowAuthorized(deps, m, memberFacts[i]))) {
-        return { out: { linked: false, rejected: REJECTED_UNAUTHORIZED } };
+        return { out: { linked: false, rejected: REJECTED_UNAUTHORIZED } }
       }
       if (memberFacts.some((f, i) => f === undefined || rowContradicted(members[i]!, f))) {
-        return { out: { linked: false, rejected: REJECTED_UNVERIFIABLE } };
+        return { out: { linked: false, rejected: REJECTED_UNVERIFIABLE } }
       }
-      const classFacts = memberFacts as readonly GroundedFact[];
+      const classFacts = memberFacts as readonly GroundedFact[]
 
       // 4. RATIFY (KNOW-8) — the SAME law emit runs, over the JOIN of every class this link MERGES.
       //
@@ -338,10 +355,10 @@ export function createGovernedLink(deps: GovernedLinkDeps): {
       const linkClass = classFacts.reduce<Tier>(
         (acc, f) => strictestTier(acc, f.tier),
         strictestTier(factA.tier, factB.tier),
-      );
-      const staged = stage({ tier: linkClass } as unknown as Candidate);
-      if (!ratify(staged, { by: deps.ratifyToken ?? '' }).committed) {
-        return { out: { linked: false, rejected: REJECTED_UNRATIFIED } };
+      )
+      const staged = stage({ tier: linkClass } as unknown as Candidate)
+      if (!ratify(staged, { by: deps.ratifyToken ?? "" }).committed) {
+        return { out: { linked: false, rejected: REJECTED_UNRATIFIED } }
       }
 
       // 4.5 PAIR STATE (A-D3 / task #83) — the ONLY mode-dependent gate, and it runs LAST on purpose.
@@ -358,32 +375,32 @@ export function createGovernedLink(deps: GovernedLinkDeps): {
       //     never removes the peer from `sameAs`, so WITHOUT this the door would report `linked:true` for a
       //     re-link that changed nothing and that `deriveSameAs` goes on ignoring — a write door lying about
       //     its own effect, which is worse than having no retraction at all.
-      const state = sameAsEdgeState(proj, a, b);
-      if (retract && state === 'absent') return { out: { linked: false, rejected: NOT_LINKED_REASON } };
-      if (retract && state === 'retracted') return { out: { linked: false, rejected: ALREADY_RETRACTED_REASON } };
-      if (!retract && state === 'retracted') return { out: { linked: false, rejected: RETRACTED_PAIR_REASON } };
+      const state = sameAsEdgeState(proj, a, b)
+      if (retract && state === "absent") return { out: { linked: false, rejected: NOT_LINKED_REASON } }
+      if (retract && state === "retracted") return { out: { linked: false, rejected: ALREADY_RETRACTED_REASON } }
+      if (!retract && state === "retracted") return { out: { linked: false, rejected: RETRACTED_PAIR_REASON } }
 
       // 5. APPLY — the pure symmetric reducer for this mode. The DECISION is RETURNED, not written:
       //    publishing it is the commit's job, and only if this snapshot is still the head when the generation
       //    is linked in. `unlinkSameAs` APPENDS the retraction to both rows and removes nothing, so who
       //    asserted the edge and who withdrew it both survive in the projection.
-      const next = retract ? unlinkSameAs(proj, a, b) : linkSameAs(proj, a, b);
+      const next = retract ? unlinkSameAs(proj, a, b) : linkSameAs(proj, a, b)
       // `linked` reports that the governed link act SETTLED; `retracted` names WHICH act it was. A refused
       // act of either mode is `linked:false`, which is the one discriminator the handler, the CLI exit map
       // and the MCP `isError` mapping already key off — so a retraction's refusals are fail-closed-visible on
       // every transport with no new plumbing, and a SUCCESSFUL retraction is never mis-rendered as a refusal.
-      return { out: retract ? { linked: true, a, b, retracted: true } : { linked: true, a, b }, next };
-    });
+      return { out: retract ? { linked: true, a, b, retracted: true } : { linked: true, a, b }, next }
+    })
     // 6. COMMIT — its own two refusals, visible and never silent. Identical in kind to the emit door's, and
     //    deliberately the SAME vocabulary: one protocol, one set of reason names.
-    if (committed.settled) return committed.out;
+    if (committed.settled) return committed.out
     const commitRefusal =
-      committed.refusal === 'contended'
+      committed.refusal === "contended"
         ? REJECTED_CONTENDED
-        : committed.refusal === 'untrusted'
+        : committed.refusal === "untrusted"
           ? COMMIT_UNTRUSTED
-          : REJECTED_UNREADABLE;
-    return { linked: false, rejected: commitRefusal };
-  };
-  return { link };
+          : REJECTED_UNREADABLE
+    return { linked: false, rejected: commitRefusal }
+  }
+  return { link }
 }

@@ -51,7 +51,7 @@
 //
 // Pure + total: no clock, no IO, no throw. It reads shas and compares them.
 
-import type { CurrentNode, StoreProjection } from '@atlas/knowledge';
+import type { CurrentNode, StoreProjection } from "@atlas/knowledge"
 
 /**
  * Stamp ONE generation's rows for publication — the write half.
@@ -66,21 +66,21 @@ import type { CurrentNode, StoreProjection } from '@atlas/knowledge';
  * which the reader treats conservatively and never as a flag.
  */
 export function stampGeneration(
-  next: StoreProjection['current'],
-  prev: StoreProjection['current'] | undefined,
+  next: StoreProjection["current"],
+  prev: StoreProjection["current"] | undefined,
   builtAt: string | undefined,
 ): (readonly [string, CurrentNode])[] {
-  const out: (readonly [string, CurrentNode])[] = [];
+  const out: (readonly [string, CurrentNode])[] = []
   for (const [key, row] of next) {
-    const before = prev?.get(key);
+    const before = prev?.get(key)
     // Carried forward iff the SAME key still addresses the SAME bytes. `undefined !== undefined` can never
     // fire here: `contentHash` is a required field of `CurrentNode`, so both sides are strings.
-    const carried = before !== undefined && before.contentHash === row.contentHash;
-    const stamp = carried ? (row.derivedAt ?? before.derivedAt) : builtAt;
-    const { derivedAt: _dropped, ...rest } = row;
-    out.push([key, { ...rest, ...(stamp !== undefined ? { derivedAt: stamp } : {}) }]);
+    const carried = before !== undefined && before.contentHash === row.contentHash
+    const stamp = carried ? (row.derivedAt ?? before.derivedAt) : builtAt
+    const { derivedAt: _dropped, ...rest } = row
+    out.push([key, { ...rest, ...(stamp !== undefined ? { derivedAt: stamp } : {}) }])
   }
-  return out;
+  return out
 }
 
 /**
@@ -103,7 +103,7 @@ export function rowBehindHead(
   projectionBuiltAt: string | undefined,
   head: string | undefined,
 ): boolean {
-  if (head === undefined) return false; // live HEAD unknown ⇒ nothing is provable ⇒ never a false flag
-  const stamp = typeof row.derivedAt === 'string' ? row.derivedAt : projectionBuiltAt;
-  return stamp !== undefined && stamp !== head;
+  if (head === undefined) return false // live HEAD unknown ⇒ nothing is provable ⇒ never a false flag
+  const stamp = typeof row.derivedAt === "string" ? row.derivedAt : projectionBuiltAt
+  return stamp !== undefined && stamp !== head
 }

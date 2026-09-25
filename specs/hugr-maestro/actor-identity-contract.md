@@ -31,12 +31,12 @@ free-text actor labels are not identity. User approval is separate durable conve
 
 ## Boundaries
 
-| Included here | Not decided here |
-|---|---|
-| Actor identity fields and fail-closed mapping | External account/authentication provider implementation |
-| Direct user approval versus executing member separation | GitHub review/commit/merge policy |
-| Stable provenance semantics | Atlas context-envelope shape |
-| Session/Task as provenance references | Role permission/delegation graph |
+| Included here                                           | Not decided here                                        |
+| ------------------------------------------------------- | ------------------------------------------------------- |
+| Actor identity fields and fail-closed mapping           | External account/authentication provider implementation |
+| Direct user approval versus executing member separation | GitHub review/commit/merge policy                       |
+| Stable provenance semantics                             | Atlas context-envelope shape                            |
+| Session/Task as provenance references                   | Role permission/delegation graph                        |
 
 ## Acceptance
 

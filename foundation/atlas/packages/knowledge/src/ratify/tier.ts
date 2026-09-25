@@ -14,8 +14,8 @@
 //    contract value: a closed, path-segment-matched list of security-critical territory names. It writes
 //    NOTHING to the tier — the human ratifier owns any `T0` promotion.
 
-import type { Tier } from '@atlas/contracts';
-import type { TerritoryView } from '../types.js';
+import type { Tier } from "@atlas/contracts"
+import type { TerritoryView } from "../types.js"
 
 // ── frozen TierApi surface, co-located here (was ref/tier.ts) ─────────────────────────────────────────
 
@@ -24,23 +24,19 @@ export interface TierApi {
    *  `tier='T2'` — the invariant `t0Candidate ⇒ tier=='T2'` holds over the whole keyword corpus
    *  (method-tags-knw:64). A `T0` tier is human-ratified only (never mechanical). Pure + total.
    *  Typed on the knowledge-local `TerritoryView` (the init.ts output shape). */
-  classify(territory: TerritoryView): { readonly t0Candidate: boolean; readonly tier: Tier };
+  classify(territory: TerritoryView): { readonly t0Candidate: boolean; readonly tier: Tier }
 }
 
 /** The closed `T0`-flag keyword corpus (heuristic — flags only, never assigns the tier). */
-export const T0_KEYWORDS: readonly string[] = [
-  'auth',
-  'payments',
-  'secrets',
-  'kms',
-  'crypto',
-  'billing',
-];
+export const T0_KEYWORDS: readonly string[] = ["auth", "payments", "secrets", "kms", "crypto", "billing"]
 
 /** True iff a path has a segment matching a `T0` keyword (e.g. `auth/`, `payments/…`). */
 export function isT0Candidate(path: string): boolean {
-  const segments = path.toLowerCase().split('/').filter((s) => s.length > 0);
-  return segments.some((seg) => T0_KEYWORDS.includes(seg));
+  const segments = path
+    .toLowerCase()
+    .split("/")
+    .filter((s) => s.length > 0)
+  return segments.some((seg) => T0_KEYWORDS.includes(seg))
 }
 
 /**
@@ -49,11 +45,11 @@ export function isT0Candidate(path: string): boolean {
  * human-ratified only (never mechanical). Pure + total.
  */
 export function classify(territory: TerritoryView): { readonly t0Candidate: boolean; readonly tier: Tier } {
-  return { t0Candidate: isT0Candidate(territory.path), tier: 'T2' };
+  return { t0Candidate: isT0Candidate(territory.path), tier: "T2" }
 }
 
 /** The frozen-`TierApi` binding (conformance handle). */
-export const classifier: TierApi = { classify };
+export const classifier: TierApi = { classify }
 
 // ── the tier LATTICE (task #84) ────────────────────────────────────────────────────────────────────────
 //
@@ -80,10 +76,10 @@ export const classifier: TierApi = { classify };
 /** Strictness rank — HIGHER binds harder. `T0` is the strictest (human+billy ratification, KNOW-8);
  *  `T2` the most permissive (fast-path auto-accept, KNOW-18). THE one numeric encoding of the lattice:
  *  every other question (membership, sort rank, downgrade, join) is derived from this table. */
-const STRICTNESS: Readonly<Record<Tier, number>> = { T2: 0, T1: 1, T0: 2 };
+const STRICTNESS: Readonly<Record<Tier, number>> = { T2: 0, T1: 1, T0: 2 }
 
 /** How many real governance classes exist — read off the one table, never re-declared. */
-const TIER_COUNT = Object.keys(STRICTNESS).length;
+const TIER_COUNT = Object.keys(STRICTNESS).length
 
 /**
  * Is `v` one of the three real governance classes? THE runtime guard for a type that has none of its own.
@@ -93,7 +89,7 @@ const TIER_COUNT = Object.keys(STRICTNESS).length;
  * `toString`/`valueOf` coercion.
  */
 export function isTier(v: unknown): v is Tier {
-  return typeof v === 'string' && Object.prototype.hasOwnProperty.call(STRICTNESS, v);
+  return typeof v === "string" && Object.prototype.hasOwnProperty.call(STRICTNESS, v)
 }
 
 /**
@@ -105,7 +101,7 @@ export function isTier(v: unknown): v is Tier {
  * stays total and a poisoned row sinks instead of scrambling the order around it.
  */
 export function tierRank(v: unknown): number {
-  return isTier(v) ? TIER_COUNT - 1 - STRICTNESS[v] : TIER_COUNT;
+  return isTier(v) ? TIER_COUNT - 1 - STRICTNESS[v] : TIER_COUNT
 }
 
 /**
@@ -117,8 +113,8 @@ export function tierRank(v: unknown): number {
  * cannot be read is never written).
  */
 export function isWeakerTier(declared: unknown, incumbent: unknown): boolean {
-  if (!isTier(declared) || !isTier(incumbent)) return true; // off-lattice either side ⇒ refuse
-  return STRICTNESS[declared] < STRICTNESS[incumbent];
+  if (!isTier(declared) || !isTier(incumbent)) return true // off-lattice either side ⇒ refuse
+  return STRICTNESS[declared] < STRICTNESS[incumbent]
 }
 
 /**
@@ -128,6 +124,6 @@ export function isWeakerTier(declared: unknown, incumbent: unknown): boolean {
  * DILUTE the join and make a governed act cheaper to sign.
  */
 export function strictestTier(a: unknown, b: unknown): Tier {
-  if (!isTier(a) || !isTier(b)) return 'T0';
-  return isWeakerTier(a, b) ? b : a;
+  if (!isTier(a) || !isTier(b)) return "T0"
+  return isWeakerTier(a, b) ? b : a
 }

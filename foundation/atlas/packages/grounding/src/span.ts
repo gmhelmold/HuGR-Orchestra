@@ -33,8 +33,8 @@
 // detect a span rewritten in the store to point somewhere else in the same bytes. That limit is measured and
 // recorded in the amendment's REQ (`docs/requirements/req-grd.md#REQ-GROUND-1f`), not implied away here.
 
-import type { Encoder } from '@atlas/kernel';
-import type { GroundingSpan } from './types.js';
+import type { Encoder } from "@atlas/kernel"
+import type { GroundingSpan } from "./types.js"
 
 /**
  * The span carrier's two verbs, bound to an injected `Encoder` (GROUND-10). Both pure + total: no clock, no
@@ -45,24 +45,24 @@ export interface SpanApi {
    *  in — it is never accepted from a caller — so a span can only be minted by something that actually
    *  holds the evidence. Refuses (`undefined`) a range that is not a non-empty, integral, in-bounds byte
    *  range, or whose boundaries split a UTF-8 code point (a slice nobody can decode is not a citation). */
-  mintSpan(bytes: Uint8Array, start: number, end: number): GroundingSpan | undefined;
+  mintSpan(bytes: Uint8Array, start: number, end: number): GroundingSpan | undefined
 
   /** Re-derive the cited slice from `bytes`. Returns the slice ONLY if `bytes` hash to `span.contentHash`
    *  and the range still fits; otherwise `undefined` — these are not the bytes that were cited, so no
    *  slice of them is the citation. Never throws. */
-  readSpan(span: GroundingSpan, bytes: Uint8Array): Uint8Array | undefined;
+  readSpan(span: GroundingSpan, bytes: Uint8Array): Uint8Array | undefined
 }
 
 /** A UTF-8 continuation byte (`10xxxxxx`) — the interior of a multi-byte code point. A span boundary that
  *  lands on one would slice a character in half and decode to U+FFFD, so it is refused at mint. */
 function splitsCodePoint(bytes: Uint8Array, at: number): boolean {
-  return at < bytes.length && ((bytes[at] as number) & 0xc0) === 0x80;
+  return at < bytes.length && ((bytes[at] as number) & 0xc0) === 0x80
 }
 
 /** A non-negative safe integer — the only offsets the canonical preimage can even carry (floats are a
  *  canonical-form violation, canonical.ts) and the only ones that index bytes. */
 function isOffset(n: number): boolean {
-  return Number.isSafeInteger(n) && n >= 0;
+  return Number.isSafeInteger(n) && n >= 0
 }
 
 /**
@@ -72,18 +72,18 @@ function isOffset(n: number): boolean {
  */
 export function bindSpan(encoder: Encoder): SpanApi {
   const mintSpan = (bytes: Uint8Array, start: number, end: number): GroundingSpan | undefined => {
-    if (!isOffset(start) || !isOffset(end)) return undefined;
-    if (start >= end || end > bytes.length) return undefined; // empty / inverted / out-of-bounds
-    if (splitsCodePoint(bytes, start) || splitsCodePoint(bytes, end)) return undefined;
-    return { contentHash: encoder.hash(bytes), start, end };
-  };
+    if (!isOffset(start) || !isOffset(end)) return undefined
+    if (start >= end || end > bytes.length) return undefined // empty / inverted / out-of-bounds
+    if (splitsCodePoint(bytes, start) || splitsCodePoint(bytes, end)) return undefined
+    return { contentHash: encoder.hash(bytes), start, end }
+  }
 
   const readSpan = (span: GroundingSpan, bytes: Uint8Array): Uint8Array | undefined => {
-    if (encoder.hash(bytes) !== span.contentHash) return undefined; // not the bytes that were cited
-    if (!isOffset(span.start) || !isOffset(span.end)) return undefined;
-    if (span.start >= span.end || span.end > bytes.length) return undefined;
-    return bytes.slice(span.start, span.end);
-  };
+    if (encoder.hash(bytes) !== span.contentHash) return undefined // not the bytes that were cited
+    if (!isOffset(span.start) || !isOffset(span.end)) return undefined
+    if (span.start >= span.end || span.end > bytes.length) return undefined
+    return bytes.slice(span.start, span.end)
+  }
 
-  return { mintSpan, readSpan };
+  return { mintSpan, readSpan }
 }

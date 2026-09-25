@@ -22,8 +22,8 @@
   joined only the two endpoints of a transitive relation. What is written below is the design that survived
   that, not the one that was proposed. The rejected version is described in §"What the review broke", because
   an ADR that quietly presents its remediated form as its original judgement is a false record.
-- **Discharges:** the deferral recorded in `governed-link.ts` (*"the T0→billy tier gate emit runs is
-  deferred — sameAs is non-destructive"*).
+- **Discharges:** the deferral recorded in `governed-link.ts` (_"the T0→billy tier gate emit runs is
+  deferred — sameAs is non-destructive"_).
 
 ## Context
 
@@ -40,7 +40,7 @@ two different things, and the author controlled the second one. That is the whol
 
 1. billy ratifies a `T0` fact at some anchor. The node now requires the `billy` token to write.
 2. An actor emits a fact at the **same anchor and slot** — same minted `nodeKey` — but declares `tier: 'T2'`
-   and no `check`. `route` sees *grounded ∧ lowRisk ∧ T2 ∧ advisory ∧ ¬contested* and returns `auto-accept`.
+   and no `check`. `route` sees _grounded ∧ lowRisk ∧ T2 ∧ advisory ∧ ¬contested_ and returns `auto-accept`.
    **No token is consulted at all.**
 3. `upsert` finds the `nodeKey` present, family advisory, and routes `UPDATE` — set-unioning the new claim
    into the billy-ratified node.
@@ -49,13 +49,13 @@ The same shape holds in the authorization dimension: `actorInScope(policy, actor
 scope **the write declares**, so an actor declares a scope they happen to own and writes a node that lives
 in someone else's.
 
-This is not a novel defect; it is a *confused deputy*, and the literature name for the specific instance is
-**capability gating is not authorization** — deciding *which gate applies* is a different question from
-deciding *whether this call, with these argument values, may touch this resource*. The object-capability
+This is not a novel defect; it is a _confused deputy_, and the literature name for the specific instance is
+**capability gating is not authorization** — deciding _which gate applies_ is a different question from
+deciding _whether this call, with these argument values, may touch this resource_. The object-capability
 answer (Miller; KeyKOS/EROS/Capsicum) is the one adopted here: **authority is derived from the resource, not
 asserted by the request.**
 
-Note what was already right, and why it was not enough: WP-F3 had established that the *routing identity* is
+Note what was already right, and why it was not enough: WP-F3 had established that the _routing identity_ is
 minted from content and never trusted from the payload (`SCN-GE-6` / `SCN-GE-7`). That closed identity
 spoofing. It did not close this, because here the attacker does not spoof the identity — they let the real
 identity collide, and lie about the **class** instead.
@@ -90,7 +90,7 @@ content-addressed read-back the link door already used for its authz gate). Two 
 the target rather than of the write:
 
 - **Authority** — is the actor in the scope the node ALREADY LIVES IN? Gate 2 asked only about the scope the
-  write *declares*, which the attacker picks. Failing this is `unauthorized for target`. This is membership,
+  write _declares_, which the attacker picks. Failing this is `unauthorized for target`. This is membership,
   **not** name equality: equality was tried first and was wrong in both directions — it carved out
   scope-less nodes (every `mine`-written row, capturable by any actor), and it made an admin RENAMING a scope
   brick every existing node permanently, for everyone including `billy`.
@@ -101,18 +101,18 @@ the target rather than of the write:
 on the write's own claim, which is exactly the hole.
 
 > **Amended (F1, task #84 follow-up) — `atlas-emit` no longer reports this as a DISTINCT reason.** A separate
-> `unverifiable target` string, returned *before* the authority check, let an actor authorized only in
+> `unverifiable target` string, returned _before_ the authority check, let an actor authorized only in
 > `public` distinguish a healthy `core` node from one whose CAS bytes had been pruned, at an identity anyone
 > can pre-compute from public code structure — a storage-health oracle over another scope's nodes, and a
 > direct contradiction of this ADR's own increasing-disclosure ordering. Reordering does not fix it: with the
-> bytes gone there is no scope left to check, so no caller can be *shown* to have authority and any distinct
+> bytes gone there is no scope left to check, so no caller can be _shown_ to have authority and any distinct
 > string IS the oracle. The two are now ONE gate returning `unauthorized for target`, whose text names both
 > causes. `atlas-link` keeps its distinct `unverifiable endpoint` (different door, different disclosure
 > profile — see SCN-GL-7); this amendment is about `atlas-emit` only.
 
 **4. `atlas-link` runs the same KNOW-8 law, over the JOIN of every class the link MERGES.** A link touching a
 `T0` node is a `T0` act and needs `billy`. `sameAs` being non-destructive was the reason the tier gate was
-deferred here, but *non-destructive* is not *ungoverned*: the edge is symmetric and the read-side union-find
+deferred here, but _non-destructive_ is not _ungoverned_: the edge is symmetric and the read-side union-find
 fold walks it, so the weaker endpoint was a side door onto the stronger one.
 
 The join is over the merged **equivalence class**, not the two endpoints. `deriveSameAs` is transitive, so
@@ -128,7 +128,7 @@ test now exists and fast-check shrinks the counterexample to a single asymmetric
 ### Why refuse a downgrade rather than merely gate it on the stricter class
 
 Gating the downgrade on the stricter class would also close the bypass — the write would demand `billy`, and
-`billy` might sign it. But then the *stored* fact is the `T2` one, and the node's class has been lowered as a
+`billy` might sign it. But then the _stored_ fact is the `T2` one, and the node's class has been lowered as a
 side effect of emitting a claim, which is not what the signer was asked to approve. Since a pack bounds `T2`
 OUT (TOOLS-6), that quietly erases the invariant from every read as effectively as deleting it.
 
@@ -145,14 +145,14 @@ governance off the target" could only be implemented as **read the target's CAS 
 substitution is where the rest of the damage came from:
 
 1. The authority question became **contingent on storage health.** When the bytes were pruned there was no
-   scope to check, so no caller could be *shown* to have authority — and a caller with none could tell the
+   scope to check, so no caller could be _shown_ to have authority — and a caller with none could tell the
    two states apart by which refusal came back. That is the storage-health oracle the F1 amendment above
-   describes, and the amendment's own reasoning ("reordering does not fix it") is correct *given the missing
-   carrier* and only given it.
+   describes, and the amendment's own reasoning ("reordering does not fix it") is correct _given the missing
+   carrier_ and only given it.
 2. The F1 repair — merge both causes into one `unauthorized for target` — closed the leak and **overshot**.
    The incumbent's OWN AUTHOR then received an authorization error for a pruned disk, which sends an admin to
    grant a scope in order to fix storage, and erases the `SCN-GL-7` distinction this codebase makes
-   deliberately at the other door. A cold test built specifically to forbid *that* remedy caught it: its two
+   deliberately at the other door. A cold test built specifically to forbid _that_ remedy caught it: its two
    legs are in tension on purpose, the equality leg forbidding the oracle and the inequality leg forbidding
    the over-broad fix. Seven of its eight assertions passed against the shipped branch; the eighth did not.
 
@@ -167,7 +167,7 @@ row, before reading a single byte**. The two refusals then split on AUTHORITY ra
   property keys coerce, so an unvalidated stored scope would read as a legitimate one exactly as it would
   have on the way in.
 
-**Corroboration.** The row may decide *who is heard*; it may not be the last word on *what the node is*. The
+**Corroboration.** The row may decide _who is heard_; it may not be the last word on _what the node is_. The
 projection sidecar is unauthenticated mutable state, while CAS bytes are content-addressed and re-hashed on
 read. So after authority is established the bytes must AGREE with the row (`stored.scope === row.scope`, and
 the tier gate takes `strictestTier(row, stored)`, so a disagreeing row can only ever make the gate harder).
@@ -185,6 +185,7 @@ executing the identity formula in a clean worktree at the pre-change commit and 
 because the suite is otherwise blind to a hash change (every assertion recomputes both sides).
 
 ## What this deliberately does not do
+
 - **It does not implement re-classification.** Lowering a node's tier, or moving it between scopes, has no
   door. This is a stated gap, not a hidden one: the refusal message names re-classification as a separate
   governed act. Nothing in the product needs it yet.
@@ -223,7 +224,7 @@ Recorded because the first draft's own §Decision asserted things a cold review 
   MCP surfaces via the existing rejection channel (WP-F2F5).
 - `atlas-link` gains `unverifiable endpoint`, and its `unratified` reason now names the `billy` condition.
   Previously an unreadable fact degraded to an absent scope and was reported merely `unauthorized` — which
-  reads as a policy problem an admin would try to fix by *granting a scope*.
+  reads as a policy problem an admin would try to fix by _granting a scope_.
 - **A pre-existing node emitted at `T2` can still be raised to `T0` by anyone holding `billy`.** That is
   intended: strictness ratchets up freely, because raising a class cannot be an attack.
 - **`atlas-emit` regains `unverifiable target` as a distinct reason** — reachable only by a caller already
@@ -231,13 +232,13 @@ Recorded because the first draft's own §Decision asserted things a cold review 
 - **A carrier-less row falls back to its CAS bytes for authority, and is UPGRADED by the next successful
   governed write.** This is a REVERSAL, recorded as one.
 
-  *What was implemented first, and why it was wrong.* The carrier WP shipped the strict reading of "authority
+  _What was implemented first, and why it was wrong._ The carrier WP shipped the strict reading of "authority
   unconfirmable": a row with no `scope` authorizes nobody, so the door fails closed. That is correct
   fail-closed reasoning and it is still a BRICK — every row written before the carrier became permanently
   unwritable through the emit door and unlinkable through the link door, with the migration door (task #88)
   not built. The implementing seat measured the brick and escalated it rather than shipping it quietly.
 
-  *The lead reversed it,* on three grounds. (1) A permanently unwritable row is the failure this codebase has
+  _The lead reversed it,_ on three grounds. (1) A permanently unwritable row is the failure this codebase has
   twice declared unacceptable and twice fixed — the scope-rename brick and the relocation brick — and trading
   an availability catastrophe for a diagnostic improvement is the wrong trade even when it fails closed.
   (2) The objection that a fallback lets an attacker bypass the carrier by DELETING the field does not
@@ -249,15 +250,15 @@ Recorded because the first draft's own §Decision asserted things a cold review 
   unreadable bytes leave authority unestablished ⇒ `unauthorized for target` — the same string an
   out-of-scope caller gets when the bytes ARE readable. One string in both byte-states.
 
-  *Scoped narrowly, and the narrowness is load-bearing.* ONLY a row with no `scope` property at all takes the
+  _Scoped narrowly, and the narrowness is load-bearing._ ONLY a row with no `scope` property at all takes the
   fallback. A row that HAS one is judged on it: malformed ⇒ refused, byte-contradicting ⇒ `unverifiable
-  target`. Collapsing either into "absent" would make the bypass reachable by writing junk rather than by
+target`. Collapsing either into "absent" would make the bypass reachable by writing junk rather than by
   deleting, which is strictly easier. `strictestTier(row, stored)` still governs the class wherever BOTH
   exist, so a forged row can only ever make the gate harder; where the row carries no class the authenticated
   bytes stand alone, because joining `undefined` through the lattice fails closed to `T0` and would re-brick
   precisely the rows the fallback exists to keep writable.
 
-  *The legacy path DRAINS.* `upsert` stamps the carrier from the governed door, so the first successful write
+  _The legacy path DRAINS._ `upsert` stamps the carrier from the governed door, so the first successful write
   to a carrier-less node makes it carried — migration by use, no new door, no task-#88 dependency. The link
   door does NOT drain it (`linkSameAs` adds only the peer), so a node becomes carried the first time it is
   emitted to, not the first time it is linked. Recorded rather than relied upon.
@@ -269,7 +270,7 @@ Recorded because the first draft's own §Decision asserted things a cold review 
   until a review followed it and found nothing) — `SCN-GE-I1` (tier), `SCN-GE-I2`
   (scope), `SCN-GE-I5` (unreadable incumbent). All three failed on `master` before the guard existed.
 - `SCN-GE-I3` / `SCN-GE-I4` are the anti-over-blocking controls: re-emitting at the same class still
-  set-unions, and raising strictness is allowed. Both passed *before* the fix and still pass — so the guard
+  set-unions, and raising strictness is allowed. Both passed _before_ the fix and still pass — so the guard
   is not simply denying more.
 - `packages/adapter-io/test/governed-link.test.ts` is new. The second governed write door had **no unit
   test at all** — only an end-to-end happy-path story, which cannot plant a gate-level mutant.
@@ -286,8 +287,8 @@ Recorded because the first draft's own §Decision asserted things a cold review 
     leg → `SCN-GL-9b`; `sameAsClassOf`'s dangling-peer inclusion → `SCN-SA-2` / `SCN-SA-4` /
     `PROP-SAMEAS-1`; its reverse-direction `touches` half → `SCN-SA-3`; one-sided `REJECTED_UNVERIFIABLE`
     → `SCN-GL-10` / `SCN-GL-11`.
-  Each of the four above was mutation-verified by its author AND re-verified independently by the lead;
-  the two the lead re-ran personally are `SCN-TIER-4` and the `sameAsClassOf` dangling-peer leg.
+    Each of the four above was mutation-verified by its author AND re-verified independently by the lead;
+    the two the lead re-ran personally are `SCN-TIER-4` and the `sameAsClassOf` dangling-peer leg.
 - Two independent cold-review seats returned **REJECT** and **FIX-FIRST** on the first draft. Every finding
   they reproduced is either fixed above or recorded as an open task (#87, #88).
 - **Carrier WP.** `packages/adapter-io/test/door-regression-reject-disclosure.test.ts` is the cold test that
@@ -304,7 +305,7 @@ Recorded because the first draft's own §Decision asserted things a cold review 
 - **Reversal WP.** `CARRIER-2` (a carrier-less row is WRITABLE by its owner and UPGRADED by that write),
   `CARRIER-6` (the fallback cannot grant where the bytes do not; byte-identical for a stranger in both
   storage states), `CARRIER-7` (a row that HAS a scope never takes the fallback — mismatched ⇒ `unverifiable
-  target`, malformed ⇒ `unauthorized for target`), `CARRIER-8` (the link door's twin). Six mutants, each
+target`, malformed ⇒ `unauthorized for target`), `CARRIER-8` (the link door's twin). Six mutants, each
   killed: fallback grants blindly → `CARRIER-6`; malformed collapses into absent → `CARRIER-7`; "try the row,
   else try the bytes" → `CARRIER-7`; `unverifiable` collapsed into `unauthorized` → the held test +
   `CARRIER-2`/`-7`; disclosure-first ordering → the held test + `CARRIER-4`/`-6`; link door reads bytes

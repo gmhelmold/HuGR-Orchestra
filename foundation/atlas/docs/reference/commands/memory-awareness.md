@@ -36,10 +36,10 @@ honest absence `rollup` (`@atlas/memory`) renders, never a fabricated value.
 
 ## Exit codes
 
-| code | meaning |
-| --- | --- |
-| `0` | the slab was assembled (an UN-SEEDED facet is a legitimate answer, not an error) |
-| `1` | an uncomposed runtime — the composition root failed to stand up, never a throw |
+| code | meaning                                                                          |
+| ---- | -------------------------------------------------------------------------------- |
+| `0`  | the slab was assembled (an UN-SEEDED facet is a legitimate answer, not an error) |
+| `1`  | an uncomposed runtime — the composition root failed to stand up, never a throw   |
 
 There is no `2` (rejected) outcome: this door opens no governed token and persists nothing.
 

@@ -2,27 +2,27 @@
 
 - **Status:** **Accepted (2026-08-03) — IMPLEMENTED IN CODE AND IN THE REQUIREMENT LAYER; THE INVARIANT
   TEXT THIS ADR CLAIMS TO AMEND IS STILL UNAMENDED.** Read the `Amends` bullet below against this, because
-  the loop it describes closes on nothing: `req-tls.md:89-95` defers amending `INV-TOOLS-6` to *"ADR-0013's
-  own declared surface"*, this ADR names `INV-TOOLS-6` as a surface it amends, and
-  `reference/atlas-tools.md:53` still reads *"return a `≤ ~2K` pack of `tier≥T1` invariants"* as a statement
+  the loop it describes closes on nothing: `req-tls.md:89-95` defers amending `INV-TOOLS-6` to _"ADR-0013's
+  own declared surface"_, this ADR names `INV-TOOLS-6` as a surface it amends, and
+  `reference/atlas-tools.md:53` still reads _"return a `≤ ~2K` pack of `tier≥T1` invariants"_ as a statement
   about the whole pack. `reference/atlas-retrieval.md:139` is the same for `RETR-12`. Both are recorded as
   live divergences in the requirement layer, so they are declared rather than hidden — and they are open.
   **A third one is not merely a document:** `packages/tools/src/handler.ts:143`, the `atlas-query` MCP tool
-  `description` that every client shows a calling agent, still promises *"the merged covering pack of
-  `tier>=T1` invariants"* while the tool returns the advisory band too. The sibling `invariant` string
+  `description` that every client shows a calling agent, still promises _"the merged covering pack of
+  `tier>=T1` invariants"_ while the tool returns the advisory band too. The sibling `invariant` string
   (`:77`) was corrected; this one was not. Tracked separately; it is a product defect, not a doc lag, and it
-  contradicts clause 3 of this ADR at the first place a reader looks. The owner ratified the *substance* on 2026-08-03
+  contradicts clause 3 of this ADR at the first place a reader looks. The owner ratified the _substance_ on 2026-08-03
   ("advisory facts enter the pack, marked as advisory and kept separate from the governing ones"). This ADR
   was first recorded **BLOCKED — deliberately not implemented**, because measurement showed the amendment
   could not be landed honestly without a **second** amendment to a **separately ratified** decision
   (`REQ-TOOLS-6d` / ADR-0002) and a change to the **frozen `Pack` contract** — see §"Why this ADR ships
   without its code", which is that measurement. Both preconditions were then met and the decision shipped:
 
-  | ADR-0013 clause | landed by |
-  | --- | --- |
-  | `REQ-TOOLS-6d` amended · ADR-0002 amended · `PackInvariant.freshness` added | `2cbc5cc` (#107) |
-  | clauses 1–4 (two bands) on `atlas-query`, advisory cap `2000` | `2cbc5cc` (#107) |
-  | clause 5 (every row carries its own freshness verdict) | `2cbc5cc` (#107) |
+  | ADR-0013 clause                                                                  | landed by        |
+  | -------------------------------------------------------------------------------- | ---------------- |
+  | `REQ-TOOLS-6d` amended · ADR-0002 amended · `PackInvariant.freshness` added      | `2cbc5cc` (#107) |
+  | clauses 1–4 (two bands) on `atlas-query`, advisory cap `2000`                    | `2cbc5cc` (#107) |
+  | clause 5 (every row carries its own freshness verdict)                           | `2cbc5cc` (#107) |
   | extended to `atlas own` via `REQ-RETR-12m`, `OWN_ADVISORY_CAP = OWN_CAP/2 = 750` | `0befe4c` (#112) |
 
   **Everything below this header block is the record as written on 2026-08-03 and is deliberately
@@ -30,6 +30,7 @@
   (`d079b0f`), not the tree that shipped the amendment; the two commits above moved several of the exact
   lines it cites. Retrofitting the body to look prescient would destroy the only thing that makes the
   measurement worth keeping.
+
 - **Spec author:** lead, grounded against `origin/master` `d079b0f` and measured on the built binary against
   the real 199-fact projection mined from Atlas at `8ada771b`.
 - **Amends (ratified surfaces):** `INV-TOOLS-6`, `REQ-TOOLS-6b`, and the `TOOLS-6` guidance string the CLI
@@ -52,7 +53,7 @@ Every one is invisible to `atlas query`, because the pack bound is stated as a f
 > invariants; `stale:true` MUST mean re-ground before trusting (§6.1)."
 
 `REQ-TOOLS-6b` (`docs/requirements/req-tls.md:84`) restates it as the normative clause
-*"return a `≤ ~2K` pack of `tier≥T1` invariants"*, and `packages/tools/src/handler.ts:74` prints it to the
+_"return a `≤ ~2K` pack of `tier≥T1` invariants"_, and `packages/tools/src/handler.ts:74` prints it to the
 user on **every** invocation:
 
 > `invariant: TOOLS-6: bounded read projection (tier>=T1)`
@@ -133,7 +134,7 @@ becomes the boundary between two separately bounded, separately rendered bands.
 
 - **`REQ-TOOLS-6a` (scope resolution)** — untouched. The amendment changes what a covering territory yields,
   never how a scope resolves to one.
-- **`REQ-TOOLS-6c` (`stale` means re-ground)** — untouched, and deliberately *not* weakened. Clause 5 adds a
+- **`REQ-TOOLS-6c` (`stale` means re-ground)** — untouched, and deliberately _not_ weakened. Clause 5 adds a
   per-row obligation on top of it; it does not relax the pack-level one.
 - **`RETR-2` / `RETR-7` (the bounded fill, the cap-table)** — untouched. The advisory band reuses `capFor`
   and the cap-wins rule rather than introducing a second bounding discipline. There is no new rank: the
@@ -151,7 +152,7 @@ Clause 5 is not decoration. It is what separates this amendment from making the 
 clause the measurement killed.
 
 **Today's silence has one virtue: it is silent.** Admitting 199 machine-proposed claims into a surface that
-*has* a freshness field, under a flag that cannot say which of them rotted, is worse than not admitting them.
+_has_ a freshness field, under a flag that cannot say which of them rotted, is worse than not admitting them.
 
 ### What was measured
 
@@ -159,11 +160,11 @@ The graph was mined at `8ada771b`. Labelled set: `git diff --name-only 8ada771b 
 of the 199 facts as anchored at a file that changed, and **182** as anchored at a file that did not. Three
 tree states, all through the built binary or the built (`dist/`) modules — never `src/`:
 
-| tree state | pack-level `stale` (shipped) | per-fact `driftDetect` (shipped, uncalled on this path) |
-| --- | --- | --- |
-| **A** — tree at the mine sha | `false` (0/199 flagged) | 0 flagged — correct, nothing has changed |
-| **B** — tree at `origin/master` | `true` (**199/199** flagged: TP 17, **FP 182**) | **TP 17, FP 0, TN 182, FN 0** |
-| **C** — one commit touching only `README.md` | `true` (**199/199** flagged, **FP 182**) | **0 flagged** — correct |
+| tree state                                   | pack-level `stale` (shipped)                    | per-fact `driftDetect` (shipped, uncalled on this path) |
+| -------------------------------------------- | ----------------------------------------------- | ------------------------------------------------------- |
+| **A** — tree at the mine sha                 | `false` (0/199 flagged)                         | 0 flagged — correct, nothing has changed                |
+| **B** — tree at `origin/master`              | `true` (**199/199** flagged: TP 17, **FP 182**) | **TP 17, FP 0, TN 182, FN 0**                           |
+| **C** — one commit touching only `README.md` | `true` (**199/199** flagged, **FP 182**)        | **0 flagged** — correct                                 |
 
 Scenario C is the crux. One commit, to a file no fact is anchored at, flips the only freshness signal the
 pack has to `true` for all 199 rows. A signal that fires on every commit anywhere in the repository trains
@@ -179,12 +180,12 @@ This is not a bug. **ADR-0002 ratified it in as many words** (`docs/adr/ADR-0002
 
 1. **`packages/contracts/src/pack.ts:32`** — `PackInvariant { nodeId, tier, claim }`. There is **no per-row
    freshness field in the frozen `Pack` contract**, and `Pack.stale` (line 25) is one boolean for the whole
-   pack. Per-row freshness has nowhere to be reported. ADR-0002:52 deferred exactly this as *"a `Pack`
-   contract change for a later consumer."* This ADR is that consumer.
-2. **`packages/adapter-io/src/projection-query-index.ts:82-86`** — both legs *are* evaluated per row and are
+   pack. Per-row freshness has nowhere to be reported. ADR-0002:52 deferred exactly this as _"a `Pack`
+   contract change for a later consumer."_ This ADR is that consumer.
+2. **`packages/adapter-io/src/projection-query-index.ts:82-86`** — both legs _are_ evaluated per row and are
    then OR-folded into one pack-scoped boolean. The per-row verdict is computed and immediately discarded.
    The leg is **tier-blind**: it already runs over `T2` rows today, which is why scenario B prints
-   `stale: true` over an *empty* pack — the flag is about rows the pack does not show.
+   `stale: true` over an _empty_ pack — the flag is about rows the pack does not show.
 3. **`packages/adapter-io/src/freshness-watermark.ts:107`** — `rowBehindHead` compares the row's `derivedAt`
    to live HEAD. Measured: **199/199 rows carry the same `derivedAt`** (`8ada771b`), because one genesis run
    published them all. For a mined graph the "per-row" stamp is a constant, so the comparison is a
@@ -198,7 +199,7 @@ This is not a bug. **ADR-0002 ratified it in as many words** (`docs/adr/ADR-0002
 `driftDetect(fact.grounding, axes)` (`packages/grounding/src/drift.ts:99`) is the existing GROUND-1 per-fact
 oracle. It is **the same function the write door already uses** (`compose.ts:99-105` `buildGate(axes)`), over
 the **same `axes` the composition root already builds once per process**. It is not a second freshness
-concept — it is *the* freshness concept, simply never called on the read path. Measured over all 199 facts:
+concept — it is _the_ freshness concept, simply never called on the read path. Measured over all 199 facts:
 **17/17 true positives, 0 false positives, 43-109 ms, no git I/O.**
 
 It cannot be wired, because `REQ-TOOLS-6d` (`docs/requirements/req-tls.md:94`) says:
@@ -206,7 +207,7 @@ It cannot be wired, because `REQ-TOOLS-6d` (`docs/requirements/req-tls.md:94`) s
 > "`atlas-query` shall NOT re-derive per-fact drift on the read path (the live oracle stays
 > `atlas-reconcile`/`atlas-doctor`)."
 
-That is a separately ratified requirement, and ADR-0002's rejected alternative is stated against a *git*
+That is a separately ratified requirement, and ADR-0002's rejected alternative is stated against a _git_
 re-derivation ("puts a git-worktree checkout ... on **every** query"), a cost `driftDetect`-against-built-axes
 does not have. The rejection may well have been aimed at a cost this design avoids. **Deciding that is an
 amendment to ADR-0002, not a reading of it**, and it belongs to the owner rather than to the seat that

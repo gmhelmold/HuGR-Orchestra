@@ -14,36 +14,36 @@
 // every call (never inherited) so a failure stays diagnosable via the thrown error and git's benign progress
 // never leaks to the parent's stderr (fleet-wide the F7 anti-chatter property). No clock, no random.
 
-import { execFileSync } from 'node:child_process';
+import { execFileSync } from "node:child_process"
 
 /** Options for one git invocation. `input` (when set) is piped to stdin (e.g. `notes add -F -`); otherwise
  *  stdin is closed. */
 export interface RunGitOptions {
-  readonly input?: string;
+  readonly input?: string
 }
 
 /** The one git seam — `execFileSync`, NO shell (args are never shell-interpolated). stdin is closed (or
  *  `input`-piped); stdout+stderr are CAPTURED. On a non-zero exit `execFileSync` THROWS, the thrown error
  *  carrying the captured `.stderr` — a real failure is classifiable + diagnosable, never silently swallowed. */
 export function runGit(repo: string, args: readonly string[], opts: RunGitOptions = {}): string {
-  const hasInput = opts.input !== undefined;
-  return execFileSync('git', args as string[], {
+  const hasInput = opts.input !== undefined
+  return execFileSync("git", args as string[], {
     cwd: repo,
-    encoding: 'utf8',
-    stdio: [hasInput ? 'pipe' : 'ignore', 'pipe', 'pipe'],
+    encoding: "utf8",
+    stdio: [hasInput ? "pipe" : "ignore", "pipe", "pipe"],
     ...(hasInput ? { input: opts.input } : {}),
-  });
+  })
 }
 
 /** Read a caught git error's diagnostic text — `execFileSync` attaches the captured `.stderr` (and a generic
  *  `.message`) to the thrown Error. Total: any shape collapses to a string, never a throw. Classification-only
  *  (never enters any computed value, so it stays OFF the KERNEL identity path). */
 export function gitErrText(err: unknown): string {
-  if (err !== null && typeof err === 'object') {
-    const e = err as { stderr?: unknown; message?: unknown };
-    return [e.stderr, e.message].map((p) => (p == null ? '' : String(p))).join('\n');
+  if (err !== null && typeof err === "object") {
+    const e = err as { stderr?: unknown; message?: unknown }
+    return [e.stderr, e.message].map((p) => (p == null ? "" : String(p))).join("\n")
   }
-  return String(err);
+  return String(err)
 }
 
 /** DETERMINISTIC git-failure signatures — a genuine bad rev / non-git dir / absent path fails IDENTICALLY on
@@ -51,24 +51,24 @@ export function gitErrText(err: unknown): string {
  *  and bad-path shapes); the result is unchanged for every caller (a deterministic failure was always going to
  *  fail-closed — this only reaches that verdict without the retry delay). */
 const DETERMINISTIC_RE =
-  /invalid reference|unknown revision|not a valid object|bad revision|not a git repository|does not exist|no such|ambiguous argument|unknown option/i;
+  /invalid reference|unknown revision|not a valid object|bad revision|not a git repository|does not exist|no such|ambiguous argument|unknown option/i
 
 /** Classify a caught git error as DETERMINISTIC (no point retrying) vs transient/unclassified. The git binary
  *  being absent surfaces as `ENOENT` on the error object — also deterministic. Total: never throws. */
 export function isDeterministicGitError(err: unknown): boolean {
-  if (err !== null && typeof err === 'object' && (err as { code?: unknown }).code === 'ENOENT') return true;
-  return DETERMINISTIC_RE.test(gitErrText(err));
+  if (err !== null && typeof err === "object" && (err as { code?: unknown }).code === "ENOENT") return true
+  return DETERMINISTIC_RE.test(gitErrText(err))
 }
 
 /** The fixed escalating inter-attempt schedule (ms) — values are NOT read from a clock. */
-export const GIT_BACKOFF_MS = [5, 10, 20] as const;
+export const GIT_BACKOFF_MS = [5, 10, 20] as const
 /** Bounded attempt cap for the retrying reader (1 initial + 3 retries). */
-export const GIT_MAX_ATTEMPTS = 4;
+export const GIT_MAX_ATTEMPTS = 4
 
 /** Clock-FREE synchronous inter-attempt yield — `Atomics.wait` blocks the thread on a never-signaled
  *  `SharedArrayBuffer` word, so NO wall-clock value (`Date.now`/`Math.random`) enters any computation. */
 export function gitYieldMs(ms: number): void {
-  Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, ms);
+  Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, ms)
 }
 
 // NOTE (#74 scope, deliberate): no generic `runGitRetrying` wrapper is shipped — rev-index is the ONLY
@@ -84,9 +84,9 @@ export function gitYieldMs(ms: number): void {
  *  query can honestly ask "has HEAD advanced past the projection?" without paying the oracle's cost. */
 export function headSha(repo: string): string | undefined {
   try {
-    const s = runGit(repo, ['rev-parse', 'HEAD']).trim();
-    return s.length > 0 ? s : undefined;
+    const s = runGit(repo, ["rev-parse", "HEAD"]).trim()
+    return s.length > 0 ? s : undefined
   } catch {
-    return undefined;
+    return undefined
   }
 }

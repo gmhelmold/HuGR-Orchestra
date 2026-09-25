@@ -10,75 +10,75 @@
 // keyed on less than its real inputs). TEETH: revert the memo (call the un-memoized body directly) and the
 // "no second call" assertions go red — see the comment beside each `expect` for which line it pins.
 
-import { describe, it, expect, afterEach, vi } from 'vitest';
-import { createHistorySource } from '../src/git-history.js';
-import { makeGitSbx, type GitSbx } from './harness/git-sbx.js';
+import { describe, it, expect, afterEach, vi } from "vitest"
+import { createHistorySource } from "../src/git-history.js"
+import { makeGitSbx, type GitSbx } from "./harness/git-sbx.js"
 
-vi.mock('../src/run-git.js', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('../src/run-git.js')>();
-  return { ...actual, runGit: vi.fn(actual.runGit) };
-});
+vi.mock("../src/run-git.js", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("../src/run-git.js")>()
+  return { ...actual, runGit: vi.fn(actual.runGit) }
+})
 
-describe('git-history memo (CACHE-HISTORY-SOURCE)', () => {
-  let sbx: GitSbx | undefined;
+describe("git-history memo (CACHE-HISTORY-SOURCE)", () => {
+  let sbx: GitSbx | undefined
   afterEach(() => {
-    sbx?.cleanup();
-    sbx = undefined;
-    vi.clearAllMocks();
-  });
+    sbx?.cleanup()
+    sbx = undefined
+    vi.clearAllMocks()
+  })
 
   const blameCalls = (mockCalls: unknown[][]): unknown[][] =>
-    mockCalls.filter((c) => Array.isArray(c[1]) && (c[1] as string[]).includes('blame'));
+    mockCalls.filter((c) => Array.isArray(c[1]) && (c[1] as string[]).includes("blame"))
 
-  it('blameConcentration — a second call at the SAME (repo, rev) shells zero more `git blame`', async () => {
-    sbx = makeGitSbx();
-    const { repoPath, r0 } = sbx;
-    const { runGit } = await import('../src/run-git.js');
-    const spy = vi.mocked(runGit);
+  it("blameConcentration — a second call at the SAME (repo, rev) shells zero more `git blame`", async () => {
+    sbx = makeGitSbx()
+    const { repoPath, r0 } = sbx
+    const { runGit } = await import("../src/run-git.js")
+    const spy = vi.mocked(runGit)
 
-    const hist = createHistorySource(repoPath, r0);
-    const first = hist.blameConcentration(repoPath, r0);
-    const callsAfterFirst = blameCalls(spy.mock.calls as unknown[][]).length;
-    expect(callsAfterFirst).toBeGreaterThan(0); // sanity: the fixture has tracked files to blame at all
+    const hist = createHistorySource(repoPath, r0)
+    const first = hist.blameConcentration(repoPath, r0)
+    const callsAfterFirst = blameCalls(spy.mock.calls as unknown[][]).length
+    expect(callsAfterFirst).toBeGreaterThan(0) // sanity: the fixture has tracked files to blame at all
 
-    const second = hist.blameConcentration(repoPath, r0);
-    const callsAfterSecond = blameCalls(spy.mock.calls as unknown[][]).length;
+    const second = hist.blameConcentration(repoPath, r0)
+    const callsAfterSecond = blameCalls(spy.mock.calls as unknown[][]).length
 
-    expect(second).toBe(first); // same answer
+    expect(second).toBe(first) // same answer
     // TEETH: without the memo, this doubles (one `git blame` per tracked file, per call).
-    expect(callsAfterSecond).toBe(callsAfterFirst);
-  });
+    expect(callsAfterSecond).toBe(callsAfterFirst)
+  })
 
-  it('commitCount / frontier / signals — a repeated call at the SAME args shells zero more git', async () => {
-    sbx = makeGitSbx();
-    const { repoPath, r0 } = sbx;
-    const { runGit } = await import('../src/run-git.js');
-    const spy = vi.mocked(runGit);
+  it("commitCount / frontier / signals — a repeated call at the SAME args shells zero more git", async () => {
+    sbx = makeGitSbx()
+    const { repoPath, r0 } = sbx
+    const { runGit } = await import("../src/run-git.js")
+    const spy = vi.mocked(runGit)
 
-    const hist = createHistorySource(repoPath, r0);
-    hist.commitCount(repoPath, r0);
-    hist.frontier(repoPath, r0);
-    hist.signals({ kind: 'file', qualifiedPath: 'src/util.ts', subtreeHash: '' as never });
-    const after1 = spy.mock.calls.length;
+    const hist = createHistorySource(repoPath, r0)
+    hist.commitCount(repoPath, r0)
+    hist.frontier(repoPath, r0)
+    hist.signals({ kind: "file", qualifiedPath: "src/util.ts", subtreeHash: "" as never })
+    const after1 = spy.mock.calls.length
 
-    hist.commitCount(repoPath, r0);
-    hist.frontier(repoPath, r0);
-    hist.signals({ kind: 'file', qualifiedPath: 'src/util.ts', subtreeHash: '' as never });
-    const after2 = spy.mock.calls.length;
+    hist.commitCount(repoPath, r0)
+    hist.frontier(repoPath, r0)
+    hist.signals({ kind: "file", qualifiedPath: "src/util.ts", subtreeHash: "" as never })
+    const after2 = spy.mock.calls.length
 
     // TEETH: without the memo, each of the 3 repeated calls re-shells its own git command(s).
-    expect(after2).toBe(after1);
-  });
+    expect(after2).toBe(after1)
+  })
 
-  it('a DIFFERENT rev is NOT starved by the memo — the cache key carries the real args, not just the closure', () => {
-    sbx = makeGitSbx();
-    const { repoPath, r0, mb } = sbx;
-    const hist = createHistorySource(repoPath, r0);
+  it("a DIFFERENT rev is NOT starved by the memo — the cache key carries the real args, not just the closure", () => {
+    sbx = makeGitSbx()
+    const { repoPath, r0, mb } = sbx
+    const hist = createHistorySource(repoPath, r0)
 
-    const atR0 = hist.commitCount(repoPath, r0);
-    const atMb = hist.commitCount(repoPath, mb); // an EARLIER rev — fewer commits reachable
-    expect(atMb).toBeLessThan(atR0); // proves the second call was NOT served the r0-cached answer
-  });
+    const atR0 = hist.commitCount(repoPath, r0)
+    const atMb = hist.commitCount(repoPath, mb) // an EARLIER rev — fewer commits reachable
+    expect(atMb).toBeLessThan(atR0) // proves the second call was NOT served the r0-cached answer
+  })
 
   // ── IDENTICAL OUTPUT — 3 fresh (pre-fix-shaped) instances vs 1 shared (post-fix-shaped) instance ──────
   // This is the "top-40 before == after" proof at the mechanism level: `mine-arms.ts` drives 3 independent
@@ -87,24 +87,24 @@ describe('git-history memo (CACHE-HISTORY-SOURCE)', () => {
   // so a shared instance queried 3× (the arm shape) must return byte-identical results to 3 independent
   // instances queried once each (the pre-memo shape). A ranking change here would be exactly the class of
   // regression the WP forbids ("anything that moves the ranking is a defect of this WP").
-  it('3 independent instances vs 1 shared instance queried 3× — byte-identical frontier + blameConcentration', () => {
-    sbx = makeGitSbx();
-    const { repoPath, r0 } = sbx;
+  it("3 independent instances vs 1 shared instance queried 3× — byte-identical frontier + blameConcentration", () => {
+    sbx = makeGitSbx()
+    const { repoPath, r0 } = sbx
 
     const independent = [0, 1, 2].map(() => {
-      const h = createHistorySource(repoPath, r0);
-      return { blame: h.blameConcentration(repoPath, r0), frontier: h.frontier(repoPath, r0) };
-    });
+      const h = createHistorySource(repoPath, r0)
+      return { blame: h.blameConcentration(repoPath, r0), frontier: h.frontier(repoPath, r0) }
+    })
 
-    const shared = createHistorySource(repoPath, r0);
+    const shared = createHistorySource(repoPath, r0)
     const fromShared = [0, 1, 2].map(() => ({
       blame: shared.blameConcentration(repoPath, r0),
       frontier: shared.frontier(repoPath, r0),
-    }));
+    }))
 
-    expect(fromShared).toEqual(independent);
+    expect(fromShared).toEqual(independent)
     // every arm's own value equal to the mine-arms shared-instance value (the exact comparison mine-arms.ts
     // performs 3×, once per resolved slot, over the SAME shared `deps.history`).
-    for (let i = 0; i < 3; i++) expect(fromShared[i]).toEqual(independent[i]);
-  });
-});
+    for (let i = 0; i < 3; i++) expect(fromShared[i]).toEqual(independent[i])
+  })
+})

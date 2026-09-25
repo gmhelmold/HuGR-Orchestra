@@ -43,24 +43,24 @@
 // TOTAL + READ-ONLY: an unknown fact, an absent anchor, a missing HEAD resolution ⇒ `undefined`/empty,
 // NEVER a throw and NEVER a write. Every read rides the total store/revIndex seams (both fail-closed).
 
-import type { Freshness, Hash, StructRef } from '@atlas/contracts';
-import type { GroundingEntry } from '@atlas/grounding';
-import { readdirSync, readFileSync } from 'node:fs';
-import { join } from 'node:path';
-import { asHash, id } from '@atlas/kernel';
-import type { CasObject } from '@atlas/kernel';
-import { currentNodes } from '@atlas/knowledge';
-import type { GroundedFact } from '@atlas/knowledge';
-import type { CasIntegrity, DoctorSource, DriftItem } from '@atlas/tools';
-import type { RevIndex } from './rev-index.js';
-import { rehydrateProjection } from './store.js';
-import type { DiskStore } from './store.js';
-import { refuseUntrustedRead } from './read-provenance.js';
-import type { SidecarTrust } from './store-provenance.js';
+import type { Freshness, Hash, StructRef } from "@atlas/contracts"
+import type { GroundingEntry } from "@atlas/grounding"
+import { readdirSync, readFileSync } from "node:fs"
+import { join } from "node:path"
+import { asHash, id } from "@atlas/kernel"
+import type { CasObject } from "@atlas/kernel"
+import { currentNodes } from "@atlas/knowledge"
+import type { GroundedFact } from "@atlas/knowledge"
+import type { CasIntegrity, DoctorSource, DriftItem } from "@atlas/tools"
+import type { RevIndex } from "./rev-index.js"
+import { rehydrateProjection } from "./store.js"
+import type { DiskStore } from "./store.js"
+import { refuseUntrustedRead } from "./read-provenance.js"
+import type { SidecarTrust } from "./store-provenance.js"
 
 /** The rev `drift`/`plan` diff against — the composition root pins HEAD once per process (revIndex memoizes
  *  the built `Axes` by rev), so `drift` compares the RECORDED anchor vs HEAD-at-compose-time. */
-const HEAD: Hash = asHash('HEAD');
+const HEAD: Hash = asHash("HEAD")
 
 /** The fact restricted to ONE grounding entry — the unit a per-entry drift verdict is taken on.
  *
@@ -72,17 +72,17 @@ const HEAD: Hash = asHash('HEAD');
  *  `entries.length >= 1` leg is why the equivalence is stated for a non-empty grounding; the empty case is
  *  refused before any of this runs.) Narrowed on `kind` so the discriminated union stays intact. */
 function restrictTo(fact: GroundedFact, entry: GroundingEntry): GroundedFact {
-  const grounding = { entries: [entry] };
-  return fact.kind === 'predicate' ? { ...fact, grounding } : { ...fact, grounding };
+  const grounding = { entries: [entry] }
+  return fact.kind === "predicate" ? { ...fact, grounding } : { ...fact, grounding }
 }
 
 /** One drifted citation: the recorded entry, its POSITION in the grounding, and where its CONTENT lives at
  *  the target rev (`now`; `undefined` = nowhere, or at ≥2 distinct paths, which `resolveBySubtreeAt` REFUSES
  *  rather than guesses — either way not mechanically re-groundable). */
 interface DriftedEntry {
-  readonly index: number;
-  readonly entry: GroundingEntry;
-  readonly now: StructRef | undefined;
+  readonly index: number
+  readonly entry: GroundingEntry
+  readonly now: StructRef | undefined
 }
 
 /** EVERY recorded entry that no longer re-derives at `at`, in recorded order. It spans the whole grounding
@@ -94,7 +94,7 @@ function driftedEntries(revIndex: RevIndex, fact: GroundedFact, at: Hash): reado
     revIndex.reDerives(restrictTo(fact, entry), at)
       ? []
       : [{ index, entry, now: revIndex.resolveBySubtreeAt(String(at), String(entry.anchor.subtreeHash)) }],
-  );
+  )
 }
 
 /**
@@ -117,12 +117,10 @@ function classifyDrift(
   revIndex: RevIndex,
   fact: GroundedFact,
   at: Hash,
-): { readonly class: 'mechanical' | 'semantic'; readonly keyedOn: DriftedEntry | undefined } {
-  const drifted = driftedEntries(revIndex, fact, at);
-  const rotted = drifted.find((d) => d.now === undefined);
-  return rotted !== undefined
-    ? { class: 'semantic', keyedOn: rotted }
-    : { class: 'mechanical', keyedOn: drifted[0] };
+): { readonly class: "mechanical" | "semantic"; readonly keyedOn: DriftedEntry | undefined } {
+  const drifted = driftedEntries(revIndex, fact, at)
+  const rotted = drifted.find((d) => d.now === undefined)
+  return rotted !== undefined ? { class: "semantic", keyedOn: rotted } : { class: "mechanical", keyedOn: drifted[0] }
 }
 
 /**
@@ -141,7 +139,7 @@ function classifyDrift(
  * through on a rev it could not read.
  */
 export function isMechanicalAt(revIndex: RevIndex, fact: GroundedFact, at: Hash): boolean {
-  return classifyDrift(revIndex, fact, at).class === 'mechanical';
+  return classifyDrift(revIndex, fact, at).class === "mechanical"
 }
 
 /**
@@ -160,17 +158,15 @@ export function isMechanicalAt(revIndex: RevIndex, fact: GroundedFact, at: Hash)
  * (nothing to re-ground). Narrowed on `kind` so the discriminated union stays intact.
  */
 export function regroundTemplate(fact: GroundedFact, resolved: readonly (StructRef | undefined)[]): GroundedFact {
-  const recorded = fact.grounding.entries;
-  if (recorded.length === 0) return fact;
+  const recorded = fact.grounding.entries
+  if (recorded.length === 0) return fact
   const entries = recorded.map((e, i) => {
-    const now = resolved[i];
-    return now === undefined ? e : { ...e, anchor: now };
-  });
-  const grounding = { entries };
-  const freshness: Freshness = recorded.every((_, i) => resolved[i] !== undefined) ? 'FRESH' : 'DRIFTED';
-  return fact.kind === 'predicate'
-    ? { ...fact, grounding, freshness }
-    : { ...fact, grounding, freshness };
+    const now = resolved[i]
+    return now === undefined ? e : { ...e, anchor: now }
+  })
+  const grounding = { entries }
+  const freshness: Freshness = recorded.every((_, i) => resolved[i] !== undefined) ? "FRESH" : "DRIFTED"
+  return fact.kind === "predicate" ? { ...fact, grounding, freshness } : { ...fact, grounding, freshness }
 }
 
 /**
@@ -179,9 +175,7 @@ export function regroundTemplate(fact: GroundedFact, resolved: readonly (StructR
  * re-grounded. Pure + total; the claim body is otherwise unchanged.
  */
 export function retireTemplate(fact: GroundedFact): GroundedFact {
-  return fact.kind === 'predicate'
-    ? { ...fact, authoring: 'SUPERSEDED' }
-    : { ...fact, authoring: 'SUPERSEDED' };
+  return fact.kind === "predicate" ? { ...fact, authoring: "SUPERSEDED" } : { ...fact, authoring: "SUPERSEDED" }
 }
 
 /**
@@ -210,76 +204,76 @@ export function createDoctorSource(
    *  same structured error + guidance + non-zero exit every other doctor failure renders. The absent-seam
    *  case is unaffected: `refuseUntrustedRead` is a no-op for a store built without the provenance seam. */
   const nodes = () => {
-    refuseUntrustedRead(trusted);
-    return currentNodes(rehydrateProjection(store));
-  };
+    refuseUntrustedRead(trusted)
+    return currentNodes(rehydrateProjection(store))
+  }
 
   /** Read a fact back from CAS by its content hash (invariant-6). `undefined` on any miss/tamper. */
   const factOf = (contentHash: string): GroundedFact | undefined =>
-    store.get(contentHash as Hash) as GroundedFact | undefined;
+    store.get(contentHash as Hash) as GroundedFact | undefined
 
-  const hotSetSize = (): number => nodes().length;
+  const hotSetSize = (): number => nodes().length
 
   const lineage = (scope?: string): readonly Hash[] => {
-    const chain: string[] = [];
+    const chain: string[] = []
     for (const n of nodes()) {
-      if (scope !== undefined && factOf(n.contentHash)?.scope !== scope) continue; // scope-filtered
-      chain.push(n.contentHash);
-      if (n.supersededBy !== undefined) chain.push(n.supersededBy); // the CAS supersede pointer
+      if (scope !== undefined && factOf(n.contentHash)?.scope !== scope) continue // scope-filtered
+      chain.push(n.contentHash)
+      if (n.supersededBy !== undefined) chain.push(n.supersededBy) // the CAS supersede pointer
     }
-    return [...new Set(chain)].sort() as Hash[]; // canonical (dedup + lexicographic) order
-  };
+    return [...new Set(chain)].sort() as Hash[] // canonical (dedup + lexicographic) order
+  }
 
   const drift = (fact: string): DriftItem | undefined => {
-    const node = nodes().find((n) => n.nodeKey === fact);
-    const grounded = node && factOf(node.contentHash);
-    if (!grounded) return undefined; // unknown fact / missing bytes — fail-closed
-    if (grounded.grounding.entries.length === 0) return undefined; // no citation to diff
+    const node = nodes().find((n) => n.nodeKey === fact)
+    const grounded = node && factOf(node.contentHash)
+    if (!grounded) return undefined // unknown fact / missing bytes — fail-closed
+    if (grounded.grounding.entries.length === 0) return undefined // no citation to diff
     // DETECT (unchanged, and it always spanned the WHOLE grounding): the recorded grounding still holds at
     // HEAD (every anchor re-derives FRESH) ⇒ NOT drifted. This fires on BOTH a moved anchor (a recorded
     // qualifiedPath gone at HEAD) AND a changed unit (same path, new subtreeHash) — never a self-compare of
     // the recorded hash against itself, and never a look at entry 0 alone.
-    if (revIndex.reDerives(grounded, HEAD)) return undefined;
+    if (revIndex.reDerives(grounded, HEAD)) return undefined
     // CLASSIFY through the SHARED verdict — the same call `compose.ts` gives the merge gate, so doctor's
     // advisory answer and `atlas reconcile`'s exit code can never disagree about the same fact.
-    const verdict = classifyDrift(revIndex, grounded, HEAD);
-    const keyed = verdict.keyedOn;
-    if (keyed === undefined) return undefined; // totality: a DRIFTED fact has ≥1 drifted entry
-    const anchorWas = keyed.entry.anchor;
-    if (verdict.class === 'semantic') {
+    const verdict = classifyDrift(revIndex, grounded, HEAD)
+    const keyed = verdict.keyedOn
+    if (keyed === undefined) return undefined // totality: a DRIFTED fact has ≥1 drifted entry
+    const anchorWas = keyed.entry.anchor
+    if (verdict.class === "semantic") {
       // `anchorNow` names what the ROTTED entry's recorded path holds now, or — when the path itself is gone
       // — its recorded anchor (a total, honest pointer; never a throw).
-      const anchorNow = revIndex.resolveAnchorAt(String(HEAD), anchorWas.qualifiedPath) ?? anchorWas;
-      return { fact, class: 'semantic', anchorWas, anchorNow };
+      const anchorNow = revIndex.resolveAnchorAt(String(HEAD), anchorWas.qualifiedPath) ?? anchorWas
+      return { fact, class: "semantic", anchorWas, anchorNow }
     }
     // Mechanical: every drifted citation MOVED but survives — the whole fact is re-groundable. `DriftItem`
     // carries ONE anchor pair (atlas-tools:24, frozen), so it reports the FIRST drifted entry's move; the
     // repair below is not limited to it. When only the primary drifted — the case that already worked — this
     // is byte-for-byte the item the entry-0 classifier produced.
-    if (keyed.now === undefined) return undefined; // totality: mechanical ⇒ every drifted entry resolved
-    return { fact, class: 'mechanical', anchorWas, anchorNow: keyed.now };
-  };
+    if (keyed.now === undefined) return undefined // totality: mechanical ⇒ every drifted entry resolved
+    return { fact, class: "mechanical", anchorWas, anchorNow: keyed.now }
+  }
 
-  const plan = (fact: string): { readonly action: 'reground' | 'retire'; readonly emit: GroundedFact } | undefined => {
-    const item = drift(fact);
-    if (item === undefined) return undefined; // only a drifted fact carries a plan
-    const node = nodes().find((n) => n.nodeKey === fact);
-    const grounded = node && factOf(node.contentHash);
-    if (!grounded) return undefined; // totality guard (drift implies present, but never assume)
-    if (item.class !== 'mechanical') return { action: 'retire', emit: retireTemplate(grounded) };
+  const plan = (fact: string): { readonly action: "reground" | "retire"; readonly emit: GroundedFact } | undefined => {
+    const item = drift(fact)
+    if (item === undefined) return undefined // only a drifted fact carries a plan
+    const node = nodes().find((n) => n.nodeKey === fact)
+    const grounded = node && factOf(node.contentHash)
+    if (!grounded) return undefined // totality guard (drift implies present, but never assume)
+    if (item.class !== "mechanical") return { action: "retire", emit: retireTemplate(grounded) }
     // REPAIR spans the same entries CLASSIFICATION did. Position by position: a drifted entry is established
     // at the HEAD location its content re-derived to; an entry that did NOT drift is already established at
     // its recorded anchor (that is what "did not drift" means), so it is passed through unchanged. The
     // classifier only reaches here when every drifted entry resolved, so the template's FRESH stamp is
     // EARNED — the emitted fact re-derives at HEAD end to end, and `regroundTemplate` would stamp DRIFTED if
     // it did not.
-    const drifted = driftedEntries(revIndex, grounded, HEAD);
+    const drifted = driftedEntries(revIndex, grounded, HEAD)
     const resolved = grounded.grounding.entries.map((e, i) => {
-      const d = drifted.find((x) => x.index === i);
-      return d === undefined ? e.anchor : d.now; // a drifted-and-unresolved entry stays `undefined` ⇒ PARTIAL
-    });
-    return { action: 'reground', emit: regroundTemplate(grounded, resolved) };
-  };
+      const d = drifted.find((x) => x.index === i)
+      return d === undefined ? e.anchor : d.now // a drifted-and-unresolved entry stays `undefined` ⇒ PARTIAL
+    })
+    return { action: "reground", emit: regroundTemplate(grounded, resolved) }
+  }
 
   /**
    * ADR-0022 — the CAS integrity audit. Re-derives every object's address from its own bytes and compares
@@ -306,50 +300,60 @@ export function createDoctorSource(
    */
   const casAudit = (): CasIntegrity => {
     const empty: CasIntegrity = {
-      objects: 0, corrupt: [], unreadable: [], missing: [], orphan: 0, referenced: 0, sound: true,
-    };
-    refuseUntrustedRead(trusted); // the SAME guard every other leg funnels through — see the header above
-    if (casPath === undefined) return empty;
+      objects: 0,
+      corrupt: [],
+      unreadable: [],
+      missing: [],
+      orphan: 0,
+      referenced: 0,
+      sound: true,
+    }
+    refuseUntrustedRead(trusted) // the SAME guard every other leg funnels through — see the header above
+    if (casPath === undefined) return empty
 
     // The bytes actually on disk, at `<cas>/<xx>/<h>`. A shard that cannot be listed contributes nothing
     // rather than aborting the walk — a single unreadable directory must not blind the audit to the rest.
-    const present = new Set<string>();
-    const corrupt: string[] = [];
-    const unreadable: string[] = [];
-    let shards: string[];
+    const present = new Set<string>()
+    const corrupt: string[] = []
+    const unreadable: string[] = []
+    let shards: string[]
     try {
-      shards = readdirSync(casPath, { withFileTypes: true }).filter((e) => e.isDirectory()).map((e) => e.name);
+      shards = readdirSync(casPath, { withFileTypes: true })
+        .filter((e) => e.isDirectory())
+        .map((e) => e.name)
     } catch {
-      shards = [];
+      shards = []
     }
     for (const shard of shards) {
-      let files: string[];
+      let files: string[]
       try {
-        files = readdirSync(join(casPath, shard), { withFileTypes: true }).filter((e) => e.isFile()).map((e) => e.name);
+        files = readdirSync(join(casPath, shard), { withFileTypes: true })
+          .filter((e) => e.isFile())
+          .map((e) => e.name)
       } catch {
-        continue;
+        continue
       }
       for (const name of files) {
-        present.add(name);
-        let parsed: unknown;
+        present.add(name)
+        let parsed: unknown
         try {
-          parsed = JSON.parse(readFileSync(join(casPath, shard, name), 'utf8'));
+          parsed = JSON.parse(readFileSync(join(casPath, shard, name), "utf8"))
         } catch {
-          unreadable.push(name);
-          continue;
+          unreadable.push(name)
+          continue
         }
         // THE CHECK. `id()` is the same sealed canonicalize-then-hash seam `store.put` addressed the object
         // with, so a mismatch means the bytes changed after they were filed — the one thing a content-
         // addressed store promises cannot happen silently. `id` can throw on a value it cannot canonicalize;
         // that is `unreadable`, not `corrupt`, because nothing was proven about the address either way.
-        let addr: string;
+        let addr: string
         try {
-          addr = id(parsed as CasObject);
+          addr = id(parsed as CasObject)
         } catch {
-          unreadable.push(name);
-          continue;
+          unreadable.push(name)
+          continue
         }
-        if (addr !== name) corrupt.push(name);
+        if (addr !== name) corrupt.push(name)
       }
     }
 
@@ -363,14 +367,14 @@ export function createDoctorSource(
     // `orphan`. It can never make `sound` false — `orphan` is excluded from `sound` — so the limit costs a
     // count's precision and cannot manufacture a fault. Stated here rather than left for a reader to
     // discover from a surprising number.
-    const referenced = new Set<string>(store.loadProjection()?.cas ?? []);
+    const referenced = new Set<string>(store.loadProjection()?.cas ?? [])
 
-    const missing = [...referenced].filter((h) => !present.has(h)).sort();
-    let orphan = 0;
-    for (const h of present) if (!referenced.has(h)) orphan += 1;
+    const missing = [...referenced].filter((h) => !present.has(h)).sort()
+    let orphan = 0
+    for (const h of present) if (!referenced.has(h)) orphan += 1
 
-    corrupt.sort();
-    unreadable.sort();
+    corrupt.sort()
+    unreadable.sort()
     return {
       objects: present.size,
       corrupt: corrupt as readonly string[] as readonly Hash[],
@@ -379,8 +383,8 @@ export function createDoctorSource(
       orphan,
       referenced: referenced.size,
       sound: corrupt.length === 0 && unreadable.length === 0 && missing.length === 0,
-    };
-  };
+    }
+  }
 
-  return { hotSetSize, lineage, drift, plan, casAudit };
+  return { hotSetSize, lineage, drift, plan, casAudit }
 }

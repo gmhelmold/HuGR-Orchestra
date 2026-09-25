@@ -42,10 +42,10 @@
 //   (4) THE BOUNDS ARE ARITHMETIC on the declaration, and the measured carry never exceeds them.
 
 /** Body base classes, as regex class bodies. A family picks one and may add at most one extra character. */
-const ALNUM = 'A-Za-z0-9';
-const UPPER = '0-9A-Z';
+const ALNUM = "A-Za-z0-9"
+const UPPER = "0-9A-Z"
 
-export type BodyBase = 'alnum' | 'upper';
+export type BodyBase = "alnum" | "upper"
 
 /**
  * One credential FAMILY — the whole declaration. Everything on `CredentialShape` is derived from it.
@@ -56,20 +56,20 @@ export type BodyBase = 'alnum' | 'upper';
  * prefixes of an opaque regex source.
  */
 export interface CredentialFamily {
-  readonly name: string;
+  readonly name: string
   /** The opening prefix, one character-SET per position. */
-  readonly prefix: readonly string[];
+  readonly prefix: readonly string[]
   /** Which base class the body is drawn from. Default `alnum`. */
-  readonly bodyBase?: BodyBase;
+  readonly bodyBase?: BodyBase
   /** Characters this family's body admits BEYOND its base class — at most one. */
-  readonly bodyExtra: string;
+  readonly bodyExtra: string
   /** The minimum number of BODY characters after the prefix. */
-  readonly floor: number;
+  readonly floor: number
   /** The maximum number of BODY characters, for a FIXED-LENGTH family. `undefined` = unbounded (`{n,}`).
    *  A bounded family must stop absorbing at its ceiling or the streaming path and the whole-buffer path
    *  disagree: `AKIAIOSFODNN7EXAMPLEX` scrubbed to `[REDACTED]X` whole-buffer and `[REDACTED]` chunked,
    *  because the seam kept absorbing the trailing `X` that the shape has no room for. */
-  readonly ceiling?: number;
+  readonly ceiling?: number
 }
 
 /**
@@ -81,9 +81,9 @@ export const FAMILIES: readonly CredentialFamily[] = [
   {
     // GitHub token: ghp_ / gho_ / ghu_ / ghs_ / ghr_ + >= 6 token characters. Single-segment; `_` is the
     // prefix separator and is NOT a body character, so `ghp_ABCDEF_prod` keeps `_prod`.
-    name: 'github-token',
-    prefix: ['g', 'h', 'pousr', '_'],
-    bodyExtra: '',
+    name: "github-token",
+    prefix: ["g", "h", "pousr", "_"],
+    bodyExtra: "",
     floor: 6,
   },
   {
@@ -96,9 +96,9 @@ export const FAMILIES: readonly CredentialFamily[] = [
     // is that hyphen-joined NON-secret text immediately following a Slack token is absorbed into the
     // redaction: `xoxb-A1B2C3-not-part-of-token` redacts whole. It is bounded by the first non-body byte
     // (space, quote, newline, `=`, `.`), and can only ever trigger AFTER a literal `xox[baprs]-`.
-    name: 'slack-token',
-    prefix: ['x', 'o', 'x', 'baprs', '-'],
-    bodyExtra: '-',
+    name: "slack-token",
+    prefix: ["x", "o", "x", "baprs", "-"],
+    bodyExtra: "-",
     floor: 6,
   },
   {
@@ -119,9 +119,9 @@ export const FAMILIES: readonly CredentialFamily[] = [
     //
     // floor 22 is the FIRST segment's length, so `github_pat_` + a short fragment is not a credential and is
     // not redacted (`github_pat_ABCDEFGH` passes through). A real token clears it many times over.
-    name: 'github-pat',
-    prefix: ['g', 'i', 't', 'h', 'u', 'b', '_', 'p', 'a', 't', '_'],
-    bodyExtra: '_',
+    name: "github-pat",
+    prefix: ["g", "i", "t", "h", "u", "b", "_", "p", "a", "t", "_"],
+    bodyExtra: "_",
     floor: 22,
   },
   {
@@ -132,18 +132,18 @@ export const FAMILIES: readonly CredentialFamily[] = [
     //
     // Only the ACCESS KEY ID. The AWS SECRET access key has no distinctive prefix and is NOT declared —
     // see the bottom of this file.
-    name: 'aws-access-key-id',
-    prefix: ['A', 'K', 'I', 'A'],
-    bodyBase: 'upper',
-    bodyExtra: '',
+    name: "aws-access-key-id",
+    prefix: ["A", "K", "I", "A"],
+    bodyBase: "upper",
+    bodyExtra: "",
     floor: 16,
     ceiling: 16,
   },
-];
+]
 
 /** The redaction placeholder written in place of a matched secret. Declared here because gate (2) — every
  *  family's shortest match is at least this long — is a property of the DECLARATION, not of the writer. */
-export const REDACTION = '[REDACTED]';
+export const REDACTION = "[REDACTED]"
 
 /**
  * A credential SHAPE, described completely enough to be recognised ACROSS a chunk boundary. `full` alone is
@@ -152,73 +152,74 @@ export const REDACTION = '[REDACTED]';
  */
 export interface CredentialShape {
   /** The family this shape was derived from (diagnostics; never matched against). */
-  readonly name: string;
+  readonly name: string
   /** STICKY (`y`); matches a complete credential starting exactly at `lastIndex`. The leftmost scan's atom. */
-  readonly at: RegExp;
+  readonly at: RegExp
   /** g-flagged; the same source, for whole-buffer diagnostics and for tests. */
-  readonly full: RegExp;
+  readonly full: RegExp
   /** Anchored; matches a STRICT prefix — not a credential yet, but more bytes could make it one. */
-  readonly partial: RegExp;
+  readonly partial: RegExp
   /** How many characters the opening prefix occupies. */
-  readonly prefixLen: number;
+  readonly prefixLen: number
   /** Minimum / maximum body characters (`ceiling: undefined` = unbounded). */
-  readonly floor: number;
-  readonly ceiling: number | undefined;
+  readonly floor: number
+  readonly ceiling: number | undefined
   /** A body character of this family that appears in NO family prefix, so a canonicalised body can be
    *  padded with it without inventing a prefix. `''` if none exists — see gate (3). */
-  readonly filler: string;
+  readonly filler: string
   /** The shortest string `full` can match. */
-  readonly minFull: number;
+  readonly minFull: number
   /** The longest string `partial` can match. */
-  readonly maxPartial: number;
+  readonly maxPartial: number
   /** The longest a match of this shape can be once the seam has canonicalised it. */
-  readonly maxCanon: number;
+  readonly maxCanon: number
 }
 
 // ── derivation ──────────────────────────────────────────────────────────────────────────────────────
 
-const baseOf = (f: CredentialFamily): string => (f.bodyBase === 'upper' ? UPPER : ALNUM);
+const baseOf = (f: CredentialFamily): string => (f.bodyBase === "upper" ? UPPER : ALNUM)
 
 function inBase(f: CredentialFamily, c: string): boolean {
-  const n = c.charCodeAt(0);
-  const digit = n >= 48 && n <= 57;
-  const upper = n >= 65 && n <= 90;
-  const lower = n >= 97 && n <= 122;
-  return f.bodyBase === 'upper' ? digit || upper : digit || upper || lower;
+  const n = c.charCodeAt(0)
+  const digit = n >= 48 && n <= 57
+  const upper = n >= 65 && n <= 90
+  const lower = n >= 97 && n <= 122
+  return f.bodyBase === "upper" ? digit || upper : digit || upper || lower
 }
 
 /** Is `c` a BODY character of `f`? The single definition; the regex class below is built from it. */
 export function inBody(f: CredentialFamily, c: string): boolean {
-  return c !== '' && (inBase(f, c) || f.bodyExtra.includes(c));
+  return c !== "" && (inBase(f, c) || f.bodyExtra.includes(c))
 }
 
 /** One prefix POSITION as regex source. Every declared character is `[A-Za-z0-9_-]` (asserted by test), all
  *  of which are literal outside a character class and safe last-position inside one — no escaping needed. */
 function atom(set: string): string {
-  return set.length === 1 ? set : `[${set}]`;
+  return set.length === 1 ? set : `[${set}]`
 }
 
-const prefixSrc = (f: CredentialFamily): string => f.prefix.map(atom).join('');
-const bodyClass = (f: CredentialFamily): string => `[${baseOf(f)}${f.bodyExtra}]`;
-const quantifier = (f: CredentialFamily): string => (f.ceiling === undefined ? `{${f.floor},}` : `{${f.floor},${f.ceiling}}`);
+const prefixSrc = (f: CredentialFamily): string => f.prefix.map(atom).join("")
+const bodyClass = (f: CredentialFamily): string => `[${baseOf(f)}${f.bodyExtra}]`
+const quantifier = (f: CredentialFamily): string =>
+  f.ceiling === undefined ? `{${f.floor},}` : `{${f.floor},${f.ceiling}}`
 
 /** The union of every declared family prefix — what a body character may NOT open. */
-export const ANY_FAMILY_PREFIX = `(?:${FAMILIES.map(prefixSrc).join('|')})`;
+export const ANY_FAMILY_PREFIX = `(?:${FAMILIES.map(prefixSrc).join("|")})`
 
 /** A body character of `f` that does not open ANY family's prefix. The one lookahead that stops a credential
  *  from swallowing the credential written immediately after it, whatever family that one belongs to. */
-const bodyAtom = (f: CredentialFamily): string => `(?:(?!${ANY_FAMILY_PREFIX})${bodyClass(f)})`;
+const bodyAtom = (f: CredentialFamily): string => `(?:(?!${ANY_FAMILY_PREFIX})${bodyClass(f)})`
 
 /** Every character that appears anywhere in any family prefix — the set a canonicalisation filler must avoid. */
-const PREFIX_CHARS = new Set<string>(FAMILIES.flatMap((f) => f.prefix.flatMap((set) => [...set])));
+const PREFIX_CHARS = new Set<string>(FAMILIES.flatMap((f) => f.prefix.flatMap((set) => [...set])))
 
 /** The first body character of `f` that appears in no family prefix. `'0'` for every family declared today
  *  (no prefix contains a digit), which is what makes canonicalising an absorbed body safe. */
 function fillerFor(f: CredentialFamily): string {
-  for (const c of '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz') {
-    if (inBody(f, c) && !PREFIX_CHARS.has(c)) return c;
+  for (const c of "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz") {
+    if (inBody(f, c) && !PREFIX_CHARS.has(c)) return c
   }
-  return '';
+  return ""
 }
 
 /** Derive the full shape from a family declaration. Every bound is arithmetic on the declaration:
@@ -231,16 +232,16 @@ function fillerFor(f: CredentialFamily): string {
  *                                                      still be sitting at its end
  */
 export function shapeOf(f: CredentialFamily): CredentialShape {
-  const p = prefixSrc(f);
-  const own: string[] = [];
-  for (let k = 1; k < f.prefix.length; k++) own.push(f.prefix.slice(0, k).map(atom).join(''));
-  const src = `${p}${bodyAtom(f)}${quantifier(f)}`;
-  const minFull = f.prefix.length + f.floor;
+  const p = prefixSrc(f)
+  const own: string[] = []
+  for (let k = 1; k < f.prefix.length; k++) own.push(f.prefix.slice(0, k).map(atom).join(""))
+  const src = `${p}${bodyAtom(f)}${quantifier(f)}`
+  const minFull = f.prefix.length + f.floor
   return {
     name: f.name,
-    at: new RegExp(src, 'y'),
-    full: new RegExp(src, 'g'),
-    partial: new RegExp(`^(?:${own.join('|')}|${p}${bodyClass(f)}{0,${f.floor - 1}})$`),
+    at: new RegExp(src, "y"),
+    full: new RegExp(src, "g"),
+    partial: new RegExp(`^(?:${own.join("|")}|${p}${bodyClass(f)}{0,${f.floor - 1}})$`),
     prefixLen: f.prefix.length,
     floor: f.floor,
     ceiling: f.ceiling,
@@ -248,21 +249,21 @@ export function shapeOf(f: CredentialFamily): CredentialShape {
     minFull,
     maxPartial: minFull - 1,
     maxCanon: f.ceiling === undefined ? minFull + AMBIGUOUS_TAIL : f.prefix.length + f.ceiling,
-  };
+  }
 }
 
 /** The longest run that can be a STRICT prefix of some family prefix. Nothing longer can sit ambiguously at
  *  the end of a stream: a COMPLETE family prefix inside a match body is blocked by the union lookahead, so
  *  the only prefix bytes a body can hold are the ones still short of one. */
-export const AMBIGUOUS_TAIL = Math.max(...FAMILIES.map((f) => f.prefix.length)) - 1;
+export const AMBIGUOUS_TAIL = Math.max(...FAMILIES.map((f) => f.prefix.length)) - 1
 
-export const SHAPES: readonly CredentialShape[] = FAMILIES.map(shapeOf);
+export const SHAPES: readonly CredentialShape[] = FAMILIES.map(shapeOf)
 
 /** The widest window in which a not-yet-complete candidate can begin. */
-export const MAX_PARTIAL = Math.max(...SHAPES.map((s) => s.maxPartial));
+export const MAX_PARTIAL = Math.max(...SHAPES.map((s) => s.maxPartial))
 
 /** The longest a single canonicalised match can be. */
-export const MAX_CANON_MATCH = Math.max(...SHAPES.map((s) => s.maxCanon));
+export const MAX_CANON_MATCH = Math.max(...SHAPES.map((s) => s.maxCanon))
 
 /**
  * The hard ceiling on undecided bytes the seam may hold at a chunk boundary, and on the trailing emitted
@@ -276,7 +277,7 @@ export const MAX_CANON_MATCH = Math.max(...SHAPES.map((s) => s.maxCanon));
  * The emitted side cannot exceed the raw side because every family's shortest match is at least as long as
  * the placeholder it is replaced by (gate 2), so redaction never lengthens.
  */
-export const MAX_SEAM_CARRY = MAX_CANON_MATCH + MAX_PARTIAL - 1;
+export const MAX_SEAM_CARRY = MAX_CANON_MATCH + MAX_PARTIAL - 1
 
 /**
  * Fast dispatch for the leftmost scan: for each character code, WHICH shapes can open there (empty for the
@@ -284,12 +285,12 @@ export const MAX_SEAM_CARRY = MAX_CANON_MATCH + MAX_PARTIAL - 1;
  * regex attempt per byte per family, and an `x` never pays for the three families that cannot start with it.
  */
 export const SHAPES_BY_OPENER: readonly (readonly CredentialShape[])[] = (() => {
-  const t: CredentialShape[][] = Array.from({ length: 256 }, () => []);
+  const t: CredentialShape[][] = Array.from({ length: 256 }, () => [])
   SHAPES.forEach((shape, i) => {
-    for (const c of FAMILIES[i]!.prefix[0] as string) (t[c.charCodeAt(0) & 0xff] as CredentialShape[]).push(shape);
-  });
-  return t;
-})();
+    for (const c of FAMILIES[i]!.prefix[0] as string) (t[c.charCodeAt(0) & 0xff] as CredentialShape[]).push(shape)
+  })
+  return t
+})()
 
 // ── DELIBERATELY NOT DECLARED (each was measured; each breaks something specific) ────────────────────
 //

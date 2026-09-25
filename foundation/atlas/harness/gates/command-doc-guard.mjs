@@ -64,36 +64,36 @@
 //
 // Run: `node harness/gates/command-doc-guard.mjs` (no build needed — it reads source only).
 
-import { existsSync, readFileSync, readdirSync } from 'node:fs';
-import { join, dirname, sep } from 'node:path';
-import { fileURLToPath } from 'node:url';
-import ts from 'typescript';
+import { existsSync, readFileSync, readdirSync } from "node:fs"
+import { join, dirname, sep } from "node:path"
+import { fileURLToPath } from "node:url"
+import ts from "typescript"
 
-const ROOT = process.env.COMMAND_DOC_GUARD_ROOT ?? join(dirname(fileURLToPath(import.meta.url)), '..', '..');
+const ROOT = process.env.COMMAND_DOC_GUARD_ROOT ?? join(dirname(fileURLToPath(import.meta.url)), "..", "..")
 
 /** The oracle. Its PATH is the one thing this gate hardcodes — moving the file must fail loudly, not silently. */
-const MAP_REL = join('packages', 'cli', 'src', 'map.ts');
+const MAP_REL = join("packages", "cli", "src", "map.ts")
 /** One page per command lives here. Its PATH is a convention this gate defines; nothing else reads it. */
-const DOCS_REL = join('docs', 'reference', 'commands');
+const DOCS_REL = join("docs", "reference", "commands")
 /** The front door. Its command table is the first surface description a stranger reads. */
-const README_REL = 'README.md';
+const README_REL = "README.md"
 
-const MAP = join(ROOT, MAP_REL);
-const DOCS = join(ROOT, DOCS_REL);
-const README = join(ROOT, README_REL);
+const MAP = join(ROOT, MAP_REL)
+const DOCS = join(ROOT, DOCS_REL)
+const README = join(ROOT, README_REL)
 
 /** The delimiters of the checked region in the README. Explicit, so the gate's scope cannot drift with the prose. */
-const TABLE_BEGIN = '<!-- command-table:begin -->';
-const TABLE_END = '<!-- command-table:end -->';
+const TABLE_BEGIN = "<!-- command-table:begin -->"
+const TABLE_END = "<!-- command-table:end -->"
 
 /** The delimiters of the transport-parity region — same discipline, second region. */
-const PARITY_BEGIN = '<!-- transport-parity:begin -->';
-const PARITY_END = '<!-- transport-parity:end -->';
+const PARITY_BEGIN = "<!-- transport-parity:begin -->"
+const PARITY_END = "<!-- transport-parity:end -->"
 
 /** The second oracle: the two advertised MCP surface arrays. Its PATH is hardcoded for the same reason
  *  `MAP_REL` is — a moved file must fail loudly rather than quietly stop being checked. */
-const HANDLER_REL = join('packages', 'tools', 'src', 'handler.ts');
-const HANDLER = join(ROOT, HANDLER_REL);
+const HANDLER_REL = join("packages", "tools", "src", "handler.ts")
+const HANDLER = join(ROOT, HANDLER_REL)
 
 /**
  * The THIRD oracle, and the reason it exists is a defect this gate had on the day it was written.
@@ -116,16 +116,16 @@ const HANDLER = join(ROOT, HANDLER_REL);
  * the eighteen names `tools/list` returned. `packages/mcp-server/test/surface-conformance-req-mcp-1e.test.ts`
  * is the leg that proves advertisement itself; this one proves the DOCS match the declaration.
  */
-const MCP_SRC_REL = join('packages', 'mcp-server', 'src');
-const MCP_SRC = join(ROOT, MCP_SRC_REL);
+const MCP_SRC_REL = join("packages", "mcp-server", "src")
+const MCP_SRC = join(ROOT, MCP_SRC_REL)
 
 /** A tool token is `atlas-<command>`; the command it exposes is the token minus that prefix. This is the
  *  ONLY correspondence rule between the two oracles, and it is checked rather than assumed: a token whose
  *  stripped name is not a shipped command is a named failure below, not a silently dropped row. */
-const TOOL_PREFIX = 'atlas-';
+const TOOL_PREFIX = "atlas-"
 
 /** The exported identifier that enumerates the shipped surface. */
-const ORACLE = 'COMMANDS';
+const ORACLE = "COMMANDS"
 
 /**
  * Extract the string members of the exported `COMMANDS` array from map.ts SOURCE.
@@ -134,7 +134,7 @@ const ORACLE = 'COMMANDS';
  * returns an empty `names` and it never returns both — a caller cannot mistake "broke" for "nothing to do".
  */
 function extractCommands(text) {
-  return extractStringArray(text, MAP_REL, ORACLE);
+  return extractStringArray(text, MAP_REL, ORACLE)
 }
 
 /**
@@ -143,37 +143,46 @@ function extractCommands(text) {
  * on purpose: three copies of a fail-closed reader is three chances for one of them to quietly return `[]`.
  */
 function extractStringArray(text, relPath, ORACLE, { allowEmpty = false } = {}) {
-  const sf = ts.createSourceFile(relPath, text, ts.ScriptTarget.Latest, /* setParentNodes */ false, ts.ScriptKind.TS);
+  const sf = ts.createSourceFile(relPath, text, ts.ScriptTarget.Latest, /* setParentNodes */ false, ts.ScriptKind.TS)
 
-  let init;
+  let init
   for (const stmt of sf.statements) {
-    if (!ts.isVariableStatement(stmt)) continue;
+    if (!ts.isVariableStatement(stmt)) continue
     for (const d of stmt.declarationList.declarations) {
-      if (ts.isIdentifier(d.name) && d.name.text === ORACLE) init = d.initializer;
+      if (ts.isIdentifier(d.name) && d.name.text === ORACLE) init = d.initializer
     }
   }
   if (init === undefined) {
-    return { broken: `no \`${ORACLE}\` variable declaration found in ${relPath}. The oracle was renamed, moved, or deleted.` };
+    return {
+      broken: `no \`${ORACLE}\` variable declaration found in ${relPath}. The oracle was renamed, moved, or deleted.`,
+    }
   }
 
   // `COMMANDS = [...] as const` / `satisfies …` — unwrap the assertions the declaration is written with.
-  while (ts.isAsExpression(init) || ts.isSatisfiesExpression(init) || ts.isParenthesizedExpression(init)) init = init.expression;
+  while (ts.isAsExpression(init) || ts.isSatisfiesExpression(init) || ts.isParenthesizedExpression(init))
+    init = init.expression
 
   if (!ts.isArrayLiteralExpression(init)) {
-    return { broken: `\`${ORACLE}\` in ${relPath} is no longer initialised with an ARRAY LITERAL (found ${ts.SyntaxKind[init.kind]}). This gate can only enumerate a literal surface — a computed one cannot be checked statically.` };
+    return {
+      broken: `\`${ORACLE}\` in ${relPath} is no longer initialised with an ARRAY LITERAL (found ${ts.SyntaxKind[init.kind]}). This gate can only enumerate a literal surface — a computed one cannot be checked statically.`,
+    }
   }
 
-  const names = [];
+  const names = []
   for (const el of init.elements) {
     if (!ts.isStringLiteralLike(el)) {
-      return { broken: `\`${ORACLE}\` in ${relPath} contains a non-literal element (${ts.SyntaxKind[el.kind]}) — a spread or an expression. Every command must be a literal string, or the shipped surface cannot be enumerated.` };
+      return {
+        broken: `\`${ORACLE}\` in ${relPath} contains a non-literal element (${ts.SyntaxKind[el.kind]}) — a spread or an expression. Every command must be a literal string, or the shipped surface cannot be enumerated.`,
+      }
     }
-    names.push(el.text);
+    names.push(el.text)
   }
   if (names.length === 0 && !allowEmpty) {
-    return { broken: `\`${ORACLE}\` in ${relPath} extracted EMPTY. Either the CLI ships no commands, or this gate's reading of the file broke — and a gate that checks zero commands would print OK for a completely undocumented product. Failing instead.` };
+    return {
+      broken: `\`${ORACLE}\` in ${relPath} extracted EMPTY. Either the CLI ships no commands, or this gate's reading of the file broke — and a gate that checks zero commands would print OK for a completely undocumented product. Failing instead.`,
+    }
   }
-  return { names };
+  return { names }
 }
 
 /**
@@ -188,32 +197,40 @@ function extractStringArray(text, relPath, ORACLE, { allowEmpty = false } = {}) 
  * table agrees with a surface of zero commands".
  */
 function extractReadmeCommands(text) {
-  const b = text.indexOf(TABLE_BEGIN);
-  const e = text.indexOf(TABLE_END);
+  const b = text.indexOf(TABLE_BEGIN)
+  const e = text.indexOf(TABLE_END)
   if (b === -1 || e === -1) {
-    return { broken: `${README_REL} is missing the ${b === -1 ? TABLE_BEGIN : TABLE_END} marker. The gate cannot tell which rows are the command table, and refuses to guess — a check whose scope is inferred from prose stops checking the moment the prose moves.` };
+    return {
+      broken: `${README_REL} is missing the ${b === -1 ? TABLE_BEGIN : TABLE_END} marker. The gate cannot tell which rows are the command table, and refuses to guess — a check whose scope is inferred from prose stops checking the moment the prose moves.`,
+    }
   }
   if (e < b) {
-    return { broken: `${README_REL} has ${TABLE_END} BEFORE ${TABLE_BEGIN}. The region is inside-out, so it encloses nothing.` };
+    return {
+      broken: `${README_REL} has ${TABLE_END} BEFORE ${TABLE_BEGIN}. The region is inside-out, so it encloses nothing.`,
+    }
   }
 
-  const names = [];
-  for (const line of text.slice(b + TABLE_BEGIN.length, e).split('\n')) {
-    const m = /^\s*\|\s*`atlas ([a-z][a-z0-9-]*)/.exec(line);
-    if (m !== null) names.push(m[1]);
+  const names = []
+  for (const line of text.slice(b + TABLE_BEGIN.length, e).split("\n")) {
+    const m = /^\s*\|\s*`atlas ([a-z][a-z0-9-]*)/.exec(line)
+    if (m !== null) names.push(m[1])
   }
   if (names.length === 0) {
-    return { broken: `the ${README_REL} command-table region extracted ZERO rows. Either the table was emptied or its row shape changed, and a table that names no commands would agree with any surface at all. Failing instead.` };
+    return {
+      broken: `the ${README_REL} command-table region extracted ZERO rows. Either the table was emptied or its row shape changed, and a table that names no commands would agree with any surface at all. Failing instead.`,
+    }
   }
 
-  const seen = new Set();
+  const seen = new Set()
   for (const n of names) {
     if (seen.has(n)) {
-      return { broken: `the ${README_REL} command table lists \`atlas ${n}\` TWICE. A duplicated row makes the table's own count meaningless and hides a missing command behind a matching set.` };
+      return {
+        broken: `the ${README_REL} command table lists \`atlas ${n}\` TWICE. A duplicated row makes the table's own count meaningless and hides a missing command behind a matching set.`,
+      }
     }
-    seen.add(n);
+    seen.add(n)
   }
-  return { names };
+  return { names }
 }
 
 /**
@@ -229,34 +246,46 @@ function extractReadmeCommands(text) {
  * them; what may NOT happen is a number quietly disappearing, because its absence fails.
  */
 function extractParityClaims(text) {
-  const b = text.indexOf(PARITY_BEGIN);
-  const e = text.indexOf(PARITY_END);
+  const b = text.indexOf(PARITY_BEGIN)
+  const e = text.indexOf(PARITY_END)
   if (b === -1 || e === -1) {
-    return { broken: `${README_REL} is missing the ${b === -1 ? PARITY_BEGIN : PARITY_END} marker. The gate cannot tell which prose states the surface cardinality, and refuses to guess.` };
+    return {
+      broken: `${README_REL} is missing the ${b === -1 ? PARITY_BEGIN : PARITY_END} marker. The gate cannot tell which prose states the surface cardinality, and refuses to guess.`,
+    }
   }
   if (e < b) {
-    return { broken: `${README_REL} has ${PARITY_END} BEFORE ${PARITY_BEGIN}. The region is inside out; the gate would read an empty span and pass vacuously.` };
+    return {
+      broken: `${README_REL} has ${PARITY_END} BEFORE ${PARITY_BEGIN}. The region is inside out; the gate would read an empty span and pass vacuously.`,
+    }
   }
-  const region = text.slice(b + PARITY_BEGIN.length, e);
+  const region = text.slice(b + PARITY_BEGIN.length, e)
 
-  const commands = /CLI exposes \*\*(\d+)\*\* commands/.exec(region);
+  const commands = /CLI exposes \*\*(\d+)\*\* commands/.exec(region)
   if (commands === null) {
-    return { broken: `the transport-parity region does not state the command count in the form "CLI exposes **N** commands". A count the gate cannot find is a count nobody is checking.` };
+    return {
+      broken: `the transport-parity region does not state the command count in the form "CLI exposes **N** commands". A count the gate cannot find is a count nobody is checking.`,
+    }
   }
-  const tools = /\*\*(\d+)\*\* tools \((\d+) governance \+ (\d+) read \+ (\d+) parallel-path\)/.exec(region);
+  const tools = /\*\*(\d+)\*\* tools \((\d+) governance \+ (\d+) read \+ (\d+) parallel-path\)/.exec(region)
   if (tools === null) {
-    return { broken: `the transport-parity region does not state the tool cardinality in the form "**N** tools (G governance + R read + P parallel-path)". The parallel-path term is REQUIRED: omitting it is how this bullet came to call two advertised tools unreachable.` };
+    return {
+      broken: `the transport-parity region does not state the tool cardinality in the form "**N** tools (G governance + R read + P parallel-path)". The parallel-path term is REQUIRED: omitting it is how this bullet came to call two advertised tools unreachable.`,
+    }
   }
   // The count may or may not be inside the sentence's own bold span, so the emphasis markers are OPTIONAL
   // around it — matching the number, not the styling. Everything after the colon up to a blank line is the
   // list; the backtick scan below is what actually decides membership.
-  const cliOnly = /remaining (?:\*\*)?(\d+)(?:\*\*)? commands are CLI-only[^:]*:([^]*?)(?=\n\s*\n|$)/.exec(region);
+  const cliOnly = /remaining (?:\*\*)?(\d+)(?:\*\*)? commands are CLI-only[^:]*:([^]*?)(?=\n\s*\n|$)/.exec(region)
   if (cliOnly === null) {
-    return { broken: `the transport-parity region does not state the CLI-only set in the form "The remaining **N** commands are CLI-only ... : \`a\`, \`b\`, ...".` };
+    return {
+      broken: `the transport-parity region does not state the CLI-only set in the form "The remaining **N** commands are CLI-only ... : \`a\`, \`b\`, ...".`,
+    }
   }
-  const listed = [...cliOnly[2].matchAll(/\`([a-z][a-z-]*)\`/g)].map((m) => m[1]);
+  const listed = [...cliOnly[2].matchAll(/\`([a-z][a-z-]*)\`/g)].map((m) => m[1])
   if (listed.length === 0) {
-    return { broken: `the transport-parity region names ZERO CLI-only commands. An empty list would agree with a surface in which every command is on MCP, which is not a state this repo can reach by accident.` };
+    return {
+      broken: `the transport-parity region names ZERO CLI-only commands. An empty list would agree with a surface in which every command is on MCP, which is not a state this repo can reach by accident.`,
+    }
   }
   return {
     claimed: {
@@ -268,7 +297,7 @@ function extractParityClaims(text) {
       cliOnlyCount: Number(cliOnly[1]),
       cliOnly: listed,
     },
-  };
+  }
 }
 
 /**
@@ -280,120 +309,139 @@ function extractParityClaims(text) {
  * silently shrink the advertised set and make the CLI-only list look correct while over-stating it.
  */
 function extractMcpToolTokens() {
-  let files;
+  let files
   try {
-    files = readdirSync(MCP_SRC).filter((f) => f.endsWith('.ts')).sort();
+    files = readdirSync(MCP_SRC)
+      .filter((f) => f.endsWith(".ts"))
+      .sort()
   } catch {
-    return { broken: `${MCP_SRC_REL} could not be listed. The MCP server's source moved; point this gate at it.` };
+    return { broken: `${MCP_SRC_REL} could not be listed. The MCP server's source moved; point this gate at it.` }
   }
-  const names = new Set();
+  const names = new Set()
   for (const f of files) {
-    const sf = ts.createSourceFile(f, readFileSync(join(MCP_SRC, f), 'utf8'), ts.ScriptTarget.Latest, false, ts.ScriptKind.TS);
+    const sf = ts.createSourceFile(
+      f,
+      readFileSync(join(MCP_SRC, f), "utf8"),
+      ts.ScriptTarget.Latest,
+      false,
+      ts.ScriptKind.TS,
+    )
     for (const stmt of sf.statements) {
-      if (!ts.isVariableStatement(stmt)) continue;
+      if (!ts.isVariableStatement(stmt)) continue
       for (const d of stmt.declarationList.declarations) {
-        if (!ts.isIdentifier(d.name) || !/_TOOL$/.test(d.name.text)) continue;
-        let init = d.initializer;
-        while (init !== undefined && (ts.isAsExpression(init) || ts.isParenthesizedExpression(init))) init = init.expression;
-        if (init !== undefined && ts.isStringLiteralLike(init)) names.add(init.text);
+        if (!ts.isIdentifier(d.name) || !/_TOOL$/.test(d.name.text)) continue
+        let init = d.initializer
+        while (init !== undefined && (ts.isAsExpression(init) || ts.isParenthesizedExpression(init)))
+          init = init.expression
+        if (init !== undefined && ts.isStringLiteralLike(init)) names.add(init.text)
       }
     }
   }
   if (names.size === 0) {
-    return { broken: `no \`*_TOOL\` string constant found under ${MCP_SRC_REL}. Either the server declares no tools, or this gate's reading of it broke — and the second would silently shrink the advertised surface.` };
+    return {
+      broken: `no \`*_TOOL\` string constant found under ${MCP_SRC_REL}. Either the server declares no tools, or this gate's reading of it broke — and the second would silently shrink the advertised surface.`,
+    }
   }
-  return { names: [...names].sort() };
+  return { names: [...names].sort() }
 }
 
 /** Every `.md` under DOCS, as slash-joined paths relative to it (recursive: a nested page is not a hiding place). */
-function pages(dir, prefix = '') {
-  if (!existsSync(dir)) return [];
-  const out = [];
+function pages(dir, prefix = "") {
+  if (!existsSync(dir)) return []
+  const out = []
   for (const e of readdirSync(dir, { withFileTypes: true }).sort((a, b) => a.name.localeCompare(b.name))) {
-    if (e.isDirectory()) out.push(...pages(join(dir, e.name), `${prefix}${e.name}/`));
-    else if (e.name.endsWith('.md')) out.push(`${prefix}${e.name}`);
+    if (e.isDirectory()) out.push(...pages(join(dir, e.name), `${prefix}${e.name}/`))
+    else if (e.name.endsWith(".md")) out.push(`${prefix}${e.name}`)
   }
-  return out;
+  return out
 }
 
-const fail = [];
+const fail = []
 
 if (!existsSync(MAP)) {
-  console.error('command-doc-guard: FAIL\n');
-  console.error(`  ✗ EXTRACTION BROKEN — ${MAP_REL} does not exist. The command oracle moved; point this gate at it.\n`);
-  process.exit(1);
+  console.error("command-doc-guard: FAIL\n")
+  console.error(`  ✗ EXTRACTION BROKEN — ${MAP_REL} does not exist. The command oracle moved; point this gate at it.\n`)
+  process.exit(1)
 }
 
 if (!existsSync(README)) {
-  console.error('command-doc-guard: FAIL\n');
-  console.error(`  ✗ EXTRACTION BROKEN — ${README_REL} does not exist, so the front door's command table cannot be checked.\n`);
-  process.exit(1);
+  console.error("command-doc-guard: FAIL\n")
+  console.error(
+    `  ✗ EXTRACTION BROKEN — ${README_REL} does not exist, so the front door's command table cannot be checked.\n`,
+  )
+  process.exit(1)
 }
 
-const { names, broken } = extractCommands(readFileSync(MAP, 'utf8'));
+const { names, broken } = extractCommands(readFileSync(MAP, "utf8"))
 
 if (broken !== undefined) {
-  console.error('command-doc-guard: FAIL\n');
-  console.error(`  ✗ EXTRACTION BROKEN — ${broken}\n`);
-  console.error('The gate refuses to report on a surface it could not read. Fix the extraction, not the docs.');
-  process.exit(1);
+  console.error("command-doc-guard: FAIL\n")
+  console.error(`  ✗ EXTRACTION BROKEN — ${broken}\n`)
+  console.error("The gate refuses to report on a surface it could not read. Fix the extraction, not the docs.")
+  process.exit(1)
 }
 
-const readme = extractReadmeCommands(readFileSync(README, 'utf8'));
+const readme = extractReadmeCommands(readFileSync(README, "utf8"))
 
 if (readme.broken !== undefined) {
-  console.error('command-doc-guard: FAIL\n');
-  console.error(`  ✗ EXTRACTION BROKEN — ${readme.broken}\n`);
-  console.error('The gate refuses to report on a table it could not read. Fix the extraction, not the docs.');
-  process.exit(1);
+  console.error("command-doc-guard: FAIL\n")
+  console.error(`  ✗ EXTRACTION BROKEN — ${readme.broken}\n`)
+  console.error("The gate refuses to report on a table it could not read. Fix the extraction, not the docs.")
+  process.exit(1)
 }
 
 if (!existsSync(HANDLER)) {
-  console.error('command-doc-guard: FAIL\n');
-  console.error(`  ✗ EXTRACTION BROKEN — ${HANDLER_REL} does not exist, so the advertised MCP surface cannot be read.\n`);
-  process.exit(1);
+  console.error("command-doc-guard: FAIL\n")
+  console.error(
+    `  ✗ EXTRACTION BROKEN — ${HANDLER_REL} does not exist, so the advertised MCP surface cannot be read.\n`,
+  )
+  process.exit(1)
 }
 
-const handlerText = readFileSync(HANDLER, 'utf8');
+const handlerText = readFileSync(HANDLER, "utf8")
 // EMPTINESS IS PERMITTED PER ARRAY, AND REFUSED ON THE UNION — a deliberate departure from the rule the
 // `COMMANDS` extraction uses, and the reason is in ADR-0006: "READ_SURFACE does not exist yet. The gate
 // treats it as empty." An empty READ_SURFACE is a state this repository has ACTUALLY BEEN IN, so failing on
 // it would be a gate refusing a legitimate configuration rather than catching a broken read. The anti-vacuity
 // property still has to hold somewhere, so it holds where the impossible state actually is: MCP advertising
 // NOTHING would mean the whole tool surface vanished, which no surface change reaches by accident.
-const gov = extractStringArray(handlerText, HANDLER_REL, 'GOVERNANCE_SURFACE', { allowEmpty: true });
-const rd = extractStringArray(handlerText, HANDLER_REL, 'READ_SURFACE', { allowEmpty: true });
-const mcp = extractMcpToolTokens();
-const parity = extractParityClaims(readFileSync(README, 'utf8'));
+const gov = extractStringArray(handlerText, HANDLER_REL, "GOVERNANCE_SURFACE", { allowEmpty: true })
+const rd = extractStringArray(handlerText, HANDLER_REL, "READ_SURFACE", { allowEmpty: true })
+const mcp = extractMcpToolTokens()
+const parity = extractParityClaims(readFileSync(README, "utf8"))
 
 if (mcp.broken !== undefined) {
-  console.error('command-doc-guard: FAIL\n');
-  console.error(`  ✗ EXTRACTION BROKEN (the MCP tool declarations) — ${mcp.broken}\n`);
-  process.exit(1);
+  console.error("command-doc-guard: FAIL\n")
+  console.error(`  ✗ EXTRACTION BROKEN (the MCP tool declarations) — ${mcp.broken}\n`)
+  process.exit(1)
 }
 
 if (gov.broken === undefined && rd.broken === undefined && gov.names.length + rd.names.length === 0) {
-  console.error('command-doc-guard: FAIL\n');
+  console.error("command-doc-guard: FAIL\n")
   console.error(
     `  ✗ EXTRACTION BROKEN — GOVERNANCE_SURFACE ∪ READ_SURFACE in ${HANDLER_REL} is EMPTY. Either MCP now ` +
-      'advertises no tools at all, or this gate stopped reading the arrays. Those two look identical from ' +
-      'here and only one of them is survivable, so the gate refuses rather than reporting a surface of zero.\n',
-  );
-  process.exit(1);
+      "advertises no tools at all, or this gate stopped reading the arrays. Those two look identical from " +
+      "here and only one of them is survivable, so the gate refuses rather than reporting a surface of zero.\n",
+  )
+  process.exit(1)
 }
 
-for (const [what, r] of [['GOVERNANCE_SURFACE', gov], ['READ_SURFACE', rd], ['the transport-parity region', parity]]) {
+for (const [what, r] of [
+  ["GOVERNANCE_SURFACE", gov],
+  ["READ_SURFACE", rd],
+  ["the transport-parity region", parity],
+]) {
   if (r.broken !== undefined) {
-    console.error('command-doc-guard: FAIL\n');
-    console.error(`  ✗ EXTRACTION BROKEN (${what}) — ${r.broken}\n`);
-    console.error('The gate refuses to report on a surface it could not read. Fix the extraction, not the docs.');
-    process.exit(1);
+    console.error("command-doc-guard: FAIL\n")
+    console.error(`  ✗ EXTRACTION BROKEN (${what}) — ${r.broken}\n`)
+    console.error("The gate refuses to report on a surface it could not read. Fix the extraction, not the docs.")
+    process.exit(1)
   }
 }
 
-const documented = new Set(pages(DOCS));
-const shipped = new Set(names);
-const tabled = new Set(readme.names);
+const documented = new Set(pages(DOCS))
+const shipped = new Set(names)
+const tabled = new Set(readme.names)
 
 // (1) a shipped command nobody wrote a page for.
 for (const c of names) {
@@ -402,19 +450,19 @@ for (const c of names) {
       `UNDOCUMENTED COMMAND — \`atlas ${c}\`\n` +
         `      Shipped (it is in \`${ORACLE}\`, ${MAP_REL}) with no page at ${DOCS_REL}${sep}${c}.md.\n` +
         `      Write the page. A stub added to clear this gate is the exact lie the gate exists to prevent.`,
-    );
+    )
   }
 }
 
 // (2) a page describing a door that is not there.
 for (const p of documented) {
-  if (!shipped.has(p.replace(/\.md$/, ''))) {
+  if (!shipped.has(p.replace(/\.md$/, ""))) {
     fail.push(
       `ORPHAN PAGE — ${DOCS_REL}${sep}${p}\n` +
         `      Names something \`${ORACLE}\` (${MAP_REL}) does not contain, so it documents a door that does\n` +
         `      not open. Delete it, or rename it to the command it actually describes. One page per command,\n` +
         `      flat, named exactly \`<command>.md\` — a nested or extra file cannot be told apart from a stale one.`,
-    );
+    )
   }
 }
 
@@ -426,7 +474,7 @@ for (const c of names) {
         `      Shipped (it is in \`${ORACLE}\`, ${MAP_REL}) and absent from the command table in ${README_REL}.\n` +
         `      A stranger reads that table as the product's surface, so a command missing from it does not\n` +
         `      exist as far as anyone outside this repo is concerned. Add the row.`,
-    );
+    )
   }
 }
 
@@ -437,19 +485,19 @@ for (const c of tabled) {
       `README TABLE NAMES A NON-COMMAND — \`atlas ${c}\`\n` +
         `      The command table in ${README_REL} advertises it; \`${ORACLE}\` (${MAP_REL}) does not contain it.\n` +
         `      The front door promises a command that does not run. Delete the row, or ship the command.`,
-    );
+    )
   }
 }
 
 // (5) the transport-parity bullet: four numbers and one set, all against SOURCE.
 {
-  const c = parity.claimed;
+  const c = parity.claimed
   // The union of the MODEL (the two surface constants) and the PATH (what the server declares). The
   // parallel-path tools live only in the second, and they are exactly the names the README used to call
   // unreachable. Deduped, because the read tools appear in both.
-  const advertised = [...new Set([...gov.names, ...rd.names, ...mcp.names])].sort();
-  const parallel = advertised.filter((t) => !gov.names.includes(t) && !rd.names.includes(t));
-  const exposed = advertised.map((t) => (t.startsWith(TOOL_PREFIX) ? t.slice(TOOL_PREFIX.length) : t));
+  const advertised = [...new Set([...gov.names, ...rd.names, ...mcp.names])].sort()
+  const parallel = advertised.filter((t) => !gov.names.includes(t) && !rd.names.includes(t))
+  const exposed = advertised.map((t) => (t.startsWith(TOOL_PREFIX) ? t.slice(TOOL_PREFIX.length) : t))
 
   // A token whose stripped name is not a shipped command breaks the ONE correspondence rule this leg
   // relies on. Named, never silently skipped — a dropped token would shrink the derived CLI-only set and
@@ -462,19 +510,29 @@ for (const c of tabled) {
           `      This gate derives the CLI-only set by subtracting the advertised names from the shipped ones,\n` +
           `      so an unmappable token would silently inflate that set rather than fail. Fix the surface or\n` +
           `      teach this gate the new correspondence explicitly.`,
-      );
+      )
     }
   }
 
-  const derivedCliOnly = names.filter((n) => !new Set(exposed).has(n));
+  const derivedCliOnly = names.filter((n) => !new Set(exposed).has(n))
   const numbers = [
-    ['command count', c.commands, names.length, `\`${ORACLE}\` in ${MAP_REL}`],
-    ['tool count', c.tools, advertised.length, `GOVERNANCE_SURFACE ∪ READ_SURFACE ∪ the *_TOOL declarations under ${MCP_SRC_REL}`],
-    ['parallel-path count', c.parallel, parallel.length, `the *_TOOL declarations under ${MCP_SRC_REL} that are in NEITHER surface constant`],
-    ['governance count', c.governance, gov.names.length, `GOVERNANCE_SURFACE in ${HANDLER_REL}`],
-    ['read count', c.read, rd.names.length, `READ_SURFACE in ${HANDLER_REL}`],
-    ['CLI-only count', c.cliOnlyCount, derivedCliOnly.length, 'the shipped surface minus the advertised one'],
-  ];
+    ["command count", c.commands, names.length, `\`${ORACLE}\` in ${MAP_REL}`],
+    [
+      "tool count",
+      c.tools,
+      advertised.length,
+      `GOVERNANCE_SURFACE ∪ READ_SURFACE ∪ the *_TOOL declarations under ${MCP_SRC_REL}`,
+    ],
+    [
+      "parallel-path count",
+      c.parallel,
+      parallel.length,
+      `the *_TOOL declarations under ${MCP_SRC_REL} that are in NEITHER surface constant`,
+    ],
+    ["governance count", c.governance, gov.names.length, `GOVERNANCE_SURFACE in ${HANDLER_REL}`],
+    ["read count", c.read, rd.names.length, `READ_SURFACE in ${HANDLER_REL}`],
+    ["CLI-only count", c.cliOnlyCount, derivedCliOnly.length, "the shipped surface minus the advertised one"],
+  ]
   for (const [what, claimed, actual, source] of numbers) {
     if (claimed !== actual) {
       fail.push(
@@ -482,19 +540,19 @@ for (const c of tabled) {
           `      Oracle: ${source}.\n` +
           `      This is the exact drift that went unnoticed across two campaigns. Update the number in the\n` +
           `      \`transport-parity\` region of ${README_REL}; do not widen this check to accept it.`,
-      );
+      )
     }
   }
 
-  const claimedSet = new Set(c.cliOnly);
-  const derivedSet = new Set(derivedCliOnly);
+  const claimedSet = new Set(c.cliOnly)
+  const derivedSet = new Set(derivedCliOnly)
   for (const n of derivedCliOnly) {
     if (!claimedSet.has(n)) {
       fail.push(
         `MISSING FROM THE README CLI-ONLY LIST — \`atlas ${n}\`\n` +
           `      Shipped, and not advertised over MCP, so it belongs in that list. A stranger reads the list as\n` +
           `      the complete set of doors MCP cannot reach.`,
-      );
+      )
     }
   }
   for (const n of claimedSet) {
@@ -503,27 +561,27 @@ for (const c of tabled) {
         `README CLI-ONLY LIST NAMES A REACHABLE OR ABSENT COMMAND — \`atlas ${n}\`\n` +
           `      Either it is advertised over MCP after all, or it is not a shipped command. Both make the\n` +
           `      list wrong in the direction that understates the MCP surface.`,
-      );
+      )
     }
   }
 }
 
 if (fail.length > 0) {
-  console.error('command-doc-guard: FAIL\n');
-  for (const f of fail) console.error(`  ✗ ${f}\n`);
+  console.error("command-doc-guard: FAIL\n")
+  for (const f of fail) console.error(`  ✗ ${f}\n`)
   console.error(
-    `${fail.length} violation(s) across a surface of ${names.length} command(s): ${names.join(', ')}.\n` +
-      'The surface is the oracle. Move the docs to it — do not weaken this gate to the docs.',
-  );
-  process.exit(1);
+    `${fail.length} violation(s) across a surface of ${names.length} command(s): ${names.join(", ")}.\n` +
+      "The surface is the oracle. Move the docs to it — do not weaken this gate to the docs.",
+  )
+  process.exit(1)
 }
 
 console.log(
-  `command-doc-guard: OK — ${names.length} shipped command(s) (${names.join(', ')}), ` +
+  `command-doc-guard: OK — ${names.length} shipped command(s) (${names.join(", ")}), ` +
     `${documented.size} reference page(s) under ${DOCS_REL}, ${tabled.size} row(s) in the ${README_REL} ` +
     `command table, and a transport-parity region agreeing on ${gov.names.length} governance + ` +
     `${rd.names.length} read + ${mcp.names.filter((t) => !gov.names.includes(t) && !rd.names.includes(t)).length} ` +
     `parallel-path advertised tool(s), plus ` +
     `${parity.claimed.cliOnlyCount} CLI-only command(s). Correspondence holds in all three directions. ` +
-    'Existence only — whether a page is worth reading is a human job and is not claimed here.',
-);
+    "Existence only — whether a page is worth reading is a human job and is not claimed here.",
+)

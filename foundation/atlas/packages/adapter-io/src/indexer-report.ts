@@ -14,11 +14,11 @@
 // behind an automatic invocation that fails opaquely the moment the binary is absent. So the output of this
 // module is a PLAN plus the state of the dump, and every command in it is a string.
 
-import { join } from 'node:path';
-import type { FileTree } from '@atlas/index';
-import { walkFileTree } from './fs.js';
-import { HONEST_HOLE, SCIP_INDEX_REL, planIndexers, readScip } from './scip.js';
-import type { IndexerPlan, LangId } from './scip.js';
+import { join } from "node:path"
+import type { FileTree } from "@atlas/index"
+import { walkFileTree } from "./fs.js"
+import { HONEST_HOLE, SCIP_INDEX_REL, planIndexers, readScip } from "./scip.js"
+import type { IndexerPlan, LangId } from "./scip.js"
 
 /**
  * File extension → the `LangId` whose indexer owns it. DERIVED FROM WHAT THE CONFIGURED TOOLS ACTUALLY
@@ -29,68 +29,68 @@ import type { IndexerPlan, LangId } from './scip.js';
  * statements and only the first is a diagnosis.
  */
 const EXT_LANG: Readonly<Record<string, LangId>> = {
-  ts: 'ts',
-  tsx: 'ts',
-  mts: 'ts',
-  cts: 'ts',
-  js: 'ts',
-  jsx: 'ts',
-  mjs: 'ts',
-  cjs: 'ts',
-  py: 'py',
-  pyi: 'py',
-  go: 'go',
-  java: 'java',
-  rs: 'rust',
-  rb: 'rb',
-};
+  ts: "ts",
+  tsx: "ts",
+  mts: "ts",
+  cts: "ts",
+  js: "ts",
+  jsx: "ts",
+  mjs: "ts",
+  cjs: "ts",
+  py: "py",
+  pyi: "py",
+  go: "go",
+  java: "java",
+  rs: "rust",
+  rb: "rb",
+}
 
 /** The state of the dump the readers open. Three CASES, because a user staring at `0 sites` needs to tell
  *  "there is no index" from "there is an index and it is unreadable" from "there is an index and it is
  *  simply small". `readScipOrEmpty` deliberately folds the first two together (it degrades, never throws);
  *  a DIAGNOSTIC must not, so this reads through the throwing `readScip` and keeps the reason. */
 export type ScipState =
-  | { readonly kind: 'absent' }
-  | { readonly kind: 'unreadable'; readonly reason: string }
-  | { readonly kind: 'present'; readonly documents: number };
+  | { readonly kind: "absent" }
+  | { readonly kind: "unreadable"; readonly reason: string }
+  | { readonly kind: "present"; readonly documents: number }
 
 /** One language actually present in the repository, with the plan that covers it. `files` is the count of
  *  git-TRACKED files carrying one of that language's extensions (the same tracked set the index is built
  *  from — an ignored or untracked file is in neither). */
 export interface PlannedLang {
-  readonly plan: IndexerPlan;
-  readonly files: number;
+  readonly plan: IndexerPlan
+  readonly files: number
 }
 
 /** What `atlas doctor index` reports for one repository. Pure data — the CLI owns every rendered byte. */
 export interface IndexPlanReport {
   /** Repo-relative path of the ONE dump every reader opens (`SCIP_INDEX_REL`). */
-  readonly scipRel: string;
-  readonly scip: ScipState;
+  readonly scipRel: string
+  readonly scip: ScipState
   /** Languages present WITH a configured indexer, ascending by `LangId` (deterministic). */
-  readonly configured: readonly PlannedLang[];
+  readonly configured: readonly PlannedLang[]
   /** Languages present with NO configured indexer — the `honest-hole` set. Their files are in the
    *  `FileTree` and they contribute NO edges; naming them is the whole point, because "Atlas has no
    *  indexer for this language" and "Atlas found nothing here" are indistinguishable without it. */
-  readonly holes: readonly PlannedLang[];
+  readonly holes: readonly PlannedLang[]
 }
 
 /** The lower-cased final extension of a repo-relative path, or `''` (a dotfile / no dot in the basename). */
 function extensionOf(path: string): string {
-  const base = path.slice(path.lastIndexOf('/') + 1);
-  const dot = base.lastIndexOf('.');
-  return dot > 0 ? base.slice(dot + 1).toLowerCase() : '';
+  const base = path.slice(path.lastIndexOf("/") + 1)
+  const dot = base.lastIndexOf(".")
+  return dot > 0 ? base.slice(dot + 1).toLowerCase() : ""
 }
 
 /** Tally tracked FILE leaves by language over the walked tree. A `FileTree` file is a leaf carrying
  *  `content`; directory nodes carry `children` and no content, so the two can never be confused. */
 function tallyLangs(tree: FileTree, into: Map<LangId, number> = new Map()): Map<LangId, number> {
   if (tree.content !== undefined) {
-    const lang = EXT_LANG[extensionOf(tree.path)];
-    if (lang !== undefined) into.set(lang, (into.get(lang) ?? 0) + 1);
+    const lang = EXT_LANG[extensionOf(tree.path)]
+    if (lang !== undefined) into.set(lang, (into.get(lang) ?? 0) + 1)
   }
-  for (const child of tree.children) tallyLangs(child, into);
-  return into;
+  for (const child of tree.children) tallyLangs(child, into)
+  return into
 }
 
 /** The dump's state at `scipPath`. TOTAL — a missing file, a device/FIFO symlink (`scip.ts` `scipBytes`
@@ -98,10 +98,10 @@ function tallyLangs(tree: FileTree, into: Map<LangId, number> = new Map()): Map<
  *  reported state, never a throw: a diagnostic that crashes on the thing it is diagnosing is not one. */
 function scipState(scipPath: string): ScipState {
   try {
-    return { kind: 'present', documents: readScip(scipPath).documents.length };
+    return { kind: "present", documents: readScip(scipPath).documents.length }
   } catch (e) {
-    const reason = e instanceof Error ? e.message : String(e);
-    return /ENOENT/.test(reason) ? { kind: 'absent' } : { kind: 'unreadable', reason };
+    const reason = e instanceof Error ? e.message : String(e)
+    return /ENOENT/.test(reason) ? { kind: "absent" } : { kind: "unreadable", reason }
   }
 }
 
@@ -115,13 +115,13 @@ function scipState(scipPath: string): ScipState {
  * a measurement. Ascending `LangId` order keeps two runs on one tree byte-identical.
  */
 export function reportIndexPlan(repoPath: string): IndexPlanReport {
-  const counts = tallyLangs(walkFileTree(repoPath));
-  const langs = [...counts.keys()].sort();
-  const present = planIndexers(langs).map((plan) => ({ plan, files: counts.get(plan.lang) ?? 0 }));
+  const counts = tallyLangs(walkFileTree(repoPath))
+  const langs = [...counts.keys()].sort()
+  const present = planIndexers(langs).map((plan) => ({ plan, files: counts.get(plan.lang) ?? 0 }))
   return {
     scipRel: SCIP_INDEX_REL,
     scip: scipState(join(repoPath, SCIP_INDEX_REL)),
     configured: present.filter((p) => p.plan.tool !== HONEST_HOLE),
     holes: present.filter((p) => p.plan.tool === HONEST_HOLE),
-  };
+  }
 }

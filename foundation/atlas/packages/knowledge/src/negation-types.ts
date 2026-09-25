@@ -8,10 +8,10 @@
 // here (a type-only cycle, erased at runtime). `Seal` (ADR-0017) is imported the same way. See
 // docs/design/99b-negation-fact-contract.md §1.
 
-import type { Tier, NodeKey } from '@atlas/contracts';
-import type { ClaimEntry } from '@atlas/kernel';
-import type { Grounding } from '@atlas/grounding';
-import type { KnowledgeFreshness, RelationKind, ObviousnessScore, Seal } from './types.js';
+import type { Tier, NodeKey } from "@atlas/contracts"
+import type { ClaimEntry } from "@atlas/kernel"
+import type { Grounding } from "@atlas/grounding"
+import type { KnowledgeFreshness, RelationKind, ObviousnessScore, Seal } from "./types.js"
 
 /**
  * A SCOPED grounded NEGATIVE (ADR-0015 D3, #99b — "the honesty core"). Structurally a sibling of
@@ -40,19 +40,19 @@ import type { KnowledgeFreshness, RelationKind, ObviousnessScore, Seal } from '.
  *     wired, a negation is sound only under a FIXED edge model. (freshness never re-runs `reverseCallers`.)
  */
 export interface NegationNode {
-  readonly kind: 'negation';
-  readonly id: NodeKey; // = negationKey (negation-key.ts); MINTED, never trusted from the payload
-  readonly tier: Tier;
-  readonly relationKind: RelationKind; // the NEGATED relation (reuse #99a's closed 'depends-on'|'calls')
-  readonly target: string; // the location-free GLOBAL symbol key X the negative is ABOUT (¬∃ · →X) — identity leg
-  readonly scope: string; // the CLOSED scope S (a DIRECTORY key) the witness ranges over — identity leg
-  readonly grounding: Grounding; // ONE entry anchored at S; its subtreeHash IS the scope Merkle (§3 — DECIDED)
-  readonly edgeModel: string; // the IndexerPlan.version at emit — the ONE witness clause the oracle can't see (§3)
-  readonly freshness: KnowledgeFreshness;
-  readonly claims: readonly ClaimEntry[];
-  readonly authoring: 'NEGATED' | 'SUPERSEDED';
-  readonly obviousness?: ObviousnessScore; // ADR-0012 — additive, absent-tolerant (see AdvisoryNode)
-  readonly seal?: Seal; // ADR-0017 — two-seal provenance, additive/absent-tolerant (see AdvisoryNode)
+  readonly kind: "negation"
+  readonly id: NodeKey // = negationKey (negation-key.ts); MINTED, never trusted from the payload
+  readonly tier: Tier
+  readonly relationKind: RelationKind // the NEGATED relation (reuse #99a's closed 'depends-on'|'calls')
+  readonly target: string // the location-free GLOBAL symbol key X the negative is ABOUT (¬∃ · →X) — identity leg
+  readonly scope: string // the CLOSED scope S (a DIRECTORY key) the witness ranges over — identity leg
+  readonly grounding: Grounding // ONE entry anchored at S; its subtreeHash IS the scope Merkle (§3 — DECIDED)
+  readonly edgeModel: string // the IndexerPlan.version at emit — the ONE witness clause the oracle can't see (§3)
+  readonly freshness: KnowledgeFreshness
+  readonly claims: readonly ClaimEntry[]
+  readonly authoring: "NEGATED" | "SUPERSEDED"
+  readonly obviousness?: ObviousnessScore // ADR-0012 — additive, absent-tolerant (see AdvisoryNode)
+  readonly seal?: Seal // ADR-0017 — two-seal provenance, additive/absent-tolerant (see AdvisoryNode)
   /**
    * THE AUTHZ SCOPE (F3 — WP-96-N, owner-ratified 2026-08-11, amends #99b/ADR-0015 D3). ADDITIVE + OPTIONAL.
    * The scope the DOOR's authz gate binds instead of the witness `scope`, when present. It is NEVER an
@@ -67,7 +67,7 @@ export interface NegationNode {
    *     `atlas:mined` grant — the split #99b's single-scope shape could not express (a miner holds no
    *     authority over an arbitrary source directory it happened to prove closed).
    */
-  readonly authzScope?: string;
+  readonly authzScope?: string
 }
 
 /**
@@ -83,11 +83,11 @@ export interface NegationNode {
  * left the scope OPEN (the completeness hole), so the abstention carries its own evidence.
  */
 export interface AbstainedRecord {
-  readonly kind: 'abstained';
-  readonly id: NodeKey; // = negationKey(the refused question) — the same address the negation WOULD take
-  readonly relationKind: RelationKind;
-  readonly target: string;
-  readonly scope: string;
+  readonly kind: "abstained"
+  readonly id: NodeKey // = negationKey(the refused question) — the same address the negation WOULD take
+  readonly relationKind: RelationKind
+  readonly target: string
+  readonly scope: string
   // WHY it could not decide (closed set). `target-unresolvable` (#220): the target is a global symbol Atlas
   // cannot SEE defined, so "it is not called in S" would be VACUOUSLY true — the door abstains instead of
   // grounding a negative about a phantom. Distinct from `target-not-global` (a syntactically `local ` symbol).
@@ -102,6 +102,12 @@ export interface AbstainedRecord {
   //       emitted occurrence. `witness.underApproxSources` = the offending channels. Conservative abstain.
   //   Both REPLACE the canon blanket `scope-open` on the target-relative path; `scope-open` remains the fallback
   //   (machinery absent) — see docs/adr/ADR-0016-*.
-  readonly reason: 'scope-open' | 'target-not-global' | 'scope-empty' | 'target-unresolvable' | 'escape-open' | 'scope-dynamic';
-  readonly witness: { readonly underApproxSources: readonly string[] }; // the unresolved/dynamic edges that opened S
+  readonly reason:
+    | "scope-open"
+    | "target-not-global"
+    | "scope-empty"
+    | "target-unresolvable"
+    | "escape-open"
+    | "scope-dynamic"
+  readonly witness: { readonly underApproxSources: readonly string[] } // the unresolved/dynamic edges that opened S
 }

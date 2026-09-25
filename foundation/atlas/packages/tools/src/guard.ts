@@ -22,24 +22,24 @@
 // Declared in the ledger at `harness/gates/reference-model-guard.mjs`, which fails if this module quietly
 // acquires a caller, loses one, or grows another export nobody calls.
 
-import { id } from '@atlas/kernel';
-import type { CasObject } from '@atlas/kernel';
+import { id } from "@atlas/kernel"
+import type { CasObject } from "@atlas/kernel"
 
 /** One row of the append-only, permissioned store medium (TOOLS-15). No concrete store-row record is
  *  frozen in a lower layer at this seam, so it is DEFINED minimally here: a content-addressed `key` and
  *  its opaque persisted `value` (the byte payload the read-time integrity check recomputes the address
  *  over). Kept minimal — the value stays `unknown` (heterogeneous persisted bytes); never invented wider. */
 export interface StoreRow {
-  readonly key: string;
-  readonly value: unknown;
+  readonly key: string
+  readonly value: unknown
 }
 
 /** The guard's verdict on a row (TOOLS-15). `admitted:false` ⇒ the row was NOT produced by `atlas-emit`'s
  *  grounded, content-addressed path — a direct/back-channel write — and is refused (at write) or rejected
  *  (at read), never served. `rejected` names the structural reason. */
 export interface GuardVerdict {
-  readonly admitted: boolean;
-  readonly rejected?: string; // structural refusal reason (append-only/permission | integrity-check)
+  readonly admitted: boolean
+  readonly rejected?: string // structural refusal reason (append-only/permission | integrity-check)
 }
 
 export interface GuardApi {
@@ -48,19 +48,18 @@ export interface GuardApi {
    *
    *  [PINNED — `row` shape] DEFINED minimally as the append-only `StoreRow` (`{key, value}`); the `value`
    *  stays opaque (`unknown`), NOT invented wider. */
-  admitOnWrite(row: StoreRow): GuardVerdict;
+  admitOnWrite(row: StoreRow): GuardVerdict
 
   /** Read-time integrity check: recompute the content address and REJECT any row whose bytes were NOT
    *  produced by `atlas-emit`'s grounded path — an un-emitted (ungrounded) row fails and is not served
    *  (TOOLS-15, method-tags-tls:128). This is the second leg that closes the unscoped-CLI hole. */
-  admitOnRead(row: StoreRow): GuardVerdict;
+  admitOnRead(row: StoreRow): GuardVerdict
 }
 
 /** Structural refusal reasons (the `rejected` leg of `GuardVerdict`). */
 const REFUSED_WRITE =
-  'append-only/permission: key is not the content address of value — not produced by atlas-emit (TOOLS-15)';
-const REJECTED_READ =
-  'integrity-check: recomputed content address does not match key — ungrounded row (TOOLS-15)';
+  "append-only/permission: key is not the content address of value — not produced by atlas-emit (TOOLS-15)"
+const REJECTED_READ = "integrity-check: recomputed content address does not match key — ungrounded row (TOOLS-15)"
 
 /**
  * Is this row content-addressed — i.e. was it produced by `atlas-emit`'s grounded path? True iff its key
@@ -69,9 +68,9 @@ const REJECTED_READ =
  */
 function contentAddressed(row: StoreRow): boolean {
   try {
-    return id(row.value as CasObject) === row.key;
+    return id(row.value as CasObject) === row.key
   } catch {
-    return false;
+    return false
   }
 }
 
@@ -83,20 +82,20 @@ function contentAddressed(row: StoreRow): boolean {
 export function createGuard(): GuardApi {
   return {
     admitOnWrite(row: StoreRow): GuardVerdict {
-      return contentAddressed(row) ? { admitted: true } : { admitted: false, rejected: REFUSED_WRITE };
+      return contentAddressed(row) ? { admitted: true } : { admitted: false, rejected: REFUSED_WRITE }
     },
     admitOnRead(row: StoreRow): GuardVerdict {
-      return contentAddressed(row) ? { admitted: true } : { admitted: false, rejected: REJECTED_READ };
+      return contentAddressed(row) ? { admitted: true } : { admitted: false, rejected: REJECTED_READ }
     },
-  };
+  }
 }
 
 /** A read-only projection handle over one node (RETR-5 / TOOLS-10). It exposes `read` and NOTHING that
  *  mutates the store — it opens NO write door, governed or otherwise (TOOLS-1d). */
 export interface ReadProjection {
-  readonly key: string;
+  readonly key: string
   /** Resolve this node through the read-time integrity check (ungrounded ⇒ `undefined`). */
-  read(): StoreRow | undefined;
+  read(): StoreRow | undefined
 }
 
 /** The append-only / permissioned store medium for grounded-fact rows, fronted by the governed `atlas-emit`
@@ -107,12 +106,12 @@ export interface GovernedStore {
    *  to the projection sidecar — a different persist surface, NOT this row medium.
    *  Append-only: a grounded row for a fresh key is appended; an existing key is never overwritten in place;
    *  an ungrounded / forged-key row is refused (nothing lands). Returns the guard verdict. */
-  write(row: StoreRow): GuardVerdict;
+  write(row: StoreRow): GuardVerdict
   /** Read with the content-address integrity check — an un-emitted / tampered / directly-injected row is
    *  rejected and never served (`undefined`). Read-only. */
-  read(key: string): StoreRow | undefined;
+  read(key: string): StoreRow | undefined
   /** A read-only projection handle for one node — carries NO write authority (TOOLS-1d / TOOLS-10). */
-  project(key: string): ReadProjection;
+  project(key: string): ReadProjection
 }
 
 /**
@@ -126,27 +125,27 @@ export function createGovernedStore(
   guard: GuardApi = createGuard(),
 ): GovernedStore {
   const read = (key: string): StoreRow | undefined => {
-    const row = medium.get(key);
-    if (row === undefined) return undefined;
+    const row = medium.get(key)
+    if (row === undefined) return undefined
     // read-time integrity: an ungrounded row (never produced by atlas-emit) is rejected, never served.
-    return guard.admitOnRead(row).admitted ? row : undefined;
-  };
+    return guard.admitOnRead(row).admitted ? row : undefined
+  }
   return {
     write(row: StoreRow): GuardVerdict {
-      const verdict = guard.admitOnWrite(row);
-      if (!verdict.admitted) return verdict; // refused — nothing lands
+      const verdict = guard.admitOnWrite(row)
+      if (!verdict.admitted) return verdict // refused — nothing lands
       // append-only: never overwrite an existing key in place. Since key == id(value) for every admitted
       // row, a re-emit of identical content is an idempotent no-op and prior rows are byte-preserved.
-      if (!medium.has(row.key)) medium.set(row.key, row);
-      return verdict;
+      if (!medium.has(row.key)) medium.set(row.key, row)
+      return verdict
     },
     read,
     project(key: string): ReadProjection {
-      return { key, read: () => read(key) };
+      return { key, read: () => read(key) }
     },
-  };
+  }
 }
 
 // differential-vs-oracle (compile-time): the guard conforms to the co-located frozen `GuardApi`.
-const _guardConforms: GuardApi = createGuard();
-void _guardConforms;
+const _guardConforms: GuardApi = createGuard()
+void _guardConforms

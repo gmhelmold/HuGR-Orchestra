@@ -24,88 +24,88 @@
 // unsound over its declared domain (any `readonly ClosureMember[]`), independent of whether a caller
 // currently sends it a duplicate.
 
-import { describe, it, expect } from 'vitest';
-import { asHash, asSubtreeHash } from '@atlas/kernel';
-import type { Freshness } from '@atlas/contracts';
-import { freshness } from '../src/freshness.js';
-import type { FreshnessSnapshot, ClosureMember } from '../src/freshness.js';
+import { describe, it, expect } from "vitest"
+import { asHash, asSubtreeHash } from "@atlas/kernel"
+import type { Freshness } from "@atlas/contracts"
+import { freshness } from "../src/freshness.js"
+import type { FreshnessSnapshot, ClosureMember } from "../src/freshness.js"
 
-const SH_OWN = asSubtreeHash('sh-own-01');
-const SH_BODY = asSubtreeHash('sh-body-01');
-const NODE_A = asHash('u-a');
-const NODE_B = asHash('u-b');
-const IR = 'ir-01'; // shared interface rState — irrelevant to this defect, held constant
+const SH_OWN = asSubtreeHash("sh-own-01")
+const SH_BODY = asSubtreeHash("sh-body-01")
+const NODE_A = asHash("u-a")
+const NODE_B = asHash("u-b")
+const IR = "ir-01" // shared interface rState — irrelevant to this defect, held constant
 
 const member = (node: string, interfaceRState = IR): ClosureMember => ({
   node: asHash(node),
   interfaceRState,
   bodySubtreeHash: SH_BODY,
-});
+})
 
-describe('WP-4.10-b.GROUND — closure multiset soundness (GROUND-11, sameClosure)', () => {
+describe("WP-4.10-b.GROUND — closure multiset soundness (GROUND-11, sameClosure)", () => {
   // THE TEETH: pinned [A, A] vs current [A, B] — same length, and A is present in current, but the
   // membership genuinely changed (a real A dropped out, replaced by B). A sound multiset comparison
   // MUST read this as DRIFTED. The length-plus-lookup implementation reads it as FRESH (fails RED on
   // unpatched code — see report for the `cp`-backup verification).
-  it('a duplicated pinned member masking a real membership change reads DRIFTED, not FRESH', () => {
+  it("a duplicated pinned member masking a real membership change reads DRIFTED, not FRESH", () => {
     const pinned: FreshnessSnapshot = {
       ownSubtreeHashes: [SH_OWN],
-      closure: [member('u-a'), member('u-a')], // [A, A]
-    };
+      closure: [member("u-a"), member("u-a")], // [A, A]
+    }
     const current: FreshnessSnapshot = {
       ownSubtreeHashes: [SH_OWN],
-      closure: [member('u-a'), member('u-b')], // [A, B] — B genuinely replaced the second A
-    };
-    expect(freshness(pinned, current)).toBe<Freshness>('DRIFTED');
-  });
+      closure: [member("u-a"), member("u-b")], // [A, B] — B genuinely replaced the second A
+    }
+    expect(freshness(pinned, current)).toBe<Freshness>("DRIFTED")
+  })
 
   // Symmetric direction: current holds the duplicate, pinned does not — membership still changed and
   // must not be masked by matching the single pinned A against either current A.
-  it('a duplicated current member masking a real membership change reads DRIFTED, not FRESH', () => {
+  it("a duplicated current member masking a real membership change reads DRIFTED, not FRESH", () => {
     const pinned: FreshnessSnapshot = {
       ownSubtreeHashes: [SH_OWN],
-      closure: [member('u-a'), member('u-b')], // [A, B]
-    };
+      closure: [member("u-a"), member("u-b")], // [A, B]
+    }
     const current: FreshnessSnapshot = {
       ownSubtreeHashes: [SH_OWN],
-      closure: [member('u-a'), member('u-a')], // [A, A] — B vanished, A doubled
-    };
-    expect(freshness(pinned, current)).toBe<Freshness>('DRIFTED');
-  });
+      closure: [member("u-a"), member("u-a")], // [A, A] — B vanished, A doubled
+    }
+    expect(freshness(pinned, current)).toBe<Freshness>("DRIFTED")
+  })
 
   // NEGATIVE DIRECTION (must NOT regress): genuinely identical closures, including ones with a legitimate
   // duplicate `node` on BOTH sides in the SAME order and out of order, must still read FRESH. A multiset
   // fix that over-corrects into "any duplicate ⇒ DRIFTED" or that is order-sensitive would fail this.
-  it('genuinely identical closures — including legitimate duplicates on both sides — read FRESH', () => {
+  it("genuinely identical closures — including legitimate duplicates on both sides — read FRESH", () => {
     const pinned: FreshnessSnapshot = {
       ownSubtreeHashes: [SH_OWN],
-      closure: [member('u-a'), member('u-a'), member('u-b')], // [A, A, B]
-    };
+      closure: [member("u-a"), member("u-a"), member("u-b")], // [A, A, B]
+    }
     const currentSameOrder: FreshnessSnapshot = {
       ownSubtreeHashes: [SH_OWN],
-      closure: [member('u-a'), member('u-a'), member('u-b')], // [A, A, B]
-    };
-    expect(freshness(pinned, currentSameOrder)).toBe<Freshness>('FRESH');
+      closure: [member("u-a"), member("u-a"), member("u-b")], // [A, A, B]
+    }
+    expect(freshness(pinned, currentSameOrder)).toBe<Freshness>("FRESH")
 
     const currentReordered: FreshnessSnapshot = {
       ownSubtreeHashes: [SH_OWN],
-      closure: [member('u-b'), member('u-a'), member('u-a')], // [B, A, A] — same multiset, different order
-    };
-    expect(freshness(pinned, currentReordered)).toBe<Freshness>('FRESH');
-  });
+      closure: [member("u-b"), member("u-a"), member("u-a")], // [B, A, A] — same multiset, different order
+    }
+    expect(freshness(pinned, currentReordered)).toBe<Freshness>("FRESH")
+  })
 
   // A count-only fix (drop the interfaceRState from the comparison key) would falsely read this FRESH:
   // same node multiset {A, A} on both sides, but ONE of the two A's changed its interfaceRState. That is
   // a real signature/contract change on one call site of A and MUST drift (GROUND-11c, interface-fold).
-  it('same node-multiset but one duplicate member changed interfaceRState reads DRIFTED (11c)', () => {
+  it("same node-multiset but one duplicate member changed interfaceRState reads DRIFTED (11c)", () => {
     const pinned: FreshnessSnapshot = {
       ownSubtreeHashes: [SH_OWN],
-      closure: [member('u-a', 'ir-01'), member('u-a', 'ir-01')],
-    };
+      closure: [member("u-a", "ir-01"), member("u-a", "ir-01")],
+    }
     const current: FreshnessSnapshot = {
       ownSubtreeHashes: [SH_OWN],
-      closure: [member('u-a', 'ir-01'), member('u-a', 'ir-02')], // one A's interface changed
-    };
-    expect(freshness(pinned, current)).toBe<Freshness>('DRIFTED');
-  });
-});
+      closure: [member("u-a", "ir-01"), member("u-a", "ir-02")], // one A's interface changed
+    }
+    expect(freshness(pinned, current)).toBe<Freshness>("DRIFTED")
+  })
+})

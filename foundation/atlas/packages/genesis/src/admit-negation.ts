@@ -19,22 +19,22 @@
 // ABSTENTION at the door. That is exactly one drop reason in genesis, deliberately — the second failure mode is
 // the door's abstention, not a second genesis drop.
 
-import type { NegationNode } from '@atlas/knowledge';
+import type { NegationNode } from "@atlas/knowledge"
 // The negation identity leg + the closed-vocabulary guard — the SEALED mint (`negationKey`) and the
 // value-boundary membership check (`isKnownRelationKind`), consumed EXACTLY as the governed door does
 // (governed-emit-negation.ts). Identity is minted from the proposal's (relationKind, target, scope), NEVER
 // trusted off a payload — the proposal carries no id leg at all (KNOW-15b parity).
-import { negationKey, isKnownRelationKind } from '@atlas/knowledge';
-import type { NegationProposal } from './admit-proposals.js';
+import { negationKey, isKnownRelationKind } from "@atlas/knowledge"
+import type { NegationProposal } from "./admit-proposals.js"
 
 // The ONE honest negation drop (ADR-0015 D3, WP-96-N). The `shape-not-yet-emitted` stub reason is GONE
 // (deleted, not commented) so a resurrected stub cannot reach a ready-made string. There is deliberately no
 // `ungrounded`/`abstain` reason here: a well-formed negative's undecidability is the DOOR's abstention (F4).
 export const DROP_NEGATION_MALFORMED =
-  'malformed negation: the identity triple (relationKind, target, scope) is not well-formed — target and scope ' +
-  'must each be a non-empty string and relationKind must be a closed-vocabulary member (depends-on | calls). ' +
-  'A malformed triple has no address to mint (ADR-0015 D3 — MalformedNegationError\'s conditions, checked here ' +
-  'so `negationKey` never throws out of the total `admit`)';
+  "malformed negation: the identity triple (relationKind, target, scope) is not well-formed — target and scope " +
+  "must each be a non-empty string and relationKind must be a closed-vocabulary member (depends-on | calls). " +
+  "A malformed triple has no address to mint (ADR-0015 D3 — MalformedNegationError's conditions, checked here " +
+  "so `negationKey` never throws out of the total `admit`)"
 
 /**
  * Gate-0 well-formedness for a negation (ADR-0015 D3). MIRRORS the door's gate-0.1 shape check
@@ -48,10 +48,12 @@ export const DROP_NEGATION_MALFORMED =
  */
 export function negationTripleResolves(p: NegationProposal): boolean {
   return (
-    typeof p.target === 'string' && p.target.length > 0 &&
-    typeof p.scope === 'string' && p.scope.length > 0 &&
+    typeof p.target === "string" &&
+    p.target.length > 0 &&
+    typeof p.scope === "string" &&
+    p.scope.length > 0 &&
     isKnownRelationKind(p.relationKind)
-  );
+  )
 }
 
 /**
@@ -71,17 +73,17 @@ export function negationTripleResolves(p: NegationProposal): boolean {
  */
 export function buildNegation(p: NegationProposal): NegationNode {
   return {
-    kind: 'negation',
+    kind: "negation",
     id: negationKey(p.relationKind, p.target, p.scope), // MINTED over the WITNESS scope, never trusted
     tier: p.tier,
     relationKind: p.relationKind,
     target: p.target,
     scope: p.scope, // the WITNESS directory — the identity leg AND the abstention-law scope (both the door's)
     grounding: { entries: [] }, // PLACEHOLDER — the door constructs the §3 scope-Merkle grounding at admit
-    edgeModel: '', //            PLACEHOLDER — the door stamps the extractor release at admit (§3 clause 4)
-    freshness: 'FRESH',
+    edgeModel: "", //            PLACEHOLDER — the door stamps the extractor release at admit (§3 clause 4)
+    freshness: "FRESH",
     claims: [],
-    authoring: 'NEGATED',
+    authoring: "NEGATED",
     ...(p.authzScope !== undefined ? { authzScope: p.authzScope } : {}),
-  };
+  }
 }

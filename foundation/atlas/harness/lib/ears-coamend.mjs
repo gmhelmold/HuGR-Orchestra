@@ -29,21 +29,24 @@
 
 /** The REQ-owner corpus: `req-<m>.md` AND `requirements-<m>.md` — the family `id-integrity` calls
  *  OWNER.REQ. Keying on `req-*.md` alone silently drops `requirements-adapters/authoring.md` (22%). */
-export const REQ_FILE_RE = /^(?:req|requirements)-[a-z]+\.md$/;
+export const REQ_FILE_RE = /^(?:req|requirements)-[a-z]+\.md$/
 
 /** A change is judged on MEANING, not bytes: HTML comments stripped (amendment tombstones + scope notes
  *  are not the clause), whitespace runs collapsed (the reference docs hard-wrap and the REQ does not, so a
  *  pure re-wrap must read as UNCHANGED and raise no co-amend demand). Nothing else is folded — no case, no
  *  markdown: `pack` → `**governing** pack` is a real edit and must count as one. */
 export function norm(text) {
-  return text.replace(/<!--[\s\S]*?-->/g, ' ').replace(/\s+/g, ' ').trim();
+  return text
+    .replace(/<!--[\s\S]*?-->/g, " ")
+    .replace(/\s+/g, " ")
+    .trim()
 }
 
 /** A deliberate "the clause changed but the EARS did not, and here is why" marker, mirroring the house
  *  `<!-- AMENDED <date>: … -->` tombstone. It only earns an exemption when its TEXT is co-amended in the
  *  same commit as the clause (see `coamendViolations`); a marker left untouched from a prior commit gives
  *  no cover, so it cannot silently exempt a REQ from every future clause change. */
-const EXEMPT_RE = /<!--\s*COAMEND-EXEMPT\b[\s\S]*?-->/;
+const EXEMPT_RE = /<!--\s*COAMEND-EXEMPT\b[\s\S]*?-->/
 
 /** A metadata FIELD line inside a block — `source:`, `amendment:`, `note:`, `normative-clause:`. The EARS
  *  restatement is a normative sentence ("Genesis shall …" / "The `atlas-query` tool shall …" / "If a seed
@@ -52,7 +55,7 @@ const EXEMPT_RE = /<!--\s*COAMEND-EXEMPT\b[\s\S]*?-->/;
  *  `normative-clause:`; folding those into the EARS let a tombstone bump (the house action when amending a
  *  clause) satisfy `earsChanged` while the real restatement stayed stale — the exact class this gate exists
  *  to catch, defeated on its own target path (found at cold review). Keying on prose alone closes it. */
-const FIELD_LINE_RE = /^[a-z][a-z0-9-]*:/;
+const FIELD_LINE_RE = /^[a-z][a-z0-9-]*:/
 
 /**
  * Parse every `### REQ-…` block in one file's text into `{ ears, clause, exempt }`, keyed by REQ id.
@@ -67,43 +70,43 @@ const FIELD_LINE_RE = /^[a-z][a-z0-9-]*:/;
  * corpus shape (that is `id-integrity`'s job).
  */
 export function parseReqBlocks(text) {
-  const out = new Map();
-  const lines = text.split('\n');
-  let id = null;
-  let buf = [];
+  const out = new Map()
+  const lines = text.split("\n")
+  let id = null
+  let buf = []
   const flush = () => {
-    if (id === null) return;
-    const srcIdx = buf.findIndex((l) => /^source:/.test(l.trim()));
-    const clsIdx = buf.findIndex((l) => /^normative-clause:/.test(l.trim()));
+    if (id === null) return
+    const srcIdx = buf.findIndex((l) => /^source:/.test(l.trim()))
+    const clsIdx = buf.findIndex((l) => /^normative-clause:/.test(l.trim()))
     if (srcIdx >= 0 && clsIdx > srcIdx) {
       const earsLines = buf
         .slice(srcIdx + 1, clsIdx)
-        .filter((l) => l.trim() !== '' && !l.trim().startsWith('<!--') && !FIELD_LINE_RE.test(l.trim()));
-      const exemptMatch = buf.map((l) => EXEMPT_RE.exec(l)).find((m) => m !== null);
+        .filter((l) => l.trim() !== "" && !l.trim().startsWith("<!--") && !FIELD_LINE_RE.test(l.trim()))
+      const exemptMatch = buf.map((l) => EXEMPT_RE.exec(l)).find((m) => m !== null)
       out.set(id, {
-        ears: earsLines.join(' '),
-        clause: buf[clsIdx].replace(/^normative-clause:/, '').trim(),
+        ears: earsLines.join(" "),
+        clause: buf[clsIdx].replace(/^normative-clause:/, "").trim(),
         exempt: exemptMatch === undefined ? null : exemptMatch[0],
-      });
+      })
     }
-    id = null;
-    buf = [];
-  };
+    id = null
+    buf = []
+  }
   for (const l of lines) {
-    const h = /^###\s+(REQ-[A-Z]+-[0-9A-Za-z-]+)/.exec(l);
+    const h = /^###\s+(REQ-[A-Z]+-[0-9A-Za-z-]+)/.exec(l)
     if (h !== null) {
-      flush();
-      id = h[1];
-      continue;
+      flush()
+      id = h[1]
+      continue
     }
     if (/^##\s/.test(l)) {
-      flush();
-      continue;
+      flush()
+      continue
     }
-    if (id !== null) buf.push(l);
+    if (id !== null) buf.push(l)
   }
-  flush();
-  return out;
+  flush()
+  return out
 }
 
 /**
@@ -118,19 +121,19 @@ export function parseReqBlocks(text) {
  * is skipped. Returns the violations, sorted, each with the before/after clause so the failure names what moved.
  */
 export function coamendViolations(baseById, headById) {
-  const violations = [];
+  const violations = []
   for (const [id, head] of [...headById].sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0))) {
-    const base = baseById.get(id);
-    if (base === undefined) continue; // new REQ — nothing amended
-    const clauseChanged = norm(base.clause) !== norm(head.clause);
-    const earsChanged = norm(base.ears) !== norm(head.ears);
+    const base = baseById.get(id)
+    if (base === undefined) continue // new REQ — nothing amended
+    const clauseChanged = norm(base.clause) !== norm(head.clause)
+    const earsChanged = norm(base.ears) !== norm(head.ears)
     // The exemption is itself an HTML comment, so `norm` (which STRIPS comments) would collapse every
     // marker to '' and defeat the freshness test — compare the marker's own text, whitespace-collapsed.
-    const marker = (b) => (b?.exempt == null ? null : b.exempt.replace(/\s+/g, ' ').trim());
-    const exemptFresh = marker(head) !== null && marker(head) !== marker(base);
+    const marker = (b) => (b?.exempt == null ? null : b.exempt.replace(/\s+/g, " ").trim())
+    const exemptFresh = marker(head) !== null && marker(head) !== marker(base)
     if (clauseChanged && !earsChanged && !exemptFresh) {
-      violations.push({ id, clauseBefore: base.clause, clauseAfter: head.clause });
+      violations.push({ id, clauseBefore: base.clause, clauseAfter: head.clause })
     }
   }
-  return violations;
+  return violations
 }

@@ -1,7 +1,7 @@
 # ADR-0005 — the advertised MCP surface is `GOVERNANCE_SURFACE ∪ READ_SURFACE`
 
 - **Status:** Proposed (2026-07-25) — DEFINE seat (owner) ratifies
-- **Owner-directed:** yes — *"Lembre-se que tem que ter via mcp tool e via cli"* (2026-07-25). The
+- **Owner-directed:** yes — _"Lembre-se que tem que ter via mcp tool e via cli"_ (2026-07-25). The
   requirement that every authoring door exist on both transports is the owner's, not the lead's.
 - **Spec author:** lead, grounded against `packages/mcp-server/src/server.ts` @ `3496d6f`.
 - **Introduces:** `INV-MCP-3`, `INV-MCP-4` (reference/atlas-authoring.md#entry-mcp-3, #entry-mcp-4).
@@ -25,8 +25,8 @@
 ## Context
 
 `advertisedTools` maps **exactly `GOVERNANCE_SURFACE`** — the five governance tools — and nothing else.
-The server's own comment states the surface is *"EXACTLY the `GOVERNANCE_SURFACE` tools, no more, no less
-(TOOLS-1)."*
+The server's own comment states the surface is _"EXACTLY the `GOVERNANCE_SURFACE` tools, no more, no less
+(TOOLS-1)."_
 
 Three consequences, all verified against the code:
 
@@ -39,7 +39,7 @@ Three consequences, all verified against the code:
 2. **The authoring surface would inherit the same asymmetry.** `anchors`/`slots`/`draft`/`check`
    (ADR-0004) are planners; if the advertised set may only contain governance tools, an agent gets none of
    them and the owner's both-transports requirement cannot be met.
-3. **The framing conflates two different sets.** TOOLS-1 governs the *write* surface and the *governance*
+3. **The framing conflates two different sets.** TOOLS-1 governs the _write_ surface and the _governance_
    surface. It says nothing about what a transport may advertise. The literal claim "the MCP surface is
    exactly the five governance tools" is a **stronger** statement than any ratified invariant requires — and
    it is the one blocking the requirement.
@@ -71,11 +71,11 @@ over MCP — extending the existing TOOLS-3 CLI≡MCP property to the new doors.
 
 ## Why this does not weaken TOOLS-1
 
-TOOLS-1's guarantee, as re-stated in ADR-0003, is: *no ungoverned path mutates the store, and no write
-silently succeeds-or-fails invisibly.* Nothing in this decision touches either half.
+TOOLS-1's guarantee, as re-stated in ADR-0003, is: _no ungoverned path mutates the store, and no write
+silently succeeds-or-fails invisibly._ Nothing in this decision touches either half.
 
 - `READ_SURFACE` members are planners (ADR-0004, AUTHOR-2) — they persist nothing, so there is no path for
-  them to be ungoverned *on*.
+  them to be ungoverned _on_.
 - Write-freedom is a property of the **type**, not of reviewer vigilance: a planner returns a payload and
   never receives a store handle. This is the structural resolution of coupling **C2** in
   `design/authoring.md` §3.3 — FR-A4 (governance preserved) holds by construction, independent of what

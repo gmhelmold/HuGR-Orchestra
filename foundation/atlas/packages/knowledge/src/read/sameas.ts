@@ -28,24 +28,24 @@
 // the row records that the equivalence was asserted AND that it was withdrawn. Deleting the edge would make
 // "never linked" and "linked, then unlinked" the same bytes — the store lying about its own history.
 
-import { asNodeKey } from '@atlas/kernel';
-import type { NodeKey } from '@atlas/contracts';
-import type { StoreProjection } from '../write/router.js';
+import { asNodeKey } from "@atlas/kernel"
+import type { NodeKey } from "@atlas/contracts"
+import type { StoreProjection } from "../write/router.js"
 
 /** A derived symmetric equivalence edge — two current nodes a human asserted name the SAME fact.
  *  CANONICAL: `a < b` lexicographically, so each unordered pair is emitted exactly once. */
 export interface SameAs {
-  readonly a: NodeKey;
-  readonly b: NodeKey;
+  readonly a: NodeKey
+  readonly b: NodeKey
 }
 
 /** Lexicographic string comparator (the same one subsumes sorts by) — total, no locale. */
 function cmp(x: string, y: string): number {
-  return x < y ? -1 : x > y ? 1 : 0;
+  return x < y ? -1 : x > y ? 1 : 0
 }
 
 /** The state of ONE unordered `sameAs` pair, as the stored relation records it (A-D3, task #83). */
-export type SameAsEdgeState = 'absent' | 'asserted' | 'retracted';
+export type SameAsEdgeState = "absent" | "asserted" | "retracted"
 
 /**
  * The CANONICAL key of an unordered pair — LENGTH-PREFIXED, hence INJECTIVE over ANY two strings.
@@ -86,10 +86,10 @@ export type SameAsEdgeState = 'absent' | 'asserted' | 'retracted';
  * not search this file before: the literal NUL made git classify `sameas.ts` as a BINARY file.)
  */
 const pairKey = (x: string, y: string): string => {
-  const lo = x < y ? x : y;
-  const hi = x < y ? y : x;
-  return `${String(lo.length)}:${lo}${hi}`;
-};
+  const lo = x < y ? x : y
+  const hi = x < y ? y : x
+  return `${String(lo.length)}:${lo}${hi}`
+}
 
 /**
  * Every unordered pair with a RETRACTION recorded on EITHER endpoint (A-D3, task #83).
@@ -104,17 +104,17 @@ const pairKey = (x: string, y: string): string => {
  * resolves to "does not merge".
  */
 function retractedPairs(projection: StoreProjection): ReadonlySet<string> {
-  const out = new Set<string>();
+  const out = new Set<string>()
   for (const [key, node] of projection.current) {
     for (const peer of node.sameAsRetracted ?? []) {
-      out.add(pairKey(key, peer));
+      out.add(pairKey(key, peer))
       // The row's DECLARED identity too, for the same reason `deriveSameAs` unions on both: under KNOW-4g
       // these are one string and this adds nothing; under a divergent row it can only ADD pairs, i.e. it can
       // only cause a SPLIT, never a merge. Monotone in the safe direction.
-      out.add(pairKey(node.nodeKey, peer));
+      out.add(pairKey(node.nodeKey, peer))
     }
   }
-  return out;
+  return out
 }
 
 /**
@@ -130,10 +130,10 @@ function retractedPairs(projection: StoreProjection): ReadonlySet<string> {
  * row it is iterating and therefore merges on a half-written assertion too.
  */
 export function sameAsEdgeState(projection: StoreProjection, a: string, b: string): SameAsEdgeState {
-  if (a === b) return 'absent'; // a node never names itself; there is no self-pair to be in any state
-  if (retractedPairs(projection).has(pairKey(a, b))) return 'retracted';
-  const peersOf = (k: string): readonly string[] => projection.current.get(k)?.sameAs ?? [];
-  return peersOf(a).includes(b) || peersOf(b).includes(a) ? 'asserted' : 'absent';
+  if (a === b) return "absent" // a node never names itself; there is no self-pair to be in any state
+  if (retractedPairs(projection).has(pairKey(a, b))) return "retracted"
+  const peersOf = (k: string): readonly string[] => projection.current.get(k)?.sameAs ?? []
+  return peersOf(a).includes(b) || peersOf(b).includes(a) ? "asserted" : "absent"
 }
 
 /**
@@ -148,15 +148,15 @@ export function sameAsEdgeState(projection: StoreProjection, a: string, b: strin
  * spliced unrelated classes through a shared `undefined` parent slot.
  */
 export function deriveSameAs(projection: StoreProjection): readonly SameAs[] {
-  const keys = [...projection.current.keys()];
-  const present = new Set(keys);
+  const keys = [...projection.current.keys()]
+  const present = new Set(keys)
   // A-D3 (task #83): the withdrawn edges, resolved ONCE per fold. See `retractedPairs` for why a retraction
   // recorded on EITHER endpoint is enough to stop the merge.
-  const retracted = retractedPairs(projection);
+  const retracted = retractedPairs(projection)
   // REBUILD-PER-READ, and this line is the whole reason retraction is cheap: the union-find is minted here,
   // per call, from the stored edge list. Nothing about class membership survives between calls.
-  const parent = new Map<string, string>();
-  for (const k of keys) parent.set(k, k);
+  const parent = new Map<string, string>()
+  for (const k of keys) parent.set(k, k)
 
   // TOTAL `find` — a key with NO entry in `parent` is its OWN root, and NOTHING is written for it.
   // The previous `while (parent.get(r) !== r) r = parent.get(r) as string` was PARTIAL: for an off-domain key
@@ -167,25 +167,25 @@ export function deriveSameAs(projection: StoreProjection): readonly SameAs[] {
   // broke PROP-SAMEAS-1 (the spliced pair is derived-equal yet outside the door class), the one direction the
   // link gate may never lose.
   const find = (x: string): string => {
-    let r = x;
+    let r = x
     for (;;) {
-      const p = parent.get(r);
-      if (p === undefined || p === r) return r; // absent ⇒ its own root (total); self-parent ⇒ the root
-      r = p;
+      const p = parent.get(r)
+      if (p === undefined || p === r) return r // absent ⇒ its own root (total); self-parent ⇒ the root
+      r = p
     }
-  };
+  }
   const union = (x: string, y: string): void => {
-    const rx = find(x);
-    const ry = find(y);
-    if (rx === ry) return;
+    const rx = find(x)
+    const ry = find(y)
+    if (rx === ry) return
     // Attach the LARGER root under the SMALLER — the class root is deterministically the MIN member of the
     // class, independent of edge/iteration order, so the fold is a pure function of the stored relation.
     // (MEMBER, not "current key": a divergent row's declared `nodeKey` below may be off-domain and may be that
     // minimum. It never reaches the OUTPUT — the grouping pass below enumerates `keys` only — it merely roots
     // the bucket, and it is chosen by the same min rule, so determinism is unchanged.)
-    if (rx < ry) parent.set(ry, rx);
-    else parent.set(rx, ry);
-  };
+    if (rx < ry) parent.set(ry, rx)
+    else parent.set(rx, ry)
+  }
 
   for (const [key, node] of projection.current) {
     // A row has TWO identities: the ADDRESS it is stored at (`key` — what every reader and every write door
@@ -196,39 +196,39 @@ export function deriveSameAs(projection: StoreProjection): readonly SameAs[] {
     // about a well-formed projection changes; under a divergent row the class only ever WIDENS (the
     // conservative direction), and in particular the edges stored AT `key` are never lost — losing them is
     // class SHRINKAGE, which is the bypass direction the door is priced against.
-    union(key, node.nodeKey);
-    if (node.sameAs === undefined) continue;
+    union(key, node.nodeKey)
+    if (node.sameAs === undefined) continue
     for (const peer of node.sameAs) {
       // A-D3 (task #83): a RETRACTED edge stops merging here. Because the `parent` map above is rebuilt per
       // call, dropping the union is ALL a retraction has to do — the class SPLITS on the next read wherever
       // the withdrawn edge was its only bridge. Classical union-find has no delete; this fold never needed
       // one, because it holds no state between calls.
-      if (retracted.has(pairKey(key, peer))) continue;
-      if (present.has(peer)) union(key, peer); // dangling peer (not current) ⇒ ignored (total)
+      if (retracted.has(pairKey(key, peer))) continue
+      if (present.has(peer)) union(key, peer) // dangling peer (not current) ⇒ ignored (total)
     }
   }
 
   // Group the current keys by their union-find root — one bucket per equivalence class.
-  const classes = new Map<string, string[]>();
+  const classes = new Map<string, string[]>()
   for (const k of keys) {
-    const root = find(k);
-    const bucket = classes.get(root);
-    if (bucket === undefined) classes.set(root, [k]);
-    else bucket.push(k);
+    const root = find(k)
+    const bucket = classes.get(root)
+    if (bucket === undefined) classes.set(root, [k])
+    else bucket.push(k)
   }
 
-  const edges: SameAs[] = [];
+  const edges: SameAs[] = []
   for (const members of classes.values()) {
-    if (members.length < 2) continue; // a singleton class asserts no equivalence
-    const sorted = [...members].sort(cmp);
+    if (members.length < 2) continue // a singleton class asserts no equivalence
+    const sorted = [...members].sort(cmp)
     for (let i = 0; i < sorted.length; i++) {
       for (let j = i + 1; j < sorted.length; j++) {
-        edges.push({ a: asNodeKey(sorted[i]!), b: asNodeKey(sorted[j]!) }); // i<j ⇒ a<b (canonical)
+        edges.push({ a: asNodeKey(sorted[i]!), b: asNodeKey(sorted[j]!) }) // i<j ⇒ a<b (canonical)
       }
     }
   }
-  edges.sort((x, y) => cmp(String(x.a), String(y.a)) || cmp(String(x.b), String(y.b)));
-  return edges;
+  edges.sort((x, y) => cmp(String(x.a), String(y.a)) || cmp(String(x.b), String(y.b)))
+  return edges
 }
 
 /**
@@ -283,13 +283,13 @@ export function deriveSameAs(projection: StoreProjection): readonly SameAs[] {
  * (This docstring previously asserted the two "can never disagree" — false on both halves.)
  */
 export function sameAsClassOf(projection: StoreProjection, key: string): readonly string[] {
-  const members = new Set<string>([key]);
+  const members = new Set<string>([key])
   // Transitive closure by repeated expansion over the SYMMETRIC stored edges. The relation is stored on both
   // endpoints (the link door writes it symmetrically), but a peer is followed from EITHER direction here so a
   // half-written edge still widens the class — the conservative reading for a gate.
-  let grew = true;
+  let grew = true
   while (grew) {
-    grew = false;
+    grew = false
     for (const [rowKey, node] of projection.current) {
       // THREE identities per row, all of them followed: the ADDRESS the row is stored at (`rowKey` — what
       // this query is SEEDED with, and what the door then looks members up by), the identity the row DECLARES
@@ -299,16 +299,16 @@ export function sameAsClassOf(projection: StoreProjection, key: string): readonl
       // COLLAPSED the class to a singleton — `classOf(M) = [M]` for a row at `M` declaring `B ~ A` — which is
       // class shrinkage, i.e. the gate prices its authz and ratify checks over nothing. Following all three
       // can only ever WIDEN, and a wider class merely asks a link for a stronger signature.
-      const peers = node.sameAs ?? [];
-      const touches = members.has(rowKey) || members.has(node.nodeKey) || peers.some((p) => members.has(p));
-      if (!touches) continue;
+      const peers = node.sameAs ?? []
+      const touches = members.has(rowKey) || members.has(node.nodeKey) || peers.some((p) => members.has(p))
+      if (!touches) continue
       for (const k of [rowKey, node.nodeKey, ...peers]) {
         if (!members.has(k)) {
-          members.add(k);
-          grew = true;
+          members.add(k)
+          grew = true
         }
       }
     }
   }
-  return [...members].sort(cmp);
+  return [...members].sort(cmp)
 }

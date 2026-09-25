@@ -17,77 +17,77 @@
 // This module OWNS the runtime seam construction; `assembleHandler` (wire.ts) OWNS the leg assembly. Their
 // composition is the driver — no per-entrypoint copy (WIRE-1).
 
-import { join } from 'node:path';
-import type { Hash } from '@atlas/contracts';
-import { asHash } from '@atlas/kernel';
-import { createSymbolReverse, nodeHashOfPath } from '@atlas/index';
-import type { Axes } from '@atlas/index';
-import { bindReconcile, currentNodes } from '@atlas/knowledge';
-import type { GroundedFact } from '@atlas/knowledge';
-import { bindHits } from '@atlas/knowledge';
-import { asNodeKey } from '@atlas/kernel';
-import { createAnchors, createSlots, createDraft, createCheck } from '@atlas/tools';
-import type { T0Heuristic, TruthGate } from '@atlas/tools';
-import { walkFileTree } from './fs.js';
-import { deriveGroundingAxes, buildGroundingComputer, buildGate } from './grounding-computer.js';
-import { buildCheckPort } from './check-source.js';
-import { buildDraftIncumbentPort } from './draft-incumbent-source.js';
-import { readScipOrEmpty, readScipIndexerName } from './scip.js';
-import { loadPolicy } from './policy.js';
-import type { AtlasPolicy } from './policy.js';
-import { createRevIndex } from './rev-index.js';
-import { runGit, headSha } from './run-git.js';
-import { createDoctorSource, isMechanicalAt } from './doctor-source.js';
-import { createGovernedEmit } from './governed-emit.js';
-import { buildTargetEscapes } from './escape/target-escapes.js';
-import { buildDynamicReach } from './escape/dynamic-reach.js';
-import { createGovernedPromote } from './governed-promote.js';
-import { createOwnLeg } from './own-source.js';
-import { budgetLeg, territoriesLeg } from './calibration-ledger.js';
-import { createRelationLeg } from './relation-source.js';
-import { runDeriveRelations } from './relation-derive-run.js';
-import type { DeriveRelationsRun } from './relation-derive-run.js';
-import { createNegationLeg } from './negation-source.js';
-import { createTransitionLeg, createTransitionProducer } from './transition-source.js';
-import { buildTestVacuityFeed, buildTestVacuityLegs } from './compose-test-vacuity.js';
-import { createVerifyFactLeg } from './verify-fact-source.js';
-import { reverifyStore, makeScopeHasDocs, driftPairsOf, danglingOf } from './reverify-store.js';
-import type { DocExists } from './reverify-store.js';
-import { createDiskStore, rehydrateProjection } from './store.js';
-import { gitStoreProvenance } from './store-provenance.js';
-import type { SidecarTrust } from './store-provenance.js';
-import { buildReadAccess, trackedProvableAdvisory } from './read-access.js';
-import { assembleHandler, bindFreshnessOracle, edgeModelVersion } from './wire.js';
-import type { WireConfig, WireSeams } from './wire.js';
-import type { ComposedRuntime } from './compose-runtime.js';
-import { createDurableMemory } from './memory-store.js';
-import { createMemoryEmit } from './memory-emit.js';
-import { createMemoryRead } from './memory-read.js';
-import { createDurableOrientation } from './orientation-store.js';
-import { createAwarenessStore } from './awareness-store.js';
-import { makeScannerAdapter } from './scanner.js';
+import { join } from "node:path"
+import type { Hash } from "@atlas/contracts"
+import { asHash } from "@atlas/kernel"
+import { createSymbolReverse, nodeHashOfPath } from "@atlas/index"
+import type { Axes } from "@atlas/index"
+import { bindReconcile, currentNodes } from "@atlas/knowledge"
+import type { GroundedFact } from "@atlas/knowledge"
+import { bindHits } from "@atlas/knowledge"
+import { asNodeKey } from "@atlas/kernel"
+import { createAnchors, createSlots, createDraft, createCheck } from "@atlas/tools"
+import type { T0Heuristic, TruthGate } from "@atlas/tools"
+import { walkFileTree } from "./fs.js"
+import { deriveGroundingAxes, buildGroundingComputer, buildGate } from "./grounding-computer.js"
+import { buildCheckPort } from "./check-source.js"
+import { buildDraftIncumbentPort } from "./draft-incumbent-source.js"
+import { readScipOrEmpty, readScipIndexerName } from "./scip.js"
+import { loadPolicy } from "./policy.js"
+import type { AtlasPolicy } from "./policy.js"
+import { createRevIndex } from "./rev-index.js"
+import { runGit, headSha } from "./run-git.js"
+import { createDoctorSource, isMechanicalAt } from "./doctor-source.js"
+import { createGovernedEmit } from "./governed-emit.js"
+import { buildTargetEscapes } from "./escape/target-escapes.js"
+import { buildDynamicReach } from "./escape/dynamic-reach.js"
+import { createGovernedPromote } from "./governed-promote.js"
+import { createOwnLeg } from "./own-source.js"
+import { budgetLeg, territoriesLeg } from "./calibration-ledger.js"
+import { createRelationLeg } from "./relation-source.js"
+import { runDeriveRelations } from "./relation-derive-run.js"
+import type { DeriveRelationsRun } from "./relation-derive-run.js"
+import { createNegationLeg } from "./negation-source.js"
+import { createTransitionLeg, createTransitionProducer } from "./transition-source.js"
+import { buildTestVacuityFeed, buildTestVacuityLegs } from "./compose-test-vacuity.js"
+import { createVerifyFactLeg } from "./verify-fact-source.js"
+import { reverifyStore, makeScopeHasDocs, driftPairsOf, danglingOf } from "./reverify-store.js"
+import type { DocExists } from "./reverify-store.js"
+import { createDiskStore, rehydrateProjection } from "./store.js"
+import { gitStoreProvenance } from "./store-provenance.js"
+import type { SidecarTrust } from "./store-provenance.js"
+import { buildReadAccess, trackedProvableAdvisory } from "./read-access.js"
+import { assembleHandler, bindFreshnessOracle, edgeModelVersion } from "./wire.js"
+import type { WireConfig, WireSeams } from "./wire.js"
+import type { ComposedRuntime } from "./compose-runtime.js"
+import { createDurableMemory } from "./memory-store.js"
+import { createMemoryEmit } from "./memory-emit.js"
+import { createMemoryRead } from "./memory-read.js"
+import { createDurableOrientation } from "./orientation-store.js"
+import { createAwarenessStore } from "./awareness-store.js"
+import { makeScannerAdapter } from "./scanner.js"
 
 // The `mine` ADMISSION SUPPLY (REQ-CLI-4d), split to its own file at the LOC ceiling and RE-EXPORTED here so
 // the composition root's SURFACE is unchanged — see that file's header for why the seam is real, and for the
 // measurement that made it necessary (0 candidates staged on every repository `atlas mine` was ever run on).
-export { buildMineAdmission } from './compose-mine-admission.js';
-export type { MineAdmission, Reground } from './compose-mine-admission.js';
+export { buildMineAdmission } from "./compose-mine-admission.js"
+export type { MineAdmission, Reground } from "./compose-mine-admission.js"
 
 // `ComposedRuntime` — extracted to `compose-runtime.ts` at the godfile-guard HARD ceiling (mechanical,
 // byte/behaviour-preserving: the interface body is transcribed verbatim there). Imported above and
 // RE-EXPORTED here under the same name so every existing import site is untouched (`adapter-io/src/
 // index.ts`'s `export type { ComposedRuntime, … } from './compose.js'`).
-export type { ComposedRuntime } from './compose-runtime.js';
+export type { ComposedRuntime } from "./compose-runtime.js"
 
 /** Where `composeRuntime` looks for the optional SCIP dump under a repo (empty axes if absent, per §7). */
-const SCIP_REL = join('.atlas', 'index.scip');
+const SCIP_REL = join(".atlas", "index.scip")
 /** The durable CAS root under a repo (D4). */
-const CAS_REL = join('.atlas', 'cas');
+const CAS_REL = join(".atlas", "cas")
 
 /** The exhaustive-projection ROW-COUNT CEILING for `atlas derive-relations` (F2/AR-28/AR-30) — a resolved-edge
  *  count above this makes the run FAIL LOUD (an `overBudget` refusal, never a partial set labelled complete).
  *  Sized well above Atlas's own resolved intra-repo edge count (low thousands) with headroom; a DELIBERATE knob. */
-const DERIVE_RELATIONS_BUDGET = 50_000;
+const DERIVE_RELATIONS_BUDGET = 50_000
 
 /**
  * The T0-candidate keyword heuristic (TOOLS-5): a territory is a T0 candidate iff its name contains one of
@@ -95,13 +95,13 @@ const DERIVE_RELATIONS_BUDGET = 50_000;
  * proposes nothing on its own until an admin declares the set. Pure + total.
  */
 export function buildHeuristic(policy: AtlasPolicy): T0Heuristic {
-  return { isCandidate: (t) => policy.t0Heuristic.keywords.some((k) => t.name.includes(k)) };
+  return { isCandidate: (t) => policy.t0Heuristic.keywords.some((k) => t.name.includes(k)) }
 }
 
 // `buildGate` — the REAL GROUND truth-gate adapted to the tools `TruthGate` surface — now lives with the ONE
 // grounding computer it shares an `Axes` with (grounding-computer.ts, AUTHOR-1: gate and `anchors` planner are
 // one seam). RE-EXPORTED so the barrel + `../src/compose.js` importers stay byte-unchanged.
-export { buildGate };
+export { buildGate }
 /**
  * The LOCAL git identity (`git config user.email`) at `repoPath`, or `undefined`. TOTAL — never throws:
  * no git, no configured email, a non-repo/absent path, or ANY execFile failure ⇒ `undefined`; an empty
@@ -116,10 +116,10 @@ export { buildGate };
  */
 export function gitUserEmail(repoPath: string): string | undefined {
   try {
-    const email = runGit(repoPath, ['config', 'user.email']).trim();
-    return email.length > 0 ? email : undefined;
+    const email = runGit(repoPath, ["config", "user.email"]).trim()
+    return email.length > 0 ? email : undefined
   } catch {
-    return undefined;
+    return undefined
   }
 }
 
@@ -167,46 +167,46 @@ export function composeRuntime(repoPath: string): ComposedRuntime {
   //
   // NOT AUTHENTICATION — see the doc block above. This line reads a self-asserted string; it does not
   // establish who anyone is, and no code downstream of it does either.
-  const actor = process.env.ATLAS_ACTOR ?? gitUserEmail(repoPath) ?? '';
+  const actor = process.env.ATLAS_ACTOR ?? gitUserEmail(repoPath) ?? ""
   // The KNOW-8 ratify token for a full-ratify (T0/predicate/contested) commit. Env-sourced ONLY
   // (`ATLAS_RATIFY_TOKEN`) — the SAME payload-free channel as the actor; there is NO git/machine fallback (a
   // ratifier signature is deliberate, not a local default). ABSENT ⇒ passed as absent below ⇒ the door fails
   // closed on a full-ratify fact (a T0 fact requires the `billy` token). NEVER sourced from an emitted fact.
-  const ratifyToken = process.env.ATLAS_RATIFY_TOKEN;
+  const ratifyToken = process.env.ATLAS_RATIFY_TOKEN
 
-  const policy = loadPolicy(repoPath);
-  const scipPath = join(repoPath, SCIP_REL);
+  const policy = loadPolicy(repoPath)
+  const scipPath = join(repoPath, SCIP_REL)
   // Fold sub-file AST units BEFORE `build` (F1), the SAME transform `assembleHandler` applies to its index
   // FileTree, so the truth-gate re-derives freshness against an index that carries `::` symbol nodes. A
   // symbol-grounded fact therefore resolves FRESH and its `::` primaryAnchor lets `deriveSubsumes` fire.
   // `foldAstUnits` is a no-op until `initAst()` has been awaited (the entrypoint bins do this once, before
   // composeRuntime); this keeps composeRuntime SYNC for its many direct callers while the production doors
   // (which spawn these bins) get real sub-file granularity.
-  const scipOutput = readScipOrEmpty(scipPath);
+  const scipOutput = readScipOrEmpty(scipPath)
   // #99 F1 — the indexer identity the collapsed-local gate trusts, read from the raw dump's
   // `metadata.toolInfo.name` (the frozen `ScipOutput` projection drops it). `undefined` on a missing/foreign
   // dump ⇒ the heuristic stays OFF (fail-closed). Threaded into BOTH symbol-reverse feeds built below.
-  const indexerName = readScipIndexerName(scipPath);
+  const indexerName = readScipIndexerName(scipPath)
   // Capture the RAW (unfolded) file tree so the sound-negation `dynamicReach` leg can scan file bytes off the
   // SAME walk `build` folds — no second FS traversal, no divergent view of what the repo contains.
-  const rawTree = walkFileTree(repoPath);
+  const rawTree = walkFileTree(repoPath)
   // THE ONE GROUNDING DERIVATION (AUTHOR-1): the emit truth-gate (`buildGate(axes)`) and the `anchors` planner
   // both route through this single seam (`deriveGroundingAxes` — the SOLE fold→build on the grounding path;
   // rev-index.ts's arbitrary-rev oracle routes through it too), so neither can derive a different `subtreeHash`
   // for an anchor. `fileTree` (the folded input) rides back for DEDUP-COMPOSITION (#241, threaded below).
-  const { axes, fileTree } = deriveGroundingAxes(rawTree, scipOutput);
+  const { axes, fileTree } = deriveGroundingAxes(rawTree, scipOutput)
   // THE ONE GROUNDING COMPUTER (AUTHOR-1) over the axes just derived — the `anchors` planner's backing seam;
   // `createAnchors` (frozen `@atlas/tools` leg) wraps it with the honest-empty invariant. Same `axes`/`rawTree`
   // the gate rides, same HEAD sha the durable store stamps — provably one seam. A PLANNER (no write path).
-  const groundingComputer = buildGroundingComputer({ axes, rawTree, rev: headSha(repoPath) ?? '' });
-  const anchorsLeg = createAnchors(groundingComputer);
+  const groundingComputer = buildGroundingComputer({ axes, rawTree, rev: headSha(repoPath) ?? "" })
+  const anchorsLeg = createAnchors(groundingComputer)
   // THE `slots` DISCOVERY PLANNER (WP-10.A2-a / ADR-0004, AUTHOR-5) — no injected port: it reads the
   // compile-time `PredicateSlot` union, not the index, so it needs no `groundingComputer`.
-  const slotsLeg = createSlots();
+  const slotsLeg = createSlots()
   // #96 F2 — the SAME N0 completeness view the emit leg rides (`() => index.symbolReverse()`, wire.ts:217),
   // built ONCE off the SAME `scipOutput` the axes above are built from, so the promote leg (below) reaches
   // `emitNegation` with its deps satisfied instead of fail-closing `scope-empty` for every promoted negation.
-  const symbolReverseView = createSymbolReverse(scipOutput, { indexerName });
+  const symbolReverseView = createSymbolReverse(scipOutput, { indexerName })
 
   // ADR-0016 M2b — the TWO v2 negation closure legs, built ONCE off the same `scipPath`/`repoPath`/`rawTree`
   // the other legs ride. `targetEscapes` = `escape(X)` (raw SCIP ranges ⋈ tree-sitter, canonicalized);
@@ -215,17 +215,16 @@ export function composeRuntime(repoPath: string): ComposedRuntime {
   // have run — or the dump is unreadable). The door runs the target-relative gate IFF BOTH are wired; if either
   // is absent it falls back to the sound `holeSources() ∩ S` blanket, so we wire NEITHER unless BOTH exist (a
   // half-gate is never run). This mirrors the `foldAstUnits` no-op-until-`initAst` degrade a few lines above.
-  const targetEscapes = buildTargetEscapes({ scipPath, repoPath });
-  const dynamicReach = buildDynamicReach(rawTree);
-  const escapeLegs =
-    targetEscapes !== undefined && dynamicReach !== undefined ? { targetEscapes, dynamicReach } : {};
+  const targetEscapes = buildTargetEscapes({ scipPath, repoPath })
+  const dynamicReach = buildDynamicReach(rawTree)
+  const escapeLegs = targetEscapes !== undefined && dynamicReach !== undefined ? { targetEscapes, dynamicReach } : {}
 
   // The REAL reconcile drift seams (COMPOSE-C). `revIndex` builds the code index at an arbitrary rev:
   //   - `reDerives`         — a fact re-derives iff its grounding is still FRESH at the topic sha.
   //   - `resolveAnchorAt`   — the anchor's `StructRef` at a rev (the drift-source diffs mergeBase vs topic).
   //   - `driftFacts`        — the current grounded facts from the durable projection. Governed-emit
   //     `store.put`s the WHOLE `GroundedFact` (invariant 6), so `store.get(contentHash)` reads it back.
-  const revIndex = createRevIndex(repoPath);
+  const revIndex = createRevIndex(repoPath)
   // N11: the doctor/reconcile store stamps the same freshness watermark (HEAD at persist) as the handler's.
   // PROVENANCE (the root the doors hang from): git is owned HERE, so the tripwire that asks whether the
   // durable store is TRACKED — i.e. arrived by commit rather than through a door — is built here and
@@ -236,35 +235,35 @@ export function composeRuntime(repoPath: string): ComposedRuntime {
   // caller (`store` itself, for writes) rides, byte-identical to before (`true` iff `provenance()` is
   // `'trusted'`); the RICHER answer — what a READ may see for `tracked-staging` vs `tracked-provable` — is
   // `readAccess`, built below once `verifyFactLeg` (its oracle) exists.
-  const provenance = gitStoreProvenance(repoPath);
-  const trusted: SidecarTrust = () => provenance() === 'trusted';
-  const store = createDiskStore(join(repoPath, CAS_REL), () => headSha(repoPath), trusted);
+  const provenance = gitStoreProvenance(repoPath)
+  const trusted: SidecarTrust = () => provenance() === "trusted"
+  const store = createDiskStore(join(repoPath, CAS_REL), () => headSha(repoPath), trusted)
   // THE `draft` + `draftSupersede` COMPOSITION PLANNERS (WP-10.A2-a/b / ADR-0004, AUTHOR-6/7/9/10/13) — over
   // the SAME `groundingComputer` `anchors` rides (AUTHOR-1: one grounding seam), so a drafted fact's
   // `subtreeHash` is exactly the value the emit truth-gate will re-derive against, PLUS the `IncumbentPort`
   // (`@atlas/tools` `draft.ts`) built here over the SAME `store` the durable emit door and the `check`
   // dry-run leg (below) ride — never a second store, never a second occupancy notion.
-  const draftLeg = createDraft(groundingComputer, buildDraftIncumbentPort(store));
+  const draftLeg = createDraft(groundingComputer, buildDraftIncumbentPort(store))
   // `driftPairs` carries each fact ALONGSIDE its own `CurrentNode` (`reverify` needs `node.primaryAnchor` for
   // the anchor-binding check, #199); `driftFacts` is the same pairing's `.fact` projection — ONE store read.
-  const driftPairs = driftPairsOf(store);
-  const driftFacts = driftPairs.map((p) => p.fact);
+  const driftPairs = driftPairsOf(store)
+  const driftFacts = driftPairs.map((p) => p.fact)
   // THE SOUND-GENESIS PROVEN-FAMILY ORACLE, built ONCE and shared by BOTH `verifyFact` (the CLI's
   // `atlas verify-fact`) and `reverify` (`atlas verify-store`) below — the ONE production oracle, never a
   // duplicate that could drift from it.
-  const verifyFactLeg = createVerifyFactLeg(scipOutput, { indexerName });
+  const verifyFactLeg = createVerifyFactLeg(scipOutput, { indexerName })
   // THE ANCHOR-EXISTENCE CHECK (#199 fix-round round 3, tamper binding (d)) — reverifyFact's PROOF that a
   // fact's own anchor names a document the live index actually has, not merely that it stands in the right
   // RELATION to the witness's scope. Built from the SAME `scipOutput.documents` list `createVerifyFactLeg`
   // already iterates for its own `pathByHash` table (`verify-fact-source.ts`) — NO second index build, no
   // new seam, one `Set` over data already in memory.
-  const docPaths = new Set(scipOutput.documents.map((d) => d.relativePath));
-  const docExists: DocExists = (p) => docPaths.has(p);
-  const scopeHasDocs = makeScopeHasDocs(scipOutput.documents); // #240 follow-up — ∃ doc under a negation's scope
+  const docPaths = new Set(scipOutput.documents.map((d) => d.relativePath))
+  const docExists: DocExists = (p) => docPaths.has(p)
+  const scopeHasDocs = makeScopeHasDocs(scipOutput.documents) // #240 follow-up — ∃ doc under a negation's scope
   // THE ONE SHARED TEST-VACUITY FEED (#95 D5), built HERE — BEFORE `buildReadAccess` — because its `replay`
   // needs only `rawTree` + `axes` (in hand), NEVER `readAccess.store`. Early build lets the `tracked-provable`
   // serve re-prove proven test-vacuities (#249); reused below so producer + BOTH replay sites scan ONE `testUnitsOf` (#186/N10).
-  const tvFeed = buildTestVacuityFeed(rawTree, axes);
+  const tvFeed = buildTestVacuityFeed(rawTree, axes)
   // THE READ-SIDE ANSWER (TRAVEL-BY-REPROOF, `read-access.ts`): what every read leg below is allowed to see.
   // `trusted` ⇒ `store` verbatim, no new cost. `tracked-staging` ⇒ a refusal, unchanged in kind. `tracked-
   // provable` ⇒ a raw re-read filtered to the facts that replay `re-proven` against `verifyFactLeg` — the
@@ -280,7 +279,7 @@ export function composeRuntime(repoPath: string): ComposedRuntime {
     // #249 — thread the replay so `tracked-provable` RE-PROVES proven test-vacuities instead of dropping them
     // `unverifiable`. `readAccess.reverified` is now computed WITH it, keeping the `reverify()` `??` consistent.
     replay: tvFeed.replay,
-  });
+  })
 
   // WP-D3B-B.USE-OR-SEAL (ARCH-D3b item 2, INV-AUTH-16) — the ONE served-use ledger, bound here (the
   // composition root) and injected into the WIRE server seam. This is what CLOSES the "no production
@@ -299,20 +298,20 @@ export function composeRuntime(repoPath: string): ComposedRuntime {
   const hits = bindHits({
     servedSet: () => currentNodes(rehydrateProjection(readAccess.store)).map((n) => asNodeKey(n.nodeKey)),
     archive: (nodeId) => {
-      const proj = currentNodes(rehydrateProjection(readAccess.store));
-      const node = proj.find((n) => n.nodeKey === nodeId);
-      if (node === undefined) return; // a node not in the served set has nothing to archive
-      const fact = store.get(node.contentHash as Hash) as GroundedFact | undefined;
-      if (fact === undefined) return; // CAS bytes already absent ⇒ nothing to re-assert (never a throw)
-      store.put(fact); // KNOW-12: re-assert into CAS — idempotent, never deletes.
+      const proj = currentNodes(rehydrateProjection(readAccess.store))
+      const node = proj.find((n) => n.nodeKey === nodeId)
+      if (node === undefined) return // a node not in the served set has nothing to archive
+      const fact = store.get(node.contentHash as Hash) as GroundedFact | undefined
+      if (fact === undefined) return // CAS bytes already absent ⇒ nothing to re-assert (never a throw)
+      store.put(fact) // KNOW-12: re-assert into CAS — idempotent, never deletes.
     },
     calibrate: (observedHits: number) => observedHits, // OPEN-DEFINE door-2 — pass-through, no veto
-  });
+  })
 
   // THE ONE TRUTH-GATE INSTANCE — built once here so `seams.gate` (the durable emit door's gate) and the
   // `check` dry-run below (next) share the IDENTICAL adapted gate over the SAME `axes`, never two instances
   // that could drift apart.
-  const truthGate = buildGate(axes);
+  const truthGate = buildGate(axes)
 
   // THE `check` DRY-RUN PLANNER (WP-10.A3 / ADR-0004, AUTHOR-11/12) — the `GateChainRunner` port
   // (`@atlas/tools`) implemented over `runGateChain` (WP-10.A3.ADAPTER, `check-source.ts`) with the IDENTICAL
@@ -326,8 +325,8 @@ export function composeRuntime(repoPath: string): ComposedRuntime {
     policy,
     actor,
     ...(ratifyToken !== undefined ? { ratifyToken } : {}),
-  });
-  const checkLeg = createCheck(checkPort);
+  })
+  const checkLeg = createCheck(checkPort)
 
   const seams: WireSeams = {
     heuristic: buildHeuristic(policy),
@@ -357,21 +356,21 @@ export function composeRuntime(repoPath: string): ComposedRuntime {
     // PURE RENAME (old path deleted at HEAD ⇒ path-keyed `now` undefined ⇒ no pair under the old logic ⇒ the
     // moved fact was silently dropped before the classifier ever saw it). Same frozen revIndex method N9 uses.
     resolveBySubtreeAt: revIndex.resolveBySubtreeAt,
-  };
+  }
 
   // WP-11.W8 / CAMPAIGN-11 — the durable MEMORY doors, over their OWN separate log (`.atlas/memory.jsonl`,
   // `.atlas/orientation.jsonl` — NOT the knowledge CAS `store` above). D1: the owner is `actor`, the SAME
   // env/git-resolved identity every other governed write door rides (KNOW-11) — this composition root
   // resolves it once and threads it here; no door downstream reads it from a fact/payload or accepts one
   // as a caller-supplied argument (that would reopen the confused-deputy hole D1/D3 closed).
-  const memoryStore = createDurableMemory(repoPath);
-  const orientationStore = createDurableOrientation(repoPath);
-  const awarenessStore = createAwarenessStore(repoPath);
+  const memoryStore = createDurableMemory(repoPath)
+  const orientationStore = createDurableOrientation(repoPath)
+  const awarenessStore = createAwarenessStore(repoPath)
   // MEM-9b/9c — the real pre-write scanner: binds `gitleaks`/`trufflehog` when one is on PATH, else a
   // named fail-closed refusal (never a silent pass — `scanner.ts`'s own header, A9).
-  const memoryScanner = makeScannerAdapter();
-  const memoryEmitDoor = createMemoryEmit({ store: memoryStore, actor, scanner: memoryScanner });
-  const memoryReadDoor = createMemoryRead({ store: memoryStore, actor });
+  const memoryScanner = makeScannerAdapter()
+  const memoryEmitDoor = createMemoryEmit({ store: memoryStore, actor, scanner: memoryScanner })
+  const memoryReadDoor = createMemoryRead({ store: memoryStore, actor })
 
   const config: WireConfig = {
     repoPath,
@@ -420,7 +419,7 @@ export function composeRuntime(repoPath: string): ComposedRuntime {
     // threading them individually cannot desync the two doors' half-gate discipline from each other.
     ...(targetEscapes !== undefined ? { targetEscapes } : {}),
     ...(dynamicReach !== undefined ? { dynamicReach } : {}),
-  };
+  }
 
   // The real read-only diagnostic port — built over `readAccess.store` (TRAVEL-BY-REPROOF: the durable
   // store `atlas doctor` reads is the SAME possibly-filtered one every other read leg reads, never a second
@@ -428,20 +427,24 @@ export function composeRuntime(repoPath: string): ComposedRuntime {
   // read at all" (`true` for `trusted`/`tracked-provable`, `false` for `tracked-staging`/fail-closed) —
   // `readAccess.store` itself already carries the FILTER for `tracked-provable`, so the boolean only needs
   // to gate the flat-refusal case, exactly as `doctor-source.ts`'s `refuseUntrustedRead` expects.
-  const doctorSource = createDoctorSource(readAccess.store, revIndex, () => readAccess.refusal === undefined,
-    join(repoPath, CAS_REL)); // ADR-0022: the CAS root, from the ONE place that already knows it
+  const doctorSource = createDoctorSource(
+    readAccess.store,
+    revIndex,
+    () => readAccess.refusal === undefined,
+    join(repoPath, CAS_REL),
+  ) // ADR-0022: the CAS root, from the ONE place that already knows it
 
   // The provenance verdict, resolved ONCE by `buildReadAccess` above and handed to the entrypoint.
   // Conditional spread keeps it ABSENT (not `undefined`) on a healthy repo — `exactOptionalPropertyTypes`,
   // and the same discipline `ratifyToken` uses above. `tracked-provable` success is NOT a refusal (case 2
   // narrows, it does not refuse) — `readAccess.refusal` is only present for `tracked-staging` or the
   // fail-closed leg, which is exactly the population this used to name.
-  const readRefusal = readAccess.refusal;
+  const readRefusal = readAccess.refusal
   // The ADVISORY MESSAGE (TRAVEL-BY-REPROOF): present ONLY for a successful `tracked-provable` serve —
   // legible, in the product's own voice, about WHY a committed store might be serving fewer facts than it
   // holds. `undefined` for `trusted` (nothing to explain) and for a refusal (the refusal text already says
   // why nothing is served).
-  const readAdvisory = readAccess.reverified !== undefined ? trackedProvableAdvisory(readAccess.reverified) : undefined;
+  const readAdvisory = readAccess.reverified !== undefined ? trackedProvableAdvisory(readAccess.reverified) : undefined
 
   // THE `origin:'promoted'` EMIT DOOR — the ONE builder BOTH the promote leg (KNOW-8) AND the sound-relation +
   // transition producers ride. Composed from the SAME parts the `atlas-emit` leg is (this store, gate, policy,
@@ -466,22 +469,22 @@ export function composeRuntime(repoPath: string): ComposedRuntime {
       gate: seams.gate,
       policy,
       actor,
-      origin: 'promoted',
+      origin: "promoted",
       ...(ratifyToken !== undefined ? { ratifyToken } : {}),
       symbolReverse: () => symbolReverseView,
       axes,
       nodeHashOfPath,
       edgeModel: edgeModelVersion(),
       ...escapeLegs,
-    }).emit;
+    }).emit
 
-  const promoteLeg = createGovernedPromote({ store, emit: promotedEmit() });
+  const promoteLeg = createGovernedPromote({ store, emit: promotedEmit() })
 
   // THE #99 SOUND-RELATION DERIVE-AND-PERSIST LEG (`atlas derive-relations`, WP-R7). It publishes proven
   // `depends-on` relations through the SAME `promotedEmit` door above (also the transition producer's door). The
   // leg is a THUNK; `runDeriveRelations` re-composes `buildMineAdmission` (now carrying the sound `verifyRelation`
   // oracle) + `ground`-over-`axes` over the SAME index every other leg reads.
-  const relationEmit = promotedEmit();
+  const relationEmit = promotedEmit()
   const deriveRelationsLeg = (): DeriveRelationsRun =>
     runDeriveRelations({
       axes,
@@ -490,13 +493,13 @@ export function composeRuntime(repoPath: string): ComposedRuntime {
       emit: relationEmit,
       // The anchor rev the write is stamped at (the repo's live HEAD, read through the shared no-shell git seam).
       // The composed truth-gate ignores it (it re-derives freshness against the built `axes`), threaded honestly.
-      at: asHash(headSha(repoPath) ?? ''),
+      at: asHash(headSha(repoPath) ?? ""),
       maxRelations: DERIVE_RELATIONS_BUDGET,
-    });
+    })
 
   // #95 D5 — the THREE test-vacuity legs built from the ONE shared feed `tvFeed` above (the SAME feed the
   // `tracked-provable` serve filter already re-proved over). Producer rides `relationEmit`; `replay` feeds `reverify`.
-  const tvLegs = buildTestVacuityLegs(tvFeed, readAccess.store, relationEmit, asHash(headSha(repoPath) ?? ''));
+  const tvLegs = buildTestVacuityLegs(tvFeed, readAccess.store, relationEmit, asHash(headSha(repoPath) ?? ""))
 
   return {
     handler: assembleHandler(config),
@@ -543,7 +546,7 @@ export function composeRuntime(repoPath: string): ComposedRuntime {
     negations: createNegationLeg(readAccess.store, bindFreshnessOracle(axes, edgeModelVersion())),
     // #234 — READ leg off the SAME store the query leg reads. The PRODUCER routes THROUGH the governed door (`relationEmit`; transition branch = `governed-emit-transition.ts`) so KNOW-11 authz + ARCH-9 anchor apply (billy #234 — no gate-less write).
     transitions: createTransitionLeg(readAccess.store),
-    transition: createTransitionProducer(revIndex, relationEmit, asHash(headSha(repoPath) ?? '')),
+    transition: createTransitionProducer(revIndex, relationEmit, asHash(headSha(repoPath) ?? "")),
     testVacuities: tvLegs.testVacuities, // #95 D5 READ leg (from `tvLegs` above; replay is its third leg, fed to `reverify`)
     testVacuity: tvLegs.testVacuity,
     // THE SOUND-GENESIS PROVEN-FAMILY FEED (`atlas verify-fact`). Off the SAME `scipOutput` the axes ride — a
@@ -590,5 +593,5 @@ export function composeRuntime(repoPath: string): ComposedRuntime {
     territories: territoriesLeg(policy),
     ...(readRefusal !== undefined ? { readRefusal } : {}),
     ...(readAdvisory !== undefined ? { readAdvisory } : {}),
-  };
+  }
 }

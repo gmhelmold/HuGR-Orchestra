@@ -26,11 +26,11 @@
 // `sr` does NOT (a raw `startsWith` would wrongly match). Reused, not reinvented, and kept in-layer (the fold
 // lives in @atlas/knowledge, which cannot reach adapter-io's `underScope`).
 
-import type { StoreProjection } from '../write/router.js';
-import type { CurrentNode } from '../write/upsert.js';
-import type { KnowledgeFreshness } from '../types.js';
-import type { AbstainedRecord } from '../negation-types.js';
-import { isPrefix } from './anchor-match.js';
+import type { StoreProjection } from "../write/router.js"
+import type { CurrentNode } from "../write/upsert.js"
+import type { KnowledgeFreshness } from "../types.js"
+import type { AbstainedRecord } from "../negation-types.js"
+import { isPrefix } from "./anchor-match.js"
 
 /** One grounded NEGATIVE the truth door admitted. `nodeKey` is the negation's identity (`negationKey`, the
  *  row's key); `relationKind`/`target`/`scope` are the identity legs stamped on the row's frozen carriers.
@@ -44,23 +44,23 @@ import { isPrefix } from './anchor-match.js';
  *  (billy F3's observability). ABSENT the recompute (the bare fold / a pre-wiring caller) ⇒ `DRIFTED`,
  *  fail-closed — never "always fresh". */
 export interface GroundedNegation {
-  readonly nodeKey: string;
-  readonly relationKind: string;
-  readonly target: string; // the GLOBAL symbol X the negative is ABOUT (¬∃ · →X) — the endpointB carrier
-  readonly scope: string; //  the CLOSED scope S the witness ranges over — the governance carrier
-  readonly freshness: KnowledgeFreshness; // §3 4-clause verdict (driftDetect ∧ edgeModel), resolved by the adapter
+  readonly nodeKey: string
+  readonly relationKind: string
+  readonly target: string // the GLOBAL symbol X the negative is ABOUT (¬∃ · →X) — the endpointB carrier
+  readonly scope: string //  the CLOSED scope S the witness ranges over — the governance carrier
+  readonly freshness: KnowledgeFreshness // §3 4-clause verdict (driftDetect ∧ edgeModel), resolved by the adapter
 }
 
 /** Lexicographic string comparator — total, no locale (the one the sibling read folds sort by). */
 function cmp(x: string, y: string): number {
-  return x < y ? -1 : x > y ? 1 : 0;
+  return x < y ? -1 : x > y ? 1 : 0
 }
 
 /** Is `rowScope` UNDER `queryScope` — a SEGMENT-WISE path-prefix test (`/`-split), the #153-safe containment
  *  the read side scopes on (`isPrefix`, anchor-match.ts; adapter-io `underScope` mirrors the same discipline).
  *  `src` covers `src/payments`; `sr` does not cover `src`. Equal scopes are contained (a prefix of itself). */
 function scopeCovers(queryScope: string, rowScope: string): boolean {
-  return isPrefix(queryScope.split('/'), rowScope.split('/'));
+  return isPrefix(queryScope.split("/"), rowScope.split("/"))
 }
 
 /**
@@ -82,22 +82,25 @@ export function negationsOf(
   scope?: string,
   freshnessOf?: (node: CurrentNode) => KnowledgeFreshness,
 ): readonly GroundedNegation[] {
-  const filter = typeof scope === 'string' && scope.length > 0 ? scope : undefined;
-  const out: GroundedNegation[] = [];
+  const filter = typeof scope === "string" && scope.length > 0 ? scope : undefined
+  const out: GroundedNegation[] = []
   for (const node of projection.current.values()) {
-    if (node.family !== 'negation') continue;
-    const k = node.relationKind;
-    const target = node.endpointB;
-    const s = node.scope;
-    if (typeof k !== 'string' || typeof target !== 'string' || typeof s !== 'string') continue; // malformed ⇒ skip
-    if (filter !== undefined && !scopeCovers(filter, s)) continue;
-    const freshness = freshnessOf?.(node) ?? 'DRIFTED'; // fail-closed: no recompute ⇒ never asserted FRESH
-    out.push({ nodeKey: node.nodeKey, relationKind: k, target, scope: s, freshness });
+    if (node.family !== "negation") continue
+    const k = node.relationKind
+    const target = node.endpointB
+    const s = node.scope
+    if (typeof k !== "string" || typeof target !== "string" || typeof s !== "string") continue // malformed ⇒ skip
+    if (filter !== undefined && !scopeCovers(filter, s)) continue
+    const freshness = freshnessOf?.(node) ?? "DRIFTED" // fail-closed: no recompute ⇒ never asserted FRESH
+    out.push({ nodeKey: node.nodeKey, relationKind: k, target, scope: s, freshness })
   }
   return out.sort(
     (x, y) =>
-      cmp(x.scope, y.scope) || cmp(x.relationKind, y.relationKind) || cmp(x.target, y.target) || cmp(x.nodeKey, y.nodeKey),
-  );
+      cmp(x.scope, y.scope) ||
+      cmp(x.relationKind, y.relationKind) ||
+      cmp(x.target, y.target) ||
+      cmp(x.nodeKey, y.nodeKey),
+  )
 }
 
 /**
@@ -111,13 +114,13 @@ export function negationsOf(
  * readable end to end — the exact thing "abstention NEVER fired, 0/300" said no one could see.
  */
 export function abstentionsOf(projection: StoreProjection, scope?: string): readonly AbstainedRecord[] {
-  const ledger = projection.abstained;
-  if (ledger === undefined) return []; // absent map ⇒ no abstentions (back-compat), never a throw
-  const filter = typeof scope === 'string' && scope.length > 0 ? scope : undefined;
-  const out: AbstainedRecord[] = [];
+  const ledger = projection.abstained
+  if (ledger === undefined) return [] // absent map ⇒ no abstentions (back-compat), never a throw
+  const filter = typeof scope === "string" && scope.length > 0 ? scope : undefined
+  const out: AbstainedRecord[] = []
   for (const rec of ledger.values()) {
-    if (filter !== undefined && !scopeCovers(filter, rec.scope)) continue;
-    out.push(rec);
+    if (filter !== undefined && !scopeCovers(filter, rec.scope)) continue
+    out.push(rec)
   }
   return out.sort(
     (x, y) =>
@@ -126,5 +129,5 @@ export function abstentionsOf(projection: StoreProjection, scope?: string): read
       cmp(x.target, y.target) ||
       cmp(x.reason, y.reason) ||
       cmp(x.id, y.id),
-  );
+  )
 }

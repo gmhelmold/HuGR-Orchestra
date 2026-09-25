@@ -14,40 +14,40 @@
 // SEMANTIC ("FAILs the build") but are silent on the bit. Per the resolution rule we adopt the ref's
 // recommendation `true`=PASS (gate reads as a predicate), so a FAILing gate returns `false`. FLAGGED.
 
-import { describe, expect, it } from 'vitest';
-import type { Territory } from '@atlas/contracts';
-import { createCoverage } from '../src/coverage.js';
+import { describe, expect, it } from "vitest"
+import type { Territory } from "@atlas/contracts"
+import { createCoverage } from "../src/coverage.js"
 
-const cas = (tier: Territory['tier']): Territory => ({
-  name: 'cas',
-  owner: 'seat:index',
+const cas = (tier: Territory["tier"]): Territory => ({
+  name: "cas",
+  owner: "seat:index",
   tier,
   globs: [],
-});
+})
 
-describe('INDEX-16 — standing coverage gate (coverage.ts)', () => {
-  it('SCN-INDEX-16a-1: publishes the unresolved-edge ratio per-territory on every rollup', () => {
+describe("INDEX-16 — standing coverage gate (coverage.ts)", () => {
+  it("SCN-INDEX-16a-1: publishes the unresolved-edge ratio per-territory on every rollup", () => {
     // Given `territory:cas` with 3 unresolved of 20 total edges.
-    const cov = createCoverage([{ territory: 'cas', unresolved: 3, total: 20 }]);
+    const cov = createCoverage([{ territory: "cas", unresolved: 3, total: 20 }])
     // Then the rollup publishes ratio(cas) = 3/20 = 0.15 as a readable per-territory health metric.
-    expect(cov.ratio(cas('T0'))).toBe(0.15);
-  });
+    expect(cov.ratio(cas("T0"))).toBe(0.15)
+  })
 
-  it('SCN-INDEX-16b-1: enforces the T0 ceiling as a standing gate from day one', () => {
+  it("SCN-INDEX-16b-1: enforces the T0 ceiling as a standing gate from day one", () => {
     // Given a T0 territory with ratio 0.20 (> 0.15) at first build.
-    const cov = createCoverage([{ territory: 'cas', unresolved: 4, total: 20 }]);
-    const t0 = cas('T0');
+    const cov = createCoverage([{ territory: "cas", unresolved: 4, total: 20 }])
+    const t0 = cas("T0")
     // The gate is active from day one and evaluates the ceiling (not deferred to the `functional` axis):
     // it returns a real verdict now, and a crossing ratio yields FAIL (=== false under true=PASS).
-    expect(cov.ratio(t0)).toBe(0.2);
-    expect(cov.gate(t0)).toBe(false);
-  });
+    expect(cov.ratio(t0)).toBe(0.2)
+    expect(cov.gate(t0)).toBe(false)
+  })
 
-  it('SCN-INDEX-16c-1: a T0 territory crossing the ceiling FAILs the gate', () => {
+  it("SCN-INDEX-16c-1: a T0 territory crossing the ceiling FAILs the gate", () => {
     // Given T0 `territory:cas` with unresolved/total = 0.20 > 0.15.
-    const cov = createCoverage([{ territory: 'cas', unresolved: 4, total: 20 }]);
+    const cov = createCoverage([{ territory: "cas", unresolved: 4, total: 20 }])
     // Then gate(cas) FAILs the build (not merely schedules the `functional` axis).
     // true=PASS polarity ⇒ FAIL is encoded as `false` (the gate-fires assertion).
-    expect(cov.gate(cas('T0'))).toBe(false);
-  });
-});
+    expect(cov.gate(cas("T0"))).toBe(false)
+  })
+})

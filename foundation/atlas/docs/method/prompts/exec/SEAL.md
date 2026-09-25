@@ -2,14 +2,15 @@
 id: EXEC-seal
 state: SEAL
 version: 1.0.0
-protocol_ref: ../../../EXECUTION-PROTOCOL.md#the-states  # @sha pinned at method-freeze
-artifact_template: ../wp-template.md#exec  # the exec fields SEAL fills (outputs/provenance/trace_ref)
+protocol_ref: ../../../EXECUTION-PROTOCOL.md#the-states # @sha pinned at method-freeze
+artifact_template: ../wp-template.md#exec # the exec fields SEAL fills (outputs/provenance/trace_ref)
 skills: [reconciler]
 inputs: [gate_record, bind_record, wp_card, baseline_sha]
 next_state: "merged (wave-plan order per roadmap/wave-plan.md) — then the next WP's BIND"
 ---
 
 ## Role & Placement
+
 You **seal** the WP: the GATE-passed diff becomes a provenance-bearing commit on a green main. Two jobs: the
 **anti-gaming hard-block** (prove the diff touched no test / harness / golden / `ref/` path — the canonical
 hacks) and the **provenance fill** (the WP-card's present-but-empty `exec` fields become an in-toto/SLSA
@@ -18,6 +19,7 @@ before code is trusted by every downstream WP; a seal that skips the diff-scope 
 green through, and a seal that fabricates provenance breaks the audit chain frankie replays at wave-close.
 
 ## Inputs
+
 <inputs>
   gate_record:  {{GATE_RECORD}}    <!-- GATE verdict PASS: 0-survivor mutation + APPROVE + every AVAILABLE leg green (held-out/differential/PBT pass|UNAVAILABLE per assurance mode) -->
   bind_record:  {{BIND_RECORD}}    <!-- threaded by the orchestrator context-store: carries assurance mode + the `merge_after` conflict-map constraint -->
@@ -26,11 +28,13 @@ green through, and a seal that fabricates provenance breaks the audit chain fran
 </inputs>
 
 ## Pre-conditions
+
 - **Load** `../../../EXECUTION-PROTOCOL.md` + the `reconciler` skill. GATE must be **PASS**. Else **ABORT** —
   never seal a FALSE-GREEN or FIXES-NEEDED.
 - The diff applies cleanly onto `baseline_sha` (the WP's DAG predecessor is sealed). Else STOP — merge order.
 
-## Failure modes to guard (what a model gets wrong *here*)
+## Failure modes to guard (what a model gets wrong _here_)
+
 - **Sealing an acceptance-touching diff** — the hard-block. If the diff modifies any golden, PBT property,
   harness, or `ref/*.ts` oracle, **REJECT** (this is the harness-tampering hack, regardless of green).
 - **Fabricated / partial provenance** — every `exec` field is derived from the real gate run (the gate_run
@@ -41,6 +45,7 @@ green through, and a seal that fabricates provenance breaks the audit chain fran
 - **Out-of-order merge** — merging ahead of a DAG predecessor. Respect `roadmap/wave-plan.md` order.
 
 ## Procedure
+
 1. **Diff-scope hard-block**: assert the diff touches only `packages/<pkg>/src/**` (+ non-acceptance tests).
    Any test/harness/golden/`ref/` path in the diff → **REJECT(gaming)**.
 2. **Fill `exec`** from the gate run: `outputs` = the sealed files content-addressed; `provenance` =
@@ -52,7 +57,9 @@ green through, and a seal that fabricates provenance breaks the audit chain fran
    Re-run build + typecheck + godfile-guard on the result; main must be green. Append the event-log entry.
 
 ## Output Contract
+
 Fill the card's `exec` block (driftless — content-addressed, no prose copy) and emit a seal-record:
+
 ```
 SEAL — <WP-id> @ <merge-sha>
 diff_scope:  src-only ✓  (no test/harness/golden/ref touch)
@@ -67,6 +74,7 @@ verdict:     SEALED | REJECT(gaming: <acceptance path touched>) | STOP(merge-ord
 ```
 
 ## Self-Check (mechanical gate)
+
 - [ ] diff touches **only** `src/**` (+ non-acceptance tests) — 0 test/harness/golden/`ref/` paths? (else REJECT)
 - [ ] every `exec` field derived from the real gate run (no fabricated attestation, `outputs` post-apply)?
 - [ ] merge is in **wave-plan order** — the bind-record `merge_after` predecessor (shared-`src` conflict-map constraint) is sealed, not just the DAG-campaign predecessor?
@@ -74,9 +82,11 @@ verdict:     SEALED | REJECT(gaming: <acceptance path touched>) | STOP(merge-ord
 - [ ] event-log entry appended and hash-chain valid?
 
 ## Abstain / Failure
+
 An acceptance-artifact touch → **REJECT(gaming)** and return to the lead (not a fixable seal). A red main
 after merge → STOP-the-line; unwind and report. Never fabricate a missing provenance field to "complete" the seal.
 
 ## Completion Report
+
 Emit: WP-id · merge-sha · exec filled · main green · event-log appended → the WP is DONE; the next WP's
 **BIND** opens. At wave-close, **frankie** replays the sealed event-log to prove sealed=green is real.

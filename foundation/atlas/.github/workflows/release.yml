@@ -6,7 +6,7 @@ name: release (draft)
 on:
   push:
     tags:
-      - 'v*'
+      - "v*"
 jobs:
   pack:
     runs-on: ubuntu-latest

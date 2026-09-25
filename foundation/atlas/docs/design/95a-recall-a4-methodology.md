@@ -19,11 +19,11 @@ as honest as its stated denominator. This document's whole job is to define a de
 
 Three candidate denominators, with what each actually measures:
 
-| Denominator | What recall then means | Honest caveat |
-|---|---|---|
-| **Exhaustive human gold** | absolute recall vs an expert's complete reading | expensive, subjective, does not scale; two experts disagree, so "complete" is itself an estimate |
-| **Seeded / known-answer** | recall over facts we PLANTED | controls the denominator exactly, but measures recall on synthetic invariants, not the real distribution |
-| **Pooling (TREC-style)** | recall RELATIVE to the union of many miners | cheap, fair across systems, SOTA in IR — but underestimates absolute recall (misses facts no miner found) |
+| Denominator               | What recall then means                          | Honest caveat                                                                                             |
+| ------------------------- | ----------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
+| **Exhaustive human gold** | absolute recall vs an expert's complete reading | expensive, subjective, does not scale; two experts disagree, so "complete" is itself an estimate          |
+| **Seeded / known-answer** | recall over facts we PLANTED                    | controls the denominator exactly, but measures recall on synthetic invariants, not the real distribution  |
+| **Pooling (TREC-style)**  | recall RELATIVE to the union of many miners     | cheap, fair across systems, SOTA in IR — but underestimates absolute recall (misses facts no miner found) |
 
 None is sufficient alone. The design uses **pooling as the primary instrument** (it is the only one that
 scales and stays fair vs SOTA baselines) and a **small human gold set as a calibration ceiling** (to bound
@@ -45,7 +45,7 @@ Borrowed directly from TREC pooling (the standard answer to "recall without an e
    fact no system should get credit for finding.
 5. **Recall(system) = |true facts that system emitted| / |true facts in the pool|.**
 
-**The caveat travels with the number, always:** pooled recall is recall *relative to what the pool found*.
+**The caveat travels with the number, always:** pooled recall is recall _relative to what the pool found_.
 The pool is an UPPER bound on the denominator, hence pooled recall is a LOWER bound's complement — it can
 only over-state absolute recall (facts no miner found are invisible and silently excluded). Report it as
 "recall@pool(N systems)", never as bare "recall". Adding more diverse miners to the pool only lowers every

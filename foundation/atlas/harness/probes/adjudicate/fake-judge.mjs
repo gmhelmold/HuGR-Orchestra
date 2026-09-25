@@ -19,26 +19,26 @@
 //
 // Harness invariant (harness/README.md): no `@atlas/*` import.
 
-import { readFileSync, writeSync } from 'node:fs';
+import { readFileSync, writeSync } from "node:fs"
 
-const MODE = process.env.FAKE_JUDGE_MODE || 'oracle';
-const raw = readFileSync(0, 'utf8');
+const MODE = process.env.FAKE_JUDGE_MODE || "oracle"
+const raw = readFileSync(0, "utf8")
 
-const m = raw.match(/FIXTURE_ID:\s*([A-Za-z0-9_]+)/);
-const id = m ? m[1] : '';
-const isTrue = id.startsWith('T');
+const m = raw.match(/FIXTURE_ID:\s*([A-Za-z0-9_]+)/)
+const id = m ? m[1] : ""
+const isTrue = id.startsWith("T")
 
-let verdict = isTrue ? 'GROUNDED_TRUE' : 'HALLUCINATED';
+let verdict = isTrue ? "GROUNDED_TRUE" : "HALLUCINATED"
 
-if (MODE === 'noisy') {
+if (MODE === "noisy") {
   // Deterministic perturbation keyed on the numeric part of the id + a per-process pass nonce, so different
   // passes disagree (κ<1) but the run is reproducible given ATLAS_JUDGE_PASS.
-  const num = Number((id.match(/\d+/) || ['0'])[0]);
-  const pass = Number(process.env.ATLAS_JUDGE_PASS || '0');
-  const flip = (num + pass) % 4 === 0; // flip a quarter of calls
-  if (flip) verdict = verdict === 'GROUNDED_TRUE' ? 'HALLUCINATED' : 'GROUNDED_TRUE';
-  if ((num + pass) % 7 === 0) verdict = 'ABSTAIN';
+  const num = Number((id.match(/\d+/) || ["0"])[0])
+  const pass = Number(process.env.ATLAS_JUDGE_PASS || "0")
+  const flip = (num + pass) % 4 === 0 // flip a quarter of calls
+  if (flip) verdict = verdict === "GROUNDED_TRUE" ? "HALLUCINATED" : "GROUNDED_TRUE"
+  if ((num + pass) % 7 === 0) verdict = "ABSTAIN"
 }
 
-writeSync(1, `Reasoning omitted (fake judge, mode=${MODE}).\n${verdict}\n`);
-process.exit(0);
+writeSync(1, `Reasoning omitted (fake judge, mode=${MODE}).\n${verdict}\n`)
+process.exit(0)

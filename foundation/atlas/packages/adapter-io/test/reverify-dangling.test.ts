@@ -13,53 +13,67 @@
 // Every assertion below is paired with a control, because "the bucket is non-empty" is satisfiable by a
 // counter that counts everything.
 
-import { describe, it, expect } from 'vitest';
-import { reverifyStore, danglingRow } from '../src/reverify-store.js';
-import type { ReverifyReport } from '../src/reverify-store.js';
-import type { CurrentNode } from '@atlas/knowledge';
+import { describe, it, expect } from "vitest"
+import { reverifyStore, danglingRow } from "../src/reverify-store.js"
+import type { ReverifyReport } from "../src/reverify-store.js"
+import type { CurrentNode } from "@atlas/knowledge"
 
 const node = (nodeKey: string, seal?: string): CurrentNode =>
-  ({ nodeKey, contentHash: `${nodeKey}-hash`, seal, claims: [], family: 'advisory' }) as unknown as CurrentNode;
+  ({ nodeKey, contentHash: `${nodeKey}-hash`, seal, claims: [], family: "advisory" }) as unknown as CurrentNode
 
 /** No pairs, no oracle calls — this suite is about the ROWS that never reach the oracle. */
 const report = (dangling: readonly CurrentNode[]): ReverifyReport =>
-  reverifyStore([], null as never, () => true, () => true, undefined, dangling);
+  reverifyStore(
+    [],
+    null as never,
+    () => true,
+    () => true,
+    undefined,
+    dangling,
+  )
 
-describe('the counted skip', () => {
-  it('CONTROL: no dangling rows ⇒ the honest zero really is one', () => {
+describe("the counted skip", () => {
+  it("CONTROL: no dangling rows ⇒ the honest zero really is one", () => {
     // Without this, a bucket that counted a phantom row would satisfy every assertion below.
-    expect(report([])).toMatchObject({ sealedProven: 0, dangling: 0, rows: [] });
-  });
+    expect(report([])).toMatchObject({ sealedProven: 0, dangling: 0, rows: [] })
+  })
 
-  it('a dangling row is COUNTED, in its own bucket, and lands in the denominator', () => {
-    const r = report([node('n1', 'proven')]);
-    expect(r.dangling).toBe(1);
-    expect(r.sealedProven).toBe(1); // the denominator is what the pass CONSIDERED, not what it could read
-    expect(r.reProven).toBe(0);
-    expect(r.broken).toBe(0);
-    expect(r.unverifiable).toBe(0); // NOT folded into an existing bucket — different fault, different name
-  });
+  it("a dangling row is COUNTED, in its own bucket, and lands in the denominator", () => {
+    const r = report([node("n1", "proven")])
+    expect(r.dangling).toBe(1)
+    expect(r.sealedProven).toBe(1) // the denominator is what the pass CONSIDERED, not what it could read
+    expect(r.reProven).toBe(0)
+    expect(r.broken).toBe(0)
+    expect(r.unverifiable).toBe(0) // NOT folded into an existing bucket — different fault, different name
+  })
 
-  it('the row NAMES the node and the address that resolves to nothing', () => {
-    const [row] = report([node('n1', 'proven')]).rows;
-    expect(row?.nodeKey).toBe('n1');
-    expect(row?.outcome).toBe('dangling');
-    expect(row?.reason).toContain('n1-hash');
-    expect(row?.reason).toContain('doctor cas'); // the leg that audits the layer this fault lives in
-  });
+  it("the row NAMES the node and the address that resolves to nothing", () => {
+    const [row] = report([node("n1", "proven")]).rows
+    expect(row?.nodeKey).toBe("n1")
+    expect(row?.outcome).toBe("dangling")
+    expect(row?.reason).toContain("n1-hash")
+    expect(row?.reason).toContain("doctor cas") // the leg that audits the layer this fault lives in
+  })
 
-  it('the DEFAULT is empty — which is the one thing that could quietly re-open the hole', () => {
+  it("the DEFAULT is empty — which is the one thing that could quietly re-open the hole", () => {
     // `dangling` defaults to `[]` so every pre-existing caller keeps its exact behaviour. That default is
     // also exactly how the production path could silently stop counting again, so it is pinned here: the
     // composition root MUST pass `danglingOf(store)`, and `compose.ts` does.
-    expect(reverifyStore([], null as never, () => true, () => true)).toMatchObject({ dangling: 0 });
-  });
+    expect(
+      reverifyStore(
+        [],
+        null as never,
+        () => true,
+        () => true,
+      ),
+    ).toMatchObject({ dangling: 0 })
+  })
 
-  it('one row shape, minted in ONE place — the two report paths cannot disagree', () => {
+  it("one row shape, minted in ONE place — the two report paths cannot disagree", () => {
     // `read-access.ts` builds its own report for a committed store. The defect being fixed was those two
     // paths independently deciding what to do with an unresolvable row.
-    const direct = danglingRow(node('n7', 'proven'));
-    const viaPass = report([node('n7', 'proven')]).rows[0];
-    expect(viaPass).toEqual(direct);
-  });
-});
+    const direct = danglingRow(node("n7", "proven"))
+    const viaPass = report([node("n7", "proven")]).rows[0]
+    expect(viaPass).toEqual(direct)
+  })
+})

@@ -26,45 +26,45 @@
 //   · Symbols NOT in the returned map are non-escaping ⇒ `[]` — an honest "scanned, found every reference of
 //     X in a safe position (or X has no reference at all)".
 
-import { readFileSync } from 'node:fs';
-import { join } from 'node:path';
-import type { deserializeSCIP } from '@c4312/scip';
-import { canonicalizeSymbol, isLocalSymbol } from '@atlas/index';
-import { astWarmed, isTsPath, parseTsDoc } from '../ast.js';
-import { decodeScipCached } from '../scip.js';
-import { tsEscapeClassifier } from './classifier.js';
+import { readFileSync } from "node:fs"
+import { join } from "node:path"
+import type { deserializeSCIP } from "@c4312/scip"
+import { canonicalizeSymbol, isLocalSymbol } from "@atlas/index"
+import { astWarmed, isTsPath, parseTsDoc } from "../ast.js"
+import { decodeScipCached } from "../scip.js"
+import { tsEscapeClassifier } from "./classifier.js"
 
 /** The SCIP `symbolRoles` bit for a DEFINITION occurrence (`@c4312/scip` `SymbolRole.Definition`, mirrored
  *  as the literal the probe uses so this module reads raw occurrences the same way). */
-const DEF_ROLE = 1;
+const DEF_ROLE = 1
 
 /** The ONE indexer whose symbol scheme `canonicalizeSymbol` (the dist→src `.d.ts` regex, #189) is proven on,
  *  and whose escape⋈oracle agreement was measured ~0-unsound. ADR-0016 item 2 gates enablement per indexer:
  *  on any OTHER indexer a cross-package escaping ref may not canonicalize onto its source symbol ⇒ a false
  *  non-escape ⇒ a false-admit. So the leg is built ONLY for this indexer; otherwise `undefined` (fallback). */
-const SUPPORTED_INDEXER = 'scip-typescript';
+const SUPPORTED_INDEXER = "scip-typescript"
 
 /** The descriptor NAME a SCIP symbol ends in — the single trailing top-level descriptor's identifier, or
  *  `undefined` for a compound/anonymous symbol. Ported from `escape-ts-oracle-agree.mjs` `scipName`. Used ONLY
  *  as a STALE-RANGE guard: the tree-sitter node a (possibly stale) SCIP range resolves to must carry this exact
  *  text, else the range no longer points at the reference and the classify verdict is meaningless. */
 function scipName(symbol: string): string | undefined {
-  const m = symbol.match(/^scip-typescript npm (\S+) (\S+) (.+)$/);
-  if (m === null) return undefined;
-  const seg = m[3]!.replace(/`/g, '').split('/');
-  const i = seg.findIndex((s) => /\.tsx?$/.test(s));
-  if (i === -1 || i + 1 >= seg.length) return undefined;
-  const after = seg.slice(i + 1);
-  if (after.length !== 1) return undefined;
-  const name = after[0]!.replace(/\(\)\.?$/, '').replace(/[#.]$/, '');
-  return /^[A-Za-z_$][\w$]*$/.test(name) ? name : undefined;
+  const m = symbol.match(/^scip-typescript npm (\S+) (\S+) (.+)$/)
+  if (m === null) return undefined
+  const seg = m[3]!.replace(/`/g, "").split("/")
+  const i = seg.findIndex((s) => /\.tsx?$/.test(s))
+  if (i === -1 || i + 1 >= seg.length) return undefined
+  const after = seg.slice(i + 1)
+  if (after.length !== 1) return undefined
+  const name = after[0]!.replace(/\(\)\.?$/, "").replace(/[#.]$/, "")
+  return /^[A-Za-z_$][\w$]*$/.test(name) ? name : undefined
 }
 
 export interface TargetEscapesConfig {
   /** Absolute path to the `.atlas/index.scip` dump (RAW occurrences with ranges are read from it here). */
-  readonly scipPath: string;
+  readonly scipPath: string
   /** Repo root — each SCIP doc's source is read at `join(repoPath, doc.relativePath)` to be parsed. */
-  readonly repoPath: string;
+  readonly repoPath: string
 }
 
 /** Read the raw SCIP index at `scipPath`, or `undefined` when it is missing / not a regular file / corrupt —
@@ -78,17 +78,17 @@ export interface TargetEscapesConfig {
  *  this function used to catch. */
 function readRawScip(scipPath: string): ReturnType<typeof deserializeSCIP> | undefined {
   try {
-    return decodeScipCached(scipPath);
+    return decodeScipCached(scipPath)
   } catch {
-    return undefined;
+    return undefined
   }
 }
 
 /** Append `site` to `witnesses[symbol]`, creating the bucket on first use. */
 function witness(map: Map<string, string[]>, symbol: string, site: string): void {
-  const bucket = map.get(symbol);
-  if (bucket === undefined) map.set(symbol, [site]);
-  else bucket.push(site);
+  const bucket = map.get(symbol)
+  if (bucket === undefined) map.set(symbol, [site])
+  else bucket.push(site)
 }
 
 /**
@@ -97,35 +97,35 @@ function witness(map: Map<string, string[]>, symbol: string, site: string): void
  * to the sound `holeSources() ∩ S` blanket — never a silent unsound empty map.
  */
 export function buildTargetEscapes(config: TargetEscapesConfig): ((target: string) => readonly string[]) | undefined {
-  if (!astWarmed()) return undefined; // an un-warmed process parses nothing ⇒ an unsound empty map — degrade.
-  const idx = readRawScip(config.scipPath);
-  if (idx === undefined) return undefined; // no index ⇒ no escape data (the door's phantom guard abstains anyway).
+  if (!astWarmed()) return undefined // an un-warmed process parses nothing ⇒ an unsound empty map — degrade.
+  const idx = readRawScip(config.scipPath)
+  if (idx === undefined) return undefined // no index ⇒ no escape data (the door's phantom guard abstains anyway).
   // ADR-0016 item 2 — enable ONLY for the indexer `canonicalizeSymbol` is proven on. A different indexer ⇒
   // `undefined` ⇒ NEITHER v2 leg wired ⇒ the door falls back to the sound blanket (never a false non-escape
   // from an un-canonicalizable cross-package ref). This is the per-indexer canon-completeness gate, mechanized.
-  if (idx.metadata?.toolInfo?.name !== SUPPORTED_INDEXER) return undefined;
+  if (idx.metadata?.toolInfo?.name !== SUPPORTED_INDEXER) return undefined
 
-  const witnesses = new Map<string, string[]>(); // canonical escaping symbol → witness sites (relpath:line:col)
+  const witnesses = new Map<string, string[]>() // canonical escaping symbol → witness sites (relpath:line:col)
 
   for (const doc of idx.documents) {
-    const relp = doc.relativePath;
-    if (!isTsPath(relp)) continue; // a non-TS doc carries no reference to a TS target (different symbol scheme).
+    const relp = doc.relativePath
+    if (!isTsPath(relp)) continue // a non-TS doc carries no reference to a TS target (different symbol scheme).
     // Reference occurrences of NON-local symbols (a `local ` symbol is document-scoped, out of a global-target
     // negation — mirrors `symbol-reverse.ts`/`deriveEdges`), keyed by their CANONICAL (src-form) symbol.
-    const refs = doc.occurrences.filter((o) => (o.symbolRoles & DEF_ROLE) === 0 && !isLocalSymbol(o.symbol));
-    if (refs.length === 0) continue;
+    const refs = doc.occurrences.filter((o) => (o.symbolRoles & DEF_ROLE) === 0 && !isLocalSymbol(o.symbol))
+    if (refs.length === 0) continue
 
-    let content: string | undefined;
+    let content: string | undefined
     try {
-      content = readFileSync(join(config.repoPath, relp), 'utf8');
+      content = readFileSync(join(config.repoPath, relp), "utf8")
     } catch {
-      content = undefined;
+      content = undefined
     }
-    const parsed = content === undefined ? undefined : parseTsDoc(relp, content);
+    const parsed = content === undefined ? undefined : parseTsDoc(relp, content)
     if (parsed === undefined) {
       // FAIL-CLOSED: a TS doc we cannot read/parse — every symbol it references is treated as ESCAPING.
-      for (const o of refs) witness(witnesses, canonicalizeSymbol(o.symbol), `${relp}:unreadable`);
-      continue;
+      for (const o of refs) witness(witnesses, canonicalizeSymbol(o.symbol), `${relp}:unreadable`)
+      continue
     }
 
     try {
@@ -136,31 +136,31 @@ export function buildTargetEscapes(config: TargetEscapesConfig): ((target: strin
       // SAFE would cost soundness — which a false-admit gate cannot afford). A symbol lands in `witnesses` iff
       // ANY of its refs is non-safe OR un-locatable.
       for (const o of refs) {
-        const sym = canonicalizeSymbol(o.symbol);
-        const range = o.range ?? [];
+        const sym = canonicalizeSymbol(o.symbol)
+        const range = o.range ?? []
         if (range.length < 2) {
-          witness(witnesses, sym, `${relp}:norange`); // no position ⇒ cannot classify ⇒ ESCAPING (fail-closed).
-          continue;
+          witness(witnesses, sym, `${relp}:norange`) // no position ⇒ cannot classify ⇒ ESCAPING (fail-closed).
+          continue
         }
-        const node = parsed.root.descendantForPosition({ row: range[0]!, column: range[1]! });
+        const node = parsed.root.descendantForPosition({ row: range[0]!, column: range[1]! })
         // STALE-RANGE GUARD (finding #5): the source bytes are read at the CURRENT worktree while the ranges
         // come from `.atlas/index.scip`, which may lag. If the node the range resolves to does NOT carry the
         // reference's own descriptor NAME, the range no longer points at the reference and the classify verdict
         // would be meaningless ⇒ fail-closed ESCAPING. (Skipped when the name is a compound/anonymous symbol
         // `scipName` cannot extract — there the node-null + classifier legs still apply.)
-        const expectedName = scipName(o.symbol);
-        const staleRange = node !== null && expectedName !== undefined && node.text !== expectedName;
+        const expectedName = scipName(o.symbol)
+        const staleRange = node !== null && expectedName !== undefined && node.text !== expectedName
         if (node === null || staleRange || !tsEscapeClassifier.isSafe(node)) {
-          witness(witnesses, sym, `${relp}:${range[0]! + 1}:${range[1]! + 1}`);
+          witness(witnesses, sym, `${relp}:${range[0]! + 1}:${range[1]! + 1}`)
         }
       }
     } finally {
-      parsed.dispose();
+      parsed.dispose()
     }
   }
 
   return (target: string): readonly string[] => {
-    const bucket = witnesses.get(canonicalizeSymbol(target));
-    return bucket === undefined ? [] : [...bucket].sort();
-  };
+    const bucket = witnesses.get(canonicalizeSymbol(target))
+    return bucket === undefined ? [] : [...bucket].sort()
+  }
 }

@@ -25,15 +25,15 @@
 // field is kept (that precedent is `promptDigest`: one digest, no companion ref). #209 digests the admitted
 // rows' `answerRef`s so the issued-vs-stored CARDINALITY is visible in the run artifact.
 
-import { scrub } from '@atlas/persist';
-import { id } from '@atlas/kernel';
+import { scrub } from "@atlas/persist"
+import { id } from "@atlas/kernel"
 
 /** A mined answer's provenance receipt. `obj` is the SCRUBBED answer text — the CAS object the pass stores
  *  (through its `put` array) and that `answerRef` addresses. Stamped on a `WriteRequest` ONLY on the mine
  *  emit path; a human `atlas emit`/`atlas link` carries neither. */
 export interface AnswerReceipt {
-  readonly obj: string; //       the scrubbed answer text = the stored CAS object (never a raw credential)
-  readonly answerRef: string; // the CAS id of `obj` (== `store.put(obj)`); its own tamper-evidence at rest
+  readonly obj: string //       the scrubbed answer text = the stored CAS object (never a raw credential)
+  readonly answerRef: string // the CAS id of `obj` (== `store.put(obj)`); its own tamper-evidence at rest
 }
 
 /**
@@ -46,10 +46,10 @@ export function answerReceipt(rawAnswer: string): AnswerReceipt {
   // (1) SCRUB FIRST — the primary control. The input is valid UTF-8 (the `llm.ts` admission sanity gate
   //     guarantees it), and `scrub` only redacts credential SHAPES to an ASCII placeholder, so the result is
   //     still valid UTF-8 and round-trips losslessly through the CAS string object below.
-  const scrubbed = scrub(Buffer.from(rawAnswer, 'utf8'));
-  const obj = Buffer.from(scrubbed).toString('utf8'); // the scrubbed answer text = the CAS object we store
+  const scrubbed = scrub(Buffer.from(rawAnswer, "utf8"))
+  const obj = Buffer.from(scrubbed).toString("utf8") // the scrubbed answer text = the CAS object we store
   // (2) THEN CAS — `answerRef` is the exact id `store.put(obj)` returns (`id(obj)`); pushing `obj` to the
   //     pass's `put` array stores it at that id.
-  const answerRef = id(obj) as unknown as string;
-  return { obj, answerRef };
+  const answerRef = id(obj) as unknown as string
+  return { obj, answerRef }
 }

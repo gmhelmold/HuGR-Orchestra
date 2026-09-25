@@ -11,43 +11,42 @@
 ### WP-FIX-6.KNOW — Atlas fabricated a verification field, and the door that should have rejected it never read one (#200)
 
 epic: none (out-of-band hotfix, dispatched by the lead from two facts Atlas mined about its own source —
-  not carried by any CAMPAIGN)
+not carried by any CAMPAIGN)
 id: WP-FIX-6.KNOW
 title: `soundCheck` emitted an assertion never passed to `verify`, and `admit` switched on `kind` without
-  ever inspecting `expr`
+ever inspecting `expr`
 
 intent: >
-  Two defects that the lead framed as composing into one. They are both real, and they do NOT compose the
-  way the brief said — see the framing section. Fixed separately, with the composition made true by
-  construction (a test that runs the producer's output through the consumer's door).
+Two defects that the lead framed as composing into one. They are both real, and they do NOT compose the
+way the brief said — see the framing section. Fixed separately, with the composition made true by
+construction (a test that runs the producer's output through the consumer's door).
 
-  **(1) FABRICATION, `packages/genesis/src/admit-harness.ts:206,230` (pre-fix line numbers CONFIRMED).**
-  `admitPredicate`'s GEN-12k branch built its emitted node around
-  `soundCheck(slot) = {kind:'assertion', expr: \`type-checker/LSP diagnostics: ${slot}\`}`. That string was
-  never passed to `PredicateApi.verify` and never subjected to `PredicateApi.teeth` — the two mechanisms the
-  synthesized-check branch twelve lines below runs unconditionally — and the node shipped `status: 'HOLDS'`
-  plus the `machine-checked likely invariant` label on the strength of it. It is also unreadable by the
-  evaluator that later re-runs it: the assertion grammar is `child-count|<key>|<n>` / `subtree-hash|<key>|
-  <hash>` over one `IndexNode`, and that string names no operator, so `evaluate` answers `NA` on every index
-  state, forever.
+**(1) FABRICATION, `packages/genesis/src/admit-harness.ts:206,230` (pre-fix line numbers CONFIRMED).**
+`admitPredicate`'s GEN-12k branch built its emitted node around
+`soundCheck(slot) = {kind:'assertion', expr: \`type-checker/LSP diagnostics: ${slot}\`}`. That string was
+  never passed to `PredicateApi.verify`and never subjected to`PredicateApi.teeth`— the two mechanisms the
+  synthesized-check branch twelve lines below runs unconditionally — and the node shipped`status: 'HOLDS'`  plus the`machine-checked likely invariant`label on the strength of it. It is also unreadable by the
+  evaluator that later re-runs it: the assertion grammar is`child-count|<key>|<n>`/`subtree-hash|<key>|
+<hash>`over one`IndexNode`, and that string names no operator, so `evaluate`answers`NA` on every index
+state, forever.
 
-  Fixed by REMOVING the check rather than improving it, and the choice is forced rather than stylistic:
-  REQ-GEN-12k wants the SOUND compiler oracle; KNOW-16's `Check` can express nothing but INDEX STATE; a
-  type-checker diagnostic is not index state; and `PredicateNode.check` is REQUIRED, not optional. So the
-  predicate family cannot honestly hold this fact, and substituting an expression that merely parses
-  (`exists|<the site>`) would be the same fabrication in a costume that also gets past the door. The branch
-  now emits an ADVISORY carrying `predicateSlot`, which has NO `status` field at all — `HOLDS` is not
-  unset here, it is UNREPRESENTABLE. `ABSENT means UNKNOWN, never a fabricated placeholder`.
+Fixed by REMOVING the check rather than improving it, and the choice is forced rather than stylistic:
+REQ-GEN-12k wants the SOUND compiler oracle; KNOW-16's `Check` can express nothing but INDEX STATE; a
+type-checker diagnostic is not index state; and `PredicateNode.check` is REQUIRED, not optional. So the
+predicate family cannot honestly hold this fact, and substituting an expression that merely parses
+(`exists|<the site>`) would be the same fabrication in a costume that also gets past the door. The branch
+now emits an ADVISORY carrying `predicateSlot`, which has NO `status` field at all — `HOLDS` is not
+unset here, it is UNREPRESENTABLE. `ABSENT means UNKNOWN, never a fabricated placeholder`.
 
-  **(2) BLIND ADMISSION, `packages/knowledge/src/lifecycle/evaluator.ts:62-76` (CONFIRMED).** `admit()`
-  switched on `kind` and returned any `{kind:'assertion', expr}` as evaluable whatever the `expr` said. It
-  now PARSES the body against the shipped five-operator grammar and refuses what does not parse, naming the
-  expected form and quoting what it read. The door and the interpreter were re-pointed at ONE split and ONE
-  operator table, so a stricter door cannot narrow the language by drifting from it.
+**(2) BLIND ADMISSION, `packages/knowledge/src/lifecycle/evaluator.ts:62-76` (CONFIRMED).** `admit()`
+switched on `kind` and returned any `{kind:'assertion', expr}` as evaluable whatever the `expr` said. It
+now PARSES the body against the shipped five-operator grammar and refuses what does not parse, naming the
+expected form and quoting what it read. The door and the interpreter were re-pointed at ONE split and ONE
+operator table, so a stricter door cannot narrow the language by drifting from it.
 
-  The mined claim that "a malformed check is admitted and reaches the `reconcile` merge gate as a genuine
-  `BROKEN`" is TRUE, but not of the fabricated string, and it took measuring to find which inputs do it —
-  see the framing section. Two of them are now the anti-vacuity evidence for refusal (2).
+The mined claim that "a malformed check is admitted and reaches the `reconcile` merge gate as a genuine
+`BROKEN`" is TRUE, but not of the fabricated string, and it took measuring to find which inputs do it —
+see the framing section. Two of them are now the anti-vacuity evidence for refusal (2).
 
 ## axioms (given — not re-litigated)
 
@@ -59,39 +58,43 @@ intent: >
   ordinary mining path emits no check because `makeAdmitGate` proposes ADVISORIES ONLY, so `admitPredicate`
   is never entered at all, and `soundCheck` had ZERO production callers by two independent constructions.
 
-source_reqs:                                # ptr+digest
-  - source: ../req-knw.md#REQ-KNOW-16a      # ptr+digest — "a check MUST be a deterministic query over the Atlas index … evaluated mechanically to HOLDS/BROKEN/NA"; a body that names no operator is not one, and admitting it is what let a verdict nobody computed reach the merge gate
-  - source: ../req-gen.md#REQ-GEN-12k       # ptr+digest — "for a type-expressible slot the check MUST prefer the type-checker / LSP diagnostics over a synthesized query"; the sound oracle still decides, it just no longer mints a `Check` it cannot express
+source_reqs: # ptr+digest
 
-seam-freezes: [ ]   (no cross-module obligation created; the `Check` union and `EvaluatorApi` are untouched)
+- source: ../req-knw.md#REQ-KNOW-16a # ptr+digest — "a check MUST be a deterministic query over the Atlas index … evaluated mechanically to HOLDS/BROKEN/NA"; a body that names no operator is not one, and admitting it is what let a verdict nobody computed reach the merge gate
+- source: ../req-gen.md#REQ-GEN-12k # ptr+digest — "for a type-expressible slot the check MUST prefer the type-checker / LSP diagnostics over a synthesized query"; the sound oracle still decides, it just no longer mints a `Check` it cannot express
+
+seam-freezes: [ ] (no cross-module obligation created; the `Check` union and `EvaluatorApi` are untouched)
 
 anchor:
-  - `packages/genesis/src/admit-harness.ts` — `admitPredicate` GEN-12k branch, `attest` (new), `buildSound`
-    (new, replaces `soundCheck`), `buildPredicate` (signature narrowed to `VerifiedCheck`)
-  - `packages/knowledge/src/lifecycle/evaluator.ts` — `admit`, `whyUnparseable` (new), the shared
-    `splitQuery` / `splitAssertion` / `QUERY_FORMS` / `ASSERTION_FORMS`
 
-interface_contract:                         # free-form (unchecked, per repo convention)
-  - source: ../method-tags-knw.md#KNOW-16   (deterministic index-query, no code execution)
-  - source: ../method-tags-gen.md#GEN-12    (mechanical admission: HOLDS-and-flips-BROKEN; vacuous dropped)
+- `packages/genesis/src/admit-harness.ts` — `admitPredicate` GEN-12k branch, `attest` (new), `buildSound`
+  (new, replaces `soundCheck`), `buildPredicate` (signature narrowed to `VerifiedCheck`)
+- `packages/knowledge/src/lifecycle/evaluator.ts` — `admit`, `whyUnparseable` (new), the shared
+  `splitQuery` / `splitAssertion` / `QUERY_FORMS` / `ASSERTION_FORMS`
+
+interface_contract: # free-form (unchecked, per repo convention)
+
+- source: ../method-tags-knw.md#KNOW-16 (deterministic index-query, no code execution)
+- source: ../method-tags-gen.md#GEN-12 (mechanical admission: HOLDS-and-flips-BROKEN; vacuous dropped)
 
 exclusions:
-  - `packages/knowledge/src/ratify/**` — LIVE seat (`fix/failopen-and-mergebase`). Read-only.
-  - `packages/knowledge/src/write/**` — LIVE seat (`fix/dead-authz-and-slotgate`). Read-only. `router.ts`
-    was READ (its `normalizeCheck` folds a check body into the predicate `nodeKey`) and not edited.
-  - `packages/tools/src/reconcile.ts`, `packages/adapter-io/src/git-drift.ts` — live seat. Read-only.
-  - `packages/adapter-io/src/governed-emit.ts` — NOT in the action surface. It is the SHIPPED write door
-    and its `isCheck` validates the check's SHAPE only; the grammar leg belongs there too and is left as a
-    named follow-up rather than smuggled in. See the framing section.
-  - Any new evaluator grammar / AST-predicate work (A2).
+
+- `packages/knowledge/src/ratify/**` — LIVE seat (`fix/failopen-and-mergebase`). Read-only.
+- `packages/knowledge/src/write/**` — LIVE seat (`fix/dead-authz-and-slotgate`). Read-only. `router.ts`
+  was READ (its `normalizeCheck` folds a check body into the predicate `nodeKey`) and not edited.
+- `packages/tools/src/reconcile.ts`, `packages/adapter-io/src/git-drift.ts` — live seat. Read-only.
+- `packages/adapter-io/src/governed-emit.ts` — NOT in the action surface. It is the SHIPPED write door
+  and its `isCheck` validates the check's SHAPE only; the grammar leg belongs there too and is left as a
+  named follow-up rather than smuggled in. See the framing section.
+- Any new evaluator grammar / AST-predicate work (A2).
 
 action: (single round) Defect 2 first — `admit` parses the body against the shipped grammar via a new
-  module-private `whyUnparseable`, with `Admission` widened by a third leg
-  (`{evaluable:false, reason:'malformed-check', expected}`) and `evalQuery` / `evalAssertion` re-pointed at
-  the shared `splitQuery` / `splitAssertion` so door and interpreter read one language; then defect 1 —
-  `soundCheck` DELETED, the GEN-12k branch emits `buildSound(...)` (an `AdvisoryNode` with
-  `predicateSlot`), the verify+teeth conjunction funnelled into a single `attest` that is the only
-  constructor of the new branded `VerifiedCheck`, and `buildPredicate` narrowed to accept nothing else.
+module-private `whyUnparseable`, with `Admission` widened by a third leg
+(`{evaluable:false, reason:'malformed-check', expected}`) and `evalQuery` / `evalAssertion` re-pointed at
+the shared `splitQuery` / `splitAssertion` so door and interpreter read one language; then defect 1 —
+`soundCheck` DELETED, the GEN-12k branch emits `buildSound(...)` (an `AdvisoryNode` with
+`predicateSlot`), the verify+teeth conjunction funnelled into a single `attest` that is the only
+constructor of the new branded `VerifiedCheck`, and `buildPredicate` narrowed to accept nothing else.
 
 action_surface: `[ read(**), edit(packages/genesis/src/admit-harness.ts),
   edit(packages/knowledge/src/lifecycle/evaluator.ts), edit(packages/genesis/test/**),
@@ -100,9 +103,9 @@ action_surface: `[ read(**), edit(packages/genesis/src/admit-harness.ts),
   run(tsc -b), run(vitest run), run(node harness/gates/*.mjs) ]`
 
 guardrails: writes confined to the two source files above, two NEW test files, the two `SCN-GEN-12k`
-  test tails (extra-golden assertions only — neither golden's TEXT is edited), one new golden, and this
-  card. Mutation used `cp`-backup / `cp`-restore with `diff -q`, never `git checkout` / `restore` /
-  `stash` / `reset`. COMMIT ONLY — no push, no PR, no merge.
+test tails (extra-golden assertions only — neither golden's TEXT is edited), one new golden, and this
+card. Mutation used `cp`-backup / `cp`-restore with `diff -q`, never `git checkout` / `restore` /
+`stash` / `reset`. COMMIT ONLY — no push, no PR, no merge.
 
 ## invariants (per-item — GATE)
 
@@ -114,7 +117,7 @@ guardrails: writes confined to the two source files above, two NEW test files, t
   has no `status` field, so the claim is unrepresentable rather than merely unset; (b) TYPE — `attest` is
   the only constructor of `VerifiedCheck` and `buildPredicate` accepts nothing else. Mutant M5 (restore the
   fabrication without a cast) is KILLED by `tsc -b` exit 2, `error TS2345: Argument of type '{ kind:
-  "assertion"; expr: string; }' is not assignable to parameter of type 'VerifiedCheck'`.
+"assertion"; expr: string; }' is not assignable to parameter of type 'VerifiedCheck'`.
 - **I3.** The five shipped operators still parse and still evaluate identically — pinned by twelve
   operator/verdict pairs written and observed GREEN against the unfixed source before the door existed,
   plus a `|`-in-the-key case proving the door splits exactly as the interpreter does.
@@ -123,60 +126,65 @@ guardrails: writes confined to the two source files above, two NEW test files, t
 - **I6.** Six mutants run, five KILLED and one SURVIVOR reported rather than hidden (M4 — see below).
 
 acceptance:
-  - source: ../goldens-knw.md#SCN-KNOW-16a-3   # ptr+digest — the new golden this WP adds and satisfies
+
+- source: ../goldens-knw.md#SCN-KNOW-16a-3 # ptr+digest — the new golden this WP adds and satisfies
   Proof of teeth (each: `cp`-backup → substitute → `occurrences === 1` ASSERTED → file proved changed by
   byte-length delta → suite run, exit code read directly → `cp`-restore proved byte-identical):
-  - **M1** assertion-text refusal removed → tsc 0, vitest **1** — 4 failed | 3 passed. KILLED.
-  - **M2** index-query refusal removed → tsc 0, vitest **1** — 1 failed | 6 passed. KILLED.
-  - **M3** fabrication restored, cast past the brand → tsc 0, vitest **1** — 4 failed, including BOTH
-    `SCN-GEN-12k-1` and `SCN-GEN-12k-2`. KILLED.
-  - **M5** fabrication restored WITHOUT the cast → `tsc -b` exit **2**, TS2345. KILLED by the type.
-  - **M6** `attest`'s HOLDS conjunct removed → vitest **1** — SCN-GEN-12c-1/-2, 12d-1/-2. KILLED.
-  - **M7** `attest`'s teeth conjunct removed → vitest **1** — SCN-GEN-12b-1/-2, 12j-1/-2 and the e2e
-    vacuous-predicate story. KILLED.
-  - **M4** the `VerifiedCheck` brand removed from `buildPredicate`'s signature ALONE → tsc 0, vitest 0,
-    191 passed. **SURVIVED, and correctly so**: `VerifiedCheck` is assignable to `Check`, so widening the
-    parameter changes no behaviour by itself. M4 is not a refusal; it is the precondition that makes M5 a
-    compile error, and reporting it as a kill would be the overclaim this WP exists to remove.
+- **M1** assertion-text refusal removed → tsc 0, vitest **1** — 4 failed | 3 passed. KILLED.
+- **M2** index-query refusal removed → tsc 0, vitest **1** — 1 failed | 6 passed. KILLED.
+- **M3** fabrication restored, cast past the brand → tsc 0, vitest **1** — 4 failed, including BOTH
+  `SCN-GEN-12k-1` and `SCN-GEN-12k-2`. KILLED.
+- **M5** fabrication restored WITHOUT the cast → `tsc -b` exit **2**, TS2345. KILLED by the type.
+- **M6** `attest`'s HOLDS conjunct removed → vitest **1** — SCN-GEN-12c-1/-2, 12d-1/-2. KILLED.
+- **M7** `attest`'s teeth conjunct removed → vitest **1** — SCN-GEN-12b-1/-2, 12j-1/-2 and the e2e
+  vacuous-predicate story. KILLED.
+- **M4** the `VerifiedCheck` brand removed from `buildPredicate`'s signature ALONE → tsc 0, vitest 0,
+  191 passed. **SURVIVED, and correctly so**: `VerifiedCheck` is assignable to `Check`, so widening the
+  parameter changes no behaviour by itself. M4 is not a refusal; it is the precondition that makes M5 a
+  compile error, and reporting it as a kill would be the overclaim this WP exists to remove.
 
-deps: [ ]   parallel_group: [P] (two files, no dependency on any concurrent seat)
+deps: [ ] parallel_group: [P] (two files, no dependency on any concurrent seat)
 
 exit_predicate: `npx tsc -b` clean ∧ full `npx vitest run` reconciled literally against the `origin/master`
-  baseline (326 files / 2608 passed + 1 todo → 328 files / 2619 passed + 1 todo; +2 files, +11 tests, 0
-  regressions) ∧ every gate in `harness/gates/` exit 0 read directly, by name.
+baseline (326 files / 2608 passed + 1 todo → 328 files / 2619 passed + 1 todo; +2 files, +11 tests, 0
+regressions) ∧ every gate in `harness/gates/` exit 0 read directly, by name.
 
-context_refs:                                # closed list
-  - source: ../req-knw.md
-  - source: ../req-gen.md
-  - source: ../goldens-knw.md
-  - source: ../goldens-gen.md
+context_refs: # closed list
+
+- source: ../req-knw.md
+- source: ../req-gen.md
+- source: ../goldens-knw.md
+- source: ../goldens-gen.md
 
 owner: KNOWLEDGE + GENESIS territory · builder_id `charlie`
 
 outputs:
-  - `packages/knowledge/src/lifecycle/evaluator.ts` — `admit` parses the body; `whyUnparseable`,
-    `QUERY_FORMS` / `ASSERTION_FORMS`, `splitQuery` / `splitAssertion`, `COUNT` added; `evalQuery` /
-    `evalAssertion` re-pointed at the shared splits; 266 LOC. Exported VALUE count UNCHANGED at 4, so the
-    `reference-model-guard` ledger row for this module is untouched (see the framing section).
-  - `packages/genesis/src/admit-harness.ts` — `soundCheck` deleted; `buildSound` + `attest` +
-    `VerifiedCheck` added; `buildPredicate` narrowed; 346 LOC.
-  - `packages/knowledge/test/evaluator.admit-grammar.test.ts` — new, 191 LOC (SCN-KNOW-16a-3).
-  - `packages/genesis/test/admit-harness.no-fabricated-check.test.ts` — new, 175 LOC, including the
-    cross-package composition case.
-  - `packages/genesis/test/wp-8.28-b-gen.test.ts` / `.heldout.test.ts` — the two `SCN-GEN-12k` tails
-    retargeted (extra-golden assertions only; both golden TEXTS unchanged).
-  - `docs/requirements/goldens-knw.md` — `SCN-KNOW-16a-3` added under the existing REQ-KNOW-16a.
-  - `docs/requirements/work-packages/wp-fabricated-checks.md` — this card.
+
+- `packages/knowledge/src/lifecycle/evaluator.ts` — `admit` parses the body; `whyUnparseable`,
+  `QUERY_FORMS` / `ASSERTION_FORMS`, `splitQuery` / `splitAssertion`, `COUNT` added; `evalQuery` /
+  `evalAssertion` re-pointed at the shared splits; 266 LOC. Exported VALUE count UNCHANGED at 4, so the
+  `reference-model-guard` ledger row for this module is untouched (see the framing section).
+- `packages/genesis/src/admit-harness.ts` — `soundCheck` deleted; `buildSound` + `attest` +
+  `VerifiedCheck` added; `buildPredicate` narrowed; 346 LOC.
+- `packages/knowledge/test/evaluator.admit-grammar.test.ts` — new, 191 LOC (SCN-KNOW-16a-3).
+- `packages/genesis/test/admit-harness.no-fabricated-check.test.ts` — new, 175 LOC, including the
+  cross-package composition case.
+- `packages/genesis/test/wp-8.28-b-gen.test.ts` / `.heldout.test.ts` — the two `SCN-GEN-12k` tails
+  retargeted (extra-golden assertions only; both golden TEXTS unchanged).
+- `docs/requirements/goldens-knw.md` — `SCN-KNOW-16a-3` added under the existing REQ-KNOW-16a.
+- `docs/requirements/work-packages/wp-fabricated-checks.md` — this card.
 
 provenance:
-  - branch `fix/fabricated-checks`, forked from `origin/master` at `a6b4a5a`
-  - worktree-local commit; this card does not self-report a sha it did not mint
+
+- branch `fix/fabricated-checks`, forked from `origin/master` at `a6b4a5a`
+- worktree-local commit; this card does not self-report a sha it did not mint
 
 trace_ref: manual — lead brief (two defects Atlas mined about its own source, framed as composing) → this
-  card + the changes under `outputs`; no automated S0–S4 trace exists for an out-of-band hotfix
+card + the changes under `outputs`; no automated S0–S4 trace exists for an out-of-band hotfix
 
 rationale:
-  - source: ../req-knw.md#REQ-KNOW-16a
+
+- source: ../req-knw.md#REQ-KNOW-16a
 
 ---
 
@@ -187,12 +195,12 @@ rationale:
 before either was touched, not taken from the mined text. `soundCheck`'s expression genuinely never reaches
 `verify` or `teeth` and genuinely cannot be read by the evaluator. `admit` genuinely never looked at `expr`.
 The instruction to do defect 2 first was right for a reason the brief did not give: parsing the body first
-is what makes it *provable* that the producer's remaining output is readable by the consumer, which is the
+is what makes it _provable_ that the producer's remaining output is readable by the consumer, which is the
 last test in the new genesis file.
 
 **Wrong 1 — the two defects do not compose the way the brief says.** "A fabricated check enters as `HOLDS`;
-when the evaluator really runs it, it can flip to `BROKEN` and block a merge" is false *of the fabricated
-string*. `evalAssertion` splits on `|`, finds no operator, and returns `NA` — not `BROKEN` — on every index
+when the evaluator really runs it, it can flip to `BROKEN` and block a merge" is false _of the fabricated
+string_. `evalAssertion` splits on `|`, finds no operator, and returns `NA` — not `BROKEN` — on every index
 state, forever. `NA` never reaches the merge gate as a break; via `bindStatus` it is a downgrade, which is
 the fail-safe direction. The fabricated check is a permanent, silent nothing.
 
@@ -208,21 +216,21 @@ the latter accepts `''`, `'2.5'`, `'0x2'` and `'1e3'`.)
 `soundCheck`. The answer is NONE, by two independent constructions, both of which are written down in the
 tree already:
 
-  1. `makeAdmitGate` (`packages/cli/src/mine-gate.ts:69-88`) — the ONLY production caller of `admit` — builds
-     `{kind:'advisory', …}` proposals exclusively, so `admitPredicate` is never entered.
-  2. `buildMineAdmission` (`packages/adapter-io/src/compose-mine-admission.ts:75`) — the ONLY production
-     construction of `AdmitDeps` — pins `typeOracle.expressible: () => false`, so even if `admitPredicate`
-     *were* entered, the GEN-12k branch could not be taken. That file says so in its own header: "THE
-     PREDICATE LEGS ARE STRUCTURALLY UNREACHABLE FROM THIS GATE".
+1. `makeAdmitGate` (`packages/cli/src/mine-gate.ts:69-88`) — the ONLY production caller of `admit` — builds
+   `{kind:'advisory', …}` proposals exclusively, so `admitPredicate` is never entered.
+2. `buildMineAdmission` (`packages/adapter-io/src/compose-mine-admission.ts:75`) — the ONLY production
+   construction of `AdmitDeps` — pins `typeOracle.expressible: () => false`, so even if `admitPredicate`
+   _were_ entered, the GEN-12k branch could not be taken. That file says so in its own header: "THE
+   PREDICATE LEGS ARE STRUCTURALLY UNREACHABLE FROM THIS GATE".
 
-  And `packages/knowledge/src/lifecycle/evaluator.ts` is a **declared reference model** — it is row 189 of
-  the `reference-model-guard` LEDGER, `{values: 4, shipped: null}`, meaning all four of its value exports
-  (`admit`, `evaluate`, `makeEvaluator`, `verdictFor`) have zero production callers. Re-measured with the
-  gate's own analyser after this change: still 4, still zero. So **fix (2) hardens a specification artifact,
-  not the shipped path**, and this card says so rather than letting the next reviewer discover it. That is
-  legal and precedented — `attach.ts` and `write/archive.ts` carry the identical note from task #136 — but
-  it must not be sold as shipped hardening. Fix (1) *is* on a module with a production caller
-  (`admit-harness.ts` → `mine-gate.ts`), but on a branch of it that production cannot reach today.
+And `packages/knowledge/src/lifecycle/evaluator.ts` is a **declared reference model** — it is row 189 of
+the `reference-model-guard` LEDGER, `{values: 4, shipped: null}`, meaning all four of its value exports
+(`admit`, `evaluate`, `makeEvaluator`, `verdictFor`) have zero production callers. Re-measured with the
+gate's own analyser after this change: still 4, still zero. So **fix (2) hardens a specification artifact,
+not the shipped path**, and this card says so rather than letting the next reviewer discover it. That is
+legal and precedented — `attach.ts` and `write/archive.ts` carry the identical note from task #136 — but
+it must not be sold as shipped hardening. Fix (1) _is_ on a module with a production caller
+(`admit-harness.ts` → `mine-gate.ts`), but on a branch of it that production cannot reach today.
 
 **Wrong 3 — `admit` is not the door the SHIPPED path would need, and the brief did not name the one that
 is.** `atlas emit` validates a check at `packages/adapter-io/src/governed-emit.ts` (`isCheck` / `familyOf`,

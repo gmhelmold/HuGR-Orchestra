@@ -24,23 +24,23 @@
 // The walk is ITERATIVE by requirement, not by taste: the predecessor resolved one path segment per stack
 // frame, so a ~8000-segment path threw an uncaught RangeError out of a security check.
 
-import { realpathSync, statSync } from 'node:fs';
-import { dirname, resolve } from 'node:path';
+import { realpathSync, statSync } from "node:fs"
+import { dirname, resolve } from "node:path"
 
 /** A file's kernel identity: the pair that answers "same file?" no matter how the name was spelled. */
 interface FileId {
-  readonly dev: bigint;
-  readonly ino: bigint;
+  readonly dev: bigint
+  readonly ino: bigint
 }
 
 /** `statSync` as a total function. `bigint: true` so a 64-bit inode is compared exactly rather than through
  *  a float64 that can alias two distinct files above 2^53. `undefined` ⇒ absent/unreadable, never a throw. */
 function idOf(path: string): FileId | undefined {
   try {
-    const st = statSync(path, { bigint: true });
-    return { dev: st.dev, ino: st.ino };
+    const st = statSync(path, { bigint: true })
+    return { dev: st.dev, ino: st.ino }
   } catch {
-    return undefined;
+    return undefined
   }
 }
 
@@ -49,9 +49,9 @@ function idOf(path: string): FileId | undefined {
  *  ancestors are what decide it. */
 function realOrAsked(path: string): string {
   try {
-    return realpathSync(path);
+    return realpathSync(path)
   } catch {
-    return path;
+    return path
   }
 }
 
@@ -70,20 +70,20 @@ function realOrAsked(path: string): string {
  * outside whose target lives inside IS.
  */
 export function isContainedIn(root: string, candidate: string): boolean {
-  const rootId = idOf(realOrAsked(resolve(root)));
-  if (rootId === undefined) return false; // fail closed: a root that cannot be stat'd contains nothing
+  const rootId = idOf(realOrAsked(resolve(root)))
+  if (rootId === undefined) return false // fail closed: a root that cannot be stat'd contains nothing
 
-  let cur = resolve(candidate);
+  let cur = resolve(candidate)
   for (;;) {
     // The real spelling first: it collapses `/var`→`/private/var` AND follows a link that points into the
     // tree, so the ancestors we climb are the ancestors the kernel would climb.
-    const here = realOrAsked(cur);
-    const id = idOf(here);
-    if (id !== undefined && id.dev === rootId.dev && id.ino === rootId.ino) return true;
-    const up = dirname(here);
+    const here = realOrAsked(cur)
+    const id = idOf(here)
+    if (id !== undefined && id.dev === rootId.dev && id.ino === rootId.ino) return true
+    const up = dirname(here)
     // Terminates: `dirname` is a fixed point only at the filesystem root, and once `here` is a resolved
     // path every further parent is resolved too, so at most ONE link jump can lengthen the walk.
-    if (up === here) return false;
-    cur = up;
+    if (up === here) return false
+    cur = up
   }
 }

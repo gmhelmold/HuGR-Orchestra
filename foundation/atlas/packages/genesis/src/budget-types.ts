@@ -12,11 +12,11 @@
 // VALUE (extra mechanisms switch on only under `high-value ∧ uncertain`). The REVIEW / ENRICH / EXPAND
 // deepening loops are GOVERNED (GEN-14): opt-in, budget-gated, fixpoint-stopping — all off ⇒ Δ=0.
 
-import type { Tier } from '@atlas/contracts';
+import type { Tier } from "@atlas/contracts"
 // `Candidate`/`CostReport` stay owned by `types.ts` (shared-model concerns, not budget-vocabulary ones) and
 // are imported here — a type-only cycle, erased at runtime, exactly as negation-types' import of
 // `RelationKind` from @atlas/knowledge's `types.ts` is.
-import type { Candidate, CostReport } from './types.js';
+import type { Candidate, CostReport } from "./types.js"
 
 /**
  * One governed deepening loop (GEN-14). REVIEW / ENRICH / EXPAND are each opt-in or default-shallow,
@@ -28,16 +28,16 @@ import type { Candidate, CostReport } from './types.js';
  * `epsilon` (the marginal-value-`<ε` stop leg). No speculative fields beyond the three named stops.
  */
 export interface LoopConfig {
-  readonly enabled: boolean; // default false — loops-off ⇒ single-pass baseline (GEN-13/14, Δ=0)
-  readonly maxDepth: number; // the bounded depth dial — 0 at the base tier
-  readonly epsilon: number; // marginal-value stop: halt a round when value gain < ε // DEFINE default, owner-tunable
+  readonly enabled: boolean // default false — loops-off ⇒ single-pass baseline (GEN-13/14, Δ=0)
+  readonly maxDepth: number // the bounded depth dial — 0 at the base tier
+  readonly epsilon: number // marginal-value stop: halt a round when value gain < ε // DEFINE default, owner-tunable
 }
 
 /** The three governed deepening loops (GEN-14). With all three off, genesis cost == the single cheap pass. */
 export interface DeepeningLoops {
-  readonly review: LoopConfig;
-  readonly enrich: LoopConfig;
-  readonly expand: LoopConfig;
+  readonly review: LoopConfig
+  readonly enrich: LoopConfig
+  readonly expand: LoopConfig
 }
 
 /**
@@ -48,8 +48,8 @@ export interface DeepeningLoops {
  * the scheduler, never carried on `GenesisBudget`. [PINNED — oracle-pin-map §12, transcribed :117.]
  */
 export interface MarginalValueStop {
-  readonly window: 20; // trailing window size (sites)
-  readonly minAdmits: 4; // halt below this many admits in the window (fewer than 4 of 20 ⇒ < 20%)
+  readonly window: 20 // trailing window size (sites)
+  readonly minAdmits: 4 // halt below this many admits in the window (fewer than 4 of 20 ⇒ < 20%)
 }
 
 /**
@@ -60,8 +60,8 @@ export interface MarginalValueStop {
  * The GEN-2 marginal-value stop is the fixed `MarginalValueStop` policy (above), NOT a field here.
  */
 export interface GenesisBudget {
-  readonly ceiling: number; // hard site budget — default min(frontier_size, 200) (GEN-2)
-  readonly deepening: DeepeningLoops; // governed loops — all off ⇒ single-pass baseline (GEN-14)
+  readonly ceiling: number // hard site budget — default min(frontier_size, 200) (GEN-2)
+  readonly deepening: DeepeningLoops // governed loops — all off ⇒ single-pass baseline (GEN-14)
 }
 
 /**
@@ -69,12 +69,12 @@ export interface GenesisBudget {
  * the base tier (an empty set ⇒ exactly one LLM call/site); each switches on ONLY under the escalation
  * predicate `(high-value ∧ uncertain)`.
  */
-export type Mechanism = 'self-consistency' | 'refuter' | 'check-synthesis' | 'codeql';
+export type Mechanism = "self-consistency" | "refuter" | "check-synthesis" | "codeql"
 
 /** The escalation decision for one site (GEN-13). Base tier ⇒ `mechanisms == []` (exactly one call). */
 export interface EscalationDecision {
-  readonly tier: Tier; // the site's (candidate) tier — refuter fires only for `T0`, checks for `tier≥T1`
-  readonly mechanisms: readonly Mechanism[]; // base ⇒ [] (one call); escalated subset otherwise
+  readonly tier: Tier // the site's (candidate) tier — refuter fires only for `T0`, checks for `tier≥T1`
+  readonly mechanisms: readonly Mechanism[] // base ⇒ [] (one call); escalated subset otherwise
 }
 
 export interface BudgetApi {
@@ -82,9 +82,9 @@ export interface BudgetApi {
    *  mechanisms on; a base-tier site returns `mechanisms: []` (exactly one LLM call — no self-consistency,
    *  no refuter, no check synthesis). Semgrep is preferred before CodeQL; the refuter fires only for
    *  `T0`-candidates. */
-  escalate(cand: Candidate, budget: GenesisBudget): EscalationDecision;
+  escalate(cand: Candidate, budget: GenesisBudget): EscalationDecision
 
   /** GEN-13 per-stage cost under the ceiling — the `GenesisReport` cost breakdown. LLM-call count is a
    *  function of the PPR frontier, never of file/line count (GEN-3). */
-  report(): CostReport;
+  report(): CostReport
 }

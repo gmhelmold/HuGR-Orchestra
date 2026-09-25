@@ -351,9 +351,7 @@ describe("tool.task", () => {
 
       const child = (yield* sessions.children(chat.id))[0]
       expect(child).toBeDefined()
-      expect(`${seen?.model?.providerID}/${seen?.model?.modelID}`).toBe(
-        "openrouter/deepseek/deepseek-chat",
-      )
+      expect(`${seen?.model?.providerID}/${seen?.model?.modelID}`).toBe("openrouter/deepseek/deepseek-chat")
       expect(seen?.variant).toBeUndefined()
       expect(result.metadata.sessionId).toBe(child?.id)
     }),

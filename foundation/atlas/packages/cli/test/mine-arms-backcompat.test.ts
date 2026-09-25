@@ -12,16 +12,10 @@
 // (s14/s24/s25/s26), which use a real ATLAS_MODEL_CONFIG (no injected proposer) under ATLAS_MINE_SLOT=advisory
 // and keep every internal assertion (llmCalls, prompt-digest, exact site lists) unchanged.
 
-import { describe, it, expect } from 'vitest';
-import { runMine } from '../src/mine.js';
-import {
-  recordingProposer,
-  gateEmitAll,
-  injectedHistory,
-  skeletonSource,
-  fakeStore,
-} from './mine-fixtures.js';
-import type { MineDeps } from '../src/mine.js';
+import { describe, it, expect } from "vitest"
+import { runMine } from "../src/mine.js"
+import { recordingProposer, gateEmitAll, injectedHistory, skeletonSource, fakeStore } from "./mine-fixtures.js"
+import type { MineDeps } from "../src/mine.js"
 
 const seams = (): Partial<MineDeps> => ({
   proposer: recordingProposer().proposer,
@@ -29,14 +23,14 @@ const seams = (): Partial<MineDeps> => ({
   history: injectedHistory,
   skeleton: skeletonSource,
   store: fakeStore(),
-});
+})
 
-describe('AC-B6 — runMine with an explicit slot is byte-identical to today', () => {
-  it('runMine(repo, {slot:advisory}) === runMine(repo) (no slot) — the single-pass contract is preserved', async () => {
-    const deps = seams();
-    const withSlot = await runMine('fix-repo', { ...deps, slot: 'advisory' });
-    const noSlot = await runMine('fix-repo', deps);
-    expect(withSlot.stdout).toBe(noSlot.stdout);
-    expect(withSlot.exitCode).toBe(noSlot.exitCode);
-  });
-});
+describe("AC-B6 — runMine with an explicit slot is byte-identical to today", () => {
+  it("runMine(repo, {slot:advisory}) === runMine(repo) (no slot) — the single-pass contract is preserved", async () => {
+    const deps = seams()
+    const withSlot = await runMine("fix-repo", { ...deps, slot: "advisory" })
+    const noSlot = await runMine("fix-repo", deps)
+    expect(withSlot.stdout).toBe(noSlot.stdout)
+    expect(withSlot.exitCode).toBe(noSlot.exitCode)
+  })
+})

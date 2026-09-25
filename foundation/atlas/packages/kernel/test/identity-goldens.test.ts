@@ -26,15 +26,15 @@
 // red, the preimage assertion says WHAT changed (a key order, an escape, a dropped side-index, an NFC form)
 // in a diff a human can read, instead of leaving two 64-character strings to stare at.
 
-import { describe, it, expect } from 'vitest';
-import { canonicalForm, id } from '../src/canonical.js';
-import type { CasObject } from '../src/types.js';
+import { describe, it, expect } from "vitest"
+import { canonicalForm, id } from "../src/canonical.js"
+import type { CasObject } from "../src/types.js"
 
 /** The remediation, attached to every assertion so a RED reads as an instruction rather than a diff. */
 const MIGRATION =
-  'MIGRATION EVENT — this digest is the floor under every hash in every on-disk store. Do NOT paste the new ' +
-  'value: bump `IDENTITY_SCHEMA` in packages/adapter-io/src/identity-schema.ts in the SAME commit (#112), ' +
-  'or every existing store silently reads DRIFTED with no explanation.';
+  "MIGRATION EVENT — this digest is the floor under every hash in every on-disk store. Do NOT paste the new " +
+  "value: bump `IDENTITY_SCHEMA` in packages/adapter-io/src/identity-schema.ts in the SAME commit (#112), " +
+  "or every existing store silently reads DRIFTED with no explanation."
 
 /**
  * The fixture, chosen so that every rule KERNEL-1 names is actually EXERCISED — a pin over `{a:1}` would be
@@ -49,48 +49,48 @@ const MIGRATION =
  *   · an array is present, because array order is SIGNIFICANT and must not be sorted with the keys.
  */
 const OBJ: CasObject = {
-  kind: 'advisory',
-  claim: 'the door is the only writer',
+  kind: "advisory",
+  claim: "the door is the only writer",
   n: 42,
-  nested: { b: [1, 2], a: 'caf\u00e9' }, // COMPOSED (U+00E9)
-} as unknown as CasObject;
+  nested: { b: [1, 2], a: "caf\u00e9" }, // COMPOSED (U+00E9)
+} as unknown as CasObject
 
-describe('#104 — PINNED IDENTITY GOLDENS: the kernel digest floor (a RED here is a MIGRATION EVENT)', () => {
-  it('canonicalForm — the exact preimage BYTES, so a red says WHAT moved and not just THAT it moved', () => {
+describe("#104 — PINNED IDENTITY GOLDENS: the kernel digest floor (a RED here is a MIGRATION EVENT)", () => {
+  it("canonicalForm — the exact preimage BYTES, so a red says WHAT moved and not just THAT it moved", () => {
     expect(new TextDecoder().decode(canonicalForm(OBJ)), MIGRATION).toBe(
       '{"claim":"the door is the only writer","kind":"advisory","n":42,"nested":{"a":"caf\u00e9","b":[1,2]}}',
-    );
-  });
+    )
+  })
 
-  it('id — the content address of that preimage', () => {
-    expect(String(id(OBJ)), MIGRATION).toBe('2777c1642a90102199b2986bed6b9ff6a6aa36b39572b1ab3fee369a53fbe9d5');
-  });
+  it("id — the content address of that preimage", () => {
+    expect(String(id(OBJ)), MIGRATION).toBe("2777c1642a90102199b2986bed6b9ff6a6aa36b39572b1ab3fee369a53fbe9d5")
+  })
 
   // The NFC rule is the one place `id` is deliberately NON-injective over JS strings, and it is RATIFIED
   // (REQ-KERNEL-1a). Pinning the decomposed presentation to the SAME literal makes that a fact about a
   // number rather than a fact about itself: the existing property test asserts `id(nfd) === id(nfc)`, which
   // stays true if both move together — this does not.
-  it('id — the DECOMPOSED presentation lands on the SAME pinned address (KERNEL-1a, NFC)', () => {
+  it("id — the DECOMPOSED presentation lands on the SAME pinned address (KERNEL-1a, NFC)", () => {
     // DECOMPOSED: `e` + COMBINING ACUTE (U+0065 U+0301) — `!==` the composed form in JavaScript.
-    const decomposed = { ...(OBJ as Record<string, unknown>), nested: { b: [1, 2], a: 'cafe\u0301' } } as CasObject;
-    expect((decomposed as unknown as { nested: { a: string } }).nested.a).not.toBe('caf\u00e9'); // really distinct
-    expect(String(id(decomposed)), MIGRATION).toBe('2777c1642a90102199b2986bed6b9ff6a6aa36b39572b1ab3fee369a53fbe9d5');
-  });
+    const decomposed = { ...(OBJ as Record<string, unknown>), nested: { b: [1, 2], a: "cafe\u0301" } } as CasObject
+    expect((decomposed as unknown as { nested: { a: string } }).nested.a).not.toBe("caf\u00e9") // really distinct
+    expect(String(id(decomposed)), MIGRATION).toBe("2777c1642a90102199b2986bed6b9ff6a6aa36b39572b1ab3fee369a53fbe9d5")
+  })
 
   // KERNEL-8: `grounding`/`status`/`freshness` are DELETED from every preimage at every level. The existing
   // tests assert the deletion relationally ("with and without them agree"), which survives any re-key. This
   // pins the survivor to the literal above, so removing a name from the side-index set — which would fold a
   // mutable field into every identity in the product — moves this and nothing else would notice.
-  it('id — the KERNEL-8 side-indexes are excluded, landing on the SAME pinned address', () => {
+  it("id — the KERNEL-8 side-indexes are excluded, landing on the SAME pinned address", () => {
     const withSideIndexes = {
       ...(OBJ as Record<string, unknown>),
       grounding: { entries: [] },
-      status: 'HOLDS',
-      freshness: 'FRESH',
-      nested: { b: [1, 2], a: 'caf\u00e9', status: 'NA' },
-    } as CasObject;
+      status: "HOLDS",
+      freshness: "FRESH",
+      nested: { b: [1, 2], a: "caf\u00e9", status: "NA" },
+    } as CasObject
     expect(String(id(withSideIndexes)), MIGRATION).toBe(
-      '2777c1642a90102199b2986bed6b9ff6a6aa36b39572b1ab3fee369a53fbe9d5',
-    );
-  });
-});
+      "2777c1642a90102199b2986bed6b9ff6a6aa36b39572b1ab3fee369a53fbe9d5",
+    )
+  })
+})

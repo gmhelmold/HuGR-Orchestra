@@ -35,10 +35,10 @@
 // RETAINED; the lineage's HEAD is the transition whose `shaAfter` is no other transition's `shaBefore`, and the
 // predecessors read back as SUPERSEDED (a derive-on-read verdict over the lineage — see read/transitions.ts).
 
-import type { Tier, NodeKey } from '@atlas/contracts';
-import type { ClaimEntry } from '@atlas/kernel';
-import type { Grounding } from '@atlas/grounding';
-import type { KnowledgeFreshness, ObviousnessScore, Seal } from './types.js';
+import type { Tier, NodeKey } from "@atlas/contracts"
+import type { ClaimEntry } from "@atlas/kernel"
+import type { Grounding } from "@atlas/grounding"
+import type { KnowledgeFreshness, ObviousnessScore, Seal } from "./types.js"
 
 /**
  * A 2-rev grounded TRANSITION (ADR-0015 D4, #234 — "unit returned A, now returns B"). Structurally the OTHER
@@ -47,18 +47,18 @@ import type { KnowledgeFreshness, ObviousnessScore, Seal } from './types.js';
  * `justified` (never `proven`, D-T1), superseded not falsified (D-T3). See the module header + D4 (L107-110).
  */
 export interface TransitionNode {
-  readonly kind: 'transition';
-  readonly id: NodeKey; // = transitionKey(unitKey, shaBefore, shaAfter) (transition-key.ts); MINTED, never trusted from the payload
-  readonly tier: Tier;
-  readonly unitKey: string; // the LOCATION-FREE unit lineage (qualifiedPath) — the identity leg the two revs share
-  readonly shaBefore: string; // the BEFORE revision's content hash of the unit — identity leg (the interval's open end)
-  readonly shaAfter: string; //  the AFTER revision's content hash of the unit — identity leg (the interval's close)
-  readonly grounding: Grounding; // EXACTLY two entries: [0] anchors unit@shaBefore, [1] anchors unit@shaAfter (stamped at emit, never re-checked — D-T2)
-  readonly freshness: KnowledgeFreshness; // STAMPED AT EMIT (D-T2) — a historical record is not re-derived against HEAD
-  readonly claims: readonly ClaimEntry[];
-  readonly authoring: 'TRANSITIONED' | 'SUPERSEDED'; // minted 'TRANSITIONED'; the lineage HEAD/predecessor verdict is derive-on-read (D-T3)
-  readonly seal?: Seal; // ADR-0017 — ALWAYS 'justified' on a minted transition (D-T1); additive/absent-tolerant like the sibling families
-  readonly derivation?: string; // the contestable grounds the seal names (proven-vs-justified.md §JUSTIFIED) — the change the model read across the two rev bodies
-  readonly scope?: string; // KNOW-11a — the write/authz scope; additive/absent-tolerant (see AdvisoryNode)
-  readonly obviousness?: ObviousnessScore; // ADR-0012 — additive, absent-tolerant (see AdvisoryNode)
+  readonly kind: "transition"
+  readonly id: NodeKey // = transitionKey(unitKey, shaBefore, shaAfter) (transition-key.ts); MINTED, never trusted from the payload
+  readonly tier: Tier
+  readonly unitKey: string // the LOCATION-FREE unit lineage (qualifiedPath) — the identity leg the two revs share
+  readonly shaBefore: string // the BEFORE revision's content hash of the unit — identity leg (the interval's open end)
+  readonly shaAfter: string //  the AFTER revision's content hash of the unit — identity leg (the interval's close)
+  readonly grounding: Grounding // EXACTLY two entries: [0] anchors unit@shaBefore, [1] anchors unit@shaAfter (stamped at emit, never re-checked — D-T2)
+  readonly freshness: KnowledgeFreshness // STAMPED AT EMIT (D-T2) — a historical record is not re-derived against HEAD
+  readonly claims: readonly ClaimEntry[]
+  readonly authoring: "TRANSITIONED" | "SUPERSEDED" // minted 'TRANSITIONED'; the lineage HEAD/predecessor verdict is derive-on-read (D-T3)
+  readonly seal?: Seal // ADR-0017 — ALWAYS 'justified' on a minted transition (D-T1); additive/absent-tolerant like the sibling families
+  readonly derivation?: string // the contestable grounds the seal names (proven-vs-justified.md §JUSTIFIED) — the change the model read across the two rev bodies
+  readonly scope?: string // KNOW-11a — the write/authz scope; additive/absent-tolerant (see AdvisoryNode)
+  readonly obviousness?: ObviousnessScore // ADR-0012 — additive, absent-tolerant (see AdvisoryNode)
 }

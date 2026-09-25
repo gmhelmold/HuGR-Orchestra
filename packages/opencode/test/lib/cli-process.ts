@@ -407,11 +407,11 @@ export function withCliFixture<A, E>(
       // Either way we await proc.exited so the test scope doesn't leak.
       const proc = yield* Effect.acquireRelease(
         Effect.sync(() =>
-            Bun.spawn(["bun", "run", cliEntry, ...argv], {
-              cwd: opts?.cwd ?? home,
-              // ACPProfile supplies a stderr-only connection-ready marker for
-              // this harness. It keeps request deadlines scoped to protocol work.
-              env: { ...process.env, ...env, ...opts?.env, OPENCODE_ACP_PROFILE: "1" },
+          Bun.spawn(["bun", "run", cliEntry, ...argv], {
+            cwd: opts?.cwd ?? home,
+            // ACPProfile supplies a stderr-only connection-ready marker for
+            // this harness. It keeps request deadlines scoped to protocol work.
+            env: { ...process.env, ...env, ...opts?.env, OPENCODE_ACP_PROFILE: "1" },
             stdin: "pipe",
             stdout: "pipe",
             stderr: "pipe",
@@ -439,7 +439,9 @@ export function withCliFixture<A, E>(
       const stderrChunks: string[] = []
       const ready = yield* Deferred.make<void>()
       yield* forkStderrDrain(proc.stderr, stderrChunks, (output) =>
-        output.includes("[acp-profile] cli.acp.connection.create.mark") ? Deferred.succeed(ready, undefined) : Effect.void,
+        output.includes("[acp-profile] cli.acp.connection.create.mark")
+          ? Deferred.succeed(ready, undefined)
+          : Effect.void,
       )
 
       // Each ndjson line becomes one queue entry. JSON.parse failures are

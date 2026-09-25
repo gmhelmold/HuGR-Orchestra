@@ -6,8 +6,8 @@
 // representative chosen by a pure content function — NOT because "first seen wins", which is an
 // arrival-order rule and was the defect (see the §canonical entry representative block below).
 
-import type { AtlasState, Event, EventLog, Node } from './types.js';
-import { combine } from './log.js';
+import type { AtlasState, Event, EventLog, Node } from "./types.js"
+import { combine } from "./log.js"
 
 /**
  * The convergent fold + CRDT OR-Set merge core (frozen, KERNEL-10/11): `fold` reduces the event set to
@@ -17,15 +17,15 @@ import { combine } from './log.js';
 export interface FoldApi {
   /** Convergent reconstruction of current state from the set; order-independent (KERNEL-11).
    *  (atlas-kernel:103; fspec-merge:152) */
-  fold(log: EventLog): AtlasState;
+  fold(log: EventLog): AtlasState
   /** Set-union by event id; commutative, associative, idempotent (KERNEL-9/11).
    *  (atlas-kernel:102; fspec-merge:128) */
-  merge(a: EventLog, b: EventLog): EventLog;
+  merge(a: EventLog, b: EventLog): EventLog
   /** Commutative, grow-only per-nodeKey union — 0 dropped (KERNEL-10). (fspec-merge:139-143) */
-  mergeNode(x: Node, y: Node): Node;
+  mergeNode(x: Node, y: Node): Node
   /** The forced single head = `max-by-contentHash` among FRESH, non-superseded entries — contentHash
    *  ALONE, never seq/clock/LLM (KERNEL-10). (fspec-merge:144-147) */
-  head(n: Node): Event;
+  head(n: Node): Event
 }
 
 // ── the canonical entry representative — what makes the union a JOIN rather than a race ───────────────
@@ -64,7 +64,7 @@ export interface FoldApi {
  *  NOT reach the folded state, where a retained arrival-first value would make `AtlasState` order-dependent.
  *  The LOG keeps each event's `seq` verbatim (it is a legitimate local hint there); only the fold normalizes. */
 function canonicalEntry(e: Event): Event {
-  return e.seq === 0 ? e : { ...e, seq: 0 };
+  return e.seq === 0 ? e : { ...e, seq: 0 }
 }
 
 /** The slot winner when two DISTINCT events collide on one `contentHash`: MAX by the event's own content
@@ -79,7 +79,7 @@ function canonicalEntry(e: Event): Event {
  *  A caller that hand-rolls `id` (KERNEL-1b forbids it) can present two different events under one `id`; they
  *  are then already indistinguishable to the id-keyed log itself, so the ambiguity is upstream, not here. */
 function preferred(incumbent: Event, candidate: Event): Event {
-  return candidate.id > incumbent.id ? candidate : incumbent;
+  return candidate.id > incumbent.id ? candidate : incumbent
 }
 
 /** Re-key a Map in ascending key order. A JS `Map` iterates in INSERTION order, so a fold that inserted
@@ -92,7 +92,7 @@ function preferred(incumbent: Event, candidate: Event): Event {
  *  re-sorting cannot pick up an arrival-order dependence the canonical projection would have masked.
  *  This is STRONGER than the ratified law demands — flagged as such in the completion card. */
 function sorted<K extends string, V>(m: ReadonlyMap<K, V>): Map<K, V> {
-  return new Map([...m.entries()].sort((a, b) => (a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0)));
+  return new Map([...m.entries()].sort((a, b) => (a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0)))
 }
 
 /**
@@ -100,25 +100,26 @@ function sorted<K extends string, V>(m: ReadonlyMap<K, V>): Map<K, V> {
  * Order-independent: the folded state depends only on the SET of events, not their insertion order.
  */
 export function fold(log: EventLog): AtlasState {
-  const state: AtlasState = new Map();
+  const state: AtlasState = new Map()
   for (const ev of log.values()) {
-    const nodeKey = ev.nodeKey;
-    if (nodeKey === undefined) continue; // non-node-forming event — nothing to project
-    let node = state.get(nodeKey);
+    const nodeKey = ev.nodeKey
+    if (nodeKey === undefined) continue // non-node-forming event — nothing to project
+    let node = state.get(nodeKey)
     if (node === undefined) {
-      node = { nodeKey, entries: new Map<Event['contentHash'], Event>() };
-      state.set(nodeKey, node satisfies Node);
+      node = { nodeKey, entries: new Map<Event["contentHash"], Event>() }
+      state.set(nodeKey, node satisfies Node)
     }
     // grow-only OR-Set union keyed by contentHash. The slot value is the CANONICAL representative and, on a
     // collision, the MAX-by-id one — a pure content function, so the result is a function of the event SET.
-    const entry = canonicalEntry(ev);
-    const incumbent = node.entries.get(entry.contentHash);
-    node.entries.set(entry.contentHash, incumbent === undefined ? entry : preferred(incumbent, entry));
+    const entry = canonicalEntry(ev)
+    const incumbent = node.entries.get(entry.contentHash)
+    node.entries.set(entry.contentHash, incumbent === undefined ? entry : preferred(incumbent, entry))
   }
   // canonical key ORDER as well as canonical values — see `sorted`.
-  const out: AtlasState = new Map();
-  for (const [nodeKey, node] of sorted(state)) out.set(nodeKey, { nodeKey: node.nodeKey, entries: sorted(node.entries) });
-  return out;
+  const out: AtlasState = new Map()
+  for (const [nodeKey, node] of sorted(state))
+    out.set(nodeKey, { nodeKey: node.nodeKey, entries: sorted(node.entries) })
+  return out
 }
 
 // ── KERNEL-10 / KERNEL-11: the merge / collision fold — set-union, grow-only node union, forced head ────
@@ -135,7 +136,7 @@ export function fold(log: EventLog): AtlasState {
  * is the log-level join `RefLog.merge`; the per-nodeKey resolution is `mergeNode` / `head` below.
  */
 export function merge(a: EventLog, b: EventLog): EventLog {
-  return combine(a, b);
+  return combine(a, b)
 }
 
 /**
@@ -150,21 +151,21 @@ export function merge(a: EventLog, b: EventLog): EventLog {
  * entry, and first-seen-wins made `mergeNode(x,y) ≠ mergeNode(y,x)` on precisely that input.
  */
 export function mergeNode(x: Node, y: Node): Node {
-  const entries = new Map<Event['contentHash'], Event>();
+  const entries = new Map<Event["contentHash"], Event>()
   for (const src of [x.entries, y.entries]) {
     for (const [h, e] of src) {
-      const entry = canonicalEntry(e);
-      const incumbent = entries.get(h);
-      entries.set(h, incumbent === undefined ? entry : preferred(incumbent, entry));
+      const entry = canonicalEntry(e)
+      const incumbent = entries.get(h)
+      entries.set(h, incumbent === undefined ? entry : preferred(incumbent, entry))
     }
   }
-  return { nodeKey: x.nodeKey, entries };
+  return { nodeKey: x.nodeKey, entries }
 }
 
 /** Whether entry `e` is archived by some other entry's supersedes-DAG within node `n` (fspec-merge:148). */
 function supersededIn(e: Event, n: Node): boolean {
-  for (const o of n.entries.values()) if (o.supersedes.includes(e.contentHash)) return true;
-  return false;
+  for (const o of n.entries.values()) if (o.supersedes.includes(e.contentHash)) return true
+  return false
 }
 
 /**
@@ -174,10 +175,10 @@ function supersededIn(e: Event, n: Node): boolean {
  * the node has no eligible (fresh, non-superseded) entry — no head is forced over an empty candidate set.
  */
 export function head(n: Node): Event | undefined {
-  let winner: Event | undefined;
+  let winner: Event | undefined
   for (const e of n.entries.values()) {
-    if (!e.fresh || supersededIn(e, n)) continue;
-    if (winner === undefined || e.contentHash > winner.contentHash) winner = e;
+    if (!e.fresh || supersededIn(e, n)) continue
+    if (winner === undefined || e.contentHash > winner.contentHash) winner = e
   }
-  return winner;
+  return winner
 }

@@ -8,10 +8,10 @@
 // IT ALSO OWNS THE VALIDITY OF ITS OWN BASE, which it did not, and the gap turned the merge gate GREEN on a
 // rev that does not exist. See {@link UnresolvableMergeBaseError}.
 
-import type { DriftPair, DriftSource } from '@atlas/tools';
-import type { Hash, StructRef } from '@atlas/contracts';
-import type { GroundedFact } from '@atlas/knowledge';
-import { gitErrText, runGit } from './run-git.js';
+import type { DriftPair, DriftSource } from "@atlas/tools"
+import type { Hash, StructRef } from "@atlas/contracts"
+import type { GroundedFact } from "@atlas/knowledge"
+import { gitErrText, runGit } from "./run-git.js"
 
 /**
  * The merge base the caller named does not resolve to a commit in this repository.
@@ -51,8 +51,8 @@ export class UnresolvableMergeBaseError extends Error {
         `baseline to diff HEAD against. NOTHING WAS CLASSIFIED and nothing was written — this is a refusal, ` +
         `not a clean merge gate: an unresolvable base would otherwise make every fact skip and report zero ` +
         `drift. Pass a merge-base sha or ref that exists here (\`git merge-base <base> HEAD\`). ${detail}`,
-    );
-    this.name = 'UnresolvableMergeBaseError';
+    )
+    this.name = "UnresolvableMergeBaseError"
   }
 }
 
@@ -70,22 +70,22 @@ export class UnresolvableMergeBaseError extends Error {
  * valid refname begins with `-`, so the check costs nothing real and depends on no git version.
  */
 function resolveMergeBase(repoPath: string, rev: string): string {
-  if (rev.startsWith('-')) {
-    throw new UnresolvableMergeBaseError(rev, 'A revision cannot begin with `-`; it was not passed to git.');
+  if (rev.startsWith("-")) {
+    throw new UnresolvableMergeBaseError(rev, "A revision cannot begin with `-`; it was not passed to git.")
   }
-  let out: string;
+  let out: string
   try {
     // `^{commit}` PEELS: a tag or a tree resolves to the commit it names, and anything that is not a commit
     // (a blob sha, a tree sha) fails here rather than being carried into the anchor resolver as a rev that
     // silently checks out nothing. `--verify` makes git exit non-zero — and `runGit` throw — on any miss.
-    out = runGit(repoPath, ['rev-parse', '--verify', `${rev}^{commit}`]).trim();
+    out = runGit(repoPath, ["rev-parse", "--verify", `${rev}^{commit}`]).trim()
   } catch (e) {
-    throw new UnresolvableMergeBaseError(rev, gitErrText(e).split('\n')[0] ?? '');
+    throw new UnresolvableMergeBaseError(rev, gitErrText(e).split("\n")[0] ?? "")
   }
   if (out.length === 0) {
-    throw new UnresolvableMergeBaseError(rev, 'git resolved it to an empty string.');
+    throw new UnresolvableMergeBaseError(rev, "git resolved it to an empty string.")
   }
-  return out;
+  return out
 }
 
 /**
@@ -139,71 +139,75 @@ function resolveMergeBase(repoPath: string, rev: string): string {
  *  Total: never throws, mirrors the pre-widening inline body exactly for one entry. */
 function entryDrift(
   deps: {
-    resolveAnchorAt: (rev: string, qualifiedPath: string) => StructRef | undefined;
-    resolveBySubtreeAt?: (rev: string, subtreeHash: string) => StructRef | undefined;
+    resolveAnchorAt: (rev: string, qualifiedPath: string) => StructRef | undefined
+    resolveBySubtreeAt?: (rev: string, subtreeHash: string) => StructRef | undefined
   },
   baseSha: string,
   topicSha: string,
-  entry: GroundedFact['grounding']['entries'][number],
+  entry: GroundedFact["grounding"]["entries"][number],
 ): { readonly anchorWas: StructRef; readonly anchorNow: StructRef } | undefined {
-  const qp = entry.anchor.qualifiedPath;
+  const qp = entry.anchor.qualifiedPath
   // THIS `undefined` MEANS ONE THING ONLY (the base is known to exist, validated once by the caller): this
   // entry's anchor did not exist at that base, there is no baseline to diff — nothing to say about it.
-  const was = deps.resolveAnchorAt(baseSha, qp);
-  if (was === undefined) return undefined;
-  const now = deps.resolveAnchorAt(topicSha, qp);
+  const was = deps.resolveAnchorAt(baseSha, qp)
+  if (was === undefined) return undefined
+  const now = deps.resolveAnchorAt(topicSha, qp)
   if (now !== undefined && was.subtreeHash !== now.subtreeHash) {
     // In-place drift: the SAME qualifiedPath now carries different content at HEAD.
-    return { anchorWas: was, anchorNow: now };
+    return { anchorWas: was, anchorNow: now }
   }
   // The recorded qualifiedPath STILL resolves at HEAD (and did not drift in place) ⇒ this entry is intact at
   // its own path ⇒ NEVER a rename. Return BEFORE the content lookup — otherwise a byte-identical DUPLICATE of
   // the content at some other path would let `resolveBySubtreeAt` (first-preorder / refused-ambiguity) hand
   // back a different path and fabricate a PHANTOM move, diverging from doctor (whose `reDerives` reads FRESH
   // here). The pure-rename widening below fires ONLY when the recorded path is truly GONE at HEAD.
-  if (now !== undefined) return undefined;
+  if (now !== undefined) return undefined
   // PURE-RENAME widening (N10): the recorded qualifiedPath is GONE at HEAD. If this entry's RECORDED content
   // re-located to a DIFFERENT qualifiedPath at HEAD, the citation MOVED but survives ⇒ report it, anchored at
   // that new location (mirrors doctor surfacing a moved anchor). The `!== qp` guard is a belt-and-braces
   // totality check (the content cannot resolve at the now-absent qp, but never assume).
-  const relocated = deps.resolveBySubtreeAt?.(topicSha, String(entry.anchor.subtreeHash));
+  const relocated = deps.resolveBySubtreeAt?.(topicSha, String(entry.anchor.subtreeHash))
   if (relocated !== undefined && relocated.qualifiedPath !== qp) {
-    return { anchorWas: was, anchorNow: relocated };
+    return { anchorWas: was, anchorNow: relocated }
   }
-  return undefined;
+  return undefined
 }
 
 export function createDriftSource(deps: {
-  repoPath: string;
-  resolveAnchorAt: (rev: string, qualifiedPath: string) => StructRef | undefined;
-  resolveBySubtreeAt?: (rev: string, subtreeHash: string) => StructRef | undefined;
-  facts: readonly GroundedFact[];
+  repoPath: string
+  resolveAnchorAt: (rev: string, qualifiedPath: string) => StructRef | undefined
+  resolveBySubtreeAt?: (rev: string, subtreeHash: string) => StructRef | undefined
+  facts: readonly GroundedFact[]
 }): DriftSource {
   return {
     driftAt(mergeBase: Hash): readonly DriftPair[] {
       // THE BASE IS VALIDATED ONCE, HERE, BEFORE ANY FACT IS LOOKED AT. Doing it per fact is what let an
       // unresolvable rev wear the per-fact "no baseline anchor" skip and report a clean merge gate — see
       // {@link UnresolvableMergeBaseError} for the measurement. A refusal, never an empty drift set.
-      const baseSha = resolveMergeBase(deps.repoPath, String(mergeBase));
+      const baseSha = resolveMergeBase(deps.repoPath, String(mergeBase))
       // HEAD is the topic tip — the branch reconcile runs on. The two revs diffed are `mergeBase`
       // (the param) vs HEAD (topic); this adapter owns that choice.
-      const topicSha = runGit(deps.repoPath, ['rev-parse', 'HEAD']).trim();
+      const topicSha = runGit(deps.repoPath, ["rev-parse", "HEAD"]).trim()
 
-      const pairs: DriftPair[] = [];
+      const pairs: DriftPair[] = []
       for (const f of deps.facts) {
         // SPAN EVERY ENTRY (#185): a fact is surfaced when ANY entry has drifted, not just `entries[0]`. The
         // pair reported is the FIRST drifted entry in recorded order — `DriftItem` stays frozen at one pair —
         // so the anchor a human is shown actually moved, rather than a primary that never did. `break` after
         // the first hit: ONE pair per fact, never all-or-nothing across its own citations either.
         for (const entry of f.grounding.entries) {
-          const d = entryDrift(deps, baseSha, topicSha, entry);
+          const d = entryDrift(deps, baseSha, topicSha, entry)
           if (d !== undefined) {
-            pairs.push({ drifted: { fact: f, newSha: topicSha as Hash }, anchorWas: d.anchorWas, anchorNow: d.anchorNow });
-            break;
+            pairs.push({
+              drifted: { fact: f, newSha: topicSha as Hash },
+              anchorWas: d.anchorWas,
+              anchorNow: d.anchorNow,
+            })
+            break
           }
         }
       }
-      return pairs;
+      return pairs
     },
-  };
+  }
 }

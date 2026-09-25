@@ -46,9 +46,9 @@
 // Harness invariant (harness/README.md): no `@atlas/*` import. It reads a directory of JSON lines from the
 // outside and links no product code.
 
-import { readFileSync, readdirSync, realpathSync, statSync } from 'node:fs';
-import { join } from 'node:path';
-import { pathToFileURL } from 'node:url';
+import { readFileSync, readdirSync, realpathSync, statSync } from "node:fs"
+import { join } from "node:path"
+import { pathToFileURL } from "node:url"
 
 /**
  * Is THIS module the process entry point?
@@ -66,19 +66,19 @@ import { pathToFileURL } from 'node:url';
  * that no longer exists answers "not the entry point", which is the safe direction for an imported module.
  */
 function isEntryPoint(url) {
-  if (process.argv[1] === undefined) return false;
+  if (process.argv[1] === undefined) return false
   try {
-    return pathToFileURL(realpathSync(process.argv[1])).href === url;
+    return pathToFileURL(realpathSync(process.argv[1])).href === url
   } catch {
-    return false;
+    return false
   }
 }
 
 /** Why a log cannot be read as a measurement. Thrown, never returned as a number — see the file banner. */
 export class UnfitLogError extends Error {
   constructor(message) {
-    super(message);
-    this.name = 'UnfitLogError';
+    super(message)
+    this.name = "UnfitLogError"
   }
 }
 
@@ -93,50 +93,55 @@ export class UnfitLogError extends Error {
  * is raised, not skipped — a silently skipped record is a silently lowered peak.
  */
 export function readCallLog(dir) {
-  let names;
+  let names
   try {
-    names = readdirSync(dir);
+    names = readdirSync(dir)
   } catch (e) {
-    throw new UnfitLogError(`cannot read the log directory ${dir}: ${e?.message ?? e}`);
+    throw new UnfitLogError(`cannot read the log directory ${dir}: ${e?.message ?? e}`)
   }
-  const calls = [];
-  const seen = new Map();
-  for (const name of names.filter((n) => n.endsWith('.jsonl')).sort()) {
-    const path = join(dir, name);
-    if (!statSync(path).isFile()) continue;
-    const lines = readFileSync(path, 'utf8').split('\n').filter((l) => l.trim() !== '');
+  const calls = []
+  const seen = new Map()
+  for (const name of names.filter((n) => n.endsWith(".jsonl")).sort()) {
+    const path = join(dir, name)
+    if (!statSync(path).isFile()) continue
+    const lines = readFileSync(path, "utf8")
+      .split("\n")
+      .filter((l) => l.trim() !== "")
     if (lines.length > 2) {
       throw new UnfitLogError(
         `${name} holds ${lines.length} event lines but a call writes exactly 2 — two calls collided on one ` +
           `record name, so this log cannot be read as a measurement`,
-      );
+      )
     }
-    let events;
+    let events
     try {
-      events = lines.map((l) => JSON.parse(l));
+      events = lines.map((l) => JSON.parse(l))
     } catch (e) {
-      throw new UnfitLogError(`${name} is not valid NDJSON: ${e?.message ?? e}`);
+      throw new UnfitLogError(`${name} is not valid NDJSON: ${e?.message ?? e}`)
     }
-    const start = events.find((e) => e.ev === 'start');
-    const end = events.find((e) => e.ev === 'end');
-    if (start === undefined) throw new UnfitLogError(`${name} has no \`start\` event`);
-    if (seen.has(start.id)) throw new UnfitLogError(`call id ${start.id} appears in both ${seen.get(start.id)} and ${name}`);
-    seen.set(start.id, name);
+    const start = events.find((e) => e.ev === "start")
+    const end = events.find((e) => e.ev === "end")
+    if (start === undefined) throw new UnfitLogError(`${name} has no \`start\` event`)
+    if (seen.has(start.id))
+      throw new UnfitLogError(`call id ${start.id} appears in both ${seen.get(start.id)} and ${name}`)
+    seen.set(start.id, name)
     if (end !== undefined && end.at < start.at) {
       throw new UnfitLogError(
         `${name} ends (${end.at}) before it starts (${start.at}) — the wall clock moved backwards during the ` +
           `run, so intervals from different processes are not comparable`,
-      );
+      )
     }
     calls.push({
       id: start.id,
       pid: start.pid,
       startMs: start.at,
-      ...(end === undefined ? {} : { endMs: end.at, durationMs: end.durationMs ?? end.at - start.at, status: end.status }),
-    });
+      ...(end === undefined
+        ? {}
+        : { endMs: end.at, durationMs: end.durationMs ?? end.at - start.at, status: end.status }),
+    })
   }
-  if (calls.length === 0) throw new UnfitLogError(`${dir} holds no call records — this run was not measured`);
-  return calls;
+  if (calls.length === 0) throw new UnfitLogError(`${dir} holds no call records — this run was not measured`)
+  return calls
 }
 
 /**
@@ -147,14 +152,14 @@ export function readCallLog(dir) {
  * not. Checked only once there are at least two timestamps, because a single one proves nothing either way.
  */
 export function assertSubSecondClock(calls) {
-  const stamps = calls.flatMap((c) => (c.endMs === undefined ? [c.startMs] : [c.startMs, c.endMs]));
-  if (stamps.length < 2) return;
+  const stamps = calls.flatMap((c) => (c.endMs === undefined ? [c.startMs] : [c.startMs, c.endMs]))
+  if (stamps.length < 2) return
   if (stamps.every((t) => Number.isInteger(t) && t % 1000 === 0)) {
     throw new UnfitLogError(
       `every one of the ${stamps.length} timestamps in this log is an exact whole second, so the shim's clock ` +
         `had one-second resolution and sub-second overlap is unresolvable — this is the signature ` +
         `\`date +%s%N\` leaves on a BSD \`date\`, which emits a literal "N" rather than nanoseconds`,
-    );
+    )
   }
 }
 
@@ -165,39 +170,39 @@ export function assertSubSecondClock(calls) {
  * count as overlapping — see the banner on why this instrument errs downward.
  */
 export function peakConcurrency(calls) {
-  const events = [];
+  const events = []
   for (const c of calls) {
-    if (c.endMs === undefined) continue; // in flight at the end of the run — reported separately, see `summarize`
-    events.push({ at: c.startMs, kind: 1 });
-    events.push({ at: c.endMs, kind: 0 });
+    if (c.endMs === undefined) continue // in flight at the end of the run — reported separately, see `summarize`
+    events.push({ at: c.startMs, kind: 1 })
+    events.push({ at: c.endMs, kind: 0 })
   }
-  events.sort((a, b) => a.at - b.at || a.kind - b.kind);
-  let running = 0;
-  let peak = 0;
+  events.sort((a, b) => a.at - b.at || a.kind - b.kind)
+  let running = 0
+  let peak = 0
   for (const e of events) {
-    running += e.kind === 1 ? 1 : -1;
-    if (running > peak) peak = running;
+    running += e.kind === 1 ? 1 : -1
+    if (running > peak) peak = running
   }
-  return peak;
+  return peak
 }
 
 const median = (xs) => {
-  if (xs.length === 0) return 0;
-  const s = [...xs].sort((a, b) => a - b);
-  const mid = s.length >> 1;
-  return s.length % 2 === 1 ? s[mid] : (s[mid - 1] + s[mid]) / 2;
-};
+  if (xs.length === 0) return 0
+  const s = [...xs].sort((a, b) => a - b)
+  const mid = s.length >> 1
+  return s.length % 2 === 1 ? s[mid] : (s[mid - 1] + s[mid]) / 2
+}
 
 /** The whole measurement, as data. `peakIsLowerBound` is true exactly when calls were still in flight. */
 export function summarize(calls) {
-  assertSubSecondClock(calls);
-  const done = calls.filter((c) => c.endMs !== undefined);
-  const unfinished = calls.filter((c) => c.endMs === undefined);
-  const durations = done.map((c) => c.durationMs);
-  const starts = calls.map((c) => c.startMs);
-  const ends = done.map((c) => c.endMs);
-  const wallClockMs = ends.length === 0 ? 0 : Math.max(...ends) - Math.min(...starts);
-  const busyMs = durations.reduce((a, b) => a + b, 0);
+  assertSubSecondClock(calls)
+  const done = calls.filter((c) => c.endMs !== undefined)
+  const unfinished = calls.filter((c) => c.endMs === undefined)
+  const durations = done.map((c) => c.durationMs)
+  const starts = calls.map((c) => c.startMs)
+  const ends = done.map((c) => c.endMs)
+  const wallClockMs = ends.length === 0 ? 0 : Math.max(...ends) - Math.min(...starts)
+  const busyMs = durations.reduce((a, b) => a + b, 0)
   return {
     calls: calls.length,
     completed: done.length,
@@ -214,43 +219,43 @@ export function summarize(calls) {
     maxDurationMs: durations.length === 0 ? 0 : Math.max(...durations),
     busyMs,
     wallClockMs,
-  };
+  }
 }
 
-const ms = (n) => `${(n / 1000).toFixed(3)}s`;
+const ms = (n) => `${(n / 1000).toFixed(3)}s`
 
 export function render(s) {
   const lines = [
     `calls                 ${s.calls}`,
     `completed             ${s.completed}`,
-    `unfinished            ${s.unfinished}${s.unfinished > 0 ? ` (${s.unfinishedIds.join(', ')})` : ''}`,
+    `unfinished            ${s.unfinished}${s.unfinished > 0 ? ` (${s.unfinishedIds.join(", ")})` : ""}`,
     `non-zero exits        ${s.failed}`,
-    `PEAK CONCURRENCY      ${s.peakConcurrency}${s.peakIsLowerBound ? '   ← LOWER BOUND: calls were still in flight' : ''}`,
+    `PEAK CONCURRENCY      ${s.peakConcurrency}${s.peakIsLowerBound ? "   ← LOWER BOUND: calls were still in flight" : ""}`,
     `effective concurrency ${s.effectiveConcurrency.toFixed(2)}×`,
     `duration  min/med/max ${ms(s.minDurationMs)} / ${ms(s.medianDurationMs)} / ${ms(s.maxDurationMs)}`,
     `model time (sum)      ${ms(s.busyMs)}`,
     `wall clock            ${ms(s.wallClockMs)}`,
-  ];
-  return lines.join('\n');
+  ]
+  return lines.join("\n")
 }
 
 function cli(argv) {
-  const dir = argv.find((a) => !a.startsWith('--'));
+  const dir = argv.find((a) => !a.startsWith("--"))
   if (dir === undefined) {
-    process.stderr.write('usage: node harness/probes/concurrency-report.mjs <log-dir> [--json]\n');
-    return 2;
+    process.stderr.write("usage: node harness/probes/concurrency-report.mjs <log-dir> [--json]\n")
+    return 2
   }
   try {
-    const s = summarize(readCallLog(dir));
-    process.stdout.write(argv.includes('--json') ? `${JSON.stringify(s, null, 2)}\n` : `${render(s)}\n`);
-    return 0;
+    const s = summarize(readCallLog(dir))
+    process.stdout.write(argv.includes("--json") ? `${JSON.stringify(s, null, 2)}\n` : `${render(s)}\n`)
+    return 0
   } catch (e) {
     if (e instanceof UnfitLogError) {
-      process.stderr.write(`concurrency-report: REFUSED — ${e.message}\n`);
-      return 1;
+      process.stderr.write(`concurrency-report: REFUSED — ${e.message}\n`)
+      return 1
     }
-    throw e;
+    throw e
   }
 }
 
-if (isEntryPoint(import.meta.url)) process.exit(cli(process.argv.slice(2)));
+if (isEntryPoint(import.meta.url)) process.exit(cli(process.argv.slice(2)))

@@ -41,8 +41,8 @@ DoctorOut    = { archive?, whyBroken?, hotSet?: { size, budget, over: boolean },
   a governed door; this MUST be enforced **structurally** by the store, not by tool convention alone
   (TOOLS-15) — a shell-armed seat cannot inject a row a governed door did not admit. The read/derive tools
   (`-init`/`-query`/`-reconcile`) and per-node read projections (RETR-5 / TOOLS-10, `diff`/`doctor`/`node`)
-  carry NO write authority. *(This amends the former "single write door / exactly four" wording; the property
-  preserved is "every write is governed + fail-closed-visible," not the count — see ADR-0003 and ADR-0006.)*
+  carry NO write authority. _(This amends the former "single write door / exactly four" wording; the property
+  preserved is "every write is governed + fail-closed-visible," not the count — see ADR-0003 and ADR-0006.)_
 - **TOOLS-2 Pure + total.** Every tool MUST be pure and total: a malformed argument fails closed to a
   structured empty/rejected verdict; none throws (acceptance §8.12).
 - **TOOLS-3 CLI + MCP parity.** Every tool MUST be callable identically over the CLI and over MCP, against
@@ -51,7 +51,7 @@ DoctorOut    = { archive?, whyBroken?, hotSet?: { size, budget, over: boolean },
   which invariant governs — so the caller is never left to guess the follow-up.
 - **TOOLS-5 `atlas-init` auto-promotes nothing.** Move-in MUST be `$0`-LLM and structural; it MUST return
   the territory skeleton + blast radius + T0-candidate flags and MUST NOT set any tier above `T2` or promote
-  a `T0` automatically (A-5, A-6). Heuristics MAY only *flag* a T0 candidate.
+  a `T0` automatically (A-5, A-6). Heuristics MAY only _flag_ a T0 candidate.
 - **TOOLS-6 `atlas-query` returns a bounded pack.** It MUST accept any scope (file/folder/module/crate),
   resolve it through the index to the covering territory/-ies, and return a `≤ ~2K` **governing** pack of
   `tier≥T1` invariants, **beside a separately capped ADVISORY band of `T2` machine proposals no ratifier
@@ -109,13 +109,13 @@ DoctorOut    = { archive?, whyBroken?, hotSet?: { size, budget, over: boolean },
   re-derives at the new `@sha`) — updating the anchor with no human and no merge block — and report
   `regroundedCount`. It MUST NOT auto-touch `semantic` drift: those still surface for review and still
   exit `2` (TOOLS-8). Each re-ground write MUST still pass the `atlas-emit` fail-closed check (TOOLS-7) —
-  the flag changes *who triggers* the write (mechanical, automatic), never the grounding bar.
+  the flag changes _who triggers_ the write (mechanical, automatic), never the grounding bar.
 - **TOOLS-11 Subagent reach — push owns the common case, pull is laddered, CLI is the floor.** A seat MUST
   NOT be forced to the CLI to reach the Atlas. Delivery MUST split by **direction**: **push** (the poke /
   pack / `RelationSet`) is the **orchestrator's** job and MUST reach a seat with **no tool grant required** —
   delivered by brief-injection or as a **materialized file the seat reads with its native `Read`**. Only
   **pull** (an ad-hoc mid-task query) MAY require the seat to reach the store, and it MUST resolve down a
-  fixed **native-first** ladder (see *Subagent transport*): in-process SDK MCP → registered MCP + grant →
+  fixed **native-first** ladder (see _Subagent transport_): in-process SDK MCP → registered MCP + grant →
   poke-as-file → orchestrator relay → CLI. Every tier is backed by the **one** handler (TOOLS-10) — tiers
   differ only in transport, never in contract or result.
 - **TOOLS-11a Native pull is pinned to the SDK in-process spawn path; the ladder is honest per harness.**
@@ -131,7 +131,7 @@ DoctorOut    = { archive?, whyBroken?, hotSet?: { size, budget, over: boolean },
 - **TOOLS-14 Pre-phase discovery hook — re-grounding is pushed, never a seat decision.** Mid-task PULL MUST
   NOT be load-bearing. At **every phase transition** the orchestrator MUST **auto-inject a fresh
   `atlas-query`/`own_<unit>` pack** into the seat's context (a push at the phase boundary) — the seat never
-  has to *decide* to re-ground when its context has drifted, and the relay (pull 4) stops being a hot path.
+  has to _decide_ to re-ground when its context has drifted, and the relay (pull 4) stops being a hot path.
   This is a **push** obligation (TOOLS-11's push tier), so it MUST hold with **no tool grant** and is
   **unaffected by TOOLS-11a**: a seat that received its phase pack by push is correct even on a harness where
   native MCP (pull 1–2) is `unavailable`, because it never needed the grant. Ad-hoc mid-task pull remains
@@ -193,7 +193,7 @@ atlas doctor    reground <fact>        → DoctorOut    // guided re-ground/reti
   exits 2 (blocking), **mechanical** drift does not. `--accept-reground` auto-re-grounds the mechanical
   subset in one pass — no human, no block — leaving only genuine semantic drift for review.
 - **`atlas doctor`** — the human-facing inspect/repair/GC surface for a store where nothing dies and the
-  archive grows monotone. Read-only: browse the archive, explain *why-broken*, report the hot-set against
+  archive grows monotone. Read-only: browse the archive, explain _why-broken_, report the hot-set against
   a budget, and drive a **guided** re-ground/retire whose write still funnels through `atlas-emit`.
 
 ## Subagent transport (push vs pull)
@@ -202,14 +202,14 @@ The hard part is never "how does a seat call a tool" — it is **most knowledge 
 all.** Split by direction (TOOLS-11): the orchestrator **pushes**; only ad-hoc **pull** needs the seat to
 reach the store, down a native-first ladder where the **CLI is the floor, not the fallback**.
 
-| Tier | Mechanism | Seat needs | Engineering status |
-|---|---|---|---|
-| **push** | poke / pack / `RelationSet` in the brief, or a materialized `.atlas/*` file | nothing (or `Read`) | trivially available |
-| **pull 1** | in-process SDK MCP server (zero-IPC, shared live state) | Orchestra spawns the seat via the **SDK in-process path** | native ONLY on the SDK path; `unavailable` elsewhere (TOOLS-11a) |
-| **pull 2** | registered MCP server + Atlas tools in the seat's grant | SDK spawn + per-seat `allowed_tools` grant | native ONLY on the SDK path; `unavailable` on `.claude/agents` (reproduced defect) |
-| **pull 3** | poke-as-file / brief-injection | `Read` only | trivially true |
-| **pull 4** | orchestrator **relay** (orchestrator proxies the native call) | emit a structured request | **proven** (the relay pattern) |
-| **pull 5** | CLI (`atlas node <addr>`) | shell | the floor |
+| Tier       | Mechanism                                                                   | Seat needs                                                | Engineering status                                                                 |
+| ---------- | --------------------------------------------------------------------------- | --------------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| **push**   | poke / pack / `RelationSet` in the brief, or a materialized `.atlas/*` file | nothing (or `Read`)                                       | trivially available                                                                |
+| **pull 1** | in-process SDK MCP server (zero-IPC, shared live state)                     | Orchestra spawns the seat via the **SDK in-process path** | native ONLY on the SDK path; `unavailable` elsewhere (TOOLS-11a)                   |
+| **pull 2** | registered MCP server + Atlas tools in the seat's grant                     | SDK spawn + per-seat `allowed_tools` grant                | native ONLY on the SDK path; `unavailable` on `.claude/agents` (reproduced defect) |
+| **pull 3** | poke-as-file / brief-injection                                              | `Read` only                                               | trivially true                                                                     |
+| **pull 4** | orchestrator **relay** (orchestrator proxies the native call)               | emit a structured request                                 | **proven** (the relay pattern)                                                     |
+| **pull 5** | CLI (`atlas node <addr>`)                                                   | shell                                                     | the floor                                                                          |
 
 - **Own-the-spawn is the unlock — but only on the SDK path:** pull 1–2 are a wiring job Orchestra controls
   end-to-end **only** when it spawns via the Agent SDK in-process path (it registers the Atlas server **and**

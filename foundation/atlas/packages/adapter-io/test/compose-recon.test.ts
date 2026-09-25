@@ -18,78 +18,78 @@
 // The shared fixtures/helpers live in ./harness/recon-fixtures.js; the N10 content-addressed classifier,
 // rename detection, and phantom-move guard live in ./compose-recon-n10.test.ts.
 
-import { describe, it, expect, afterEach } from 'vitest';
-import type { Hash } from '@atlas/contracts';
-import type { ReconcileOut } from '@atlas/tools';
-import { composeRuntime } from '../src/compose.js';
-import { createRevIndex } from '../src/rev-index.js';
-import { RECONCILE, makeFix, runLeg, type Fix } from './harness/recon-fixtures.js';
+import { describe, it, expect, afterEach } from "vitest"
+import type { Hash } from "@atlas/contracts"
+import type { ReconcileOut } from "@atlas/tools"
+import { composeRuntime } from "../src/compose.js"
+import { createRevIndex } from "../src/rev-index.js"
+import { RECONCILE, makeFix, runLeg, type Fix } from "./harness/recon-fixtures.js"
 
-let fix: Fix | undefined;
+let fix: Fix | undefined
 afterEach(() => {
-  fix?.cleanup();
-  fix = undefined;
-});
+  fix?.cleanup()
+  fix = undefined
+})
 
-describe('RECON-SEAMS — composeRuntime wires the REAL reconcile drift seams (COMPOSE-C)', () => {
-  it('SCN-RS-1 — reconcile DETECTS a real structural change as DRIFTED (mechanical + semantic split)', () => {
-    fix = makeFix();
-    const { handler } = composeRuntime(fix.repoPath);
+describe("RECON-SEAMS — composeRuntime wires the REAL reconcile drift seams (COMPOSE-C)", () => {
+  it("SCN-RS-1 — reconcile DETECTS a real structural change as DRIFTED (mechanical + semantic split)", () => {
+    fix = makeFix()
+    const { handler } = composeRuntime(fix.repoPath)
 
     // Drive the reconcile leg through the assembled handler: mergeBase=A, topic=HEAD=B.
-    const v = handler.handle(RECONCILE, { mergeBase: fix.A as Hash });
-    expect(v.ok).toBe(true);
-    const out = v.data as ReconcileOut;
+    const v = handler.handle(RECONCILE, { mergeBase: fix.A as Hash })
+    expect(v.ok).toBe(true)
+    const out = v.data as ReconcileOut
 
     // DRIFT PROVEN — both facts' anchor moved A→B; the classifier splits by re-derivation at B.
-    expect(out.drift).toHaveLength(2); // GOLDEN-drift-detected (teeth: resolveAnchorAt stub ⇒ 0)
-    expect(out.semantic).toContain('F_A'); // grounded @A ⇒ no longer re-derives at B ⇒ BROKEN
-    expect(out.mechanical).toContain('F_B'); // grounded @B ⇒ re-derives at B ⇒ auto-re-groundable
-    expect(out.exitCode).toBe(2); // any semantic flip blocks (never a silent green)
-    expect(out.reauthorCount).toBe(1); // == |semantic|
-  });
+    expect(out.drift).toHaveLength(2) // GOLDEN-drift-detected (teeth: resolveAnchorAt stub ⇒ 0)
+    expect(out.semantic).toContain("F_A") // grounded @A ⇒ no longer re-derives at B ⇒ BROKEN
+    expect(out.mechanical).toContain("F_B") // grounded @B ⇒ re-derives at B ⇒ auto-re-groundable
+    expect(out.exitCode).toBe(2) // any semantic flip blocks (never a silent green)
+    expect(out.reauthorCount).toBe(1) // == |semantic|
+  })
 
-  it('SCN-RS-2 (control) — NO structural change (mergeBase == topic) ⇒ nothing drifts', () => {
-    fix = makeFix();
-    const { handler } = composeRuntime(fix.repoPath);
+  it("SCN-RS-2 (control) — NO structural change (mergeBase == topic) ⇒ nothing drifts", () => {
+    fix = makeFix()
+    const { handler } = composeRuntime(fix.repoPath)
 
     // mergeBase = HEAD (B) == topic ⇒ the anchor is identical at both ends ⇒ no drift pair.
-    const out = handler.handle(RECONCILE, { mergeBase: fix.B as Hash }).data as ReconcileOut;
-    expect(out.drift).toHaveLength(0);
-    expect(out.semantic).toHaveLength(0);
-    expect(out.mechanical).toHaveLength(0);
-    expect(out.exitCode).toBe(0);
-  });
+    const out = handler.handle(RECONCILE, { mergeBase: fix.B as Hash }).data as ReconcileOut
+    expect(out.drift).toHaveLength(0)
+    expect(out.semantic).toHaveLength(0)
+    expect(out.mechanical).toHaveLength(0)
+    expect(out.exitCode).toBe(0)
+  })
 
-  it('TEETH-resolveAnchorAt — revert resolveAnchorAt→()=>undefined ⇒ NO drift detected (golden RED)', () => {
-    fix = makeFix();
-    const rev = createRevIndex(fix.repoPath);
+  it("TEETH-resolveAnchorAt — revert resolveAnchorAt→()=>undefined ⇒ NO drift detected (golden RED)", () => {
+    fix = makeFix()
+    const rev = createRevIndex(fix.repoPath)
 
     // Real seams detect the drift...
-    const real = runLeg(fix, { resolveAnchorAt: rev.resolveAnchorAt, reDerives: rev.reDerives }, fix.A);
-    expect(real.drift).toHaveLength(2);
-    expect(real.exitCode).toBe(2);
+    const real = runLeg(fix, { resolveAnchorAt: rev.resolveAnchorAt, reDerives: rev.reDerives }, fix.A)
+    expect(real.drift).toHaveLength(2)
+    expect(real.exitCode).toBe(2)
 
     // ...MUTANT: the v1-empty anchor resolver ⇒ no anchor resolves at either end ⇒ zero drift pairs ⇒
     // the drift-detected golden FLIPS (drift empty, exitCode 0). resolveAnchorAt is load-bearing.
-    const mutant = runLeg(fix, { resolveAnchorAt: () => undefined, reDerives: rev.reDerives }, fix.A);
-    expect(mutant.drift).toHaveLength(0);
-    expect(mutant.exitCode).toBe(0);
-  });
+    const mutant = runLeg(fix, { resolveAnchorAt: () => undefined, reDerives: rev.reDerives }, fix.A)
+    expect(mutant.drift).toHaveLength(0)
+    expect(mutant.exitCode).toBe(0)
+  })
 
-  it('TEETH-reDerives — revert reDerives→()=>false ⇒ the mechanical fact is misclassified (golden RED)', () => {
-    fix = makeFix();
-    const rev = createRevIndex(fix.repoPath);
+  it("TEETH-reDerives — revert reDerives→()=>false ⇒ the mechanical fact is misclassified (golden RED)", () => {
+    fix = makeFix()
+    const rev = createRevIndex(fix.repoPath)
 
     // Real seams classify factB (grounded @B, re-derives at B) as MECHANICAL...
-    const real = runLeg(fix, { resolveAnchorAt: rev.resolveAnchorAt, reDerives: rev.reDerives }, fix.A);
-    expect(real.mechanical).toContain('F_B');
-    expect(real.exitCode).toBe(2); // factA is still semantic
+    const real = runLeg(fix, { resolveAnchorAt: rev.resolveAnchorAt, reDerives: rev.reDerives }, fix.A)
+    expect(real.mechanical).toContain("F_B")
+    expect(real.exitCode).toBe(2) // factA is still semantic
 
     // ...MUTANT: the v1 fail-closed `()=>false` ⇒ EVERY drifted fact reads semantic ⇒ the mechanical arm
     // empties and factB flips into semantic. reDerives is load-bearing (mechanical/semantic split).
-    const mutant = runLeg(fix, { resolveAnchorAt: rev.resolveAnchorAt, reDerives: () => false }, fix.A);
-    expect(mutant.mechanical).toHaveLength(0);
-    expect(mutant.semantic).toContain('F_B');
-  });
-});
+    const mutant = runLeg(fix, { resolveAnchorAt: rev.resolveAnchorAt, reDerives: () => false }, fix.A)
+    expect(mutant.mechanical).toHaveLength(0)
+    expect(mutant.semantic).toContain("F_B")
+  })
+})

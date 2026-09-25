@@ -17,8 +17,8 @@
 // detail and MUST NOT be observable in the output. Sites finish out of order; nothing downstream may learn
 // that. See `drive` for the three properties that make it structurally true rather than merely tested.
 
-import type { Candidate, ExtractResult, Fact, GenesisBudget, SiteOutcome } from './types.js';
-import { classifyVisit, interruptedAt, readVisit, unvisited } from './coverage.js';
+import type { Candidate, ExtractResult, Fact, GenesisBudget, SiteOutcome } from "./types.js"
+import { classifyVisit, interruptedAt, readVisit, unvisited } from "./coverage.js"
 
 /**
  * The bounded width of the S2 pass (task #158). A run-shape bound the operator does not set — deliberately
@@ -29,7 +29,7 @@ import { classifyVisit, interruptedAt, readVisit, unvisited } from './coverage.j
  * a product bug rather than as a tuning choice. It is the batch width here AND the pool width in the driver
  * that supplies `visitAll`; one constant, so the two can never disagree.
  */
-export const POOL_WIDTH = 8 as const;
+export const POOL_WIDTH = 8 as const
 
 /**
  * ONE site's outcome from a batched dispatch: the value `visit` would have RETURNED, or the error it would
@@ -39,7 +39,7 @@ export const POOL_WIDTH = 8 as const;
  */
 export type VisitAttempt =
   | { readonly ok: true; readonly value: readonly Fact[] | ExtractResult }
-  | { readonly ok: false; readonly error: unknown };
+  | { readonly ok: false; readonly error: unknown }
 
 /**
  * The three ports a PASS needs — a strict subset of `ControllerDeps` (which adds `plan`/`changed`/
@@ -54,7 +54,7 @@ export interface DrivePorts {
    *  `WhyNot` survives into the run ledger instead of being dropped here. Widened, never replaced: every
    *  existing driver compiles and behaves identically, and one that drops `.facts` from its call gains the
    *  abstention record for free. MAY throw (an interruption, GEN-8c). */
-  visit(cand: Candidate): readonly Fact[] | ExtractResult;
+  visit(cand: Candidate): readonly Fact[] | ExtractResult
 
   /** OPTIONAL batched S2 dispatch — the ONE seam concurrency is allowed to enter through (task #158), and
    *  the reason nothing else in the package had to learn about it. Given up to `POOL_WIDTH` candidates IN
@@ -69,22 +69,22 @@ export interface DrivePorts {
    *  ABSENT ⇒ the loop drives `visit` one site at a time, which is the pre-#158 behaviour exactly. The two
    *  paths agree BY CONSTRUCTION rather than by testing: the fold walks the batch in rank order and stops
    *  where a sequential drive would have stopped, so completion order reaches nothing. */
-  visitAll?(cands: readonly Candidate[]): readonly VisitAttempt[];
+  visitAll?(cands: readonly Candidate[]): readonly VisitAttempt[]
 
   /** The KNOW-15 write-decision: idempotent merge by fact `id`, returning the grounded set. */
-  upsert(incoming: readonly Fact[]): readonly Fact[];
+  upsert(incoming: readonly Fact[]): readonly Fact[]
 }
 
 export interface DriveResult {
-  readonly seeded: readonly Fact[];
+  readonly seeded: readonly Fact[]
   /** Model calls ISSUED, including those whose results were discarded. See `GenesisReport.modelCalls`:
    *  `llmCalls` is what the run USED and this is what the run PAID FOR, and under a pool they differ. */
-  readonly modelCalls: number;
-  readonly lastCompletedRank: number; // the resume cursor — the last fully-completed ranked site (GEN-8)
-  readonly interrupted: boolean; // a site threw mid-run ⇒ resumable partial (never propagated — GEN-8c)
-  readonly llmCalls: number;
-  readonly budgetSpent: number;
-  readonly outcomes: readonly SiteOutcome[]; // one row per site this drive was handed — the GEN-8/12g ledger
+  readonly modelCalls: number
+  readonly lastCompletedRank: number // the resume cursor — the last fully-completed ranked site (GEN-8)
+  readonly interrupted: boolean // a site threw mid-run ⇒ resumable partial (never propagated — GEN-8c)
+  readonly llmCalls: number
+  readonly budgetSpent: number
+  readonly outcomes: readonly SiteOutcome[] // one row per site this drive was handed — the GEN-8/12g ledger
 }
 
 /**
@@ -103,17 +103,17 @@ export interface DriveResult {
 function dispatch(batch: readonly Candidate[], ports: DrivePorts): readonly VisitAttempt[] {
   if (ports.visitAll !== undefined) {
     try {
-      return ports.visitAll(batch);
+      return ports.visitAll(batch)
     } catch (error) {
-      return batch.map(() => ({ ok: false, error }));
+      return batch.map(() => ({ ok: false, error }))
     }
   }
-  const cand = batch[0];
-  if (cand === undefined) return [];
+  const cand = batch[0]
+  if (cand === undefined) return []
   try {
-    return [{ ok: true, value: ports.visit(cand) }]; // S2 per-site (WP-8.28); may throw = interruption
+    return [{ ok: true, value: ports.visit(cand) }] // S2 per-site (WP-8.28); may throw = interruption
   } catch (error) {
-    return [{ ok: false, error }];
+    return [{ ok: false, error }]
   }
 }
 
@@ -168,57 +168,57 @@ export function drive(
   base: readonly Fact[],
   ports: DrivePorts,
 ): DriveResult {
-  let seeded = base;
-  let lastCompletedRank = floor;
-  let llmCalls = startCalls;
-  let budgetSpent = startSpent;
-  let modelCalls = startModelCalls;
-  let interrupted = false;
-  const outcomes: SiteOutcome[] = [];
+  let seeded = base
+  let lastCompletedRank = floor
+  let llmCalls = startCalls
+  let budgetSpent = startSpent
+  let modelCalls = startModelCalls
+  let interrupted = false
+  const outcomes: SiteOutcome[] = []
 
   // Sorted ONCE, here, from the frontier the controller was handed. Nothing below re-derives it.
-  const ordered = [...sites].sort((a, b) => a.rank - b.rank);
-  let i = 0;
+  const ordered = [...sites].sort((a, b) => a.rank - b.rank)
+  let i = 0
   while (i < ordered.length) {
-    const room = budget.ceiling - budgetSpent; // GEN-2 hard ceiling, as a WIDTH bound (property 1 above)
-    if (room <= 0) break;
-    const width = Math.min(ports.visitAll !== undefined ? POOL_WIDTH : 1, room, ordered.length - i);
-    const batch = ordered.slice(i, i + width);
-    const attempts = dispatch(batch, ports);
+    const room = budget.ceiling - budgetSpent // GEN-2 hard ceiling, as a WIDTH bound (property 1 above)
+    if (room <= 0) break
+    const width = Math.min(ports.visitAll !== undefined ? POOL_WIDTH : 1, room, ordered.length - i)
+    const batch = ordered.slice(i, i + width)
+    const attempts = dispatch(batch, ports)
     // COUNTED AT DISPATCH, NOT AT FOLD — the whole point of the counter. Every site in this batch was
     // handed to the proposer, so every one of them was paid for, whether or not its result survives the
     // fold below. Counting the batch we ASKED FOR (rather than the attempts we got back) keeps the figure
     // an honest upper bound when a pool answers short: an unanswered site may still have reached the model.
-    modelCalls += batch.length;
+    modelCalls += batch.length
 
-    let folded = 0;
+    let folded = 0
     for (const cand of batch) {
-      const a = attempts[folded];
-      if (a === undefined || !a.ok) break; // the first fault BY RANK ends the drive — property 2 above
-      const record = readVisit(a.value); // normalize the union — `abstained` present only if the port sent it
-      seeded = ports.upsert(record.facts); // KNOW-15 idempotent upsert — 0 duplicates on re-run (GEN-7b)
-      llmCalls += 1;
-      budgetSpent += 1;
-      lastCompletedRank = cand.rank; // checkpoint the last completed ranked site (GEN-8a)
+      const a = attempts[folded]
+      if (a === undefined || !a.ok) break // the first fault BY RANK ends the drive — property 2 above
+      const record = readVisit(a.value) // normalize the union — `abstained` present only if the port sent it
+      seeded = ports.upsert(record.facts) // KNOW-15 idempotent upsert — 0 duplicates on re-run (GEN-7b)
+      llmCalls += 1
+      budgetSpent += 1
+      lastCompletedRank = cand.rank // checkpoint the last completed ranked site (GEN-8a)
       // The ledger row is written from what the site ACTUALLY produced — the seeded facts by id, or the
       // grounded GEN-12 `WhyNot` the port carried. It is never derived by subtracting counts.
-      outcomes.push(classifyVisit(cand, record));
-      folded += 1;
+      outcomes.push(classifyVisit(cand, record))
+      folded += 1
     }
-    i += folded;
+    i += folded
     if (folded < batch.length) {
-      interrupted = true; // GEN-8c: never propagate — resume continues from lastCompletedRank
-      outcomes.push(interruptedAt(ordered[i]!)); // the site is visited-but-not-completed, and says so
-      i += 1;
-      break;
+      interrupted = true // GEN-8c: never propagate — resume continues from lastCompletedRank
+      outcomes.push(interruptedAt(ordered[i]!)) // the site is visited-but-not-completed, and says so
+      i += 1
+      break
     }
   }
   // The tail nobody reached. Recorded rather than omitted: a silent tail is exactly the shape a dropped site
   // would take. WHY it went unvisited is the run's own state — a ceiling reached is a deliberate scope and an
   // interruption is resumable, and a ledger that conflated the two would be unreadable in the one situation
   // it exists for.
-  const reason = interrupted ? 'after-interrupt' : 'ceiling';
-  for (; i < ordered.length; i++) outcomes.push(unvisited(ordered[i]!, reason));
+  const reason = interrupted ? "after-interrupt" : "ceiling"
+  for (; i < ordered.length; i++) outcomes.push(unvisited(ordered[i]!, reason))
 
-  return { seeded, modelCalls, lastCompletedRank, interrupted, llmCalls, budgetSpent, outcomes };
+  return { seeded, modelCalls, lastCompletedRank, interrupted, llmCalls, budgetSpent, outcomes }
 }

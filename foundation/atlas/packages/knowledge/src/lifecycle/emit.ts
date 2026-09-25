@@ -23,9 +23,9 @@
 // ("the content-addressed CAS id of the persisted object"); this binding surfaces exactly the injected
 // sink's returned `Hash` (never a self-hashed value) — the which-id reconciliation stays the ref's flag.
 
-import type { Hash } from '@atlas/contracts';
-import type { GroundApi } from '@atlas/grounding';
-import type { GroundedFact } from '../types.js';
+import type { Hash } from "@atlas/contracts"
+import type { GroundApi } from "@atlas/grounding"
+import type { GroundedFact } from "../types.js"
 
 // ── frozen EmitApi surface, co-located here (was ref/emit.ts) ─────────────────────────────────────────
 
@@ -35,7 +35,7 @@ export interface EmitApi {
    *  persisted. Returns the CAS id on success. Pure + total — a structured rejection, never a throw
    *  (atlas-knowledge:79). `id` is the content-addressed CAS id of the persisted object (a `Hash`);
    *  under `exactOptionalPropertyTypes`, `id?` is genuinely absent-on-reject / present-on-emit. */
-  admit(node: GroundedFact): { readonly emitted: boolean; readonly id?: Hash };
+  admit(node: GroundedFact): { readonly emitted: boolean; readonly id?: Hash }
 }
 
 /**
@@ -46,10 +46,10 @@ export interface EmitApi {
 export interface EmitDeps {
   /** GROUND-2 real-grounding predicate: ≥1 entry ∧ every entry carries a non-empty `subtreeHash`. The
    *  single fail-closed gate the admission defers to (no second copy of the gate). */
-  readonly isGrounded: GroundApi['isGrounded'];
+  readonly isGrounded: GroundApi["isGrounded"]
   /** The content-addressed persistence sink: writes the admitted node and returns its CAS `id`. Injected
    *  (consume-only) — this module performs NO raw hashing (SEAM). */
-  readonly persist: (node: GroundedFact) => Hash;
+  readonly persist: (node: GroundedFact) => Hash
 }
 
 /**
@@ -65,9 +65,7 @@ export interface EmitDeps {
  * single empty `subtreeHash` fails closed for the same reason GROUND-2 says it does.
  */
 export function bindEmit(deps: EmitDeps): EmitApi {
-  const admit: EmitApi['admit'] = (node: GroundedFact) =>
-    deps.isGrounded(node.grounding)
-      ? { emitted: true, id: deps.persist(node) }
-      : { emitted: false };
-  return { admit };
+  const admit: EmitApi["admit"] = (node: GroundedFact) =>
+    deps.isGrounded(node.grounding) ? { emitted: true, id: deps.persist(node) } : { emitted: false }
+  return { admit }
 }

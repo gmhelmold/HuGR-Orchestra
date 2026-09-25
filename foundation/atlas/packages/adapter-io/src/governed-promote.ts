@@ -50,65 +50,65 @@
 // prevent: 8 mine processes × 5 sites reported 40 candidates committed with 5 durable, every process
 // exiting 0. A count of what was tried is not a count of what happened.
 
-import type { Hash } from '@atlas/contracts';
-import { DegenerateAnchorError } from '@atlas/knowledge';
-import type { GroundedFact, StoreProjection } from '@atlas/knowledge';
-import type { EmitOut } from '@atlas/tools';
-import type { CommitRefusal } from './sidecar.js';
-import type { DiskStore } from './store.js';
+import type { Hash } from "@atlas/contracts"
+import { DegenerateAnchorError } from "@atlas/knowledge"
+import type { GroundedFact, StoreProjection } from "@atlas/knowledge"
+import type { EmitOut } from "@atlas/tools"
+import type { CommitRefusal } from "./sidecar.js"
+import type { DiskStore } from "./store.js"
 
 /** A staged row whose `contentHash` names bytes the CAS cannot return. NOT a skip and NOT a batch throw: the
  *  row is real, its fact is unreadable, and a curator has to know WHICH row so they can re-mine it. `mine`
  *  puts the bytes before it publishes the row, so this state means the CAS was pruned/corrupted underneath. */
 export const REJECTED_CANDIDATE_UNREADABLE =
-  'candidate bytes absent from CAS — the staged row names a contentHash the store cannot return, so there is no fact to promote';
+  "candidate bytes absent from CAS — the staged row names a contentHash the store cannot return, so there is no fact to promote"
 
 /** A staged row whose grounding names no single containing unit, so `primaryAnchorId` cannot mint an
  *  identity for it. `governed-emit.ts` throws `DegenerateAnchorError` by design at that gate; ONE such row
  *  must not take the batch down with it, so it is caught here and filed as this row's own refusal. */
 export const REJECTED_DEGENERATE_CANDIDATE =
-  'degenerate anchor — the staged candidate\'s grounding names no single containing unit, so no identity can be minted for it';
+  "degenerate anchor — the staged candidate's grounding names no single containing unit, so no identity can be minted for it"
 
 /** What the promotion door is composed over: the durable store the staging sidecar lives beside, and the
  *  GOVERNED EMIT LEG itself — passed in already bound (with `origin:'promoted'`) by the composition root, so
  *  this module composes the door rather than constructing a second one that could drift from `atlas-emit`. */
 export interface GovernedPromoteDeps {
-  readonly store: DiskStore;
+  readonly store: DiskStore
   /** `createGovernedEmit({…, origin: 'promoted'}).emit` — the SAME leg `atlas-emit` binds, never a copy. */
-  readonly emit: (node: GroundedFact, at: Hash) => EmitOut;
+  readonly emit: (node: GroundedFact, at: Hash) => EmitOut
 }
 
 /** One staged row's outcome. `settled` is the DURABLE fact: the door answered `emitted:true`. */
 export interface PromotedRow {
-  readonly nodeKey: string;
-  readonly settled: boolean;
+  readonly nodeKey: string
+  readonly settled: boolean
   /** The CAS address the durable write landed on (present iff `settled`). */
-  readonly id?: string;
+  readonly id?: string
   /** The refusal — the emit door's own `rejected` string, or one of this module's two per-row refusals. */
-  readonly rejected?: string;
+  readonly rejected?: string
 }
 
 /** The fold of one promotion pass. */
 export interface PromoteOut {
   /** Did the STAGING READ settle? `false` ⇒ nothing was read and nothing was attempted — see `refusal`. */
-  readonly read: boolean;
+  readonly read: boolean
   /** Why the staging read refused (`unreadable` / `untrusted` / `contended`). Present iff `read` is false. */
-  readonly refusal?: CommitRefusal;
+  readonly refusal?: CommitRefusal
   /** Rows FOUND in staging. `0` with `read:true` is an honest empty staging; `read:false` is NOT that. */
-  readonly candidates: number;
+  readonly candidates: number
   /** Rows the door made DURABLE. Settled, never attempted. */
-  readonly promoted: number;
+  readonly promoted: number
   /** Rows the door (or this module) refused. `promoted + refused === candidates`, always. */
-  readonly refused: number;
+  readonly refused: number
   /** Per-row outcomes, in the staging projection's own iteration order. */
-  readonly rows: readonly PromotedRow[];
+  readonly rows: readonly PromotedRow[]
 }
 
 /** Is this the identity refusal `governed-emit.ts` throws by design at gate 2.1? Matched on the NAMED class
  *  AND on its `name`, because a cross-package `instanceof` is defeated by a duplicated module instance and a
  *  silent `false` here would turn one bad row into a batch-killing throw — the failure this guard prevents. */
 function isDegenerateAnchor(e: unknown): boolean {
-  return e instanceof DegenerateAnchorError || (e as { name?: unknown } | null)?.name === 'DegenerateAnchorError';
+  return e instanceof DegenerateAnchorError || (e as { name?: unknown } | null)?.name === "DegenerateAnchorError"
 }
 
 /**
@@ -124,46 +124,50 @@ export function createGovernedPromote(deps: GovernedPromoteDeps): { readonly pro
   const promote = (at: Hash): PromoteOut => {
     // 1. READ STAGING — the store's own documented read-only decision. A decision with no `next` publishes
     //    nothing (`sidecar-commit.ts` returns before the CAS put), so this is a read that cannot write.
-    const staged = deps.store.commitStaging<StoreProjection>((p) => ({ out: p }));
+    const staged = deps.store.commitStaging<StoreProjection>((p) => ({ out: p }))
 
     // 2. AN UNREADABLE STAGING SIDECAR IS NOT AN EMPTY ONE. Treating "did not parse" as "0 candidates" is
     //    the amplification that once turned a torn read into a 402-node erasure, in the other direction: it
     //    would report a clean, complete promotion of nothing over a store whose candidates are still there
     //    and simply could not be read. The refusal is carried out whole, named, and `read:false`.
     if (!staged.settled) {
-      return { read: false, refusal: staged.refusal, candidates: 0, promoted: 0, refused: 0, rows: [] };
+      return { read: false, refusal: staged.refusal, candidates: 0, promoted: 0, refused: 0, rows: [] }
     }
 
-    const rows: PromotedRow[] = [];
+    const rows: PromotedRow[] = []
     for (const row of staged.out.current.values()) {
       // 3. REHYDRATE — `store.get(contentHash)` returns the WHOLE fact `mine` put before it published the
       //    row (the CAS bytes ARE the fact), which is structurally the `GroundedFact` `emit(node, at)` takes.
       //    `get` is total: a miss / tampered / oversized / traversal read all answer `undefined`.
-      const fact = deps.store.get(row.contentHash as unknown as Hash) as GroundedFact | undefined;
+      const fact = deps.store.get(row.contentHash as unknown as Hash) as GroundedFact | undefined
       if (fact === undefined) {
-        rows.push({ nodeKey: row.nodeKey, settled: false, rejected: REJECTED_CANDIDATE_UNREADABLE });
-        continue;
+        rows.push({ nodeKey: row.nodeKey, settled: false, rejected: REJECTED_CANDIDATE_UNREADABLE })
+        continue
       }
       // 4. THE GOVERNED DOOR, ONE ROW AT A TIME. Every gate is the emit door's: the truth door re-derives the
       //    citation, KNOW-11 authz refuses an actor outside `atlas:mined`, the ARCH-10 incumbent guard prices
       //    the write against whatever node the minted identity actually resolves to, and KNOW-8 ratification
       //    runs because `origin:'promoted'` took the fast path off the table.
       try {
-        const out = deps.emit(fact, at);
+        const out = deps.emit(fact, at)
         rows.push(
           out.emitted
             ? { nodeKey: row.nodeKey, settled: true, ...(out.id !== undefined ? { id: String(out.id) } : {}) }
-            : { nodeKey: row.nodeKey, settled: false, ...(out.rejected !== undefined ? { rejected: out.rejected } : {}) },
-        );
+            : {
+                nodeKey: row.nodeKey,
+                settled: false,
+                ...(out.rejected !== undefined ? { rejected: out.rejected } : {}),
+              },
+        )
       } catch (e) {
-        if (!isDegenerateAnchor(e)) throw e;
-        rows.push({ nodeKey: row.nodeKey, settled: false, rejected: REJECTED_DEGENERATE_CANDIDATE });
+        if (!isDegenerateAnchor(e)) throw e
+        rows.push({ nodeKey: row.nodeKey, settled: false, rejected: REJECTED_DEGENERATE_CANDIDATE })
       }
     }
 
     // 5. THE FOLD — `promoted` is the count of rows the store actually holds because of this call.
-    const promoted = rows.filter((r) => r.settled).length;
-    return { read: true, candidates: rows.length, promoted, refused: rows.length - promoted, rows };
-  };
-  return { promote };
+    const promoted = rows.filter((r) => r.settled).length
+    return { read: true, candidates: rows.length, promoted, refused: rows.length - promoted, rows }
+  }
+  return { promote }
 }

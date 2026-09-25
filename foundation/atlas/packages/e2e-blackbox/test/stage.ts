@@ -25,22 +25,22 @@
 // WHAT IT STANDS IN FOR, precisely: the row a wired mine gate would have staged. It is NOT a claim that
 // `atlas mine` produces one today — it does not, and the story says so in its own prose.
 
-import { join } from 'node:path';
-import { createDiskStore, gitSidecarTrust, headSha } from '@atlas/adapter-io';
-import { id } from '@atlas/kernel';
-import type { CasObject } from '@atlas/kernel';
-import { nodeKey, primaryAnchorId, upsert } from '@atlas/knowledge';
-import type { Candidate, GroundedFact, WriteRequest } from '@atlas/knowledge';
+import { join } from "node:path"
+import { createDiskStore, gitSidecarTrust, headSha } from "@atlas/adapter-io"
+import { id } from "@atlas/kernel"
+import type { CasObject } from "@atlas/kernel"
+import { nodeKey, primaryAnchorId, upsert } from "@atlas/knowledge"
+import type { Candidate, GroundedFact, WriteRequest } from "@atlas/knowledge"
 // The governance scope `mine` stamps on every candidate — imported, never retyped: the promotion door
 // authorizes against this exact string, and two copies of it is the drift the constant exists to stop.
-import { MINED_SCOPE, MINED_TIER } from '@atlas/cli';
+import { MINED_SCOPE, MINED_TIER } from "@atlas/cli"
 
-export { MINED_SCOPE, MINED_TIER };
+export { MINED_SCOPE, MINED_TIER }
 
 /** What was staged: the minted identity and the CAS address of the fact's bytes. */
 export interface StagedRow {
-  readonly nodeKey: string;
-  readonly contentHash: string;
+  readonly nodeKey: string
+  readonly contentHash: string
 }
 
 /**
@@ -49,27 +49,27 @@ export interface StagedRow {
  * forwarded from the fact) exactly as `mine.ts` does, so a caller cannot stage a candidate declaring `T0`.
  */
 export function stageCandidate(repoPath: string, fact: GroundedFact): StagedRow {
-  const store = createDiskStore(join(repoPath, '.atlas', 'cas'), () => headSha(repoPath), gitSidecarTrust(repoPath));
+  const store = createDiskStore(join(repoPath, ".atlas", "cas"), () => headSha(repoPath), gitSidecarTrust(repoPath))
   // Stamped BEFORE the content hash so the BYTES carry the scope — and onto the request below so the ROW
   // does too. A row and its bytes that disagree is the state the emit door's corroboration gate refuses.
-  const f = { ...fact, scope: MINED_SCOPE, tier: MINED_TIER } as GroundedFact;
+  const f = { ...fact, scope: MINED_SCOPE, tier: MINED_TIER } as GroundedFact
   // `predicateSlot → .slot` FIRST: the identity functions read `.slot`, so a view without the map computes a
   // slot-free key that diverges from stored identity (found by E2E, missed by four isolated reviews).
   // A RelationNode (ADR-0015 D2) carries no `predicateSlot`; narrow it away (this staging path emits intrinsic facts).
-  const fSlot = f.kind === 'advisory' || f.kind === 'predicate' ? f.predicateSlot : undefined;
-  const view = { ...f, slot: fSlot } as unknown as Candidate;
-  const key = nodeKey(view) as unknown as string;
-  const contentHash = id(f as unknown as CasObject) as unknown as string;
+  const fSlot = f.kind === "advisory" || f.kind === "predicate" ? f.predicateSlot : undefined
+  const view = { ...f, slot: fSlot } as unknown as Candidate
+  const key = nodeKey(view) as unknown as string
+  const contentHash = id(f as unknown as CasObject) as unknown as string
   const req: WriteRequest = {
     nodeKey: key,
     contentHash,
-    family: 'advisory',
+    family: "advisory",
     claimNorm: (f as { claimNorm: string }).claimNorm,
     primaryAnchor: primaryAnchorId(view) as unknown as string,
     ...(fSlot !== undefined ? { slot: fSlot } : {}),
     scope: MINED_SCOPE,
     tier: MINED_TIER,
-  };
+  }
   // BYTES BEFORE THE ROW: `put` rides the commit's own `put` list, which the protocol makes durable before it
   // publishes the generation naming them. A row referencing bytes absent from CAS is a candidate no curator
   // could ever promote — the exact state the promotion door has to refuse per row.
@@ -77,7 +77,7 @@ export function stageCandidate(repoPath: string, fact: GroundedFact): StagedRow 
     out: key,
     next: upsert(staged, req).store,
     put: [f as unknown as CasObject],
-  }));
-  if (!r.settled) throw new Error(`stage: the staging sidecar refused (${r.refusal}) — nothing was staged`);
-  return { nodeKey: key, contentHash };
+  }))
+  if (!r.settled) throw new Error(`stage: the staging sidecar refused (${r.refusal}) — nothing was staged`)
+  return { nodeKey: key, contentHash }
 }

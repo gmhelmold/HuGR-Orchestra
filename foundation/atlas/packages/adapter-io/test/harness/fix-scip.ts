@@ -16,10 +16,10 @@
 //               : REFERENCE to `util/missingHelper().`  (NO definition anywhere ⇒ dangling, downstream to:null)
 // No `util/deletedFn()` symbol; no `app.ts → api/service.py:compute` occurrence/edge.
 
-import { mkdtempSync, writeFileSync, rmSync } from 'node:fs';
-import { tmpdir } from 'node:os';
-import { join } from 'node:path';
-import { create } from '@bufbuild/protobuf';
+import { mkdtempSync, writeFileSync, rmSync } from "node:fs"
+import { tmpdir } from "node:os"
+import { join } from "node:path"
+import { create } from "@bufbuild/protobuf"
 import {
   serializeSCIP,
   IndexSchema,
@@ -28,12 +28,12 @@ import {
   DocumentSchema,
   OccurrenceSchema,
   SymbolRole,
-} from '@c4312/scip';
-import type { ScipOutput } from '@atlas/index';
+} from "@c4312/scip"
+import type { ScipOutput } from "@atlas/index"
 
 /** The three symbols in the corpus (exported so SCN tests name them without magic strings). */
-export const SYM_GREET = 'util/greet().';
-export const SYM_MISSING = 'util/missingHelper().';
+export const SYM_GREET = "util/greet()."
+export const SYM_MISSING = "util/missingHelper()."
 
 /**
  * The conformance oracle: the exact `ScipOutput` a faithful reader MUST project from `fix.scip` — the
@@ -44,24 +44,24 @@ export const SYM_MISSING = 'util/missingHelper().';
 export const expectedScipOutput: ScipOutput = {
   documents: [
     {
-      relativePath: 'src/util.ts',
-      occurrences: [{ symbol: SYM_GREET, role: 'definition' }],
+      relativePath: "src/util.ts",
+      occurrences: [{ symbol: SYM_GREET, role: "definition" }],
     },
     {
-      relativePath: 'src/app.ts',
+      relativePath: "src/app.ts",
       occurrences: [
-        { symbol: SYM_GREET, role: 'reference' },
-        { symbol: SYM_MISSING, role: 'reference' },
+        { symbol: SYM_GREET, role: "reference" },
+        { symbol: SYM_MISSING, role: "reference" },
       ],
     },
   ],
-};
+}
 
 export interface FixScip {
   /** Absolute path to the serialized `.scip` protobuf on disk. */
-  readonly scipPath: string;
+  readonly scipPath: string
   /** Remove the temp file. Call in an `afterEach`/`finally`. */
-  cleanup(): void;
+  cleanup(): void
 }
 
 /**
@@ -72,25 +72,25 @@ export interface FixScip {
 export function makeFixScip(): FixScip {
   const index = create(IndexSchema, {
     metadata: create(MetadataSchema, {
-      projectRoot: 'file:///fix-repo',
-      toolInfo: create(ToolInfoSchema, { name: 'atlas-fixture', version: '0' }),
+      projectRoot: "file:///fix-repo",
+      toolInfo: create(ToolInfoSchema, { name: "atlas-fixture", version: "0" }),
     }),
     documents: [
       create(DocumentSchema, {
-        relativePath: 'src/util.ts',
+        relativePath: "src/util.ts",
         occurrences: [create(OccurrenceSchema, { symbol: SYM_GREET, symbolRoles: SymbolRole.Definition })],
       }),
       create(DocumentSchema, {
-        relativePath: 'src/app.ts',
+        relativePath: "src/app.ts",
         occurrences: [
           create(OccurrenceSchema, { symbol: SYM_GREET, symbolRoles: 0 }),
           create(OccurrenceSchema, { symbol: SYM_MISSING, symbolRoles: 0 }),
         ],
       }),
     ],
-  });
-  const dir = mkdtempSync(join(tmpdir(), 'atlas-fix-scip-'));
-  const scipPath = join(dir, 'index.scip');
-  writeFileSync(scipPath, serializeSCIP(index));
-  return { scipPath, cleanup: () => rmSync(dir, { recursive: true, force: true }) };
+  })
+  const dir = mkdtempSync(join(tmpdir(), "atlas-fix-scip-"))
+  const scipPath = join(dir, "index.scip")
+  writeFileSync(scipPath, serializeSCIP(index))
+  return { scipPath, cleanup: () => rmSync(dir, { recursive: true, force: true }) }
 }

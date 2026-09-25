@@ -1,4 +1,4 @@
-import { defineWorkspace } from 'vitest/config';
+import { defineWorkspace } from "vitest/config"
 
 // SEAT TIMEOUT fix — split the suite into two vitest "projects" so the black-box suite gets its own,
 // higher wall-clock budget WITHOUT touching the global 10s cap that guards the pure/total unit suites
@@ -22,18 +22,18 @@ import { defineWorkspace } from 'vitest/config';
 // entry, where concatenation is the correct, intended effect.
 export default defineWorkspace([
   {
-    extends: './vitest.config.ts',
+    extends: "./vitest.config.ts",
     test: {
-      name: 'unit',
-      exclude: ['**/node_modules/**', '**/dist/**', 'packages/e2e-blackbox/test/**'],
+      name: "unit",
+      exclude: ["**/node_modules/**", "**/dist/**", "packages/e2e-blackbox/test/**"],
     },
   },
   {
     test: {
-      name: 'e2e-blackbox',
-      include: ['packages/e2e-blackbox/test/**/*.test.ts'],
-      exclude: ['**/node_modules/**', '**/dist/**'],
-      environment: 'node',
+      name: "e2e-blackbox",
+      include: ["packages/e2e-blackbox/test/**/*.test.ts"],
+      exclude: ["**/node_modules/**", "**/dist/**"],
+      environment: "node",
       // Real subprocess spawn dominates wall-clock here, not test purity — see file banner. 30s was
       // sized against the measured red (10s cap tripped under sustained synthetic CPU load; this
       // suite's individual subtests ran 5-20s under the SAME load once given headroom) and re-verified
@@ -42,4 +42,4 @@ export default defineWorkspace([
       testTimeout: 60000,
     },
   },
-]);
+])

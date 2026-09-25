@@ -6,7 +6,7 @@ separately bounded bands**: `tier≥T1` **governing** invariants, and a separate
 `stale` flag of its own. Read-only: it opens no write door.
 
 This page describes the **CLI** command `atlas query`. The MCP tool is `atlas-query`; both route through the
-same handler, so the same input yields the same verdict — but see *Transport differences* below, the two
+same handler, so the same input yields the same verdict — but see _Transport differences_ below, the two
 argument surfaces are not identical.
 
 ## Invocation
@@ -39,7 +39,7 @@ data:
 
 - `inv <tier> <nodeKey> [<freshness>]: <claim>` — one line per **governing** invariant (`tier≥T1`). The
   identifier is the **nodeKey**, which is what [`link`](./link.md), [`doctor why`](./doctor.md) and
-  `doctor reground` take. It is *not* the address [`node`](./node.md) takes — see that page.
+  `doctor reground` take. It is _not_ the address [`node`](./node.md) takes — see that page.
 - `advisory <tier> <nodeKey> [<freshness>]: <claim>` — one line per row of the **advisory** band, which is
   exactly `T2` and separately capped ([ADR-0013](../../adr/ADR-0013-the-pack-has-two-bands-governing-and-advisory.md)).
   Its own verb, never interleaved with `inv`: an advisory row is a machine proposal no ratifier saw. This is
@@ -49,7 +49,7 @@ data:
   A row from a door that predates the field renders `[?]`, never `[FRESH]`.
 - `advisoryDropped: <n>` — how many advisory rows the advisory cap cut. Printed unconditionally, so `0` is a
   measured fact rather than a line you have to notice is missing.
-- `stale: true` means *do not trust this pack until it is re-grounded*. Read the next section for exactly
+- `stale: true` means _do not trust this pack until it is re-grounded_. Read the next section for exactly
   what it is computed from — it is a watermark, not a live re-derivation.
 - `tokenEstimate` is an advisory size figure, not a budget the tool enforces.
 
@@ -88,11 +88,11 @@ data:
 
 ## Exit codes
 
-| code | meaning |
-| --- | --- |
-| `0` | the pack was served (possibly empty — check `stale` and the `inv` lines) |
-| `1` | usage error — missing `<scope>`, an unknown `--by` mode, or a scope no territory covers |
-| `2` | a governance gate refused the read |
+| code | meaning                                                                                 |
+| ---- | --------------------------------------------------------------------------------------- |
+| `0`  | the pack was served (possibly empty — check `stale` and the `inv` lines)                |
+| `1`  | usage error — missing `<scope>`, an unknown `--by` mode, or a scope no territory covers |
+| `2`  | a governance gate refused the read                                                      |
 
 ## What it refuses, and why
 

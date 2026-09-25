@@ -19,11 +19,11 @@
 //
 // Declared `types: true` in the ledger at `harness/gates/reference-model-guard.mjs`.
 
-import type { Hash, Status } from '@atlas/contracts';
-import type { GroundedFact } from '@atlas/knowledge';
-import type { Cas, CasObject } from '@atlas/kernel';
-import { id } from '@atlas/kernel';
-import type { EmitOut } from './types.js';
+import type { Hash, Status } from "@atlas/contracts"
+import type { GroundedFact } from "@atlas/knowledge"
+import type { Cas, CasObject } from "@atlas/kernel"
+import { id } from "@atlas/kernel"
+import type { EmitOut } from "./types.js"
 
 export interface EmitApi {
   /** Fail-closed grounded write (TOOLS-7, A-2). Re-derives the citation at `source@sha`; on failure ⇒
@@ -34,7 +34,7 @@ export interface EmitApi {
    *  is transcribed as `Hash` (mirrors @atlas/persist `diff(shaA,shaB)` typing the commit sha as `Hash`).
    *  `node` is the templated candidate fact — typed to the @atlas/knowledge `GroundedFact` the grounded
    *  admission consumes (mirrors knowledge `EmitApi.admit(node: GroundedFact)`). */
-  emit(node: GroundedFact, at: Hash): EmitOut;
+  emit(node: GroundedFact, at: Hash): EmitOut
 
   /** Absorb-driven write at wave-close (TOOLS-9, A-10). Routes `ResultCard.absorb` THROUGH the same
    *  fail-closed `emit` path — a sealing wave MUST feed the Atlas or emit a grounded why-not; a seal with
@@ -43,7 +43,7 @@ export interface EmitApi {
    *  [OPAQUE-BY-DESIGN — `ResultCard`] the reference names `ResultCard.absorb`, but a `ResultCard` is an
    *  Orchestra orchestration artifact OUTSIDE atlas layer-0 (upward/Orchestra-owned) — it has no type at
    *  this layer BY DESIGN. Pinned to explicit `unknown` (like `CasObject`), correct to leave opaque. */
-  absorb(card: unknown): EmitOut;
+  absorb(card: unknown): EmitOut
 }
 
 /**
@@ -53,35 +53,35 @@ export interface EmitApi {
  * its concrete implementation (`atlas-grounding` `GateApi.gateHolds`) — it is NOT defined here.
  */
 export interface TruthGate {
-  gateHolds(node: GroundedFact, at: Hash): Status;
+  gateHolds(node: GroundedFact, at: Hash): Status
 }
 
 /** The structured fail-closed reason (TOOLS-7b, GROUND-6): an ungrounded fact never enters at emit. */
-const REJECTED = 'ungrounded: citation does not re-derive at source@sha (TOOLS-7b / GROUND-6)';
+const REJECTED = "ungrounded: citation does not re-derive at source@sha (TOOLS-7b / GROUND-6)"
 
 /**
  * Build `atlas-emit` over an injected content-addressed store + the GROUND truth-gate seam. The returned
  * `emit` conforms EXACTLY to the frozen `EmitApi.emit(node, at)` signature. Pure + total given the store
  * and gate: no clock, no IO, no throw — a non-re-deriving node fails closed to a structured verdict.
  */
-export function createEmit(store: Cas, gate: TruthGate): { readonly emit: EmitApi['emit'] } {
+export function createEmit(store: Cas, gate: TruthGate): { readonly emit: EmitApi["emit"] } {
   const emit = (node: GroundedFact, at: Hash): EmitOut => {
     // Re-derive the citation at source@sha — the caller's citation is NOT trusted (TOOLS-7a).
-    if (gate.gateHolds(node, at) !== 'HOLDS') {
+    if (gate.gateHolds(node, at) !== "HOLDS") {
       // Fail closed: reject the node, persist NOTHING — the store is left byte-identical (TOOLS-7b).
-      return { emitted: false, rejected: REJECTED };
+      return { emitted: false, rejected: REJECTED }
     }
     // Re-derives ⇒ persist through the sealed content-addressed seam (no raw hashing). Minimal write:
     // upsert/template semantics are TOOLS-7c/7d, out of this facet.
-    const obj = node as CasObject;
-    const key = id(obj);
-    store.set(key, obj);
-    return { emitted: true, id: key };
-  };
-  return { emit };
+    const obj = node as CasObject
+    const key = id(obj)
+    store.set(key, obj)
+    return { emitted: true, id: key }
+  }
+  return { emit }
 }
 
 // differential-vs-oracle (compile-time): the impl's `emit` conforms to the frozen `EmitApi.emit`
 // signature (co-located `EmitApi`). `absorb` (TOOLS-9) is a DISTINCT req, out of this facet — not asserted.
-const _emitConforms: EmitApi['emit'] = createEmit(new Map(), { gateHolds: () => 'NA' }).emit;
-void _emitConforms;
+const _emitConforms: EmitApi["emit"] = createEmit(new Map(), { gateHolds: () => "NA" }).emit
+void _emitConforms

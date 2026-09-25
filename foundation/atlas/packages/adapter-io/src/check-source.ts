@@ -13,11 +13,11 @@
 // Per ARCH-2 the port lives in `@atlas/tools` (the innermost layer); this file is the adapter-io CONSUMER of
 // that freeze, exactly the same split `grounding-computer.ts` uses for `GroundingComputer`.
 
-import type { GroundedFact } from '@atlas/knowledge';
-import type { GateChainRunner } from '@atlas/tools';
-import type { CheckOut } from '@atlas/tools';
-import { runGateChain } from './governed-emit-gates.js';
-import type { GateChainDeps } from './governed-emit-gates.js';
+import type { GroundedFact } from "@atlas/knowledge"
+import type { GateChainRunner } from "@atlas/tools"
+import type { CheckOut } from "@atlas/tools"
+import { runGateChain } from "./governed-emit-gates.js"
+import type { GateChainDeps } from "./governed-emit-gates.js"
 
 /**
  * Build the `@atlas/tools` `GateChainRunner` port over `runGateChain` (WP-10.A3.ADAPTER). `deps` is the
@@ -30,8 +30,8 @@ import type { GateChainDeps } from './governed-emit-gates.js';
 export function buildCheckPort(deps: GateChainDeps): GateChainRunner {
   return {
     runChain(candidate: GroundedFact, at): CheckOut {
-      const folded = runGateChain(candidate, at, deps);
-      return { wouldEmit: folded.wouldEmit, gates: folded.gates };
+      const folded = runGateChain(candidate, at, deps)
+      return { wouldEmit: folded.wouldEmit, gates: folded.gates }
     },
-  };
+  }
 }

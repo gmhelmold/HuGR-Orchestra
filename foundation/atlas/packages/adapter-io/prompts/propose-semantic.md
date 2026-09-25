@@ -55,6 +55,7 @@ Every clause is traceable. HTML comments are stripped before the text reaches th
     non-obvious fact; abstaining is correct, expected, never a failure. The token string is COUPLED to
     `ABSTAIN_SENTINEL` in llm.ts and pinned by test.
 -->
+
 You are shown ONE anchored unit from a real codebase, and nothing else.
 
 <unit path="{{PATH}}" name="{{UNIT}}">
@@ -78,6 +79,7 @@ Work in two steps.
 
 STEP 1 — REASON FREELY (scratch, never stored). Read the bytes closely. Draft a candidate fact, then actively
 try to REFUTE it against the source:
+
 - Is it derivable from THESE bytes — the declarations, control flow, types or literals — or are you leaning on
   what you know about a library/framework/convention that is not visible here, or on a stale/past-tense COMMENT
   the current code may contradict?
@@ -89,10 +91,11 @@ try to REFUTE it against the source:
   you actually counted it in the shown bytes and re-checked it item by item. Prefer the qualitative form.
 - Is it more than a restatement of the name, signature or types, or a summary of what the code plainly does? A
   restated signature is not worth recording.
-Discard any candidate that does not survive. This reasoning is scratch: it is parsed away and never persisted.
+  Discard any candidate that does not survive. This reasoning is scratch: it is parsed away and never persisted.
 
 STEP 2 — EMIT THE RESULT. If a fact survived, emit it as EXACTLY ONE fenced block tagged `atlas-fact`, holding
 a JSON object with THREE fields:
+
 - `slot` — exactly one of the eight slot names above (the BEST-fitting classification), lowercase, verbatim.
 - `claim` — one sentence of plain prose naming the fact, derivable from the CODE bytes above.
 - `derivation` — the compact chain from the cited bytes that leads a reader to the SAME conclusion: the

@@ -17,32 +17,32 @@
 // advisory test-vacuity form: the family is PROVEN-only, so an abstaining oracle yields NO fact (a drop), never
 // a downgraded advisory. See docs/design/95-test-vacuity-design.md and ADR-0015 D5.
 
-import type { ObviousnessScore, TestVacuityNode, TestVacuityShape, TestVacuityWitness } from '@atlas/knowledge';
+import type { ObviousnessScore, TestVacuityNode, TestVacuityShape, TestVacuityWitness } from "@atlas/knowledge"
 // The test-vacuity identity leg — the SEALED mint (`testVacuityKey`). Identity is minted from the proposal's
 // (unitKey, testName) PAIR, NEVER trusted off a payload (the proposal carries no id leg at all — KNOW-15b parity).
-import { testVacuityKey } from '@atlas/knowledge';
-import type { FactGrounding, TestVacuityProposal } from './admit-proposals.js';
-import type { Admission } from './admit-harness.js';
+import { testVacuityKey } from "@atlas/knowledge"
+import type { FactGrounding, TestVacuityProposal } from "./admit-proposals.js"
+import type { Admission } from "./admit-harness.js"
 
 /** The sound test-vacuity oracle (D5) — the injected re-runnable verifier. `'proven'` iff a fact with this
  *  `(shape, testName)` still appears when `scanTestVacuity` runs over the unit at HEAD; `'abstain'` otherwise.
  *  Captured in adapter-io (where tree-sitter lives); genesis calls it agnostic to where it runs, exactly like
  *  `verifyRelation`. ABSTAIN ≠ REFUTE: an abstaining oracle earns no seal, never a forced fact. */
-export type TestVacuityVerifier = (unitKey: string, testName: string, shape: TestVacuityShape) => 'proven' | 'abstain';
+export type TestVacuityVerifier = (unitKey: string, testName: string, shape: TestVacuityShape) => "proven" | "abstain"
 
 // The two honest, distinct refusals (ADR-0015 D5), mirroring the relation gate-0/gate-1 split: a malformed
 // identity has no address to mint, an unproven shape earned no seal. There is deliberately NO advisory
 // fallthrough (unlike a relation) — the family is PROVEN-only, so a non-proven verdict is a drop, not a downgrade.
 export const DROP_TEST_VACUITY_MALFORMED =
-  'malformed test-vacuity: the identity pair (unitKey, testName) is not well-formed — unitKey must be a ' +
-  'non-empty location-free unit key and testName a non-empty test name string. A malformed pair has no address ' +
-  'to mint (ADR-0015 D5 — MalformedTestVacuityError\'s conditions, checked here so `testVacuityKey` never throws ' +
-  'out of the total `admit`)';
+  "malformed test-vacuity: the identity pair (unitKey, testName) is not well-formed — unitKey must be a " +
+  "non-empty location-free unit key and testName a non-empty test name string. A malformed pair has no address " +
+  "to mint (ADR-0015 D5 — MalformedTestVacuityError's conditions, checked here so `testVacuityKey` never throws " +
+  "out of the total `admit`)"
 export const DROP_TEST_VACUITY_UNGROUNDED =
-  'test-vacuity fails the truth door — the unit-anchor citation does not re-derive FRESH (GEN-12e / ADR-0015 D5)';
+  "test-vacuity fails the truth door — the unit-anchor citation does not re-derive FRESH (GEN-12e / ADR-0015 D5)"
 export const DROP_TEST_VACUITY_UNPROVEN =
-  'the injected sound oracle (scanTestVacuity) did not re-prove the proposed test-vacuity shape at HEAD — the ' +
-  'PROVEN-only test-vacuity family has no advisory form, so an abstaining oracle yields NO fact (ADR-0015 D5)';
+  "the injected sound oracle (scanTestVacuity) did not re-prove the proposed test-vacuity shape at HEAD — the " +
+  "PROVEN-only test-vacuity family has no advisory form, so an abstaining oracle yields NO fact (ADR-0015 D5)"
 
 /**
  * Gate-0 well-formedness for a test-vacuity fact (ADR-0015 D5). MIRRORS `testVacuityKey`'s own refusal
@@ -52,9 +52,8 @@ export const DROP_TEST_VACUITY_UNPROVEN =
  */
 export function testVacuityWellFormed(p: TestVacuityProposal): boolean {
   return (
-    typeof p.unitKey === 'string' && p.unitKey.length > 0 &&
-    typeof p.testName === 'string' && p.testName.length > 0
-  );
+    typeof p.unitKey === "string" && p.unitKey.length > 0 && typeof p.testName === "string" && p.testName.length > 0
+  )
 }
 
 /**
@@ -64,8 +63,8 @@ export function testVacuityWellFormed(p: TestVacuityProposal): boolean {
  * witness is EXACTLY what reverify (reverify-store.ts) re-runs `scanTestVacuity` against — never model prose.
  */
 export function testVacuityWitnessOf(p: TestVacuityProposal): TestVacuityWitness | undefined {
-  if (typeof p.testName !== 'string' || p.testName.length === 0) return undefined;
-  return { shape: p.shape, testName: p.testName };
+  if (typeof p.testName !== "string" || p.testName.length === 0) return undefined
+  return { shape: p.shape, testName: p.testName }
 }
 
 /**
@@ -76,7 +75,7 @@ export function testVacuityWitnessOf(p: TestVacuityProposal): TestVacuityWitness
  * does NOT assert a vacuous execution is reachable (see test-vacuity.ts's soundness rails). Pure + total.
  */
 export function testVacuityClaimNormFromWitness(w: TestVacuityWitness): string {
-  return `test '${w.testName}' has every assertion-shaped call inside a catch clause and no assertion-count guard (shape ${w.shape}, witnessed AST oracle)`;
+  return `test '${w.testName}' has every assertion-shaped call inside a catch clause and no assertion-count guard (shape ${w.shape}, witnessed AST oracle)`
 }
 
 /**
@@ -95,21 +94,21 @@ export function buildSoundTestVacuity(
   obviousness?: ObviousnessScore,
 ): TestVacuityNode {
   return {
-    kind: 'test-vacuity',
+    kind: "test-vacuity",
     id: testVacuityKey(p.unitKey, p.testName),
     tier: p.tier,
     unitKey: p.unitKey,
     testName: p.testName,
     shape: p.shape,
     grounding: p.grounding,
-    freshness: 'FRESH',
+    freshness: "FRESH",
     claims: [],
-    authoring: 'PROVEN',
-    seal: 'proven',
+    authoring: "PROVEN",
+    seal: "proven",
     witness,
     ...(obviousness !== undefined ? { obviousness } : {}),
     ...(p.scope !== undefined ? { scope: p.scope } : {}),
-  };
+  }
 }
 
 /**
@@ -125,10 +124,14 @@ export function trySoundTestVacuity(
   verifyTestVacuity: TestVacuityVerifier | undefined,
   score?: (claimNorm: string) => ObviousnessScore,
 ): TestVacuityNode | undefined {
-  const witness = testVacuityWitnessOf(p);
-  if (witness === undefined || verifyTestVacuity === undefined) return undefined;
-  if (verifyTestVacuity(p.unitKey, witness.testName, witness.shape) !== 'proven') return undefined;
-  return buildSoundTestVacuity(p, witness, score !== undefined ? score(testVacuityClaimNormFromWitness(witness)) : undefined);
+  const witness = testVacuityWitnessOf(p)
+  if (witness === undefined || verifyTestVacuity === undefined) return undefined
+  if (verifyTestVacuity(p.unitKey, witness.testName, witness.shape) !== "proven") return undefined
+  return buildSoundTestVacuity(
+    p,
+    witness,
+    score !== undefined ? score(testVacuityClaimNormFromWitness(witness)) : undefined,
+  )
 }
 
 /**
@@ -146,9 +149,9 @@ export function admitTestVacuity(
   grounded: (grounding: FactGrounding) => boolean,
   score: (claimNorm: string) => ObviousnessScore,
 ): Admission {
-  if (!testVacuityWellFormed(p)) return { outcome: 'dropped', reason: DROP_TEST_VACUITY_MALFORMED };
-  if (!grounded(p.grounding)) return { outcome: 'dropped', reason: DROP_TEST_VACUITY_UNGROUNDED };
-  const proven = trySoundTestVacuity(p, verifyTestVacuity, score);
-  if (proven !== undefined) return { outcome: 'admitted', fact: proven };
-  return { outcome: 'dropped', reason: DROP_TEST_VACUITY_UNPROVEN };
+  if (!testVacuityWellFormed(p)) return { outcome: "dropped", reason: DROP_TEST_VACUITY_MALFORMED }
+  if (!grounded(p.grounding)) return { outcome: "dropped", reason: DROP_TEST_VACUITY_UNGROUNDED }
+  const proven = trySoundTestVacuity(p, verifyTestVacuity, score)
+  if (proven !== undefined) return { outcome: "admitted", fact: proven }
+  return { outcome: "dropped", reason: DROP_TEST_VACUITY_UNPROVEN }
 }

@@ -18,7 +18,7 @@ either by asking (the `atlas-query` tool) or by letting the Atlas push it to you
 2. **Run the query.**
    - CLI: `atlas-query packages/atlas-kernel/src/cas.ts`
    - MCP: call the `atlas-query` tool with `{ "scope": "packages/atlas-kernel/src/cas.ts" }`
-   You may pass a folder (`packages/atlas-kernel/`), a module, or a crate name just as well.
+     You may pass a folder (`packages/atlas-kernel/`), a module, or a crate name just as well.
 3. **Read the pack.** You get a pack: the territory's `tier≥T1` invariants as 1-line entries, `≤ ~2K`
    tokens, plus a `stale` flag and `next + invariant` guidance.
 4. **Check `stale` before you trust it.** If `stale:true`, a grounding behind the pack has drifted — do

@@ -29,23 +29,23 @@
 // the cut out to the enclosing match makes the whole redaction provisional and re-decidable, which is what
 // "unify the two carries into one" actually means in code.
 
-import { AMBIGUOUS_TAIL, MAX_PARTIAL, REDACTION, SHAPES, SHAPES_BY_OPENER } from './scrub-shapes.js';
-import type { CredentialShape } from './scrub-shapes.js';
+import { AMBIGUOUS_TAIL, MAX_PARTIAL, REDACTION, SHAPES, SHAPES_BY_OPENER } from "./scrub-shapes.js"
+import type { CredentialShape } from "./scrub-shapes.js"
 
 /** A credential occurrence, as a half-open `[start, end)` span over the latin1 view. */
 export interface Match {
-  readonly start: number;
-  readonly end: number;
+  readonly start: number
+  readonly end: number
   /** Index into `SHAPES`. */
-  readonly shape: number;
+  readonly shape: number
 }
 
-const NONE: readonly CredentialShape[] = [];
+const NONE: readonly CredentialShape[] = []
 
 /** Which shapes, if any, could open at `i`. Table lookup — see `SHAPES_BY_OPENER`. */
 function openers(s: string, i: number): readonly CredentialShape[] {
-  const code = s.charCodeAt(i);
-  return code < 256 ? (SHAPES_BY_OPENER[code] as readonly CredentialShape[]) : NONE;
+  const code = s.charCodeAt(i)
+  return code < 256 ? (SHAPES_BY_OPENER[code] as readonly CredentialShape[]) : NONE
 }
 
 /**
@@ -55,40 +55,40 @@ function openers(s: string, i: number): readonly CredentialShape[] {
  * body from reaching it in the first place).
  */
 export function scanMatches(s: string): readonly Match[] {
-  const out: Match[] = [];
-  let i = 0;
+  const out: Match[] = []
+  let i = 0
   while (i < s.length) {
-    const here = openers(s, i);
-    let end = -1;
+    const here = openers(s, i)
+    let end = -1
     for (const shape of here) {
-      shape.at.lastIndex = i;
-      const m = shape.at.exec(s);
+      shape.at.lastIndex = i
+      const m = shape.at.exec(s)
       if (m !== null) {
-        end = i + m[0].length;
-        out.push({ start: i, end, shape: SHAPES.indexOf(shape) });
-        break;
+        end = i + m[0].length
+        out.push({ start: i, end, shape: SHAPES.indexOf(shape) })
+        break
       }
     }
-    i = end === -1 ? i + 1 : end;
+    i = end === -1 ? i + 1 : end
   }
-  return out;
+  return out
 }
 
 /** Replace each match with the placeholder; every other byte is copied verbatim. */
 export function render(s: string, matches: readonly Match[]): string {
-  if (matches.length === 0) return s;
-  let out = '';
-  let at = 0;
+  if (matches.length === 0) return s
+  let out = ""
+  let at = 0
   for (const m of matches) {
-    out += s.slice(at, m.start) + REDACTION;
-    at = m.end;
+    out += s.slice(at, m.start) + REDACTION
+    at = m.end
   }
-  return out + s.slice(at);
+  return out + s.slice(at)
 }
 
 /** The whole-buffer answer: redact every declared credential shape, preserve every other byte. */
 export function scrubString(s: string): string {
-  return render(s, scanMatches(s));
+  return render(s, scanMatches(s))
 }
 
 /**
@@ -114,23 +114,23 @@ export function scrubString(s: string): string {
  * a blocking lookahead can only ADD matches, i.e. over-redaction, never a leak.
  */
 export function renderPrefix(s: string, matches: readonly Match[], cut: number): string {
-  let out = '';
-  let at = 0;
+  let out = ""
+  let at = 0
   for (const m of matches) {
-    if (m.end > cut) break;
-    out += s.slice(at, m.start) + REDACTION;
-    at = m.end;
+    if (m.end > cut) break
+    out += s.slice(at, m.start) + REDACTION
+    at = m.end
   }
-  return out + s.slice(at, cut);
+  return out + s.slice(at, cut)
 }
 
 /** Could a credential START at `p` and still be incomplete at the end of `s`? */
 function isPartialStart(s: string, p: number): boolean {
-  const here = openers(s, p);
-  if (here.length === 0) return false;
-  const tail = s.slice(p);
-  for (const shape of here) if (shape.partial.test(tail)) return true;
-  return false;
+  const here = openers(s, p)
+  if (here.length === 0) return false
+  const tail = s.slice(p)
+  for (const shape of here) if (shape.partial.test(tail)) return true
+  return false
 }
 
 /**
@@ -142,22 +142,22 @@ function isPartialStart(s: string, p: number): boolean {
  * per admit O(1) in the size of the stream rather than a re-scan of everything written so far.
  */
 export function seamCut(s: string, matches: readonly Match[]): number {
-  let cut = s.length;
-  const last = matches[matches.length - 1];
-  if (last !== undefined && last.end === s.length) cut = last.start; // (1) it can still grow
+  let cut = s.length
+  const last = matches[matches.length - 1]
+  if (last !== undefined && last.end === s.length) cut = last.start // (1) it can still grow
   for (let p = Math.max(0, s.length - MAX_PARTIAL); p < cut; p++) {
     if (isPartialStart(s, p)) {
-      cut = p; // (2) leftmost candidate that could still be completed
-      break;
+      cut = p // (2) leftmost candidate that could still be completed
+      break
     }
   }
   for (const m of matches) {
     if (m.start < cut && cut < m.end) {
-      cut = m.start; // (3) the undecided region begins inside a match — the whole match is provisional
-      break;
+      cut = m.start // (3) the undecided region begins inside a match — the whole match is provisional
+      break
     }
   }
-  return cut;
+  return cut
 }
 
 /**
@@ -180,23 +180,23 @@ export function seamCut(s: string, matches: readonly Match[]): number {
  * memory-bound test sees.
  */
 export function canonicalise(carry: string): string {
-  const matches = scanMatches(carry);
-  if (matches.length === 0) return carry;
-  let out = '';
-  let at = 0;
+  const matches = scanMatches(carry)
+  if (matches.length === 0) return carry
+  let out = ""
+  let at = 0
   for (const m of matches) {
-    const sh = SHAPES[m.shape]!;
-    if (sh.ceiling === undefined && sh.filler !== '' && m.end - m.start > sh.maxCanon) {
-      const body = carry.slice(m.start + sh.prefixLen, m.end);
+    const sh = SHAPES[m.shape]!
+    if (sh.ceiling === undefined && sh.filler !== "" && m.end - m.start > sh.maxCanon) {
+      const body = carry.slice(m.start + sh.prefixLen, m.end)
       out +=
         carry.slice(at, m.start) +
         carry.slice(m.start, m.start + sh.prefixLen) +
         sh.filler.repeat(sh.floor) +
-        body.slice(body.length - AMBIGUOUS_TAIL);
+        body.slice(body.length - AMBIGUOUS_TAIL)
     } else {
-      out += carry.slice(at, m.end);
+      out += carry.slice(at, m.end)
     }
-    at = m.end;
+    at = m.end
   }
-  return out + carry.slice(at);
+  return out + carry.slice(at)
 }

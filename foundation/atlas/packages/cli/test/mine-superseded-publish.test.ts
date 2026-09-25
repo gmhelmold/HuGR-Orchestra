@@ -25,33 +25,33 @@
 // truth. Both halves are asserted below — the report AND the disk — because either alone is satisfied by the
 // wrong fix (dropping the skip would make the report right by re-authoring an established row).
 
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
-import { tmpdir } from 'node:os';
-import { dirname, join } from 'node:path';
-import { createDiskStore, IDENTITY_SCHEMA } from '@atlas/adapter-io';
-import type { CommitDecision, CommitResult, DiskStore } from '@atlas/adapter-io';
-import type { StoreProjection } from '@atlas/knowledge';
-import type { Fact } from '@atlas/genesis';
-import { buildControllerDeps } from '../src/mine.js';
-import { A, B, REPO, depsOf, factFor, readStaging } from './mine-fixtures.js';
+import { describe, it, expect, beforeEach, afterEach } from "vitest"
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs"
+import { tmpdir } from "node:os"
+import { dirname, join } from "node:path"
+import { createDiskStore, IDENTITY_SCHEMA } from "@atlas/adapter-io"
+import type { CommitDecision, CommitResult, DiskStore } from "@atlas/adapter-io"
+import type { StoreProjection } from "@atlas/knowledge"
+import type { Fact } from "@atlas/genesis"
+import { buildControllerDeps } from "../src/mine.js"
+import { A, B, REPO, depsOf, factFor, readStaging } from "./mine-fixtures.js"
 
-let dir: string | undefined;
+let dir: string | undefined
 beforeEach(() => {
-  dir = mkdtempSync(join(tmpdir(), 'atlas-mine-superseded-'));
-});
+  dir = mkdtempSync(join(tmpdir(), "atlas-mine-superseded-"))
+})
 afterEach(() => {
-  if (dir !== undefined) rmSync(dir, { recursive: true, force: true });
-  dir = undefined;
-});
+  if (dir !== undefined) rmSync(dir, { recursive: true, force: true })
+  dir = undefined
+})
 
-const casPath = (): string => join(dir!, '.atlas', 'cas');
+const casPath = (): string => join(dir!, ".atlas", "cas")
 
 /** The durable staged set as the product's OWN reader sees it, keyed by the anchor each row carries — the
  *  same projection `mine-contention.test.ts` compares against, so the two suites cannot drift. */
 function durableAnchors(): string[] {
-  const staged = readStaging(createDiskStore(casPath()));
-  return [...staged.current.values()].map((n) => n.primaryAnchor ?? `<no anchor: ${n.nodeKey}>`).sort();
+  const staged = readStaging(createDiskStore(casPath()))
+  return [...staged.current.values()].map((n) => n.primaryAnchor ?? `<no anchor: ${n.nodeKey}>`).sort()
 }
 
 /**
@@ -66,15 +66,15 @@ function durableAnchors(): string[] {
  * because its writer read ours, so it carries our rows.
  */
 function storeWithRivalOnFirstCommit(): DiskStore {
-  const real = createDiskStore(casPath());
-  const sidecarDir = dirname(casPath());
-  let commits = 0;
+  const real = createDiskStore(casPath())
+  const sidecarDir = dirname(casPath())
+  let commits = 0
   return {
     ...real,
     commitStaging<T>(decide: (p: StoreProjection) => CommitDecision<T>): CommitResult<T> {
       return real.commitStaging<T>((staged) => {
-        const decision = decide(staged);
-        commits += 1;
+        const decision = decide(staged)
+        commits += 1
         if (commits === 1 && decision.next !== undefined) {
           // Our first commit targets generation 1 over an empty sidecar, so the rival is generation 2.
           // `identity` (#112) is what keeps this a FAITHFUL rival: a rival is by definition another instance
@@ -86,18 +86,18 @@ function storeWithRivalOnFirstCommit(): DiskStore {
             cas: [...decision.next.cas],
             gen: 2,
             identity: IDENTITY_SCHEMA,
-          };
-          mkdirSync(sidecarDir, { recursive: true }); // the protocol creates it in `publish`, one step later
-          writeFileSync(join(sidecarDir, 'staging.2.json'), JSON.stringify(wire), 'utf8');
+          }
+          mkdirSync(sidecarDir, { recursive: true }) // the protocol creates it in `publish`, one step later
+          writeFileSync(join(sidecarDir, "staging.2.json"), JSON.stringify(wire), "utf8")
         }
-        return decision;
-      });
+        return decision
+      })
     },
-  };
+  }
 }
 
-describe('CLI-4h — a mine pass reports the candidates it staged even when a rival built on its generation', () => {
-  it('the pass that PUBLISHED reports its candidate — the row is durable AND promised', () => {
+describe("CLI-4h — a mine pass reports the candidates it staged even when a rival built on its generation", () => {
+  it("the pass that PUBLISHED reports its candidate — the row is durable AND promised", () => {
     // RED at 57d6129, deterministically, every run (verbatim):
     //   AssertionError: expected [] to deeply equal [ 'pkg/st-a10.ts::st-a10' ]
     //   - Expected  + Received
@@ -107,30 +107,31 @@ describe('CLI-4h — a mine pass reports the candidates it staged even when a ri
     //   + Array []
     // — with `durableAnchors()` returning `[ 'pkg/st-a10.ts::st-a10' ]` in the SAME run. That gap is the
     // whole defect: one row on disk, zero rows claimed, and the pass exiting 0.
-    const ports = buildControllerDeps(REPO, depsOf({ store: storeWithRivalOnFirstCommit() }));
-    const grounded = ports.upsert([factFor({ site: A } as never, 'a mined claim about st-a10')]);
+    const ports = buildControllerDeps(REPO, depsOf({ store: storeWithRivalOnFirstCommit() }))
+    const grounded = ports.upsert([factFor({ site: A } as never, "a mined claim about st-a10")])
 
-    const promised = grounded.map(anchorOf).sort();
-    expect(promised).toEqual(['pkg/st-a10.ts::st-a10']); // the pass claims the candidate it wrote…
-    expect(durableAnchors()).toEqual(promised); //          …and promised ≡ durable, in both directions
-  });
+    const promised = grounded.map(anchorOf).sort()
+    expect(promised).toEqual(["pkg/st-a10.ts::st-a10"]) // the pass claims the candidate it wrote…
+    expect(durableAnchors()).toEqual(promised) //          …and promised ≡ durable, in both directions
+  })
 
-  it('a SECOND site through the same pass is still additive — the rival generation was built on, not clobbered', () => {
+  it("a SECOND site through the same pass is still additive — the rival generation was built on, not clobbered", () => {
     // The fix must not settle by throwing away the snapshot it raced against: the rival's generation is the
     // one the retry-free path builds on, so both rows have to be there afterwards. (A "fix" that made the
     // pass republish its own attempt-1 projection unconditionally would pass the case above and fail here.)
-    const ports = buildControllerDeps(REPO, depsOf({ store: storeWithRivalOnFirstCommit() }));
-    ports.upsert([factFor({ site: A } as never, 'a mined claim about st-a10')]);
-    const grounded = ports.upsert([factFor({ site: B } as never, 'a mined claim about st-b22')]);
+    const ports = buildControllerDeps(REPO, depsOf({ store: storeWithRivalOnFirstCommit() }))
+    ports.upsert([factFor({ site: A } as never, "a mined claim about st-a10")])
+    const grounded = ports.upsert([factFor({ site: B } as never, "a mined claim about st-b22")])
 
-    const promised = grounded.map(anchorOf).sort();
-    expect(promised).toEqual(['pkg/st-a10.ts::st-a10', 'pkg/st-b22.ts::st-b22']);
-    expect(durableAnchors()).toEqual(promised);
-  });
-});
+    const promised = grounded.map(anchorOf).sort()
+    expect(promised).toEqual(["pkg/st-a10.ts::st-a10", "pkg/st-b22.ts::st-b22"])
+    expect(durableAnchors()).toEqual(promised)
+  })
+})
 
 /** The anchor a grounded fact carries — the same value `primaryAnchorId` reduces to, so the report and the
  *  durable row are compared on ONE identity rather than on two that happen to agree. */
 function anchorOf(f: Fact): string {
-  return (f as unknown as { grounding: { entries: { anchor: { qualifiedPath: string } }[] } }).grounding.entries[0]!.anchor.qualifiedPath;
+  return (f as unknown as { grounding: { entries: { anchor: { qualifiedPath: string } }[] } }).grounding.entries[0]!
+    .anchor.qualifiedPath
 }

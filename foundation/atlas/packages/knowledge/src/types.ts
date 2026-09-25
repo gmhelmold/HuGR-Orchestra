@@ -7,21 +7,21 @@
 // identity vocabulary (Tier/Status/StructRef/Hash/NodeKey), kernel ClaimEntry, grounding Grounding, and
 // the index IndexNode are imported, NEVER redefined.
 
-import type { Tier, Status, StructRef, Hash, NodeKey } from '@atlas/contracts';
-import type { ClaimEntry } from '@atlas/kernel';
-import type { Grounding } from '@atlas/grounding';
-import type { IndexNode } from '@atlas/index';
+import type { Tier, Status, StructRef, Hash, NodeKey } from "@atlas/contracts"
+import type { ClaimEntry } from "@atlas/kernel"
+import type { Grounding } from "@atlas/grounding"
+import type { IndexNode } from "@atlas/index"
 // The #99b scoped-negative shapes are declared in a cohesive sibling (extracted at the godfile ceiling) and
 // IMPORTED here so `GroundedFact` can reference `NegationNode`, then RE-EXPORTED below for a byte-identical surface.
-import type { NegationNode, AbstainedRecord } from './negation-types.js';
+import type { NegationNode, AbstainedRecord } from "./negation-types.js"
 // The #234 transition shape (ADR-0015 D4) is declared in its own cohesive sibling (same godfile-ceiling
 // extraction as negation-types.ts) and IMPORTED here so `GroundedFact` can reference `TransitionNode`, then
 // RE-EXPORTED below for a byte-identical surface.
-import type { TransitionNode } from './transition-types.js';
+import type { TransitionNode } from "./transition-types.js"
 // The #95 test-vacuity shape (ADR-0015 D5) is declared in its own cohesive sibling (same godfile-ceiling
 // extraction as negation-types.ts/transition-types.ts) and IMPORTED here so `GroundedFact` can reference
 // `TestVacuityNode`, then RE-EXPORTED below for a byte-identical surface.
-import type { TestVacuityNode, TestVacuityWitness, TestVacuityShape } from './test-vacuity-types.js';
+import type { TestVacuityNode, TestVacuityWitness, TestVacuityShape } from "./test-vacuity-types.js"
 
 /**
  * The Knowledge freshness vocabulary. Transcribed from atlas-knowledge:29 — `Freshness = 'FRESH' |
@@ -35,7 +35,7 @@ import type { TestVacuityNode, TestVacuityWitness, TestVacuityShape } from './te
  * `KnowledgeFreshness` — same discipline the ratified skeleton applied to `TerritoryView`/
  * `ClaimProvenance`. Flagged for the two references (atlas-knowledge:29 vs contracts) to reconcile.
  */
-export type KnowledgeFreshness = 'FRESH' | 'DRIFTED';
+export type KnowledgeFreshness = "FRESH" | "DRIFTED"
 
 /**
  * The provenance receipt on a claim. Transcribed EXACTLY from atlas-knowledge:27 —
@@ -49,9 +49,9 @@ export type KnowledgeFreshness = 'FRESH' | 'DRIFTED';
  * new exported type. Under `exactOptionalPropertyTypes`, `sha?` is genuinely absent-or-string.
  */
 export interface ClaimProvenance {
-  readonly source: string; // PINNED → string (provenance origin nominal form)
-  readonly trusted: boolean;
-  readonly sha?: string;
+  readonly source: string // PINNED → string (provenance origin nominal form)
+  readonly trusted: boolean
+  readonly sha?: string
 }
 
 /**
@@ -61,8 +61,8 @@ export interface ClaimProvenance {
  * into `nodeKey`) treat it opaquely — minimal, no speculative fields.
  */
 export type Check =
-  | { readonly kind: 'index-query'; readonly query: string }
-  | { readonly kind: 'assertion'; readonly expr: string };
+  | { readonly kind: "index-query"; readonly query: string }
+  | { readonly kind: "assertion"; readonly expr: string }
 
 /**
  * The Knowledge node — the content kinds of the Atlas. Transcribed from atlas-knowledge:19
@@ -95,7 +95,7 @@ export type Check =
  * `justified`) and carries a re-runnable `witness`, exactly as a proven `depends-on` relation does. Identity
  * is the (unitKey, testName) pair. See docs/design/95-test-vacuity-design.md.
  */
-export type GroundedFact = AdvisoryNode | PredicateNode | RelationNode | NegationNode | TransitionNode | TestVacuityNode;
+export type GroundedFact = AdvisoryNode | PredicateNode | RelationNode | NegationNode | TransitionNode | TestVacuityNode
 
 /**
  * The closed relation vocabulary (NORMATIVE, additive-only — a new kind is a `cv` bump, exactly like the
@@ -111,8 +111,8 @@ export type GroundedFact = AdvisoryNode | PredicateNode | RelationNode | Negatio
  * corrected here to a semantic vocabulary. The dependency axis remains the drift/witness SOURCE.
  */
 export type RelationKind =
-  | 'depends-on' // A's unit references/imports B's unit (a grounded dependency-axis edge)
-  | 'calls'; // A's body calls B (a resolved call edge)
+  | "depends-on" // A's unit references/imports B's unit (a grounded dependency-axis edge)
+  | "calls" // A's body calls B (a resolved call edge)
 
 /**
  * A 2-ended grounded fact (ADR-0015 D2, #99a). Structurally a sibling of `AdvisoryNode` — no `check`, so no
@@ -128,20 +128,20 @@ export type RelationKind =
  *     verbatim — the whole point of D2 is that the multi-entry AND-fold already existed (the deferred GAP-1).
  */
 export interface RelationNode {
-  readonly kind: 'relation';
-  readonly id: NodeKey; // = relationKey (router.ts); MINTED, never trusted from the payload
-  readonly tier: Tier;
-  readonly relationKind: RelationKind;
-  readonly endpointA: string; // location-free unitKey (qualifiedPath of A's anchor) — identity leg, subject
-  readonly endpointB: string; // location-free unitKey (qualifiedPath of B's anchor) — identity leg, object
-  readonly grounding: Grounding; // EXACTLY two entries: [0] anchors A, [1] anchors B (freshness, AND-folded)
-  readonly freshness: KnowledgeFreshness;
-  readonly claims: readonly ClaimEntry[];
-  readonly authoring: 'RELATED' | 'SUPERSEDED';
-  readonly scope?: string; // KNOW-11a — the write scope (authz); the 2.1 anchor gate binds on `endpointA`
-  readonly obviousness?: ObviousnessScore; // ADR-0012 — additive, absent-tolerant (see AdvisoryNode)
-  readonly seal?: Seal; // ADR-0017 — two-seal provenance, additive/absent-tolerant (see AdvisoryNode)
-  readonly witness?: RelationWitness; // #99 ADR-0018 — the `proven` relation's re-runnable derivation (see RelationWitness). ADDITIVE + absent-tolerant.
+  readonly kind: "relation"
+  readonly id: NodeKey // = relationKey (router.ts); MINTED, never trusted from the payload
+  readonly tier: Tier
+  readonly relationKind: RelationKind
+  readonly endpointA: string // location-free unitKey (qualifiedPath of A's anchor) — identity leg, subject
+  readonly endpointB: string // location-free unitKey (qualifiedPath of B's anchor) — identity leg, object
+  readonly grounding: Grounding // EXACTLY two entries: [0] anchors A, [1] anchors B (freshness, AND-folded)
+  readonly freshness: KnowledgeFreshness
+  readonly claims: readonly ClaimEntry[]
+  readonly authoring: "RELATED" | "SUPERSEDED"
+  readonly scope?: string // KNOW-11a — the write scope (authz); the 2.1 anchor gate binds on `endpointA`
+  readonly obviousness?: ObviousnessScore // ADR-0012 — additive, absent-tolerant (see AdvisoryNode)
+  readonly seal?: Seal // ADR-0017 — two-seal provenance, additive/absent-tolerant (see AdvisoryNode)
+  readonly witness?: RelationWitness // #99 ADR-0018 — the `proven` relation's re-runnable derivation (see RelationWitness). ADDITIVE + absent-tolerant.
 }
 
 // The #99b scoped-negative shapes (ADR-0015 D3) — `NegationNode` (the FOURTH `GroundedFact` variant) and its
@@ -149,20 +149,20 @@ export interface RelationNode {
 // (imported above) and RE-EXPORTED here so the package surface is byte-identical to an inline declaration.
 // They were extracted at the 400-LOC godfile ceiling along a cohesive boundary, exactly as `relation-key.ts`
 // split from `router.ts` on the sibling #99a leg. `RelationKind`/`ObviousnessScore` stay owned HERE.
-export type { NegationNode, AbstainedRecord };
+export type { NegationNode, AbstainedRecord }
 
 // The #234 transition shape (ADR-0015 D4) — `TransitionNode` (the FIFTH `GroundedFact` variant) — is DECLARED
 // in `transition-types.ts` (imported above) and RE-EXPORTED here so the package surface is byte-identical to an
 // inline declaration, exactly as `negation-types.ts` is on the sibling #99b leg. `Seal`/`ObviousnessScore`
 // stay owned HERE and are imported by that module (a type-only cycle, erased at runtime).
-export type { TransitionNode };
+export type { TransitionNode }
 
 // The #95 test-vacuity shape (ADR-0015 D5) — `TestVacuityNode` (the SIXTH `GroundedFact` variant), its
 // `TestVacuityWitness` (the seal's re-runnable derivation) and `TestVacuityShape` — is DECLARED in
 // `test-vacuity-types.ts` (imported above) and RE-EXPORTED here so the package surface is byte-identical to an
 // inline declaration, exactly as `negation-types.ts`/`transition-types.ts` are on the sibling legs.
 // `Seal`/`ObviousnessScore` stay owned HERE and are imported by that module (a type-only cycle, erased at runtime).
-export type { TestVacuityNode, TestVacuityWitness, TestVacuityShape };
+export type { TestVacuityNode, TestVacuityWitness, TestVacuityShape }
 
 /**
  * The ORDINAL leg of the obviousness score (ADR-0012). Two-point on purpose, and the honesty matters:
@@ -172,7 +172,7 @@ export type { TestVacuityNode, TestVacuityWitness, TestVacuityShape };
  * twice over (the predicate is not mechanical, and the retrieval weight is a decision on real data).
  * Widening this union later is additive.
  */
-export type ObviousnessRank = 'obvious' | 'non-obvious';
+export type ObviousnessRank = "obvious" | "non-obvious"
 
 /**
  * The seal provenance vocabulary. Records HOW a mined fact's grounds were established, and the two never blur
@@ -187,7 +187,7 @@ export type ObviousnessRank = 'obvious' | 'non-obvious';
  * EXIST; it never decides WHEN a seal is set (that is the admit path's job). ADR-0017 CORRECTION 5 added
  * `justified` (196b) — the ratified two-seal vocabulary the design always named.
  */
-export type Seal = 'proven' | 'justified';
+export type Seal = "proven" | "justified"
 
 /**
  * The `seal:'proven'` fact's own DERIVATION — the oracle call that discharged it, carried alongside the
@@ -201,10 +201,10 @@ export type Seal = 'proven' | 'justified';
  * mints the seal; an advisory/predicate/relation/negation fact with no seal carries no witness either.
  */
 export interface PredicateWitness {
-  readonly slot: PredicateSlot; // the oracle FAMILY the witness answers ('dependency' | 'count' | 'definition' | a type-expressible slot)
-  readonly target: string; // the global symbol the oracle proved against (verifyDependency/verifyCount's `target`)
-  readonly scope: string; // the VERIFY-SCOPE directory the witness ranges over — NOT the authz `scope` above
-  readonly atLeast?: number; // the witnessed lower bound N — present for the 'count' slot only
+  readonly slot: PredicateSlot // the oracle FAMILY the witness answers ('dependency' | 'count' | 'definition' | a type-expressible slot)
+  readonly target: string // the global symbol the oracle proved against (verifyDependency/verifyCount's `target`)
+  readonly scope: string // the VERIFY-SCOPE directory the witness ranges over — NOT the authz `scope` above
+  readonly atLeast?: number // the witnessed lower bound N — present for the 'count' slot only
 }
 
 /**
@@ -223,9 +223,9 @@ export interface PredicateWitness {
  * ADDITIVE + absent-tolerant, same discipline as `PredicateWitness`.
  */
 export interface RelationWitness {
-  readonly relationKind: RelationKind; // the PROVEN kind — only 'depends-on' is mechanically provable (F3)
-  readonly target: string; // the global SCIP symbol under endpointB whose witnessed reference proves the edge
-  readonly sourceScope: string; // endpointA's verify-scope — reverify re-runs verifyDependency(sourceScope, target)
+  readonly relationKind: RelationKind // the PROVEN kind — only 'depends-on' is mechanically provable (F3)
+  readonly target: string // the global SCIP symbol under endpointB whose witnessed reference proves the edge
+  readonly sourceScope: string // endpointA's verify-scope — reverify re-runs verifyDependency(sourceScope, target)
 }
 
 /**
@@ -244,9 +244,9 @@ export interface RelationWitness {
  * non-obvious its own claim is."
  */
 export interface ObviousnessScore {
-  readonly rank: ObviousnessRank;
+  readonly rank: ObviousnessRank
   /** Provenance. The harness's predicate over the SOURCE BYTES — never a field the proposer wrote. */
-  readonly by: 'harness-predicate';
+  readonly by: "harness-predicate"
 }
 
 /**
@@ -281,31 +281,31 @@ export interface ObviousnessScore {
  * amendment — so nothing reads `owner` after this change, and the field is deleted rather than kept-but-unused.
  */
 export interface AdvisoryNode {
-  readonly kind: 'advisory';
-  readonly id: NodeKey; // [FLAG] identity leg — see above (reference:15 says "hash of canonical form")
-  readonly tier: Tier;
-  readonly claimNorm: string;
-  readonly grounding: Grounding;
-  readonly freshness: KnowledgeFreshness;
-  readonly claims: readonly ClaimEntry[]; // [FLAG] kernel `ClaimEntry` — see the union note below
-  readonly provenance?: ClaimProvenance; // KNOW-14 — intrinsic claim receipt, absent on legacy rows
-  readonly authoring: 'ADVISORY' | 'SUPERSEDED';
-  readonly scope?: string; // R3 — KNOW-11a (territory scope id)
-  readonly predicateSlot?: PredicateSlot; // R3 — KNOW-15b nodeKey leg / KNOW-4g read-side grouping
+  readonly kind: "advisory"
+  readonly id: NodeKey // [FLAG] identity leg — see above (reference:15 says "hash of canonical form")
+  readonly tier: Tier
+  readonly claimNorm: string
+  readonly grounding: Grounding
+  readonly freshness: KnowledgeFreshness
+  readonly claims: readonly ClaimEntry[] // [FLAG] kernel `ClaimEntry` — see the union note below
+  readonly provenance?: ClaimProvenance // KNOW-14 — intrinsic claim receipt, absent on legacy rows
+  readonly authoring: "ADVISORY" | "SUPERSEDED"
+  readonly scope?: string // R3 — KNOW-11a (territory scope id)
+  readonly predicateSlot?: PredicateSlot // R3 — KNOW-15b nodeKey leg / KNOW-4g read-side grouping
   /** ADR-0012 — the stored obviousness score. ADDITIVE + absent-tolerant, exactly as the N11 `builtAt` /
    *  `sameAs` widening (task #75): old data stays readable, no migration, no default fabricated. TOTALITY
    *  ("every emitted fact carries a score") is enforced BEHAVIOURALLY at the emit path + its goldens, the
    *  same way KNOW-11's "every fact MUST carry a scope" is — not by the type, because ~17 merged
    *  `GroundedFact` literals predate the field and a required field would make them unreadable. */
-  readonly obviousness?: ObviousnessScore;
-  readonly seal?: Seal; // ADR-0017 — two-seal provenance. ADDITIVE + absent-tolerant, same discipline as `obviousness`.
-  readonly witness?: PredicateWitness; // SEAL-CARRIES-ITS-WITNESS — the `proven` seal's own derivation (see above). ADDITIVE + absent-tolerant.
+  readonly obviousness?: ObviousnessScore
+  readonly seal?: Seal // ADR-0017 — two-seal provenance. ADDITIVE + absent-tolerant, same discipline as `obviousness`.
+  readonly witness?: PredicateWitness // SEAL-CARRIES-ITS-WITNESS — the `proven` seal's own derivation (see above). ADDITIVE + absent-tolerant.
   /** ADR-0017 CORRECTION 5 (196b) — the `justified` seal's own carried derivation: the compact, contestable
    *  chain from the cited bytes that leads a reader to the SAME conclusion (genesis-epistemic-contract.md
    *  §JUSTIFIED). It is the model's grounds, NOT its free scratch reasoning (that stays parsed-away). Prose,
    *  provenance only — never a `nodeKey`/route/authz leg. ADDITIVE + absent-tolerant, same discipline as
    *  `witness`; a `proven` fact carries `witness`, a `justified` fact carries `derivation`. */
-  readonly derivation?: string;
+  readonly derivation?: string
 }
 
 /**
@@ -324,20 +324,20 @@ export interface AdvisoryNode {
  * frozen record — NOT invented here. Flagged.
  */
 export interface PredicateNode {
-  readonly kind: 'predicate';
-  readonly id: NodeKey; // [FLAG] identity leg — see AdvisoryNode
-  readonly tier: Tier;
-  readonly check: Check; // PINNED → Check (KNOW-16 index-query | declarative assertion)
-  readonly grounding: Grounding;
-  readonly status: Status;
-  readonly freshness: KnowledgeFreshness;
-  readonly claims: readonly ClaimEntry[]; // [FLAG] kernel `ClaimEntry` — see the union note below
-  readonly provenance?: ClaimProvenance; // KNOW-14 — intrinsic claim receipt, absent on legacy rows
-  readonly authoring: 'PREDICATED' | 'SUPERSEDED';
-  readonly scope?: string; // R3 — KNOW-11a
-  readonly predicateSlot?: PredicateSlot; // R3 — KNOW-15b nodeKey leg / KNOW-4g grouping
-  readonly obviousness?: ObviousnessScore; // ADR-0012 — the stored obviousness score (see AdvisoryNode)
-  readonly seal?: Seal; // ADR-0017 — two-seal provenance (see AdvisoryNode)
+  readonly kind: "predicate"
+  readonly id: NodeKey // [FLAG] identity leg — see AdvisoryNode
+  readonly tier: Tier
+  readonly check: Check // PINNED → Check (KNOW-16 index-query | declarative assertion)
+  readonly grounding: Grounding
+  readonly status: Status
+  readonly freshness: KnowledgeFreshness
+  readonly claims: readonly ClaimEntry[] // [FLAG] kernel `ClaimEntry` — see the union note below
+  readonly provenance?: ClaimProvenance // KNOW-14 — intrinsic claim receipt, absent on legacy rows
+  readonly authoring: "PREDICATED" | "SUPERSEDED"
+  readonly scope?: string // R3 — KNOW-11a
+  readonly predicateSlot?: PredicateSlot // R3 — KNOW-15b nodeKey leg / KNOW-4g grouping
+  readonly obviousness?: ObviousnessScore // ADR-0012 — the stored obviousness score (see AdvisoryNode)
+  readonly seal?: Seal // ADR-0017 — two-seal provenance (see AdvisoryNode)
 }
 
 // [FLAG — `ClaimEntry` reference divergence] atlas-knowledge:26 defines a Knowledge-local
@@ -366,12 +366,12 @@ export interface PredicateNode {
  * genuinely absent-or-value.
  */
 export interface TerritoryView {
-  readonly path: string;
-  readonly owner: string; // [FLAG] reference: `seat` (nominal seat id) — transcribed as string
-  readonly tier: Tier;
-  readonly files: readonly string[];
-  readonly regions?: readonly NodeKey[]; // PINNED → NodeKey[] (region set)
-  readonly blastRadius: readonly NodeKey[]; // PINNED → NodeKey[] (reachability set)
+  readonly path: string
+  readonly owner: string // [FLAG] reference: `seat` (nominal seat id) — transcribed as string
+  readonly tier: Tier
+  readonly files: readonly string[]
+  readonly regions?: readonly NodeKey[] // PINNED → NodeKey[] (region set)
+  readonly blastRadius: readonly NodeKey[] // PINNED → NodeKey[] (reachability set)
 }
 
 /**
@@ -382,19 +382,19 @@ export interface TerritoryView {
  * Each slot binds to exactly one write template (KNOW-10) — see `template.ts`.
  */
 export type PredicateSlot =
-  | 'invariant'
-  | 'contract'
-  | 'precondition'
-  | 'postcondition'
-  | 'sideeffect'
-  | 'ownership'
-  | 'perf-bound'
-  | 'security-property'
-  | 'gotcha'
-  | 'rationale'
-  | 'dependency'
-  | 'count'
-  | 'definition';
+  | "invariant"
+  | "contract"
+  | "precondition"
+  | "postcondition"
+  | "sideeffect"
+  | "ownership"
+  | "perf-bound"
+  | "security-property"
+  | "gotcha"
+  | "rationale"
+  | "dependency"
+  | "count"
+  | "definition"
 
 /**
  * The SEMANTIC subset of `PredicateSlot` (196c) — the eight slots NO mechanical oracle decides (now or
@@ -404,14 +404,14 @@ export type PredicateSlot =
  * `postcondition`), which get a real oracle later and MUST NOT be laundered as `justified` here. A CLOSED
  * subtype of `PredicateSlot` — every member is one, so `isSemanticSlot` NARROWS to it. */
 export type SemanticSlot =
-  | 'invariant'
-  | 'contract'
-  | 'sideeffect'
-  | 'ownership'
-  | 'perf-bound'
-  | 'security-property'
-  | 'gotcha'
-  | 'rationale';
+  | "invariant"
+  | "contract"
+  | "sideeffect"
+  | "ownership"
+  | "perf-bound"
+  | "security-property"
+  | "gotcha"
+  | "rationale"
 
 /** The runtime copy of the eight-member semantic vocabulary (KNOW-10 closed-slot discipline — the erased
  *  `SemanticSlot` type enforces nothing at a value boundary, so the semantic mining arm validates the model's
@@ -421,17 +421,17 @@ export type SemanticSlot =
  *  is the `isSemanticSlot` guard, which is what the mining arm imports. Exporting the raw list would be dead
  *  cross-package value surface (reference-model-guard). */
 const SEMANTIC_SLOTS: readonly SemanticSlot[] = [
-  'invariant',
-  'contract',
-  'sideeffect',
-  'ownership',
-  'perf-bound',
-  'security-property',
-  'gotcha',
-  'rationale',
-];
+  "invariant",
+  "contract",
+  "sideeffect",
+  "ownership",
+  "perf-bound",
+  "security-property",
+  "gotcha",
+  "rationale",
+]
 
-const SEMANTIC_SLOT_SET: ReadonlySet<string> = new Set(SEMANTIC_SLOTS);
+const SEMANTIC_SLOT_SET: ReadonlySet<string> = new Set(SEMANTIC_SLOTS)
 
 /** Closed-vocabulary membership guard that NARROWS a `PredicateSlot` (or any `unknown`) to `SemanticSlot`.
  *  TOTAL over `unknown`: `Set.has` never throws/coerces, so a non-string, an out-of-vocabulary slot, or an
@@ -439,7 +439,7 @@ const SEMANTIC_SLOT_SET: ReadonlySet<string> = new Set(SEMANTIC_SLOTS);
  *  semantic arm ABSTAIN (fail-closed) on a model that classified outside the eight, never mint a fact whose
  *  slot the harness cannot honestly seal `justified`. */
 export function isSemanticSlot(x: unknown): x is SemanticSlot {
-  return typeof x === 'string' && SEMANTIC_SLOT_SET.has(x);
+  return typeof x === "string" && SEMANTIC_SLOT_SET.has(x)
 }
 
 /**
@@ -459,16 +459,16 @@ export function isSemanticSlot(x: unknown): x is SemanticSlot {
  * side-indexes minted at ratification. Flagged: this record is not frozen; do not treat as canonical.
  */
 export interface Candidate {
-  readonly claimText: string;
-  readonly claimNorm: string;
-  readonly slot: PredicateSlot;
-  readonly target?: string; // ADR-0017 dependency-slot leg — the global symbol X the fact depends on (absent for non-oracle slots)
-  readonly scope?: string; //  ADR-0017 dependency-slot leg — the directory key S the dependency witness ranges over
-  readonly atLeast?: number; // #196c count-slot leg — the WITNESSED lower bound N (distinct caller units); absent for non-count slots
-  readonly check?: Check; // PINNED → Check (predicate candidates only)
-  readonly grounding: Grounding;
-  readonly provenance: ClaimProvenance;
-  readonly tier: Tier;
+  readonly claimText: string
+  readonly claimNorm: string
+  readonly slot: PredicateSlot
+  readonly target?: string // ADR-0017 dependency-slot leg — the global symbol X the fact depends on (absent for non-oracle slots)
+  readonly scope?: string //  ADR-0017 dependency-slot leg — the directory key S the dependency witness ranges over
+  readonly atLeast?: number // #196c count-slot leg — the WITNESSED lower bound N (distinct caller units); absent for non-count slots
+  readonly check?: Check // PINNED → Check (predicate candidates only)
+  readonly grounding: Grounding
+  readonly provenance: ClaimProvenance
+  readonly tier: Tier
 }
 
 // ── frozen API surface, co-located here (was ref/evaluator.ts · ref/store.ts) ─────────────────────────
@@ -497,7 +497,7 @@ export interface EvaluatorApi {
    *  (structural/dependency AXES)", which may be the multi-axis root set (`Axes`) rather than a single
    *  `IndexNode`; transcribed to the pinned `IndexNode` per the task, flagged for the WP to confirm the
    *  index-state granularity. */
-  evaluate(check: Check, indexState: IndexNode): Status;
+  evaluate(check: Check, indexState: IndexNode): Status
 }
 
 /**
@@ -519,5 +519,5 @@ export interface StoreApi {
    *  [SIG-TBD] The full emit→query→reconcile operating surface is composed from the sibling facets
    *  (`emit.ts`, `reconcile.ts`, the query pack) — the aggregate store signature is not frozen; only the
    *  optional-evaluator parametrization is transcribed. Flagged. */
-  readonly evaluator?: EvaluatorApi;
+  readonly evaluator?: EvaluatorApi
 }

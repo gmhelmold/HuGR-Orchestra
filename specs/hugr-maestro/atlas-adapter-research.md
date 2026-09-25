@@ -4,14 +4,14 @@ Status: blocked before implementation. Researched 2026-09-08 against vendored At
 
 ## Verified Source
 
-| Need | Source | Result |
-|---|---|---|
-| Canonical territory identity | `foundation/atlas/packages/contracts/src/territory.ts` | `Territory.name` is governance key; path/glob is not consumer scope identity |
-| Single territory pack | `foundation/atlas/packages/retrieval/src/pack.ts:105-115,224-231` | `Packer.pack(Territory)` returns `BoundedPack` with axis hash, freshness, truncation, tail |
-| Shared-scope pack | `foundation/atlas/packages/retrieval/src/pack.ts:234-245` | `Packer.mergedPack(Territory[])` enforces one shared `PACK_CAP` budget |
-| Cap source | `foundation/atlas/packages/retrieval/src/pack.ts:50-65,130-134` | `capFor('pack')` is current budget authority |
-| Empty scope behavior | `foundation/atlas/packages/retrieval/src/pack.ts:204-206,234-241` | uncovered/malformed scope returns empty total pack; it is not `UN-SEEDED` |
-| Package boundary | root `package.json`; `foundation/atlas/package.json`; retrieval `package.json` | Atlas is nested independent workspace; no `@atlas/*` dependency/export exists in OpenCode workspace |
+| Need                         | Source                                                                         | Result                                                                                              |
+| ---------------------------- | ------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------- |
+| Canonical territory identity | `foundation/atlas/packages/contracts/src/territory.ts`                         | `Territory.name` is governance key; path/glob is not consumer scope identity                        |
+| Single territory pack        | `foundation/atlas/packages/retrieval/src/pack.ts:105-115,224-231`              | `Packer.pack(Territory)` returns `BoundedPack` with axis hash, freshness, truncation, tail          |
+| Shared-scope pack            | `foundation/atlas/packages/retrieval/src/pack.ts:234-245`                      | `Packer.mergedPack(Territory[])` enforces one shared `PACK_CAP` budget                              |
+| Cap source                   | `foundation/atlas/packages/retrieval/src/pack.ts:50-65,130-134`                | `capFor('pack')` is current budget authority                                                        |
+| Empty scope behavior         | `foundation/atlas/packages/retrieval/src/pack.ts:204-206,234-241`              | uncovered/malformed scope returns empty total pack; it is not `UN-SEEDED`                           |
+| Package boundary             | root `package.json`; `foundation/atlas/package.json`; retrieval `package.json` | Atlas is nested independent workspace; no `@atlas/*` dependency/export exists in OpenCode workspace |
 
 ## Blocker
 

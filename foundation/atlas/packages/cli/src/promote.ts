@@ -17,13 +17,13 @@
 //   2  a governed refusal — at least one row the door declined, or a staging read that refused
 // There is no exit-1 leg here: reaching this function means the invocation parsed and the runtime composed.
 
-import type { Hash } from '@atlas/contracts';
-import type { PromoteOut } from '@atlas/adapter-io';
-import type { CliVerdict } from './render.js';
+import type { Hash } from "@atlas/contracts"
+import type { PromoteOut } from "@atlas/adapter-io"
+import type { CliVerdict } from "./render.js"
 
 /** The invariant line every promote outcome carries — the one property a reader should check the bytes against. */
 const INVARIANT =
-  'KNOW-8: a staged candidate reaches governed knowledge only THROUGH the emit door, and only with a ratifier named — the count reported is what SETTLED durably, never what was attempted';
+  "KNOW-8: a staged candidate reaches governed knowledge only THROUGH the emit door, and only with a ratifier named — the count reported is what SETTLED durably, never what was attempted"
 
 /**
  * Project one finished promotion pass to the CLI's process outcome. PURE — a function of the `PromoteOut`
@@ -42,18 +42,18 @@ export function promoteVerdict(out: PromoteOut): CliVerdict {
     return {
       exitCode: 2,
       stdout:
-        'status: rejected\n' +
-        `next: promote read nothing — the staging sidecar refused (${out.refusal ?? 'unknown'}). ` +
+        "status: rejected\n" +
+        `next: promote read nothing — the staging sidecar refused (${out.refusal ?? "unknown"}). ` +
         'This is NOT "0 candidates": nothing was read, so nothing could be promoted, and whatever is staged is still staged. ' +
-        `${out.refusal === 'untrusted' ? 'Remove `.atlas/` from version control (`git rm -r --cached .atlas`, keeping `.atlas/policy.json`) and re-derive the store locally.' : out.refusal === 'contended' ? 'Another writer held the sidecar for every attempt — re-run.' : 'Restore `.atlas/staging.*.json` from a backup, or re-run `atlas mine` to rebuild it.'}\n` +
+        `${out.refusal === "untrusted" ? "Remove `.atlas/` from version control (`git rm -r --cached .atlas`, keeping `.atlas/policy.json`) and re-derive the store locally." : out.refusal === "contended" ? "Another writer held the sidecar for every attempt — re-run." : "Restore `.atlas/staging.*.json` from a backup, or re-run `atlas mine` to rebuild it."}\n` +
         `invariant: ${INVARIANT}\n`,
-    };
+    }
   }
 
-  const settled = out.promoted;
-  const rejected = out.refused > 0;
+  const settled = out.promoted
+  const rejected = out.refused > 0
   const lines = [
-    `status: ${rejected ? 'rejected' : 'ok'}`,
+    `status: ${rejected ? "rejected" : "ok"}`,
     `next: ${nextLine(out)}`,
     `invariant: ${INVARIANT}`,
     `promote: ${settled} of ${out.candidates} staged candidate(s) promoted; ${out.refused} refused`,
@@ -61,10 +61,10 @@ export function promoteVerdict(out: PromoteOut): CliVerdict {
     // curator has to know WHICH candidate the door declined and WHY, and a refusal reason without its row is
     // exactly as useless as a row without its reason.
     ...out.rows.map((r) =>
-      r.settled ? `  promoted ${r.nodeKey} -> ${r.id ?? ''}` : `  refused ${r.nodeKey}: ${r.rejected ?? 'unknown'}`,
+      r.settled ? `  promoted ${r.nodeKey} -> ${r.id ?? ""}` : `  refused ${r.nodeKey}: ${r.rejected ?? "unknown"}`,
     ),
-  ];
-  return { exitCode: rejected ? 2 : 0, stdout: `${lines.join('\n')}\n` };
+  ]
+  return { exitCode: rejected ? 2 : 0, stdout: `${lines.join("\n")}\n` }
 }
 
 /** The one actionable sentence, derived from the pass's own numbers — never a guess about the wiring. */
@@ -73,19 +73,19 @@ function nextLine(out: PromoteOut): string {
     // HONESTLY EMPTY, and it says which emptiness it is. Staging read fine and holds nothing, which after a
     // default `atlas mine` is the expected state — that pass wires no admission machinery, so it abstains at
     // every site and stages nothing to promote.
-    return 'staging holds no candidates — nothing to promote. `atlas mine` stages candidates; a pass that abstained at every site staged none';
+    return "staging holds no candidates — nothing to promote. `atlas mine` stages candidates; a pass that abstained at every site staged none"
   }
   if (out.refused === 0) {
     // `atlas node <addr>` and NOT `atlas query`, deliberately, and this line was WRONG before it was
     // measured: a mined candidate is `T2` and the read pack bounds `T2` OUT (TOOLS-6), so a promoted mined
     // fact is addressable and doctor-visible but NOT served by `atlas query`. Telling a curator to query for
     // it would send them to look for something the product is correctly declining to show.
-    return `${out.promoted} staged candidate(s) are now governed knowledge — \`atlas node <addr>\` reads each one back (a T2 fact is bounded OUT of the \`atlas query\` pack, TOOLS-6)`;
+    return `${out.promoted} staged candidate(s) are now governed knowledge — \`atlas node <addr>\` reads each one back (a T2 fact is bounded OUT of the \`atlas query\` pack, TOOLS-6)`
   }
   if (out.promoted === 0) {
-    return `every staged candidate was refused (${out.candidates}) — read the per-row reasons below; nothing was written`;
+    return `every staged candidate was refused (${out.candidates}) — read the per-row reasons below; nothing was written`
   }
-  return `${out.promoted} promoted, ${out.refused} refused — read the per-row reasons below; the refused rows are still staged`;
+  return `${out.promoted} promoted, ${out.refused} refused — read the per-row reasons below; the refused rows are still staged`
 }
 
 /**
@@ -100,5 +100,5 @@ function nextLine(out: PromoteOut): string {
  * constant somebody has to go back and fix.
  */
 export function runPromote(promote: (at: Hash) => PromoteOut, at: Hash): CliVerdict {
-  return promoteVerdict(promote(at));
+  return promoteVerdict(promote(at))
 }

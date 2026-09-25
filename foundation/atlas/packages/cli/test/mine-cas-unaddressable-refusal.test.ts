@@ -22,72 +22,72 @@
 // #136 established the mine path reaches the same seam. Here we import the REAL error class so `.name` and its
 // discriminant-leading `.message` are exactly what production throws — not a hand-rolled stand-in.
 
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { UnaddressableCasObjectError } from '@atlas/adapter-io';
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
+import { UnaddressableCasObjectError } from "@atlas/adapter-io"
 
 // Mock ONLY `runMineArms` — `cli.ts` imports nothing else from this module — so `main(['mine', '.'])` exercises
 // the real catch/render path over a thrown error, with no need for a repo, a model, or a durable store.
 // [SOUND-DEFAULT-MINE] `cli.ts` now drives the multi-arm `runMineArms` (was `runMine`); the mine-catch this
 // pins is BYTE-IDENTICAL — only the mocked symbol name follows the call site the frozen seam moved.
-vi.mock('../src/mine.js', () => ({ runMineArms: vi.fn() }));
-import { runMineArms } from '../src/mine.js';
-import { main } from '../src/cli.js';
+vi.mock("../src/mine.js", () => ({ runMineArms: vi.fn() }))
+import { runMineArms } from "../src/mine.js"
+import { main } from "../src/cli.js"
 
-const runMineMock = vi.mocked(runMineArms);
+const runMineMock = vi.mocked(runMineArms)
 
 /** The discriminant — everything before the first `:` (the `reasonOf` rule, ADR-0007). */
-const reasonOf = (s: string): string => s.split(':')[0]!;
+const reasonOf = (s: string): string => s.split(":")[0]!
 
 /** A named `status: …`/`reason: …` line the CLI renders, without its label — or `''` when absent. */
 function line(stdout: string, label: string): string {
-  const l = stdout.split('\n').find((x) => x.startsWith(`${label}: `));
-  return l === undefined ? '' : l.slice(`${label}: `.length);
+  const l = stdout.split("\n").find((x) => x.startsWith(`${label}: `))
+  return l === undefined ? "" : l.slice(`${label}: `.length)
 }
 
-let writes: string[];
+let writes: string[]
 beforeEach(() => {
-  writes = [];
-  vi.spyOn(process.stdout, 'write').mockImplementation((chunk: unknown) => {
-    writes.push(String(chunk));
-    return true;
-  });
-});
-afterEach(() => vi.restoreAllMocks());
+  writes = []
+  vi.spyOn(process.stdout, "write").mockImplementation((chunk: unknown) => {
+    writes.push(String(chunk))
+    return true
+  })
+})
+afterEach(() => vi.restoreAllMocks())
 
-const out = (): string => writes.join('');
+const out = (): string => writes.join("")
 
-describe('#140 — `atlas mine` renders a CAS-unaddressable throw as the door does, not as a silent crash', () => {
-  it('a thrown UnaddressableCasObjectError becomes an exit-2 governed refusal on the reason line', async () => {
+describe("#140 — `atlas mine` renders a CAS-unaddressable throw as the door does, not as a silent crash", () => {
+  it("a thrown UnaddressableCasObjectError becomes an exit-2 governed refusal on the reason line", async () => {
     // The REAL error, constructed with a real SidecarBase-shaped tag (the message is a pure function of it).
-    const err = new UnaddressableCasObjectError('candidate' as never);
-    runMineMock.mockRejectedValueOnce(err);
+    const err = new UnaddressableCasObjectError("candidate" as never)
+    runMineMock.mockRejectedValueOnce(err)
 
-    const code = await main(['mine', '.']);
+    const code = await main(["mine", "."])
 
     // Exit 2 — a governed refusal, not a usage/wiring error (exit 1) and not success (exit 0).
-    expect(code).toBe(2);
-    expect(line(out(), 'status')).toBe('rejected');
+    expect(code).toBe(2)
+    expect(line(out(), "status")).toBe("rejected")
     // The discriminant leads the reason verbatim — the SAME name a reader sees from the emit door's refusal.
-    expect(reasonOf(line(out(), 'reason'))).toBe('unaddressable-cas-object');
+    expect(reasonOf(line(out(), "reason"))).toBe("unaddressable-cas-object")
     // And the message travels UNCHANGED (not relabelled with the CLI's own guidance).
-    expect(line(out(), 'reason')).toBe(err.message);
-  });
+    expect(line(out(), "reason")).toBe(err.message)
+  })
 
-  it('the allow-list is not a catch-all: a foreign error still propagates (never rendered as a refusal)', async () => {
+  it("the allow-list is not a catch-all: a foreign error still propagates (never rendered as a refusal)", async () => {
     // Negative control — if the catch swallowed everything, an internal defect would masquerade as a
     // governance refusal (the #129 blame-shift). Anything whose name is not on the allow-list re-throws.
-    const foreign = new TypeError("Cannot read properties of undefined (reading 'contentHash')");
-    runMineMock.mockRejectedValueOnce(foreign);
+    const foreign = new TypeError("Cannot read properties of undefined (reading 'contentHash')")
+    runMineMock.mockRejectedValueOnce(foreign)
 
-    await expect(main(['mine', '.'])).rejects.toBe(foreign);
+    await expect(main(["mine", "."])).rejects.toBe(foreign)
     // Nothing was rendered as a refusal on the way out.
-    expect(out()).not.toContain('status: rejected');
-  });
+    expect(out()).not.toContain("status: rejected")
+  })
 
-  it('positive control: a normal mine verdict is rendered unchanged (the catch is not on the success path)', async () => {
-    runMineMock.mockResolvedValueOnce({ exitCode: 0, stdout: 'status: ok\n' });
-    const code = await main(['mine', '.']);
-    expect(code).toBe(0);
-    expect(line(out(), 'status')).toBe('ok');
-  });
-});
+  it("positive control: a normal mine verdict is rendered unchanged (the catch is not on the success path)", async () => {
+    runMineMock.mockResolvedValueOnce({ exitCode: 0, stdout: "status: ok\n" })
+    const code = await main(["mine", "."])
+    expect(code).toBe(0)
+    expect(line(out(), "status")).toBe("ok")
+  })
+})

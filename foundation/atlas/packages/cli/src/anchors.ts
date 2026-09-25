@@ -6,4 +6,4 @@
 // dispatch (`cli.ts`) is byte-unchanged. The builder is a READ-ONLY DISCOVERY PLANNER (ADR-0004, AUTHOR-2/3/4):
 // it lists the groundable units under `path` and persists NOTHING; TOTAL — a missing/empty `path` fails CLOSED.
 
-export { anchorsVerdict } from '@atlas/adapter-io';
+export { anchorsVerdict } from "@atlas/adapter-io"
