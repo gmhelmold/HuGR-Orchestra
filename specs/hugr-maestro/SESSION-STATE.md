@@ -36,6 +36,7 @@ This is the short operational snapshot. Read [ROADMAP.md](ROADMAP.md) for depend
 | P1       | #109 canonical Own host boundary                           | #108 cannot consume static Own context safely without it.                                                             |
 | P1       | #108 ContextToolPlan adapter                               | This is required before Atlas-backed governed work can run.                                                           |
 | P2       | #102 Windows Core test instability                         | Root cause remains open; do not paper over with broad timeout or serialization changes.                               |
+| P2       | #113 safety hardening                                      | #25, #42, #49, #62, #72, and #86 must close or be explicitly non-applicable before #111.                              |
 
 ## Do Not Claim
 
@@ -48,11 +49,12 @@ This is the short operational snapshot. Read [ROADMAP.md](ROADMAP.md) for depend
 ## Next Execution
 
 1. Triage #107 and the Windows Core failure #102 with current-run evidence.
-2. Deliver #112 as an installed, read-only, versioned boundary. Do not recreate Atlas catalog logic in OpenCode.
-3. Deliver #114 durable record boundaries; missing context must HOLD.
-4. Deliver #109, then #108 to persist verified ContextRecord evidence.
-5. Deliver #106 and #110 from current `dev`.
-6. Run #111 only as fresh current-base integration gate after applicable dependencies close.
+2. Classify and close applicable #113 P2 safety children before #111.
+3. Deliver #112 as an installed, read-only, versioned boundary. Do not recreate Atlas catalog logic in OpenCode.
+4. Deliver #114 durable record boundaries; missing context must HOLD.
+5. Deliver #109, then #108 to persist verified ContextRecord evidence.
+6. Deliver #106 and #110 from current `dev`.
+7. Run #111 only as fresh current-base integration gate after applicable dependencies close.
 
 ## Update Rule
 
