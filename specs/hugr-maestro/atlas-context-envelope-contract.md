@@ -27,7 +27,7 @@ distinct units may share one leaf handle, such as `src/billing` and `crates/bill
 ```text
 actor             ratified ComposedActor { projectId, sessionId, memberId }
 planRevision      immutable proposed revision ID + content hash
-units             ordered canonical ownership-unit IDs selected by approved plan
+units             ordered canonical ownership-unit IDs selected by proposed PlanRevision
 headSnapshot      verified Atlas structural/Knowledge snapshot identity
 artifacts[]       verified static Own receipts for units
 ```
@@ -53,7 +53,7 @@ artifact hash, drill pointers, and bounded rendered state. The action never subs
 ## Readiness
 
 The context is ready only when every planned ownership action loads an artifact verified against head snapshot and
-its materialized ownership state is complete enough for approved plan:
+its materialized ownership state is complete enough to validate the proposed PlanRevision:
 
 1. Actor, plan revision, unit IDs, and snapshot bind exactly.
 2. Every action loads exact static skill once; skill name never selects a unit.
@@ -73,7 +73,7 @@ its materialized ownership state is complete enough for approved plan:
 | Missing/malformed ownership artifact                               | `HOLD`; never `UN-SEEDED`                            |
 | Stale ownership artifact or cited fact                             | `HOLD` with receipt                                  |
 | `UNDER_APPROX` impact coverage                                     | `HOLD` with graph evidence                           |
-| Ownership cap/tail cannot satisfy approved plan                    | `HOLD` with exact drill pointers                     |
+| Ownership cap/tail cannot satisfy proposed PlanRevision            | `HOLD` with exact drill pointers                     |
 | Snapshot changed after plan                                        | `HOLD`; regenerate ContextToolPlan and Own artifacts |
 
 ## Boundary
