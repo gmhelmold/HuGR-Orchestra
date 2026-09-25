@@ -1,0 +1,237 @@
+[
+  {
+    "id": "sequential-admission",
+    "identical": true
+  },
+  {
+    "id": "concurrent-admission-0",
+    "returns": [
+      {
+        "ok": true
+      },
+      {
+        "ok": true
+      },
+      {
+        "ok": true
+      },
+      {
+        "ok": true
+      },
+      {
+        "ok": true
+      },
+      {
+        "ok": true
+      },
+      {
+        "ok": true
+      },
+      {
+        "ok": true
+      }
+    ],
+    "persisted": {
+      "sessionID": "ses_round2_parallel_0",
+      "messageID": "msg_round2",
+      "methodVersion": "v1",
+      "outcome": "READY_TO_DRAFT",
+      "assessment": {
+        "kind": "work",
+        "goal": "Document the fixture.",
+        "known": [],
+        "proposals": [],
+        "unknowns": [],
+        "uncertainty": "None.",
+        "activeWorkEffect": "none",
+        "reason": "A bounded documentation request."
+      }
+    },
+    "desiredInvariant": true
+  },
+  {
+    "id": "concurrent-admission-1",
+    "returns": [
+      {
+        "ok": true
+      },
+      {
+        "ok": true
+      },
+      {
+        "ok": true
+      },
+      {
+        "ok": true
+      },
+      {
+        "ok": true
+      },
+      {
+        "ok": true
+      },
+      {
+        "ok": true
+      },
+      {
+        "ok": true
+      }
+    ],
+    "persisted": {
+      "sessionID": "ses_round2_parallel_1",
+      "messageID": "msg_round2",
+      "methodVersion": "v1",
+      "outcome": "READY_TO_DRAFT",
+      "assessment": {
+        "kind": "work",
+        "goal": "Document the fixture.",
+        "known": [],
+        "proposals": [],
+        "unknowns": [],
+        "uncertainty": "None.",
+        "activeWorkEffect": "none",
+        "reason": "A bounded documentation request."
+      }
+    },
+    "desiredInvariant": true
+  },
+  {
+    "id": "concurrent-admission-2",
+    "returns": [
+      {
+        "ok": true
+      },
+      {
+        "ok": true
+      },
+      {
+        "ok": true
+      },
+      {
+        "ok": true
+      },
+      {
+        "ok": true
+      },
+      {
+        "ok": true
+      },
+      {
+        "ok": true
+      },
+      {
+        "ok": true
+      }
+    ],
+    "persisted": {
+      "sessionID": "ses_round2_parallel_2",
+      "messageID": "msg_round2",
+      "methodVersion": "v1",
+      "outcome": "READY_TO_DRAFT",
+      "assessment": {
+        "kind": "work",
+        "goal": "Document the fixture.",
+        "known": [],
+        "proposals": [],
+        "unknowns": [],
+        "uncertainty": "None.",
+        "activeWorkEffect": "none",
+        "reason": "A bounded documentation request."
+      }
+    },
+    "desiredInvariant": true
+  },
+  {
+    "id": "concurrent-presentation-0",
+    "returns": [
+      {
+        "ok": true
+      },
+      {
+        "ok": true
+      },
+      {
+        "ok": true
+      },
+      {
+        "ok": true
+      },
+      {
+        "ok": true
+      },
+      {
+        "ok": true
+      },
+      {
+        "ok": true
+      },
+      {
+        "ok": true
+      }
+    ],
+    "replayID": "apr_0bc8f1e9c139b57785241e99638471e5bb018ff90e149f3c63039a144bf4ff02",
+    "desiredInvariant": true
+  },
+  {
+    "id": "concurrent-presentation-1",
+    "returns": [
+      {
+        "ok": true
+      },
+      {
+        "ok": true
+      },
+      {
+        "ok": true
+      },
+      {
+        "ok": true
+      },
+      {
+        "ok": true
+      },
+      {
+        "ok": true
+      },
+      {
+        "ok": true
+      },
+      {
+        "ok": true
+      }
+    ],
+    "replayID": "apr_9cdf9ffd011b008f9ebc6d06b147e4236b7a04ad2c5d9398fffa5d114790aff9",
+    "desiredInvariant": true
+  },
+  {
+    "id": "concurrent-presentation-2",
+    "returns": [
+      {
+        "ok": true
+      },
+      {
+        "ok": true
+      },
+      {
+        "ok": true
+      },
+      {
+        "ok": true
+      },
+      {
+        "ok": true
+      },
+      {
+        "ok": true
+      },
+      {
+        "ok": true
+      },
+      {
+        "ok": true
+      }
+    ],
+    "replayID": "apr_de36862ef44b7b5454971b86aaf43ea89ab2848575a03772eb589cec9d467216",
+    "desiredInvariant": true
+  }
+]

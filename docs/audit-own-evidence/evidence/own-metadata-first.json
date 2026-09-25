@@ -1,0 +1,54 @@
+{
+  "sha": "b0c33d2f6567a2c741240f3c44bc00ca2f01e7e7",
+  "root": "/private/tmp/hugr-deep-round4.zjlitC/repo/foundation/atlas",
+  "node": "v22.17.1",
+  "results": [
+    {
+      "id": "path-control",
+      "reportedOwner": "alice",
+      "policyScope": "unbound",
+      "policyMembers": [
+        "alice"
+      ],
+      "authorizedActor": true,
+      "emitted": true
+    },
+    {
+      "id": "logical-owner",
+      "reportedOwner": "",
+      "policyScope": "payments",
+      "policyMembers": [
+        "bob"
+      ],
+      "authorizedActor": true,
+      "emitted": true
+    },
+    {
+      "id": "misleading-path-fallback",
+      "reportedOwner": "alice",
+      "policyScope": "payments",
+      "policyMembers": [
+        "bob"
+      ],
+      "authorizedActor": true,
+      "emitted": true
+    },
+    {
+      "id": "role-currentness",
+      "beforeRole": "The fixture value is one.",
+      "afterRole": "The fixture value is one.",
+      "afterBands": {
+        "invariants": [],
+        "advisory": [
+          {
+            "nodeId": "7737276d2101192f88c82e1747357c0af7c3cce82642392dc73849cbb7f5d1ca",
+            "tier": "T2",
+            "claim": "The fixture value is one.",
+            "freshness": "DRIFTED"
+          }
+        ]
+      },
+      "classification": "unannotated role read differs from stale band verdict; no assertion static exporter accepts this pack"
+    }
+  ]
+}

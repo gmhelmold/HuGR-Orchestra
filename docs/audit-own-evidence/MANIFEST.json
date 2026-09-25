@@ -1,0 +1,137 @@
+[
+  {
+    "path": "EVIDENCE.md",
+    "bytes": 1389,
+    "sha256": "b151288bfd6c0247cfd4d0ab755843edaf95e5b3be2da4f3e91536fc4341de18"
+  },
+  {
+    "path": "JOURNAL.md",
+    "bytes": 4195,
+    "sha256": "d3589733b810b1d739a4794b59d46b7d41fa429a5e78bccb14e9a4b6f522a858"
+  },
+  {
+    "path": "README.md",
+    "bytes": 26173,
+    "sha256": "911f3fceede5a5bc2b988c26de18b020874271ac4e77dc29ed498e21fbadefb4"
+  },
+  {
+    "path": "evidence/atlas-baseline.exit",
+    "bytes": 2,
+    "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+  },
+  {
+    "path": "evidence/atlas-summary.json",
+    "bytes": 77256,
+    "sha256": "dc76062f955cf7ef3dfac5e85b309233a5fefccf03d92c9560b3202cfa400808"
+  },
+  {
+    "path": "evidence/atlas-typecheck.exit",
+    "bytes": 2,
+    "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+  },
+  {
+    "path": "evidence/atlas-typecheck.log",
+    "bytes": 9,
+    "sha256": "faeaa94bcf7012d86f91ca647580449f56a263fb7eaf572c54789764f60a9b8f"
+  },
+  {
+    "path": "evidence/build-identity.json",
+    "bytes": 30790,
+    "sha256": "77318c5a17f8d0348ea9c2aebe4653a5992219d09b31b2e1992b4f596c87268e"
+  },
+  {
+    "path": "evidence/environment.json",
+    "bytes": 308,
+    "sha256": "b144362d6497d9f71a1954dae30652c30659cb13a5eb95679d9239f33b8e03d7"
+  },
+  {
+    "path": "evidence/graph-first.json",
+    "bytes": 9255,
+    "sha256": "1cae0e736c20ad5d818bf66c8726c56147d2524d5624503aa54801b3da5b73ae"
+  },
+  {
+    "path": "evidence/graph-portable.json",
+    "bytes": 9255,
+    "sha256": "5cf51e622d43221806634307acd6f697e35c289193653f92f81833dcfd539965"
+  },
+  {
+    "path": "evidence/graph-second.json",
+    "bytes": 9255,
+    "sha256": "407b6eae4ea4556289aa7b7caa82e2824263bed5eb09361081bd02c3e9af2ae9"
+  },
+  {
+    "path": "evidence/maestro-concurrency-linked.log",
+    "bytes": 743,
+    "sha256": "7c1305ad5fcf7bbf224995a4e04a42b89e0cbb5e3a6050c383efae5cc93f6e40"
+  },
+  {
+    "path": "evidence/maestro-concurrency.json",
+    "bytes": 4010,
+    "sha256": "f7f87e656227fba5e079f358c0c96d0d515e50cdf8b745092fb280ea825e16bd"
+  },
+  {
+    "path": "evidence/maestro-original-linked.log",
+    "bytes": 3498,
+    "sha256": "bb735189f981a0d40981edc5dffcd5c5ee234e1de2455e5e9936bcb75aa3f855"
+  },
+  {
+    "path": "evidence/mcp-graph.json",
+    "bytes": 28220,
+    "sha256": "19b0d24e66d828ac01cbdbcd3723fa060aa35e995a6864b2942e67a7b02966f6"
+  },
+  {
+    "path": "evidence/own-metadata-first.json",
+    "bytes": 1383,
+    "sha256": "3aaef5c269e8649c93d7afc6a611d04c987d78c45569db208867bf5ac4b2d46a"
+  },
+  {
+    "path": "evidence/own-metadata-second.json",
+    "bytes": 1383,
+    "sha256": "3aaef5c269e8649c93d7afc6a611d04c987d78c45569db208867bf5ac4b2d46a"
+  },
+  {
+    "path": "evidence/owner-contract.exit",
+    "bytes": 2,
+    "sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865"
+  },
+  {
+    "path": "evidence/owner-contract.log",
+    "bytes": 629,
+    "sha256": "bf82d7ceb01dde455ca02d6c7065c58e9d5eed66b831d7098f2a510cb7638822"
+  },
+  {
+    "path": "evidence/package-topology.json",
+    "bytes": 7788,
+    "sha256": "2dc62ef1e88283cc2e15383f6ee745a0463f7c66f3b184578f28bd9f7ef41c48"
+  },
+  {
+    "path": "evidence/source-ledger.json",
+    "bytes": 8359,
+    "sha256": "cacb0ec4619fca69316612de275013790de3e7e54c63c752898fabcaeb7ef0ec"
+  },
+  {
+    "path": "probes/check-owner-contract.mjs",
+    "bytes": 610,
+    "sha256": "93a74f2d62cf4dd7dd462d5389d26ad72c54046de447d4f63b1b169a181405b5"
+  },
+  {
+    "path": "probes/graph-probes.mjs",
+    "bytes": 9023,
+    "sha256": "78df99350a2c9a980479f4991464219f2fad8b51609a64fc970a6809652e8f59"
+  },
+  {
+    "path": "probes/maestro-concurrency.test.ts",
+    "bytes": 3402,
+    "sha256": "a3eab3a8b4b555e8a958521f51d1497752b589fb01363516e8ab41a156334a47"
+  },
+  {
+    "path": "probes/mcp-graph.mjs",
+    "bytes": 7007,
+    "sha256": "474f2cbdc676bee446204a0fa0ff448f2df1b3d3c5d347516094f57c9dbf3e3c"
+  },
+  {
+    "path": "probes/own-metadata.mjs",
+    "bytes": 3839,
+    "sha256": "955cdd8c7dc526186fe0d29697992c0d0da892675e5a2396cf43e89aa1e5c804"
+  }
+]
