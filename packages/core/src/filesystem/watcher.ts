@@ -78,9 +78,14 @@ const layer = Layer.effect(
     const git = yield* Git.Service
     const context = yield* Effect.context()
     const runFork = Effect.runForkWith(context)
-    const subscriptions: ParcelWatcher.AsyncSubscription[] = []
+    const pendingSubscriptions = new Set<Promise<ParcelWatcher.AsyncSubscription>>()
     yield* Effect.addFinalizer(() =>
-      Effect.promise(() => Promise.allSettled(subscriptions.map((subscription) => subscription.unsubscribe()))),
+      Effect.promise(async () => {
+        const results = await Promise.allSettled(pendingSubscriptions)
+        await Promise.allSettled(
+          results.flatMap((result) => (result.status === "fulfilled" ? [result.value.unsubscribe()] : [])),
+        )
+      }),
     )
 
     const callback: ParcelWatcher.SubscribeCallback = (_error, updates) => {
@@ -93,11 +98,10 @@ const layer = Layer.effect(
 
     const subscribe = (directory: string, ignore: string[]) => {
       const pending = w.subscribe(directory, callback, { ignore, backend })
+      pendingSubscriptions.add(pending)
       return Effect.promise(() => pending).pipe(
-        Effect.tap((subscription) => Effect.sync(() => subscriptions.push(subscription))),
         Effect.timeout(SUBSCRIBE_TIMEOUT_MS),
         Effect.catchCause((cause) => {
-          pending.then((subscription) => subscription.unsubscribe()).catch(() => {})
           return Effect.logError("failed to subscribe", { directory, cause: Cause.pretty(cause) })
         }),
       )
