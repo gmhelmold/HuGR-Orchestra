@@ -36,15 +36,13 @@ CI root cause (#102) ------------> reliable current-base evidence
 
 #107 remediation ledger ---------> trusted Atlas/Own release disposition
 
-#112 catalog boundary -----------> #114 durable plan/validation -----> #106 approval readers
-        |                                  |
-        |                                  +---------------------------> #108 context adapter
-        |
-#109 Own host boundary -----------+
+#112 catalog boundary -----------> #114 durable plan/context/validation records
+                                           |
+#109 Own host boundary --------------------+--> #108 context adapter -----> #106 approval readers
 
-#110 automatic admission --------> independent runtime slice; rebase/revalidate prior branch first
+#110 automatic admission -----------------------------------------------> #111 current-base integration gate
 
-all applicable P1 items + CI ------> #111 current-base integration gate
+#102 CI root cause + #107 remediation ledger + all P1 -----------------> #111 current-base integration gate
 ```
 
 ## Ordered Backlog
@@ -54,10 +52,10 @@ all applicable P1 items + CI ------> #111 current-base integration gate
 | 0     | #102  | Current CI defect         | Current Windows failure evidence                                    | Root cause and focused regression gate; no global timeout or serialization workaround.          |
 | 1     | #107  | Foundation tracker        | Reconcile original Atlas/Own findings                               | Every child has category, dependency, owner, and release disposition.                           |
 | 2     | #112  | Partial implementation    | Freeze installed read API                                           | OpenCode reads versioned canonical Territory objects without vendor-relative imports.           |
-| 3     | #114  | Not implemented           | #112 available                                                      | Immutable PlanRevision and ValidationRecord persist/read back through real runtime boundaries.  |
-| 4     | #106  | Not implemented           | #114 available                                                      | Approval presenter reads exact durable records and remains fail-closed on mismatch.             |
-| 5     | #109  | Not implemented           | Relevant Own findings resolved or explicitly gated                  | Host verifies canonical Own bytes, identity, receipt, freshness, and coverage before injection. |
-| 6     | #108  | Not implemented           | #112, #114, and #109 available                                      | Deterministic ContextToolPlan loads verified static Own skills or returns HOLD.                 |
+| 3     | #114  | Not implemented           | #112 available                                                      | PlanRevision, ContextRecord, and validation records persist/read; absent context produces HOLD. |
+| 4     | #109  | Not implemented           | Relevant Own findings resolved or explicitly gated                  | Host verifies canonical Own bytes, identity, receipt, freshness, and coverage before injection. |
+| 5     | #108  | Not implemented           | #112, #114, and #109 available                                      | Deterministic ContextToolPlan persists verified ContextRecord or returns HOLD.                  |
+| 6     | #106  | Not implemented           | #114 and #108 available                                             | Approval presenter reads exact durable records and remains fail-closed on mismatch.             |
 | 7     | #110  | Partial branch exists     | Rebase from current `dev`; close #62 hardening in same evidence set | Persisted direct stakeholder messages create exactly one admission before model work.           |
 | 8     | #111  | Current-base gate pending | All applicable prior work complete                                  | Current-base integration evidence, no historical PR #11 assumption, human merge decision.       |
 

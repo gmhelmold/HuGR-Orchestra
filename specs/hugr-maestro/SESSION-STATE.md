@@ -27,15 +27,15 @@ This is the short operational snapshot. Read [ROADMAP.md](ROADMAP.md) for depend
 
 ## Active Blockers
 
-| Priority | Item                                           | Why it blocks                                                                                                                 |
-| -------- | ---------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| P1       | #107 Atlas/Own remediation ledger              | Context cannot claim trusted Atlas/Own evidence until source findings have ordered ownership and release disposition.         |
-| P1       | #112 installed territory catalog boundary      | #114 and #108 need versioned canonical Territory objects outside direct vendor imports.                                       |
-| P1       | #114 durable PlanRevision and ValidationRecord | #106 must read authority, never reconstruct it from tool parameters.                                                          |
-| P1       | #106 durable approval readers                  | Public approval presentation remains disabled without these readers.                                                          |
-| P1       | #109 canonical Own host boundary               | #108 cannot consume static Own context safely without it.                                                                     |
-| P1       | #108 ContextToolPlan adapter                   | This is required before Atlas-backed governed work can run.                                                                   |
-| P2       | #102 Windows Core test instability             | Current CI evidence repeatedly names `@opencode-ai/core#test`; do not paper over with broad timeout or serialization changes. |
+| Priority | Item                                                       | Why it blocks                                                                                                         |
+| -------- | ---------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| P1       | #107 Atlas/Own remediation ledger                          | Context cannot claim trusted Atlas/Own evidence until source findings have ordered ownership and release disposition. |
+| P1       | #112 installed territory catalog boundary                  | #114 and #108 need versioned canonical Territory objects outside direct vendor imports.                               |
+| P1       | #114 durable PlanRevision, ContextRecord, ValidationRecord | #108 persists and #106 reads authority; neither reconstructs tool parameters.                                         |
+| P1       | #106 durable approval readers                              | Public approval presentation remains disabled without these readers.                                                  |
+| P1       | #109 canonical Own host boundary                           | #108 cannot consume static Own context safely without it.                                                             |
+| P1       | #108 ContextToolPlan adapter                               | This is required before Atlas-backed governed work can run.                                                           |
+| P2       | #102 Windows Core test instability                         | Root cause remains open; do not paper over with broad timeout or serialization changes.                               |
 
 ## Do Not Claim
 
@@ -49,9 +49,10 @@ This is the short operational snapshot. Read [ROADMAP.md](ROADMAP.md) for depend
 
 1. Triage #107 and the Windows Core failure #102 with current-run evidence.
 2. Deliver #112 as an installed, read-only, versioned boundary. Do not recreate Atlas catalog logic in OpenCode.
-3. Deliver #114, then #106.
-4. Deliver #109 and #108 only after their prerequisite evidence is current.
-5. Run #111 only as fresh current-base integration gate after applicable dependencies close.
+3. Deliver #114 durable record boundaries; missing context must HOLD.
+4. Deliver #109, then #108 to persist verified ContextRecord evidence.
+5. Deliver #106 and #110 from current `dev`.
+6. Run #111 only as fresh current-base integration gate after applicable dependencies close.
 
 ## Update Rule
 
