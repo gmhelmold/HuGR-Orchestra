@@ -12,7 +12,7 @@ outputs:
     description: "GitHub token"
     value: ${{ steps.auth.outputs.token }}
   app-slug:
-    description: "GitHub App slug or workflow actor"
+    description: "GitHub App slug or github-actions"
     value: ${{ steps.auth.outputs.app-slug }}
 runs:
   using: "composite"
@@ -36,6 +36,7 @@ runs:
     - name: Select token
       id: auth
       env:
+        APP_ID: ${{ inputs.opencode-app-id }}
         APP_TOKEN: ${{ steps.apptoken.outputs.token }}
         APP_SLUG: ${{ steps.apptoken.outputs.app-slug }}
         WORKFLOW_TOKEN: ${{ github.token }}
@@ -43,9 +44,12 @@ runs:
         if [ -n "$APP_TOKEN" ]; then
           echo "token=$APP_TOKEN" >> "$GITHUB_OUTPUT"
           echo "app-slug=$APP_SLUG" >> "$GITHUB_OUTPUT"
-        else
+        elif [ -z "$APP_ID" ]; then
           echo "token=$WORKFLOW_TOKEN" >> "$GITHUB_OUTPUT"
           echo "app-slug=github-actions" >> "$GITHUB_OUTPUT"
+        else
+          echo "GitHub App token creation returned no token"
+          exit 1
         fi
       shell: bash
 
