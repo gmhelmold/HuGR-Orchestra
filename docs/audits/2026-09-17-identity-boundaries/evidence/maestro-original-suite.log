@@ -1,0 +1,80 @@
+bun test v1.3.14 (0d9b296a)
+
+test/maestro/governed-task.test.ts:
+(pass) Maestro governed Task guard > permits exact approved decision [0.64ms]
+(pass) Maestro governed Task guard > holds missing, declined, duplicate, and mismatched decisions [0.11ms]
+
+test/maestro/admission-record.test.ts:
+(pass) Maestro admission record > persists and replays one deterministic admission result [272.72ms]
+(pass) Maestro admission record > refuses altered input for an existing admission key [52.65ms]
+
+test/maestro/governed-lifecycle.test.ts:
+(pass) Maestro governed lifecycle > records intake, direct approval, then exact governed child Task [734.72ms]
+(pass) Maestro governed lifecycle > shows governance tools only to Maestro [113.86ms]
+(pass) Maestro governed lifecycle > refuses model-supplied validation until durable validation reader exists [64.02ms]
+(pass) Maestro governed lifecycle > denies governed Task before child Session creation without exact approval [106.95ms]
+(pass) Maestro governed lifecycle > creates governed Task only from exact approved event [104.77ms]
+
+test/maestro/approval-record.test.ts:
+(pass) Maestro approval record > records direct approval from exact rendered tool evidence [65.98ms]
+(pass) Maestro approval record > holds when tool output differs from immutable presentation [54.01ms]
+(pass) Maestro approval record > holds when discussion intervenes before direct approval [64.76ms]
+(pass) Maestro approval record > replays one presentation for same revision after a retried tool call [49.06ms]
+
+test/maestro/task-hash.test.ts:
+(pass) Maestro task hash > mutation probe: every governed task intent and evidence field changes hash [0.18ms]
+
+test/maestro/admit-request.test.ts:
+(pass) Maestro admit request > returns ORIENT for valid orient assessment [1.01ms]
+(pass) Maestro admit request > clarifies work without usable goal [0.05ms]
+(pass) Maestro admit request > clarifies material blocker before draft [0.04ms]
+(pass) Maestro admit request > returns READY_TO_DRAFT while preserving labeled claims [0.03ms]
+(pass) Maestro admit request > invalid or partial assessment never reaches READY_TO_DRAFT [0.04ms]
+(pass) Maestro admit request > clarifies work that may redirect active approved work [0.02ms]
+(pass) Maestro admit request > mutation probe: claim labels cannot cross fact and proposal boundary [0.04ms]
+
+test/maestro/approval.test.ts:
+(pass) Maestro approval > binds explicit direct approval to visible exact revision and validation [0.34ms]
+(pass) Maestro approval > accepts exact English approval and explicit decline [0.16ms]
+(pass) Maestro approval > keeps questions and sentiment pending [0.15ms]
+(pass) Maestro approval > mutation probe: assistant or tool text cannot self-approve [0.18ms]
+(pass) Maestro approval > mutation probe: synthetic user text cannot approve [0.08ms]
+(pass) Maestro approval > mutation probe: reply must follow exact visible presentation in same session [0.16ms]
+(pass) Maestro approval > holds stale presentation when a newer presentation intervenes [0.14ms]
+(pass) Maestro approval > mutation probe: duplicated presentation identity holds [0.08ms]
+(pass) Maestro approval > replays only same decision; reused reply against another presentation holds [0.18ms]
+(pass) Maestro approval > holds when revision evidence no longer current [0.06ms]
+(pass) Maestro approval > holds malformed actor identity and timestamp before interpreting approval [0.08ms]
+
+test/tool/task.test.ts:
+(pass) tool.task > description sorts subagents by name and is stable across calls [63.58ms]
+(pass) tool.task > description hides denied subagents for the caller [76.44ms]
+(pass) tool.task > execute resumes an existing task session from task_id [79.22ms]
+(pass) tool.task > execute resumes renamed agents by stable id [79.12ms]
+(pass) tool.task > execute forwards an explicit model to the subagent prompt [81.75ms]
+(pass) tool.task > execute rejects a malformed model parameter [74.54ms]
+(pass) tool.task > execute adds the resolved model to ask patterns when the session scopes task models [80.42ms]
+(pass) tool.task > execute surfaces child errors with a resumable task_id [69.44ms]
+(pass) tool.task > execute surfaces terminal child tool errors with a resumable task_id [78.11ms]
+(pass) tool.task > execute asks by default and skips checks when bypassed [82.37ms]
+(pass) tool.task > execute cancels child session when abort signal fires [77.29ms]
+(pass) tool.task > execute creates a child when task_id does not exist [76.71ms]
+(pass) tool.task > prevents subagents from launching subagents by default [101.30ms]
+(pass) tool.task > allows nested subagents up to the configured depth [80.62ms]
+(pass) tool.task > execute shapes child permissions for task, todowrite, and primary tools [78.98ms]
+(pass) tool.task > rejects background execution when the experiment is disabled [59.72ms]
+(pass) tool.task > promotes a running foreground task without restarting it [85.64ms]
+(pass) tool.task > execute launches background tasks without waiting for completion [86.96ms]
+(pass) tool.task > background task completion waits for running updates [87.83ms]
+(pass) tool.task > background tasks complete through the background job service [77.54ms]
+(pass) tool.task > background task completion does not wait for the parent async prompt [144.75ms]
+(pass) tool.task > removing the parent session cancels running background tasks [104.78ms]
+(pass) tool.task > removing the child task session cancels its running background task [247.99ms]
+(pass) tool.task > cancelling the parent run cancels running background tasks [81.46ms]
+(pass) tool.task > cancelling a child run cancels its own pre-runner task job [80.75ms]
+(pass) tool.task > cancelling a parent run recursively cancels descendant background tasks [76.93ms]
+
+ 58 pass
+ 0 fail
+ 153 expect() calls
+Ran 58 tests across 8 files. [6.11s]

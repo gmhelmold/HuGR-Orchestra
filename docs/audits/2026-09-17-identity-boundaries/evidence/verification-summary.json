@@ -1,0 +1,35 @@
+{
+  "product_sha": "b0c33d2f6567a2c741240f3c44bc00ca2f01e7e7",
+  "atlas_typecheck_exit": 0,
+  "original_suites": {
+    "atlas": {
+      "files": 15,
+      "passed": 136,
+      "failed": 0
+    },
+    "maestro_and_task": {
+      "files": 8,
+      "passed": 58,
+      "failed": 0
+    }
+  },
+  "characterizations": {
+    "identity_runtime_independent_runs": 3,
+    "failure_boundaries_independent_runs": 3,
+    "maestro_consumption_independent_runs": 3,
+    "maestro_cases_per_run": 3,
+    "meaning": "Success means the documented observed behavior, including defects, was reproduced."
+  },
+  "full_files_reviewed": 42,
+  "reviewed_lines_including_comments_and_tests": 7071,
+  "independent_GitHub_blob_checks": 4,
+  "limitations": [
+    "not five whole-monorepo line-by-line reviews",
+    "not the full original test suite",
+    "no live LLM execution",
+    "no public Maestro approval-presentation success",
+    "Maestro fault injected at EventV2Bridge consumption publish before commit, not a physical disk-failure test",
+    "moving-ref case reaches retained composed transition producer, not a demonstrated live MCP request",
+    "host dependencies reuse source-identical baseline checkout; Atlas workspace packages compile from this checkout"
+  ]
+}

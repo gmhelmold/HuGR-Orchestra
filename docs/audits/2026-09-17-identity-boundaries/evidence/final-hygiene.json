@@ -1,0 +1,14 @@
+{
+  "product_sha": "b0c33d2f6567a2c741240f3c44bc00ca2f01e7e7",
+  "production_source_diff": [],
+  "temporary_diagnostic_moved_outside_repo": true,
+  "portable_identity_probe_exit": 0,
+  "all_evidence_JSON_parseable": true,
+  "created_issues": [
+    68,
+    69,
+    70,
+    71,
+    72
+  ]
+}

@@ -1,0 +1,26 @@
+[
+  {
+    "path": "packages/opencode/src/tool/task.ts",
+    "local_blob": "f80e0beaf8e7cbd227d506f5769a05733d61dcda",
+    "independent_GitHub_blob": "f80e0beaf8e7cbd227d506f5769a05733d61dcda",
+    "match": true
+  },
+  {
+    "path": "foundation/atlas/packages/adapter-io/src/rev-index.ts",
+    "local_blob": "6d4744bb4fe9d1b1a94cae7ac360d45dc4a57a0c",
+    "independent_GitHub_blob": "6d4744bb4fe9d1b1a94cae7ac360d45dc4a57a0c",
+    "match": true
+  },
+  {
+    "path": "foundation/atlas/packages/cli/src/test-vacuity.ts",
+    "local_blob": "363caa4ba003fb036327d3860afe75888ea82878",
+    "independent_GitHub_blob": "363caa4ba003fb036327d3860afe75888ea82878",
+    "match": true
+  },
+  {
+    "path": "foundation/atlas/packages/knowledge/src/read/transitions.ts",
+    "local_blob": "1437eed9e007dcbbadfdb77e490eea6539a742c8",
+    "independent_GitHub_blob": "1437eed9e007dcbbadfdb77e490eea6539a742c8",
+    "match": true
+  }
+]

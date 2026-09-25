@@ -1,0 +1,16 @@
+{
+  "command": [
+    "bun",
+    "test",
+    "test/maestro/admission-record.test.ts",
+    "test/maestro/admit-request.test.ts",
+    "test/maestro/approval-record.test.ts",
+    "test/maestro/approval.test.ts",
+    "test/maestro/governed-lifecycle.test.ts",
+    "test/maestro/governed-task.test.ts",
+    "test/maestro/task-hash.test.ts",
+    "test/tool/task.test.ts"
+  ],
+  "cwd": "/private/tmp/hugr-deep-followup.ou9sem/repo/packages/opencode",
+  "note": "Tracked original Maestro tests plus original Task tests; additional audit probe excluded."
+}

@@ -1,0 +1,11 @@
+bun test v1.3.14 (0d9b296a)
+
+test/maestro/audit-consume-boundary.test.ts:
+(pass) Audit: original Maestro consumption boundary > normal original dispatch persists consumption and calls one counted executor [1152.03ms]
+(pass) Audit: original Maestro consumption boundary > an existing consumption record legitimately refuses another dispatch [136.95ms]
+(pass) Audit: original Maestro consumption boundary > pre-commit event-write fault is mislabeled consumed although durable marker is absent and clean retry works [95.27ms]
+
+ 3 pass
+ 0 fail
+ 18 expect() calls
+Ran 3 tests across 1 file. [4.77s]

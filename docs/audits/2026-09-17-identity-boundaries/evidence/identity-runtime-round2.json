@@ -1,0 +1,665 @@
+{
+  "scope": "Original built Atlas code; real Git/filesystem/WASM/governed persistence; controlled fixtures; no LLM calls.",
+  "transitions": {
+    "linear": {
+      "dir": "/private/tmp/hugr-deep-followup.ou9sem/fixtures/linear-3fx4Xr",
+      "unit": "src/pay.ts",
+      "values": [
+        1,
+        2,
+        3
+      ],
+      "revs": [
+        "2a9ffc675f5e00ded07c8f32c728feafdfac3cb0",
+        "f6d6471ba8aeda8d7a166830cecb7126a2c1aec7",
+        "847254929e8e8da5f734845f6ef7da86f6d4dfa3"
+      ],
+      "steps": [
+        {
+          "before": "2a9ffc675f5e00ded07c8f32c728feafdfac3cb0",
+          "after": "f6d6471ba8aeda8d7a166830cecb7126a2c1aec7",
+          "production": {
+            "args": [
+              "transition",
+              "src/pay.ts",
+              "2a9ffc675f5e00ded07c8f32c728feafdfac3cb0",
+              "f6d6471ba8aeda8d7a166830cecb7126a2c1aec7"
+            ],
+            "status": 0,
+            "stdout": "status: ok\nnext: justified transition on 'src/pay.ts' is durable (c9362e8141f04ebf0fbe0afc6b64a65950ed6e08211fc7c7f50763d3912184b4) — read it back with `atlas transitions src/pay.ts`; a later transition on this lineage supersedes it (D-T3)\ninvariant: #234 D4: a transition is an IMMUTABLE ADVISORY HISTORICAL record admitted from TWO real revs where the unit changed — sealed `justified` NEVER `proven` (no HEAD oracle exists, D-T1), grounded on the rev-pair (never re-checked at HEAD, D-T2), superseded not falsified by a later transition on the same lineage (D-T3); rename/move is OUT of scope (D-T4)\ntransition: src/pay.ts @ 701f6fbb9088 → c5e589877cff (seal: justified)\n",
+            "stderr": ""
+          },
+          "read": [
+            {
+              "nodeKey": "32ae387506509a2af64f91d5ee068804815088427486f71c0f3e34c18bfe70c3",
+              "unitKey": "src/pay.ts",
+              "shaBefore": "701f6fbb908807028989eac6bb451e1f6a50cf93dc888e0a55cfe16219140dbb",
+              "shaAfter": "c5e589877cff0e8ee82418600bdc203282a1e25f168f6ca46424b93719eb767a",
+              "authoring": "TRANSITIONED",
+              "freshness": "FRESH"
+            }
+          ],
+          "current": 1
+        },
+        {
+          "before": "f6d6471ba8aeda8d7a166830cecb7126a2c1aec7",
+          "after": "847254929e8e8da5f734845f6ef7da86f6d4dfa3",
+          "production": {
+            "args": [
+              "transition",
+              "src/pay.ts",
+              "f6d6471ba8aeda8d7a166830cecb7126a2c1aec7",
+              "847254929e8e8da5f734845f6ef7da86f6d4dfa3"
+            ],
+            "status": 0,
+            "stdout": "status: ok\nnext: justified transition on 'src/pay.ts' is durable (e580a77494f30729d117cf4b57f5a8dc9ff21b50d9e25bcac0ff8ab3f87d047d) — read it back with `atlas transitions src/pay.ts`; a later transition on this lineage supersedes it (D-T3)\ninvariant: #234 D4: a transition is an IMMUTABLE ADVISORY HISTORICAL record admitted from TWO real revs where the unit changed — sealed `justified` NEVER `proven` (no HEAD oracle exists, D-T1), grounded on the rev-pair (never re-checked at HEAD, D-T2), superseded not falsified by a later transition on the same lineage (D-T3); rename/move is OUT of scope (D-T4)\ntransition: src/pay.ts @ c5e589877cff → fffb08845efe (seal: justified)\n",
+            "stderr": ""
+          },
+          "read": [
+            {
+              "nodeKey": "32ae387506509a2af64f91d5ee068804815088427486f71c0f3e34c18bfe70c3",
+              "unitKey": "src/pay.ts",
+              "shaBefore": "701f6fbb908807028989eac6bb451e1f6a50cf93dc888e0a55cfe16219140dbb",
+              "shaAfter": "c5e589877cff0e8ee82418600bdc203282a1e25f168f6ca46424b93719eb767a",
+              "authoring": "SUPERSEDED",
+              "freshness": "FRESH"
+            },
+            {
+              "nodeKey": "53807997660b0d5c1c983b2957e57ac4112d325a098827cb0e0ea10e980a6251",
+              "unitKey": "src/pay.ts",
+              "shaBefore": "c5e589877cff0e8ee82418600bdc203282a1e25f168f6ca46424b93719eb767a",
+              "shaAfter": "fffb08845efe17f338b2dae898550b5f8f9d43a87ff566d176efa766c86a1e21",
+              "authoring": "TRANSITIONED",
+              "freshness": "FRESH"
+            }
+          ],
+          "current": 1
+        }
+      ],
+      "readCLI": {
+        "args": [
+          "transitions",
+          "src/pay.ts"
+        ],
+        "status": 0,
+        "stdout": "status: ok\nnext: 2 transition(s) on lineage 'src/pay.ts': 1 current (TRANSITIONED), 1 SUPERSEDED — supersession is derive-on-read over the shaBefore→shaAfter chain (D-T3), the record is never falsified\ninvariant: TRN-1: `atlas transitions` reads GROUNDED 2-rev historical records (family:transition) off the live projection the query readback rides — one unit LINEAGE, sorted (unitKey, shaBefore, shaAfter, nodeKey) so equal input is byte-identical output, the current head marked TRANSITIONED and predecessors SUPERSEDED (derive-on-read, D-T3), never re-checked at HEAD (D-T2), never a throw, no write path\n",
+        "stderr": ""
+      },
+      "worktrees": "worktree /private/tmp/hugr-deep-followup.ou9sem/fixtures/linear-3fx4Xr\nHEAD 847254929e8e8da5f734845f6ef7da86f6d4dfa3\nbranch refs/heads/master"
+    },
+    "revert": {
+      "dir": "/private/tmp/hugr-deep-followup.ou9sem/fixtures/revert-ro9f2E",
+      "unit": "src/pay.ts",
+      "values": [
+        1,
+        2,
+        1
+      ],
+      "revs": [
+        "044322e9b334c397a19f701abd1b9aa4d0668278",
+        "c190b46796fab97284ddf39bd364160f40a451f4",
+        "caefbbbc62d4ff18d3bf98ee720b1e7f8ca84da8"
+      ],
+      "steps": [
+        {
+          "before": "044322e9b334c397a19f701abd1b9aa4d0668278",
+          "after": "c190b46796fab97284ddf39bd364160f40a451f4",
+          "production": {
+            "args": [
+              "transition",
+              "src/pay.ts",
+              "044322e9b334c397a19f701abd1b9aa4d0668278",
+              "c190b46796fab97284ddf39bd364160f40a451f4"
+            ],
+            "status": 0,
+            "stdout": "status: ok\nnext: justified transition on 'src/pay.ts' is durable (2240b1e162defb00bbaa0553303821fd5da472fb426794962d30fc7916441c2b) — read it back with `atlas transitions src/pay.ts`; a later transition on this lineage supersedes it (D-T3)\ninvariant: #234 D4: a transition is an IMMUTABLE ADVISORY HISTORICAL record admitted from TWO real revs where the unit changed — sealed `justified` NEVER `proven` (no HEAD oracle exists, D-T1), grounded on the rev-pair (never re-checked at HEAD, D-T2), superseded not falsified by a later transition on the same lineage (D-T3); rename/move is OUT of scope (D-T4)\ntransition: src/pay.ts @ 701f6fbb9088 → c5e589877cff (seal: justified)\n",
+            "stderr": ""
+          },
+          "read": [
+            {
+              "nodeKey": "32ae387506509a2af64f91d5ee068804815088427486f71c0f3e34c18bfe70c3",
+              "unitKey": "src/pay.ts",
+              "shaBefore": "701f6fbb908807028989eac6bb451e1f6a50cf93dc888e0a55cfe16219140dbb",
+              "shaAfter": "c5e589877cff0e8ee82418600bdc203282a1e25f168f6ca46424b93719eb767a",
+              "authoring": "TRANSITIONED",
+              "freshness": "FRESH"
+            }
+          ],
+          "current": 1
+        },
+        {
+          "before": "c190b46796fab97284ddf39bd364160f40a451f4",
+          "after": "caefbbbc62d4ff18d3bf98ee720b1e7f8ca84da8",
+          "production": {
+            "args": [
+              "transition",
+              "src/pay.ts",
+              "c190b46796fab97284ddf39bd364160f40a451f4",
+              "caefbbbc62d4ff18d3bf98ee720b1e7f8ca84da8"
+            ],
+            "status": 0,
+            "stdout": "status: ok\nnext: justified transition on 'src/pay.ts' is durable (6cc7442e94bf58392e3bcec5d42d4aebd723ce0fc3d081529e38508aa971f4b8) — read it back with `atlas transitions src/pay.ts`; a later transition on this lineage supersedes it (D-T3)\ninvariant: #234 D4: a transition is an IMMUTABLE ADVISORY HISTORICAL record admitted from TWO real revs where the unit changed — sealed `justified` NEVER `proven` (no HEAD oracle exists, D-T1), grounded on the rev-pair (never re-checked at HEAD, D-T2), superseded not falsified by a later transition on the same lineage (D-T3); rename/move is OUT of scope (D-T4)\ntransition: src/pay.ts @ c5e589877cff → 701f6fbb9088 (seal: justified)\n",
+            "stderr": ""
+          },
+          "read": [
+            {
+              "nodeKey": "32ae387506509a2af64f91d5ee068804815088427486f71c0f3e34c18bfe70c3",
+              "unitKey": "src/pay.ts",
+              "shaBefore": "701f6fbb908807028989eac6bb451e1f6a50cf93dc888e0a55cfe16219140dbb",
+              "shaAfter": "c5e589877cff0e8ee82418600bdc203282a1e25f168f6ca46424b93719eb767a",
+              "authoring": "SUPERSEDED",
+              "freshness": "FRESH"
+            },
+            {
+              "nodeKey": "f231c5895c69ab20384ae476d44a47f7f009b87d4cbcbabf1ddeabcae9b51539",
+              "unitKey": "src/pay.ts",
+              "shaBefore": "c5e589877cff0e8ee82418600bdc203282a1e25f168f6ca46424b93719eb767a",
+              "shaAfter": "701f6fbb908807028989eac6bb451e1f6a50cf93dc888e0a55cfe16219140dbb",
+              "authoring": "SUPERSEDED",
+              "freshness": "FRESH"
+            }
+          ],
+          "current": 0
+        }
+      ],
+      "readCLI": {
+        "args": [
+          "transitions",
+          "src/pay.ts"
+        ],
+        "status": 0,
+        "stdout": "status: ok\nnext: 2 transition(s) on lineage 'src/pay.ts': 0 current (TRANSITIONED), 2 SUPERSEDED — supersession is derive-on-read over the shaBefore→shaAfter chain (D-T3), the record is never falsified\ninvariant: TRN-1: `atlas transitions` reads GROUNDED 2-rev historical records (family:transition) off the live projection the query readback rides — one unit LINEAGE, sorted (unitKey, shaBefore, shaAfter, nodeKey) so equal input is byte-identical output, the current head marked TRANSITIONED and predecessors SUPERSEDED (derive-on-read, D-T3), never re-checked at HEAD (D-T2), never a throw, no write path\n",
+        "stderr": ""
+      },
+      "worktrees": "worktree /private/tmp/hugr-deep-followup.ou9sem/fixtures/revert-ro9f2E\nHEAD caefbbbc62d4ff18d3bf98ee720b1e7f8ca84da8\nbranch refs/heads/master"
+    },
+    "reapply": {
+      "dir": "/private/tmp/hugr-deep-followup.ou9sem/fixtures/reapply-aWrtu5",
+      "unit": "src/pay.ts",
+      "values": [
+        1,
+        2,
+        1,
+        2
+      ],
+      "revs": [
+        "c9a4589d4b2ba386591f96cf8d38a9f4373f1089",
+        "cafb025fd2bd6a3f77c914acde09338f02c7cec3",
+        "965d7d3809c5befbc6359ceb98e5702e8800cf65",
+        "3335c12e0f21e1ca3ae88281e307f0c4367916d2"
+      ],
+      "steps": [
+        {
+          "before": "c9a4589d4b2ba386591f96cf8d38a9f4373f1089",
+          "after": "cafb025fd2bd6a3f77c914acde09338f02c7cec3",
+          "production": {
+            "args": [
+              "transition",
+              "src/pay.ts",
+              "c9a4589d4b2ba386591f96cf8d38a9f4373f1089",
+              "cafb025fd2bd6a3f77c914acde09338f02c7cec3"
+            ],
+            "status": 0,
+            "stdout": "status: ok\nnext: justified transition on 'src/pay.ts' is durable (bfae397d9c30caf446d1b1d1725544d153e26fee9c619293112e3a9dd145f55d) — read it back with `atlas transitions src/pay.ts`; a later transition on this lineage supersedes it (D-T3)\ninvariant: #234 D4: a transition is an IMMUTABLE ADVISORY HISTORICAL record admitted from TWO real revs where the unit changed — sealed `justified` NEVER `proven` (no HEAD oracle exists, D-T1), grounded on the rev-pair (never re-checked at HEAD, D-T2), superseded not falsified by a later transition on the same lineage (D-T3); rename/move is OUT of scope (D-T4)\ntransition: src/pay.ts @ 701f6fbb9088 → c5e589877cff (seal: justified)\n",
+            "stderr": ""
+          },
+          "read": [
+            {
+              "nodeKey": "32ae387506509a2af64f91d5ee068804815088427486f71c0f3e34c18bfe70c3",
+              "unitKey": "src/pay.ts",
+              "shaBefore": "701f6fbb908807028989eac6bb451e1f6a50cf93dc888e0a55cfe16219140dbb",
+              "shaAfter": "c5e589877cff0e8ee82418600bdc203282a1e25f168f6ca46424b93719eb767a",
+              "authoring": "TRANSITIONED",
+              "freshness": "FRESH"
+            }
+          ],
+          "current": 1
+        },
+        {
+          "before": "cafb025fd2bd6a3f77c914acde09338f02c7cec3",
+          "after": "965d7d3809c5befbc6359ceb98e5702e8800cf65",
+          "production": {
+            "args": [
+              "transition",
+              "src/pay.ts",
+              "cafb025fd2bd6a3f77c914acde09338f02c7cec3",
+              "965d7d3809c5befbc6359ceb98e5702e8800cf65"
+            ],
+            "status": 0,
+            "stdout": "status: ok\nnext: justified transition on 'src/pay.ts' is durable (64061a9e9eda6b011fc23cd33e5dc6076bc45c28db0c331869b55b5593f9f2f2) — read it back with `atlas transitions src/pay.ts`; a later transition on this lineage supersedes it (D-T3)\ninvariant: #234 D4: a transition is an IMMUTABLE ADVISORY HISTORICAL record admitted from TWO real revs where the unit changed — sealed `justified` NEVER `proven` (no HEAD oracle exists, D-T1), grounded on the rev-pair (never re-checked at HEAD, D-T2), superseded not falsified by a later transition on the same lineage (D-T3); rename/move is OUT of scope (D-T4)\ntransition: src/pay.ts @ c5e589877cff → 701f6fbb9088 (seal: justified)\n",
+            "stderr": ""
+          },
+          "read": [
+            {
+              "nodeKey": "32ae387506509a2af64f91d5ee068804815088427486f71c0f3e34c18bfe70c3",
+              "unitKey": "src/pay.ts",
+              "shaBefore": "701f6fbb908807028989eac6bb451e1f6a50cf93dc888e0a55cfe16219140dbb",
+              "shaAfter": "c5e589877cff0e8ee82418600bdc203282a1e25f168f6ca46424b93719eb767a",
+              "authoring": "SUPERSEDED",
+              "freshness": "FRESH"
+            },
+            {
+              "nodeKey": "f231c5895c69ab20384ae476d44a47f7f009b87d4cbcbabf1ddeabcae9b51539",
+              "unitKey": "src/pay.ts",
+              "shaBefore": "c5e589877cff0e8ee82418600bdc203282a1e25f168f6ca46424b93719eb767a",
+              "shaAfter": "701f6fbb908807028989eac6bb451e1f6a50cf93dc888e0a55cfe16219140dbb",
+              "authoring": "SUPERSEDED",
+              "freshness": "FRESH"
+            }
+          ],
+          "current": 0
+        },
+        {
+          "before": "965d7d3809c5befbc6359ceb98e5702e8800cf65",
+          "after": "3335c12e0f21e1ca3ae88281e307f0c4367916d2",
+          "production": {
+            "args": [
+              "transition",
+              "src/pay.ts",
+              "965d7d3809c5befbc6359ceb98e5702e8800cf65",
+              "3335c12e0f21e1ca3ae88281e307f0c4367916d2"
+            ],
+            "status": 0,
+            "stdout": "status: ok\nnext: justified transition on 'src/pay.ts' is durable (2d97663f18bf715531a236216a5a77de3850398e7c177b72048223afa46271d8) — read it back with `atlas transitions src/pay.ts`; a later transition on this lineage supersedes it (D-T3)\ninvariant: #234 D4: a transition is an IMMUTABLE ADVISORY HISTORICAL record admitted from TWO real revs where the unit changed — sealed `justified` NEVER `proven` (no HEAD oracle exists, D-T1), grounded on the rev-pair (never re-checked at HEAD, D-T2), superseded not falsified by a later transition on the same lineage (D-T3); rename/move is OUT of scope (D-T4)\ntransition: src/pay.ts @ 701f6fbb9088 → c5e589877cff (seal: justified)\n",
+            "stderr": ""
+          },
+          "read": [
+            {
+              "nodeKey": "32ae387506509a2af64f91d5ee068804815088427486f71c0f3e34c18bfe70c3",
+              "unitKey": "src/pay.ts",
+              "shaBefore": "701f6fbb908807028989eac6bb451e1f6a50cf93dc888e0a55cfe16219140dbb",
+              "shaAfter": "c5e589877cff0e8ee82418600bdc203282a1e25f168f6ca46424b93719eb767a",
+              "authoring": "SUPERSEDED",
+              "freshness": "FRESH"
+            },
+            {
+              "nodeKey": "f231c5895c69ab20384ae476d44a47f7f009b87d4cbcbabf1ddeabcae9b51539",
+              "unitKey": "src/pay.ts",
+              "shaBefore": "c5e589877cff0e8ee82418600bdc203282a1e25f168f6ca46424b93719eb767a",
+              "shaAfter": "701f6fbb908807028989eac6bb451e1f6a50cf93dc888e0a55cfe16219140dbb",
+              "authoring": "SUPERSEDED",
+              "freshness": "FRESH"
+            }
+          ],
+          "current": 0
+        }
+      ],
+      "readCLI": {
+        "args": [
+          "transitions",
+          "src/pay.ts"
+        ],
+        "status": 0,
+        "stdout": "status: ok\nnext: 2 transition(s) on lineage 'src/pay.ts': 0 current (TRANSITIONED), 2 SUPERSEDED — supersession is derive-on-read over the shaBefore→shaAfter chain (D-T3), the record is never falsified\ninvariant: TRN-1: `atlas transitions` reads GROUNDED 2-rev historical records (family:transition) off the live projection the query readback rides — one unit LINEAGE, sorted (unitKey, shaBefore, shaAfter, nodeKey) so equal input is byte-identical output, the current head marked TRANSITIONED and predecessors SUPERSEDED (derive-on-read, D-T3), never re-checked at HEAD (D-T2), never a throw, no write path\n",
+        "stderr": ""
+      },
+      "worktrees": "worktree /private/tmp/hugr-deep-followup.ou9sem/fixtures/reapply-aWrtu5\nHEAD 3335c12e0f21e1ca3ae88281e307f0c4367916d2\nbranch refs/heads/master"
+    }
+  },
+  "testVacuity": {
+    "unique": {
+      "dir": "/private/tmp/hugr-deep-followup.ou9sem/fixtures/tv-unique-3s4Kme",
+      "unit": "src/example.test.ts",
+      "bytes": "import { describe, test, expect } from 'vitest';\ndescribe('left-suite', () => { test('left', () => { try { work(); } catch (e) { expect(e).toBeDefined(); } }); });\ndescribe('right-suite', () => { test('right', () => { work(); }); });\n",
+      "scanned": [
+        {
+          "testName": "left",
+          "shape": "assertion-only-in-catch",
+          "row": 1,
+          "col": 31
+        },
+        {
+          "testName": "right",
+          "shape": "no-assertion-in-test",
+          "row": 2,
+          "col": 32
+        }
+      ],
+      "production": {
+        "args": [
+          "test-vacuity",
+          "."
+        ],
+        "status": 0,
+        "stdout": "status: ok\nnext: admitted 2 proven test-vacuity fact(s) durably through the governed door — read one back with `atlas node <id>`\ninvariant: #95 D5: a test-vacuity is a single-anchor PROVEN AST-shape fact — named test T in unit U holds one shape of the closed, additive-only `TestVacuityShape` vocabulary (reference/atlas-knowledge.md): `assertion-only-in-catch` (every assertion-shaped call inside a catch clause, no assertion-count guard), `no-assertion-in-test` (no check at all in a body that discards work and neither throws, fails, returns a value nor catches), or `assertion-never-invoked` (a matcher rooted at the bare global `expect(` is referenced but never called, so the assertion never runs). Each is re-derivable at HEAD by `scanTestVacuity`, sealed `proven` ONLY when the injected oracle re-proves it, admitted THROUGH the governed emit door (KNOW-11 authz + ARCH-9 anchor); the PROVEN-only family has no advisory form, so an abstaining oracle yields NO fact (0-false-proven)\ntest-vacuity: left @ src/example.test.ts (assertion-only-in-catch, seal: proven) — f14d8d266215299b58fdc5726c562aa3063fc912094cbbdee557dc35b73ebe08\ntest-vacuity: right @ src/example.test.ts (no-assertion-in-test, seal: proven) — 6e01215f021f13c11edae127f45ce986fcc4af91c8bbc018dd9160f0187e4674\n",
+        "stderr": ""
+      },
+      "read": [
+        {
+          "nodeKey": "cd7e447a068aba371986b91d71e28ade16ab8d156699335f7641b8f4bef5606d",
+          "unitKey": "src/example.test.ts",
+          "testName": "left",
+          "shape": "assertion-only-in-catch",
+          "seal": "proven"
+        },
+        {
+          "nodeKey": "d676432a655bd490fd679b55c419d193d760a9bf9bed1a7182b8ab5717f97a55",
+          "unitKey": "src/example.test.ts",
+          "testName": "right",
+          "shape": "no-assertion-in-test",
+          "seal": "proven"
+        }
+      ],
+      "rows": [
+        {
+          "nodeKey": "cd7e447a068aba371986b91d71e28ade16ab8d156699335f7641b8f4bef5606d",
+          "family": "test-vacuity",
+          "contentHash": "f14d8d266215299b58fdc5726c562aa3063fc912094cbbdee557dc35b73ebe08",
+          "claims": [
+            "assertion-only-in-catch test 'left' @ src/example.test.ts"
+          ],
+          "primaryAnchor": "src/example.test.ts",
+          "seal": "proven",
+          "scope": "src",
+          "tier": "T2",
+          "unitKey": "src/example.test.ts",
+          "testName": "left",
+          "shape": "assertion-only-in-catch",
+          "derivedAt": "69df58b65ef9003540314e1f89975528db84608a"
+        },
+        {
+          "nodeKey": "d676432a655bd490fd679b55c419d193d760a9bf9bed1a7182b8ab5717f97a55",
+          "family": "test-vacuity",
+          "contentHash": "6e01215f021f13c11edae127f45ce986fcc4af91c8bbc018dd9160f0187e4674",
+          "claims": [
+            "no-assertion-in-test test 'right' @ src/example.test.ts"
+          ],
+          "primaryAnchor": "src/example.test.ts",
+          "seal": "proven",
+          "scope": "src",
+          "tier": "T2",
+          "unitKey": "src/example.test.ts",
+          "testName": "right",
+          "shape": "no-assertion-in-test",
+          "derivedAt": "69df58b65ef9003540314e1f89975528db84608a"
+        }
+      ],
+      "stored": [
+        {
+          "kind": "test-vacuity",
+          "id": "cd7e447a068aba371986b91d71e28ade16ab8d156699335f7641b8f4bef5606d",
+          "tier": "T2",
+          "unitKey": "src/example.test.ts",
+          "testName": "left",
+          "shape": "assertion-only-in-catch",
+          "grounding": {
+            "entries": [
+              {
+                "anchor": {
+                  "kind": "file",
+                  "qualifiedPath": "src/example.test.ts",
+                  "subtreeHash": "d8016e3552f334cde462d7372acb9bff4bc69f227d28a5d031a162145c6c4757"
+                },
+                "path": "src/example.test.ts"
+              }
+            ]
+          },
+          "freshness": "FRESH",
+          "claims": [],
+          "authoring": "PROVEN",
+          "seal": "proven",
+          "witness": {
+            "shape": "assertion-only-in-catch",
+            "testName": "left"
+          },
+          "scope": "src"
+        },
+        {
+          "kind": "test-vacuity",
+          "id": "d676432a655bd490fd679b55c419d193d760a9bf9bed1a7182b8ab5717f97a55",
+          "tier": "T2",
+          "unitKey": "src/example.test.ts",
+          "testName": "right",
+          "shape": "no-assertion-in-test",
+          "grounding": {
+            "entries": [
+              {
+                "anchor": {
+                  "kind": "file",
+                  "qualifiedPath": "src/example.test.ts",
+                  "subtreeHash": "d8016e3552f334cde462d7372acb9bff4bc69f227d28a5d031a162145c6c4757"
+                },
+                "path": "src/example.test.ts"
+              }
+            ]
+          },
+          "freshness": "FRESH",
+          "claims": [],
+          "authoring": "PROVEN",
+          "seal": "proven",
+          "witness": {
+            "shape": "no-assertion-in-test",
+            "testName": "right"
+          },
+          "scope": "src"
+        }
+      ],
+      "readCLI": {
+        "args": [
+          "test-vacuities",
+          "src/example.test.ts"
+        ],
+        "status": 0,
+        "stdout": "status: ok\nnext: 2 proven test-vacuity fact(s) on unit 'src/example.test.ts' — each a named test proven to hold one of the vacuity shapes, sealed proven\ninvariant: TV-READ: `atlas test-vacuities` reads GROUNDED single-anchor proven facts (family:test-vacuity) off the live projection the query readback rides — sorted (unitKey, testName, nodeKey) so equal input is byte-identical output, each fact standing alone (no lineage, no supersession — the family is single-anchor), never a throw, no write path\n",
+        "stderr": ""
+      }
+    },
+    "same": {
+      "dir": "/private/tmp/hugr-deep-followup.ou9sem/fixtures/tv-same-hrhaYw",
+      "unit": "src/example.test.ts",
+      "bytes": "import { describe, test, expect } from 'vitest';\ndescribe('left-suite', () => { test('same', () => { try { work(); } catch (e) { expect(e).toBeDefined(); } }); });\ndescribe('right-suite', () => { test('same', () => { work(); }); });\n",
+      "scanned": [
+        {
+          "testName": "same",
+          "shape": "assertion-only-in-catch",
+          "row": 1,
+          "col": 31
+        },
+        {
+          "testName": "same",
+          "shape": "no-assertion-in-test",
+          "row": 2,
+          "col": 32
+        }
+      ],
+      "production": {
+        "args": [
+          "test-vacuity",
+          "."
+        ],
+        "status": 0,
+        "stdout": "status: ok\nnext: admitted 2 proven test-vacuity fact(s) durably through the governed door — read one back with `atlas node <id>`\ninvariant: #95 D5: a test-vacuity is a single-anchor PROVEN AST-shape fact — named test T in unit U holds one shape of the closed, additive-only `TestVacuityShape` vocabulary (reference/atlas-knowledge.md): `assertion-only-in-catch` (every assertion-shaped call inside a catch clause, no assertion-count guard), `no-assertion-in-test` (no check at all in a body that discards work and neither throws, fails, returns a value nor catches), or `assertion-never-invoked` (a matcher rooted at the bare global `expect(` is referenced but never called, so the assertion never runs). Each is re-derivable at HEAD by `scanTestVacuity`, sealed `proven` ONLY when the injected oracle re-proves it, admitted THROUGH the governed emit door (KNOW-11 authz + ARCH-9 anchor); the PROVEN-only family has no advisory form, so an abstaining oracle yields NO fact (0-false-proven)\ntest-vacuity: same @ src/example.test.ts (assertion-only-in-catch, seal: proven) — a4e714a8916e64da8e0687aaf450c7d492dfc15dabd1831ebac36258208738a5\ntest-vacuity: same @ src/example.test.ts (no-assertion-in-test, seal: proven) — c47c45bb1fd183ab4ed0b3f01e65e5090ef1bfc1aa1f63c82056d9a38180aa90\n",
+        "stderr": ""
+      },
+      "read": [
+        {
+          "nodeKey": "8135e01a928491bb7535fc5cbc3af2f488e6b9c85e5394dd0a8af19fec17dbae",
+          "unitKey": "src/example.test.ts",
+          "testName": "same",
+          "shape": "no-assertion-in-test",
+          "seal": "proven"
+        }
+      ],
+      "rows": [
+        {
+          "nodeKey": "8135e01a928491bb7535fc5cbc3af2f488e6b9c85e5394dd0a8af19fec17dbae",
+          "family": "test-vacuity",
+          "contentHash": "c47c45bb1fd183ab4ed0b3f01e65e5090ef1bfc1aa1f63c82056d9a38180aa90",
+          "claims": [
+            "assertion-only-in-catch test 'same' @ src/example.test.ts",
+            "no-assertion-in-test test 'same' @ src/example.test.ts"
+          ],
+          "primaryAnchor": "src/example.test.ts",
+          "scope": "src",
+          "tier": "T2",
+          "unitKey": "src/example.test.ts",
+          "testName": "same",
+          "shape": "no-assertion-in-test",
+          "seal": "proven",
+          "derivedAt": "e1417b0354e992294d10203f2a7d8eda4aacc14b"
+        }
+      ],
+      "stored": [
+        {
+          "kind": "test-vacuity",
+          "id": "8135e01a928491bb7535fc5cbc3af2f488e6b9c85e5394dd0a8af19fec17dbae",
+          "tier": "T2",
+          "unitKey": "src/example.test.ts",
+          "testName": "same",
+          "shape": "no-assertion-in-test",
+          "grounding": {
+            "entries": [
+              {
+                "anchor": {
+                  "kind": "file",
+                  "qualifiedPath": "src/example.test.ts",
+                  "subtreeHash": "43d339cc15d8261931bc0f9b14abe03872ffd58433ea8fd9d8aee6c18c567a55"
+                },
+                "path": "src/example.test.ts"
+              }
+            ]
+          },
+          "freshness": "FRESH",
+          "claims": [],
+          "authoring": "PROVEN",
+          "seal": "proven",
+          "witness": {
+            "shape": "no-assertion-in-test",
+            "testName": "same"
+          },
+          "scope": "src"
+        }
+      ],
+      "readCLI": {
+        "args": [
+          "test-vacuities",
+          "src/example.test.ts"
+        ],
+        "status": 0,
+        "stdout": "status: ok\nnext: 1 proven test-vacuity fact(s) on unit 'src/example.test.ts' — each a named test proven to hold one of the vacuity shapes, sealed proven\ninvariant: TV-READ: `atlas test-vacuities` reads GROUNDED single-anchor proven facts (family:test-vacuity) off the live projection the query readback rides — sorted (unitKey, testName, nodeKey) so equal input is byte-identical output, each fact standing alone (no lineage, no supersession — the family is single-anchor), never a throw, no write path\n",
+        "stderr": ""
+      }
+    },
+    "same-reversed": {
+      "dir": "/private/tmp/hugr-deep-followup.ou9sem/fixtures/tv-same-reversed-l9y3pW",
+      "unit": "src/example.test.ts",
+      "bytes": "import { describe, test, expect } from 'vitest';\ndescribe('right-suite', () => { test('same', () => { work(); }); });\ndescribe('left-suite', () => { test('same', () => { try { work(); } catch (e) { expect(e).toBeDefined(); } }); });\n",
+      "scanned": [
+        {
+          "testName": "same",
+          "shape": "no-assertion-in-test",
+          "row": 1,
+          "col": 32
+        },
+        {
+          "testName": "same",
+          "shape": "assertion-only-in-catch",
+          "row": 2,
+          "col": 31
+        }
+      ],
+      "production": {
+        "args": [
+          "test-vacuity",
+          "."
+        ],
+        "status": 0,
+        "stdout": "status: ok\nnext: admitted 2 proven test-vacuity fact(s) durably through the governed door — read one back with `atlas node <id>`\ninvariant: #95 D5: a test-vacuity is a single-anchor PROVEN AST-shape fact — named test T in unit U holds one shape of the closed, additive-only `TestVacuityShape` vocabulary (reference/atlas-knowledge.md): `assertion-only-in-catch` (every assertion-shaped call inside a catch clause, no assertion-count guard), `no-assertion-in-test` (no check at all in a body that discards work and neither throws, fails, returns a value nor catches), or `assertion-never-invoked` (a matcher rooted at the bare global `expect(` is referenced but never called, so the assertion never runs). Each is re-derivable at HEAD by `scanTestVacuity`, sealed `proven` ONLY when the injected oracle re-proves it, admitted THROUGH the governed emit door (KNOW-11 authz + ARCH-9 anchor); the PROVEN-only family has no advisory form, so an abstaining oracle yields NO fact (0-false-proven)\ntest-vacuity: same @ src/example.test.ts (no-assertion-in-test, seal: proven) — c47c45bb1fd183ab4ed0b3f01e65e5090ef1bfc1aa1f63c82056d9a38180aa90\ntest-vacuity: same @ src/example.test.ts (assertion-only-in-catch, seal: proven) — a4e714a8916e64da8e0687aaf450c7d492dfc15dabd1831ebac36258208738a5\n",
+        "stderr": ""
+      },
+      "read": [
+        {
+          "nodeKey": "8135e01a928491bb7535fc5cbc3af2f488e6b9c85e5394dd0a8af19fec17dbae",
+          "unitKey": "src/example.test.ts",
+          "testName": "same",
+          "shape": "assertion-only-in-catch",
+          "seal": "proven"
+        }
+      ],
+      "rows": [
+        {
+          "nodeKey": "8135e01a928491bb7535fc5cbc3af2f488e6b9c85e5394dd0a8af19fec17dbae",
+          "family": "test-vacuity",
+          "contentHash": "a4e714a8916e64da8e0687aaf450c7d492dfc15dabd1831ebac36258208738a5",
+          "claims": [
+            "no-assertion-in-test test 'same' @ src/example.test.ts",
+            "assertion-only-in-catch test 'same' @ src/example.test.ts"
+          ],
+          "primaryAnchor": "src/example.test.ts",
+          "scope": "src",
+          "tier": "T2",
+          "unitKey": "src/example.test.ts",
+          "testName": "same",
+          "shape": "assertion-only-in-catch",
+          "seal": "proven",
+          "derivedAt": "1c5680fb656cc9859c62067dfbe806cfdf100bab"
+        }
+      ],
+      "stored": [
+        {
+          "kind": "test-vacuity",
+          "id": "8135e01a928491bb7535fc5cbc3af2f488e6b9c85e5394dd0a8af19fec17dbae",
+          "tier": "T2",
+          "unitKey": "src/example.test.ts",
+          "testName": "same",
+          "shape": "assertion-only-in-catch",
+          "grounding": {
+            "entries": [
+              {
+                "anchor": {
+                  "kind": "file",
+                  "qualifiedPath": "src/example.test.ts",
+                  "subtreeHash": "2a15c037b1c963f2dbb363b8931761796110e618fa812727e99b7f07e704e1b2"
+                },
+                "path": "src/example.test.ts"
+              }
+            ]
+          },
+          "freshness": "FRESH",
+          "claims": [],
+          "authoring": "PROVEN",
+          "seal": "proven",
+          "witness": {
+            "shape": "assertion-only-in-catch",
+            "testName": "same"
+          },
+          "scope": "src"
+        }
+      ],
+      "readCLI": {
+        "args": [
+          "test-vacuities",
+          "src/example.test.ts"
+        ],
+        "status": 0,
+        "stdout": "status: ok\nnext: 1 proven test-vacuity fact(s) on unit 'src/example.test.ts' — each a named test proven to hold one of the vacuity shapes, sealed proven\ninvariant: TV-READ: `atlas test-vacuities` reads GROUNDED single-anchor proven facts (family:test-vacuity) off the live projection the query readback rides — sorted (unitKey, testName, nodeKey) so equal input is byte-identical output, each fact standing alone (no lineage, no supersession — the family is single-anchor), never a throw, no write path\n",
+        "stderr": ""
+      }
+    }
+  },
+  "movingRev": {
+    "dir": "/private/tmp/hugr-deep-followup.ou9sem/fixtures/moving-rev-r5YMUK",
+    "rev1": "4da522ae815b693aaa919702df2430b333e06e56",
+    "rev2": "ba0e039bc37619c60ac445965469e6ecd1d9964a",
+    "before": {
+      "kind": "block",
+      "qualifiedPath": "src/pay.ts",
+      "subtreeHash": "701f6fbb908807028989eac6bb451e1f6a50cf93dc888e0a55cfe16219140dbb"
+    },
+    "retained": {
+      "kind": "block",
+      "qualifiedPath": "src/pay.ts",
+      "subtreeHash": "701f6fbb908807028989eac6bb451e1f6a50cf93dc888e0a55cfe16219140dbb"
+    },
+    "fresh": {
+      "kind": "block",
+      "qualifiedPath": "src/pay.ts",
+      "subtreeHash": "c5e589877cff0e8ee82418600bdc203282a1e25f168f6ca46424b93719eb767a"
+    },
+    "pinned": {
+      "kind": "block",
+      "qualifiedPath": "src/pay.ts",
+      "subtreeHash": "c5e589877cff0e8ee82418600bdc203282a1e25f168f6ca46424b93719eb767a"
+    }
+  }
+}

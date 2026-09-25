@@ -1,0 +1,35 @@
+{
+  "parse": {
+    "valid-no-findings": {
+      "runs": [],
+      "exit": 2
+    },
+    "unparseable-only": {
+      "runs": [
+        {
+          "admitted": false,
+          "reason": "unit 'src/bad.test.ts' could not be parsed (error tree / non-TS / parse throw) — fail-closed, no fact"
+        }
+      ],
+      "exit": 2
+    },
+    "mixed": {
+      "runs": [
+        {
+          "admitted": false,
+          "reason": "unit 'src/bad.test.ts' could not be parsed (error tree / non-TS / parse throw) — fail-closed, no fact"
+        },
+        {
+          "admitted": true,
+          "persisted": true
+        }
+      ],
+      "exit": 0
+    }
+  },
+  "movingProducer": {
+    "retainedAdmitted": false,
+    "freshPersisted": true,
+    "immutableSHAPersisted": true
+  }
+}

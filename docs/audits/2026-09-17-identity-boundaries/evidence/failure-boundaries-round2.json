@@ -1,0 +1,120 @@
+{
+  "scope": "Original CLI/composition; real fixtures; no substituted gates or parser; no model.",
+  "parse": {
+    "valid-no-findings": {
+      "dir": "/private/tmp/hugr-deep-followup.ou9sem/fixtures/valid-no-findings-QrdSot",
+      "files": {
+        "src/good.test.ts": "import { test, expect } from 'vitest';\ntest('checks', () => { expect(1).toBe(1); });\n"
+      },
+      "runs": [],
+      "output": {
+        "args": [
+          "test-vacuity",
+          "."
+        ],
+        "status": 2,
+        "stdout": "status: rejected\nnext: admitted 0 proven test-vacuity facts — no test in the scanned HEAD units holds a proven vacuity shape (nothing to admit, abstain-by-design)\ninvariant: #95 D5: a test-vacuity is a single-anchor PROVEN AST-shape fact — named test T in unit U holds one shape of the closed, additive-only `TestVacuityShape` vocabulary (reference/atlas-knowledge.md): `assertion-only-in-catch` (every assertion-shaped call inside a catch clause, no assertion-count guard), `no-assertion-in-test` (no check at all in a body that discards work and neither throws, fails, returns a value nor catches), or `assertion-never-invoked` (a matcher rooted at the bare global `expect(` is referenced but never called, so the assertion never runs). Each is re-derivable at HEAD by `scanTestVacuity`, sealed `proven` ONLY when the injected oracle re-proves it, admitted THROUGH the governed emit door (KNOW-11 authz + ARCH-9 anchor); the PROVEN-only family has no advisory form, so an abstaining oracle yields NO fact (0-false-proven)\n",
+        "stderr": ""
+      }
+    },
+    "unparseable-only": {
+      "dir": "/private/tmp/hugr-deep-followup.ou9sem/fixtures/unparseable-only-ML8ZWe",
+      "files": {
+        "src/bad.test.ts": "test('syntax error' => {{{ this is not TypeScript\n"
+      },
+      "runs": [
+        {
+          "admitted": false,
+          "unitKey": "src/bad.test.ts",
+          "reason": "unit 'src/bad.test.ts' could not be parsed (error tree / non-TS / parse throw) — fail-closed, no fact"
+        }
+      ],
+      "output": {
+        "args": [
+          "test-vacuity",
+          "."
+        ],
+        "status": 2,
+        "stdout": "status: rejected\nnext: admitted 0 proven test-vacuity facts — no test in the scanned HEAD units holds a proven vacuity shape (nothing to admit, abstain-by-design)\ninvariant: #95 D5: a test-vacuity is a single-anchor PROVEN AST-shape fact — named test T in unit U holds one shape of the closed, additive-only `TestVacuityShape` vocabulary (reference/atlas-knowledge.md): `assertion-only-in-catch` (every assertion-shaped call inside a catch clause, no assertion-count guard), `no-assertion-in-test` (no check at all in a body that discards work and neither throws, fails, returns a value nor catches), or `assertion-never-invoked` (a matcher rooted at the bare global `expect(` is referenced but never called, so the assertion never runs). Each is re-derivable at HEAD by `scanTestVacuity`, sealed `proven` ONLY when the injected oracle re-proves it, admitted THROUGH the governed emit door (KNOW-11 authz + ARCH-9 anchor); the PROVEN-only family has no advisory form, so an abstaining oracle yields NO fact (0-false-proven)\n",
+        "stderr": ""
+      }
+    },
+    "mixed": {
+      "dir": "/private/tmp/hugr-deep-followup.ou9sem/fixtures/mixed-FhLY48",
+      "files": {
+        "src/bad.test.ts": "test('syntax error' => {{{ this is not TypeScript\n",
+        "src/vacuous.test.ts": "import { test } from 'vitest';\ntest('no assertion', () => { work(); });\n"
+      },
+      "runs": [
+        {
+          "admitted": false,
+          "unitKey": "src/bad.test.ts",
+          "reason": "unit 'src/bad.test.ts' could not be parsed (error tree / non-TS / parse throw) — fail-closed, no fact"
+        },
+        {
+          "admitted": true,
+          "unitKey": "src/vacuous.test.ts",
+          "testName": "no assertion",
+          "shape": "no-assertion-in-test",
+          "persisted": true,
+          "id": "d5a1bb11c20d5cd95e258142312ca850948627df256cbab293e66393c45a277f"
+        }
+      ],
+      "output": {
+        "args": [
+          "test-vacuity",
+          "."
+        ],
+        "status": 0,
+        "stdout": "status: ok\nnext: admitted 1 proven test-vacuity fact(s) durably through the governed door — read one back with `atlas node <id>`\ninvariant: #95 D5: a test-vacuity is a single-anchor PROVEN AST-shape fact — named test T in unit U holds one shape of the closed, additive-only `TestVacuityShape` vocabulary (reference/atlas-knowledge.md): `assertion-only-in-catch` (every assertion-shaped call inside a catch clause, no assertion-count guard), `no-assertion-in-test` (no check at all in a body that discards work and neither throws, fails, returns a value nor catches), or `assertion-never-invoked` (a matcher rooted at the bare global `expect(` is referenced but never called, so the assertion never runs). Each is re-derivable at HEAD by `scanTestVacuity`, sealed `proven` ONLY when the injected oracle re-proves it, admitted THROUGH the governed emit door (KNOW-11 authz + ARCH-9 anchor); the PROVEN-only family has no advisory form, so an abstaining oracle yields NO fact (0-false-proven)\ntest-vacuity: no assertion @ src/vacuous.test.ts (no-assertion-in-test, seal: proven) — d5a1bb11c20d5cd95e258142312ca850948627df256cbab293e66393c45a277f\n",
+        "stderr": ""
+      }
+    }
+  },
+  "movingProducer": {
+    "dir": "/private/tmp/hugr-deep-followup.ou9sem/fixtures/moving-producer-XDCiyF",
+    "unit": "src/pay.ts",
+    "a": "5ab9d48b71b93095b86e39c28b1b2fbae676e9ee",
+    "b": "80480764c8c8ec1faf7ea18198bc4b9e425a7418",
+    "c": "6e513bc32fb63fcc8ecf4e0da7e8cccf7db0346f",
+    "first": {
+      "admitted": true,
+      "unitKey": "src/pay.ts",
+      "revBefore": "5ab9d48b71b93095b86e39c28b1b2fbae676e9ee",
+      "revAfter": "HEAD",
+      "shaBefore": "701f6fbb908807028989eac6bb451e1f6a50cf93dc888e0a55cfe16219140dbb",
+      "shaAfter": "c5e589877cff0e8ee82418600bdc203282a1e25f168f6ca46424b93719eb767a",
+      "persisted": true,
+      "id": "cd3fb6026e4f15a739bb88f49f0b9ae55d54346cc7eb6f495a9518c8e61f2b96"
+    },
+    "wrong": {
+      "admitted": false,
+      "unitKey": "src/pay.ts",
+      "revBefore": "80480764c8c8ec1faf7ea18198bc4b9e425a7418",
+      "revAfter": "HEAD",
+      "shaBefore": "c5e589877cff0e8ee82418600bdc203282a1e25f168f6ca46424b93719eb767a",
+      "shaAfter": "c5e589877cff0e8ee82418600bdc203282a1e25f168f6ca46424b93719eb767a",
+      "reason": "unit 'src/pay.ts' has IDENTICAL content at both revs (c5e589877cff) — no change, so no transition"
+    },
+    "fresh": {
+      "admitted": true,
+      "unitKey": "src/pay.ts",
+      "revBefore": "80480764c8c8ec1faf7ea18198bc4b9e425a7418",
+      "revAfter": "HEAD",
+      "shaBefore": "c5e589877cff0e8ee82418600bdc203282a1e25f168f6ca46424b93719eb767a",
+      "shaAfter": "fffb08845efe17f338b2dae898550b5f8f9d43a87ff566d176efa766c86a1e21",
+      "persisted": true,
+      "id": "580943e27fa05a784725ab70893b9fe00653dd2804f197d041ea0b7ae59035d8"
+    },
+    "pinned": {
+      "admitted": true,
+      "unitKey": "src/pay.ts",
+      "revBefore": "80480764c8c8ec1faf7ea18198bc4b9e425a7418",
+      "revAfter": "6e513bc32fb63fcc8ecf4e0da7e8cccf7db0346f",
+      "shaBefore": "c5e589877cff0e8ee82418600bdc203282a1e25f168f6ca46424b93719eb767a",
+      "shaAfter": "fffb08845efe17f338b2dae898550b5f8f9d43a87ff566d176efa766c86a1e21",
+      "persisted": true,
+      "id": "ab70a68363f7ee5de1b7de061764f55b260380dc12e8de2fc5fbc97eda541869"
+    }
+  }
+}

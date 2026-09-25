@@ -1,0 +1,7 @@
+{
+  "product_sha": "b0c33d2f6567a2c741240f3c44bc00ca2f01e7e7",
+  "tracked_files": 7936,
+  "atlas_files": 1252,
+  "timestamp_utc": "2026-09-17T22:44:48.433870+00:00",
+  "dependency_policy": "external Atlas dependencies symlinked read-only; @atlas points at new checkout; host workspace deps reused from source-identical original checkout"
+}
