@@ -53,6 +53,8 @@ import { PermissionProvider } from "@/context/permission"
 import { usePlatform } from "@/context/platform"
 import { PromptProvider } from "@/context/prompt"
 import { ServerConnection, ServerProvider, serverName, useServer } from "@/context/server"
+import { JanitorProvider } from "@/context/janitor"
+import { JanitorWidget } from "@/components/janitor-widget"
 import { SettingsProvider, useSettings } from "@/context/settings"
 import { TabsProvider, useTabs, type DraftTab } from "@/context/tabs"
 import { SDKProvider, useSDK } from "@/context/sdk"
@@ -274,6 +276,13 @@ declare global {
     api?: {
       setTitlebar?: (theme: { mode: "light" | "dark"; scheme?: "system" | "light" | "dark" }) => Promise<void>
       exportDebugLogs?: () => Promise<string>
+      janitor?: {
+        getReport: () => Promise<{ report: string; source: string | null } | null>
+        publish: (report: string, notify?: boolean, source?: string | null) => Promise<boolean>
+        snooze: (minutes: number, source?: string | null) => Promise<boolean>
+        dismiss: (source?: string | null) => Promise<boolean>
+        onReport: (cb: (event: { report: string; notify: boolean; source: string | null }) => void) => () => void
+      }
     }
   }
 }
@@ -570,8 +579,11 @@ export function AppInterface(props: {
   const ServerShell = (shellProps: ParentProps) => (
     <QueryProvider>
       <SharedProviders>
-        {props.children}
-        {shellProps.children}
+        <JanitorProvider>
+          {props.children}
+          {shellProps.children}
+          <JanitorWidget />
+        </JanitorProvider>
       </SharedProviders>
     </QueryProvider>
   )

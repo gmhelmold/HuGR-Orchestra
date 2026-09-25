@@ -25,11 +25,11 @@ export const lazyCommand = <T, U>(
   const describe = input.describe
   const handle = async (args: unknown) => {
     const mod = await input.load()
-    return input.resolve(mod).handler?.(args as U)
+    return input.resolve(mod).handler?.(args as Parameters<NonNullable<CommandModule<T, U>["handler"]>>[0])
   }
   const build = async (args: Argv<T>) => {
     const mod = await input.load()
-    const builder = input.resolve(mod).builder as unknown
+    const builder = input.resolve(mod).builder
     if (typeof builder === "function") return builder(args)
     return args
   }

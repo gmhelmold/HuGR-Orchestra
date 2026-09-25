@@ -31,3 +31,7 @@ export function useServerSync() {
     updateConfig: async () => {},
   })
 }
+
+export function ServerSyncProvider(props: { children?: unknown }) {
+  return props.children
+}
