@@ -20,7 +20,7 @@ This is the short operational snapshot. Read [ROADMAP.md](ROADMAP.md) for depend
 
 - PR #124 made GitHub App credentials optional. Fork workflows use `GITHUB_TOKEN`; malformed partial App configuration fails closed.
 - PR #125 fixed malformed Atlas HTML, restored `generate`, and limits final `publish` to upstream `anomalyco/opencode`.
-- Post-merge `generate` completed and created baseline commit `102e763599`.
+- Generated successor baseline is `102e763599`; no workflow URL is recorded here.
 - Fork `publish` is intentionally skipped.
 - Windows Core instability remains tracked in #102. A successful rerun is not root-cause evidence; require a reproducer and focused regression gate before claiming Windows stability.
 - GitHub Actions evidence must name its SHA. `102e763599` is generated successor baseline; do not inherit matrix evidence from parent `688d264010`.

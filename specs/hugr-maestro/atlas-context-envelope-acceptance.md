@@ -19,7 +19,7 @@ or leaf handle is never sufficient identity.
 
 ### OCE-1: Exact Static Ownership Plan
 
-Given approved units `unitBilling`, `unitPayments` under `snapshotA`.
+Given proposed `revisionA` selecting `unitBilling`, `unitPayments` under `snapshotA`.
 
 When Maestro plans ownership context from verified static artifacts.
 
@@ -73,7 +73,7 @@ Then next context actions load exact static `own_*` skills named by pointers. No
 
 Given missing, malformed, stale, over-cap, tail-insufficient, or `UNDER_APPROX` ownership artifact.
 
-When executor tries to satisfy approved context.
+When executor tries to satisfy context for proposed `revisionA`.
 
 Then it returns `HOLD` with exact state receipt/pointers. It never calls the state `READY` or `UN-SEEDED`.
 
