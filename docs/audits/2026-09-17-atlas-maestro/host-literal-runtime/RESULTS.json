@@ -1,0 +1,36 @@
+{
+  "product": "b0c33d2f6567a2c741240f3c44bc00ca2f01e7e7",
+  "typechecks": {
+    "atlas": 0,
+    "core": 0,
+    "host": 0
+  },
+  "existingBaselines": {
+    "core": {
+      "passed": 12,
+      "files": 4,
+      "exit": 0
+    },
+    "host": {
+      "passed": 51,
+      "files": 9,
+      "exit": 0
+    }
+  },
+  "observationalRuns": {
+    "host": {
+      "runs": 2,
+      "casesPerRun": 9,
+      "observedOwnLiteralDifferencesPerRun": 5,
+      "controlsPerRun": 4
+    },
+    "v2": {
+      "runs": 2,
+      "casesPerRun": 5,
+      "staleReplacementCasesPerRun": 2,
+      "controlsPerRun": 3
+    }
+  },
+  "standaloneAcceptanceChecker": "creation blocked, not created, not executed",
+  "productionChanges": false
+}

@@ -1,0 +1,293 @@
+bun test v1.3.14 (0d9b296a)
+
+test/session/audit-host-context.test.ts:
+[23:08:25.475] ERROR (#2): 555 |       return result
+556 |     })
+557 |
+558 |     const get = Effect.fn("Session.get")(function* (id: SessionID) {
+559 |       const row = yield* db.select().from(SessionTable).where(eq(SessionTable.id, id)).get().pipe(Effect.orDie)
+560 |       if (!row) return yield* Effect.fail(new NotFoundError({ message: `Session not found: ${id}` }))
+                                                    ^
+NotFoundError: Session not found: ses_f4e5f2188ffe69W3Kw6kLIEP5l
+ _tag: "NotFoundError",
+
+      at /private/tmp/hugr-host-audit.muyPVW/repo/packages/opencode/src/session/session.ts:560:47
+      at SessionPrompt.prompt (/private/tmp/hugr-host-audit.muyPVW/repo/packages/opencode/test/session/audit-host-context.test.ts:81:17)
+      at SessionPrompt.prompt (definition) (/private/tmp/hugr-host-audit.muyPVW/repo/packages/opencode/src/session/prompt.ts:1445:64)
+
+555 |       return result
+556 |     })
+557 |
+558 |     const get = Effect.fn("Session.get")(function* (id: SessionID) {
+559 |       const row = yield* db.select().from(SessionTable).where(eq(SessionTable.id, id)).get().pipe(Effect.orDie)
+560 |       if (!row) return yield* Effect.fail(new NotFoundError({ message: `Session not found: ${id}` }))
+                                                    ^
+error: Session not found: ses_f4e5f2188ffe69W3Kw6kLIEP5l
+ _tag: "NotFoundError",
+
+      at /private/tmp/hugr-host-audit.muyPVW/repo/packages/opencode/src/session/session.ts:560:47
+      at ~effect/Effect/successCont (/private/tmp/hugr-atlas-maestro-audit.cHgl1X/repo/node_modules/.bun/effect@4.0.0-beta.83/node_modules/effect/dist/internal/effect.js:910:23)
+      at runLoop (/private/tmp/hugr-atlas-maestro-audit.cHgl1X/repo/node_modules/.bun/effect@4.0.0-beta.83/node_modules/effect/dist/internal/effect.js:420:66)
+      at evaluate (/private/tmp/hugr-atlas-maestro-audit.cHgl1X/repo/node_modules/.bun/effect@4.0.0-beta.83/node_modules/effect/dist/internal/effect.js:380:20)
+      at /private/tmp/hugr-atlas-maestro-audit.cHgl1X/repo/node_modules/.bun/effect@4.0.0-beta.83/node_modules/effect/dist/internal/effect.js:734:14
+      at processTicksAndRejections (unknown:7:39)
+(fail) fresh-tool [1991.86ms]
+[23:08:27.674] ERROR (#9326): 555 |       return result
+556 |     })
+557 |
+558 |     const get = Effect.fn("Session.get")(function* (id: SessionID) {
+559 |       const row = yield* db.select().from(SessionTable).where(eq(SessionTable.id, id)).get().pipe(Effect.orDie)
+560 |       if (!row) return yield* Effect.fail(new NotFoundError({ message: `Session not found: ${id}` }))
+                                                    ^
+NotFoundError: Session not found: ses_f4e5f17beffei1pjy8emQA7N4o
+ _tag: "NotFoundError",
+
+      at /private/tmp/hugr-host-audit.muyPVW/repo/packages/opencode/src/session/session.ts:560:47
+      at SessionPrompt.prompt (/private/tmp/hugr-host-audit.muyPVW/repo/packages/opencode/test/session/audit-host-context.test.ts:81:17)
+      at SessionPrompt.prompt (definition) (/private/tmp/hugr-host-audit.muyPVW/repo/packages/opencode/src/session/prompt.ts:1445:64)
+
+555 |       return result
+556 |     })
+557 |
+558 |     const get = Effect.fn("Session.get")(function* (id: SessionID) {
+559 |       const row = yield* db.select().from(SessionTable).where(eq(SessionTable.id, id)).get().pipe(Effect.orDie)
+560 |       if (!row) return yield* Effect.fail(new NotFoundError({ message: `Session not found: ${id}` }))
+                                                    ^
+error: Session not found: ses_f4e5f17beffei1pjy8emQA7N4o
+ _tag: "NotFoundError",
+
+      at /private/tmp/hugr-host-audit.muyPVW/repo/packages/opencode/src/session/session.ts:560:47
+      at ~effect/Effect/successCont (/private/tmp/hugr-atlas-maestro-audit.cHgl1X/repo/node_modules/.bun/effect@4.0.0-beta.83/node_modules/effect/dist/internal/effect.js:910:23)
+      at runLoop (/private/tmp/hugr-atlas-maestro-audit.cHgl1X/repo/node_modules/.bun/effect@4.0.0-beta.83/node_modules/effect/dist/internal/effect.js:420:66)
+      at evaluate (/private/tmp/hugr-atlas-maestro-audit.cHgl1X/repo/node_modules/.bun/effect@4.0.0-beta.83/node_modules/effect/dist/internal/effect.js:380:20)
+      at /private/tmp/hugr-atlas-maestro-audit.cHgl1X/repo/node_modules/.bun/effect@4.0.0-beta.83/node_modules/effect/dist/internal/effect.js:734:14
+      at processTicksAndRejections (unknown:7:39)
+(fail) dirty-cold-tool [2191.21ms]
+[23:08:29.085] ERROR (#18646): 555 |       return result
+556 |     })
+557 |
+558 |     const get = Effect.fn("Session.get")(function* (id: SessionID) {
+559 |       const row = yield* db.select().from(SessionTable).where(eq(SessionTable.id, id)).get().pipe(Effect.orDie)
+560 |       if (!row) return yield* Effect.fail(new NotFoundError({ message: `Session not found: ${id}` }))
+                                                    ^
+NotFoundError: Session not found: ses_f4e5f122dffeXVcf5SYhLC0oYR
+ _tag: "NotFoundError",
+
+      at /private/tmp/hugr-host-audit.muyPVW/repo/packages/opencode/src/session/session.ts:560:47
+      at SessionPrompt.prompt (/private/tmp/hugr-host-audit.muyPVW/repo/packages/opencode/test/session/audit-host-context.test.ts:81:17)
+      at SessionPrompt.prompt (definition) (/private/tmp/hugr-host-audit.muyPVW/repo/packages/opencode/src/session/prompt.ts:1445:64)
+
+555 |       return result
+556 |     })
+557 |
+558 |     const get = Effect.fn("Session.get")(function* (id: SessionID) {
+559 |       const row = yield* db.select().from(SessionTable).where(eq(SessionTable.id, id)).get().pipe(Effect.orDie)
+560 |       if (!row) return yield* Effect.fail(new NotFoundError({ message: `Session not found: ${id}` }))
+                                                    ^
+error: Session not found: ses_f4e5f122dffeXVcf5SYhLC0oYR
+ _tag: "NotFoundError",
+
+      at /private/tmp/hugr-host-audit.muyPVW/repo/packages/opencode/src/session/session.ts:560:47
+      at ~effect/Effect/successCont (/private/tmp/hugr-atlas-maestro-audit.cHgl1X/repo/node_modules/.bun/effect@4.0.0-beta.83/node_modules/effect/dist/internal/effect.js:910:23)
+      at runLoop (/private/tmp/hugr-atlas-maestro-audit.cHgl1X/repo/node_modules/.bun/effect@4.0.0-beta.83/node_modules/effect/dist/internal/effect.js:420:66)
+      at evaluate (/private/tmp/hugr-atlas-maestro-audit.cHgl1X/repo/node_modules/.bun/effect@4.0.0-beta.83/node_modules/effect/dist/internal/effect.js:380:20)
+      at /private/tmp/hugr-atlas-maestro-audit.cHgl1X/repo/node_modules/.bun/effect@4.0.0-beta.83/node_modules/effect/dist/internal/effect.js:734:14
+      at processTicksAndRejections (unknown:7:39)
+(fail) dirty-warm-tool [1410.65ms]
+[23:08:30.515] ERROR (#27966): 555 |       return result
+556 |     })
+557 |
+558 |     const get = Effect.fn("Session.get")(function* (id: SessionID) {
+559 |       const row = yield* db.select().from(SessionTable).where(eq(SessionTable.id, id)).get().pipe(Effect.orDie)
+560 |       if (!row) return yield* Effect.fail(new NotFoundError({ message: `Session not found: ${id}` }))
+                                                    ^
+NotFoundError: Session not found: ses_f4e5f0ca9ffeHrvt3yTJ3iqN67
+ _tag: "NotFoundError",
+
+      at /private/tmp/hugr-host-audit.muyPVW/repo/packages/opencode/src/session/session.ts:560:47
+      at SessionPrompt.prompt (/private/tmp/hugr-host-audit.muyPVW/repo/packages/opencode/test/session/audit-host-context.test.ts:81:17)
+      at SessionPrompt.prompt (definition) (/private/tmp/hugr-host-audit.muyPVW/repo/packages/opencode/src/session/prompt.ts:1445:64)
+
+555 |       return result
+556 |     })
+557 |
+558 |     const get = Effect.fn("Session.get")(function* (id: SessionID) {
+559 |       const row = yield* db.select().from(SessionTable).where(eq(SessionTable.id, id)).get().pipe(Effect.orDie)
+560 |       if (!row) return yield* Effect.fail(new NotFoundError({ message: `Session not found: ${id}` }))
+                                                    ^
+error: Session not found: ses_f4e5f0ca9ffeHrvt3yTJ3iqN67
+ _tag: "NotFoundError",
+
+      at /private/tmp/hugr-host-audit.muyPVW/repo/packages/opencode/src/session/session.ts:560:47
+      at ~effect/Effect/successCont (/private/tmp/hugr-atlas-maestro-audit.cHgl1X/repo/node_modules/.bun/effect@4.0.0-beta.83/node_modules/effect/dist/internal/effect.js:910:23)
+      at runLoop (/private/tmp/hugr-atlas-maestro-audit.cHgl1X/repo/node_modules/.bun/effect@4.0.0-beta.83/node_modules/effect/dist/internal/effect.js:420:66)
+      at evaluate (/private/tmp/hugr-atlas-maestro-audit.cHgl1X/repo/node_modules/.bun/effect@4.0.0-beta.83/node_modules/effect/dist/internal/effect.js:380:20)
+      at /private/tmp/hugr-atlas-maestro-audit.cHgl1X/repo/node_modules/.bun/effect@4.0.0-beta.83/node_modules/effect/dist/internal/effect.js:734:14
+      at processTicksAndRejections (unknown:7:39)
+(fail) committed-cold-tool [1430.57ms]
+[23:08:32.286] ERROR (#37285): 555 |       return result
+556 |     })
+557 |
+558 |     const get = Effect.fn("Session.get")(function* (id: SessionID) {
+559 |       const row = yield* db.select().from(SessionTable).where(eq(SessionTable.id, id)).get().pipe(Effect.orDie)
+560 |       if (!row) return yield* Effect.fail(new NotFoundError({ message: `Session not found: ${id}` }))
+                                                    ^
+NotFoundError: Session not found: ses_f4e5f05b4ffe45lpllAmnaIehs
+ _tag: "NotFoundError",
+
+      at /private/tmp/hugr-host-audit.muyPVW/repo/packages/opencode/src/session/session.ts:560:47
+      at SessionPrompt.prompt (/private/tmp/hugr-host-audit.muyPVW/repo/packages/opencode/test/session/audit-host-context.test.ts:81:17)
+      at SessionPrompt.prompt (definition) (/private/tmp/hugr-host-audit.muyPVW/repo/packages/opencode/src/session/prompt.ts:1445:64)
+
+555 |       return result
+556 |     })
+557 |
+558 |     const get = Effect.fn("Session.get")(function* (id: SessionID) {
+559 |       const row = yield* db.select().from(SessionTable).where(eq(SessionTable.id, id)).get().pipe(Effect.orDie)
+560 |       if (!row) return yield* Effect.fail(new NotFoundError({ message: `Session not found: ${id}` }))
+                                                    ^
+error: Session not found: ses_f4e5f05b4ffe45lpllAmnaIehs
+ _tag: "NotFoundError",
+
+      at /private/tmp/hugr-host-audit.muyPVW/repo/packages/opencode/src/session/session.ts:560:47
+      at ~effect/Effect/successCont (/private/tmp/hugr-atlas-maestro-audit.cHgl1X/repo/node_modules/.bun/effect@4.0.0-beta.83/node_modules/effect/dist/internal/effect.js:910:23)
+      at runLoop (/private/tmp/hugr-atlas-maestro-audit.cHgl1X/repo/node_modules/.bun/effect@4.0.0-beta.83/node_modules/effect/dist/internal/effect.js:420:66)
+      at evaluate (/private/tmp/hugr-atlas-maestro-audit.cHgl1X/repo/node_modules/.bun/effect@4.0.0-beta.83/node_modules/effect/dist/internal/effect.js:380:20)
+      at /private/tmp/hugr-atlas-maestro-audit.cHgl1X/repo/node_modules/.bun/effect@4.0.0-beta.83/node_modules/effect/dist/internal/effect.js:734:14
+      at processTicksAndRejections (unknown:7:39)
+(fail) deleted-cold-tool [1771.32ms]
+[23:08:34.440] ERROR (#46604): 555 |       return result
+556 |     })
+557 |
+558 |     const get = Effect.fn("Session.get")(function* (id: SessionID) {
+559 |       const row = yield* db.select().from(SessionTable).where(eq(SessionTable.id, id)).get().pipe(Effect.orDie)
+560 |       if (!row) return yield* Effect.fail(new NotFoundError({ message: `Session not found: ${id}` }))
+                                                    ^
+NotFoundError: Session not found: ses_f4e5effc8ffePneMnKwlzs0nfw
+ _tag: "NotFoundError",
+
+      at /private/tmp/hugr-host-audit.muyPVW/repo/packages/opencode/src/session/session.ts:560:47
+      at SessionPrompt.prompt (/private/tmp/hugr-host-audit.muyPVW/repo/packages/opencode/src/session/prompt.ts:1495:29)
+      at SessionPrompt.prompt (definition) (/private/tmp/hugr-host-audit.muyPVW/repo/packages/opencode/src/session/prompt.ts:1445:64)
+      at SessionPrompt.command (/private/tmp/hugr-host-audit.muyPVW/repo/packages/opencode/test/session/audit-host-context.test.ts:77:16)
+      at SessionPrompt.command (definition) (/private/tmp/hugr-host-audit.muyPVW/repo/packages/opencode/src/session/prompt.ts:1384:28)
+
+555 |       return result
+556 |     })
+557 |
+558 |     const get = Effect.fn("Session.get")(function* (id: SessionID) {
+559 |       const row = yield* db.select().from(SessionTable).where(eq(SessionTable.id, id)).get().pipe(Effect.orDie)
+560 |       if (!row) return yield* Effect.fail(new NotFoundError({ message: `Session not found: ${id}` }))
+                                                    ^
+error: Session not found: ses_f4e5effc8ffePneMnKwlzs0nfw
+ _tag: "NotFoundError",
+
+      at /private/tmp/hugr-host-audit.muyPVW/repo/packages/opencode/src/session/session.ts:560:47
+      at ~effect/Effect/successCont (/private/tmp/hugr-atlas-maestro-audit.cHgl1X/repo/node_modules/.bun/effect@4.0.0-beta.83/node_modules/effect/dist/internal/effect.js:910:23)
+      at runLoop (/private/tmp/hugr-atlas-maestro-audit.cHgl1X/repo/node_modules/.bun/effect@4.0.0-beta.83/node_modules/effect/dist/internal/effect.js:420:66)
+      at evaluate (/private/tmp/hugr-atlas-maestro-audit.cHgl1X/repo/node_modules/.bun/effect@4.0.0-beta.83/node_modules/effect/dist/internal/effect.js:380:20)
+      at /private/tmp/hugr-atlas-maestro-audit.cHgl1X/repo/node_modules/.bun/effect@4.0.0-beta.83/node_modules/effect/dist/internal/effect.js:734:14
+      at /private/tmp/hugr-atlas-maestro-audit.cHgl1X/repo/node_modules/.bun/@effect+platform-node-shared@4.0.0-beta.83+43902b222b0d7d3e/node_modules/@effect/platform-node-shared/dist/NodeFileSystem.js:326:9
+      at processTicksAndRejections (unknown:7:39)
+(fail) fresh-command [2153.68ms]
+[23:08:36.350] ERROR (#55924): 555 |       return result
+556 |     })
+557 |
+558 |     const get = Effect.fn("Session.get")(function* (id: SessionID) {
+559 |       const row = yield* db.select().from(SessionTable).where(eq(SessionTable.id, id)).get().pipe(Effect.orDie)
+560 |       if (!row) return yield* Effect.fail(new NotFoundError({ message: `Session not found: ${id}` }))
+                                                    ^
+NotFoundError: Session not found: ses_f4e5ef788ffegPdgqqdMZphd8f
+ _tag: "NotFoundError",
+
+      at /private/tmp/hugr-host-audit.muyPVW/repo/packages/opencode/src/session/session.ts:560:47
+      at SessionPrompt.prompt (/private/tmp/hugr-host-audit.muyPVW/repo/packages/opencode/src/session/prompt.ts:1495:29)
+      at SessionPrompt.prompt (definition) (/private/tmp/hugr-host-audit.muyPVW/repo/packages/opencode/src/session/prompt.ts:1445:64)
+      at SessionPrompt.command (/private/tmp/hugr-host-audit.muyPVW/repo/packages/opencode/test/session/audit-host-context.test.ts:77:16)
+      at SessionPrompt.command (definition) (/private/tmp/hugr-host-audit.muyPVW/repo/packages/opencode/src/session/prompt.ts:1384:28)
+
+555 |       return result
+556 |     })
+557 |
+558 |     const get = Effect.fn("Session.get")(function* (id: SessionID) {
+559 |       const row = yield* db.select().from(SessionTable).where(eq(SessionTable.id, id)).get().pipe(Effect.orDie)
+560 |       if (!row) return yield* Effect.fail(new NotFoundError({ message: `Session not found: ${id}` }))
+                                                    ^
+error: Session not found: ses_f4e5ef788ffegPdgqqdMZphd8f
+ _tag: "NotFoundError",
+
+      at /private/tmp/hugr-host-audit.muyPVW/repo/packages/opencode/src/session/session.ts:560:47
+      at ~effect/Effect/successCont (/private/tmp/hugr-atlas-maestro-audit.cHgl1X/repo/node_modules/.bun/effect@4.0.0-beta.83/node_modules/effect/dist/internal/effect.js:910:23)
+      at runLoop (/private/tmp/hugr-atlas-maestro-audit.cHgl1X/repo/node_modules/.bun/effect@4.0.0-beta.83/node_modules/effect/dist/internal/effect.js:420:66)
+      at evaluate (/private/tmp/hugr-atlas-maestro-audit.cHgl1X/repo/node_modules/.bun/effect@4.0.0-beta.83/node_modules/effect/dist/internal/effect.js:380:20)
+      at /private/tmp/hugr-atlas-maestro-audit.cHgl1X/repo/node_modules/.bun/effect@4.0.0-beta.83/node_modules/effect/dist/internal/effect.js:734:14
+      at /private/tmp/hugr-atlas-maestro-audit.cHgl1X/repo/node_modules/.bun/@effect+platform-node-shared@4.0.0-beta.83+43902b222b0d7d3e/node_modules/@effect/platform-node-shared/dist/NodeFileSystem.js:326:9
+      at processTicksAndRejections (unknown:7:39)
+(fail) dirty-command [1909.18ms]
+[23:08:37.908] ERROR (#65244): 555 |       return result
+556 |     })
+557 |
+558 |     const get = Effect.fn("Session.get")(function* (id: SessionID) {
+559 |       const row = yield* db.select().from(SessionTable).where(eq(SessionTable.id, id)).get().pipe(Effect.orDie)
+560 |       if (!row) return yield* Effect.fail(new NotFoundError({ message: `Session not found: ${id}` }))
+                                                    ^
+NotFoundError: Session not found: ses_f4e5eefdeffe9AJWJRc6xMrDpc
+ _tag: "NotFoundError",
+
+      at /private/tmp/hugr-host-audit.muyPVW/repo/packages/opencode/src/session/session.ts:560:47
+      at SessionPrompt.prompt (/private/tmp/hugr-host-audit.muyPVW/repo/packages/opencode/test/session/audit-host-context.test.ts:81:17)
+      at SessionPrompt.prompt (definition) (/private/tmp/hugr-host-audit.muyPVW/repo/packages/opencode/src/session/prompt.ts:1445:64)
+
+555 |       return result
+556 |     })
+557 |
+558 |     const get = Effect.fn("Session.get")(function* (id: SessionID) {
+559 |       const row = yield* db.select().from(SessionTable).where(eq(SessionTable.id, id)).get().pipe(Effect.orDie)
+560 |       if (!row) return yield* Effect.fail(new NotFoundError({ message: `Session not found: ${id}` }))
+                                                    ^
+error: Session not found: ses_f4e5eefdeffe9AJWJRc6xMrDpc
+ _tag: "NotFoundError",
+
+      at /private/tmp/hugr-host-audit.muyPVW/repo/packages/opencode/src/session/session.ts:560:47
+      at ~effect/Effect/successCont (/private/tmp/hugr-atlas-maestro-audit.cHgl1X/repo/node_modules/.bun/effect@4.0.0-beta.83/node_modules/effect/dist/internal/effect.js:910:23)
+      at runLoop (/private/tmp/hugr-atlas-maestro-audit.cHgl1X/repo/node_modules/.bun/effect@4.0.0-beta.83/node_modules/effect/dist/internal/effect.js:420:66)
+      at evaluate (/private/tmp/hugr-atlas-maestro-audit.cHgl1X/repo/node_modules/.bun/effect@4.0.0-beta.83/node_modules/effect/dist/internal/effect.js:380:20)
+      at /private/tmp/hugr-atlas-maestro-audit.cHgl1X/repo/node_modules/.bun/effect@4.0.0-beta.83/node_modules/effect/dist/internal/effect.js:734:14
+      at processTicksAndRejections (unknown:7:39)
+(fail) missing-tool [1558.12ms]
+[23:08:38.841] ERROR (#74563): 555 |       return result
+556 |     })
+557 |
+558 |     const get = Effect.fn("Session.get")(function* (id: SessionID) {
+559 |       const row = yield* db.select().from(SessionTable).where(eq(SessionTable.id, id)).get().pipe(Effect.orDie)
+560 |       if (!row) return yield* Effect.fail(new NotFoundError({ message: `Session not found: ${id}` }))
+                                                    ^
+NotFoundError: Session not found: ses_f4e5eec12fferUcDRNjOLR2gk0
+ _tag: "NotFoundError",
+
+      at /private/tmp/hugr-host-audit.muyPVW/repo/packages/opencode/src/session/session.ts:560:47
+      at SessionPrompt.prompt (/private/tmp/hugr-host-audit.muyPVW/repo/packages/opencode/test/session/audit-host-context.test.ts:81:17)
+      at SessionPrompt.prompt (definition) (/private/tmp/hugr-host-audit.muyPVW/repo/packages/opencode/src/session/prompt.ts:1445:64)
+
+555 |       return result
+556 |     })
+557 |
+558 |     const get = Effect.fn("Session.get")(function* (id: SessionID) {
+559 |       const row = yield* db.select().from(SessionTable).where(eq(SessionTable.id, id)).get().pipe(Effect.orDie)
+560 |       if (!row) return yield* Effect.fail(new NotFoundError({ message: `Session not found: ${id}` }))
+                                                    ^
+error: Session not found: ses_f4e5eec12fferUcDRNjOLR2gk0
+ _tag: "NotFoundError",
+
+      at /private/tmp/hugr-host-audit.muyPVW/repo/packages/opencode/src/session/session.ts:560:47
+      at ~effect/Effect/successCont (/private/tmp/hugr-atlas-maestro-audit.cHgl1X/repo/node_modules/.bun/effect@4.0.0-beta.83/node_modules/effect/dist/internal/effect.js:910:23)
+      at runLoop (/private/tmp/hugr-atlas-maestro-audit.cHgl1X/repo/node_modules/.bun/effect@4.0.0-beta.83/node_modules/effect/dist/internal/effect.js:420:66)
+      at evaluate (/private/tmp/hugr-atlas-maestro-audit.cHgl1X/repo/node_modules/.bun/effect@4.0.0-beta.83/node_modules/effect/dist/internal/effect.js:380:20)
+      at /private/tmp/hugr-atlas-maestro-audit.cHgl1X/repo/node_modules/.bun/effect@4.0.0-beta.83/node_modules/effect/dist/internal/effect.js:734:14
+      at processTicksAndRejections (unknown:7:39)
+(fail) ordinary-skill [933.12ms]
+
+ 0 pass
+ 9 fail
+ 19 expect() calls
+Ran 9 tests across 1 file. [19.46s]

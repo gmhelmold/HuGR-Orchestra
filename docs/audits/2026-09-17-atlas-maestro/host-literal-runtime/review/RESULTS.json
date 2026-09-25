@@ -1,0 +1,159 @@
+{
+  "reviewedPublication": "a360219b7f3b8d317c6bf24712f6ac88103f27e1",
+  "product": "b0c33d2f6567a2c741240f3c44bc00ca2f01e7e7",
+  "scope": {
+    "commitFiles": 38,
+    "bundleFiles": 37,
+    "issues": [
+      83,
+      84
+    ],
+    "pr": 14
+  },
+  "historicalManifest": {
+    "entries": 36,
+    "valid": 36
+  },
+  "historicalRecompiledComparison": {
+    "entries": 819,
+    "differences": 0
+  },
+  "originalProbeRerun": {
+    "core": {
+      "pass": 5,
+      "fail": 0
+    },
+    "host": {
+      "pass": 9,
+      "fail": 0
+    }
+  },
+  "revisedProbeObserved": {
+    "core": {
+      "pass": 5,
+      "fail": 0
+    },
+    "host": {
+      "pass": 9,
+      "fail": 0
+    }
+  },
+  "revisedProbeDesired": {
+    "core": {
+      "pass": 3,
+      "fail": 2,
+      "exit": 1
+    },
+    "host": {
+      "pass": 4,
+      "fail": 5,
+      "exit": 1
+    }
+  },
+  "baseline": {
+    "core": {
+      "pass": 12,
+      "files": 4
+    },
+    "host": {
+      "pass": 51,
+      "files": 9
+    }
+  },
+  "typechecks": {
+    "atlas": 0,
+    "core": 0,
+    "host": 0
+  },
+  "outputGuardTests": [
+    {
+      "case": "existing-output",
+      "passed": true,
+      "exit": 1,
+      "expectedErrorPresent": true,
+      "existingEvidencePreserved": true,
+      "invalidOutputAbsent": true
+    },
+    {
+      "case": "missing-output",
+      "passed": true,
+      "exit": 1,
+      "expectedErrorPresent": true,
+      "existingEvidencePreserved": true,
+      "invalidOutputAbsent": true
+    },
+    {
+      "case": "invalid-mode",
+      "passed": true,
+      "exit": 1,
+      "expectedErrorPresent": true,
+      "existingEvidencePreserved": true,
+      "invalidOutputAbsent": true
+    }
+  ],
+  "productFixed": false,
+  "productionEdits": false,
+  "fullMonorepoReview": false,
+  "finalExactProbeRuns": [
+    {
+      "name": "observed-core",
+      "args": [
+        "bun",
+        "test",
+        "test/audit-skill-replacement.test.ts",
+        "--timeout",
+        "60000"
+      ],
+      "cwd": "packages/core",
+      "probeSha256": "d7f05669a58d985cb50a3554286c269ba5930e8bcb93ec8992180198fa1bd31a",
+      "exit": 0,
+      "seconds": 2.24
+    },
+    {
+      "name": "observed-host",
+      "args": [
+        "bun",
+        "test",
+        "test/session/audit-own-literal.test.ts",
+        "--timeout",
+        "60000"
+      ],
+      "cwd": "packages/opencode",
+      "probeSha256": "92560570687e4a31935a41ec2d3e4ed76de4ee3369db913a1d575b501a1a81a8",
+      "exit": 0,
+      "seconds": 102.77
+    },
+    {
+      "name": "desired-core",
+      "args": [
+        "bun",
+        "test",
+        "test/audit-skill-replacement.test.ts",
+        "--timeout",
+        "60000"
+      ],
+      "cwd": "packages/core",
+      "probeSha256": "d7f05669a58d985cb50a3554286c269ba5930e8bcb93ec8992180198fa1bd31a",
+      "exit": 1,
+      "seconds": 1.78
+    },
+    {
+      "name": "desired-host",
+      "args": [
+        "bun",
+        "test",
+        "test/session/audit-own-literal.test.ts",
+        "--timeout",
+        "60000"
+      ],
+      "cwd": "packages/opencode",
+      "probeSha256": "92560570687e4a31935a41ec2d3e4ed76de4ee3369db913a1d575b501a1a81a8",
+      "exit": 1,
+      "seconds": 144.09
+    }
+  ],
+  "finalTypechecks": {
+    "core": 0,
+    "opencode": 0
+  }
+}

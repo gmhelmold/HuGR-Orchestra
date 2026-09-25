@@ -1,0 +1,1348 @@
+
+> atlas@0.0.0 test
+> vitest run --maxWorkers=2 --minWorkers=1
+
+▲ [WARNING] Cannot find base config file "@tsconfig/bun/tsconfig.json" [tsconfig.json]
+
+    ../../tsconfig.json:3:13:
+      3 │   "extends": "@tsconfig/bun/tsconfig.json",
+        ╵              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+▲ [WARNING] Cannot find base config file "@tsconfig/bun/tsconfig.json" [tsconfig.json]
+
+    ../../tsconfig.json:3:13:
+      3 │   "extends": "@tsconfig/bun/tsconfig.json",
+        ╵              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+ RUN  v2.1.9 <AUDIT_ROOT>/repo/foundation/atlas
+
+ ✓ |unit| packages/adapter-io/test/governed-emit.test.ts (23 tests) 37ms
+ ✓ |unit| packages/adapter-io/test/semantic-bench.test.ts (17 tests | 9 skipped) 12ms
+ ✓ |unit| packages/adapter-io/test/sidecar.test.ts (17 tests) 10761ms
+   ✓ SIDECAR — the generation-CAS commit protocol > LEG 1 (REGRESSION): 8 concurrent PROCESSES × 5 commits ⇒ what was REPORTED committed IS durable 5101ms
+   ✓ SIDECAR — the generation-CAS commit protocol > generations are PRUNED to a bounded window (churn stays bounded; the fallback still has a target) 342ms
+   ✓ SIDECAR — the generation-CAS commit protocol > A RECYCLED generation name does NOT count as a win — the stale writer retries instead of vanishing 486ms
+   ✓ SIDECAR — the generation-CAS commit protocol > exhaustion is a VISIBLE refusal — a decision that always loses the CAS returns `contended` 4179ms
+ ✓ |unit| packages/adapter-io/test/governed-emit-incumbent.test.ts (11 tests) 26ms
+ ✓ |unit| packages/adapter-io/test/travel-by-reproof-compose.test.ts (14 tests) 10627ms
+   ✓ TRAVEL-BY-REPROOF — CASE 1 (untracked): unchanged, every fact served, no new cost > all four seeded facts are served — re-proven, broken, unverifiable AND unsealed alike 614ms
+   ✓ TRAVEL-BY-REPROOF — CASE 1 (untracked): unchanged, every fact served, no new cost > no new cost: the composed runtime never even builds a reverify report for this repo 459ms
+   ✓ TRAVEL-BY-REPROOF — CASE 3 (staging tracked): flat refusal, unchanged in kind > committing ONLY `.atlas/staging.json` refuses every read, legibly 685ms
+   ✓ TRAVEL-BY-REPROOF — CASE 3 (staging tracked): flat refusal, unchanged in kind > TEETH (b): staging tracked WINS even when projection+cas are ALSO tracked — never softens to a filtered serve 774ms
+   ✓ TRAVEL-BY-REPROOF — CASE 2 (projection+cas tracked, staging is NOT): served, filtered to what re-proves > re-proven is served; broken, unverifiable AND unsealed are all dropped — never a blanket refusal 855ms
+   ✓ TRAVEL-BY-REPROOF — CASE 2 (projection+cas tracked, staging is NOT): served, filtered to what re-proves > TEETH (a): breaking the ONE re-proven witness drops it too — the count moves, and the survivor is named 920ms
+   ✓ TRAVEL-BY-REPROOF — CASE 2 (projection+cas tracked, staging is NOT): served, filtered to what re-proves > the ADVISORY MESSAGE is surfaced on the composed runtime, naming the fraction served 742ms
+   ✓ TRAVEL-BY-REPROOF — CASE 2 (projection+cas tracked, staging is NOT): served, filtered to what re-proves > `atlas node <hash>` — the address-direct CAS door — refuses a broken row and serves the re-proven one 660ms
+   ✓ THE PoC IS A REGRESSION TEST — forged tier + forged anchor + forged prose over a TRUE witness is NEVER served > committed and queried: the forged fact is dropped, not served — never `ok:true` over it 836ms
+   ✓ THE PoC IS A REGRESSION TEST — forged tier + forged anchor + forged prose over a TRUE witness is NEVER served > THE WIDENING ATTACK (round 2): a broad-ancestor anchor over the same true witness is STILL refused, not served 880ms
+   ✓ ROUND 3 — ANCHOR EXISTENCE: an otherwise-HONEST fact anchored at something that is not really there > FAKE FILENAME — unitScopeOf-correct, but the SCIP index has never heard of this file — refused, not served 852ms
+   ✓ ROUND 3 — ANCHOR EXISTENCE: an otherwise-HONEST fact anchored at something that is not really there > BARE DIRECTORY ('src/', no filename at all) — unitScopeOf('src/') === 'src' trivially, but names no document — refused, not served 1016ms
+   ✓ a COMMITTED store whose proven fact has no bytes is COUNTED, not dropped > the CONTROL: with its bytes present, the fact is counted and NOT dangling 701ms
+   ✓ a COMMITTED store whose proven fact has no bytes is COUNTED, not dropped > with its CAS object deleted, the row lands in `dangling` — not in a zero 632ms
+ ✓ |unit| harness/gates/layer-guard.test.mjs (31 tests) 25955ms
+   ✓ layer-guard — the gate can be falsified > PASSES the clean fixture (it does not fire on everything) 1192ms
+   ✓ layer-guard — the gate can be falsified > catches a layer INVERSION declared only in a manifest 1256ms
+   ✓ layer-guard — the gate can be falsified > catches an inversion introduced ONLY by a source import — the hole a cold review proved 1746ms
+   ✓ layer-guard — the gate can be falsified > NAMES a dependency cycle by its path 1476ms
+   ✓ layer-guard — the gate can be falsified > refuses a package that is in NO layer (silent exemption is how memory/genesis went unchecked) 1101ms
+   ✓ layer-guard — the gate can be falsified > refuses a GHOST leg spread into the composition root — invisible to a key scan, invocable at runtime 723ms
+   ✓ layer-guard — the gate can be falsified > does NOT fire on a spread inside a NESTED object (the false alarm a first attempt produced) 739ms
+   ✓ layer-guard — the gate can be falsified > reports a source import the manifest does not declare 743ms
+   ✓ layer-guard — the gate can be falsified > does NOT treat a package NAMED in a comment as an import (the 68-false-positive trap) 752ms
+   ✓ layer-guard — comment stripping does not swallow code > sees a forbidden import sitting under a line comment that contains a glob 740ms
+   ✓ layer-guard — comment stripping does not swallow code > sees a bound leg sitting under a line comment that contains a glob 831ms
+   ✓ layer-guard — comment stripping does not swallow code > still ignores a package named in a comment that also contains a glob 691ms
+   ✓ layer-guard — comment stripping does not swallow code > still ignores a package name inside a string literal 654ms
+   ✓ layer-guard — the source scan sees every specifier shape the manifest scan sees > catches a forbidden import written as a DEEP SUBPATH 790ms
+   ✓ layer-guard — the source scan sees every specifier shape the manifest scan sees > catches a forbidden import from a package with a DIGIT in its name 821ms
+   ✓ layer-guard — the source scan sees every specifier shape the manifest scan sees > catches the SAME edge whether it arrives via manifest or via source import 1317ms
+   ✓ layer-guard — the source scan sees every specifier shape the manifest scan sees > does NOT fire on a LEGAL deep-subpath import 679ms
+   ✓ layer-guard — the source scan sees every specifier shape the manifest scan sees > does NOT invent an edge from a third-party subpath import 605ms
+   ✓ layer-guard — the leg scan cannot be blinded by prose or by a digit > CONTROL — a plain ghost leg is caught 798ms
+   ✓ layer-guard — the leg scan cannot be blinded by prose or by a digit > a stray `}` in a COMMENT cannot truncate the block and hide the leg below it 645ms
+   ✓ layer-guard — the leg scan cannot be blinded by prose or by a digit > a DIGIT in a leg name does not make the leg invisible 756ms
+   ✓ layer-guard — the leg scan cannot be blinded by prose or by a digit > does NOT fire on BALANCED braces in prose inside the literal (the real wire.ts shape) 700ms
+   ✓ layer-guard — the leg scan cannot be blinded by prose or by a digit > is not fooled by a COMMENTED-OUT binding site earlier in the file 683ms
+   ✓ layer-guard — READ_SURFACE binds by THREE kinds (compose-planner / query-projection / direct leg) > kind (a) — a compose-planner field (compose.ts) satisfies its READ_SURFACE member 685ms
+   ✓ layer-guard — READ_SURFACE binds by THREE kinds (compose-planner / query-projection / direct leg) > kind (b) — a query-projection (CLI COMMAND_LEG onto a bound atlas-query leg) satisfies its member 663ms
+   ✓ layer-guard — READ_SURFACE binds by THREE kinds (compose-planner / query-projection / direct leg) > kind (b), negative — a COMMAND_LEG entry onto an UNBOUND Tool does NOT satisfy the member 698ms
+   ✓ layer-guard — READ_SURFACE binds by THREE kinds (compose-planner / query-projection / direct leg) > kind (b) ATTACK — a COMMAND_LEG entry onto a bound WRITE leg (atlas-emit) must still RED 715ms
+   ✓ layer-guard — READ_SURFACE binds by THREE kinds (compose-planner / query-projection / direct leg) > kind (a) ATTACK — a READ_SURFACE member matching only a NESTED key must still RED 733ms
+   ✓ layer-guard — READ_SURFACE binds by THREE kinds (compose-planner / query-projection / direct leg) > kind (c) — a direct wire.ts leg satisfies its READ_SURFACE member (unchanged pre-existing path) 661ms
+   ✓ layer-guard — READ_SURFACE binds by THREE kinds (compose-planner / query-projection / direct leg) > NEGATIVE — a member bound by NONE of the three kinds still reds (the property has teeth) 711ms
+   ✓ layer-guard — READ_SURFACE binds by THREE kinds (compose-planner / query-projection / direct leg) > an EMPTY READ_SURFACE (module absent/vacuous) never triggers a compose.ts/map.ts "missing" note 648ms
+ ✓ |unit| packages/adapter-io/test/store.test.ts (19 tests) 441ms
+ ✓ |unit| packages/adapter-io/test/store-fail-closed-door.test.ts (25 tests) 633ms
+ ✓ |unit| packages/adapter-io/test/governed-link.test.ts (15 tests) 27ms
+ ✓ |unit| packages/persist/test/scrub-declared-families.test.ts (27 tests) 6034ms
+   ✓ PERSIST-10a #120 — github_pat_, the measured regression, at EVERY split offset > "ghp_AAAAAAgithub_pat_NOTAREA"… : whole-buffer, and every split offset, agree 308ms
+   ✓ PERSIST-10a #120 — the seam step this task added is load-bearing > seamCut NEVER lands strictly inside a match, and the head is never RIGHT-truncated 328ms
+   ✓ PERSIST-10a #120 — the corpus REACHES the regions its law quantifies over > the independent oracle declares the same four families, and agrees case by case 1824ms
+   ✓ PERSIST-10a #120 — the corpus REACHES the regions its law quantifies over > it produces github-pat bodies containing `_`, AWS matches at the ceiling, and `github`-tailed bodies 972ms
+   ✓ PERSIST-10a #120 — the corpus REACHES the regions its law quantifies over > EVERY split offset over an adversarial alphabet dense in all four families 1167ms
+ ✓ |unit| packages/adapter-io/test/identity-schema.test.ts (13 tests) 4011ms
+   ✓ #112 — the identity schema moved and the store could not say which one it was written under > MEASURED: over BYTE-IDENTICAL source, an old-schema anchor is DRIFTED and the new-schema one is FRESH 317ms
+   ✓ #112 — the identity schema moved and the store could not say which one it was written under > a sidecar stamped with a DIFFERENT schema is detected as foreign, and the tag it carries is reported 349ms
+   ✓ #112 — the identity schema moved and the store could not say which one it was written under > CONTROL: the identical store, stamped with the CURRENT schema, is accepted — the check discriminates 495ms
+   ✓ #112 — the identity schema moved and the store could not say which one it was written under > CONTROL: an EMPTY repo (no sidecar at all) is not a schema refusal — a fresh install still works 440ms
+   ✓ #112 — the identity schema moved and the store could not say which one it was written under > the refusal is legible: DISCRIMINANT, what to do, and that the CAS bytes are NOT affected 402ms
+   ✓ #112 — the identity schema moved and the store could not say which one it was written under > an UNSTAMPED store is not called an OLD VERSION — the refusal says the past was never tagged 352ms
+   ✓ #112 — the identity schema moved and the store could not say which one it was written under > a store written through the production path carries the stamp and reads back 336ms
+ ✓ |unit| packages/adapter-io/test/governed-promote.test.ts (21 tests) 32ms
+ ✓ |unit| packages/persist/test/scrub-seam.test.ts (27 tests) 1371ms
+   ✓ PERSIST-10a seam — a secret split across admits never enters the buffer > secret A: split into THREE chunks at every pair of offsets stays clean 337ms
+ ✓ |unit| packages/adapter-io/test/prompt.test.ts (27 tests) 96ms
+ ✓ |unit| packages/adapter-io/test/reverify-store.test.ts (25 tests) 15ms
+ ✓ |unit| packages/e2e/test/s05-write-governance.e2e.test.ts (9 tests) 20ms
+ ✓ |unit| packages/kernel/test/merge-fold.test.ts (12 tests | 1 skipped) 9248ms
+   ✓ PROP-KERNEL-10 — order-independent union + MAX-by-contentHash tie-break (∀-law) > mergeNode is commutative and grow-only — OVERLAPPING contentHash spaces (the real union) 2292ms
+   ✓ PROP-KERNEL-11 — convergent commutative fold (∀-law) > fold(π(S)) ≡ fold(S) for permutation, reverse, and re-batched branch-union (byte-identical) 1821ms
+   ✓ PROP-KERNEL-11 — convergent commutative fold (∀-law) > merge is commutative and associative on the event id (byte-identical fold) 4967ms
+ ✓ |unit| harness/gates/command-doc-guard.test.mjs (37 tests) 31991ms
+   ✓ command-doc-guard — the gate can be falsified > PASSES when every command has a page and every page has a command 814ms
+   ✓ command-doc-guard — the gate can be falsified > FAILS a command the README table does NOT list, and NAMES it 872ms
+   ✓ command-doc-guard — the gate can be falsified > FAILS a README row for a command that does not ship, and NAMES it 753ms
+   ✓ command-doc-guard — the gate can be falsified > counts ONLY the delimited region — `atlas …` in the surrounding prose is not a row 813ms
+   ✓ command-doc-guard — the gate can be falsified > ANTI-VACUITY: a MISSING begin marker FAILS instead of checking nothing 701ms
+   ✓ command-doc-guard — the gate can be falsified > ANTI-VACUITY: a MISSING end marker FAILS 696ms
+   ✓ command-doc-guard — the gate can be falsified > ANTI-VACUITY: an EMPTY region FAILS rather than agreeing with any surface 669ms
+   ✓ command-doc-guard — the gate can be falsified > ANTI-VACUITY: a MISSING README FAILS 1098ms
+   ✓ command-doc-guard — the gate can be falsified > FAILS a DUPLICATED row — a repeated command hides a missing one behind a matching set 962ms
+   ✓ command-doc-guard — the gate can be falsified > FAILS a command with NO page, and NAMES the command 735ms
+   ✓ command-doc-guard — the gate can be falsified > names EVERY undocumented command, not just the first 678ms
+   ✓ command-doc-guard — the gate can be falsified > FAILS a page with NO command, and NAMES the page 721ms
+   ✓ command-doc-guard — the gate can be falsified > FAILS a page hidden in a SUBDIRECTORY (nesting is not an escape hatch) 754ms
+   ✓ command-doc-guard — the gate can be falsified > ANTI-VACUITY: an EMPTY command list FAILS instead of reporting everything documented 771ms
+   ✓ command-doc-guard — the gate can be falsified > ANTI-VACUITY: a RENAMED oracle FAILS (it does not read as a zero-command surface) 823ms
+   ✓ command-doc-guard — the gate can be falsified > ANTI-VACUITY: a NON-LITERAL surface FAILS rather than enumerating nothing 789ms
+   ✓ command-doc-guard — the gate can be falsified > ANTI-VACUITY: a SPREAD element FAILS rather than under-counting the surface 1013ms
+   ✓ command-doc-guard — the gate can be falsified > ANTI-VACUITY: a MISSING map.ts FAILS 810ms
+   ✓ command-doc-guard — the gate can be falsified > reports EVERY command as undocumented when the docs directory does not exist (the state on master) 810ms
+   ✓ command-doc-guard — the gate can be falsified > does NOT judge page CONTENT (an empty page satisfies the correspondence) 719ms
+   ✓ the transport-parity leg — the numbers, and the set > PASSES when every number and the CLI-only set agree with source 836ms
+   ✓ the transport-parity leg — the numbers, and the set > FAILS a STALE the command count, and says what source says instead 761ms
+   ✓ the transport-parity leg — the numbers, and the set > FAILS a STALE the tool count, and says what source says instead 960ms
+   ✓ the transport-parity leg — the numbers, and the set > FAILS a STALE the governance count, and says what source says instead 903ms
+   ✓ the transport-parity leg — the numbers, and the set > FAILS a STALE the read count, and says what source says instead 870ms
+   ✓ the transport-parity leg — the numbers, and the set > FAILS a STALE the CLI-only count, and says what source says instead 872ms
+   ✓ the transport-parity leg — the numbers, and the set > FAILS a command MISSING from the CLI-only list, and NAMES it 1991ms
+   ✓ the transport-parity leg — the numbers, and the set > FAILS a CLI-only list naming a command that IS advertised 902ms
+   ✓ the transport-parity leg — the numbers, and the set > FAILS an advertised tool whose stripped name is NOT a shipped command 680ms
+   ✓ the transport-parity leg — the numbers, and the set > ANTI-VACUITY: a MISSING parity region FAILS rather than checking no numbers 642ms
+   ✓ the transport-parity leg — the numbers, and the set > ANTI-VACUITY: an EMPTY advertised UNION FAILS (per-array empty is legal, per ADR-0006) 680ms
+   ✓ the transport-parity leg — the numbers, and the set > an EMPTY READ_SURFACE alone is LEGAL — the union is what must be non-empty 738ms
+   ✓ the transport-parity leg — the numbers, and the set > ANTI-VACUITY: a MISSING handler.ts FAILS rather than reading a zero-tool surface 1288ms
+   ✓ the parallel-path oracle — the defect this gate had on the day it was written > FAILS a README that omits a tool the SERVER declares but neither surface array carries 944ms
+   ✓ the parallel-path oracle — the defect this gate had on the day it was written > PASSES once the README counts the parallel path and drops it from CLI-only 1161ms
+   ✓ the parallel-path oracle — the defect this gate had on the day it was written > ANTI-VACUITY: no `*_TOOL` declaration anywhere FAILS rather than shrinking the advertised set 1053ms
+   ✓ the parallel-path oracle — the defect this gate had on the day it was written > ANTI-VACUITY: a MISSING mcp-server src directory FAILS 705ms
+ ✓ |unit| harness/probes/bench-driver.test.mjs (12 tests) 11869ms
+   ✓ the manifest join — site → cost → outcome → fact → provenance (fake model, $0) > joins every planned site across a MULTI-UNIT corpus 6263ms
+   ✓ cross-unit cost isolation (regression teeth for the cold-review HIGH finding) > does NOT cross-contaminate cost between two units that share a relative path (src/index.ts) 5196ms
+ ✓ |unit| packages/adapter-io/test/scip-forgery-freshness.test.ts (8 tests) 519ms
+ ✓ |unit| packages/adapter-io/test/governance-carrier-controls.test.ts (8 tests) 359ms
+ ✓ |unit| packages/adapter-io/test/governed-link-retract.test.ts (16 tests) 33ms
+ ✓ |unit| packages/persist/test/scrub-adjacent-fuzz.test.ts (16 tests) 37903ms
+   ✓ PERSIST-10a adjacency — the GENERATOR reaches the failing region > the shipped sweep alphabet can inject only ONE token — this one injects runs of 2+ adjacent 300ms
+   ✓ PERSIST-10a adjacency — the GENERATOR reaches the failing region > the generator reaches CROSS-FAMILY adjacency, and every family is both first and second 808ms
+   ✓ PERSIST-10a adjacency — the GENERATOR reaches the failing region > the generator reaches CONTINGENT matches — bodies that END on a strict family prefix 635ms
+   ✓ PERSIST-10a adjacency — the GENERATOR reaches the failing region > the construction and the independent regex-free scanner agree on every case 889ms
+   ✓ PERSIST-10a adjacency — WHOLE-BUFFER scrub, 200000 adjacency cases > 0 leaks, 0 over-redactions, 0 residual shapes, 0 exact mismatches 14256ms
+   ✓ PERSIST-10a adjacency — WHOLE-BUFFER scrub, 200000 adjacency cases > the metric has teeth: the KNOWN-BAD greedy shape scores as a leak on the same cases 1561ms
+   ✓ PERSIST-10a adjacency — WHOLE-BUFFER scrub, 200000 adjacency cases > the metric has teeth ACROSS families: the OWN-FAMILY lookahead scores as a leak 2001ms
+   ✓ PERSIST-10a adjacency — CHUNK INDEPENDENCE, 40000 adjacency cases > a random chunking folds to exactly the whole-buffer result, and to the ground truth 9107ms
+   ✓ PERSIST-10a adjacency — CHUNK INDEPENDENCE, 40000 adjacency cases > BYTE-AT-A-TIME (the realistic streaming case) over 4k adjacency cases 2733ms
+   ✓ PERSIST-10a adjacency — CHUNK INDEPENDENCE, 40000 adjacency cases > EVERY split offset of an adjacent pair folds to the whole-buffer result 620ms
+   ✓ PERSIST-10a adjacency — CHUNK INDEPENDENCE, 40000 adjacency cases > fixed chunk sizes 1/2/3/5/7/11/13 agree at EVERY prefix, not only at the end 1588ms
+   ✓ PERSIST-10a adjacency — CHUNK INDEPENDENCE, 40000 adjacency cases > CROSS-FAMILY cases specifically: every split offset, byte-at-a-time, fixed sizes 3399ms
+ ✓ |unit| packages/genesis/test/wp-8.28-b-gen.test.ts (13 tests) 13ms
+ ✓ |e2e-blackbox| packages/e2e-blackbox/test/s28-own-briefing.blackbox.test.ts (10 tests) 23523ms
+   ✓ S28 — atlas own <scope>: the RETR-12 briefing composed over the governed store > THE LOOP CLOSES — a fact emitted through the write door comes back through `atlas own` 748ms
+   ✓ S28 — atlas own <scope>: the RETR-12 briefing composed over the governed store > the role line is sourced from the `definition` fact, and the terrain from the index + the policy 734ms
+   ✓ S28 — atlas own <scope>: the RETR-12 briefing composed over the governed store > ONE STORE, TWO PROJECTIONS — `own` serves EXACTLY the fact set `query` serves for the same scope 1575ms
+   ✓ S28 — atlas own <scope>: the RETR-12 briefing composed over the governed store > the slot partition is REAL — the gotcha-slot fact is a `gotcha` row here and an `inv` row in `query` 1854ms
+   ✓ S28 — atlas own <scope>: the RETR-12 briefing composed over the governed store > the blast summary is REAL — the dependent fact rides the SAME closure `query --by dependency` serves 1935ms
+   ✓ S28 — atlas own <scope>: the RETR-12 briefing composed over the governed store > TOOLS-6 on this door: the T2 fact is off BOTH governing verbs, and on the ADVISORY verb of BOTH doors 1491ms
+   ✓ S28 — atlas own <scope>: the RETR-12 briefing composed over the governed store > the D1 availability manifest is CONTENT-FREE — it names surfaces and how to pull them, never content 1368ms
+   ✓ S28 — atlas own <scope>: the RETR-12 briefing composed over the governed store > TOTAL (RETR-9) — an unknown scope is an EMPTY briefing + exit 0, and it says WHICH emptiness it is 2015ms
+   ✓ S28 — atlas own <scope>: the RETR-12 briefing composed over the governed store > READ-ONLY + DETERMINISTIC — the door persists nothing, and equal input renders byte-identically 1962ms
+   ✓ S28 — atlas own <scope>: the RETR-12 briefing composed over the governed store > a bare `atlas own` fails CLOSED at the parser arity floor (structured, exit 1, no crash) 824ms
+ ✓ |unit| packages/adapter-io/test/model-config.test.ts (22 tests) 55ms
+ ✓ |unit| packages/persist/test/scrub-cross-family.test.ts (32 tests) 475ms
+ ✓ |unit| packages/retrieval/test/wp-6.20-retr.own.test.ts (14 tests) 22ms
+ ✓ |unit| packages/adapter-io/test/door-regression-commit-retry.test.ts (8 tests) 5003ms
+   ✓ DOOR REGRESSION — a contended retry re-runs the GATES, not just the upsert > EMIT: exhausted contention comes back as the `contended` reason, and NOTHING is written 4190ms
+ ✓ |unit| packages/genesis/test/wp-8.27-gen.test.ts (17 tests) 34ms
+ ✓ |unit| packages/adapter-io/test/read-access.test.ts (8 tests) 391ms
+ ✓ |unit| packages/adapter-io/test/grounding-computer.test.ts (17 tests) 2907ms
+   ✓ WP-10.A1.ADAPTER — the one grounding computer > SCN-AUTH-1c-1 — the seam warms itself (cold process gets the :: symbol fold) 764ms
+   ✓ WP-10.A1.ADAPTER — the one grounding computer > SCN-AUTH-1e-1 — cold caller, same fold as a warmed one (byte-identical unit set) 625ms
+ ✓ |unit| packages/cli/test/wp-9.1.1-a-cli.test.ts (11 tests) 142ms
+ ✓ |unit| packages/genesis/test/unit-frontier.test.ts (15 tests) 82ms
+ ✓ |e2e-blackbox| packages/e2e-blackbox/test/s12-grounding-kinds.blackbox.test.ts (12 tests) 21011ms
+   ✓ S12A — symbol + file both resolve & readback; drift contrast (mechanical vs semantic) > DRIFT CONTRAST — `doctor why` classifies the SYMBOL anchor MECHANICAL (moved, body survives) 1140ms
+   ✓ S12A — symbol + file both resolve & readback; drift contrast (mechanical vs semantic) > DRIFT CONTRAST — `doctor why` classifies the FILE anchor SEMANTIC (rewritten, content gone) 887ms
+   ✓ S12A — symbol + file both resolve & readback; drift contrast (mechanical vs semantic) > the SAME two facts DISAGREE end-to-end: `reconcile <genesis>` blocks on the semantic flip (exit 2) 1264ms
+   ✓ S12B — identity is symbol-only: a non-symbol grounding detail never enters nodeKey > CORROBORATED live: emitting A then B (real bin, never trusting the payload id) collides on ONE node 2336ms
+   ✓ S12B — identity is symbol-only: a non-symbol grounding detail never enters nodeKey > the fileOnly contrast fact (no symbol anchor) mints its OWN, separate node 1856ms
+   ✓ S12C — reserved kinds (block/repo/project): the fixture index builds no such node; fail CLOSED > a 'block'-kind anchor never resolves in this fixture ⇒ emit REJECTED fail-closed (exit 2, ungrounded) 1195ms
+   ✓ S12C — reserved kinds (block/repo/project): the fixture index builds no such node; fail CLOSED > a 'repo'-kind anchor never resolves in this fixture ⇒ emit REJECTED fail-closed (exit 2, ungrounded) 1076ms
+   ✓ S12C — reserved kinds (block/repo/project): the fixture index builds no such node; fail CLOSED > a 'project'-kind anchor never resolves in this fixture ⇒ emit REJECTED fail-closed (exit 2, ungrounded) 979ms
+   ✓ S12C — reserved kinds (block/repo/project): the fixture index builds no such node; fail CLOSED > SOTA grounded-or-rejected holds for reserved kinds too: query shows NOTHING landed 1032ms
+ ✓ |unit| packages/adapter-io/test/governed-link-endpoint-existence.test.ts (7 tests) 81ms
+ ✓ |unit| packages/cli/test/wp-9.3.6-b-mine.test.ts (14 tests) 441ms
+ ✓ |unit| packages/cli/test/slots-draft-cli.test.ts (16 tests) 719ms
+ ✓ |unit| packages/adapter-io/test/test-vacuity.test.ts (49 tests) 126ms
+ ✓ |unit| harness/gates/id-integrity.test.mjs (24 tests) 3626ms
+ ✓ |unit| packages/adapter-io/test/doctor-entry-symmetry.test.ts (8 tests) 642ms
+ ✓ |unit| packages/adapter-io/test/governed-emit-shape-gate.test.ts (10 tests) 34ms
+ ✓ |unit| packages/index/test/build.test.ts (10 tests) 315ms
+ ✓ |unit| packages/adapter-io/test/wp-per-fact-freshness.test.ts (12 tests) 2029ms
+   ✓ REQ-TOOLS-6e — every pack row carries its OWN freshness, re-derived on the read path > SCN-TOOLS-6e-1 — a fact at a CHANGED unit reads DRIFTED; a fact at an UNCHANGED unit still reads FRESH 619ms
+   ✓ REQ-TOOLS-6e — every pack row carries its OWN freshness, re-derived on the read path > SCN-TOOLS-6e-2 — the NEGATIVE direction: with nothing moved, EVERY row reads FRESH (no false alarm) 457ms
+   ✓ REQ-TOOLS-6e — every pack row carries its OWN freshness, re-derived on the read path > SCN-TOOLS-6e-3 — the pack-level `stale` watermark is UNCHANGED: it never reads the per-fact verdict 456ms
+   ✓ REQ-TOOLS-6e — every pack row carries its OWN freshness, re-derived on the read path > SCN-TOOLS-6e-4 — with NO oracle wired the row fails CLOSED to DRIFTED, never to the stored FRESH 490ms
+ ✓ |unit| packages/tools/test/fault-vocabulary.test.ts (21 tests) 11ms
+ ✓ |unit| packages/adapter-io/test/llm-command-client.test.ts (26 tests) 453ms
+ ↓ |unit| packages/adapter-io/test/negation-bench.test.ts (3 tests | 3 skipped)
+ ✓ |unit| packages/adapter-io/test/unit-source.test.ts (12 tests) 182ms
+ ✓ |unit| packages/adapter-io/test/wp-10.a2a-authoring.test.ts (11 tests) 6050ms
+   ✓ WP-10.A2-a — the `slots` DISCOVERY planner > SCN-AUTH-5a-1 — the returned slot set is set-equal to the closed union (13 members) 328ms
+   ✓ WP-10.A2-a — the `slots` DISCOVERY planner > SCN-AUTH-5c-1 / 5e-1 — a 13th (14th, isomorphically) union member fails the typecheck > UNDER-KEYED — the door's own mapping pattern, 14 members but 13 keys, FAILS tsc 1441ms
+   ✓ WP-10.A2-a — the `slots` DISCOVERY planner > SCN-AUTH-5c-1 / 5e-1 — a 13th (14th, isomorphically) union member fails the typecheck > FULLY-KEYED — the SAME 14-member mapping with `newslot` added compiles AND is returned 1462ms
+   ✓ WP-10.A2-a — the `draft` COMPOSITION planner > SCN-AUTH-6c-1 — the grounding subtreeHash equals the computer's CURRENT value for the anchor 388ms
+   ✓ WP-10.A2-a — the `draft` COMPOSITION planner > SCN-AUTH-6e-1 — a mutant drafter that omits `predicateSlot` fails the completeness golden 314ms
+   ✓ WP-10.A2-a — the `draft` COMPOSITION planner > SCN-AUTH-7a-1 — a draft carries the rev its grounding was computed at 356ms
+ ✓ |e2e-blackbox| packages/e2e-blackbox/test/s26-surface-lies.blackbox.test.ts (14 tests) 27151ms
+   ✓ S26.1 — the published `acceptReground` is the one the door reads > the CANONICAL shape is what the CLI already marshals: `{mergeBase, options:{acceptReground}}` 1512ms
+   ✓ S26.1 — the published `acceptReground` is the one the door reads > the DECLARED spelling actually re-grounds: `regroundedCount` counts the mechanical subset 1787ms
+   ✓ S26.1 — the published `acceptReground` is the one the door reads > the UNDECLARED top-level spelling is REFUSED, not silently ignored 2011ms
+   ✓ S26.1 — the published `acceptReground` is the one the door reads > a non-boolean NESTED `acceptReground` is malformed input, not a silently-dropped option 1727ms
+   ✓ S26.1 — the published `acceptReground` is the one the door reads > an undeclared key INSIDE `options` is refused too — the closed set is closed all the way down 1126ms
+   ✓ S26.1 — the published `acceptReground` is the one the door reads > TRANSPORT PARITY: the CLI `--accept-reground` still works, over the shape the schema now names 1365ms
+   ✓ S26.2 — `additionalProperties:false` is enforced, and every working argument is declared > an undeclared property is REFUSED (it used to be accepted and routed) 1718ms
+   ✓ S26.2 — `additionalProperties:false` is enforced, and every working argument is declared > `by` was the UNDER-declared argument — now published, so enforcement does not break a working call 1231ms
+   ✓ S26.2 — `additionalProperties:false` is enforced, and every working argument is declared > TRANSPORT PARITY: an unknown `--by` mode is refused on BOTH doors, not just the CLI 2220ms
+   ✓ S26.2 — `additionalProperties:false` is enforced, and every working argument is declared > every governance tool enforces it — a bogus key is refused on all five doors 2796ms
+   ✓ S26.2 — `additionalProperties:false` is enforced, and every working argument is declared > CONTROL: the declared arguments of every door still pass the validator 2035ms
+   ✓ S26.3 — `atlas init <path>` honours its path > BACK-TO-BACK in ONE repo state, three paths render three DIFFERENT territory blocks 2825ms
+   ✓ S26.3 — `atlas init <path>` honours its path > a path that names NOTHING is refused — never a phantom successful move-in 938ms
+   ✓ S26.3 — `atlas init <path>` honours its path > TRANSPORT PARITY: MCP `atlas-init` selects the same territories for the same path 1124ms
+ ✓ |unit| packages/genesis/test/wp-fix-concurrency.test.ts (8 tests) 17ms
+ ✓ |unit| packages/genesis/test/coverage-ledger.test.ts (10 tests) 15ms
+ ✓ |unit| packages/adapter-io/test/commit-superseded.test.ts (6 tests) 464ms
+ ✓ |unit| packages/adapter-io/test/negation-door.test.ts (15 tests) 619ms
+ ✓ |e2e-blackbox| packages/e2e-blackbox/test/s-author8-round-trip.blackbox.test.ts (10 tests) 138639ms
+   ✓ SCN-AUTH-8a-1 — the round trip closes > `src/app.ts::…run` drafted with slot 'invariant' and emitted at R2 is ACCEPTED (draft --json | emit, no reconstruction) 2349ms
+   ✓ SCN-AUTH-8b-1 (guard) — no self-rejection across the fixture's REAL unit set > every unit — dir, file, symbol, grammar-less file — drafted with slot `invariant` and emitted (draft --json | emit) is ACCEPTED 26006ms
+   ✓ PROP-AUTH-8 — draft→emit round-trip acceptance, ∀ over the real unit-kind set × the full slot union > unit kind: dir (src) > every one of the 13 real slots round-trips (draft --json | emit) — ACCEPTED, zero rejections 28760ms
+   ✓ PROP-AUTH-8 — draft→emit round-trip acceptance, ∀ over the real unit-kind set × the full slot union > unit kind: ts file (symbol-capable) (src/util.ts) > every one of the 13 real slots round-trips (draft --json | emit) — ACCEPTED, zero rejections 28376ms
+   ✓ PROP-AUTH-8 — draft→emit round-trip acceptance, ∀ over the real unit-kind set × the full slot union > unit kind: grammar-less .rs file (core/engine.rs) > every one of the 13 real slots round-trips (draft --json | emit) — ACCEPTED, zero rejections 27375ms
+   ✓ PROP-AUTH-8 — draft→emit round-trip acceptance, ∀ over the real unit-kind set × the full slot union > unit kind: non-code file (docs/notes.md) > every one of the 13 real slots round-trips (draft --json | emit) — ACCEPTED, zero rejections 22158ms
+ ✓ |unit| packages/knowledge/test/wp-5.14-know.lifecycle.test.ts (14 tests) 14ms
+ ✓ |unit| harness/gates/req-clause-guard.test.mjs (17 tests) 5990ms
+   ✓ req-clause-guard — a quote that left its invariant fails the build > a `…` elision is honoured — fragments must occur VERBATIM and IN ORDER 484ms
+   ✓ req-clause-guard — a quote that left its invariant fails the build > markdown emphasis and case are NOT normalised away — the amendment moved exactly those bytes 415ms
+   ✓ req-clause-guard — a quote that left its invariant fails the build > the LEDGER is shrink-only: it silences a known row, and a stale entry FAILS the gate 569ms
+   ✓ req-clause-guard — CARRIER COVERAGE: ratified text no live quote reaches > the pin has TEETH: with the carrier pinned, editing its text FAILS (the #199 splice, in miniature) 638ms
+   ✓ req-clause-guard — CARRIER COVERAGE: ratified text no live quote reaches > THE #208 HOLE: an `## Acceptance` restatement is pinned, and inverting it FAILS naming the carrier 523ms
+   ✓ req-clause-guard — CARRIER COVERAGE: ratified text no live quote reaches > a re-wrap of a pinned carrier is NOT a change — the pin holds words, not line breaks 384ms
+   ✓ req-clause-guard — CARRIER COVERAGE: ratified text no live quote reaches > a pin for a carrier that REGAINED a live quote is STALE and fails — the set shrinks, never grows 410ms
+   ✓ req-clause-guard — CARRIER COVERAGE: ratified text no live quote reaches > a pin for a carrier that DISAPPEARED is STALE — deleting ratified text must be said, not done by omission 313ms
+   ✓ req-clause-guard — CARRIER COVERAGE: ratified text no live quote reaches > a pin cannot be moved between carriers by copy-paste — the key is hashed with the text 424ms
+   ✓ req-clause-guard — CARRIER COVERAGE: ratified text no live quote reaches > the carrier table is PRINTED on a passing run, so the class is auditable without a failure 419ms
+ ✓ |unit| packages/knowledge/test/sameas-retraction.test.ts (17 tests) 267ms
+ ✓ |unit| packages/genesis/test/wp-8.28-a-gen.test.ts (14 tests) 20ms
+ ✓ |unit| harness/probes/metered-claude.test.mjs (10 tests) 11404ms
+   ✓ metered-claude wrapper (A3 cost metering) > (a)+(b) passes result verbatim to stdout and records tokens+cost to the sidecar 974ms
+   ✓ metered-claude wrapper (A3 cost metering) > (b) appends — a second call never truncates the first 926ms
+   ✓ metered-claude wrapper (A3 cost metering) > (c) is_error envelope ⇒ empty stdout (abstention) + sidecar line with abstained:true 855ms
+   ✓ metered-claude wrapper (A3 cost metering) > (c2) empty/whitespace result ⇒ abstention even when is_error is false 710ms
+   ✓ metered-claude wrapper (A3 cost metering) > (c3) the abstain SENTINEL ⇒ sidecar abstained:true, yet the token still flows to stdout (#201) 2520ms
+   ✓ metered-claude wrapper (A3 cost metering) > (e) records a pool-safe site key: qualifiedPath + prompt_sha256 on every row (defect a) 1566ms
+   ✓ metered-claude wrapper (A3 cost metering) > (e2) the site key is present even on an error/abstain row, and null when the template omits <unit> 1296ms
+   ✓ metered-claude wrapper (A3 cost metering) > (f) cost-sum FAILS LOUD on a null-cost non-error row and does not book it as $0 (defect b) 1361ms
+   ✓ metered-claude wrapper (A3 cost metering) > (f2) cost-sum exits 0 cleanly when every non-error call is priced 1062ms
+ ✓ |unit| packages/index/test/merkle-core.regression.test.ts (20 tests) 39ms
+ ✓ |e2e-blackbox| packages/e2e-blackbox/test/s6-edge.blackbox.test.ts (9 tests) 22646ms
+   ✓ S6 — edge / totality (WAVE-COV-4): every corner degrades, never crashes > N3 (FIXED): a corrupt `.atlas/projection.json` degrades to the empty projection — no boot crash 2655ms
+   ✓ S6 — edge / totality (WAVE-COV-4): every corner degrades, never crashes > N4 (FIXED): a corrupt `.atlas/index.scip` degrades to files-only — no boot crash 2965ms
+   ✓ S6 — edge / totality (WAVE-COV-4): every corner degrades, never crashes > N8 (FIXED): a NON-GIT repo degrades to an empty index — a structured verdict, NO boot crash 714ms
+   ✓ S6 — edge / totality (WAVE-COV-4): every corner degrades, never crashes > missing `.atlas/policy.json` (git-rm) runs on the DENYING default: query ok, a grounded write DENIED — no crash 5665ms
+   ✓ S6 — edge / totality (WAVE-COV-4): every corner degrades, never crashes > a fresh repo (an existing scope with NO facts emitted) queries `status: ok` with an EMPTY pack — no crash 2780ms
+   ✓ S6 — edge / totality (WAVE-COV-4): every corner degrades, never crashes > re-init idempotency: `atlas init .` twice both exit 0 and render BYTE-IDENTICAL (deterministic) 1201ms
+   ✓ S6 — edge / totality (WAVE-COV-4): every corner degrades, never crashes > unknown scope: `query no-such-scope` is TOTAL — a structured error (exit 1), never a throw 622ms
+   ✓ S6 — edge / totality (WAVE-COV-4): every corner degrades, never crashes > unknown MCP tool: `callTool(atlas-bogus)` fails CLOSED (isError) with guidance — no hang, no crash 929ms
+   ✓ S6 — edge / totality (WAVE-COV-4): every corner degrades, never crashes > malformed args are TOTAL: `emit` (no fact file) and `[]` (empty) → exit 1 + structured guidance, no stack 1251ms
+ ✓ |unit| harness/lib/reachability-lexing.test.mjs (26 tests) 3543ms
+ ✓ |unit| packages/adapter-io/test/git-history-bridge.test.ts (6 tests) 7850ms
+   ✓ git-history identity bridge (SEAT HIST) > BRIDGE-1 — frontier + coChanged sites resolve to real index node keys (no `unresolved:` island) 3015ms
+   ✓ git-history identity bridge (SEAT HIST) > BRIDGE-2 — the twice-referenced unicode file outranks its referrers through the real rank() 709ms
+   ✓ git-history identity bridge (SEAT HIST) > BRIDGE-3 — the minted subtreeHash IS the index dependency-node identity for the same path 653ms
+   ✓ git-history identity bridge (SEAT HIST) > FRONTIER — a never-churned vendored file is NOT in the frontier (REQ-GEN-3b: Δspend = 0) 679ms
+   ✓ git-history identity bridge (SEAT HIST) > TOTALITY — empty repo / single commit / shallow clone probe `thin` without throwing 1840ms
+   ✓ git-history identity bridge (SEAT HIST) > TOTALITY — a malformed rev degrades, never throws 952ms
+ ✓ |unit| harness/lib/reachability.test.mjs (25 tests) 256ms
+ ✓ |unit| packages/adapter-io/test/git-drift-entries.test.ts (4 tests) 4982ms
+   ✓ SCN-ADAPTER-9f-1 — detection spans every entry, driven through the real merge gate > all four facts are surfaced; a secondary-only drift now reaches the gate (MEASURED BEFORE: only 2 of 4) 661ms
+   ✓ SCN-ADAPTER-9f-1 — detection spans every entry, driven through the real merge gate > TEETH — reverting to an entries[0]-only view of the SAME facts reproduces the pre-#185 gap exactly 1232ms
+   ✓ SCN-ADAPTER-9f-2 — the negative direction: single-entry facts unaffected, no rot ⇒ exit 0 > a knowledge base with NO rotted citation anywhere still merges clean 776ms
+   ✓ SCN-ADAPTER-9f-2 — the negative direction: single-entry facts unaffected, no rot ⇒ exit 0 > a single-entry grounding is UNAFFECTED by the widening (its only entry IS entry 0), over the REAL fixture repo 492ms
+ ✓ |unit| packages/index/test/retrieval.test.ts (14 tests) 663ms
+   ✓ INDEX-9 — total: malformed → empty, never throws (visible goldens + PBT) > SCN-INDEX-9b-1 / PROP-INDEX-9: ∀ input (10k corner-biased) — 0 throws, malformed ⇒ empty 526ms
+ ✓ |unit| packages/adapter-io/test/anchor-identity.test.ts (10 tests) 197ms
+ ✓ |unit| packages/adapter-io/test/reverify-relation.test.ts (14 tests) 13ms
+ ✓ |unit| packages/cli/test/wp-doctor-cli.test.ts (18 tests) 44ms
+ ✓ |unit| packages/e2e/test/s08-transport-writedoor.e2e.test.ts (7 tests) 18ms
+ ✓ |unit| packages/mcp-server/test/surface-conformance-req-mcp-1e.test.ts (8 tests) 18ms
+ ✓ |unit| packages/persist/test/scrub-adjacent-store.test.ts (21 tests) 404ms
+ ✓ |e2e-blackbox| packages/e2e-blackbox/test/s8-doctor.blackbox.test.ts (6 tests) 19176ms
+   ✓ S8 — atlas doctor: four read/advisory legs + CLI totality (read-only) > 1. `doctor archive [scope]` renders the scope-filtered supersede lineage (exit 0, read-only) 2223ms
+   ✓ S8 — atlas doctor: four read/advisory legs + CLI totality (read-only) > 2. `doctor why <fact>` classifies BOTH a mechanical AND a semantic drift (exit 0, read-only) 1869ms
+   ✓ S8 — atlas doctor: four read/advisory legs + CLI totality (read-only) > 3. `doctor hotset <budget>` renders hot-set size vs budget with the over-budget flag (exit 0) 1671ms
+   ✓ S8 — atlas doctor: four read/advisory legs + CLI totality (read-only) > 4. `doctor reground <fact>` proposes reground (mechanical) AND retire (semantic) — PERSISTS NOTHING 1544ms
+   ✓ S8 — atlas doctor: four read/advisory legs + CLI totality (read-only) > 5. doctor is READ-ONLY overall: `.atlas/cas` is BYTE-IDENTICAL across ALL FOUR legs (both verdicts) 5130ms
+   ✓ S8 — atlas doctor: four read/advisory legs + CLI totality (read-only) > 6. CLI totality: an unknown sub / a missing arg / a bare `doctor` all fail CLOSED (structured, no crash) 2072ms
+ ✓ |unit| packages/persist/test/reconstruct.test.ts (12 tests) 114ms
+ ✓ |e2e-blackbox| packages/e2e-blackbox/test/s7-governance.blackbox.test.ts (10 tests) 23513ms
+   ✓ S7a — owner-scoped authz (KNOW-11): allow in-scope, deny everyone else, fail-closed > ALLOW: an actor listed in the fact scope ⇒ grounded emit ACCEPTED (exit 0, id rendered) 1627ms
+   ✓ S7a — owner-scoped authz (KNOW-11): allow in-scope, deny everyone else, fail-closed > DENY (not in scope): a grounded fact by an out-of-scope actor ⇒ exit 2, reason unauthorized, absent 2709ms
+   ✓ S7a — owner-scoped authz (KNOW-11): allow in-scope, deny everyone else, fail-closed > DENY (empty actor): an EXPLICIT empty ATLAS_ACTOR is in NO scope ⇒ exit 2, unauthorized, absent 2492ms
+   ✓ S7a — owner-scoped authz (KNOW-11): allow in-scope, deny everyone else, fail-closed > DENY (absent scope): a fact whose OWN scope is empty ⇒ refused at gate 0 ⇒ exit 2, malformed scope 2057ms
+   ✓ S7b — policy prototype-pollution: a malicious .atlas/policy.json is neutralized, grants nothing > the bin still RUNS (no crash / no pollution) under a poisoned policy — a normal read exits 0 810ms
+   ✓ S7b — policy prototype-pollution: a malicious .atlas/policy.json is neutralized, grants nothing > the poison grants NOTHING: the STRANGER named in the `__proto__` payload is still DENIED, absent 2777ms
+   ✓ S7b — policy prototype-pollution: a malicious .atlas/policy.json is neutralized, grants nothing > surgical, not wholesale: the HONEST sibling scope survives — ACTOR (in `src`) is ACCEPTED 1872ms
+   ✓ S7c — tier ratification (N7): T2 auto-accepts; T1/T0 need a token (T0 needs billy) > T2 auto-accept: a T2 advisory grounded fact emits with NO ratify token (fastpath) ⇒ exit 0, id 1634ms
+   ✓ S7c — tier ratification (N7): T2 auto-accepts; T1/T0 need a token (T0 needs billy) > T1 full-ratify: NO token ⇒ rejected unratified; a valid token ⇒ accepted (exit 0, id) 3584ms
+   ✓ S7c — tier ratification (N7): T2 auto-accepts; T1/T0 need a token (T0 needs billy) > T0 full-ratify: no token AND a non-billy token BOTH rejected; the billy token accepts 3811ms
+ ✓ |unit| packages/index/test/identity-goldens.test.ts (11 tests) 11ms
+ ✓ |unit| packages/retrieval/test/wp-6.22-retr.drop.test.ts (10 tests) 12ms
+ ✓ |unit| packages/adapter-io/test/reconcile-entry-symmetry.test.ts (3 tests) 2983ms
+   ✓ THE MERGE GATE — one classifier, spanning every citation (detection now spans every citation too, #185) > a fact whose non-primary citation ROTTED blocks the merge: exitCode 2 (the entry-0 copy answered 0) 550ms
+   ✓ THE MERGE GATE — one classifier, spanning every citation (detection now spans every citation too, #185) > the NEGATIVE direction — no rotted citation anywhere ⇒ the gate still passes 642ms
+   ✓ THE MERGE GATE — one classifier, spanning every citation (detection now spans every citation too, #185) > CLOSED (#185) — `driftAt` now spans every entry, so a secondary-ONLY drift reaches the gate 326ms
+ ✓ |unit| packages/cli/test/anchors-cli.test.ts (10 tests) 756ms
+ ✓ |unit| packages/knowledge/test/wp-sameas.test.ts (15 tests) 601ms
+   ✓ PROP-SAMEAS-1 — deriveSameAs ⊆ sameAsClassOf (the over-approximation is SOUND) > ∀ projection, ∀ current key: the DERIVED class ⊆ the DOOR class (and the door class holds the key) 566ms
+ ✓ |e2e-blackbox| packages/e2e-blackbox/test/s31-negation.blackbox.test.ts (8 tests) 6787ms
+   ✓ S31 — a negation grounds over a CLOSED scope and is read back FRESH > THE ADMIT: `(¬calls, X, src/pay)` over a closed+empty scope EMITS (exit 0) — the door proved S closed 1300ms
+   ✓ S31 — a negation grounds over a CLOSED scope and is read back FRESH > THE READ: `atlas negations src/pay` finds the grounded negative, surfacing [FRESH] (N4 §3 verdict) 990ms
+   ✓ S31 — DRIFT ON INSERTION: a new caller entering the scope drifts the directory Merkle (§3) > inserting a file INTO src/pay makes the negation read [DRIFTED] — insertion-sensitivity a per-unit hash lacks 801ms
+   ✓ S31 — #220: a PHANTOM target (defined nowhere) ABSTAINS, never a vacuous admit > emitting `(¬calls, PHANTOM, src/pay)` over a CLOSED scope ABSTAINS target-unresolvable (exit 2) 773ms
+   ✓ S31 — #220: a PHANTOM target (defined nowhere) ABSTAINS, never a vacuous admit > THE PROOF: `atlas negations src/pay --abstained` shows the durable target-unresolvable record 608ms
+   ✓ S31 — THE #202 CLOSE: abstention FIRES over a genuinely OPEN scope > emitting `(¬calls, Y, src/open)` over an OPEN scope ABSTAINS at the door (rejected, exit 2) 715ms
+   ✓ S31 — THE #202 CLOSE: abstention FIRES over a genuinely OPEN scope > THE PROOF: `atlas negations src/open --abstained` shows the durable AbstainedRecord + reason (#202) 730ms
+ ✓ |unit| packages/grounding/test/wp-4.10-a-grd.test.ts (10 tests) 12ms
+ ✓ |unit| packages/persist/test/transcript-store-redaction.test.ts (18 tests) 68ms
+ ✓ |unit| packages/tools/test/error-attribution.test.ts (14 tests) 13ms
+ ✓ |e2e-blackbox| packages/e2e-blackbox/test/s13-pack-fields.blackbox.test.ts (7 tests) 13130ms
+   ✓ S13a — stale: a pure function of the CURRENT fact set (projection-query-index.ts ~48-67) > baseline: a FRESH grounded fact packs `stale: false` 1914ms
+   ✓ S13a — stale: a pure function of the CURRENT fact set (projection-query-index.ts ~48-67) > a DRIFTED under-scope current fact flips the WHOLE pack `stale: true` 1861ms
+   ✓ S13b — tokenEstimate: an ADVISORY char-sum proxy, NEVER truncated on the query path (tools/src/query.ts ~50-51) > reports a positive char-sum over the merged claims (rendered on BOTH the CLI and MCP doors) 2807ms
+   ✓ S13b — tokenEstimate: an ADVISORY char-sum proxy, NEVER truncated on the query path (tools/src/query.ts ~50-51) > NO truncation on the atlas-query path: a claim far past the retrieval Packer's ~2K cap is served WHOLE 2703ms
+   ✓ S13c — underScope: a SEGMENT-WISE boundary, NOT raw startsWith (projection-query-index.ts ~27-34) > scope `src` covers the `src/foo.ts`-anchored fact (exact segment match) 622ms
+   ✓ S13c — underScope: a SEGMENT-WISE boundary, NOT raw startsWith (projection-query-index.ts ~27-34) > scope `sr` — a REAL sibling territory that is a substring PREFIX of `src` — does NOT leak the src-anchored fact 629ms
+   ✓ S13d — cover-miss: an unknown scope is `error` (exit 1), NOT a governed `rejected` (map.ts ~60-66) > `atlas query nonesuch-scope` → exit 1, `status: error`, the cover-miss reason verbatim, no crash trace 675ms
+ ✓ |unit| packages/e2e/test/s07-memory-scoping.e2e.test.ts (5 tests) 13ms
+ ✓ |e2e-blackbox| packages/e2e-blackbox/test/s26-promote.blackbox.test.ts (7 tests) 11349ms
+   ✓ S26 — atlas promote: the governed route out of staging > 1. MEASURED TODAY — with no model configured `atlas mine` visits its sites and stages NOTHING, so promote is honestly empty 2007ms
+   ✓ S26 — atlas promote: the governed route out of staging > 2. THE LOOP CLOSES — a staged candidate is promoted, and `atlas node` reads the fact back 2457ms
+   ✓ S26 — atlas promote: the governed route out of staging > 3. `atlas query` serves the promoted fact in the ADVISORY band ONLY — never on the governing line 768ms
+   ✓ S26 — atlas promote: the governed route out of staging > 4. NO RATIFIER NAMED ⇒ refused `unratified`, exit 2, nothing durable 2006ms
+   ✓ S26 — atlas promote: the governed route out of staging > 5. NO CURATOR APPOINTED ⇒ refused `unauthorized`, exit 2 — the fail-closed default is CORRECT 1772ms
+   ✓ S26 — atlas promote: the governed route out of staging > 6. a SECOND promote leaves the store where it was — idempotent in state, honest in report 1455ms
+   ✓ S26 — atlas promote: the governed route out of staging > 7. the command is CLI-only — the MCP surface publishes no promotion tool 648ms
+ ✓ |unit| packages/adapter-io/test/arch9-door-derivation.test.ts (9 tests) 257ms
+ ✓ |unit| packages/adapter-io/test/compose.test.ts (8 tests) 3265ms
+   ✓ COMPOSE-A — composeRuntime end-to-end (governed durable handler) > SCN-CR-1 — an in-scope grounded emit PERSISTS durably + is re-derivable from CAS 489ms
+   ✓ COMPOSE-A — composeRuntime end-to-end (governed durable handler) > SCN-CR-2 — an out-of-scope emit is DENIED (authz), and init/query still resolve 405ms
+   ✓ COMPOSE-A — composeRuntime end-to-end (governed durable handler) > SCN-CR-3 — unset ATLAS_ACTOR ⇒ every write denied (fail-closed composition) 569ms
+   ✓ COMPOSE-HARDENING — F3 git-derived actor + F5 shared SCIP guard > SCN-CR-F5 — composeRuntime on a git repo WITHOUT .atlas/index.scip does not throw; query resolves 403ms
+   ✓ COMPOSE-HARDENING — F3 git-derived actor + F5 shared SCIP guard > SCN-CR-F3-git — ATLAS_ACTOR UNSET ⇒ actor resolves from git config (in-scope emit AUTHORIZED); the fact payload NEVER sources the actor (spoof-guard) 520ms
+   ✓ COMPOSE-HARDENING — F3 git-derived actor + F5 shared SCIP guard > SCN-CR-F3-envwins — ATLAS_ACTOR SET overrides git config (env identity used, not git) 461ms
+   ✓ COMPOSE-HARDENING — F3 git-derived actor + F5 shared SCIP guard > SCN-CR-F3-failclosed — a git actor NOT in any policy scope is DENIED (fail-closed preserved) 412ms
+ ✓ |unit| packages/e2e/test/s02-genesis-mining.e2e.test.ts (4 tests) 10ms
+ ✓ |unit| packages/retrieval/test/wp-6.19-retr.pack.test.ts (13 tests) 14ms
+ ✓ |unit| packages/adapter-io/test/store-provenance.test.ts (6 tests) 1998ms
+   ✓ the durable projection is DERIVED state — a COMMITTED one is not knowledge > a committed projection is SERVED, NARROWED — the forged, witness-less row never comes back, but the store is not blanket-refused 459ms
+   ✓ the durable projection is DERIVED state — a COMMITTED one is not knowledge > CONTROL: the identical store, NOT committed, is still served — the check discriminates 418ms
+ ✓ |unit| packages/adapter-io/test/relation-seal-door.test.ts (8 tests) 393ms
+fatal: path 'src/ghost.ts' does not exist in 'a542a8dbae7dcd5414925c10fcc3afb178c01cdf'
+ ✓ |unit| packages/adapter-io/test/git-drift.test.ts (5 tests) 5872ms
+   ✓ createDriftSource — drift over a git merge-base (ADAPT-GIT-2) > SCN-ADAPTER-9a-1 — the drifted anchor set == the mb→topic diff (greet flagged) [happy] 1168ms
+   ✓ createDriftSource — drift over a git merge-base (ADAPT-GIT-2) > SCN-ADAPTER-9a-1 (exclusion) — a resolvable but NON-drifting anchor is excluded; the predicate is subtreeHash≠, not resolvable [guard] 1162ms
+   ✓ createDriftSource — drift over a git merge-base (ADAPT-GIT-2) > SCN-ADAPTER-9b-1 — drift baseline is the merge-base, not a HEAD~1..HEAD window [guard] 1153ms
+   ✓ createDriftSource — drift over a git merge-base (ADAPT-GIT-2) > SCN-N10-detect — a pure rename (old path gone) emits a pair with the RELOCATED anchorNow 1004ms
+   ✓ createDriftSource — drift over a git merge-base (ADAPT-GIT-2) > SCN-N10-guard — an UNMOVED fact whose content ALSO exists at a DUPLICATE (earlier-sorting) path emits ZERO pairs (no PHANTOM move) 1384ms
+ ✓ |unit| packages/genesis/test/wp-8.30-gen.test.ts (11 tests) 14ms
+ ✓ |unit| packages/genesis/test/transition-family.test.ts (11 tests) 18ms
+ ✓ |unit| packages/adapter-io/test/read-provenance-refusal.test.ts (9 tests) 2552ms
+   ✓ the provenance tripwire refuses LEGIBLY on the read doors, not silently > `atlas query --by scope` over a COMMITTED (projection+cas, no staging) store is SERVED, narrowed — the forged row never comes back 501ms
+   ✓ the provenance tripwire refuses LEGIBLY on the read doors, not silently > the OTHER read mode (`--by dependency`) narrows the SAME way — one filter, every mode 422ms
+   ✓ the provenance tripwire refuses LEGIBLY on the read doors, not silently > RED: `.atlas/staging` COMMITTED (alone, or alongside projection+cas) is the ONE population that still flatly refuses 522ms
+   ✓ the provenance tripwire refuses LEGIBLY on the read doors, not silently > RED: the per-node CAS door goes AROUND loadProjection — a committed CAS blob was served whole 434ms
+   ✓ the provenance tripwire refuses LEGIBLY on the read doors, not silently > CONTROL: the identical store, NOT committed, is still served — the refusal discriminates 436ms
+ ✓ |unit| packages/tools/test/wp-7.26-b-tools.test.ts (6 tests) 13ms
+ ✓ |e2e-blackbox| packages/e2e-blackbox/test/s16-sameas.blackbox.test.ts (6 tests) 21985ms
+   ✓ S16 — the governed sameAs write door (WP-SAMEAS) > T1: an authorized, ratified link surfaces the `a ≡ b` edge on BOTH doors, symmetrically 2648ms
+   ✓ S16 — the governed sameAs write door (WP-SAMEAS) > T2: an UNAUTHORIZED actor (outside the nodes' scope) is rejected (exit 2), nothing persisted 1361ms
+   ✓ S16 — the governed sameAs write door (WP-SAMEAS) > T3: a link to an UNKNOWN nodeKey is rejected (exit 2), a no-op, and does NOT confirm the key is absent 1645ms
+   ✓ S16 — the governed sameAs write door (WP-SAMEAS) > T3b: the MIRROR — an unknown FIRST endpoint is refused identically, and the CLI does not crash 1449ms
+   ✓ S16 — the governed sameAs write door (WP-SAMEAS) > T4: TRANSITIVE fold — link A≡B and B≡C ⇒ `atlas query` also derives A≡C (union-find) 2243ms
+   ✓ S16 — the governed sameAs write door (WP-SAMEAS) > T5: an EMPTY ratifier is rejected (exit 2, "unratified") even for an authorized actor 1123ms
+ ✓ |e2e-blackbox| packages/e2e-blackbox/test/s25-sameas-retraction.blackbox.test.ts (5 tests) 17546ms
+   ✓ S25 — sameAs retraction through the real doors (A-D3 / task #83) > T1: THE SPLIT — chain A≡B≡C, retract B—C, and `atlas query` derives {A,B} and {C} 3383ms
+   ✓ S25 — sameAs retraction through the real doors (A-D3 / task #83) > T2: APPEND, NEVER DELETE — the durable store still records that the equivalence was asserted 1456ms
+   ✓ S25 — sameAs retraction through the real doors (A-D3 / task #83) > T3: TRANSPORT PARITY — CLI and MCP refuse the same retraction with the same discriminant 1491ms
+   ✓ S25 — sameAs retraction through the real doors (A-D3 / task #83) > T4: the refusal vocabulary over the real doors — not-linked / retracted-pair / already-retracted 3322ms
+   ✓ S25 — sameAs retraction through the real doors (A-D3 / task #83) > T5: MCP advertises the mode, and a NON-boolean `retract` is the caller's malformed input 751ms
+ ✓ |unit| packages/e2e/test/s06-retrieval-budget.e2e.test.ts (4 tests) 9ms
+ ✓ |unit| harness/probes/concurrency-report.test.mjs (8 tests) 3906ms
+   ✓ the concurrency instrument, calibrated in both directions > reports EXACTLY 8 when eight 1s model calls really do overlap 1341ms
+   ✓ the concurrency instrument, calibrated in both directions > reports EXACTLY 1 when the same calls are made one after another 2355ms
+ ✓ |unit| packages/index/test/resolve.depth.test.ts (13 tests) 157ms
+ ✓ |unit| packages/retrieval/test/wp-2.8-b-retr.relate.test.ts (11 tests) 11ms
+ ✓ |unit| packages/memory/test/wp-6.24-a-mem.test.ts (11 tests) 23ms
+ ✓ |unit| packages/memory/test/wp-6.25-a-mem.test.ts (8 tests) 14ms
+ ✓ |unit| packages/memory/test/wp-6.25-b-mem.test.ts (7 tests) 12ms
+ ✓ |unit| packages/tools/test/wp-7.26-c-tools.test.ts (12 tests) 12ms
+ ✓ |e2e-blackbox| packages/e2e-blackbox/test/s11-predicate-lineage.blackbox.test.ts (7 tests) 7914ms
+   ✓ S11 — predicate facts (grounded-or-rejected, ratify-gated) + SUPERSEDE lineage (doctor archive) > 1. emit a grounded, ratified predicate ⇒ ACCEPTED (exit 0, id rendered, persisted CAS content) 995ms
+   ✓ S11 — predicate facts (grounded-or-rejected, ratify-gated) + SUPERSEDE lineage (doctor archive) > 2. readback: `atlas query src` shows the predicate — nodeId = the minted nodeKey, claim = normalizeCheck(check) 650ms
+   ✓ S11 — predicate facts (grounded-or-rejected, ratify-gated) + SUPERSEDE lineage (doctor archive) > 3. `doctor archive src` lists the ONE current contentHash (no lineage yet — nothing superseded) 603ms
+   ✓ S11 — predicate facts (grounded-or-rejected, ratify-gated) + SUPERSEDE lineage (doctor archive) > 4. SUPERSEDE: re-emit at the SAME (anchor,slot,check) with DIFFERENT bytes ⇒ ACCEPTED, a NEW contentHash 2282ms
+   ✓ S11 — predicate facts (grounded-or-rejected, ratify-gated) + SUPERSEDE lineage (doctor archive) > 5. post-supersede readback: STILL exactly ONE current node at the SAME nodeKey (KNOW-4g), claim unchanged 773ms
+   ✓ S11 — predicate facts (grounded-or-rejected, ratify-gated) + SUPERSEDE lineage (doctor archive) > 6. `doctor archive src` now lists BOTH the current AND the superseded contentHash (append-only CAS lineage) 1789ms
+ ✓ |unit| packages/adapter-io/test/retrieval-tier-bound.test.ts (5 tests) 2541ms
+   ✓ TOOLS-6 — the tier bound holds on EVERY mode that returns a Pack, not only --by scope > --by dependency (end to end through the assembled handler): T2 + off-lattice OUT, T0/T1 through 1806ms
+   ✓ TOOLS-6 — the tier bound holds on EVERY mode that returns a Pack, not only --by scope > --by trigger (the dormant leg, driven with a populated triggers map): T2 + off-lattice OUT, T0/T1 through 349ms
+   ✓ TOOLS-6 — the tier bound holds on EVERY mode that returns a Pack, not only --by scope > the production trigger mode stays empty — no trigger-axis producer exists (documented non-behavior) 383ms
+ ✓ |unit| packages/genesis/test/wp-8.28-c-gen.test.ts (13 tests) 14ms
+ ✓ |unit| packages/tools/test/wp-10.a5-tools.test.ts (6 tests) 33ms
+ ✓ |unit| packages/persist/test/merge.test.ts (10 tests) 193ms
+ ✓ |unit| packages/adapter-io/test/relation-derive.test.ts (11 tests) 23ms
+ ✓ |unit| packages/cli/test/wp-9.x-compose-b.integration.test.ts (9 tests) 816ms
+ ✓ |unit| packages/adapter-io/test/fs-tracked-symlink.test.ts (7 tests) 2385ms
+   ✓ walkFileTree — a tracked symlink is walked as its LINK TEXT, never as its target > link-text — the entry is PRESENT and its `content` is the target path, exactly [kills mutant: readFileSync the path again] 367ms
+   ✓ walkFileTree — a tracked symlink is walked as its LINK TEXT, never as its target > no-passwd — a tracked `-> /etc/passwd` puts NOT ONE BYTE of /etc/passwd in the tree [kills mutant: follow the link] 336ms
+   ✓ walkFileTree — a tracked symlink is walked as its LINK TEXT, never as its target > broken link and dir link are mode-120000 like any other — a CHANGE: they used to be dropped by accident 365ms
+   ✓ walkFileTree — a tracked symlink is walked as its LINK TEXT, never as its target > two walks of a repo WITH links are byte-identical (REQ-ADAPTER-1d, now also across hosts) 353ms
+   ✓ foldAstUnits — a mode-120000 leaf is never parsed as source > no-unit-key — a link whose TEXT is valid TypeScript mints NO `::` unit key [kills mutant: drop the fold exclusion] 543ms
+   ✓ walkFileTree — a repo with NO symlinks is byte-identical (the blast-radius regression guard) > symlink-free-noop — the walk still equals T_ref and both digests are unmoved 377ms
+ ✓ |unit| packages/retrieval/test/wp-6.21-retr.poke.test.ts (13 tests) 12ms
+ ✓ |e2e-blackbox| packages/e2e-blackbox/test/s21-scip-forgery.blackbox.test.ts (5 tests) 10765ms
+   ✓ S21 — a forged `.atlas/index.scip` cannot launder a stale fact into FRESH > (i) BASELINE: a genuinely grounded fact is accepted and served 2401ms
+   ✓ S21 — a forged `.atlas/index.scip` cannot launder a stale fact into FRESH > (ii) GENUINE DRIFT: after the cited unit really changes, the OLD citation is refused 1805ms
+   ✓ S21 — a forged `.atlas/index.scip` cannot launder a stale fact into FRESH > (iii) FORGERY: the hostile dump does NOT bring the stale citation back to life 1587ms
+   ✓ S21 — a forged `.atlas/index.scip` cannot launder a stale fact into FRESH > (iv) REVERSE — no denial-of-knowledge: a genuinely fresh citation still commits under the forgery 1903ms
+   ✓ S21 — a forged `.atlas/index.scip` cannot launder a stale fact into FRESH > (v) WHAT THE FORGERY DOES MOVE: the dependency-mode blast radius follows the dump, by design 2806ms
+ ✓ |e2e-blackbox| packages/e2e-blackbox/test/s37-sound-relation.blackbox.test.ts (8 tests) 5770ms
+   ✓ S37 — `atlas derive-relations` proves + persists depends-on relations, reads them back sealed, and drift reads broken > derive-relations: an authorized actor proves + persists BOTH cross-unit edges (0 refused, exit 0) 721ms
+   ✓ S37 — `atlas derive-relations` proves + persists depends-on relations, reads them back sealed, and drift reads broken > relations OUT: `atlas relations src/app.ts out` finds BOTH proven depends-on edges from the subject 619ms
+   ✓ S37 — `atlas derive-relations` proves + persists depends-on relations, reads them back sealed, and drift reads broken > relations IN: `atlas relations src/util.ts in` finds the SAME edge as an inbound proven dependent 677ms
+   ✓ S37 — `atlas derive-relations` proves + persists depends-on relations, reads them back sealed, and drift reads broken > DIRECTED: `atlas relations src/util.ts out` finds NOTHING — the edge points app->util, not util->app 655ms
+   ✓ S37 — `atlas derive-relations` proves + persists depends-on relations, reads them back sealed, and drift reads broken > `atlas node <addr>` renders seal:proven and the re-runnable RelationWitness 680ms
+   ✓ S37 — `atlas derive-relations` proves + persists depends-on relations, reads them back sealed, and drift reads broken > verify-store (fresh): BOTH proven relations re-prove against the live index (2 re-proven, 0 broken) 711ms
+   ✓ S37 — `atlas derive-relations` proves + persists depends-on relations, reads them back sealed, and drift reads broken > DRIFT CONTRAST: dropping the app->util reference makes that proven relation read `broken`, while app->helper stays `re-proven` (A2) 756ms
+   ✓ S37 — `atlas derive-relations` proves + persists depends-on relations, reads them back sealed, and drift reads broken > DRIFT is f(index state): restoring the reference clears the drift — verify-store re-proves BOTH again 736ms
+ ✓ |e2e-blackbox| packages/e2e-blackbox/test/s35-semantic-justified.blackbox.test.ts (4 tests) 6254ms
+   ✓ S35 — `atlas mine` emits ONE typed+justified semantic fact end to end (196c general arm) > A6: the promoted node is read back via `atlas node`, kind advisory + seal justified + the block claim 638ms
+   ✓ S35 — `atlas mine` emits ONE typed+justified semantic fact end to end (196c general arm) > TEETH: with a NO-FACT proposer the SAME fixture emits ZERO facts — emission is driven by the answer, never fabricated 2381ms
+ ↓ |unit| packages/adapter-io/test/negation-proposer-bench.test.ts (1 test | 1 skipped)
+ ✓ |unit| packages/knowledge/test/sameas-pairkey-forgery.test.ts (8 tests) 194ms
+ ✓ |unit| packages/persist/test/wp-7.32-persist.test.ts (6 tests) 11ms
+ ✓ |unit| packages/cli/test/mine-contention.test.ts (9 tests) 6317ms
+   ✓ CLI-4h — concurrent mine passes: what a pass REPORTS seeded is what is durably staged > 8 concurrent PROCESSES × 5 sites ⇒ every reported candidate survives (no last-writer-wins) 5064ms
+   ✓ CLI-4h — concurrent mine passes: what a pass REPORTS seeded is what is durably staged > a pass that runs ALONE against a store another pass already filled preserves both sets 1022ms
+ ✓ |unit| packages/tools/test/wp-7.26-a-tools.test.ts (10 tests) 14ms
+ ✓ |unit| packages/knowledge/test/evaluator.admit-grammar.test.ts (7 tests) 9ms
+ ✓ |unit| packages/index/test/symbol-reverse.test.ts (9 tests) 17ms
+ ✓ |unit| packages/adapter-io/test/negation-door-v2-escape.test.ts (8 tests) 459ms
+stdout | packages/knowledge/test/fastpath-isgrounded-parity.test.ts > GROUND-2 fitness function — local isGrounded ≡ sealed GroundApi.isGrounded, no coercion escape > prints the before/after coercion table (old fail-open String() vs new fail-closed typeof guard vs sealed) — sealed now AGREES on every row
+┌─────────┬───────────────────────────────────────────┬─────────────────────────────────────────┬─────────────────────────────────────────┬────────────────────────────────────┬──────────┐
+│ (index) │ input                                     │ old String()-coerced (BUGGY, fail-open) │ new typeof-guarded (FIXED, fail-closed) │ sealed @atlas/grounding isGrounded │ expected │
+├─────────┼───────────────────────────────────────────┼─────────────────────────────────────────┼─────────────────────────────────────────┼────────────────────────────────────┼──────────┤
+│ 0       │ 'undefined'                               │ true                                    │ false                                   │ false                              │ false    │
+│ 1       │ 'null'                                    │ true                                    │ false                                   │ false                              │ false    │
+│ 2       │ "'' (empty string)"                       │ false                                   │ false                                   │ false                              │ false    │
+│ 3       │ '0'                                       │ true                                    │ false                                   │ false                              │ false    │
+│ 4       │ 'false'                                   │ true                                    │ false                                   │ false                              │ false    │
+│ 5       │ '{} (plain object)'                       │ true                                    │ false                                   │ false                              │ false    │
+│ 6       │ '[] (empty array)'                        │ false                                   │ false                                   │ false                              │ false    │
+│ 7       │ "['a','b'] (NON-empty array)"             │ true                                    │ false                                   │ false                              │ false    │
+│ 8       │ '{length:5} (object wearing a .length)'   │ true                                    │ false                                   │ false                              │ false    │
+│ 9       │ 'new String("abc") (boxed String object)' │ true                                    │ false                                   │ false                              │ false    │
+│ 10      │ 'valid non-empty hash string'             │ true                                    │ true                                    │ true                               │ true     │
+└─────────┴───────────────────────────────────────────┴─────────────────────────────────────────┴─────────────────────────────────────────┴────────────────────────────────────┴──────────┘
+
+ ✓ |unit| packages/knowledge/test/fastpath-isgrounded-parity.test.ts (26 tests) 15ms
+Preparing worktree (detached HEAD 38326d6)
+fatal: '/tmp/atlas-revcache/84726-0' is not a working tree
+Preparing worktree (detached HEAD 4546715)
+fatal: '/tmp/atlas-revcache/84726-0' is not a working tree
+fatal: '/tmp/atlas-revcache/84726-1' is not a working tree
+fatal: '/tmp/atlas-revcache/84726-0' is not a working tree
+fatal: '/tmp/atlas-revcache/84726-1' is not a working tree
+fatal: '/tmp/atlas-revcache/84726-2' is not a working tree
+fatal: '/tmp/atlas-revcache/84726-3' is not a working tree
+fatal: '/tmp/atlas-revcache/84726-4' is not a working tree
+fatal: '/tmp/atlas-revcache/84726-5' is not a working tree
+fatal: '/tmp/atlas-revcache/84726-6' is not a working tree
+fatal: '/tmp/atlas-revcache/84726-7' is not a working tree
+ ✓ |unit| packages/adapter-io/test/rev-index.test.ts (8 tests) 5182ms
+   ✓ createRevIndex — arbitrary-rev code index (COMPOSE-C) > axesAt(A) ≠ axesAt(B): the changed unit re-keys the spatial root [teeth: build ignores content ⇒ RED] 548ms
+   ✓ createRevIndex — arbitrary-rev code index (COMPOSE-C) > reDerives: FRESH at the grounded rev, DRIFTED after the body change [teeth: skip subtreeHash compare ⇒ RED] 534ms
+   ✓ createRevIndex — arbitrary-rev code index (COMPOSE-C) > resolveAnchorAt: returns the StructRef for a present unit, undefined for an absent path [teeth: return node regardless of key ⇒ RED] 691ms
+   ✓ createRevIndex — arbitrary-rev code index (COMPOSE-C) > memoization: an immutable rev is checked out at most once [teeth: drop the Map ⇒ RED] 553ms
+   ✓ createRevIndex — arbitrary-rev code index (COMPOSE-C) > totality: a bad rev does not throw and leaves the repo pristine [teeth: drop cleanup ⇒ RED] 1003ms
+   ✓ createRevIndex — arbitrary-rev code index (COMPOSE-C) > transient-retry teeth: a lock-signature failure on attempt 1 then success ⇒ REAL axes, not EMPTY [teeth: bare catch ⇒ EMPTY, drift dropped ⇒ RED] 655ms
+   ✓ createRevIndex — arbitrary-rev code index (COMPOSE-C) > bad-rev stays fast-empty: an invalid-reference signature ⇒ EMPTY with NO retry [teeth: retry a bad rev ⇒ adds > 1 ⇒ RED] 494ms
+   ✓ createRevIndex — arbitrary-rev code index (COMPOSE-C) > retries-exhausted ⇒ EMPTY, total: a lock signature on EVERY attempt ⇒ empty snapshot, no throw 702ms
+ ✓ |unit| packages/adapter-io/test/identity-goldens.test.ts (4 tests) 315ms
+ ✓ |unit| packages/adapter-io/test/containment.test.ts (11 tests) 9082ms
+   ✓ isContainedIn — containment is decided by (dev, ino), not by text > a ~8000-segment path returns a VERDICT instead of throwing RangeError 8986ms
+ ✓ |unit| packages/adapter-io/test/memory-read.test.ts (12 tests) 387ms
+ ✓ |unit| packages/adapter-io/test/doctor-source.test.ts (7 tests) 1522ms
+ ✓ |unit| packages/adapter-io/test/governed-link-retract-disclosure.test.ts (9 tests) 20ms
+ ✓ |unit| packages/kernel/test/canonical.test.ts (13 tests) 139ms
+ ✓ |e2e-blackbox| packages/e2e-blackbox/test/s24-model-config.blackbox.test.ts (5 tests) 4508ms
+   ✓ S24 — the operator model config, through the real `atlas mine` door > a VALID config reaches the model path: the SHIPPED prompt template resolves from the built CLI 1717ms
+   ✓ S24 — the operator model config, through the real `atlas mine` door > a config planted INSIDE the repo is refused — the executable is never taken from the subject 634ms
+   ✓ S24 — the operator model config, through the real `atlas mine` door > the SAME planted config is refused when the repo path is spelled in a DIFFERENT CASE 722ms
+   ✓ S24 — the operator model config, through the real `atlas mine` door > a MALFORMED config refuses — it never degrades into "this repo has no facts" 608ms
+   ✓ S24 — the operator model config, through the real `atlas mine` door > an ABSENT config is a state, not an error — the zero-config run completes and explains itself 811ms
+ ✓ |unit| packages/adapter-io/test/wp-10.a3-check.test.ts (4 tests) 41ms
+ ✓ |unit| harness/gates/ears-coamend-guard.test.mjs (18 tests) 802ms
+   ✓ #198 end-to-end — the gate over a real git repo catches the drift and clears the co-amend > RED: the clause becomes two-band, the EARS stays single-band ⇒ exit 1 naming REQ-TOOLS-6b 408ms
+   ✓ #198 end-to-end — the gate over a real git repo catches the drift and clears the co-amend > GREEN: the clause AND the EARS both move to two bands ⇒ exit 0 371ms
+ ✓ |unit| packages/genesis/test/wp-8.31-gen.test.ts (9 tests) 11ms
+ ✓ |unit| harness/gates/reference-model-guard.test.mjs (13 tests) 9770ms
+   ✓ reference-model-guard — the gate can be falsified > PASSES the clean fixture (it does not fire on everything) 816ms
+   ✓ reference-model-guard — the gate can be falsified > catches a NEW reference model absent from the ledger, and NAMES it 694ms
+   ✓ reference-model-guard — the gate can be falsified > catches LEDGER DRIFT when a dead module GAINS a zero-caller value export 658ms
+   ✓ reference-model-guard — the gate can be falsified > catches a HEADER COUNT that disagrees with the measured tree 678ms
+   ✓ reference-model-guard — the gate can be falsified > catches a MISSING banner on a ledgered `banner: true` module 672ms
+   ✓ reference-model-guard — the gate can be falsified > catches the HEADER COUNTS LINE going missing entirely 729ms
+   ✓ reference-model-guard — the gate can be falsified > catches a STALE ledger entry that has become shipped code 751ms
+   ✓ reference-model-guard — the gate can be falsified > catches a STALE ledger entry whose file no longer exists 746ms
+   ✓ reference-model-guard — the gate can be falsified > catches MISCLASSIFIED REACH when a `types: true` module is no longer type-reachable 700ms
+   ✓ reference-model-guard — the gate can be falsified > catches an entry that OMITS the `banner:` field (undeclared legibility) 736ms
+   ✓ reference-model-guard — the gate can be falsified > catches a `banner: false` entry whose file actually HAS a banner header 784ms
+   ✓ reference-model-guard — the gate can be falsified > catches an entry that OMITS the `shipped:` field (undeclared counterpart) 715ms
+   ✓ reference-model-guard — the gate can be falsified > catches a `shipped:` path that does not name an existing FILE (dangling counterpart) 1088ms
+ ✓ |unit| packages/cli/test/wp-96-r-relation-e2e.test.ts (3 tests) 63ms
+ ✓ |e2e-blackbox| packages/e2e-blackbox/test/s26-query-description.blackbox.test.ts (5 tests) 7635ms
+   ✓ S26.4a — the published description, read off the wire from the BUILT server > `ListTools` serves the frozen `atlas-query` description byte-for-byte 1052ms
+   ✓ S26.4a — the published description, read off the wire from the BUILT server > the guidance `invariant` on a real call is the two-band one, verbatim 960ms
+   ✓ S26.4b — the claim itself, stated as properties so re-freezing a lie is not silent > the retired single-band promise is GONE from the published description 843ms
+   ✓ S26.4b — the claim itself, stated as properties so re-freezing a lie is not silent > it NAMES both bands and says the advisory one passed no ratifier (ADR-0013 clause 3) 888ms
+   ✓ S26.4c — the description is TRUE of the payload, not merely pinned against itself > a T1 and a T2 fact in one scope come back as TWO populated bands with the promised fields 3691ms
+ ✓ |unit| packages/adapter-io/test/governed-link-endpoint-authz.test.ts (3 tests) 12ms
+ ✓ |unit| packages/grounding/test/wp-4.10-d-grd.test.ts (13 tests) 29ms
+ ✓ |unit| packages/cli/test/okf-cli.test.ts (10 tests) 50ms
+ ✓ |unit| packages/tools/test/wp-4.12-a-tools.test.ts (7 tests) 9ms
+ ✓ |unit| packages/adapter-io/test/memory-emit.test.ts (19 tests) 105ms
+ ✓ |unit| packages/adapter-io/test/negation-recall-win-blackbox.test.ts (2 tests) 960ms
+   ✓ ADR-0016 M2b — the recall win end-to-end (v2 admits where the shipped blanket abstains) > CONTROL (shipped fallback): the promote door WITHOUT the v2 legs ABSTAINS scope-open on S 381ms
+   ✓ ADR-0016 M2b — the recall win end-to-end (v2 admits where the shipped blanket abstains) > v2 RECALL WIN: composeRuntime().promote ADMITS the SAME negation (¬escape ∧ no dynamic-reach ∧ no caller in S) — the recall the shipped blanket throws away 550ms
+stdout | packages/knowledge/test/wp-closed-slot-gate.test.ts > #152 A — ONE runtime list: the KNOW-10 and KNOW-15i guards are the same set, by delegation > the vocabulary is exactly 13 members, and they are PRINTED (never a bare count)
+{
+  closedVocabulary: [
+    'invariant',
+    'contract',
+    'precondition',
+    'postcondition',
+    'sideeffect',
+    'ownership',
+    'perf-bound',
+    'security-property',
+    'gotcha',
+    'rationale',
+    'dependency',
+    'count',
+    'definition'
+  ]
+}
+
+stdout | packages/knowledge/test/wp-closed-slot-gate.test.ts > #152 A — ONE runtime list: the KNOW-10 and KNOW-15i guards are the same set, by delegation > isClosedSlot ≡ isKnownSlot over the 13 AND over every out-of-vocabulary shape
+{ disagreements: [] }
+
+stdout | packages/knowledge/test/wp-closed-slot-gate.test.ts > #152 B/C — the gate at `upsert`: present-and-unrecognised REFUSES, absent stands aside > every out-of-vocabulary slot is REFUSED, and the projection is left untouched
+{
+  refused: [
+    'free-text',
+    'empty string',
+    'case variant of a real slot',
+    'whitespace-padded real slot',
+    'plural of a real slot',
+    'an array (property-key coercion hazard)',
+    'an object with toString',
+    'a number',
+    'null'
+  ]
+}
+
+stdout | packages/knowledge/test/wp-closed-slot-gate.test.ts > #152 B/C — the gate at `upsert`: present-and-unrecognised REFUSES, absent stands aside > every one of the 13 is ACCEPTED and routes normally — the gate is not an always-refuse mutant
+{
+  accepted: [
+    'invariant',
+    'contract',
+    'precondition',
+    'postcondition',
+    'sideeffect',
+    'ownership',
+    'perf-bound',
+    'security-property',
+    'gotcha',
+    'rationale',
+    'dependency',
+    'count',
+    'definition'
+  ]
+}
+
+stdout | packages/knowledge/test/wp-closed-slot-gate.test.ts > #152 D — the refusal names the value, the vocabulary and the door, and is recognised by VALUE > the reason text carries the offending value and all 13 members
+{
+  reason: "closed-slot-violation: this write declares predicateSlot 'free-text-whatever', which is not one of the closed 13. The vocabulary is CLOSED (KNOW-10 / KNOW-15i): 'invariant', 'contract', 'precondition', 'postcondition', 'sideeffect', 'ownership', 'perf-bound', 'security-property', 'gotcha', 'rationale', 'dependency', 'count', 'definition'. It is closed because node identity is hash(primaryAnchorId + predicateSlot), so an unrecognised slot does not collide with anything — it silently mints a NEW address at the same anchor and the store proliferates parallel nodes that never merge. Re-state the claim under one of the 13; adding a fourteenth is a contract-version (`cv`) bump, not a write. Refused by the governed write door (atlas-emit / atlas-link) before anything was persisted"
+}
+
+ ✓ |unit| packages/knowledge/test/wp-closed-slot-gate.test.ts (9 tests) 17ms
+ ✓ |unit| packages/cli/test/mine-governance-seam.test.ts (5 tests) 798ms
+ ✓ |e2e-blackbox| packages/e2e-blackbox/test/s5-mcp-parity.blackbox.test.ts (4 tests) 8319ms
+   ✓ S5 — MCP stdio parity with the CLI over the one governed core > listTools() advertises the 6 governance tools PLUS the 2 relations/negations + 6 authoring + 4 memory READ_SURFACE tools, each with an object input schema + required args 942ms
+   ✓ S5 — MCP stdio parity with the CLI over the one governed core > SOTA transport parity: MCP `atlas-query` returns the SAME governed verdict the CLI does 3182ms
+   ✓ S5 — MCP stdio parity with the CLI over the one governed core > SOTA fail-closed survives stdio: a rejected MCP `atlas-emit` sets isError:true + carries the reason + guidance 913ms
+   ✓ S5 — MCP stdio parity with the CLI over the one governed core > fail-closed did not persist: a subsequent CLI query still shows only the ONE grounded fact 757ms
+ ✓ |e2e-blackbox| packages/e2e-blackbox/test/s9-retrieval-modes.blackbox.test.ts (4 tests) 8273ms
+   ✓ S9 — atlas query: the CLOSED three retrieval modes (scope | dependency | trigger) > (i) `--by dependency <path>` returns ALL dependency-reachable facts — incl. 2 on ONE file (multimap teeth) 729ms
+   ✓ S9 — atlas query: the CLOSED three retrieval modes (scope | dependency | trigger) > (ii) `--by scope` is UNCHANGED — every under-scope fact appears (byte-identical projection path) 1471ms
+   ✓ S9 — atlas query: the CLOSED three retrieval modes (scope | dependency | trigger) > (iii) `--by trigger <tag>` is TOTAL and returns an HONEST EMPTY pack (documented dormant mode) 665ms
+   ✓ S9 — atlas query: the CLOSED three retrieval modes (scope | dependency | trigger) > (iv) `--by bogus` fails CLOSED — structured error + non-zero exit (the marshaller rejects the mode) 663ms
+ ✓ |unit| packages/adapter-io/test/wp-10.a2b-draft.test.ts (7 tests) 14ms
+ ✓ |unit| packages/adapter-io/test/transition-producer.test.ts (7 tests) 5145ms
+   ✓ AT-8 — reachable through the SHIPPED producer over REAL 2-rev git input, THROUGH the governed door > an AUTHORIZED actor produces + GOVERNED-emits a JUSTIFIED transition from two real revs, read back through the shipped leg 850ms
+   ✓ AT-8 — reachable through the SHIPPED producer over REAL 2-rev git input, THROUGH the governed door > SECURITY TEETH — an UNAUTHORIZED actor is REFUSED by the governed door; the row does NOT land 784ms
+   ✓ AT-8 — reachable through the SHIPPED producer over REAL 2-rev git input, THROUGH the governed door > SECURITY TEETH — an AUTHORED transition emit is REFUSED outright (a transition is produced, never authored) 768ms
+   ✓ AT-8 — reachable through the SHIPPED producer over REAL 2-rev git input, THROUGH the governed door > ABSTAINS (never fabricates) when the unit did not change across the two revs — same content ⇒ no transition 621ms
+   ✓ AT-8 — reachable through the SHIPPED producer over REAL 2-rev git input, THROUGH the governed door > ABSTAINS when the unit does not resolve at a rev (no leg to ground the transition on) 734ms
+   ✓ AT-3 (shipped) — supersession contrast on the same lineage through the governed store > A→B then B→C: the read leg marks A→B SUPERSEDED and B→C the current TRANSITIONED head, both retained 1384ms
+ ✓ |unit| harness/gates/adr-citation-guard.packages.test.mjs (13 tests) 2091ms
+   ✓ adr-citation-guard — anti-vacuity for the CODE corpus > all SIX refusal codes are distinct and reachable (no branch is dead) 690ms
+ ✓ |unit| packages/persist/test/transcript-store-door-fitness.test.ts (10 tests) 115ms
+ ✓ |unit| packages/adapter-io/test/llm-semantic-parser.test.ts (14 tests) 24ms
+ ✓ |unit| harness/gates/doc-transcript-guard.test.mjs (13 tests) 483419ms
+   ✓ doc-transcript-guard — the real corpus > passes on the repository as it stands, and reports a classification that covers every block 45728ms
+   ✓ doc-transcript-guard — the real corpus > NAMES every unverifiable transcript on a FAILING run too (the pass path is not the only path) 44878ms
+   ✓ doc-transcript-guard — the gate can be falsified > FAILS on a ONE-CHARACTER divergence, naming file, line, command and BOTH sides 71012ms
+   ✓ doc-transcript-guard — the gate can be falsified > FAILS on a wrong EXIT CODE even when every output line matches 33791ms
+   ✓ doc-transcript-guard — the gate can be falsified > BLANK LINES ARE OUTPUT — inserting them into a verified block FAILS 29864ms
+   ✓ doc-transcript-guard — the gate can be falsified > FAILS on a STALE DECLARATION — an exemption whose block no longer exists 28362ms
+   ✓ doc-transcript-guard — the gate can be falsified > RUNS a brand-new undeclared transcript rather than ignoring it 54732ms
+   ✓ doc-transcript-guard — every declaration is EARNED > no FROZEN/UNVERIFIABLE block reproduces byte-exactly against the real fixture 112942ms
+   ✓ doc-transcript-guard — an insertion cannot silently re-attach a declaration > a block inserted with a DIFFERENT invocation shifts NOTHING — only the new block is judged 30155ms
+   ✓ doc-transcript-guard — an insertion cannot silently re-attach a declaration > a block inserted with the SAME invocation FAILS LOUDLY instead of re-attaching 30746ms
+ ✓ |unit| packages/kernel/test/portable.test.ts (8 tests) 129ms
+ ✓ |unit| packages/adapter-io/test/own-two-bands.test.ts (6 tests) 2477ms
+   ✓ REQ-RETR-12m — the `own` briefing is two separately bounded bands > serves the T2 rows the shipped door refused, on their OWN band, each carrying its own freshness 365ms
+   ✓ REQ-RETR-12m — the `own` briefing is two separately bounded bands > leaves the GOVERNING band exactly as it was — T0/T1 in, in the same order, and never on the advisory verb 372ms
+   ✓ REQ-RETR-12m — the `own` briefing is two separately bounded bands > puts an OFF-LATTICE tier in NEITHER band, and does not count it as a truncation 480ms
+   ✓ REQ-RETR-12m — the `own` briefing is two separately bounded bands > caps the advisory band INSIDE OWN_CAP, and names every refused row in the pull-reachable tail 534ms
+   ✓ REQ-RETR-12m — the `own` briefing is two separately bounded bands > keeps the GOVERNING band first in line — ratified content that fills the budget leaves no advisory room 362ms
+   ✓ REQ-RETR-12m — the `own` briefing is two separately bounded bands > is byte-identical for equal input, and TOTAL for a scope that names no unit (RETR-12 / RETR-9) 362ms
+ ✓ |unit| packages/e2e/test/s04-drift-lifecycle.e2e.test.ts (5 tests) 7ms
+ ✓ |unit| packages/kernel/test/event-identity.test.ts (11 tests) 197ms
+ ✓ |unit| packages/index/test/fold.test.ts (7 tests) 150ms
+ ✓ |unit| packages/persist/test/source.test.ts (6 tests) 96ms
+ ✓ |unit| packages/e2e/test/s10-full-pipeline.e2e.test.ts (5 tests) 9ms
+ ✓ |e2e-blackbox| packages/e2e-blackbox/test/s18-durability.blackbox.test.ts (2 tests) 6035ms
+   ✓ S18 — durability of the governed store > LEG 1: 4 concurrent `atlas emit`s over a seeded store ⇒ every accepted write is durable 4427ms
+   ✓ S18 — durability of the governed store > LEG 2: an emit onto a TORN projection REFUSES visibly and leaves the store exactly as it found it 1607ms
+ ✓ |unit| packages/knowledge/test/wp-5.13-b-know.anchor-identity.test.ts (8 tests) 13ms
+ ✓ |unit| packages/knowledge/test/arch-9-10-authority.test.ts (10 tests) 17ms
+stdout | packages/e2e-blackbox/test/s29-closed-slot.blackbox.test.ts > S29 — a fact whose predicateSlot is outside the closed 13 > the refused slot left NO node behind — the address it would have minted is unreadable
+{
+  servedRows: [
+    '  inv T1 f9517988f330a775ffc767c072fa01e52f38642220442916ca6b9b8c20bef532 [FRESH]: greet returns a greeting'
+  ]
+}
+
+ ✓ |e2e-blackbox| packages/e2e-blackbox/test/s29-closed-slot.blackbox.test.ts (5 tests) 7144ms
+   ✓ S29 — a fact whose predicateSlot is outside the closed 13 > CONTROL: an IN-VOCABULARY slot is ACCEPTED and goes durable — the refusal below discriminates 1376ms
+   ✓ S29 — a fact whose predicateSlot is outside the closed 13 > an OUT-OF-VOCABULARY slot is REFUSED at exit 2, nothing persisted (RED before #152: exit 0, accepted) 1250ms
+   ✓ S29 — a fact whose predicateSlot is outside the closed 13 > the refused slot left NO node behind — the address it would have minted is unreadable 1360ms
+   ✓ S29 — a fact whose predicateSlot is outside the closed 13 > an ABSENT slot is STILL ACCEPTED — the stated NARROWING, pinned so it is a decision not a hole 2220ms
+   ✓ S29 — a fact whose predicateSlot is outside the closed 13 > the store still SERVES after the refusal — nothing was left half-applied 721ms
+ ✓ |unit| packages/cli/test/wp-9.x-argmarshal.test.ts (12 tests) 19ms
+ ✓ |unit| packages/e2e/test/s09-persist-provenance.e2e.test.ts (5 tests) 17ms
+ ✓ |e2e-blackbox| packages/e2e-blackbox/test/s24-uncanonicalizable-row.blackbox.test.ts (6 tests) 9966ms
+   ✓ S24 — a fact carrying a value Atlas cannot canonicalize > CONTROL: the same fact WITHOUT the violation is ACCEPTED and goes durable — the refusals discriminate 1370ms
+   ✓ S24 — a fact carrying a value Atlas cannot canonicalize > a FLOAT is refused with the canonicalizer's own named reason, and nothing new goes durable 2387ms
+   ✓ S24 — a fact carrying a value Atlas cannot canonicalize > an NFC KEY COLLISION is refused the same way — the one non-numeric shape that crosses a JSON wire 1367ms
+   ✓ S24 — a fact carrying a value Atlas cannot canonicalize > the store still SERVES after both refusals — a refused write left nothing half-applied 1008ms
+   ✓ S24 — a fact carrying a value Atlas cannot canonicalize > the SAME refusal, with the SAME discriminant, arrives over real MCP stdio 3598ms
+ ✓ |unit| packages/cli/test/reverify-cli.test.ts (11 tests) 82ms
+ ✓ |unit| packages/adapter-io/test/negation-authz-scope-split.test.ts (5 tests) 443ms
+ ✓ |e2e-blackbox| packages/e2e-blackbox/test/s34-reverify-store.blackbox.test.ts (5 tests) 11620ms
+   ✓ S34 — `atlas verify-store` re-proves a promoted witness, then catches it going BROKEN > mine (dependency arm) stages ONE proven dependency candidate — ZERO metered model spend 2189ms
+   ✓ S34 — `atlas verify-store` re-proves a promoted witness, then catches it going BROKEN > promote writes it to the DURABLE CAS 792ms
+   ✓ S34 — `atlas verify-store` re-proves a promoted witness, then catches it going BROKEN > RE-PROVEN — `atlas verify-store` replays the SAME index and re-proves it, exit 0 707ms
+   ✓ S34 — `atlas verify-store` re-proves a promoted witness, then catches it going BROKEN > BROKEN — the SAME durable fact stops re-proving once the caller is gone from the index, exit 2 1097ms
+   ✓ S34b — `atlas verify-store` sees the SAME population `atlas query`s advisory names, on a TRACKED store > mine + promote (untracked), then commit `.atlas/` — verify-store reports 1 re-proven, matching the read leg 6607ms
+ ✓ |unit| packages/index/test/depgraph-honest.test.ts (6 tests) 8ms
+ ✓ |unit| packages/cli/test/wp-96-identity-scrub.test.ts (6 tests) 21ms
+ ✓ |unit| packages/adapter-io/test/ast.test.ts (8 tests) 59ms
+ ✓ |unit| packages/index/test/depgraph.heldout.test.ts (11 tests) 29ms
+ ✓ |unit| packages/genesis/test/admit-harness.relation-leg.test.ts (7 tests) 11ms
+ ✓ |unit| packages/adapter-io/test/projection-query-index.use-or-seal.test.ts (5 tests) 232ms
+ ✓ |unit| packages/adapter-io/test/skeleton-source.test.ts (9 tests) 1923ms
+   ✓ createSkeletonSource — the S0 chain reaches non-zero seeds on a real indexed repo > an indexed repo yields real axes, real dep edges, and a NON-ZERO seed/candidate chain 317ms
+   ✓ createSkeletonSource — TOTAL: every degraded input yields an honest skeleton, never a throw > a MALFORMED rev yields a partial (empty) skeleton, never a throw (GEN-8) 317ms
+ ✓ |unit| harness/gates/adr-citation-guard.test.mjs (11 tests) 2071ms
+   ✓ adr-citation-guard — the real corpus > passes on the repository as it stands, and says what it checked 537ms
+   ✓ adr-citation-guard — anti-vacuity: every way of checking nothing is a NAMED refusal > all four refusal codes are distinct and reachable (no branch is dead) 385ms
+ ✓ |unit| packages/tools/test/wp-6.19-tools.test.ts (4 tests) 8ms
+ ✓ |e2e-blackbox| packages/e2e-blackbox/test/s-mcp-4-draft-parity.blackbox.test.ts (4 tests) 11482ms
+   ✓ PROP-MCP-4 — draft door: serialize(cli(draft, x)) ≡ serialize(mcp(draft, x)), byte-identical > SCN-MCP-4a-1 (valid): a plain file-anchor draft serializes byte-identically on CLI --json and MCP 1453ms
+   ✓ PROP-MCP-4 — draft door: serialize(cli(draft, x)) ≡ serialize(mcp(draft, x)), byte-identical > SCN-MCP-4b-1 (malformed input bytes): adversarial claim payloads still serialize byte-identically 6825ms
+   ✓ PROP-MCP-4 — draft door: serialize(cli(draft, x)) ≡ serialize(mcp(draft, x)), byte-identical > SCN-MCP-4c-1 (partially-populated — the divergence-teeth): absent optional string + empty optional array agree 2980ms
+ ✓ |e2e-blackbox| packages/e2e-blackbox/test/s26-watermark-laundering.blackbox.test.ts (5 tests) 12820ms
+   ✓ S26 — an unrelated write cannot LAUNDER the freshness watermark (it is per-ROW, not per-file) > AT HEAD: fact A is served and the pack is honestly fresh 660ms
+   ✓ S26 — an unrelated write cannot LAUNDER the freshness watermark (it is per-ROW, not per-file) > AFTER THE ANCHORED CODE CHANGES (C2): the read is honestly stale, and doctor agrees it drifted 1695ms
+   ✓ S26 — an unrelated write cannot LAUNDER the freshness watermark (it is per-ROW, not per-file) > THE DEFECT: an UNRELATED emit must not re-stamp the drifted fact — `stale` stays true 3439ms
+   ✓ S26 — an unrelated write cannot LAUNDER the freshness watermark (it is per-ROW, not per-file) > PER-SCOPE ACCURACY: the drifted sub-tree is stale, the just-verified sub-tree is not 1827ms
+   ✓ S26 — an unrelated write cannot LAUNDER the freshness watermark (it is per-ROW, not per-file) > BACK-COMPAT: a store with NO per-row stamps still reads, and falls back to the projection watermark 3585ms
+ ✓ |unit| packages/knowledge/test/wp-5.15-know.tier-ratify.test.ts (9 tests) 9ms
+ ✓ |unit| packages/knowledge/test/degenerate-anchor.test.ts (14 tests) 20ms
+ ✓ |e2e-blackbox| packages/e2e-blackbox/test/s-mcp-authoring.blackbox.test.ts (2 tests) 1595ms
+   ✓ SCN-MCP-AUTHOR — an agent authors AND emits a grounded fact over stdio MCP alone > anchors → slots → draft → emit, entirely over one MCP session, is ACCEPTED and readable back 1258ms
+ ✓ |unit| harness/gates/spec-conformance-guard.test.mjs (10 tests) 1348ms
+ ✓ |unit| packages/cli/test/skel-mine-default-skeleton.test.ts (5 tests) 1356ms
+   ✓ SKEL — the default `atlas mine` S0 seam is the REAL structural skeleton > 1. THE BITE: a default pass VISITS sites on an indexed repo (0 under the old emptySkeleton default) 439ms
+   ✓ SKEL — the default `atlas mine` S0 seam is the REAL structural skeleton > 2. sites are visited and STILL zero facts are seeded — the null proposer abstains (never fabricates) 338ms
+   ✓ SKEL — the default `atlas mine` S0 seam is the REAL structural skeleton > 4. SEEDED by the real skeleton ⇒ the empty pass now correctly blames the ABSENT MODEL 308ms
+ ✓ |unit| packages/knowledge/test/wp-dedup-2.subsumes.test.ts (12 tests) 9ms
+ ✓ |unit| packages/grounding/test/wp-4.10-d-grd.units.test.ts (10 tests) 13ms
+ ✓ |unit| packages/kernel/test/heldout-krn-merge.test.ts (4 tests) 15ms
+ ✓ |unit| packages/genesis/test/wp-8.30-gen-witness.test.ts (7 tests) 11ms
+ ✓ |unit| packages/cli/test/mine-gate-shape-dispatch.test.ts (6 tests) 9ms
+ ✓ |unit| packages/adapter-io/test/escape-assemble.test.ts (4 tests) 63ms
+ ✓ |unit| packages/adapter-io/test/store-staging.test.ts (4 tests) 345ms
+ ✓ |unit| packages/cli/test/mine-predicate-check-scrub.test.ts (7 tests) 20ms
+ ✓ |unit| packages/knowledge/test/wp-5.13-a-know.router.test.ts (9 tests) 11ms
+ ✓ |unit| packages/tools/test/guard-fail-closed.test.ts (20 tests) 91ms
+ ✓ |e2e-blackbox| packages/e2e-blackbox/test/s30-relation.blackbox.test.ts (8 tests) 7368ms
+   ✓ S30 — a relation grounds across two files where an intrinsic fact cannot > THE CRUX: `(A, depends-on, B)` across two directories EMITS (exit 0) — the intrinsic wildcard is bypassed 815ms
+   ✓ S30 — a relation grounds across two files where an intrinsic fact cannot > THE CONTRAST: the SAME two files as an INTRINSIC multi-anchor advisory are REFUSED (degenerate anchor) 1025ms
+   ✓ S30 — the grounded relation is read BIDIRECTIONALLY and DIRECTED > `atlas relations <A> out` finds the relation (A is the SUBJECT) 636ms
+   ✓ S30 — the grounded relation is read BIDIRECTIONALLY and DIRECTED > `atlas relations <B> in` finds the SAME relation (B is the OBJECT) 689ms
+   ✓ S30 — the grounded relation is read BIDIRECTIONALLY and DIRECTED > DIRECTED: `atlas relations <B> out` finds NOTHING — the relation points A->B, not B->A 581ms
+   ✓ S30 — the identity/freshness split, observed end-to-end (ADR-0015) > FRESHNESS leg: editing A's bytes makes `atlas reconcile <genesis>` report the relation DRIFTED 1031ms
+   ✓ S30 — the identity/freshness split, observed end-to-end (ADR-0015) > IDENTITY leg SURVIVES the edit: `atlas relations <A> out` STILL finds the relation (no false orphan) 877ms
+   ✓ S30 — the identity/freshness split, observed end-to-end (ADR-0015) > FRESH again: restoring A's exact bytes clears the drift — `atlas reconcile <genesis>` verdicts 0 1373ms
+ ✓ |unit| packages/adapter-io/test/sidecar-generation-filename.test.ts (6 tests) 52ms
+ ✓ |unit| packages/adapter-io/test/scanner.wp-11.w5.test.ts (17 tests) 9964ms
+   ✓ runScanner -- three-value verdict > a documented clean exit (0) is clean 604ms
+   ✓ runScanner -- three-value verdict > a documented hit exit (1) is hit 504ms
+   ✓ runScanner -- three-value verdict > an UNDOCUMENTED exit code is could-not-run, never clean and never hit 510ms
+   ✓ runScanner -- three-value verdict > exit 0 is could-not-run when this SPEC does not document 0 as its clean code -- the exit is read against the spec, not assumed 439ms
+   ✓ runScanner -- three-value verdict > record content is piped on stdin, not argv or a shell string -- injection metacharacters are inert 707ms
+   ✓ detectAvailableScanner > finds an available binary and reports its declared name 640ms
+   ✓ detectAvailableScanner > a binary that REJECTS --version (nonzero exit) still counts as available -- only ENOENT excludes it 655ms
+   ✓ detectAvailableScanner > prefers the first entry in declared order when both are available 3024ms
+   ✓ makeScannerAdapter -- A8: a flagged write is BLOCKED, fail-closed, named > a hit from a real named binary blocks the write via the memory door, naming the scanner 573ms
+   ✓ makeScannerAdapter -- A8: a flagged write is BLOCKED, fail-closed, named > a clean verdict from a real named binary lets the write through 622ms
+   ✓ makeScannerAdapter -- A9: no binary configured fails closed; a configured one is real+named > with a scanner configured, it is a REAL named binary -- gitleaks or trufflehog, not a synthetic label 732ms
+   ✓ makeScannerAdapter -- A9: no binary configured fails closed; a configured one is real+named > a could-not-run verdict (not hit, not clean) STILL blocks -- absence of a verdict is not a pass 741ms
+ ✓ |e2e-blackbox| packages/e2e-blackbox/test/s26-doctor-index.blackbox.test.ts (5 tests) 5295ms
+   ✓ S26 — atlas doctor index: Atlas plans the SCIP index, the operator runs it > 1. reports the dump, the PINNED per-language command, and NAMES the honest hole (exit 0) 675ms
+   ✓ S26 — atlas doctor index: Atlas plans the SCIP index, the operator runs it > 2. TEETH — the printed --output is the path the product actually READS (resolved on disk) 878ms
+   ✓ S26 — atlas doctor index: Atlas plans the SCIP index, the operator runs it > 3. ATLAS RUNS NOTHING: with no dump it says ABSENT, and produces none (`.atlas` unchanged) 1302ms
+   ✓ S26 — atlas doctor index: Atlas plans the SCIP index, the operator runs it > 4. `mine` on an unindexed repo now POINTS at the leg that explains it (the loop closes) 1360ms
+   ✓ S26 — atlas doctor index: Atlas plans the SCIP index, the operator runs it > 5. the enumerated doctor surface names `index` when a subcommand is unknown 840ms
+ ✓ |unit| packages/retrieval/test/wp-6.18-retr.test.ts (7 tests) 11ms
+ ✓ |unit| packages/cli/test/draft-json-cli.test.ts (5 tests) 671ms
+ ✓ |unit| packages/persist/test/reinvoke.test.ts (7 tests) 13ms
+ ✓ |unit| harness/probes/adjudicate/adjudicate.test.mjs (24 tests) 4850ms
+   ✓ end-to-end through the real driver with the fake ORACLE judge (no model call) > drives κ=1, catch=10/10, false-alarm=0/10 — proving the pipeline, not a real judge 4834ms
+ ✓ |unit| packages/kernel/test/heldout-krn-portable.test.ts (5 tests) 28ms
+ ✓ |unit| packages/persist/test/transcript-store-known-limits.test.ts (6 tests) 25ms
+ ✓ |unit| packages/knowledge/test/wp-9.2.4-know.writedecision.test.ts (9 tests) 73ms
+ ✓ |unit| packages/genesis/test/wp-6.18-gen.test.ts (6 tests) 14ms
+ ✓ |unit| packages/genesis/test/admit-harness.no-fabricated-check.test.ts (4 tests) 10ms
+ ✓ |unit| packages/genesis/test/admit-harness.count-leg.test.ts (8 tests) 11ms
+ ✓ |unit| packages/index/test/rollup.test.ts (7 tests) 155ms
+ ✓ |unit| packages/adapter-io/test/policy.test.ts (13 tests) 31ms
+ ✓ |unit| packages/index/test/resolve.heldout.test.ts (10 tests) 468ms
+   ✓ HELD-OUT SCN-INDEX-9a-2 / 9b-2 — malformed → empty, never throws (distinct seed) > 9b-2: ∀ fuzz input (distinct seed) — 0 throws, non-string ⇒ empty 448ms
+ ✓ |unit| packages/genesis/test/wp-8.29-gen.test.ts (9 tests) 15ms
+ ✓ |unit| packages/memory/test/wp-3.5-b-mem.test.ts (5 tests) 115ms
+ ✓ |unit| packages/genesis/test/admit-harness.witness.test.ts (7 tests) 11ms
+ ✓ |unit| packages/knowledge/test/freshness.know3.realmint.test.ts (8 tests) 18ms
+ ✓ |e2e-blackbox| packages/e2e-blackbox/test/s25-model-reachability.blackbox.test.ts (4 tests) 10003ms
+   ✓ S25 — a configured model is REACHED at every ranked site, and the run still completes > CONTROL: with NO model configured the pass visits its sites and completes 1682ms
+   ✓ S25 — a configured model is REACHED at every ranked site, and the run still completes > THE BITE: with a VALID config the model is reached at every site and the run exits 0 3038ms
+   ✓ S25 — a configured model is REACHED at every ranked site, and the run still completes > the run carries the PROMPT ARTIFACT DIGEST it proposed under (ADR-0011 D3 provenance) 2684ms
+   ✓ S25 — a configured model is REACHED at every ranked site, and the run still completes > a MISSING model binary is named, with its command — never an anonymous partial run 2579ms
+ ✓ |unit| packages/cli/test/wp-96-predicate-e2e.test.ts (2 tests) 80ms
+ ✓ |unit| packages/cli/test/own-cli.test.ts (10 tests) 22ms
+ ✓ |unit| packages/index/test/fold-drift.test.ts (8 tests) 32ms
+ ✓ |unit| packages/knowledge/test/hits.auth16.test.ts (6 tests) 8ms
+ ✓ |unit| packages/adapter-io/test/governed-emit-transition-door.test.ts (5 tests) 5026ms
+   ✓ #234 F2 — the transition door refuses on its defense-in-depth gates (direct-drive, producer bypassed) > CONTROL — a VALID node commits (so the refusals below isolate the broken field, not a broken fixture) 980ms
+   ✓ #234 F2 — the transition door refuses on its defense-in-depth gates (direct-drive, producer bypassed) > gate 0.1 TEETH — a ZERO-INTERVAL triple (shaBefore === shaAfter) is REFUSED cleanly, never a throw 1120ms
+   ✓ #234 F2 — the transition door refuses on its defense-in-depth gates (direct-drive, producer bypassed) > gate 0.1 TEETH — an EMPTY unitKey is REFUSED cleanly 1032ms
+   ✓ #234 F2 — the transition door refuses on its defense-in-depth gates (direct-drive, producer bypassed) > gate 1 TEETH — an UNGROUNDED node (empty rev-pair) is REFUSED (a transition MUST cite two revs) 916ms
+   ✓ #234 F2 — the transition door refuses on its defense-in-depth gates (direct-drive, producer bypassed) > gate 2.1 TEETH — an IN-SCOPE actor whose declared scope does NOT own the unit is REFUSED (ARCH-9) 976ms
+ ✓ |e2e-blackbox| packages/e2e-blackbox/test/s23-error-attribution.blackbox.test.ts (5 tests) 11725ms
+   ✓ S23 — the refusal is ATTRIBUTED, on every door it can reach > MCP: a read over a COMMITTED STAGING store is a NAMED governance refusal, not the caller's bad input 1862ms
+   ✓ S23 — the refusal is ATTRIBUTED, on every door it can reach > CLI: the WRITE doors over a committed store exit 2 — the code every other write refusal uses 3163ms
+   ✓ S23 — the refusal is ATTRIBUTED, on every door it can reach > CLI: the READ doors refuse with the SAME code — the class is the outcome, not read-vs-write 3359ms
+   ✓ S23 — the refusal is ATTRIBUTED, on every door it can reach > CONTROL: the same repo WITHOUT the store committed answers 0 — the exit code discriminates 1745ms
+   ✓ S23 — the refusal is ATTRIBUTED, on every door it can reach > CONTROL 2 (TRAVEL-BY-REPROOF): a committed `projection` ALONE exits 0 on `query` — narrowed, not attributed as a refusal at all 1595ms
+ ✓ |unit| packages/cli/test/check-cli.test.ts (7 tests) 769ms
+ ✓ |unit| packages/adapter-io/test/negation-collapsed-local.test.ts (5 tests) 245ms
+ ✓ |unit| packages/cli/test/error-attribution-cli.test.ts (7 tests) 14ms
+ ✓ |unit| packages/adapter-io/test/git-history.test.ts (3 tests) 8890ms
+   ✓ git-history HistorySource (ADAPT-GIT-1) > SCN-ADAPTER-8a — signals equal the real-git oracle at r0 3219ms
+   ✓ git-history HistorySource (ADAPT-GIT-1) > SCN-ADAPTER-8b — signals are byte-identical across two runs at r0 3501ms
+   ✓ git-history HistorySource (ADAPT-GIT-1) > SCN-ADAPTER-8c — computing signals/frontier mints 0 facts (structural: no store seam) 2168ms
+ ✓ |unit| packages/kernel/test/heldout-krn-store.test.ts (7 tests) 582ms
+   ✓ GATE SCN-KERNEL-7a-2 — held-out fuzz seed + a pinned deep-nesting corner stays total > a fresh-seed fuzz stream + a ~10k-deep valid object never throw on the owned entry points 535ms
+ ✓ |unit| packages/grounding/test/wp-4.10-a-grd.heldout.test.ts (9 tests) 17ms
+ ✓ |unit| packages/genesis/test/wp-8.28-a-gen.heldout.test.ts (13 tests) 16ms
+ ✓ |unit| packages/cli/test/render-data.test.ts (10 tests) 9ms
+ ✓ |unit| packages/memory/test/wp-6.24-b-mem.test.ts (6 tests) 15ms
+ ✓ |unit| packages/knowledge/test/evaluator.know16.test.ts (7 tests) 9ms
+ ✓ |unit| packages/cli/test/wp-seedgate-compose.test.ts (3 tests) 2578ms
+   ✓ SCN-CLI-4d-1 — a non-empty frontier reaches the GATE'S verdict, not an unwired default > stages the run-controller's admitted set over a real SCIP-indexed repo 1461ms
+   ✓ SCN-CLI-4d-1 — a non-empty frontier reaches the GATE'S verdict, not an unwired default > the supplied gate REFUSES with a stated reason when the anchor cannot re-derive — never the unwired text 361ms
+   ✓ SCN-CLI-4d-2 — with the gate deliberately ABSENT the run still abstains, and says so > is the control: same repo, same proposer, same frontier — only the supply is removed 689ms
+ ✓ |unit| packages/grounding/test/wp-4.10-c-grd.test.ts (3 tests) 3460ms
+   ✓ WP-4.10-c.GROUND — ground() anchor builder: re-derive@src, drop unresolvable (visible goldens) > SCN-GROUND-3c-1: a corner-biased fuzz stream over ground()/driftDetect() returns a value, 0 throws 3452ms
+ ✓ |unit| packages/knowledge/test/tier.test.ts (7 tests) 35ms
+ ✓ |unit| packages/adapter-io/test/scip.test.ts (6 tests) 52ms
+ ✓ |e2e-blackbox| packages/e2e-blackbox/test/s26-symbol-arm.blackbox.test.ts (3 tests) 9175ms
+   ✓ S26 — the symbol arm is REACHED through the proposer pool, and arm FILE is untouched > THE GUARD: every `::` site is visited and seeded when the run goes through worker threads 3861ms
+   ✓ S26 — the symbol arm is REACHED through the proposer pool, and arm FILE is untouched > arm FILE is the default and is UNCHANGED — the same binary, the shipped frontier 2680ms
+   ✓ S26 — the symbol arm is REACHED through the proposer pool, and arm FILE is untouched > a MISSPELLED arm reads as arm FILE, never as an unnamed third behaviour 2611ms
+ ✓ |unit| packages/tools/test/refusal-visibility.test.ts (11 tests) 25ms
+ ✓ |unit| packages/adapter-io/test/wp-10.a2b-adapter-retire-door.test.ts (3 tests) 140ms
+ ✓ |unit| packages/cli/test/mine-superseded-publish.test.ts (2 tests) 109ms
+ ✓ |unit| packages/adapter-io/test/wire.test.ts (4 tests) 1643ms
+   ✓ WP-9.1.1-a.WIRE — one shared five-leg WiredHandler assembly > SCN-WIRE-1a-1 — one handler exposes exactly the five legs > assembleHandler yields a single WiredHandler with all five governance legs reachable 406ms
+   ✓ WP-9.1.1-a.WIRE — one shared five-leg WiredHandler assembly > SCN-WIRE-1a-1 — one handler exposes exactly the five legs > TEETH — a split (two-handler) assembly flips: no single copy exposes all six legs 425ms
+   ✓ WP-9.1.1-a.WIRE — one shared five-leg WiredHandler assembly > SCN-WIRE-1b-1 — assembleHandler is the sole shared-module assembly point (softened) > every entrypoint imports THIS one factory (module-symbol identity) — one handler, six legs 430ms
+   ✓ WP-9.1.1-a.WIRE — one shared five-leg WiredHandler assembly > SCN-WIRE-1b-1 — assembleHandler is the sole shared-module assembly point (softened) > TEETH — a copy-assembled handler (createHandler called independently) is a distinct instance 379ms
+ ✓ |unit| packages/adapter-io/test/wire-precomputed-parity.test.ts (1 test) 812ms
+   ✓ assembleHandler — precomputed vs bare-rebuilt WireConfig answer IDENTICALLY (DEDUP-COMPOSITION #241) > SCN-PARITY-1 — query + init + reconcile leg shapes match, both builds over the SAME repo 810ms
+ ✓ |unit| packages/knowledge/test/wp-4.11-a-know.truthgate.test.ts (7 tests) 9ms
+ ✓ |unit| packages/adapter-io/test/dynamic-reach.test.ts (7 tests) 68ms
+ ✓ |unit| packages/tools/test/wp-7.32-tools.test.ts (5 tests) 10ms
+ ✓ |unit| packages/adapter-io/test/awareness-store.test.ts (8 tests) 1077ms
+ ✓ |unit| packages/adapter-io/test/doctor-cas-integrity.test.ts (11 tests) 474ms
+ ✓ |unit| packages/knowledge/test/freshness.know3.test.ts (5 tests) 6ms
+ ✓ |unit| packages/grounding/test/wp-4.10-b-grd.test.ts (7 tests) 8ms
+ ✓ |unit| packages/adapter-io/test/memory-store.test.ts (10 tests) 506ms
+   ✓ A4 — concurrent writers do not lose each other (REAL subprocesses) > 8 processes × 5 appends = 40 durable records, 0 lost 449ms
+ ✓ |unit| packages/memory/test/wp-6.23-mem.test.ts (6 tests) 12ms
+ ✓ |unit| packages/adapter-io/test/git-forge.test.ts (3 tests) 8384ms
+   ✓ REQ-ADAPTER-10 — the forge carries the atlas (ADAPT-GIT-3, over real git-sbx) > SCN-ADAPTER-10a-1: writes trailer + refs/notes/orchestra note + PR projection 2436ms
+   ✓ REQ-ADAPTER-10 — the forge carries the atlas (ADAPT-GIT-3, over real git-sbx) > SCN-ADAPTER-10b-1: a rebase (c1→c1') keeps the trailer and orphans the note data 3112ms
+   ✓ REQ-ADAPTER-10 — the forge carries the atlas (ADAPT-GIT-3, over real git-sbx) > SCN-ADAPTER-10c-1: the observed outcome == the PERSIST-13 oracle at every step (0 semantics altered) 2834ms
+ ✓ |unit| packages/adapter-io/test/governed-emit-addressable.test.ts (11 tests) 311ms
+ ✓ |unit| packages/adapter-io/test/projection-query-index.test.ts (5 tests) 330ms
+ ✓ |unit| packages/genesis/test/wp-8.28-b-gen.heldout.test.ts (11 tests) 13ms
+ ✓ |unit| packages/adapter-io/test/door-regression-supersede-sameas.test.ts (2 tests) 611ms
+   ✓ DOOR REGRESSION — a SUPERSEDE must not destroy a sameAs edge > DOOR-SAMEAS-1 — two ordinary re-evidence writes keep the signed edge on the read surface 306ms
+   ✓ DOOR REGRESSION — a SUPERSEDE must not destroy a sameAs edge > DOOR-SAMEAS-2 — re-evidence must not shrink the class a link signature is priced over 303ms
+ ✓ |unit| packages/adapter-io/test/rev-index-scip-parity.test.ts (3 tests) 1210ms
+   ✓ rev-index builds with `{documents: []}` — what that costs, measured > (1) the CONTENT-COMMITTING axes are byte-identical: SCIP touches neither spatial nor territory 434ms
+   ✓ rev-index builds with `{documents: []}` — what that costs, measured > (2) the DEPENDENCY axis does differ — so (1) is a measurement, not two identical builds 454ms
+   ✓ rev-index builds with `{documents: []}` — what that costs, measured > (3) the DRIFT ORACLE returns the same verdict against both builds — file AND `::` symbol anchors 322ms
+ ✓ |unit| harness/gates/own-snapshot-guard.test.mjs (14 tests) 10443ms
+   ✓ own-snapshot-guard > passes clean snapshot projection 806ms
+   ✓ own-snapshot-guard > fails missing snapshot 721ms
+   ✓ own-snapshot-guard > fails changed skill prose 1346ms
+   ✓ own-snapshot-guard > fails changed source blob 913ms
+   ✓ own-snapshot-guard > fails symlinked source anchor before hashing it 580ms
+   ✓ own-snapshot-guard > fails unit drift 815ms
+   ✓ own-snapshot-guard > fails sourceRevision that cannot account for anchored blobs 550ms
+   ✓ own-snapshot-guard > fails valid sourceRevision that is not an ancestor of HEAD 719ms
+   ✓ own-snapshot-guard > fails anchored blob drift even when current source matches declared blob 819ms
+   ✓ own-snapshot-guard > fails unexpected static Own file 651ms
+   ✓ own-snapshot-guard > fails symlinked static Own skill instead of ignoring or following it 984ms
+   ✓ own-snapshot-guard > fails empty snapshot 590ms
+   ✓ own-snapshot-guard > fails malformed snapshot 497ms
+   ✓ own-snapshot-guard > fails duplicate static Own path at verifier boundary 450ms
+ ✓ |unit| packages/memory/test/mem-5-field-types.test.ts (28 tests) 23ms
+ ✓ |unit| harness/gates/gate-directory.test.mjs (25 tests) 16173ms
+   ✓ harness/gates/ — the directory means one thing > command-doc-guard.mjs CAN FAIL — pointed at an empty tree it exits non-zero 930ms
+   ✓ harness/gates/ — the directory means one thing > layer-guard.mjs CAN FAIL — pointed at an empty tree it exits non-zero 1682ms
+   ✓ harness/gates/ — the directory means one thing > reference-model-guard.mjs CAN FAIL — pointed at an empty tree it exits non-zero 1270ms
+   ✓ harness/gates/ — the directory means one thing > service-gate-guard.mjs CAN FAIL — pointed at an empty tree it exits non-zero 459ms
+   ✓ harness/gates/ — the directory means one thing > spec-conformance-guard.mjs CAN FAIL — pointed at an empty tree it exits non-zero 572ms
+   ✓ harness/gates/ — the directory means one thing > wiring-guard.mjs CAN FAIL — pointed at an empty tree it exits non-zero 1915ms
+   ✓ harness/gates/ — the directory means one thing > drift-patterns.mjs is a LIBRARY — importing it runs no sweep and prints nothing 592ms
+   ✓ harness/gates/ — the directory means one thing > ears-coamend.mjs is a LIBRARY — importing it runs no sweep and prints nothing 740ms
+   ✓ harness/gates/ — the directory means one thing > inv-text-pin.mjs is a LIBRARY — importing it runs no sweep and prints nothing 488ms
+   ✓ harness/gates/ — the directory means one thing > lexing.mjs is a LIBRARY — importing it runs no sweep and prints nothing 1945ms
+   ✓ harness/gates/ — the directory means one thing > reachability.mjs is a LIBRARY — importing it runs no sweep and prints nothing 1628ms
+   ✓ harness/gates/ — the directory means one thing > workspace-scan.mjs is a LIBRARY — importing it runs no sweep and prints nothing 1850ms
+ ✓ |unit| packages/mcp-server/test/memory-emit-mcp.test.ts (3 tests) 212ms
+stdout | packages/adapter-io/test/test-vacuity-bench.test.ts > #95 WP-A4-TV — test-vacuity judge-free planted bench > AC-soundness — falseAdmit is 0/N: the oracle ADMITS no vacuity-flipped mutant
+
+=== #95 WP-A4-TV test-vacuity bench === falseAdmit=0/10 recallTrue=10/10 (10 idioms) n=20
+
+
+stdout | packages/adapter-io/test/test-vacuity-bench.test.ts > #95 WP-A4-TV — test-vacuity judge-free planted bench > AC-recall — recallTrue is the k/M coverage co-primary across the diverse idioms (measured, printed)
+  recall by construction: 10/10 TRUE vacuous variants proven across 10 idioms
+
+ ✓ |unit| packages/adapter-io/test/test-vacuity-bench.test.ts (5 tests) 120ms
+ ✓ |unit| packages/cli/test/mine-provable-frontier-driver.test.ts (5 tests) 216ms
+ ✓ |unit| harness/gates/wiring-guard.test.mjs (15 tests) 19371ms
+   ✓ wiring-guard — the gate can be falsified > PASSES when the ledger names exactly the packages nothing imports 2076ms
+   ✓ wiring-guard — the gate can be falsified > FAILS an unreached package the ledger omits, and NAMES it 1225ms
+   ✓ wiring-guard — the gate can be falsified > FAILS a ledger row for a package that IS imported, and names its importers 1328ms
+   ✓ wiring-guard — the gate can be falsified > an `import type` is NOT a runtime reference — the target stays unreached (the memory case) 1830ms
+   ✓ wiring-guard — the gate can be falsified > a VALUE import of the same package DOES reach it (the check is not blind in both directions) 1098ms
+   ✓ wiring-guard — the gate can be falsified > an `export type … from` is erased too, and does not reach its target 2254ms
+   ✓ wiring-guard — the gate can be falsified > a package named only in a COMMENT is not reached (it is a parse, not a regex) 933ms
+   ✓ wiring-guard — the gate can be falsified > counts ONLY the delimited region — a package named in surrounding prose is not a row 946ms
+   ✓ wiring-guard — the gate can be falsified > ANTI-VACUITY: an EMPTY region FAILS rather than agreeing with a fully wired tree 933ms
+   ✓ wiring-guard — the gate can be falsified > ANTI-VACUITY: a MISSING begin marker FAILS 1168ms
+   ✓ wiring-guard — the gate can be falsified > ANTI-VACUITY: a MISSING end marker FAILS 1503ms
+   ✓ wiring-guard — the gate can be falsified > ANTI-VACUITY: NO packages/ directory FAILS instead of comparing two empty sets 1043ms
+   ✓ wiring-guard — the gate can be falsified > ANTI-VACUITY: packages with no src/ FAILS rather than reporting an empty graph 962ms
+   ✓ wiring-guard — the gate can be falsified > ANTI-VACUITY: a MISSING README FAILS 990ms
+   ✓ wiring-guard — the gate can be falsified > FAILS a DUPLICATED ledger row 1077ms
+ ✓ |unit| packages/persist/test/wp-3.4-b.hostadapter-placement.test.ts (7 tests) 23ms
+ ✓ |unit| packages/adapter-io/test/relation-derive-reachability.test.ts (3 tests) 3956ms
+   ✓ AR-13 — the shipped derive-relations leg PROVES + PERSISTS + reads back a proven relation > composeRuntime(repo).deriveRelations() lands src/app.ts --depends-on--> src/util.ts, sealed proven 1872ms
+   ✓ AR-13 — the shipped derive-relations leg PROVES + PERSISTS + reads back a proven relation > the durable proven relation SURVIVES re-verification (verify-store re-proves its witness) 1167ms
+   ✓ AR-13 — the shipped derive-relations leg PROVES + PERSISTS + reads back a proven relation > an UNAUTHORIZED actor: the projection still PROVES the edge, but the governed door REFUSES the write 916ms
+ ✓ |unit| packages/retrieval/test/own-artifact.test.ts (8 tests) 49ms
+ ✓ |unit| packages/persist/test/wp-3.4-a-persist.test.ts (7 tests) 17ms
+ ✓ |unit| packages/persist/test/heldout-pst-reconstruct.test.ts (9 tests) 14ms
+ ✓ |unit| packages/genesis/test/wp-8.28-c-gen.heldout.test.ts (13 tests) 12ms
+ ✓ |unit| packages/adapter-io/test/symbol-frontier.test.ts (5 tests) 100ms
+ ✓ |unit| packages/adapter-io/test/ast-gap2-doc-comment.test.ts (8 tests) 92ms
+ ✓ |unit| packages/kernel/test/identity-goldens.test.ts (4 tests) 8ms
+ ✓ |unit| packages/persist/test/transcript-persist.test.ts (8 tests) 30ms
+ ✓ |unit| packages/cli/test/relations-cli.test.ts (7 tests) 230ms
+ ✓ |unit| packages/genesis/src/verify-fact-relation.test.ts (8 tests) 8ms
+ ✓ |unit| packages/cli/test/mine-model-wired.test.ts (5 tests) 3827ms
+   ✓ R1 — the CLI reports the model as WIRED when the operator config resolves one > names the abstention without blaming an absent model, on a run that made real calls 449ms
+   ✓ R1 — the CLI reports the model as WIRED when the operator config resolves one > CONTROL: with no config resolvable, the very same repo DOES blame the absent model 479ms
+   ✓ R1 — the CLI reports the model as WIRED when the operator config resolves one > carries the PROMPT ARTIFACT DIGEST when a model ran, and nothing when none did (ADR-0011 D3) 624ms
+   ✓ R2 — a pass is HERMETIC: the operator env is a seam, not the machine it runs on > a hostile ATLAS_MODEL_CONFIG in the ambient environment is never read, and never executed 408ms
+   ✓ GEN-15c — a dropped structural seed is COUNTED all the way out to the render > reports the pathless dep-graph node it dropped, and drops nothing when there is nothing to drop 1755ms
+ ✓ |unit| packages/memory/test/mem-9-portable-scangate.wp35a.test.ts (8 tests) 10ms
+ ✓ |unit| packages/cli/test/mine-claim-scrub-fitness.test.ts (9 tests) 62ms
+ ✓ |unit| packages/persist/test/reinvoke.heldout.test.ts (6 tests) 12ms
+ ✓ |unit| packages/knowledge/test/wp-5.15-know.tier-ratify.heldout.test.ts (9 tests) 9ms
+ ✓ |unit| packages/adapter-io/test/enrich-sibling.test.ts (6 tests) 147ms
+ ✓ |unit| packages/cli/test/mine-seed-awareness.test.ts (5 tests) 1695ms
+   ✓ WP-8.29.GEN — the mine path seeds Awareness from the run's OWN ratified/definite set (never fabricated) > GEN-9c — source-less facets on a candidate-only run render UN-SEEDED, never fabricated 462ms
+   ✓ WP-8.29.GEN — the mine path seeds Awareness from the run's OWN ratified/definite set (never fabricated) > GEN-9b / MEM-11d — the seeded Awareness is byte-identical across two runs 515ms
+   ✓ GEN-9a — a repo with a ratified/definite set reflects SEEDED Awareness through the existing store > createAwarenessStore (the `atlas memory-awareness` read surface) renders SEEDED constitution, byte-identical twice 385ms
+ ✓ |unit| packages/cli/test/wp-f6-mine-empty-explained.test.ts (7 tests) 71ms
+ ✓ |e2e-blackbox| packages/e2e-blackbox/test/s36-definition-proven.blackbox.test.ts (5 tests) 7333ms
+   ✓ S36 — a mined definition fact is sealed `proven`, carries its witness, and the sound door holds the 0-false-proven floor > mine (definition arm) stages ONE proven definition candidate — ZERO metered model spend 2522ms
+   ✓ S36 — a mined definition fact is sealed `proven`, carries its witness, and the sound door holds the 0-false-proven floor > promote writes it to the DURABLE CAS 954ms
+   ✓ S36 — a mined definition fact is sealed `proven`, carries its witness, and the sound door holds the 0-false-proven floor > `atlas node <addr>` renders seal:proven and the re-provable definition witness (slot nested under witness:) 730ms
+   ✓ S36 — a mined definition fact is sealed `proven`, carries its witness, and the sound door holds the 0-false-proven floor > RE-PROVEN (196d, #240) — `atlas verify-store` replays the promoted definition witness, re-proven not unverifiable, exit 0 775ms
+   ✓ S36 — a mined definition fact is sealed `proven`, carries its witness, and the sound door holds the 0-false-proven floor > TEETH — the sound door PROVES greet under `src`, ABSTAINS out-of-scope and on a phantom (never false-proven) 2114ms
+ ✓ |unit| packages/knowledge/test/hits.know17.test.ts (6 tests) 8ms
+ ✓ |unit| packages/e2e/test/s01-move-in.e2e.test.ts (6 tests) 22ms
+ ✓ |unit| packages/adapter-io/test/governed-emit-test-vacuity-door.test.ts (5 tests) 87ms
+ ✓ |unit| packages/memory/test/wp-6.24-b-mem.heldout.test.ts (6 tests) 13ms
+ ✓ |unit| packages/knowledge/test/fastpath-promotion-origin.test.ts (6 tests) 9ms
+ ✓ |unit| packages/genesis/src/verify-count.test.ts (11 tests) 10ms
+ ✓ |unit| packages/memory/test/wp-3.5-b-mem.heldout.test.ts (5 tests) 14ms
+ ✓ |e2e-blackbox| packages/e2e-blackbox/test/s95-test-vacuity.blackbox.test.ts (4 tests) 3813ms
+   ✓ S95 — `atlas test-vacuity` proves + persists the assertion-only-in-catch shape end-to-end (0-false-proven) > 1. `atlas test-vacuity .` admits EXACTLY the one vacuous test through the governed door (exit 0) 893ms
+   ✓ S95 — `atlas test-vacuity` proves + persists the assertion-only-in-catch shape end-to-end (0-false-proven) > 2. `atlas node <addr>` reads the vacuous fact back as `seal: proven` with the re-runnable witness 746ms
+   ✓ S95 — `atlas test-vacuity` proves + persists the assertion-only-in-catch shape end-to-end (0-false-proven) > 3. 0-FALSE-PROVEN — the SOUND test is NEVER admitted: no proven fact names it (the load-bearing rail) 829ms
+   ✓ S95 — `atlas test-vacuity` proves + persists the assertion-only-in-catch shape end-to-end (0-false-proven) > 4. a repo with NO vacuous test exits 2 and admits NOTHING (abstain-by-design, not an error) 1057ms
+ ✓ |unit| packages/index/test/resolve.test.ts (4 tests) 98ms
+ ✓ |unit| packages/adapter-io/test/git-history-frontier-szz.test.ts (3 tests) 2054ms
+   ✓ git-history frontier — SZZ composes with the churn bar > admits the two-fix / churn>=2 files, excludes the single-fix / churn=1 file 1164ms
+   ✓ git-history frontier — SZZ composes with the churn bar > does not admit a solo fix: touch on its own (the exact bug this closes) 352ms
+   ✓ git-history frontier — SZZ composes with the churn bar > a churn=1 file whose one commit IS a fix: is excluded — churn alone decides, no SZZ term 536ms
+ ✓ |unit| packages/adapter-io/test/door-regression-kind-check.test.ts (2 tests) 258ms
+ ✓ |unit| packages/adapter-io/test/compose-negation-promote-deps.test.ts (2 tests) 599ms
+   ✓ #96 F2 — the `atlas promote` leg reaches emitNegation WITH its completeness deps > a staged negation over a REAL non-empty scope does NOT abstain scope-empty through composeRuntime().promote 596ms
+ ✓ |unit| packages/adapter-io/test/negation-edgemodel-freshness.test.ts (4 tests) 227ms
+ ✓ |unit| packages/mcp-server/test/wp-9.4.7-mcp.test.ts (6 tests) 9ms
+ ✓ |unit| packages/genesis/test/wp-8.30-gen.heldout.test.ts (6 tests) 15ms
+ ✓ |unit| packages/e2e/test/s03-truth-gate.e2e.test.ts (6 tests) 9ms
+ ✓ |unit| harness/lib/drift-patterns.test.mjs (25 tests) 17ms
+ ✓ |unit| packages/grounding/test/wp-4.11-a-grd.test.ts (4 tests) 9ms
+ ✓ |unit| packages/adapter-io/test/rev-index-content-resolve.test.ts (5 tests) 1716ms
+   ✓ rev-index — a failed checkout must not ANSWER (the EMPTY sentinel fails open) > resolveBySubtreeAt on a bad rev refuses the empty-root hash [teeth: answer from EMPTY_AXES ⇒ RED] 307ms
+   ✓ rev-index — a failed checkout must not ANSWER (the EMPTY sentinel fails open) > a rev that is GENUINELY empty still resolves — the guard keys on provenance, not on the hash 317ms
+   ✓ rev-index — a genuine multi-match is refused, never guessed > two byte-identical files ⇒ resolveBySubtreeAt refuses [teeth: return first preorder hit ⇒ RED] 388ms
+   ✓ rev-index — a genuine multi-match is refused, never guessed > a UNIQUE content still resolves, despite matching in both the spatial and territory axes 404ms
+ ✓ |unit| packages/genesis/src/verify-negation.test.ts (10 tests) 8ms
+ ✓ |unit| packages/kernel/test/fold-convergence.test.ts (4 tests) 11ms
+ ✓ |unit| packages/knowledge/test/wp-9.x-adjacency-a.carrier.test.ts (7 tests) 8ms
+ ✓ |unit| packages/adapter-io/test/skeleton-memo-key.test.ts (5 tests) 17ms
+ ✓ |unit| packages/cli/test/promote-cli.test.ts (8 tests) 38ms
+ ✓ |unit| packages/genesis/test/admit-harness.justified-leg.test.ts (5 tests) 7ms
+ ✓ |unit| packages/adapter-io/test/reverify-gate-compose.test.ts (2 tests) 964ms
+   ✓ REVERIFY-GATE — composeRuntime(repoPath).reverify() over the REAL durable store + REAL oracle > an EMPTY store reports the honest all-zero (never a throw, never a silent skip) 510ms
+   ✓ REVERIFY-GATE — composeRuntime(repoPath).reverify() over the REAL durable store + REAL oracle > THREE SEALED FACTS, THREE DIFFERENT OUTCOMES — all buckets fire in ONE pass 453ms
+ ✓ |unit| packages/cli/test/mine-answer-scrub-fitness.test.ts (3 tests) 27ms
+ ✓ |unit| packages/knowledge/test/wp-5.13-a-know.router.heldout.test.ts (7 tests) 14ms
+ ✓ |unit| packages/tools/test/wp-6.22-tools.test.ts (3 tests) 7ms
+ ✓ |unit| packages/adapter-io/test/indexer-report.test.ts (5 tests) 480ms
+ ✓ |unit| harness/gates/godfile-guard.test.mjs (8 tests) 2007ms
+   ✓ godfile-guard > FAILS an over-HARD file under harness/ — the gates are subject to the bar they enforce 341ms
+   ✓ godfile-guard > is EXCLUSIVE at both boundaries: exactly TARGET is silent, TARGET+1 warns, exactly HARD passes, HARD+1 fails 497ms
+ ✓ |unit| packages/cli/test/mine-decide-family-identity.test.ts (4 tests) 11ms
+ ✓ |unit| packages/adapter-io/test/scip-raw-cache.test.ts (2 tests) 19ms
+ ✓ |unit| packages/knowledge/test/negation-witness-drift.test.ts (4 tests) 18ms
+stdout | packages/knowledge/test/wp-owner-not-required.test.ts > #187 — KNOW-11a scope fence: isScope coercion surface (re-pinned, unchanged by the amendment) > prints the full coercion table (for the review record)
+[
+  { input: 'undefined', isScope: false, expected: false },
+  { input: 'null', isScope: false, expected: false },
+  { input: "''", isScope: false, expected: false },
+  { input: '0', isScope: false, expected: false },
+  { input: 'false', isScope: false, expected: false },
+  { input: '{}', isScope: false, expected: false },
+  { input: '[]', isScope: false, expected: false },
+  { input: "['core']", isScope: false, expected: false },
+  { input: "{toString:() => 'core'}", isScope: false, expected: false },
+  { input: "'core'", isScope: true, expected: true }
+]
+
+stdout | packages/knowledge/test/wp-owner-not-required.test.ts > #186 — ONE authz implementation: the knowledge package publishes the SHAPE, never the DECISION > the barrel exports isScope and NONE of the deleted decision surface
+{ forbiddenNamesFound: [], isScopeExported: true, surfaceSize: 79 }
+
+ ✓ |unit| packages/knowledge/test/wp-owner-not-required.test.ts (13 tests) 11ms
+ ✓ |e2e-blackbox| packages/e2e-blackbox/test/s17-degenerate-anchor.blackbox.test.ts (5 tests) 6182ms
+   ✓ S17 — a grounding too diffuse to name one fact is REFUSED at the write door > the victim writes an ordinary, single-anchor fact — accepted, one node 1445ms
+   ✓ S17 — a grounding too diffuse to name one fact is REFUSED at the write door > THE ATTACK: a fact grounded across two unrelated files is refused, and NOTHING is persisted 861ms
+   ✓ S17 — a grounding too diffuse to name one fact is REFUSED at the write door > the victim's OWN diffuse fact is refused too — the wildcard address is closed to everyone 1024ms
+   ✓ S17 — a grounding too diffuse to name one fact is REFUSED at the write door > NO BRICK: two symbols in the SAME file still share a prefix and write normally 998ms
+   ✓ S17 — a grounding too diffuse to name one fact is REFUSED at the write door > NO BRICK: the refused claim is writable the moment it is re-grounded at a containing unit 1646ms
+ ✓ |e2e-blackbox| packages/e2e-blackbox/test/s14-mine.blackbox.test.ts (2 tests) 2014ms
+   ✓ S14 — atlas mine: a 0-fact pass reports the cause its own run produced (never fabricates) > 1. a default `atlas mine <repo>` run seeds 0, explains the 0 by its OBSERVED cause, and exits 0 1213ms
+   ✓ S14 — atlas mine: a 0-fact pass reports the cause its own run produced (never fabricates) > 2. re-running `atlas mine` on the SAME repo stays stable — idempotent, no accumulation, no fabrication 786ms
+ ✓ |unit| packages/persist/test/wp-3.4-b.heldout.test.ts (7 tests) 8ms
+ ✓ |unit| packages/adapter-io/test/reverify-negation.test.ts (8 tests) 7ms
+ ✓ |unit| packages/cli/test/mine-claim-scrub.test.ts (6 tests) 24ms
+ ✓ |unit| packages/grounding/test/wp-4.10-b-grd.multiset.test.ts (4 tests) 4ms
+ ✓ |unit| packages/tools/test/wp-8.27-tools.test.ts (5 tests) 8ms
+ ✓ |unit| packages/kernel/test/heldout-krn.test.ts (9 tests) 18ms
+ ✓ |unit| packages/adapter-io/test/llm-count-parser.test.ts (10 tests) 10ms
+ ✓ |unit| packages/adapter-io/test/verify-fact-source.test.ts (15 tests) 10ms
+ ✓ |unit| packages/adapter-io/test/poke-file.test.ts (5 tests) 16ms
+ ✓ |unit| packages/cli/test/derive-relations-cli.test.ts (8 tests) 13ms
+ ✓ |unit| packages/kernel/test/fold.test.ts (3 tests) 47ms
+ ✓ |unit| packages/index/test/build-key-mint.test.ts (9 tests) 104ms
+ ✓ |unit| packages/cli/test/mine-projection-surface.test.ts (7 tests) 14ms
+ ✓ |unit| packages/knowledge/test/relation-key.test.ts (15 tests) 14ms
+ ✓ |e2e-blackbox| packages/e2e-blackbox/test/s22-scip-device-read.blackbox.test.ts (3 tests) 1859ms
+   ✓ S22 — a `.atlas/index.scip` that never EOFs must not hang the product > RED before the fix: `atlas query` BOOTS and answers instead of hanging on the device 723ms
+   ✓ S22 — a `.atlas/index.scip` that never EOFs must not hang the product > the degrade is the SAME one a missing dump takes — the scope door still resolves 714ms
+ ✓ |unit| packages/genesis/test/admit-harness.definition-leg.test.ts (6 tests) 8ms
+ ✓ |unit| packages/retrieval/test/own-snapshot.test.ts (20 tests) 19ms
+ ✓ |unit| packages/genesis/test/seeds-qualified-path.test.ts (4 tests) 23ms
+ ✓ |unit| packages/genesis/test/admit-harness.dependency-leg.test.ts (6 tests) 7ms
+ ✓ |unit| packages/adapter-io/test/llm-dependency-parser.test.ts (10 tests) 10ms
+ ✓ |unit| packages/cli/test/marshal-link-retract.test.ts (14 tests) 11ms
+ ✓ |unit| packages/adapter-io/test/door-regression-scope-wellformed.test.ts (2 tests) 105ms
+ ✓ |unit| packages/adapter-io/test/store-fail-closed-cas.test.ts (34 tests) 124ms
+ ✓ |e2e-blackbox| packages/e2e-blackbox/test/s33-seal-witness.blackbox.test.ts (4 tests) 3832ms
+   ✓ S33 — a proven seal carries its own witness, through staging, CAS and BACK into the sound oracle > mine (dependency arm) stages ONE proven dependency candidate — ZERO metered model spend 2069ms
+   ✓ S33 — a proven seal carries its own witness, through staging, CAS and BACK into the sound oracle > promote writes it to the DURABLE CAS 803ms
+   ✓ S33 — a proven seal carries its own witness, through staging, CAS and BACK into the sound oracle > THE PAYOFF — the stored witness fed back into `atlas verify-fact` PROVES again, model-free 720ms
+ ✓ |unit| packages/cli/test/help-cli.test.ts (6 tests) 13ms
+ ✓ |unit| packages/genesis/test/wp-8.29-gen.heldout.test.ts (8 tests) 10ms
+ ✓ |e2e-blackbox| packages/e2e-blackbox/test/s3-dedup.blackbox.test.ts (5 tests) 12261ms
+   ✓ S3 — dedup / update / non-destructive identity (ordered — durable store accretes) > D0 DEDUP: byte-identical re-emit yields the SAME content-addressed id; query shows ONE node 2192ms
+   ✓ S3 — dedup / update / non-destructive identity (ordered — durable store accretes) > D1 UNION: a reworded claim at the SAME (anchor,slot) collides on the real nodeKey → ONE node, merged 1683ms
+   ✓ S3 — dedup / update / non-destructive identity (ordered — durable store accretes) > A2 NON-DESTRUCTIVE: the SAME claim at a DISTINCT anchor mints its OWN node — NO write-time merge 1847ms
+   ✓ S3 — dedup / update / non-destructive identity (ordered — durable store accretes) > determinism: after all writes, the merged query renders BYTE-IDENTICAL across runs 1406ms
+   ✓ S3 — dedup / update / non-destructive identity (ordered — durable store accretes) > PAYOFF — subsumes file⊃symbol FIRES end-to-end (sub-file `::` index granularity is now real) 1533ms
+ ✓ |unit| packages/cli/test/mine-budget-cap.test.ts (6 tests) 63ms
+ ✓ |unit| packages/cli/test/mine-render-seeded-count.test.ts (6 tests) 7ms
+ ✓ |unit| packages/genesis/src/verify-fact.test.ts (7 tests) 7ms
+ ✓ |unit| packages/cli/test/doctor-provenance-total.test.ts (3 tests) 562ms
+ ✓ |unit| packages/cli/test/mine-claim-scrub-fitness-rel-neg.test.ts (7 tests) 65ms
+ ✓ |unit| packages/adapter-io/test/negation-seal-promote-carry.test.ts (3 tests) 208ms
+ ✓ |unit| packages/knowledge/test/evaluator.know16.heldout.test.ts (7 tests) 8ms
+ ✓ |unit| packages/adapter-io/test/orientation-store.test.ts (9 tests) 359ms
+   ✓ concurrent appends do not lose events (REAL, CONCURRENT subprocesses) > 8 processes × 5 appends = 40 durable events, 0 lost 331ms
+ ✓ |e2e-blackbox| packages/e2e-blackbox/test/s27-reconcile-merge-base.blackbox.test.ts (6 tests) 8759ms
+   ✓ S27 — `atlas reconcile` refuses an unresolvable merge base instead of reporting a clean gate > DIRECTION 1 (the gate still bites): the REAL base with real drift BLOCKS the merge (exit 2) 960ms
+   ✓ S27 — `atlas reconcile` refuses an unresolvable merge base instead of reporting a clean gate > DIRECTION 2 (a well-formed sha that names no object): REFUSES — never a silent clean gate 720ms
+   ✓ S27 — `atlas reconcile` refuses an unresolvable merge base instead of reporting a clean gate > DIRECTION 2 (a token that is not a sha at all): REFUSES — never a silent clean gate 655ms
+   ✓ S27 — `atlas reconcile` refuses an unresolvable merge base instead of reporting a clean gate > DIRECTION 2 (the empty string (an unexpanded shell variable)): REFUSES — never a silent clean gate 650ms
+   ✓ S27 — `atlas reconcile` refuses an unresolvable merge base instead of reporting a clean gate > the refusal is NOT the internal-fault class — it is an attributed, caller-facing refusal 650ms
+   ✓ S27 — `atlas reconcile` refuses an unresolvable merge base instead of reporting a clean gate > DIRECTION 3 (the per-fact skip SURVIVES): a REAL base where the anchor did not exist ⇒ exit 0 2623ms
+ ✓ |unit| packages/genesis/test/provable-frontier.test.ts (5 tests) 15ms
+ ✓ |unit| packages/adapter-io/test/wp-d3b-a-wire-verdicts.test.ts (7 tests) 8ms
+ ✓ |e2e-blackbox| packages/e2e-blackbox/test/s20-committed-store-refusal.blackbox.test.ts (7 tests) 7550ms
+   ✓ S20 — TRAVEL-BY-REPROOF: `.atlas/staging` tracked still refuses with a reason on every user door > RED: `atlas query` over a committed STAGING store refuses and names the condition 991ms
+   ✓ S20 — TRAVEL-BY-REPROOF: `.atlas/staging` tracked still refuses with a reason on every user door > RED: `atlas doctor hotset` over a committed STAGING store refuses 1001ms
+   ✓ S20 — TRAVEL-BY-REPROOF: `.atlas/staging` tracked still refuses with a reason on every user door > RED: `atlas node <addr>` reads CAS directly, going AROUND the projection — a committed STAGING store refuses it too 947ms
+   ✓ S20 — TRAVEL-BY-REPROOF: `.atlas/staging` tracked still refuses with a reason on every user door > `atlas init` is the ONE exemption — it is the command that repairs this, so it must still run 996ms
+   ✓ S20 — TRAVEL-BY-REPROOF: `.atlas/staging` tracked still refuses with a reason on every user door > CONTROL: the same repo WITHOUT the store committed answers normally — the refusal discriminates 924ms
+   ✓ S20b — TRAVEL-BY-REPROOF: a committed `projection` ALONE (no staging) is SERVED, not refused > `atlas query` over a committed (empty) projection exits 0 with an honest empty pack, no refusal 1187ms
+   ✓ S20b — TRAVEL-BY-REPROOF: a committed `projection` ALONE (no staging) is SERVED, not refused > `atlas doctor hotset` over the same repo exits 0, honestly reporting 0 — not a refusal 1501ms
+ ✓ |unit| packages/index/test/ownership.test.ts (6 tests) 71ms
+ ✓ |unit| packages/persist/test/wp-3.4-a.heldout.test.ts (6 tests) 14ms
+ ✓ |unit| packages/cli/test/mine-provable-frontier-proposer.test.ts (3 tests) 45ms
+ ✓ |unit| packages/adapter-io/test/llm.test.ts (3 tests) 338ms
+   ✓ createSiteProposer — ADAPT-LLM-1 the single bounded S2 site proposer > SCN-ADAPTER-11a-1 — a model is invoked only via SiteProposer.propose (guard, module-graph audit) 332ms
+ ✓ |unit| harness/gates/service-gate-guard.test.mjs (11 tests) 2632ms
+ ✓ |unit| packages/knowledge/test/produce.know13.test.ts (8 tests) 6ms
+ ✓ |unit| packages/adapter-io/test/compose-recon-n10.test.ts (3 tests) 3650ms
+   ✓ RECON-N10 — a content-preserving RENAME is MECHANICAL (content-addressed classifier + detection) > SCN-N10-1 — moved-but-alive fact ⇒ mechanical, anchorNow=src/moved.ts, NOT semantic, exitCode 0 1199ms
+   ✓ RECON-N10 — a content-preserving RENAME is MECHANICAL (content-addressed classifier + detection) > TEETH-N10 — the PRE-FIX seams (path-keyed reDerives + no content resolver) DROP the moved fact (RED) 1043ms
+   ✓ RECON-N10-guard — an UNMOVED fact with a DUPLICATE of its content ⇒ NO phantom move (doctor≡reconcile) > SCN-N10-dup — reconcile emits ZERO drift AND doctor reads not-drifted (single source of truth) 1406ms
+ ✓ |unit| packages/adapter-io/test/actor-is-unauthenticated.test.ts (4 tests) 327ms
+   ✓ KNOW-11 actor — a CLAIM, not an identity (the model is advisory, and must say so) > the local git identity is NOT the actor once ATLAS_ACTOR is set — one env var names anyone 324ms
+ ✓ |unit| packages/knowledge/test/reconcile.know5.test.ts (6 tests) 6ms
+ ✓ |unit| packages/retrieval/test/wp-2.8-b-retr.heldout.test.ts (5 tests) 9ms
+ ✓ |unit| packages/knowledge/test/upsert-seal-carry.test.ts (6 tests) 7ms
+ ✓ |unit| packages/cli/test/memory-emit-cli.test.ts (7 tests) 149ms
+ ✓ |unit| packages/adapter-io/test/fs.test.ts (7 tests) 2212ms
+   ✓ walkFileTree — ADAPT-FS-1 faithful .gitignore-honoring FileTree walk > SCN-ADAPTER-1a-1 — the walk equals the reference tree, .gitignore honored (happy) 327ms
+   ✓ walkFileTree — ADAPT-FS-1 faithful .gitignore-honoring FileTree walk > SCN-ADAPTER-1b-1 — a tracked file with no indexer is still in the tree (guard) 312ms
+   ✓ walkFileTree — ADAPT-FS-1 faithful .gitignore-honoring FileTree walk > SCN-ADAPTER-1c-1 — no fabricated path is emitted (guard) 363ms
+   ✓ walkFileTree — ADAPT-FS-1 faithful .gitignore-honoring FileTree walk > SCN-ADAPTER-1d-1 — two walks of the same tree are byte-identical (happy) 384ms
+   ✓ walkFileTree — WP-N8 fail-closed boot guard (never throws at composition boot) > (b) a tracked path removed from disk → walk SKIPS it, no throw [kills mutant: unguarded readFileSync] 415ms
+   ✓ walkFileTree — WP-N8 fail-closed boot guard (never throws at composition boot) > (c) a real git fixture still walks identically (happy path byte-identical) 378ms
+ ✓ |e2e-blackbox| packages/e2e-blackbox/test/s34-mine-history-frontier.blackbox.test.ts (1 test) 3081ms
+   ✓ #243 — `atlas mine` (shipped binary) mines the HISTORY-DRIVEN frontier, not the whole structural set > stages ONLY hot.ts (churned) — many.ts (unchurned) is never even PLANNED, let alone staged 2673ms
+ ✓ |unit| packages/adapter-io/test/git-history-memo.test.ts (4 tests) 7574ms
+   ✓ git-history memo (CACHE-HISTORY-SOURCE) > blameConcentration — a second call at the SAME (repo, rev) shells zero more `git blame` 1601ms
+   ✓ git-history memo (CACHE-HISTORY-SOURCE) > commitCount / frontier / signals — a repeated call at the SAME args shells zero more git 1913ms
+   ✓ git-history memo (CACHE-HISTORY-SOURCE) > a DIFFERENT rev is NOT starved by the memo — the cache key carries the real args, not just the closure 1296ms
+   ✓ git-history memo (CACHE-HISTORY-SOURCE) > 3 independent instances vs 1 shared instance queried 3× — byte-identical frontier + blameConcentration 2756ms
+ ✓ |unit| packages/knowledge/test/wp-9.x-adjacency-b.near-dup.test.ts (5 tests) 7ms
+ ✓ |unit| packages/adapter-io/test/test-vacuity-producer.test.ts (4 tests) 120ms
+ ✓ |unit| packages/knowledge/test/hits.auth16.heldout.test.ts (5 tests) 7ms
+ ✓ |e2e-blackbox| packages/e2e-blackbox/test/s10-node-door.blackbox.test.ts (4 tests) 9598ms
+   ✓ S10 — atlas node <addr>: the read-only per-node door + totality on a miss > resolves the grounded fact for an emitted fact content address (exit 0, data rendered) 735ms
+   ✓ S10 — atlas node <addr>: the read-only per-node door + totality on a miss > a miss (`atlas node deadbeef`) is TOTAL + structured — exit 1, a reason, no crash trace 1656ms
+   ✓ S10 — atlas node <addr>: the read-only per-node door + totality on a miss > a bare `atlas node` (no address) fails CLOSED at the parser arity floor (structured, exit 1) 981ms
+   ✓ S10 — atlas node <addr>: the read-only per-node door + totality on a miss > a PATH-TRAVERSAL addr is a FAST structured miss — no filesystem read, no hang/OOM (billy PoC) 2995ms
+ ✓ |unit| packages/index/test/territory.test.ts (7 tests) 56ms
+ ✓ |unit| packages/adapter-io/test/relation-door.test.ts (6 tests) 180ms
+ ✓ |e2e-blackbox| packages/e2e-blackbox/test/s15-freshness-watermark.blackbox.test.ts (3 tests) 5308ms
+   ✓ S15 — N11 honest freshness watermark (query.stale reflects behind-HEAD, not just stored-drifted) > AT HEAD: the fact is served and the pack is HONESTLY fresh (builtAt == HEAD ⇒ stale: false) 765ms
+   ✓ S15 — N11 honest freshness watermark (query.stale reflects behind-HEAD, not just stored-drifted) > AFTER HEAD ADVANCES: the SAME still-FRESH fact packs stale: true (behind-HEAD ⇒ unverified) 909ms
+   ✓ S15 — N11 honest freshness watermark (query.stale reflects behind-HEAD, not just stored-drifted) > MCP door parity: the behind-HEAD stale rides the pack envelope (data.pack.stale === true), not just CLI text 1254ms
+ ✓ |unit| packages/tools/test/wp-10.a1-tools.test.ts (5 tests) 8ms
+ ✓ |unit| packages/tools/test/wp-8.27-tools.heldout.test.ts (5 tests) 7ms
+ ✓ |unit| packages/memory/test/mem-kind-derivation.test.ts (14 tests) 9ms
+ ✓ |unit| packages/adapter-io/test/wire-query-envelope.test.ts (2 tests) 785ms
+   ✓ assembleHandler — Seam-3 the query Verdict.data carries derived subsumes > module + function sharing an exact claim → the subsumes edge appears in query data (kills the "deriveSubsumes never called" mutant) 397ms
+   ✓ assembleHandler — Seam-3 the query Verdict.data carries derived subsumes > subsumes is filtered to under-scope nodes — an out-of-scope pair yields no edge in the pack scope 386ms
+ ✓ |unit| packages/cli/test/mine-cas-unaddressable-refusal.test.ts (3 tests) 7ms
+ ✓ |e2e-blackbox| packages/e2e-blackbox/test/s4-drift.blackbox.test.ts (5 tests) 9104ms
+   ✓ S4 — reconcile detects + classifies drift; doctor is read-only > `atlas reconcile <genesis>` DETECTS the drift and blocks on the semantic flip (exit 2) 1047ms
+   ✓ S4 — reconcile detects + classifies drift; doctor is read-only > SOTA determinism: reconciling the SAME revs re-runs BYTE-IDENTICAL (drift = f(git state)) 2523ms
+   ✓ S4 — reconcile detects + classifies drift; doctor is read-only > SOTA determinism: a mergeBase with NO drift (HEAD vs HEAD) verdicts 0 — a DIFFERENT git state 977ms
+   ✓ S4 — reconcile detects + classifies drift; doctor is read-only > `atlas doctor why <fact>` explains the drift CLASSIFICATION read-only (exit 0) 801ms
+   ✓ S4 — reconcile detects + classifies drift; doctor is read-only > SOTA doctor is advisory-only: `.atlas/cas` is BYTE-UNCHANGED across doctor why + hotset 1575ms
+ ✓ |unit| packages/mcp-server/test/relations-mcp.test.ts (6 tests) 8ms
+ ✓ |unit| packages/tools/test/push-pull-optimize.test.ts (5 tests) 5ms
+ ✓ |unit| packages/knowledge/test/negations-fold.test.ts (8 tests) 11ms
+ ✓ |unit| packages/adapter-io/test/door-regression-reject-disclosure.test.ts (1 test) 64ms
+ ✓ |unit| packages/kernel/test/heldout-krn-fold.test.ts (2 tests) 6ms
+ ✓ |unit| packages/adapter-io/test/wire-scip-guard.test.ts (3 tests) 972ms
+   ✓ SCIP-GUARD (#2) — assembleHandler degrades on a MISSING .scip (fresh repo) > SCN-SCIP-GUARD-1 — a non-existent scipPath ⇒ NO throw; query resolves over the files-only index 399ms
+   ✓ SCIP-GUARD (#2) — assembleHandler degrades on a MISSING .scip (fresh repo) > SCN-SCIP-GUARD-2 — CONTROL: a PRESENT .scip still decodes + assembles (no regression) 343ms
+ ✓ |unit| packages/tools/test/link-retract-schema.test.ts (7 tests) 9ms
+ ✓ |unit| packages/cli/test/mine-provenance-report.test.ts (5 tests) 43ms
+ ✓ |unit| packages/tools/test/wp-4.12-a-tools.heldout.test.ts (4 tests) 8ms
+ ✓ |unit| packages/knowledge/test/wp-196a-seal.test.ts (5 tests) 14ms
+ ✓ |unit| packages/index/test/compose.compose-index.test.ts (2 tests) 13ms
+ ✓ |unit| packages/adapter-io/test/wire-retrieval-freshness.test.ts (1 test) 446ms
+   ✓ assembleHandler — `--by dependency` is rebuilt PER QUERY (freshness parity with scope) > an in-session write to the SAME store is reflected by a later --by dependency query (frozen-snapshot teeth) 445ms
+ ✓ |unit| packages/adapter-io/test/compose-recon.test.ts (4 tests) 4789ms
+   ✓ RECON-SEAMS — composeRuntime wires the REAL reconcile drift seams (COMPOSE-C) > SCN-RS-1 — reconcile DETECTS a real structural change as DRIFTED (mechanical + semantic split) 1168ms
+   ✓ RECON-SEAMS — composeRuntime wires the REAL reconcile drift seams (COMPOSE-C) > SCN-RS-2 (control) — NO structural change (mergeBase == topic) ⇒ nothing drifts 1261ms
+   ✓ RECON-SEAMS — composeRuntime wires the REAL reconcile drift seams (COMPOSE-C) > TEETH-resolveAnchorAt — revert resolveAnchorAt→()=>undefined ⇒ NO drift detected (golden RED) 1224ms
+   ✓ RECON-SEAMS — composeRuntime wires the REAL reconcile drift seams (COMPOSE-C) > TEETH-reDerives — revert reDerives→()=>false ⇒ the mechanical fact is misclassified (golden RED) 1134ms
+ ✓ |unit| packages/mcp-server/test/error-attribution-mcp.test.ts (6 tests) 8ms
+ ✓ |unit| packages/mcp-server/test/negations-mcp.test.ts (5 tests) 9ms
+ ✓ |unit| packages/adapter-io/test/ast-normalize.test.ts (7 tests) 58ms
+ ✓ |unit| packages/index/test/cas.test.ts (4 tests) 10ms
+ ✓ |unit| packages/index/test/unit-deps.test.ts (7 tests) 7ms
+ ✓ |e2e-blackbox| packages/e2e-blackbox/test/s19-init-gitignore.blackbox.test.ts (4 tests) 4813ms
+   ✓ S19 — `atlas init` installs the durable-store ignore rule > RED: a fresh user repo has no Atlas rule, and `atlas init` now writes one 926ms
+   ✓ S19 — `atlas init` installs the durable-store ignore rule > THE PROPERTY: after `atlas init`, a `git add -A` no longer tracks the durable store 1164ms
+   ✓ S19 — `atlas init` installs the durable-store ignore rule > IDEMPOTENT: a second `atlas init` writes nothing and says so — re-running move-in is free 1720ms
+   ✓ S19 — `atlas init` installs the durable-store ignore rule > a repo that ALREADY has the rule (the healthy default fixture) is left byte-identical 1002ms
+ ✓ |unit| packages/cli/test/mine-arms-union.test.ts (1 test) 80ms
+ ✓ |unit| packages/adapter-io/test/reverify-test-vacuity.test.ts (7 tests) 6ms
+ ✓ |unit| packages/knowledge/test/archive-unaddressable.test.ts (5 tests) 10ms
+ ✓ |unit| packages/tools/test/wp-4.11-a-tools.test.ts (2 tests) 8ms
+ ✓ |e2e-blackbox| packages/e2e-blackbox/test/s234-transition.blackbox.test.ts (6 tests) 7985ms
+   ✓ S234 — a 2-rev transition is produced through the GOVERNED door, read back justified, superseded not falsified > an AUTHORIZED `atlas transition <unit> A B` produces + persists a JUSTIFIED transition (exit 0) 1026ms
+   ✓ S234 — a 2-rev transition is produced through the GOVERNED door, read back justified, superseded not falsified > `atlas transitions <unit>` reads the record back as the current TRANSITIONED head 733ms
+   ✓ S234 — a 2-rev transition is produced through the GOVERNED door, read back justified, superseded not falsified > a SECOND transition B→C supersedes the first on the same lineage — both retained (D-T3) 1797ms
+   ✓ S234 — a 2-rev transition is produced through the GOVERNED door, read back justified, superseded not falsified > SECURITY TEETH — an UNAUTHORIZED actor is REFUSED by the governed door; the row does NOT land 2078ms
+   ✓ S234 — a 2-rev transition is produced through the GOVERNED door, read back justified, superseded not falsified > TEETH — a transition over two revs where the unit did NOT change is REJECTED (no zero-interval fabrication) 1128ms
+   ✓ S234 — a 2-rev transition is produced through the GOVERNED door, read back justified, superseded not falsified > reading an unknown lineage is an honest empty, never a throw 740ms
+ ✓ |unit| packages/cli/test/mine-answer-provenance.test.ts (4 tests) 18ms
+ ✓ |unit| packages/cli/test/wp-196a-proposer-dependency.test.ts (3 tests) 7ms
+ ✓ |unit| packages/genesis/test/admit-test-vacuity.test.ts (8 tests) 10ms
+ ✓ |unit| packages/adapter-io/test/arch-d3b-claim-launder.test.ts (2 tests) 149ms
+ ✓ |unit| packages/knowledge/test/freshness.know3.heldout.test.ts (3 tests) 4ms
+ ✓ |unit| packages/kernel/test/heldout-krn-event.test.ts (6 tests) 180ms
+ ✓ |unit| packages/cli/test/mine-coverage-render.test.ts (3 tests) 15ms
+ ✓ |e2e-blackbox| packages/e2e-blackbox/test/s32-verify-fact.blackbox.test.ts (6 tests) 3800ms
+   ✓ S32 — atlas verify-fact PROVES/REFUTES/ABSTAINS over the shipped binary (the sound gate is reached) > dependency: a witnessed caller under scope ⇒ PROVEN, exit 0 767ms
+   ✓ S32 — atlas verify-fact PROVES/REFUTES/ABSTAINS over the shipped binary (the sound gate is reached) > count: ≥1 caller under scope ⇒ PROVEN, exit 0 610ms
+   ✓ S32 — atlas verify-fact PROVES/REFUTES/ABSTAINS over the shipped binary (the sound gate is reached) > negation: a witnessed caller under scope ⇒ REFUTED (only negation refutes), exit 0 636ms
+   ✓ S32 — atlas verify-fact PROVES/REFUTES/ABSTAINS over the shipped binary (the sound gate is reached) > negation: a closed scope with no caller ⇒ PROVEN (a grounded negative), exit 0 607ms
+   ✓ S32 — atlas verify-fact PROVES/REFUTES/ABSTAINS over the shipped binary (the sound gate is reached) > an unresolvable target ⇒ ABSTAIN (an honest non-answer), exit 0 — not an error 580ms
+   ✓ S32 — atlas verify-fact PROVES/REFUTES/ABSTAINS over the shipped binary (the sound gate is reached) > a missing --scope ⇒ a structured error + non-zero exit, never a throw 584ms
+ ✓ |unit| packages/genesis/test/ppr-damping-teeth.test.ts (3 tests) 7ms
+ ✓ |unit| packages/grounding/test/wp-4.10-b-grd.heldout.test.ts (6 tests) 6ms
+ ✓ |e2e-blackbox| packages/e2e-blackbox/test/s2-guardrails.blackbox.test.ts (4 tests) 3290ms
+   ✓ S2a — an UNGROUNDED emit is rejected fail-closed, nothing persisted > emit of a fact whose citation does not re-derive ⇒ exit 2, status rejected 617ms
+   ✓ S2a — an UNGROUNDED emit is rejected fail-closed, nothing persisted > SOTA grounded-or-rejected: a subsequent `query` shows the fact is ABSENT (nothing persisted) 625ms
+   ✓ S2b — an UNAUTHORIZED (out-of-scope) emit is rejected fail-closed, nothing persisted > a GROUNDED fact whose actor is not in the fact scope ⇒ exit 2, status rejected (KNOW-11) 1156ms
+   ✓ S2b — an UNAUTHORIZED (out-of-scope) emit is rejected fail-closed, nothing persisted > SOTA authz fail-closed: the unauthorized fact is ABSENT from a subsequent `query` 570ms
+ ✓ |unit| packages/adapter-io/test/escape-classifier.test.ts (9 tests) 37ms
+ ✓ |unit| packages/cli/test/negations-cli.test.ts (6 tests) 10ms
+ ✓ |e2e-blackbox| packages/e2e-blackbox/test/s17-nested-scope.blackbox.test.ts (7 tests) 12265ms
+   ✓ S17 — `atlas query` resolves a scope at ANY depth > depth 1 (CONTROL — unchanged): `atlas query src` exits 0 640ms
+   ✓ S17 — `atlas query` resolves a scope at ANY depth > depth 2: `atlas query src/m0` exits 0 (was exit 1 — no covering territory) 631ms
+   ✓ S17 — `atlas query` resolves a scope at ANY depth > depth 3: `atlas query src/m0/deep` exits 0 621ms
+   ✓ S17 — `atlas query` resolves a scope at ANY depth > depth 4, a leaf FILE path: `atlas query src/m0/deep/f0.ts` exits 0 657ms
+   ✓ S17 — `atlas query` resolves a scope at ANY depth > every nested scope in the fixture is addressable (the vocabulary is no longer top-level-only) 3695ms
+   ✓ S17 CONTROL — an uncovered scope still fails CLOSED on a SEPARATOR boundary > `srcM0` and `src/m0x` are their OWN territories — never reached as/through `src/m0` 1860ms
+   ✓ S17 CONTROL — an uncovered scope still fails CLOSED on a SEPARATOR boundary > character-neighbour scopes that do NOT exist still exit 1 with "no covering territory" 3963ms
+ ✓ |unit| packages/knowledge/test/hits.know17.heldout.test.ts (4 tests) 6ms
+ ✓ |unit| packages/adapter-io/test/rev-index-stable-across-builds.test.ts (2 tests) 550ms
+   ✓ #211 — N builds in one process ⇒ stable subtreeHash (freshness never lies false-DRIFTED) > createRevIndex reader path: an unchanged unit re-derives FRESH across repeated arbitrary-rev builds 458ms
+ ✓ |unit| packages/cli/test/mine-arms-render.test.ts (4 tests) 47ms
+ ✓ |unit| packages/knowledge/test/wp-4.11-a-know.heldout.test.ts (3 tests) 5ms
+ ✓ |e2e-blackbox| packages/e2e-blackbox/test/s1-genesis.blackbox.test.ts (5 tests) 4625ms
+   ✓ S1 — genesis: init → grounded emit → query sees it > `atlas init .` exits 0 and renders territories INCLUDING the source tree 539ms
+   ✓ S1 — genesis: init → grounded emit → query sees it > a GROUNDED `atlas emit` is ACCEPTED (exit 0) and renders the content-addressed `id:` 617ms
+   ✓ S1 — genesis: init → grounded emit → query sees it > `atlas query src` SEES the emitted fact — rendered as `inv <tier> <nodeId>: <claim>` 554ms
+   ✓ S1 — genesis: init → grounded emit → query sees it > SOTA determinism (RETR-1/INDEX-8): the same query renders BYTE-IDENTICAL stdout across runs 1060ms
+   ✓ S1 — genesis: init → grounded emit → query sees it > SOTA content-addressed id (KERNEL-1): re-emitting the SAME fact yields the SAME stable `id` 1177ms
+ ✓ |unit| packages/genesis/src/verify-definition.test.ts (6 tests) 5ms
+ ✓ |unit| packages/persist/test/merge.heldout.test.ts (2 tests) 6ms
+ ✓ |unit| packages/adapter-io/test/memory-read-kind-filter.test.ts (4 tests) 23ms
+ ✓ |e2e-blackbox| packages/e2e-blackbox/test/harness.smoke.test.ts (5 tests) 2053ms
+   ✓ runAtlas — drives the REAL atlas CLI as a subprocess > `atlas query src` runs end-to-end via composeRuntime (numeric exit + `status:` in stdout) 543ms
+   ✓ runAtlas — drives the REAL atlas CLI as a subprocess > `atlas doctor hotset 5` exits 0 with `doctor: hotset` (read-only advisory ran) 523ms
+   ✓ mcpSession — drives the REAL atlas-mcp server over stdio > listTools() returns the 6 governance tools PLUS the 2 relations/negations + 6 READ_SURFACE authoring tools + 4 memory READ_SURFACE tools, with input schemas; then close() 701ms
+ ✓ |unit| packages/cli/test/mine-grounding-scrub.test.ts (3 tests) 9ms
+ ✓ |unit| packages/knowledge/test/test-vacuity-fold.test.ts (7 tests) 11ms
+ ✓ |unit| packages/knowledge/test/negation-key.test.ts (13 tests) 13ms
+ ✓ |unit| packages/persist/test/heldout-pst-source.test.ts (4 tests) 16ms
+ ✓ |unit| packages/persist/test/transcript-3.5-a.heldout.test.ts (8 tests) 23ms
+ ✓ |unit| packages/cli/test/wp-f4-parse-at.test.ts (8 tests) 6ms
+ ✓ |unit| packages/adapter-io/test/scanner-conformance.test.ts (4 tests | 1 skipped) 148ms
+ ✓ |unit| packages/index/test/unit-exports.test.ts (4 tests) 5ms
+ ✓ |unit| packages/adapter-io/test/door-regression-malformed-check-shape.test.ts (6 tests) 57ms
+ ✓ |unit| packages/kernel/test/store.test.ts (3 tests) 114ms
+ ✓ |unit| packages/adapter-io/test/index-adapter.test.ts (4 tests) 41ms
+ ✓ |e2e-blackbox| packages/e2e-blackbox/test/s239-node-witness.blackbox.test.ts (1 test) 2846ms
+   ✓ S239 — `atlas node <addr>` renders the proven seal's own witness (REVERT ⇒ RED) > BY USE: a real mine→promote→node chain surfaces witness.slot/target/scope, distinct from the authz scope 606ms
+ ✓ |e2e-blackbox| packages/e2e-blackbox/test/s237-mine-summary-agrees-with-store.blackbox.test.ts (1 test) 3238ms
+   ✓ S237 — a single-arm `atlas mine` rerun reports what the store actually holds > BY USE: first run seeds 2, second run (idempotent rerun, same sites already staged) STILL reports 2 — never a false 0/abstained 3083ms
+ ✓ |unit| packages/cli/test/init-gitignore.test.ts (7 tests) 16ms
+ ✓ |unit| packages/kernel/test/encoder.test.ts (4 tests) 77ms
+ ✓ |unit| packages/mcp-server/test/memory-read-mcp.test.ts (5 tests) 7ms
+ ✓ |unit| packages/adapter-io/test/okf-store.test.ts (6 tests) 94ms
+ ✓ |unit| packages/cli/test/mine-history-wired.test.ts (1 test) 743ms
+   ✓ #243 — `atlas mine` wires the real history source on the production path > main(["mine"]) constructs createHistorySource over the repo it ran in (rev "HEAD") 501ms
+ ✓ |unit| harness/probes/a2-staleness.test.mjs (4 tests) 6008ms
+   ✓ A2 staleness probe — corpus scored against the real reDerives oracle > every PRESERVING entry re-derives FRESH (zero false-stale) and every INVALIDATING entry re-derives DRIFTED (zero true-stale miss) 5383ms
+   ✓ A2 staleness probe — corpus scored against the real reDerives oracle > scoreEntry reports UNRESOLVED (not a false verdict) for a needle absent from the base rev 621ms
+ ✓ |unit| packages/index/test/depgraph.test.ts (4 tests) 37ms
+ ✓ |unit| packages/knowledge/test/test-vacuity-key.test.ts (11 tests) 11ms
+ ✓ |unit| packages/index/test/cas.heldout.test.ts (4 tests) 8ms
+ ✓ |unit| packages/knowledge/test/reconcile.know5.heldout.test.ts (4 tests) 5ms
+ ✓ |unit| packages/adapter-io/test/memory-emit-template-reach.test.ts (5 tests) 14ms
+ ✓ |unit| packages/persist/test/attach-unaddressable.test.ts (6 tests) 8ms
+ ✓ |unit| packages/cli/test/relations-seal-render.test.ts (3 tests) 4ms
+ ✓ |e2e-blackbox| packages/e2e-blackbox/test/s-sound-default.blackbox.test.ts (1 test) 831ms
+   ✓ SOUND-DEFAULT-MINE — a default `atlas mine` mines advisory + dependency + count in ONE run > with NO ATLAS_MINE_SLOT the merged render names every arm (the ratified default flip is real) 805ms
+ ✓ |unit| packages/cli/test/mine-provenance-seam.test.ts (2 tests) 708ms
+   ✓ the mine driver composes its default store WITH the provenance seam > CONTROL: the identical repo with the store NOT committed stages normally 479ms
+ ✓ |unit| harness/probes/a2r-corpus.test.mjs (7 tests) 9ms
+ ✓ |unit| packages/grounding/test/wp-4.10-c-grd.heldout.test.ts (3 tests) 6ms
+ ✓ |unit| packages/grounding/test/ground-fail-closed.test.ts (3 tests) 6ms
+ ✓ |unit| packages/kernel/test/log.test.ts (3 tests) 49ms
+ ✓ |unit| packages/adapter-io/test/skeleton-priors-leak.test.ts (1 test) 53ms
+ ✓ |unit| packages/cli/test/memory-read-cli.test.ts (11 tests) 14ms
+ ✓ |unit| packages/adapter-io/test/ast-parser-lifecycle.test.ts (1 test) 48ms
+ ✓ |unit| packages/tools/test/wp-4.11-a-tools.heldout.test.ts (2 tests) 7ms
+ ✓ |unit| packages/adapter-io/test/reverify-dangling.test.ts (5 tests) 6ms
+ ✓ |unit| packages/knowledge/test/relations-seal-fold.test.ts (3 tests) 5ms
+ ✓ |unit| packages/cli/test/mine-proposer-identity.test.ts (3 tests) 22ms
+ ✓ |unit| packages/adapter-io/test/scip-corrupt-guard.test.ts (3 tests) 11ms
+ ✓ |unit| packages/tools/test/wp-10.a4-tools.test.ts (4 tests) 5ms
+ ✓ |unit| packages/grounding/test/wp-4.10-d-grd.heldout.test.ts (6 tests) 12ms
+ ✓ |unit| packages/cli/test/mine-decide-seal-carry.test.ts (2 tests) 53ms
+ ✓ |unit| packages/index/test/territory.heldout.test.ts (4 tests) 5ms
+ ✓ |unit| packages/grounding/test/wp-4.11-a-grd.heldout.test.ts (2 tests) 4ms
+ ✓ |unit| packages/kernel/test/totality.test.ts (3 tests) 173ms
+ ✓ |unit| packages/memory/test/wp-6.24-a-mem.heldout.test.ts (2 tests) 10ms
+ ✓ |unit| harness/lib/lexing.test.mjs (7 tests) 19ms
+ ✓ |unit| packages/knowledge/test/upsert-raise-carry-forward.test.ts (1 test) 5ms
+ ✓ |unit| packages/memory/test/mem-9.wp35a.heldout.test.ts (2 tests) 6ms
+ ✓ |unit| packages/index/test/own-impact.test.ts (4 tests) 20ms
+ ✓ |e2e-blackbox| packages/e2e-blackbox/test/door-regression-scope-brick.test.ts (1 test) 2015ms
+   ✓ DOOR REGRESSION (real CLI) — a malformed scope must not brick an anchor > DOOR-SCOPE-CLI-1 — after a JSON array scope, the same anchor is still writable 1853ms
+ ✓ |unit| packages/adapter-io/test/compose-mine-admission.count-leg.test.ts (4 tests) 4ms
+ ✓ |unit| packages/cli/test/calibration-cli.test.ts (6 tests) 9ms
+ ✓ |unit| packages/knowledge/test/wp-242-neardup-deleted.test.ts (3 tests) 7ms
+ ✓ |unit| packages/genesis/test/extract-answer-malformed.test.ts (2 tests) 6ms
+ ✓ |unit| packages/knowledge/test/upsert-answerref-update.test.ts (3 tests) 5ms
+ ✓ |unit| packages/adapter-io/test/llm-answer-provenance.test.ts (4 tests) 5ms
+ ✓ |unit| packages/cli/test/mine-semantic-arm.test.ts (8 tests) 8ms
+ ✓ |unit| packages/cli/test/mine-cold-grammar.test.ts (2 tests) 4ms
+ ✓ |unit| packages/knowledge/test/relations-fold.test.ts (6 tests) 6ms
+ ✓ |unit| packages/index/test/coverage.test.ts (3 tests) 5ms
+ ✓ |unit| packages/cli/test/mine-arms-isolation.test.ts (3 tests) 4ms
+ ✓ |unit| packages/adapter-io/test/promotion-ratify-context.test.ts (3 tests) 5ms
+ ✓ |unit| packages/adapter-io/test/harness/git-sbx.smoke.test.ts (7 tests) 6089ms
+   ✓ git-sbx harness (fixture infra) > merge-base(main, topic) === mb 1016ms
+   ✓ git-sbx harness (fixture infra) > repo is left checked out on topic (HEAD === topicTip) 831ms
+   ✓ git-sbx harness (fixture infra) > greet's body diverges between mb and topicTip (hi → hello) 849ms
+   ✓ git-sbx harness (fixture infra) > greet is UNCHANGED on main (arms the 9a mb→main mutant) 902ms
+   ✓ git-sbx harness (fixture infra) > service.py is identical at mainTip and topicTip (the shared X — arms 9b exclusion) 802ms
+   ✓ git-sbx harness (fixture infra) > blame attributes greet body line to cGreet at r0/mainTip 902ms
+   ✓ git-sbx harness (fixture infra) > all captured SHAs are distinct, non-empty 40-hex 785ms
+ ✓ |unit| packages/knowledge/test/produce.know13.heldout.test.ts (2 tests) 3ms
+ ✓ |unit| packages/index/test/fold.heldout.test.ts (3 tests) 6ms
+ ✓ |unit| harness/probes/a2-staleness-teeth.test.mjs (7 tests) 7ms
+ ✓ |unit| packages/adapter-io/test/harness/fix-scip.smoke.test.ts (2 tests) 10ms
+ ✓ |unit| packages/cli/test/mine-slot-gating.test.ts (15 tests) 8ms
+ ✓ |unit| packages/adapter-io/test/calibration-ledger.test.ts (2 tests) 5ms
+ ✓ |unit| packages/cli/test/mine-arms-backcompat.test.ts (1 test) 19ms
+ ✓ |unit| packages/cli/test/resolve-mine-slots.test.ts (12 tests) 8ms
+ ✓ |unit| packages/genesis/test/canon-skeleton-memo.test.ts (2 tests) 5ms
+ ✓ |unit| packages/adapter-io/test/harness/fix-repo.smoke.test.ts (2 tests) 199ms
+ ✓ |unit| packages/cli/test/mined-tier-mirror-pin.test.ts (2 tests) 3ms
+ ✓ |unit| packages/index/test/coverage.heldout.test.ts (3 tests) 4ms
+ ✓ |unit| packages/genesis/test/capped-budget.test.ts (3 tests) 4ms
+ ✓ |unit| packages/index/test/unit-defs-memo.test.ts (2 tests) 5ms
+ ✓ |unit| packages/cli/test/task-proposer-dispatch.test.ts (1 test) 6ms
+ ✓ |unit| packages/cli/test/enrich-env-gating.test.ts (14 tests) 5ms
+ ✓ |unit| packages/knowledge/test/wp-4.12-a-know.stale.test.ts (5 tests) 5ms
+ ✓ |unit| packages/adapter-io/test/own-availability.test.ts (1 test) 4ms
+ ✓ |unit| packages/cli/test/task-proposer.test.ts (1 test) 3ms
+
+ Test Files  527 passed | 2 skipped (529)
+      Tests  4119 passed | 12 skipped | 3 todo (4134)
+   Start at  17:01:46
+   Duration  978.00s (transform 8.53s, setup 0ms, collect 158.53s, tests 1581.84s, environment 153ms, prepare 57.41s)
+

@@ -1,0 +1,43 @@
+--- packages/opencode/test/maestro/governed-lifecycle.test.ts
++++ packages/opencode/test/maestro/governed-background-self-review.test.ts
+@@ -56,6 +56,7 @@
+     RuntimeFlags.node,
+     Ripgrep.node,
+   ]),
++  [[RuntimeFlags.node, RuntimeFlags.layer({ experimentalBackgroundSubagents: true })]],
+ )
+
+ const it = testEffect(layer)
+@@ -115,7 +116,7 @@
+   return { chat, user, assistant, sessions }
+ })
+
+-describe("Maestro governed lifecycle", () => {
++describe("Maestro governed background self-review", () => {
+   it.instance("records intake, direct approval, then exact governed child Task", () =>
+     Effect.gen(function* () {
+       const { chat, user, assistant, sessions } = yield* seed()
+@@ -222,11 +223,12 @@
+       yield* sessions.updateMessage(dispatchMessage)
+       const tool = yield* TaskTool
+       const def = yield* tool.init()
+-      yield* def.execute(
++      const dispatch = yield* def.execute(
+         {
+           description: "implement dark mode",
+           prompt: "implement dark mode",
+           subagent_type: "general",
++          background: true,
+           governed: {
+             sessionID: chat.id,
+             projectID: chat.projectID,
+@@ -254,6 +256,10 @@
+         },
+       )
+       expect(yield* sessions.children(chat.id)).toHaveLength(1)
++      expect(dispatch.metadata.background).toBe(true)
++      expect(dispatch.metadata.jobId).toBeTruthy()
++      expect(dispatch.output).toContain('state="running"')
++      expect(dispatch.output).toContain("Background task started")
+     }),
+   )

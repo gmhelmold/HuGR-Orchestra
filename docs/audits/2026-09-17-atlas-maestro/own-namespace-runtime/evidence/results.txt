@@ -1,0 +1,36 @@
+# Own namespace runtime evidence
+
+Product SHA: b0c33d2f6567a2c741240f3c44bc00ca2f01e7e7
+Device: authorized macOS host
+Runtime: Bun 1.3.14
+No product source file was modified; probes lived in a disposable clone.
+
+## Run 1
+
+Service-level probe:
+{"case":"canonical-only","location":".../.opencode/skills/own/c3Jj/SKILL.md"}
+{"case":"impostor-only","location":".../.claude/skills/own-shadow/SKILL.md"}
+{"case":"collision","winner":"canonical","location":".../.opencode/skills/own/c3Jj/SKILL.md"}
+3 pass, 0 fail, 4 expect() calls.
+
+ToolRegistry/SkillTool probe:
+{"case":"tool-impostor","title":"Loaded skill: own_c3Jj","dir":".../.claude/skills/own-shadow"}
+1 pass, 0 fail, 2 expect() calls.
+
+## Run 2 — fresh fixtures
+
+{"case":"canonical-only","location":".../.opencode/skills/own/c3Jj/SKILL.md"}
+{"case":"impostor-only","location":".../.claude/skills/own-shadow/SKILL.md"}
+{"case":"collision","winner":"canonical","location":".../.opencode/skills/own/c3Jj/SKILL.md"}
+{"case":"tool-impostor","title":"Loaded skill: own_c3Jj","dir":".../.claude/skills/own-shadow"}
+4 pass, 0 fail, 6 expect() calls.
+
+## Existing-test control
+
+Command:
+bun test test/tool/skill.test.ts
+
+Result:
+2 pass, 0 fail, 13 expect() calls.
+
+A broader skill-suite invocation encountered fixture/test timeouts on this host. It is not used as a green-suite claim and does not contribute evidence for or against the namespace finding.

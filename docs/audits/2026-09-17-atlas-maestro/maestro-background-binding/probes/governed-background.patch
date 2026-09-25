@@ -1,0 +1,27 @@
+--- packages/opencode/test/maestro/governed-lifecycle.test.ts
++++ packages/opencode/test/maestro/governed-background-audit.test.ts
+@@ -56,6 +56,7 @@
+     RuntimeFlags.node,
+     Ripgrep.node,
+   ]),
++  [[RuntimeFlags.node, RuntimeFlags.layer({ experimentalBackgroundSubagents: true })]],
+ )
+
+ const it = testEffect(layer)
+@@ -115,7 +116,7 @@
+   return { chat, user, assistant, sessions }
+ })
+
+-describe("Maestro governed lifecycle", () => {
++describe("Maestro governed background audit", () => {
+   it.instance("records intake, direct approval, then exact governed child Task", () =>
+     Effect.gen(function* () {
+       const { chat, user, assistant, sessions } = yield* seed()
+@@ -227,6 +228,7 @@
+           description: "implement dark mode",
+           prompt: "implement dark mode",
+           subagent_type: "general",
++          background: true,
+           governed: {
+             sessionID: chat.id,
+             projectID: chat.projectID,

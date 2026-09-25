@@ -1,0 +1,89 @@
+[
+  {
+    "variant": "direct",
+    "displayedMessageID": "msg_0b0ff0c39001It6w06TcgVQsFP",
+    "returnedMessageID": "msg_0b0ff0c39001It6w06TcgVQsFP",
+    "decision": {
+      "status": "APPROVED",
+      "decision": {
+        "presentationID": "apr_4a1fc2b9d094f698f5a18bb1e0aac7dcaba29a3139be2bc7007bdc1d6f48872b",
+        "approvalMessageID": "msg_0b0ff0c5200132m67V3z3rNy9c",
+        "sessionID": "ses_f4f00f8a1ffechU8B41V9TvhFD",
+        "planRevisionID": "plan-v1",
+        "validationRecordID": "validation-v1",
+        "actor": {
+          "projectId": "global",
+          "sessionId": "ses_f4f00f8a1ffechU8B41V9TvhFD",
+          "memberId": "maestro"
+        },
+        "revisionHash": "revision-hash",
+        "validationHash": "validation-hash",
+        "contextHash": "context-hash",
+        "policyHash": "policy-hash",
+        "taskHash": "task-hash",
+        "methodVersion": "audit-method-v1",
+        "outcome": "APPROVED",
+        "time": {
+          "created": 7
+        }
+      }
+    }
+  },
+  {
+    "variant": "redisplay-same-revision",
+    "displayedMessageID": "msg_0b0ff0f15001ldv1EWPej4jkTW",
+    "returnedMessageID": "msg_0b0ff0f06001vn7foupgY5Vfnj",
+    "decision": {
+      "status": "HOLD",
+      "reason": "reply-not-immediate"
+    }
+  },
+  {
+    "variant": "new-revision",
+    "displayedMessageID": "msg_0b0ff0ff7001vIUqVblCfVxMsw",
+    "returnedMessageID": "msg_0b0ff0ff7001vIUqVblCfVxMsw",
+    "decision": {
+      "status": "APPROVED",
+      "decision": {
+        "presentationID": "apr_8f3985c4bb9224c6c2e7bddabbb7f6a234958c558ad5a4fbb56a4d3a921a0cf1",
+        "approvalMessageID": "msg_0b0ff0fff001Z8q87D5AGTZcYv",
+        "sessionID": "ses_f4f00f070ffeiYR4fLA11N66mG",
+        "planRevisionID": "plan-v2",
+        "validationRecordID": "validation-v2",
+        "actor": {
+          "projectId": "global",
+          "sessionId": "ses_f4f00f070ffeiYR4fLA11N66mG",
+          "memberId": "maestro"
+        },
+        "revisionHash": "revision-hash",
+        "validationHash": "validation-hash",
+        "contextHash": "context-hash",
+        "policyHash": "policy-hash",
+        "taskHash": "task-hash",
+        "methodVersion": "audit-method-v1",
+        "outcome": "APPROVED",
+        "time": {
+          "created": 7
+        }
+      }
+    }
+  },
+  {
+    "variant": "synthetic",
+    "displayedMessageID": "msg_0b0ff1089001eOjqGY6cH3Y3am",
+    "returnedMessageID": "msg_0b0ff1089001eOjqGY6cH3Y3am",
+    "decision": {
+      "status": "HOLD",
+      "reason": "reply-synthetic"
+    }
+  },
+  {
+    "variant": "tampered-output",
+    "displayedMessageID": "msg_0b0ff1115001taWbLwYHxNFam2",
+    "returnedMessageID": "msg_0b0ff1115001taWbLwYHxNFam2",
+    "decision": {
+      "status": "HOLD",
+      "reason": "presentation-message-mismatch"
+    }
+  }
+]

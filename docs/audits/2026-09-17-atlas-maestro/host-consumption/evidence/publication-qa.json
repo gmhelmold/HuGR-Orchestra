@@ -1,0 +1,33 @@
+{
+  "markdownFilesChecked": 6,
+  "jsonParsed": 11,
+  "scriptBytesMatchExecutedCopies": true,
+  "independentChecks": [
+    {
+      "run": "first",
+      "exit": 1,
+      "controls": 5,
+      "desiredFailures": 6
+    },
+    {
+      "run": "second",
+      "exit": 1,
+      "controls": 5,
+      "desiredFailures": 6
+    }
+  ],
+  "sourceFilesWithReturnedRanges": 31,
+  "compiledJSCompared": 284,
+  "productTrackedDiffEmpty": true,
+  "errors": [],
+  "privacyCheck": "limited pattern inspection of generated evidence only; no universal guarantee",
+  "logNormalization": {
+    "file": "setup-missing-projector.log",
+    "operation": "rstrip each line",
+    "reason": "initial staged diff check flagged trailing spaces in source excerpts",
+    "outcomesChanged": false
+  },
+  "stagedDiffCheckExitAfterNormalization": 0,
+  "checksumVerification": "40 entries passed before initial publication",
+  "remoteCI": "not inspected; local test results are not remote CI results"
+}

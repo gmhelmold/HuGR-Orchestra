@@ -1,0 +1,15 @@
+{"path": "packages/core/test/preload.ts", "start": 1, "end": 5, "sha256": "ae2f3a7a8417ae795c0526c1462148c3e5c13fa8513e9a7241c16639b930f6bd", "gitBlob": "39b237d70a426e5e42bf9e1564ee55a2d25d5d68"}
+{"path": "packages/opencode/test/preload.ts", "start": 1, "end": 92, "sha256": "79fe5a30fec88144d9774203a62200e57144d891b5480255e7e3d07559232911", "gitBlob": "16b4789b0725b50cd9056f0ff9b9885bcb9139b3"}
+{"path": "packages/core/test/lib/tool.ts", "start": 1, "end": 20, "sha256": "aefb5f9751873d86857f911a5380f818719dbf8f5ed0bb722b01ffeb121586dc", "gitBlob": "a711e3118400a2a9bd5989caf2f5db965798d0b6"}
+{"path": "packages/core/package.json", "start": 1, "end": 132, "sha256": "2c78f4714da46859fdb19779a14139f039d30f891d9ef8e45f337641c56db235", "gitBlob": "0dbf20fc8756b0b64a2cfc71aff538300a09eacb"}
+{"path": "foundation/atlas/package.json", "start": 1, "end": 44, "sha256": "ba96e623f21698296b4a77b005c5c21fb35cf32cc975f17a7edc7e09756546b7", "gitBlob": "700eb8c7d4bf7a5ce2c765f0d3a0bbd2b3c6e2ec"}
+{"path": "packages/core/src/config/plugin/skill.ts", "start": 1, "end": 50, "sha256": "56c5dbea04e93cdaad6252ec763ed603e0d12e0f32858926f220ac27af0cd9e9", "gitBlob": "765992a765b25554be9de3e47443e35d54aed3ce"}
+{"path": "packages/core/src/plugin/host.ts", "start": 180, "end": 219, "sha256": "e5ac77b507c0f14c0b94194b17ceb30f739abaaac80fc559e5c5a9255d802639", "gitBlob": "a9d084709efc69d5c376c227eea122c46bffc306"}
+{"path": "packages/core/src/skill.ts", "start": 1, "end": 132, "sha256": "9c99a8e52b8aa2ae10dbc14844b9729664728d242cd7038aaffade11c61c77e3", "gitBlob": "be1cd1d49adcc18643ca3e799d1b00af5313b786"}
+{"path": "packages/core/src/state.ts", "start": 50, "end": 128, "sha256": "7fc1a20a7c602f79a3829da35ea841a690ba31ac030c33d93a4d26d6c18d941c", "gitBlob": "ab3457fc18143c10d830979dbde3a9375e194ccf"}
+{"path": "packages/opencode/src/command/index.ts", "start": 128, "end": 154, "sha256": "172cfbee8a14e8b8a37b5993e4ffb4b7ce43b67e8ea27c2b3ad579d350ea99d9", "gitBlob": "057754cd9ef879d18efb5934232eec079732d817"}
+{"path": "packages/opencode/src/session/prompt.ts", "start": 1384, "end": 1442, "sha256": "eb1ff464dd64be4179101cabb52ccdef41ad4553282ec7dfd6a7b83c61f20392", "gitBlob": "a0736c119d702e319d0778196aaf54a97d3654e8"}
+{"path": "packages/opencode/src/session/prompt.ts", "start": 1617, "end": 1628, "sha256": "eb1ff464dd64be4179101cabb52ccdef41ad4553282ec7dfd6a7b83c61f20392", "gitBlob": "a0736c119d702e319d0778196aaf54a97d3654e8"}
+{"path": "packages/schema/src/skill.ts", "start": 1, "end": 55, "sha256": "cbeed35f4d44777a7abfe4883d955aa01c832e438ece4f6515fb4956a2b6893f", "gitBlob": "ec299180ed0b5cedcf33e892a8b27a6382c423e4"}
+{"path": "packages/core/src/tool/skill.ts", "start": 60, "end": 107, "sha256": "48a19a835c1d5b9fd46dbe061bc810cc58e404c5f37ebf182deecf63d1cd2fc0", "gitBlob": "1f8b12290354aba536520c7b1416719247edca4c"}
+{"path": "foundation/atlas/packages/retrieval/src/own-artifact.ts", "start": 95, "end": 192, "sha256": "11b49d190c923a3de2633084a88b611e349cb1a9d33253f4f1915fe84486e1f6", "gitBlob": "3f8ff4c6d7f01b6e2071652b764b06680798420b"}

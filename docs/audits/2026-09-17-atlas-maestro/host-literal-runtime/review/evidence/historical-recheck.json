@@ -1,0 +1,282 @@
+{
+  "originalCompiledEntries": 819,
+  "compiledDifferences": [],
+  "observations": [
+    {
+      "file": "host-literal-1",
+      "checks": [
+        {
+          "case": "own-tool-dollar",
+          "observedMatchesCapture": true,
+          "artifactContainsOriginal": true,
+          "literalPreserved": true,
+          "ordinary": false
+        },
+        {
+          "case": "own-command-dollar",
+          "observedMatchesCapture": true,
+          "artifactContainsOriginal": true,
+          "literalPreserved": false,
+          "ordinary": false
+        },
+        {
+          "case": "own-command-arguments",
+          "observedMatchesCapture": true,
+          "artifactContainsOriginal": true,
+          "literalPreserved": false,
+          "ordinary": false
+        },
+        {
+          "case": "own-command-money",
+          "observedMatchesCapture": true,
+          "artifactContainsOriginal": true,
+          "literalPreserved": false,
+          "ordinary": false
+        },
+        {
+          "case": "own-command-path",
+          "observedMatchesCapture": true,
+          "artifactContainsOriginal": true,
+          "literalPreserved": false,
+          "ordinary": false
+        },
+        {
+          "case": "own-command-argument-value",
+          "observedMatchesCapture": true,
+          "artifactContainsOriginal": true,
+          "literalPreserved": false,
+          "ordinary": false
+        },
+        {
+          "case": "own-command-plain",
+          "observedMatchesCapture": true,
+          "artifactContainsOriginal": true,
+          "literalPreserved": true,
+          "ordinary": false
+        },
+        {
+          "case": "own-tool-path",
+          "observedMatchesCapture": true,
+          "artifactContainsOriginal": true,
+          "literalPreserved": true,
+          "ordinary": false
+        },
+        {
+          "case": "ordinary-command-control",
+          "observedMatchesCapture": true,
+          "artifactContainsOriginal": true,
+          "literalPreserved": false,
+          "ordinary": true
+        }
+      ]
+    },
+    {
+      "file": "host-literal-2",
+      "checks": [
+        {
+          "case": "own-tool-dollar",
+          "observedMatchesCapture": true,
+          "artifactContainsOriginal": true,
+          "literalPreserved": true,
+          "ordinary": false
+        },
+        {
+          "case": "own-command-dollar",
+          "observedMatchesCapture": true,
+          "artifactContainsOriginal": true,
+          "literalPreserved": false,
+          "ordinary": false
+        },
+        {
+          "case": "own-command-arguments",
+          "observedMatchesCapture": true,
+          "artifactContainsOriginal": true,
+          "literalPreserved": false,
+          "ordinary": false
+        },
+        {
+          "case": "own-command-money",
+          "observedMatchesCapture": true,
+          "artifactContainsOriginal": true,
+          "literalPreserved": false,
+          "ordinary": false
+        },
+        {
+          "case": "own-command-path",
+          "observedMatchesCapture": true,
+          "artifactContainsOriginal": true,
+          "literalPreserved": false,
+          "ordinary": false
+        },
+        {
+          "case": "own-command-argument-value",
+          "observedMatchesCapture": true,
+          "artifactContainsOriginal": true,
+          "literalPreserved": false,
+          "ordinary": false
+        },
+        {
+          "case": "own-command-plain",
+          "observedMatchesCapture": true,
+          "artifactContainsOriginal": true,
+          "literalPreserved": true,
+          "ordinary": false
+        },
+        {
+          "case": "own-tool-path",
+          "observedMatchesCapture": true,
+          "artifactContainsOriginal": true,
+          "literalPreserved": true,
+          "ordinary": false
+        },
+        {
+          "case": "ordinary-command-control",
+          "observedMatchesCapture": true,
+          "artifactContainsOriginal": true,
+          "literalPreserved": false,
+          "ordinary": true
+        }
+      ]
+    },
+    {
+      "file": "v2-replacement-1",
+      "checks": [
+        {
+          "case": "embedded-cached-replace",
+          "disposalEmpty": true,
+          "activeEmbedded": "AUDIT_VERSION_B",
+          "listed": [
+            "AUDIT_VERSION_A"
+          ],
+          "reloaded": [
+            "AUDIT_VERSION_A"
+          ],
+          "toolContainsA": true,
+          "toolContainsB": false
+        },
+        {
+          "case": "embedded-uncached-replace",
+          "disposalEmpty": true,
+          "activeEmbedded": "AUDIT_VERSION_B",
+          "listed": [
+            "AUDIT_VERSION_B"
+          ],
+          "reloaded": [
+            "AUDIT_VERSION_B"
+          ],
+          "toolContainsA": false,
+          "toolContainsB": true
+        },
+        {
+          "case": "embedded-new-name",
+          "disposalEmpty": true,
+          "activeEmbedded": "AUDIT_VERSION_B",
+          "listed": [
+            "AUDIT_VERSION_B"
+          ],
+          "reloaded": [
+            "AUDIT_VERSION_B"
+          ],
+          "toolContainsA": false,
+          "toolContainsB": true
+        },
+        {
+          "case": "directory-reload",
+          "disposalEmpty": true,
+          "activeEmbedded": null,
+          "listed": [
+            "AUDIT_VERSION_A"
+          ],
+          "reloaded": [
+            "AUDIT_VERSION_A"
+          ],
+          "toolContainsA": true,
+          "toolContainsB": false
+        },
+        {
+          "case": "directory-new-path",
+          "disposalEmpty": true,
+          "activeEmbedded": null,
+          "listed": [
+            "AUDIT_VERSION_B"
+          ],
+          "reloaded": [
+            "AUDIT_VERSION_B"
+          ],
+          "toolContainsA": false,
+          "toolContainsB": true
+        }
+      ]
+    },
+    {
+      "file": "v2-replacement-2",
+      "checks": [
+        {
+          "case": "embedded-cached-replace",
+          "disposalEmpty": true,
+          "activeEmbedded": "AUDIT_VERSION_B",
+          "listed": [
+            "AUDIT_VERSION_A"
+          ],
+          "reloaded": [
+            "AUDIT_VERSION_A"
+          ],
+          "toolContainsA": true,
+          "toolContainsB": false
+        },
+        {
+          "case": "embedded-uncached-replace",
+          "disposalEmpty": true,
+          "activeEmbedded": "AUDIT_VERSION_B",
+          "listed": [
+            "AUDIT_VERSION_B"
+          ],
+          "reloaded": [
+            "AUDIT_VERSION_B"
+          ],
+          "toolContainsA": false,
+          "toolContainsB": true
+        },
+        {
+          "case": "embedded-new-name",
+          "disposalEmpty": true,
+          "activeEmbedded": "AUDIT_VERSION_B",
+          "listed": [
+            "AUDIT_VERSION_B"
+          ],
+          "reloaded": [
+            "AUDIT_VERSION_B"
+          ],
+          "toolContainsA": false,
+          "toolContainsB": true
+        },
+        {
+          "case": "directory-reload",
+          "disposalEmpty": true,
+          "activeEmbedded": null,
+          "listed": [
+            "AUDIT_VERSION_A"
+          ],
+          "reloaded": [
+            "AUDIT_VERSION_A"
+          ],
+          "toolContainsA": true,
+          "toolContainsB": false
+        },
+        {
+          "case": "directory-new-path",
+          "disposalEmpty": true,
+          "activeEmbedded": null,
+          "listed": [
+            "AUDIT_VERSION_B"
+          ],
+          "reloaded": [
+            "AUDIT_VERSION_B"
+          ],
+          "toolContainsA": false,
+          "toolContainsB": true
+        }
+      ]
+    }
+  ]
+}

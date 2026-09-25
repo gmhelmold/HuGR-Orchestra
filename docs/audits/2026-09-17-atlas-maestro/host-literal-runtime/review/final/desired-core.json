@@ -1,0 +1,194 @@
+[
+  {
+    "assertionMode": "desired",
+    "mode": "embedded-cached-replace",
+    "primed": true,
+    "afterDisposal": [],
+    "sources": [
+      {
+        "type": "embedded",
+        "skill": {
+          "name": "audit-replace",
+          "description": "AUDIT_VERSION_B",
+          "location": "/private/tmp/opencode-core-test-PF9FNL/first/audit-replace.md",
+          "content": "AUDIT_VERSION_B"
+        }
+      }
+    ],
+    "listed": [
+      {
+        "name": "audit-replace",
+        "description": "AUDIT_VERSION_A",
+        "location": "/private/tmp/opencode-core-test-PF9FNL/first/audit-replace.md",
+        "content": "AUDIT_VERSION_A"
+      }
+    ],
+    "reloaded": [
+      {
+        "name": "audit-replace",
+        "description": "AUDIT_VERSION_A",
+        "location": "/private/tmp/opencode-core-test-PF9FNL/first/audit-replace.md",
+        "content": "AUDIT_VERSION_A"
+      }
+    ],
+    "tool": {
+      "type": "text",
+      "value": "<skill_content name=\"audit-replace\">\n# Skill: audit-replace\n\nAUDIT_VERSION_A\n\nBase directory for this skill: /private/tmp/opencode-core-test-PF9FNL/first\nRelative paths in this skill (e.g., scripts/, reference/) are relative to this base directory.\nNote: file list is sampled.\n\n<skill_files>\n</skill_files>\n</skill_content>"
+    },
+    "expected": "AUDIT_VERSION_B",
+    "desiredSourceAgreement": false,
+    "desiredReloadAgreement": false
+  },
+  {
+    "assertionMode": "desired",
+    "mode": "embedded-uncached-replace",
+    "primed": false,
+    "afterDisposal": [],
+    "sources": [
+      {
+        "type": "embedded",
+        "skill": {
+          "name": "audit-replace",
+          "description": "AUDIT_VERSION_B",
+          "location": "/private/tmp/opencode-core-test-wRMPau/first/audit-replace.md",
+          "content": "AUDIT_VERSION_B"
+        }
+      }
+    ],
+    "listed": [
+      {
+        "name": "audit-replace",
+        "description": "AUDIT_VERSION_B",
+        "location": "/private/tmp/opencode-core-test-wRMPau/first/audit-replace.md",
+        "content": "AUDIT_VERSION_B"
+      }
+    ],
+    "reloaded": [
+      {
+        "name": "audit-replace",
+        "description": "AUDIT_VERSION_B",
+        "location": "/private/tmp/opencode-core-test-wRMPau/first/audit-replace.md",
+        "content": "AUDIT_VERSION_B"
+      }
+    ],
+    "tool": {
+      "type": "text",
+      "value": "<skill_content name=\"audit-replace\">\n# Skill: audit-replace\n\nAUDIT_VERSION_B\n\nBase directory for this skill: /private/tmp/opencode-core-test-wRMPau/first\nRelative paths in this skill (e.g., scripts/, reference/) are relative to this base directory.\nNote: file list is sampled.\n\n<skill_files>\n</skill_files>\n</skill_content>"
+    },
+    "expected": "AUDIT_VERSION_B",
+    "desiredSourceAgreement": true,
+    "desiredReloadAgreement": true
+  },
+  {
+    "assertionMode": "desired",
+    "mode": "embedded-new-name",
+    "primed": true,
+    "afterDisposal": [],
+    "sources": [
+      {
+        "type": "embedded",
+        "skill": {
+          "name": "audit-replace-new",
+          "description": "AUDIT_VERSION_B",
+          "location": "/private/tmp/opencode-core-test-Osm6DX/first/audit-replace-new.md",
+          "content": "AUDIT_VERSION_B"
+        }
+      }
+    ],
+    "listed": [
+      {
+        "name": "audit-replace-new",
+        "description": "AUDIT_VERSION_B",
+        "location": "/private/tmp/opencode-core-test-Osm6DX/first/audit-replace-new.md",
+        "content": "AUDIT_VERSION_B"
+      }
+    ],
+    "reloaded": [
+      {
+        "name": "audit-replace-new",
+        "description": "AUDIT_VERSION_B",
+        "location": "/private/tmp/opencode-core-test-Osm6DX/first/audit-replace-new.md",
+        "content": "AUDIT_VERSION_B"
+      }
+    ],
+    "tool": {
+      "type": "text",
+      "value": "<skill_content name=\"audit-replace-new\">\n# Skill: audit-replace-new\n\nAUDIT_VERSION_B\n\nBase directory for this skill: /private/tmp/opencode-core-test-Osm6DX/first\nRelative paths in this skill (e.g., scripts/, reference/) are relative to this base directory.\nNote: file list is sampled.\n\n<skill_files>\n</skill_files>\n</skill_content>"
+    },
+    "expected": "AUDIT_VERSION_B",
+    "desiredSourceAgreement": true,
+    "desiredReloadAgreement": true
+  },
+  {
+    "assertionMode": "desired",
+    "mode": "directory-reload",
+    "primed": true,
+    "afterDisposal": [],
+    "sources": [
+      {
+        "type": "directory",
+        "path": "/private/tmp/opencode-core-test-e29x3d/first"
+      }
+    ],
+    "listed": [
+      {
+        "name": "audit-replace",
+        "description": "first",
+        "location": "/private/tmp/opencode-core-test-e29x3d/first/audit-replace.md",
+        "content": "AUDIT_VERSION_A"
+      }
+    ],
+    "reloaded": [
+      {
+        "name": "audit-replace",
+        "description": "first",
+        "location": "/private/tmp/opencode-core-test-e29x3d/first/audit-replace.md",
+        "content": "AUDIT_VERSION_A"
+      }
+    ],
+    "tool": {
+      "type": "text",
+      "value": "<skill_content name=\"audit-replace\">\n# Skill: audit-replace\n\nAUDIT_VERSION_A\n\nBase directory for this skill: /private/tmp/opencode-core-test-e29x3d/first\nRelative paths in this skill (e.g., scripts/, reference/) are relative to this base directory.\nNote: file list is sampled.\n\n<skill_files>\n</skill_files>\n</skill_content>"
+    },
+    "currentDiskContent": "---\nname: audit-replace\ndescription: second\n---\nAUDIT_VERSION_B",
+    "expected": "AUDIT_VERSION_B",
+    "desiredSourceAgreement": false,
+    "desiredReloadAgreement": false
+  },
+  {
+    "assertionMode": "desired",
+    "mode": "directory-new-path",
+    "primed": true,
+    "afterDisposal": [],
+    "sources": [
+      {
+        "type": "directory",
+        "path": "/private/tmp/opencode-core-test-rIpSEH/second"
+      }
+    ],
+    "listed": [
+      {
+        "name": "audit-replace",
+        "description": "second",
+        "location": "/private/tmp/opencode-core-test-rIpSEH/second/audit-replace.md",
+        "content": "AUDIT_VERSION_B"
+      }
+    ],
+    "reloaded": [
+      {
+        "name": "audit-replace",
+        "description": "second",
+        "location": "/private/tmp/opencode-core-test-rIpSEH/second/audit-replace.md",
+        "content": "AUDIT_VERSION_B"
+      }
+    ],
+    "tool": {
+      "type": "text",
+      "value": "<skill_content name=\"audit-replace\">\n# Skill: audit-replace\n\nAUDIT_VERSION_B\n\nBase directory for this skill: /private/tmp/opencode-core-test-rIpSEH/second\nRelative paths in this skill (e.g., scripts/, reference/) are relative to this base directory.\nNote: file list is sampled.\n\n<skill_files>\n</skill_files>\n</skill_content>"
+    },
+    "currentDiskContent": "---\nname: audit-replace\ndescription: second\n---\nAUDIT_VERSION_B",
+    "expected": "AUDIT_VERSION_B",
+    "desiredSourceAgreement": true,
+    "desiredReloadAgreement": true
+  }
+]

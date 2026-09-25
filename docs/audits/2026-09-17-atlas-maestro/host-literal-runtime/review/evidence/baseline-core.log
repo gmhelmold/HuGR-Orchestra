@@ -1,0 +1,26 @@
+bun test v1.3.14 (0d9b296a)
+
+test/tool-skill.test.ts:
+(pass) SkillTool > lists available skills, authorizes the selected name, and loads model-facing content [116.09ms]
+
+test/state.test.ts:
+(pass) State > commits a transform atomically when its updater is interrupted [15.86ms]
+(pass) State > runs effectful transforms during every reload [2.61ms]
+(pass) State > disposes a transform once and rebuilds remaining state [3.80ms]
+(pass) State > batches automatic rebuilds [4.83ms]
+
+test/skill.test.ts:
+(pass) SkillV2 > registers sources and resolves later source precedence [52.78ms]
+(pass) SkillV2 > loads URL sources and filters skills for agents [16.96ms]
+
+test/skill/guidance.test.ts:
+(pass) SkillGuidance > renders described agent skills and reconciles the complete available list [7.56ms]
+(pass) SkillGuidance > omits guidance when the selected agent denies all skills [3.98ms]
+(pass) SkillGuidance > omits guidance when a resource-specific denial follows the global denial [1.56ms]
+(pass) SkillGuidance > retains specifically allowed skills after a global denial [4.05ms]
+(pass) SkillGuidance > omits guidance when a specifically allowed skill is denied again [1.69ms]
+
+ 12 pass
+ 0 fail
+ 32 expect() calls
+Ran 12 tests across 4 files. [1.88s]

@@ -1,0 +1,26 @@
+[
+  {
+    "case": "existing-output",
+    "passed": true,
+    "exit": 1,
+    "expectedErrorPresent": true,
+    "existingEvidencePreserved": true,
+    "invalidOutputAbsent": true
+  },
+  {
+    "case": "missing-output",
+    "passed": true,
+    "exit": 1,
+    "expectedErrorPresent": true,
+    "existingEvidencePreserved": true,
+    "invalidOutputAbsent": true
+  },
+  {
+    "case": "invalid-mode",
+    "passed": true,
+    "exit": 1,
+    "expectedErrorPresent": true,
+    "existingEvidencePreserved": true,
+    "invalidOutputAbsent": true
+  }
+]

@@ -1,0 +1,8 @@
+{"name": "observed-core", "cwd": "packages/core", "args": ["bun", "test", "test/audit-skill-replacement.test.ts", "--timeout", "60000"], "assertionMode": "observed", "exit": 0, "seconds": 0.92}
+{"name": "observed-host", "cwd": "packages/opencode", "args": ["bun", "test", "test/session/audit-own-literal.test.ts", "--timeout", "60000"], "assertionMode": "observed", "exit": 0, "seconds": 47.79}
+{"name": "desired-core", "cwd": "packages/core", "args": ["bun", "test", "test/audit-skill-replacement.test.ts", "--timeout", "60000"], "assertionMode": "desired", "exit": 1, "seconds": 1.6}
+{"name": "desired-host", "cwd": "packages/opencode", "args": ["bun", "test", "test/session/audit-own-literal.test.ts", "--timeout", "60000"], "assertionMode": "desired", "exit": 1, "seconds": 59.41}
+{"name": "baseline-core", "cwd": "packages/core", "args": ["bun", "test", "test/state.test.ts", "test/skill.test.ts", "test/tool-skill.test.ts", "test/skill/guidance.test.ts", "--timeout", "60000"], "assertionMode": null, "exit": 0, "seconds": 1.91}
+{"name": "baseline-host", "cwd": "packages/opencode", "args": ["bun", "test", "test/maestro", "test/skill/skill.test.ts", "test/tool/skill.test.ts", "--timeout", "60000"], "assertionMode": null, "exit": 0, "seconds": 27.28}
+{"name": "typecheck-core", "cwd": "packages/core", "args": ["bun", "run", "typecheck"], "assertionMode": null, "exit": 0, "seconds": 8.98}
+{"name": "typecheck-host", "cwd": "packages/opencode", "args": ["bun", "run", "typecheck"], "assertionMode": null, "exit": 0, "seconds": 18.26}

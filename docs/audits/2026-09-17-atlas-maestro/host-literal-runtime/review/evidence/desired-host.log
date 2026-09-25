@@ -1,0 +1,262 @@
+bun test v1.3.14 (0d9b296a)
+
+test/session/audit-own-literal.test.ts:
+(pass) own-tool-dollar [7992.27ms]
+[00:35:27.681] ERROR (#10467): 123 |       renderedArtifact: artifact, capturedMessages: nonSystem,
+124 |       sourceReadback: readFileSync(path.join(dir, source), "utf8"),
+125 |     })
+126 |     // Preserve the capture before the desired invariant fails on the audited product.
+127 |     const expected = assertionMode === "desired" && scenario.route !== "ordinary" ? scenario.text : scenario.expected
+128 |     expect(delivered).toEqual([expected])
+      ^
+error: expect(received).toEqual(expected)
+
+  [
+-   "The module returns the literal "$1".",
++   "The module returns the literal "".",
+  ]
+
+- Expected  - 1
++ Received  + 1
+
+      at toEqual (unknown:1:1)
+      at <AUDIT>/runtime/packages/opencode/test/session/audit-own-literal.test.ts:128:23
+
+123 |       renderedArtifact: artifact, capturedMessages: nonSystem,
+124 |       sourceReadback: readFileSync(path.join(dir, source), "utf8"),
+125 |     })
+126 |     // Preserve the capture before the desired invariant fails on the audited product.
+127 |     const expected = assertionMode === "desired" && scenario.route !== "ordinary" ? scenario.text : scenario.expected
+128 |     expect(delivered).toEqual([expected])
+      ^
+error: expect(received).toEqual(expected)
+
+  [
+-   "The module returns the literal "$1".",
++   "The module returns the literal "".",
+  ]
+
+- Expected  - 1
++ Received  + 1
+
+      at toEqual (unknown:1:1)
+      at <AUDIT>/runtime/packages/opencode/test/session/audit-own-literal.test.ts:128:23
+      at ~effect/Effect/successCont (/private/tmp/hugr-atlas-maestro-audit.cHgl1X/repo/node_modules/.bun/effect@4.0.0-beta.83/node_modules/effect/dist/internal/effect.js:910:23)
+      at runLoop (/private/tmp/hugr-atlas-maestro-audit.cHgl1X/repo/node_modules/.bun/effect@4.0.0-beta.83/node_modules/effect/dist/internal/effect.js:420:66)
+      at evaluate (/private/tmp/hugr-atlas-maestro-audit.cHgl1X/repo/node_modules/.bun/effect@4.0.0-beta.83/node_modules/effect/dist/internal/effect.js:380:20)
+      at /private/tmp/hugr-atlas-maestro-audit.cHgl1X/repo/node_modules/.bun/effect@4.0.0-beta.83/node_modules/effect/dist/internal/effect.js:734:14
+      at doneUnsafe (/private/tmp/hugr-atlas-maestro-audit.cHgl1X/repo/node_modules/.bun/effect@4.0.0-beta.83/node_modules/effect/dist/Deferred.js:657:20)
+      at ~effect/Effect/evaluate (/private/tmp/hugr-atlas-maestro-audit.cHgl1X/repo/node_modules/.bun/effect@4.0.0-beta.83/node_modules/effect/dist/internal/effect.js:612:37)
+      at runLoop (/private/tmp/hugr-atlas-maestro-audit.cHgl1X/repo/node_modules/.bun/effect@4.0.0-beta.83/node_modules/effect/dist/internal/effect.js:420:66)
+      at evaluate (/private/tmp/hugr-atlas-maestro-audit.cHgl1X/repo/node_modules/.bun/effect@4.0.0-beta.83/node_modules/effect/dist/internal/effect.js:380:20)
+      at /private/tmp/hugr-atlas-maestro-audit.cHgl1X/repo/node_modules/.bun/effect@4.0.0-beta.83/node_modules/effect/dist/internal/effect.js:734:14
+      at processTicksAndRejections (unknown:7:39)
+(fail) own-command-dollar [4205.94ms]
+[00:35:33.645] ERROR (#20862): 123 |       renderedArtifact: artifact, capturedMessages: nonSystem,
+124 |       sourceReadback: readFileSync(path.join(dir, source), "utf8"),
+125 |     })
+126 |     // Preserve the capture before the desired invariant fails on the audited product.
+127 |     const expected = assertionMode === "desired" && scenario.route !== "ordinary" ? scenario.text : scenario.expected
+128 |     expect(delivered).toEqual([expected])
+      ^
+error: expect(received).toEqual(expected)
+
+  [
+-   "The module returns the literal "$ARGUMENTS".",
++   "The module returns the literal "".",
+  ]
+
+- Expected  - 1
++ Received  + 1
+
+      at toEqual (unknown:1:1)
+      at <AUDIT>/runtime/packages/opencode/test/session/audit-own-literal.test.ts:128:23
+
+123 |       renderedArtifact: artifact, capturedMessages: nonSystem,
+124 |       sourceReadback: readFileSync(path.join(dir, source), "utf8"),
+125 |     })
+126 |     // Preserve the capture before the desired invariant fails on the audited product.
+127 |     const expected = assertionMode === "desired" && scenario.route !== "ordinary" ? scenario.text : scenario.expected
+128 |     expect(delivered).toEqual([expected])
+      ^
+error: expect(received).toEqual(expected)
+
+  [
+-   "The module returns the literal "$ARGUMENTS".",
++   "The module returns the literal "".",
+  ]
+
+- Expected  - 1
++ Received  + 1
+
+      at toEqual (unknown:1:1)
+      at <AUDIT>/runtime/packages/opencode/test/session/audit-own-literal.test.ts:128:23
+      at ~effect/Effect/successCont (/private/tmp/hugr-atlas-maestro-audit.cHgl1X/repo/node_modules/.bun/effect@4.0.0-beta.83/node_modules/effect/dist/internal/effect.js:910:23)
+      at runLoop (/private/tmp/hugr-atlas-maestro-audit.cHgl1X/repo/node_modules/.bun/effect@4.0.0-beta.83/node_modules/effect/dist/internal/effect.js:420:66)
+      at evaluate (/private/tmp/hugr-atlas-maestro-audit.cHgl1X/repo/node_modules/.bun/effect@4.0.0-beta.83/node_modules/effect/dist/internal/effect.js:380:20)
+      at /private/tmp/hugr-atlas-maestro-audit.cHgl1X/repo/node_modules/.bun/effect@4.0.0-beta.83/node_modules/effect/dist/internal/effect.js:734:14
+      at doneUnsafe (/private/tmp/hugr-atlas-maestro-audit.cHgl1X/repo/node_modules/.bun/effect@4.0.0-beta.83/node_modules/effect/dist/Deferred.js:657:20)
+      at ~effect/Effect/evaluate (/private/tmp/hugr-atlas-maestro-audit.cHgl1X/repo/node_modules/.bun/effect@4.0.0-beta.83/node_modules/effect/dist/internal/effect.js:612:37)
+      at runLoop (/private/tmp/hugr-atlas-maestro-audit.cHgl1X/repo/node_modules/.bun/effect@4.0.0-beta.83/node_modules/effect/dist/internal/effect.js:420:66)
+      at evaluate (/private/tmp/hugr-atlas-maestro-audit.cHgl1X/repo/node_modules/.bun/effect@4.0.0-beta.83/node_modules/effect/dist/internal/effect.js:380:20)
+      at /private/tmp/hugr-atlas-maestro-audit.cHgl1X/repo/node_modules/.bun/effect@4.0.0-beta.83/node_modules/effect/dist/internal/effect.js:734:14
+      at processTicksAndRejections (unknown:7:39)
+(fail) own-command-arguments [5964.06ms]
+[00:35:38.919] ERROR (#31260): 123 |       renderedArtifact: artifact, capturedMessages: nonSystem,
+124 |       sourceReadback: readFileSync(path.join(dir, source), "utf8"),
+125 |     })
+126 |     // Preserve the capture before the desired invariant fails on the audited product.
+127 |     const expected = assertionMode === "desired" && scenario.route !== "ordinary" ? scenario.text : scenario.expected
+128 |     expect(delivered).toEqual([expected])
+      ^
+error: expect(received).toEqual(expected)
+
+  [
+-   "The documented threshold is $100.",
++   "The documented threshold is .",
+  ]
+
+- Expected  - 1
++ Received  + 1
+
+      at toEqual (unknown:1:1)
+      at <AUDIT>/runtime/packages/opencode/test/session/audit-own-literal.test.ts:128:23
+
+123 |       renderedArtifact: artifact, capturedMessages: nonSystem,
+124 |       sourceReadback: readFileSync(path.join(dir, source), "utf8"),
+125 |     })
+126 |     // Preserve the capture before the desired invariant fails on the audited product.
+127 |     const expected = assertionMode === "desired" && scenario.route !== "ordinary" ? scenario.text : scenario.expected
+128 |     expect(delivered).toEqual([expected])
+      ^
+error: expect(received).toEqual(expected)
+
+  [
+-   "The documented threshold is $100.",
++   "The documented threshold is .",
+  ]
+
+- Expected  - 1
++ Received  + 1
+
+      at toEqual (unknown:1:1)
+      at <AUDIT>/runtime/packages/opencode/test/session/audit-own-literal.test.ts:128:23
+      at ~effect/Effect/successCont (/private/tmp/hugr-atlas-maestro-audit.cHgl1X/repo/node_modules/.bun/effect@4.0.0-beta.83/node_modules/effect/dist/internal/effect.js:910:23)
+      at runLoop (/private/tmp/hugr-atlas-maestro-audit.cHgl1X/repo/node_modules/.bun/effect@4.0.0-beta.83/node_modules/effect/dist/internal/effect.js:420:66)
+      at evaluate (/private/tmp/hugr-atlas-maestro-audit.cHgl1X/repo/node_modules/.bun/effect@4.0.0-beta.83/node_modules/effect/dist/internal/effect.js:380:20)
+      at /private/tmp/hugr-atlas-maestro-audit.cHgl1X/repo/node_modules/.bun/effect@4.0.0-beta.83/node_modules/effect/dist/internal/effect.js:734:14
+      at doneUnsafe (/private/tmp/hugr-atlas-maestro-audit.cHgl1X/repo/node_modules/.bun/effect@4.0.0-beta.83/node_modules/effect/dist/Deferred.js:657:20)
+      at ~effect/Effect/evaluate (/private/tmp/hugr-atlas-maestro-audit.cHgl1X/repo/node_modules/.bun/effect@4.0.0-beta.83/node_modules/effect/dist/internal/effect.js:612:37)
+      at runLoop (/private/tmp/hugr-atlas-maestro-audit.cHgl1X/repo/node_modules/.bun/effect@4.0.0-beta.83/node_modules/effect/dist/internal/effect.js:420:66)
+      at evaluate (/private/tmp/hugr-atlas-maestro-audit.cHgl1X/repo/node_modules/.bun/effect@4.0.0-beta.83/node_modules/effect/dist/internal/effect.js:380:20)
+      at /private/tmp/hugr-atlas-maestro-audit.cHgl1X/repo/node_modules/.bun/effect@4.0.0-beta.83/node_modules/effect/dist/internal/effect.js:734:14
+      at processTicksAndRejections (unknown:7:39)
+(fail) own-command-money [5273.93ms]
+[00:35:43.003] ERROR (#41658): 123 |       renderedArtifact: artifact, capturedMessages: nonSystem,
+124 |       sourceReadback: readFileSync(path.join(dir, source), "utf8"),
+125 |     })
+126 |     // Preserve the capture before the desired invariant fails on the audited product.
+127 |     const expected = assertionMode === "desired" && scenario.route !== "ordinary" ? scenario.text : scenario.expected
+128 |     expect(delivered).toEqual([expected])
+      ^
+error: expect(received).toEqual(expected)
+
+  [
+-   "The source path is src/cost$1.ts.",
++   "The source path is src/cost.ts.",
+  ]
+
+- Expected  - 1
++ Received  + 1
+
+      at toEqual (unknown:1:1)
+      at <AUDIT>/runtime/packages/opencode/test/session/audit-own-literal.test.ts:128:23
+
+123 |       renderedArtifact: artifact, capturedMessages: nonSystem,
+124 |       sourceReadback: readFileSync(path.join(dir, source), "utf8"),
+125 |     })
+126 |     // Preserve the capture before the desired invariant fails on the audited product.
+127 |     const expected = assertionMode === "desired" && scenario.route !== "ordinary" ? scenario.text : scenario.expected
+128 |     expect(delivered).toEqual([expected])
+      ^
+error: expect(received).toEqual(expected)
+
+  [
+-   "The source path is src/cost$1.ts.",
++   "The source path is src/cost.ts.",
+  ]
+
+- Expected  - 1
++ Received  + 1
+
+      at toEqual (unknown:1:1)
+      at <AUDIT>/runtime/packages/opencode/test/session/audit-own-literal.test.ts:128:23
+      at ~effect/Effect/successCont (/private/tmp/hugr-atlas-maestro-audit.cHgl1X/repo/node_modules/.bun/effect@4.0.0-beta.83/node_modules/effect/dist/internal/effect.js:910:23)
+      at runLoop (/private/tmp/hugr-atlas-maestro-audit.cHgl1X/repo/node_modules/.bun/effect@4.0.0-beta.83/node_modules/effect/dist/internal/effect.js:420:66)
+      at evaluate (/private/tmp/hugr-atlas-maestro-audit.cHgl1X/repo/node_modules/.bun/effect@4.0.0-beta.83/node_modules/effect/dist/internal/effect.js:380:20)
+      at /private/tmp/hugr-atlas-maestro-audit.cHgl1X/repo/node_modules/.bun/effect@4.0.0-beta.83/node_modules/effect/dist/internal/effect.js:734:14
+      at doneUnsafe (/private/tmp/hugr-atlas-maestro-audit.cHgl1X/repo/node_modules/.bun/effect@4.0.0-beta.83/node_modules/effect/dist/Deferred.js:657:20)
+      at ~effect/Effect/evaluate (/private/tmp/hugr-atlas-maestro-audit.cHgl1X/repo/node_modules/.bun/effect@4.0.0-beta.83/node_modules/effect/dist/internal/effect.js:612:37)
+      at runLoop (/private/tmp/hugr-atlas-maestro-audit.cHgl1X/repo/node_modules/.bun/effect@4.0.0-beta.83/node_modules/effect/dist/internal/effect.js:420:66)
+      at evaluate (/private/tmp/hugr-atlas-maestro-audit.cHgl1X/repo/node_modules/.bun/effect@4.0.0-beta.83/node_modules/effect/dist/internal/effect.js:380:20)
+      at /private/tmp/hugr-atlas-maestro-audit.cHgl1X/repo/node_modules/.bun/effect@4.0.0-beta.83/node_modules/effect/dist/internal/effect.js:734:14
+      at processTicksAndRejections (unknown:7:39)
+(fail) own-command-path [4083.18ms]
+[00:35:48.117] ERROR (#52053): 123 |       renderedArtifact: artifact, capturedMessages: nonSystem,
+124 |       sourceReadback: readFileSync(path.join(dir, source), "utf8"),
+125 |     })
+126 |     // Preserve the capture before the desired invariant fails on the audited product.
+127 |     const expected = assertionMode === "desired" && scenario.route !== "ordinary" ? scenario.text : scenario.expected
+128 |     expect(delivered).toEqual([expected])
+      ^
+error: expect(received).toEqual(expected)
+
+  [
+-   "The module returns the literal "$1".",
++   "The module returns the literal "review".",
+  ]
+
+- Expected  - 1
++ Received  + 1
+
+      at toEqual (unknown:1:1)
+      at <AUDIT>/runtime/packages/opencode/test/session/audit-own-literal.test.ts:128:23
+
+123 |       renderedArtifact: artifact, capturedMessages: nonSystem,
+124 |       sourceReadback: readFileSync(path.join(dir, source), "utf8"),
+125 |     })
+126 |     // Preserve the capture before the desired invariant fails on the audited product.
+127 |     const expected = assertionMode === "desired" && scenario.route !== "ordinary" ? scenario.text : scenario.expected
+128 |     expect(delivered).toEqual([expected])
+      ^
+error: expect(received).toEqual(expected)
+
+  [
+-   "The module returns the literal "$1".",
++   "The module returns the literal "review".",
+  ]
+
+- Expected  - 1
++ Received  + 1
+
+      at toEqual (unknown:1:1)
+      at <AUDIT>/runtime/packages/opencode/test/session/audit-own-literal.test.ts:128:23
+      at ~effect/Effect/successCont (/private/tmp/hugr-atlas-maestro-audit.cHgl1X/repo/node_modules/.bun/effect@4.0.0-beta.83/node_modules/effect/dist/internal/effect.js:910:23)
+      at runLoop (/private/tmp/hugr-atlas-maestro-audit.cHgl1X/repo/node_modules/.bun/effect@4.0.0-beta.83/node_modules/effect/dist/internal/effect.js:420:66)
+      at evaluate (/private/tmp/hugr-atlas-maestro-audit.cHgl1X/repo/node_modules/.bun/effect@4.0.0-beta.83/node_modules/effect/dist/internal/effect.js:380:20)
+      at /private/tmp/hugr-atlas-maestro-audit.cHgl1X/repo/node_modules/.bun/effect@4.0.0-beta.83/node_modules/effect/dist/internal/effect.js:734:14
+      at doneUnsafe (/private/tmp/hugr-atlas-maestro-audit.cHgl1X/repo/node_modules/.bun/effect@4.0.0-beta.83/node_modules/effect/dist/Deferred.js:657:20)
+      at ~effect/Effect/evaluate (/private/tmp/hugr-atlas-maestro-audit.cHgl1X/repo/node_modules/.bun/effect@4.0.0-beta.83/node_modules/effect/dist/internal/effect.js:612:37)
+      at runLoop (/private/tmp/hugr-atlas-maestro-audit.cHgl1X/repo/node_modules/.bun/effect@4.0.0-beta.83/node_modules/effect/dist/internal/effect.js:420:66)
+      at evaluate (/private/tmp/hugr-atlas-maestro-audit.cHgl1X/repo/node_modules/.bun/effect@4.0.0-beta.83/node_modules/effect/dist/internal/effect.js:380:20)
+      at /private/tmp/hugr-atlas-maestro-audit.cHgl1X/repo/node_modules/.bun/effect@4.0.0-beta.83/node_modules/effect/dist/internal/effect.js:734:14
+      at processTicksAndRejections (unknown:7:39)
+(fail) own-command-argument-value [5114.33ms]
+(pass) own-command-plain [5382.27ms]
+(pass) own-tool-path [5931.41ms]
+(pass) ordinary-command-control [8162.76ms]
+
+ 4 pass
+ 5 fail
+ 45 expect() calls
+Ran 9 tests across 1 file. [59.18s]

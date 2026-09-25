@@ -1,0 +1,24 @@
+bun test v1.3.14 (0d9b296a)
+
+test/session/audit-host-context.test.ts:
+(pass) fresh-tool [4166.59ms]
+(pass) dirty-cold-tool [5425.67ms]
+(pass) dirty-warm-tool [3881.38ms]
+(pass) committed-cold-tool [4787.90ms]
+(pass) deleted-cold-tool [5077.89ms]
+(pass) fresh-command [5128.85ms]
+(pass) dirty-command [4573.41ms]
+(pass) missing-tool [4853.38ms]
+(pass) ordinary-skill [4936.94ms]
+(pass) http-fresh-tool [5743.07ms]
+(pass) http-dirty-tool [5347.47ms]
+(pass) history-after-dirty [6881.65ms]
+
+test/session/audit-host-routes.test.ts:
+(pass) public agent routes configured=false [1353.70ms]
+(pass) public agent routes configured=true [1120.71ms]
+
+ 14 pass
+ 0 fail
+ 77 expect() calls
+Ran 14 tests across 2 files. [69.04s]

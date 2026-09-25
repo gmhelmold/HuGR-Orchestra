@@ -1,0 +1,83 @@
+bun test v1.3.14 (0d9b296a)
+
+test/audit-skill-replacement.test.ts:
+[00:43:49.751] ERROR (#2): 83 |       expected: newInfo.content,
+84 |       desiredSourceAgreement: listed[0]?.content === newInfo.content,
+85 |       desiredReloadAgreement: reloaded[0]?.content === newInfo.content })
+86 |     const observed = assertionMode === "desired" ? newInfo.content
+87 |       : mode === "embedded-cached-replace" || mode === "directory-reload" ? "AUDIT_VERSION_A" : "AUDIT_VERSION_B"
+88 |     expect(listed[0]?.content).toBe(observed) // desired mode checks agreement, observed mode characterizes the baseline
+     ^
+error: expect(received).toBe(expected)
+
+Expected: "AUDIT_VERSION_B"
+Received: "AUDIT_VERSION_A"
+
+      at toBe (unknown:1:1)
+      at <AUDIT>/runtime/packages/core/test/audit-skill-replacement.test.ts:88:32
+
+83 |       expected: newInfo.content,
+84 |       desiredSourceAgreement: listed[0]?.content === newInfo.content,
+85 |       desiredReloadAgreement: reloaded[0]?.content === newInfo.content })
+86 |     const observed = assertionMode === "desired" ? newInfo.content
+87 |       : mode === "embedded-cached-replace" || mode === "directory-reload" ? "AUDIT_VERSION_A" : "AUDIT_VERSION_B"
+88 |     expect(listed[0]?.content).toBe(observed) // desired mode checks agreement, observed mode characterizes the baseline
+     ^
+error: expect(received).toBe(expected)
+
+Expected: "AUDIT_VERSION_B"
+Received: "AUDIT_VERSION_A"
+
+      at toBe (unknown:1:1)
+      at <AUDIT>/runtime/packages/core/test/audit-skill-replacement.test.ts:88:32
+      at ~effect/Effect/successCont (/private/tmp/hugr-atlas-maestro-audit.cHgl1X/repo/node_modules/.bun/effect@4.0.0-beta.83/node_modules/effect/dist/internal/effect.js:910:23)
+      at runLoop (/private/tmp/hugr-atlas-maestro-audit.cHgl1X/repo/node_modules/.bun/effect@4.0.0-beta.83/node_modules/effect/dist/internal/effect.js:420:66)
+      at evaluate (/private/tmp/hugr-atlas-maestro-audit.cHgl1X/repo/node_modules/.bun/effect@4.0.0-beta.83/node_modules/effect/dist/internal/effect.js:380:20)
+      at /private/tmp/hugr-atlas-maestro-audit.cHgl1X/repo/node_modules/.bun/effect@4.0.0-beta.83/node_modules/effect/dist/internal/effect.js:734:14
+      at processTicksAndRejections (unknown:7:39)
+(fail) embedded-cached-replace [152.92ms]
+(pass) embedded-uncached-replace [48.03ms]
+(pass) embedded-new-name [54.80ms]
+[00:43:49.976] ERROR (#239): 83 |       expected: newInfo.content,
+84 |       desiredSourceAgreement: listed[0]?.content === newInfo.content,
+85 |       desiredReloadAgreement: reloaded[0]?.content === newInfo.content })
+86 |     const observed = assertionMode === "desired" ? newInfo.content
+87 |       : mode === "embedded-cached-replace" || mode === "directory-reload" ? "AUDIT_VERSION_A" : "AUDIT_VERSION_B"
+88 |     expect(listed[0]?.content).toBe(observed) // desired mode checks agreement, observed mode characterizes the baseline
+     ^
+error: expect(received).toBe(expected)
+
+Expected: "AUDIT_VERSION_B"
+Received: "AUDIT_VERSION_A"
+
+      at toBe (unknown:1:1)
+      at <AUDIT>/runtime/packages/core/test/audit-skill-replacement.test.ts:88:32
+
+83 |       expected: newInfo.content,
+84 |       desiredSourceAgreement: listed[0]?.content === newInfo.content,
+85 |       desiredReloadAgreement: reloaded[0]?.content === newInfo.content })
+86 |     const observed = assertionMode === "desired" ? newInfo.content
+87 |       : mode === "embedded-cached-replace" || mode === "directory-reload" ? "AUDIT_VERSION_A" : "AUDIT_VERSION_B"
+88 |     expect(listed[0]?.content).toBe(observed) // desired mode checks agreement, observed mode characterizes the baseline
+     ^
+error: expect(received).toBe(expected)
+
+Expected: "AUDIT_VERSION_B"
+Received: "AUDIT_VERSION_A"
+
+      at toBe (unknown:1:1)
+      at <AUDIT>/runtime/packages/core/test/audit-skill-replacement.test.ts:88:32
+      at ~effect/Effect/successCont (/private/tmp/hugr-atlas-maestro-audit.cHgl1X/repo/node_modules/.bun/effect@4.0.0-beta.83/node_modules/effect/dist/internal/effect.js:910:23)
+      at runLoop (/private/tmp/hugr-atlas-maestro-audit.cHgl1X/repo/node_modules/.bun/effect@4.0.0-beta.83/node_modules/effect/dist/internal/effect.js:420:66)
+      at evaluate (/private/tmp/hugr-atlas-maestro-audit.cHgl1X/repo/node_modules/.bun/effect@4.0.0-beta.83/node_modules/effect/dist/internal/effect.js:380:20)
+      at /private/tmp/hugr-atlas-maestro-audit.cHgl1X/repo/node_modules/.bun/effect@4.0.0-beta.83/node_modules/effect/dist/internal/effect.js:734:14
+      at /private/tmp/hugr-atlas-maestro-audit.cHgl1X/repo/node_modules/.bun/@effect+platform-node-shared@4.0.0-beta.83+43902b222b0d7d3e/node_modules/@effect/platform-node-shared/dist/NodeFileSystem.js:328:4
+      at node:fs:225:13
+      at processTicksAndRejections (unknown:7:39)
+(fail) directory-reload [86.66ms]
+(pass) directory-new-path [102.87ms]
+
+ 3 pass
+ 2 fail
+ 27 expect() calls
+Ran 5 tests across 1 file. [1.72s]

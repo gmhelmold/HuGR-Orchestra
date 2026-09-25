@@ -1,0 +1,52 @@
+▲ [WARNING] Cannot find base config file "@tsconfig/bun/tsconfig.json" [tsconfig.json]
+
+    ../../tsconfig.json:3:13:
+      3 │   "extends": "@tsconfig/bun/tsconfig.json",
+        ╵              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+▲ [WARNING] Cannot find base config file "@tsconfig/bun/tsconfig.json" [tsconfig.json]
+
+    ../../tsconfig.json:3:13:
+      3 │   "extends": "@tsconfig/bun/tsconfig.json",
+        ╵              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+ RUN  v2.1.9 /private/tmp/hugr-genesis-audit.3PMbXg/repo/foundation/atlas
+
+ ✓ |unit| packages/genesis/test/wp-8.28-a-gen.test.ts (14 tests) 11ms
+ ✓ |unit| packages/genesis/test/wp-8.31-gen.test.ts (9 tests) 8ms
+ ✓ |unit| packages/genesis/test/wp-fix-concurrency.test.ts (8 tests) 13ms
+ ✓ |unit| packages/genesis/test/wp-8.30-gen.test.ts (11 tests) 12ms
+ ✓ |unit| packages/genesis/test/coverage-ledger.test.ts (10 tests) 14ms
+ ✓ |unit| packages/genesis/test/wp-8.27-gen.test.ts (17 tests) 42ms
+ ✓ |unit| packages/genesis/test/unit-frontier.test.ts (15 tests) 59ms
+ ✓ |unit| packages/genesis/test/wp-8.28-c-gen.test.ts (13 tests) 10ms
+ ✓ |unit| packages/genesis/test/wp-8.28-b-gen.test.ts (13 tests) 12ms
+ ✓ |unit| packages/genesis/test/admit-harness.relation-leg.test.ts (7 tests) 11ms
+ ✓ |unit| packages/genesis/test/transition-family.test.ts (11 tests) 20ms
+ ✓ |unit| packages/genesis/test/admit-harness.no-fabricated-check.test.ts (4 tests) 7ms
+ ✓ |unit| packages/genesis/test/wp-8.30-gen-witness.test.ts (7 tests) 23ms
+ ✓ |unit| packages/genesis/test/wp-6.18-gen.test.ts (6 tests) 9ms
+ ✓ |unit| packages/genesis/test/wp-8.29-gen.test.ts (9 tests) 28ms
+ ✓ |unit| packages/genesis/test/admit-harness.count-leg.test.ts (8 tests) 9ms
+ ✓ |unit| packages/genesis/test/wp-8.28-a-gen.heldout.test.ts (13 tests) 201ms
+ ✓ |unit| packages/genesis/test/admit-harness.witness.test.ts (7 tests) 9ms
+ ✓ |unit| packages/genesis/test/admit-harness.justified-leg.test.ts (5 tests) 6ms
+ ✓ |unit| packages/genesis/test/wp-8.30-gen.heldout.test.ts (6 tests) 171ms
+ ✓ |unit| packages/genesis/test/wp-8.28-b-gen.heldout.test.ts (11 tests) 89ms
+ ✓ |unit| packages/genesis/test/wp-8.28-c-gen.heldout.test.ts (13 tests) 94ms
+ ✓ |unit| packages/genesis/test/admit-harness.definition-leg.test.ts (6 tests) 6ms
+ ✓ |unit| packages/genesis/test/seeds-qualified-path.test.ts (4 tests) 69ms
+ ✓ |unit| packages/genesis/test/wp-8.29-gen.heldout.test.ts (8 tests) 9ms
+ ✓ |unit| packages/genesis/test/admit-harness.dependency-leg.test.ts (6 tests) 25ms
+ ✓ |unit| packages/genesis/test/provable-frontier.test.ts (5 tests) 102ms
+ ✓ |unit| packages/genesis/test/extract-answer-malformed.test.ts (2 tests) 14ms
+ ✓ |unit| packages/genesis/test/ppr-damping-teeth.test.ts (3 tests) 8ms
+ ✓ |unit| packages/genesis/test/admit-test-vacuity.test.ts (8 tests) 12ms
+ ✓ |unit| packages/genesis/test/canon-skeleton-memo.test.ts (2 tests) 20ms
+ ✓ |unit| packages/genesis/test/capped-budget.test.ts (3 tests) 5ms
+
+ Test Files  32 passed (32)
+      Tests  264 passed (264)
+   Start at  19:37:36
+   Duration  3.94s (transform 1.19s, setup 0ms, collect 9.33s, tests 1.13s, environment 16ms, prepare 9.47s)

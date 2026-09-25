@@ -1,0 +1,26 @@
+[
+  {
+    "number": 65,
+    "title": "[Atlas/Genesis][P2] Default mining workers ignore the selected arm and misattribute prompt provenance",
+    "state": "open",
+    "url": "https://github.com/gmhelmold/HuGR-Orchestra/issues/65",
+    "updated_at": "2026-09-17T22:46:12Z",
+    "verifiedReadAfterWrite": true
+  },
+  {
+    "number": 66,
+    "title": "[Atlas/Genesis][P2] Proposer pool cannot observe worker death while blocked in Atomics.wait",
+    "state": "open",
+    "url": "https://github.com/gmhelmold/HuGR-Orchestra/issues/66",
+    "updated_at": "2026-09-17T22:48:15Z",
+    "verifiedReadAfterWrite": true
+  },
+  {
+    "number": 67,
+    "title": "[Atlas/Genesis][P2] Mid-run staging failure erases completed progress and call accounting from the report",
+    "state": "open",
+    "url": "https://github.com/gmhelmold/HuGR-Orchestra/issues/67",
+    "updated_at": "2026-09-17T22:49:45Z",
+    "verifiedReadAfterWrite": true
+  }
+]

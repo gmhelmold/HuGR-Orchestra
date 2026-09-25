@@ -1,0 +1,67 @@
+{
+  "input": "context-first.json",
+  "checks": [
+    {
+      "case": "fresh-tool",
+      "kind": "control",
+      "pass": true
+    },
+    {
+      "case": "fresh-command",
+      "kind": "control",
+      "pass": true
+    },
+    {
+      "case": "http-fresh-tool",
+      "kind": "control",
+      "pass": true
+    },
+    {
+      "case": "missing-tool",
+      "kind": "control",
+      "pass": true
+    },
+    {
+      "case": "ordinary-skill",
+      "kind": "control",
+      "pass": true
+    },
+    {
+      "case": "dirty-cold-tool",
+      "kind": "desired-currentness",
+      "pass": false
+    },
+    {
+      "case": "dirty-warm-tool",
+      "kind": "desired-currentness",
+      "pass": false
+    },
+    {
+      "case": "committed-cold-tool",
+      "kind": "desired-currentness",
+      "pass": false
+    },
+    {
+      "case": "deleted-cold-tool",
+      "kind": "desired-currentness",
+      "pass": false
+    },
+    {
+      "case": "dirty-command",
+      "kind": "desired-currentness",
+      "pass": false
+    },
+    {
+      "case": "http-dirty-tool",
+      "kind": "desired-currentness",
+      "pass": false
+    }
+  ],
+  "passingControls": 5,
+  "failingDesired": 6,
+  "historyObservation": {
+    "requests": 3,
+    "oldClaimRetained": true,
+    "classification": "retained history, not a second load; not scored as an independent product failure"
+  }
+}

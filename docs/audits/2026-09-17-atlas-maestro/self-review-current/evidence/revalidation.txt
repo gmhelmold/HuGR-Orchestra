@@ -1,0 +1,28 @@
+# Revalidation results performed during adversarial self-review
+
+Product SHA: b0c33d2f6567a2c741240f3c44bc00ca2f01e7e7
+Audit head inspected before corrections: eca0aa8161b1423cc27544e39a135b2891f56fa0
+Runtime: Bun 1.3.14; Vitest 2.1.9 for Atlas family-shape probe.
+
+## #85 namespace probes — independent rerun
+4 pass, 0 fail, 6 expect() calls across 2 files.
+Observed canonical-only, impostor-only, collision without HOLD, and SkillTool delivery of the external impostor.
+
+## #86 strengthened background-binding rerun
+1 pass, 4 filtered, 0 fail, 6 expect() calls.
+Additional assertions beyond the published first probe:
+- dispatch.metadata.background === true
+- dispatch.metadata.jobId is present
+- dispatch.output contains state="running"
+- dispatch.output contains "Background task started"
+This confirms the approved dispatch reaches the background execution result shape, not merely child creation.
+
+## #24 strengthened complex-family rerun
+4 pass, 0 fail.
+`verifyStaticOwnSnapshot` used `git hash-object -- <path>` for current blobs rather than returning snapshot-declared blobs. relation, negation, transition and test-vacuity minimal gotchas still parse/materialize and verify READY with empty rendered claims.
+
+## Static review
+Current host-literal SHA256 manifest matched every listed file before this corrective commit. All reviewed JSON parsed. Local Markdown links resolved. `review/final` observed runs exit 0; desired runs exit 1 with host 4 pass/5 fail and Core 3 pass/2 fail. Diff from a360219b through eca0aa8 contains docs/audits paths only and passes git diff --check.
+
+## Whole PR audit-only boundary
+205 changed paths from product base to reviewed head; every path is under `docs/audits/`. The aggregate base-to-head `git diff --check` reports one historical raw-evidence warning: `runtime-proof/evidence/atlas-official-suite.log` has one extra blank line at EOF. The log is preserved byte-for-byte rather than normalized retroactively. Recent audit ranges and the corrective self-review commit pass `git diff --check`.

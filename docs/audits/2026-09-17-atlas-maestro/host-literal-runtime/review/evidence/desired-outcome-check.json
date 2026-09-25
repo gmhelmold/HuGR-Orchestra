@@ -1,0 +1,28 @@
+[
+  {
+    "check": "host-failure-membership",
+    "passed": true,
+    "failures": [
+      "own-command-argument-value",
+      "own-command-arguments",
+      "own-command-dollar",
+      "own-command-money",
+      "own-command-path"
+    ],
+    "records": 9
+  },
+  {
+    "check": "source-readback-git-blob",
+    "passed": true,
+    "records": 9
+  },
+  {
+    "check": "core-failure-membership",
+    "passed": true,
+    "failures": [
+      "directory-reload",
+      "embedded-cached-replace"
+    ],
+    "records": 5
+  }
+]

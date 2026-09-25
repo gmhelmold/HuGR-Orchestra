@@ -1,0 +1,12 @@
+# Commands used for the fresh adversarial reruns
+
+# #85 — copied the two committed probes into the product-SHA disposable checkout:
+(cd packages/opencode && bun test test/skill/own-namespace-self-review.test.ts test/tool/own-namespace-tool-self-review.test.ts --timeout 60000)
+
+# #86 — generated the strengthened lifecycle test from product b0c33d2 and ran only the target story:
+(cd packages/opencode && bun test test/maestro/governed-background-self-review.test.ts -t 'records intake, direct approval, then exact governed child Task' --timeout 60000)
+
+# #24 — copied the strengthened family probe with git hash-object currentBlob authority:
+(cd foundation/atlas && npx vitest run packages/retrieval/test/own-snapshot-family-self-review.test.ts --reporter=verbose)
+
+All temporary active-test copies were removed after execution. Product tracked diff remained empty.

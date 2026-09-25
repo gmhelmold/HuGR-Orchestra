@@ -1,0 +1,14 @@
+{
+  "inventoryOnly": {
+    "100644": 7821,
+    "100755": 55,
+    "120000": 60
+  },
+  "sourceReadMismatches": [],
+  "comparedCompiledJS": 284,
+  "compiledDifferences": [],
+  "productTrackedDiff": "",
+  "donorTrackedDiff": "",
+  "sourceFilesWithReturnedRanges": 31,
+  "sourceRangeRecords": 44
+}

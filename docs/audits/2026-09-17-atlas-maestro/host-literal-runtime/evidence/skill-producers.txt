@@ -1,0 +1,6 @@
+packages/core/src/plugin/skill.ts:16:    yield* ctx.skill.transform((draft) => {
+packages/core/src/plugin/skill.ts:18:        SkillV2.EmbeddedSource.make({
+packages/core/src/config/plugin/skill.ts:18:    yield* ctx.skill.transform(
+packages/core/src/plugin/host.ts:211:        skill.transform((draft) =>
+packages/core/src/skill.ts:21:export const EmbeddedSource = Skill.EmbeddedSource
+packages/core/src/skill.ts:22:export type EmbeddedSource = Skill.EmbeddedSource

@@ -1,0 +1,17 @@
+bun test v1.3.14 (0d9b296a)
+
+test/session/audit-own-literal.test.ts:
+(pass) own-tool-dollar [5775.59ms]
+(pass) own-command-dollar [3129.44ms]
+(pass) own-command-arguments [4750.16ms]
+(pass) own-command-money [5082.82ms]
+(pass) own-command-path [3764.69ms]
+(pass) own-command-argument-value [5460.77ms]
+(pass) own-command-plain [3429.82ms]
+(pass) own-tool-path [6745.14ms]
+(pass) ordinary-command-control [4211.44ms]
+
+ 9 pass
+ 0 fail
+ 45 expect() calls
+Ran 9 tests across 1 file. [47.61s]
