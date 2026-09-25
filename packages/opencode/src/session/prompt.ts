@@ -659,7 +659,7 @@ const layer = Layer.effect(
         sessionID: input.sessionID,
         time: { created: Date.now() },
         tools: input.tools,
-        agent: ag.name,
+        agent: ag.id ?? ag.name,
         model: {
           providerID: model.providerID,
           modelID: model.modelID,
@@ -1187,8 +1187,8 @@ const layer = Layer.effect(
             id: MessageID.ascending(),
             parentID: lastUser.id,
             role: "assistant",
-            mode: agent.name,
-            agent: agent.name,
+            mode: agent.id ?? agent.name,
+            agent: agent.id ?? agent.name,
             variant: lastUser.model.variant,
             path: { cwd: ctx.directory, root: ctx.worktree },
             cost: 0,
@@ -1316,7 +1316,34 @@ const layer = Layer.effect(
               }
             }
 
-            if (result === "stop") return "break" as const
+            if (result === "stop") {
+              // Emit `stop` hook at natural end of turn. If a plugin sets
+              // `output.continue = true`, the loop re-iterates instead of
+              // breaking. Honored only on `reason: "completed"` to prevent
+              // infinite loops on aborted or errored turns. The same
+              // `lastUser` is reprocessed — the LLM re-evaluates the
+              // conversation with the new plugin context.
+              const stopInput = {
+                sessionID,
+                agent: lastUser.agent,
+                messageID: handle.message.id,
+                reason: "completed" as const,
+              }
+              const stopOutput = { continue: false }
+              yield* plugin
+                .trigger("stop", stopInput, stopOutput)
+                .pipe(Effect.catch((err) => Effect.logError("stop hook failed", { sessionID, err })))
+
+              if (stopOutput.continue) {
+                yield* Effect.logInfo("stop hook requested continue", {
+                  "session.id": sessionID,
+                  step,
+                  messageID: stopInput.messageID,
+                })
+                return "continue" as const
+              }
+              return "break" as const
+            }
             if (result === "compact") {
               yield* compaction.create({
                 sessionID,
@@ -1336,6 +1363,7 @@ const layer = Layer.effect(
         }
 
         yield* compaction.prune({ sessionID }).pipe(Effect.ignore, Effect.forkIn(scope))
+
         return yield* lastAssistant(sessionID)
       },
     )
@@ -1441,7 +1469,7 @@ const layer = Layer.effect(
         ? [
             {
               type: "subtask" as const,
-              agent: agent.name,
+              agent: agent.id ?? agent.name,
               description: cmd.description ?? "",
               command: input.command,
               model: { providerID: taskModel.providerID, modelID: taskModel.modelID },
@@ -1450,7 +1478,8 @@ const layer = Layer.effect(
           ]
         : [...uniqueTemplateParts, ...(input.parts ?? [])]
 
-      const userAgent = isSubtask ? (input.agent ?? (yield* agents.defaultInfo()).name) : agent.name
+      const defaultAgent = isSubtask ? yield* agents.defaultInfo() : undefined
+      const userAgent = isSubtask ? (input.agent ?? defaultAgent!.id ?? defaultAgent!.name) : (agent.id ?? agent.name)
       const userModel = isSubtask
         ? input.model
           ? Provider.parseModel(input.model)

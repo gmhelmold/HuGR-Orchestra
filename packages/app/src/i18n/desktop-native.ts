@@ -155,7 +155,7 @@ export const DESKTOP_NATIVE_LOCALE_TAGS: Record<DesktopNativeLocale, string> = {
   vi: "vi-VN",
   it: "it-IT",
   ur: "ur-PK",
-  pa: "pa-Arab-PK",
+  pa: "pa-Aran-PK",
   az: "az-Latn-AZ",
   fi: "fi-FI",
   sv: "sv-SE",
@@ -200,6 +200,7 @@ export function detectDesktopNativeLocale(languages: readonly string[]): Desktop
     const source = locale(language)
     if (!source) continue
     if (["no", "nb", "nn"].includes(source.language)) return "no"
+    if (source.language === "pa" && source.region === "PK") return "pa"
     const match = DESKTOP_NATIVE_LOCALES.find((candidate) => {
       const target = locale(DESKTOP_NATIVE_LOCALE_TAGS[candidate])
       return target?.language === source.language && target.script === source.script

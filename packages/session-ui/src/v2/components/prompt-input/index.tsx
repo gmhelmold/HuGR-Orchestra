@@ -41,6 +41,7 @@ export type PromptInputV2Props = {
   borderUnderlay?: boolean
   class?: string
   modelControl?: JSX.Element
+  subagentModelsControl?: JSX.Element
   variantControlVisible?: boolean
   attachKeybind?: string[]
   attachShortcut?: string
@@ -253,6 +254,7 @@ export function PromptInputV2(props: PromptInputV2Props) {
                 </Show>
               )}
             </Show>
+            <Show when={props.subagentModelsControl}>{props.subagentModelsControl}</Show>
           </div>
           <PromptInputV2SubmitButton
             mode={state.mode}

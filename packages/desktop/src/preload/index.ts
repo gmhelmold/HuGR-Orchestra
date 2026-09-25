@@ -11,6 +11,36 @@ const updaterHandler = (_: unknown, state: UpdaterState) => {
 }
 
 const api: ElectronAPI = {
+  appDockOpen: (url, bounds, profile) => ipcRenderer.invoke("app-dock-open", url, bounds, profile),
+  appDockDeleteProfile: (profileID) => ipcRenderer.invoke("app-dock-delete-profile", { profileID }),
+  appDockResize: (bounds) => ipcRenderer.invoke("app-dock-resize", bounds),
+  appDockHide: () => ipcRenderer.invoke("app-dock-hide"),
+  appDockClose: () => ipcRenderer.invoke("app-dock-close"),
+  appDockCloseTab: (tabID) => ipcRenderer.invoke("app-dock-close-tab", tabID),
+  appDockRecoverTab: (tabID) => ipcRenderer.invoke("app-dock-recover-tab", tabID),
+  appDockCloseTabs: (tabID, scope, order) => ipcRenderer.invoke("app-dock-close-tabs", tabID, scope, order),
+  appDockSelect: (tabID, bounds) => ipcRenderer.invoke("app-dock-select", tabID, bounds),
+  appDockNavigate: (tabID, url) => ipcRenderer.invoke("app-dock-navigate", tabID, url),
+  appDockCommand: (tabID, command) => ipcRenderer.invoke("app-dock-command", tabID, command),
+  appDockEvent: (callback) => {
+    const handler = (_event: unknown, appDockEvent: Parameters<typeof callback>[0]) => callback(appDockEvent)
+    ipcRenderer.on("app-dock-event", handler)
+    return () => ipcRenderer.removeListener("app-dock-event", handler)
+  },
+  appDockFind: (tabID, text, forward) => ipcRenderer.invoke("app-dock-find", tabID, text, forward),
+  appDockStopFind: (tabID) => ipcRenderer.invoke("app-dock-stop-find", tabID),
+  appDockFindResult: (callback) => {
+    const handler = (_event: unknown, result: Parameters<typeof callback>[0]) => callback(result)
+    ipcRenderer.on("app-dock-find-result", handler)
+    return () => ipcRenderer.removeListener("app-dock-find-result", handler)
+  },
+  appDockZoom: (tabID, factor) => ipcRenderer.invoke("app-dock-zoom", tabID, factor),
+  appDockCancelDownload: (downloadID) => ipcRenderer.invoke("app-dock-cancel-download", downloadID),
+  appDockOpenDownload: (downloadID) => ipcRenderer.invoke("app-dock-open-download", downloadID),
+  appDockFullscreen: (tabID, enabled) => ipcRenderer.invoke("app-dock-fullscreen", tabID, enabled),
+  appDockGetManifest: () => ipcRenderer.invoke("app-dock-get-manifest"),
+  appDockUpdateManifest: (expectedRevision, manifest) =>
+    ipcRenderer.invoke("app-dock-update-manifest", expectedRevision, manifest),
   killSidecar: () => ipcRenderer.invoke("kill-sidecar"),
   installCli: () => ipcRenderer.invoke("install-cli"),
   awaitInitialization: () => ipcRenderer.invoke("await-initialization"),

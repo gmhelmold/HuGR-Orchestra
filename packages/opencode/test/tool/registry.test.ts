@@ -1,10 +1,10 @@
-import { afterEach, describe, expect } from "bun:test"
+import { afterEach, describe, expect, test } from "bun:test"
 import path from "path"
 import fs from "fs/promises"
 import { fileURLToPath, pathToFileURL } from "url"
 import { Effect, Layer, Result, Schema } from "effect"
 import { LayerNode } from "@opencode-ai/core/effect/layer-node"
-import { ToolRegistry } from "@/tool/registry"
+import { ToolRegistry, allowedTaskModels } from "@/tool/registry"
 import { Tool } from "@/tool/tool"
 import { disposeAllInstances, TestInstance } from "../fixture/fixture"
 import { testEffect } from "../lib/effect"
@@ -569,4 +569,26 @@ describe("tool.registry", () => {
       expect(ids).toContain("cowsay")
     }),
   )
+})
+
+describe("allowedTaskModels", () => {
+  test("returns empty without model-scoped task rules", () => {
+    expect(allowedTaskModels([])).toEqual([])
+    expect(allowedTaskModels([{ permission: "task", pattern: "general", action: "allow" }])).toEqual(
+      [],
+    )
+    expect(allowedTaskModels([{ permission: "bash", pattern: "a/b", action: "allow" }])).toEqual(
+      [],
+    )
+  })
+
+  test("resolves allowed patterns with last-match-wins", () => {
+    expect(
+      allowedTaskModels([
+        { permission: "task", pattern: "*/*", action: "deny" },
+        { permission: "task", pattern: "openrouter/*", action: "allow" },
+        { permission: "task", pattern: "openrouter/bad", action: "deny" },
+      ]),
+    ).toEqual(["openrouter/*"])
+  })
 })

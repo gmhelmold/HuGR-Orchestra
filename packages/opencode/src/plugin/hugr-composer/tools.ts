@@ -1,5 +1,5 @@
 import path from "node:path"
-import { realpath } from "node:fs/promises"
+import { lstat, realpath } from "node:fs/promises"
 import { tool, type ToolContext } from "@opencode-ai/plugin"
 import type { HugrComposerClient } from "./client"
 
@@ -145,18 +145,23 @@ async function resolveOutputDirectory(value: string, context: Pick<ToolContext, 
   if (physicalRelative === ".." || physicalRelative.startsWith(`..${path.sep}`) || path.isAbsolute(physicalRelative)) {
     throw new Error(`output_dir must stay inside worktree: ${root}`)
   }
-  return candidate
+  return physical
 }
 
 async function resolvePhysicalPath(value: string): Promise<string> {
-  const physical = await realpath(value).catch((error) => {
+  const stats = await lstat(value).catch((error) => {
     if (isMissingPath(error)) return undefined
     throw error
   })
-  if (physical) return physical
   const parent = path.dirname(value)
-  if (parent === value) throw new Error(`Cannot resolve output_dir: ${value}`)
-  return path.join(await resolvePhysicalPath(parent), path.basename(value))
+  if (parent === value) {
+    if (stats) return await realpath(value)
+    throw new Error(`Cannot resolve output_dir: ${value}`)
+  }
+  const physicalParent = await resolvePhysicalPath(parent)
+  if (stats?.isSymbolicLink()) throw new Error(`output_dir cannot contain symlinks: ${value}`)
+  if (stats) return await realpath(value)
+  return path.join(physicalParent, path.basename(value))
 }
 
 function isMissingPath(error: unknown) {

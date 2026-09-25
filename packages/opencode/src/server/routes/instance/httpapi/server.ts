@@ -10,6 +10,7 @@ import { Auth } from "@/auth"
 import { BackgroundJob } from "@/background/job"
 import { Command } from "@/command"
 import { Config } from "@/config/config"
+import { Credential } from "@opencode-ai/core/credential"
 import { Workspace } from "@/control-plane/workspace"
 import { Env } from "@/env"
 import { EventV2Bridge } from "@/event-v2-bridge"
@@ -214,6 +215,7 @@ const app = LayerNode.group([
   FSUtil.node,
   Database.node,
   Auth.node,
+  Credential.node,
   Account.node,
   Config.node,
   Env.node,

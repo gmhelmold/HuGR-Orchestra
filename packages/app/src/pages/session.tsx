@@ -2234,7 +2234,7 @@ export default function Page() {
                         setFollowup("paused", id, true)
                       },
                     })
-                    return <PromptInputV2Composer controller={controller} borderUnderlay />
+                    return <PromptInputV2Composer controller={controller} borderUnderlay sessionID={params.id} />
                   }}
                 </Show>
               }

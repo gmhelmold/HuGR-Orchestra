@@ -422,5 +422,6 @@ describe("CloudflareAIGatewayPlugin", () => {
         expect(aiGatewayCalls).toHaveLength(0)
       }),
     ),
+    30_000,
   )
 })

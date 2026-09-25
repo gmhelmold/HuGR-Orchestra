@@ -27,9 +27,16 @@ describe("Credential", () => {
         label: "Replacement",
         value: Credential.Key.make({ type: "key", key: "replacement" }),
       })
-      expect(yield* credentials.list(integrationID)).toEqual([replacement])
+      expect(yield* credentials.list(integrationID)).toEqual([
+        expect.objectContaining({ id: created.id, label: "Personal" }),
+        replacement,
+      ])
 
       yield* credentials.remove(replacement.id)
+      expect(yield* credentials.list(integrationID)).toEqual([
+        expect.objectContaining({ id: created.id, label: "Personal" }),
+      ])
+      yield* credentials.remove(created.id)
       expect(yield* credentials.list(integrationID)).toEqual([])
     }),
   )

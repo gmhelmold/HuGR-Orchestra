@@ -142,6 +142,26 @@ export const SettingsProvidersV2: Component<{
       })
   }
 
+  const removeKey = async (credentialID: string, providerName: string) => {
+    const directory = props.directory?.()
+    await serverSdk()
+      .createClient({ directory, throwOnError: true })
+      .v2.credential.remove({ credentialID, location: directory ? { directory } : undefined })
+      .then(async () => {
+        await serverSync().refreshProviders()
+        showToast({
+          variant: "success",
+          icon: "circle-check",
+          title: language.t("provider.disconnect.toast.disconnected.title", { provider: providerName }),
+          description: language.t("provider.disconnect.toast.disconnected.description", { provider: providerName }),
+        })
+      })
+      .catch((err: unknown) => {
+        const message = err instanceof Error ? err.message : String(err)
+        showToast({ title: language.t("common.requestFailed"), description: message })
+      })
+  }
+
   return (
     <>
       <div class="settings-v2-tab-header">
@@ -159,34 +179,59 @@ export const SettingsProvidersV2: Component<{
               }
             >
               <For each={connected()}>
-                {(item) => (
-                  <div class="settings-v2-provider-row group">
-                    <div class="settings-v2-provider-lead">
-                      <ProviderIcon
-                        id={item.id}
-                        width={PROVIDER_ICON_SIZE}
-                        height={PROVIDER_ICON_SIZE}
-                        class="settings-v2-provider-icon shrink-0"
-                      />
-                      <div class="settings-v2-provider-main">
-                        <span class="settings-v2-provider-name truncate">{item.name}</span>
-                        <Tag>{type(item)}</Tag>
+                {(item) => {
+                  const hash = item.id.indexOf("#")
+                  const baseID = hash === -1 ? item.id : item.id.slice(0, hash)
+                  const credentialID = hash === -1 ? undefined : item.id.slice(hash + 1)
+                  return (
+                    <div class="settings-v2-provider-row group">
+                      <div class="settings-v2-provider-lead">
+                        <ProviderIcon
+                          id={baseID}
+                          width={PROVIDER_ICON_SIZE}
+                          height={PROVIDER_ICON_SIZE}
+                          class="settings-v2-provider-icon shrink-0"
+                        />
+                        <div class="settings-v2-provider-main">
+                          <span class="settings-v2-provider-name truncate">{item.name}</span>
+                          <Tag>{type(item)}</Tag>
+                        </div>
+                      </div>
+                      <div class="flex items-center gap-2">
+                        <Show
+                          when={credentialID}
+                          fallback={
+                            <Show
+                              when={canDisconnect(item)}
+                              fallback={
+                                <span class="settings-v2-provider-env-hint">
+                                  {language.t("settings.providers.connected.environmentDescription")}
+                                </span>
+                              }
+                            >
+                              <ButtonV2
+                                size="normal"
+                                variant="ghost-muted"
+                                onClick={() => void disconnect(item.id, item.name)}
+                              >
+                                {language.t("common.disconnect")}
+                              </ButtonV2>
+                            </Show>
+                          }
+                        >
+                          {(id) => (
+                            <ButtonV2 size="normal" variant="ghost-muted" onClick={() => void removeKey(id(), item.name)}>
+                              {language.t("common.remove")}
+                            </ButtonV2>
+                          )}
+                        </Show>
+                        <ButtonV2 size="normal" variant="neutral" icon="plus" onClick={() => connect(baseID)}>
+                          {language.t("settings.providers.addKey")}
+                        </ButtonV2>
                       </div>
                     </div>
-                    <Show
-                      when={canDisconnect(item)}
-                      fallback={
-                        <span class="settings-v2-provider-env-hint">
-                          {language.t("settings.providers.connected.environmentDescription")}
-                        </span>
-                      }
-                    >
-                      <ButtonV2 size="normal" variant="ghost-muted" onClick={() => void disconnect(item.id, item.name)}>
-                        {language.t("common.disconnect")}
-                      </ButtonV2>
-                    </Show>
-                  </div>
-                )}
+                  )
+                }}
               </For>
             </Show>
           </SettingsListV2>

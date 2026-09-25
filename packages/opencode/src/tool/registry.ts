@@ -10,6 +10,8 @@ import { GlobTool } from "./glob"
 import { GrepTool } from "./grep"
 import { ReadTool } from "./read"
 import { TaskTool } from "./task"
+import { MaestroPresentApprovalTool, MaestroRecordApprovalTool } from "./maestro-approval"
+import { MaestroRecordAdmissionTool } from "./maestro-admission"
 import { Database } from "@opencode-ai/core/database/database"
 import { TodoWriteTool } from "./todo"
 import { WebFetchTool } from "./webfetch"
@@ -100,6 +102,9 @@ const layer = Layer.effect(
 
     const invalid = yield* InvalidTool
     const task = yield* TaskTool
+    const maestroPresentApproval = yield* MaestroPresentApprovalTool
+    const maestroRecordApproval = yield* MaestroRecordApprovalTool
+    const maestroRecordAdmission = yield* MaestroRecordAdmissionTool
     const read = yield* ReadTool
     const question = yield* QuestionTool
     const todo = yield* TodoWriteTool
@@ -215,6 +220,9 @@ const layer = Layer.effect(
           edit: Tool.init(edit),
           write: Tool.init(writetool),
           task: Tool.init(task),
+          maestroPresentApproval: Tool.init(maestroPresentApproval),
+          maestroRecordApproval: Tool.init(maestroRecordApproval),
+          maestroRecordAdmission: Tool.init(maestroRecordAdmission),
           fetch: Tool.init(webfetch),
           todo: Tool.init(todo),
           search: Tool.init(websearch),
@@ -238,6 +246,9 @@ const layer = Layer.effect(
             tool.edit,
             tool.write,
             tool.task,
+            tool.maestroPresentApproval,
+            tool.maestroRecordApproval,
+            tool.maestroRecordAdmission,
             tool.fetch,
             tool.todo,
             tool.search,
@@ -262,19 +273,33 @@ const layer = Layer.effect(
       return (yield* all()).map((tool) => tool.id)
     })
 
-    const describeTask = Effect.fn("ToolRegistry.describeTask")(function* (agent: Agent.Info) {
+    const describeTask = Effect.fn("ToolRegistry.describeTask")(function* (
+      agent: Agent.Info,
+      sessionPermission?: PermissionV1.Ruleset,
+    ) {
       const items = (yield* agents.list()).filter((item) => item.mode !== "primary")
       const filtered = items.filter(
-        (item) => Permission.evaluate("task", item.name, agent.permission).action !== "deny",
+        (item) => Permission.evaluate("task", item.id ?? item.name, agent.permission).action !== "deny",
       )
-      const list = filtered.toSorted((a, b) => a.name.localeCompare(b.name))
+      const list = filtered.toSorted((a, b) => (a.id ?? a.name).localeCompare(b.id ?? b.name))
       const description = list
         .map(
           (item) =>
-            `- ${item.name}: ${item.description ?? "This subagent should only be called manually by the user."}`,
+            `- ${item.id ?? item.name}: ${item.description ?? "This subagent should only be called manually by the user."}`,
         )
         .join("\n")
-      return ["Available agent types and the tools they have access to:", description].join("\n")
+      const sections = ["Available agent types and the tools they have access to:", description]
+      const allowed = allowedTaskModels(Permission.merge(agent.permission, sessionPermission ?? []))
+      if (allowed.length > 0) {
+        sections.push(
+          [
+            "Allowed subagent models in this session (picked in the Subagents panel; anything else will be denied):",
+            ...allowed.map((pattern) => `- ${pattern}`),
+            "Pass one as the task tool's `model` parameter.",
+          ].join("\n"),
+        )
+      }
+      return sections.join("\n")
     })
 
     const describeCodeMode = Effect.fn("ToolRegistry.describeCodeMode")(function* (input: {
@@ -290,6 +315,14 @@ const layer = Layer.effect(
 
     const tools: Interface["tools"] = Effect.fn("ToolRegistry.tools")(function* (input) {
       const filtered = (yield* all()).filter((tool) => {
+        if (
+          (tool.id === MaestroPresentApprovalTool.id ||
+            tool.id === MaestroRecordApprovalTool.id ||
+            tool.id === MaestroRecordAdmissionTool.id) &&
+          input.agent.id !== "maestro"
+        ) {
+          return false
+        }
         if (tool.id === WebSearchTool.id) {
           return webSearchEnabled(input.providerID, { exa: flags.enableExa, parallel: flags.enableParallel })
         }
@@ -324,7 +357,7 @@ const layer = Layer.effect(
             id: tool.id,
             description: [
               output.description,
-              tool.id === TaskTool.id ? yield* describeTask(input.agent) : undefined,
+              tool.id === TaskTool.id ? yield* describeTask(input.agent, input.permission) : undefined,
               tool.id === "execute" ? codeModeDescription : undefined,
             ]
               .filter(Boolean)
@@ -347,6 +380,20 @@ const layer = Layer.effect(
     return Service.of({ ids, all, named, tools })
   }),
 )
+
+// Model patterns the session allowlists for subagents: task rules whose
+// pattern carries a "/" (provider/model scope), resolved with the same
+// last-match-wins semantics the permission check enforces at call time.
+export function allowedTaskModels(ruleset: PermissionV1.Ruleset): string[] {
+  const candidates = new Set<string>()
+  for (const rule of ruleset) {
+    if (rule.permission !== "task" || !rule.pattern.includes("/")) continue
+    candidates.add(rule.pattern)
+  }
+  return [...candidates]
+    .filter((pattern) => Permission.evaluate("task", pattern, ruleset).action === "allow")
+    .toSorted()
+}
 
 function isZodType(value: unknown): value is z.ZodType {
   return typeof value === "object" && value !== null && "_zod" in value

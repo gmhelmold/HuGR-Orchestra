@@ -3,12 +3,24 @@ export * as Catalog from "./catalog"
 import { makeLocationNode } from "./effect/app-node"
 import { Array, Context, Effect, Layer, Option, Order, pipe, Schema } from "effect"
 import { Catalog } from "@opencode-ai/schema/catalog"
+import { Credential } from "./credential"
 import { ModelV2 } from "./model"
 import { ProviderV2 } from "./provider"
 import { EventV2 } from "./event"
 import { Policy } from "./policy"
 import { State } from "./state"
 import { Integration } from "./integration"
+
+export const VIRTUAL_SEPARATOR = "#"
+
+export const parseVirtualID = (id: ProviderV2.ID) => {
+  const index = id.indexOf(VIRTUAL_SEPARATOR)
+  if (index === -1) return undefined
+  return {
+    base: id.slice(0, index) as ProviderV2.ID,
+    credentialID: id.slice(index + 1),
+  }
+}
 
 export type ProviderRecord = {
   provider: ProviderV2.MutableInfo
@@ -67,6 +79,7 @@ const layer = Layer.effect(
     const events = yield* EventV2.Service
     const policy = yield* Policy.Service
     const integrations = yield* Integration.Service
+    const credentials = yield* Credential.Service
 
     const available = (provider: ProviderV2.Info, integration: Integration.Info | undefined) => {
       if (provider.disabled) return false
@@ -168,40 +181,95 @@ const layer = Layer.effect(
         yield* events.publish(Event.Updated, {})
       }),
     })
+
+    // Projects one virtual provider per labeled API-key credential so each
+    // key is independently selectable. Unlabeled credentials keep the legacy
+    // behavior of merging into the base provider entry.
+    const virtualEntries = Effect.fn("CatalogV2.virtuals")(function* () {
+      const keyed = (yield* credentials.all()).filter(
+        (credential) => credential.value.type === "key" && credential.label !== "default",
+      )
+      if (keyed.length === 0) return [] as ProviderRecord[]
+      const records = state.get().providers
+      const byIntegration = new Map<string, ProviderRecord[]>()
+      for (const record of records.values()) {
+        const owner = record.provider.integrationID ?? record.provider.id
+        const list = byIntegration.get(owner) ?? []
+        list.push(record)
+        byIntegration.set(owner, list)
+      }
+      const entries: ProviderRecord[] = []
+      for (const credential of keyed) {
+        for (const record of byIntegration.get(credential.integrationID) ?? []) {
+          const id = `${record.provider.id}${VIRTUAL_SEPARATOR}${credential.id}` as ProviderV2.ID
+          entries.push({
+            provider: {
+              ...record.provider,
+              id,
+              name: `${record.provider.name} (${credential.label})`,
+              integrationID: record.provider.integrationID ?? Integration.ID.make(record.provider.id),
+            },
+            models: record.models,
+          })
+        }
+      }
+      return entries
+    })
+
     const result: Interface = {
       transform: state.transform,
       reload: state.reload,
 
       provider: {
         get: Effect.fn("CatalogV2.provider.get")(function* (providerID) {
-          return state.get().providers.get(providerID)?.provider
+          const hit = state.get().providers.get(providerID)?.provider
+          if (hit) return hit
+          if (!parseVirtualID(providerID)) return undefined
+          return (yield* virtualEntries()).find((entry) => entry.provider.id === providerID)?.provider
         }),
 
         all: Effect.fn("CatalogV2.provider.all")(function* () {
-          return Array.fromIterable(state.get().providers.values()).map((record) => record.provider)
+          const base = Array.fromIterable(state.get().providers.values()).map((record) => record.provider)
+          const virtual = (yield* virtualEntries()).map((entry) => entry.provider)
+          return [...base, ...virtual]
         }),
 
         available: Effect.fn("CatalogV2.provider.available")(function* () {
+          const virtuals = yield* virtualEntries()
+          const virtualByID = new Map(virtuals.map((entry) => [entry.provider.id, entry.provider]))
           const active = new Map((yield* integrations.list()).map((integration) => [integration.id, integration]))
-          return (yield* result.provider.all()).filter((provider) =>
-            available(provider, active.get(provider.integrationID ?? Integration.ID.make(provider.id))),
-          )
+          return (yield* result.provider.all()).filter((provider) => {
+            if (virtualByID.has(provider.id)) return !provider.disabled
+            return available(provider, active.get(provider.integrationID ?? Integration.ID.make(provider.id)))
+          })
         }),
       },
 
       model: {
         get: Effect.fn("CatalogV2.model.get")(function* (providerID, modelID) {
-          const record = state.get().providers.get(providerID)
+          const parsed = parseVirtualID(providerID)
+          const record = state.get().providers.get(parsed?.base ?? providerID)
           if (!record) return
           const model = record.models.get(modelID)
-          return model && projectModel(model, record.provider)
+          if (!model) return
+          if (!parsed) return projectModel(model, record.provider)
+          const virtual = (yield* virtualEntries()).some((entry) => entry.provider.id === providerID)
+          if (!virtual) return
+          return projectModel({ ...model, providerID }, record.provider)
         }),
 
         all: Effect.fn("CatalogV2.model.all")(function* () {
+          const records = [
+            ...Array.fromIterable(state.get().providers.values()),
+            ...(yield* virtualEntries()),
+          ]
           return pipe(
-            Array.fromIterable(state.get().providers.values()),
+            records,
             Array.flatMap((record) => {
-              return Array.fromIterable(record.models.values()).map((model) => projectModel(model, record.provider))
+              const parsed = parseVirtualID(record.provider.id)
+              return Array.fromIterable(record.models.values()).map((model) =>
+                projectModel(parsed ? { ...model, providerID: record.provider.id } : model, record.provider),
+              )
             }),
             Array.sortWith((item) => item.time.released, Order.flip(Order.Number)),
           )
@@ -298,4 +366,8 @@ export const locationLayer = layer.pipe(
   Layer.provideMerge(Policy.locationLayer),
 )
 
-export const node = makeLocationNode({ service: Service, layer, deps: [EventV2.node, Policy.node, Integration.node] })
+export const node = makeLocationNode({
+  service: Service,
+  layer,
+  deps: [EventV2.node, Policy.node, Integration.node, Credential.node],
+})

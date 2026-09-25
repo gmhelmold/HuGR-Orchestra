@@ -12,6 +12,8 @@ import { useLocal, type ModelSelection } from "@/context/local"
 import { usePermission } from "@/context/permission"
 import { type ContextItem, type ImageAttachmentPart, type Prompt, type usePrompt } from "@/context/prompt"
 import { useSDK, type DirectorySDK } from "@/context/sdk"
+import { useServerSDK } from "@/context/server-sdk"
+import { clearPending, pendingRules } from "@/components/draft-subagent-models"
 import { useSync, type DirectorySync } from "@/context/sync"
 import { Identifier } from "@/utils/id"
 import { Worktree as WorktreeState } from "@/utils/worktree"
@@ -236,6 +238,7 @@ export function createPromptSubmit(input: PromptSubmitInput) {
   const sdk = useSDK()
   const sync = useSync()
   const serverSync = useServerSync()
+  const serverSDK = useServerSDK()
   const local = useLocal()
   const permission = usePermission()
   const prompt = input.prompt
@@ -417,6 +420,20 @@ export function createPromptSubmit(input: PromptSubmitInput) {
       if (created) {
         seed(sessionDirectory, created)
         session = created
+        // Flush draft subagent-model selections into session permission
+        // rules before the first prompt is sent — sequential here, so the
+        // first task call already observes them. No race by construction.
+        const draftRules = pendingRules(sessionDirectory)
+        if (draftRules.length > 0) {
+          clearPending(sessionDirectory)
+          if ((await serverSDK().protocol) === "v1") {
+            await serverSDK().client.session.update({
+              sessionID: created.id,
+              directory: sessionDirectory,
+              permission: draftRules,
+            }).catch((err) => console.error("[tasks] draft rules flush failed", err))
+          }
+        }
         await startTransition(() => {
           if (!session) return
           if (shouldAutoAccept) permissionState.enableAutoAccept(session.id, sessionDirectory)

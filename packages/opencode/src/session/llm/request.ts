@@ -102,12 +102,10 @@ export const prepare = Effect.fn("LLMRequestPrep.prepare")(function* (input: Pre
     isOpenaiOauth || input.isWorkflow
       ? input.messages
       : [
-          ...system.map(
-            (x): ModelMessage => ({
-              role: "system",
-              content: x,
-            }),
-          ),
+          ...system.map((x): ModelMessage => ({
+            role: "system",
+            content: x,
+          })),
           ...input.messages,
         ]
 
@@ -115,7 +113,7 @@ export const prepare = Effect.fn("LLMRequestPrep.prepare")(function* (input: Pre
     "chat.params",
     {
       sessionID: input.sessionID,
-      agent: input.agent.name,
+      agent: input.agent.id ?? input.agent.name,
       model: input.model,
       provider: input.provider,
       message: input.user,
@@ -135,7 +133,7 @@ export const prepare = Effect.fn("LLMRequestPrep.prepare")(function* (input: Pre
     "chat.headers",
     {
       sessionID: input.sessionID,
-      agent: input.agent.name,
+      agent: input.agent.id ?? input.agent.name,
       model: input.model,
       provider: input.provider,
       message: input.user,
