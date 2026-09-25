@@ -61,10 +61,12 @@ runs:
         # https://github.com/oven-sh/bun/issues/28147
         if [ "$RUNNER_OS" = "Windows" ]; then
           # Bun can leave a patched package directory half-renamed on Windows.
+          cache_dir="$PWD/.bun-install-cache"
+          trap 'rm -rf "$cache_dir"' EXIT
           for attempt in 1 2 3; do
-            bun pm cache rm
+            rm -rf "$cache_dir"
             rm -rf node_modules
-            if bun install --no-cache --linker hoisted ${{ inputs.install-flags }}; then
+            if bun install --no-cache --cache-dir "$cache_dir" --linker hoisted ${{ inputs.install-flags }}; then
               exit 0
             fi
           done
