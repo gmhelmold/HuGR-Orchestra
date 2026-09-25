@@ -1,0 +1,32 @@
+{
+  "productSha": "b0c33d2f6567a2c741240f3c44bc00ca2f01e7e7",
+  "newIssues": [
+    {
+      "number": 45,
+      "url": "https://github.com/gmhelmold/HuGR-Orchestra/issues/45"
+    },
+    {
+      "number": 46,
+      "url": "https://github.com/gmhelmold/HuGR-Orchestra/issues/46"
+    },
+    {
+      "number": 47,
+      "url": "https://github.com/gmhelmold/HuGR-Orchestra/issues/47"
+    },
+    {
+      "number": 48,
+      "url": "https://github.com/gmhelmold/HuGR-Orchestra/issues/48"
+    },
+    {
+      "number": 49,
+      "url": "https://github.com/gmhelmold/HuGR-Orchestra/issues/49"
+    }
+  ],
+  "relatedExistingIssues": [
+    25,
+    29,
+    42
+  ],
+  "productModified": false,
+  "merged": false
+}

@@ -1,0 +1,17 @@
+[
+  {
+    "case": "success-control",
+    "prompts": 1,
+    "children": 1,
+    "consumed": 1,
+    "duplicate": "Failure(Cause([Die(Error: Governed Task denied: approval-consumed)]))"
+  },
+  {
+    "case": "metadata-fault",
+    "prompts": 0,
+    "children": 1,
+    "consumed": 1,
+    "fault": "Failure(Cause([Die(Error: AUDIT metadata persistence fault)]))",
+    "retry": "Failure(Cause([Die(Error: Governed Task denied: approval-consumed)]))"
+  }
+]

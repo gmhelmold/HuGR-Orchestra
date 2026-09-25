@@ -1,0 +1,26 @@
+$ vitest run packages/index/test/depgraph.test.ts packages/index/test/depgraph-honest.test.ts packages/index/test/depgraph.heldout.test.ts packages/index/test/own-impact.test.ts packages/index/test/fold.test.ts packages/index/test/fold-drift.test.ts packages/index/test/retrieval.test.ts packages/adapter-io/test/wire-retrieval-freshness.test.ts packages/adapter-io/test/retrieval-tier-bound.test.ts "--maxWorkers=1" "--minWorkers=1"
+
+ RUN  v2.1.9 /private/tmp/hugr-audit-graph-maestro.qn6kWx/repo/foundation/atlas
+
+ ✓ |unit| packages/index/test/retrieval.test.ts (14 tests) 1602ms
+   ✓ INDEX-9 — total: malformed → empty, never throws (visible goldens + PBT) > SCN-INDEX-9b-1 / PROP-INDEX-9: ∀ input (10k corner-biased) — 0 throws, malformed ⇒ empty 1276ms
+ ✓ |unit| packages/adapter-io/test/retrieval-tier-bound.test.ts (5 tests) 3475ms
+   ✓ TOOLS-6 — the tier bound holds on EVERY mode that returns a Pack, not only --by scope > --by dependency (end to end through the assembled handler): T2 + off-lattice OUT, T0/T1 through 1665ms
+   ✓ TOOLS-6 — the tier bound holds on EVERY mode that returns a Pack, not only --by scope > --by trigger (the dormant leg, driven with a populated triggers map): T2 + off-lattice OUT, T0/T1 through 962ms
+   ✓ TOOLS-6 — the tier bound holds on EVERY mode that returns a Pack, not only --by scope > the production trigger mode stays empty — no trigger-axis producer exists (documented non-behavior) 843ms
+ ✓ |unit| packages/index/test/fold.test.ts (7 tests) 1379ms
+   ✓ PROP-INDEX-12 — boundedness + bucket-naming (∀-law, structural half) > bucket-naming: ∀ single-leaf edit, delta names exactly the leaf→root path (idChanged, siblings excluded) 715ms
+ ✓ |unit| packages/index/test/depgraph-honest.test.ts (6 tests) 104ms
+ ✓ |unit| packages/index/test/depgraph.heldout.test.ts (11 tests) 273ms
+ ✓ |unit| packages/index/test/fold-drift.test.ts (8 tests) 310ms
+ ✓ |unit| packages/adapter-io/test/wire-retrieval-freshness.test.ts (1 test) 1368ms
+   ✓ assembleHandler — `--by dependency` is rebuilt PER QUERY (freshness parity with scope) > an in-session write to the SAME store is reflected by a later --by dependency query (frozen-snapshot teeth) 1362ms
+ ✓ |unit| packages/index/test/depgraph.test.ts (4 tests) 888ms
+   ✓ PROP-INDEX-13 — ∀ graph, query: unresolved-in-scope ⇔ underApprox ∧ coChanged only when underApprox > underApprox iff an unresolved/dynamic edge sources from a node in scope; coChanged gated on it 790ms
+ ✓ |unit| packages/index/test/own-impact.test.ts (4 tests) 371ms
+
+ Test Files  9 passed (9)
+      Tests  60 passed (60)
+   Start at  18:34:48
+   Duration  54.36s (transform 1.41s, setup 0ms, collect 17.81s, tests 9.77s, environment 264ms, prepare 7.86s)
+
