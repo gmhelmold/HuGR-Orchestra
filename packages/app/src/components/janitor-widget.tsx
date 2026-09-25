@@ -36,6 +36,11 @@ export function JanitorWidget() {
   const [sessionID, setSessionID] = createSignal<string>()
   let resolveToken = 0
   createEffect(() => {
+    if (!janitor.store.report) {
+      setRouteDirectory(undefined)
+      setSessionID(undefined)
+      return
+    }
     const id = routeSessionID()
     const currentServer = server.current
     const token = ++resolveToken
@@ -93,7 +98,10 @@ export function JanitorWidget() {
                 onClick={() => janitor.expand()}
                 class="flex w-full cursor-pointer items-center gap-2.5 px-4 py-3 text-start transition-colors hover:bg-v2-overlay-simple-overlay-hover"
               >
-                <span aria-hidden="true" class={`size-2 shrink-0 rounded-full ${dot(report.findings[0]?.severity ?? "attention")}`} />
+                <span
+                  aria-hidden="true"
+                  class={`size-2 shrink-0 rounded-full ${dot(report.findings[0]?.severity ?? "attention")}`}
+                />
                 <span class="flex-1 truncate text-[13px] font-[530] leading-5 tracking-[-0.04px] text-v2-text-text-base">
                   {language.plural("janitor.notify.title", report.findings.length)}
                 </span>
@@ -107,7 +115,10 @@ export function JanitorWidget() {
             }
           >
             <div class="flex min-h-0 min-w-0 shrink-0 items-center gap-2.5 px-4 pb-2 pt-3">
-              <span aria-hidden="true" class={`size-2 shrink-0 rounded-full ${dot(report.findings[0]?.severity ?? "attention")}`} />
+              <span
+                aria-hidden="true"
+                class={`size-2 shrink-0 rounded-full ${dot(report.findings[0]?.severity ?? "attention")}`}
+              />
               <p class="flex-1 truncate text-[13px] font-[530] leading-5 tracking-[-0.04px] text-v2-text-text-base">
                 {language.t("janitor.report.title")}
               </p>
@@ -137,7 +148,7 @@ export function JanitorWidget() {
                     {language.t("janitor.chat.noProject")}
                   </p>
                 }
-                >
+              >
                 {(item) => (
                   <JanitorPocketChat
                     directory={() => item.directory}
