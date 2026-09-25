@@ -38,7 +38,7 @@ CI root cause (#102) ------------> reliable current-base evidence
 
 #112 catalog boundary -----------> #114 durable plan/context/validation records
                                            |
-#109 Own host boundary --------------------+--> #108 context adapter -----> #106 approval readers
+#109 Own host boundary --------------------+--> #108 context adapter -----> #106 approval readers -----> #111 current-base integration gate
 
 #110 automatic admission -----------------------------------------------> #111 current-base integration gate
 
@@ -49,18 +49,18 @@ CI root cause (#102) ------------> reliable current-base evidence
 
 ## Ordered Backlog
 
-| Order | Issue   | State                     | Entry condition                                                     | Exit condition                                                                                  |
-| ----- | ------- | ------------------------- | ------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
-| 0     | #102    | Current CI defect         | Current Windows failure evidence                                    | Root cause and focused regression gate; no global timeout or serialization workaround.          |
-| 1     | #107    | Foundation tracker        | Reconcile original Atlas/Own findings                               | Every child has category, dependency, owner, and release disposition.                           |
-| 2     | #112    | Partial implementation    | Freeze installed read API                                           | OpenCode reads versioned canonical Territory objects without vendor-relative imports.           |
-| 3     | #114    | Not implemented           | #112 available                                                      | PlanRevision, ContextRecord, and validation records persist/read; absent context produces HOLD. |
-| 4     | #109    | Not implemented           | Relevant Own findings resolved or explicitly gated                  | Host verifies canonical Own bytes, identity, receipt, freshness, and coverage before injection. |
-| 5     | #108    | Not implemented           | #112, #114, and #109 available                                      | Deterministic ContextToolPlan persists verified ContextRecord or returns HOLD.                  |
-| 6     | #106    | Not implemented           | #114 and #108 available                                             | Approval presenter reads exact durable records and remains fail-closed on mismatch.             |
-| 7     | #110    | Partial branch exists     | Rebase from current `dev`; close #62 hardening in same evidence set | Persisted direct stakeholder messages create exactly one admission before model work.           |
-| 8     | #113 P2 | Open safety hardening     | Current contracts and defect evidence reconciled                    | #25, #42, #49, #62, #72, and #86 are closed or explicitly non-applicable to governed flow.      |
-| 9     | #111    | Current-base gate pending | All applicable #113 P1/P2 children and current CI complete          | Current-base integration evidence, no historical PR #11 assumption, human merge decision.       |
+| Order | Issue   | State                     | Entry condition                                                                                 | Exit condition                                                                                  |
+| ----- | ------- | ------------------------- | ----------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| 0     | #102    | Current CI defect         | Current Windows failure evidence                                                                | Root cause and focused regression gate; no global timeout or serialization workaround.          |
+| 1     | #107    | Foundation tracker        | Reconcile original Atlas/Own findings                                                           | Every child has category, dependency, owner, and release disposition.                           |
+| 2     | #112    | Partial implementation    | Freeze installed read API                                                                       | OpenCode reads versioned canonical Territory objects without vendor-relative imports.           |
+| 3     | #114    | Not implemented           | #112 available                                                                                  | PlanRevision, ContextRecord, and validation records persist/read; absent context produces HOLD. |
+| 4     | #109    | Not implemented           | Relevant Own findings resolved or explicitly gated                                              | Host verifies canonical Own bytes, identity, receipt, freshness, and coverage before injection. |
+| 5     | #108    | Not implemented           | #112, #114, and #109 available                                                                  | Deterministic ContextToolPlan persists verified ContextRecord or returns HOLD.                  |
+| 6     | #106    | Not implemented           | #114 and #108 available                                                                         | Approval presenter reads exact durable records and remains fail-closed on mismatch.             |
+| 7     | #110    | Partial branch exists     | Rebase from current `dev`; close #62 hardening in same evidence set                             | Persisted direct stakeholder messages create exactly one admission before model work.           |
+| 8     | #113 P2 | Open safety hardening     | Current contracts and defect evidence reconciled                                                | #25, #42, #49, #62, #72, and #86 are closed or explicitly non-applicable to governed flow.      |
+| 9     | #111    | Current-base gate pending | #112, #114, #109, #108, #106, #110, all applicable #113 P1/P2 children, and current CI complete | Current-base integration evidence, no historical PR #11 assumption, human merge decision.       |
 
 ## Work In Progress And PR Triage
 
@@ -88,6 +88,8 @@ Before any of them is resumed:
 | `orchestra-maestro-rebuild`          | Clean; 85 commits behind `fork/dev`                                         | Historical integration branch; do not merge directly.            |
 | `orchestra-maestro-rebuild-clean`    | User untracked config/status files                                          | Preserve; never clean or switch over its untracked files.        |
 | `agent-issue-110-admission-trigger`  | Clean experiment branch                                                     | Review only through refreshed #110 scope.                        |
+| `agent-issue-25-approval-redisplay`  | Clean; 43 commits behind `fork/dev`                                         | Rebase/revalidate or close through #113 P2 safety contract.      |
+| `agent-issue-72-consume-attribution` | Clean; 43 commits behind `fork/dev`                                         | Rebase/revalidate or close through #113 P2 safety contract.      |
 | `agent-issue-112-territory-catalog*` | Clean experiment branches                                                   | Review only through #112 installed-boundary contract.            |
 
 No worktree is removed, reset, or force-updated by this roadmap. Cleanup requires an owner, a merged/superseded PR decision, clean status, and a worktree-specific command.
