@@ -36,6 +36,11 @@ const write = (rel, lines) => {
   writeFileSync(join(root, rel), Array.from({ length: lines }, (_, i) => `// line ${i}`).join("\n"))
 }
 
+const writeWaivers = (entries) => {
+  mkdirSync(join(root, "harness/gates"), { recursive: true })
+  writeFileSync(join(root, "harness/gates/godfile-waivers.json"), `${JSON.stringify(entries, null, 2)}\n`)
+}
+
 /** Run the guard against the fixture root. Returns the exit code and the combined output. */
 function run() {
   try {
@@ -56,6 +61,7 @@ beforeAll(() => {
   git("config", "user.email", "gate@example.invalid")
   git("config", "user.name", "gate")
   writeFileSync(join(root, ".gitignore"), "dist/\nnode_modules/\n")
+  writeWaivers({})
   write("packages/core/src/ok.ts", 10)
   write("harness/gates/ok.mjs", 10)
   git("add", "-A")
@@ -120,6 +126,44 @@ describe("godfile-guard", () => {
     rmSync(join(root, "packages/core/src/edge.ts"))
   })
 
+  it("permits only an active bounded waiver and rejects stale or exceeded entries", () => {
+    const waived = "packages/adapter-io/src/reverify-store.ts"
+    write(waived, HARD + 5)
+    writeWaivers({
+      [waived]: { maxLines: 705, reason: "owner-authorized fixture" },
+    })
+    let result = run()
+    expect(result.code).toBe(0)
+    expect(result.out).toMatch(/authorized bounded waiver/)
+
+    write(waived, 706)
+    result = run()
+    expect(result.code).toBe(1)
+    expect(result.out).toMatch(/waived through 705/)
+
+    write(waived, HARD)
+    result = run()
+    expect(result.code).toBe(1)
+    expect(result.out).toMatch(/waiver is stale/)
+
+    writeWaivers({})
+    rmSync(join(root, waived))
+    expect(run().code).toBe(0)
+  })
+
+  it("rejects a waiver for an unapproved path", () => {
+    write("packages/core/src/unapproved.ts", HARD + 5)
+    writeWaivers({
+      "packages/core/src/unapproved.ts": { maxLines: HARD + 5, reason: "not authorized" },
+    })
+    const { code, out } = run()
+    expect(code).toBe(1)
+    expect(out).toMatch(/waiver is not owner-authorized/)
+    writeWaivers({})
+    rmSync(join(root, "packages/core/src/unapproved.ts"))
+    expect(run().code).toBe(0)
+  })
+
   it("respects .gitignore rather than a denylist of its own — dist/ is out of scope", () => {
     write("packages/core/dist/generated.ts", HARD + 50)
     expect(run().code).toBe(0)
@@ -135,6 +179,8 @@ describe("godfile-guard", () => {
   it("FAILS rather than passes when it cannot build its file list (no git ⇒ nothing was checked)", () => {
     const bare = mkdtempSync(join(tmpdir(), "atlas-godfile-nogit-"))
     try {
+      mkdirSync(join(bare, "harness/gates"), { recursive: true })
+      writeFileSync(join(bare, "harness/gates/godfile-waivers.json"), "{}\n")
       const prev = root
       root = bare
       const { code, out } = run()

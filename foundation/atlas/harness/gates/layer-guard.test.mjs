@@ -478,6 +478,18 @@ describe("layer-guard — READ_SURFACE binds by THREE kinds (compose-planner / q
     expect(code).toBe(0)
   })
 
+  it("kind (b) accepts a double-quoted COMMAND_LEG value", () => {
+    readSurface(["atlas-doctor"])
+    pkg("adapter-io", ["tools"], {
+      "wire.ts": wire("    'atlas-init': () => ({}),", "    'atlas-query': () => ({}),"),
+      "compose.ts": compose(),
+    })
+    pkg("cli", ["tools"], { "map.ts": cliMap('  doctor: "atlas-query",') })
+    const { code, out } = runGate()
+    expect(out).not.toContain("✗")
+    expect(code).toBe(0)
+  })
+
   it("kind (b), negative — a COMMAND_LEG entry onto an UNBOUND Tool does NOT satisfy the member", () => {
     readSurface(["atlas-doctor"])
     pkg("adapter-io", ["tools"], {
