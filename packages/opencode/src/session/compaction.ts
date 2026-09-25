@@ -22,6 +22,7 @@ import { ProviderV2 } from "@opencode-ai/core/provider"
 import { ModelV2 } from "@opencode-ai/core/model"
 import { buildPrompt } from "@opencode-ai/core/session/compaction"
 import { SessionCompactionEvent } from "@opencode-ai/schema/session-compaction-event"
+import { DIRECT_SOURCE_KEY } from "../maestro/admission-origin"
 
 export const Event = SessionCompactionEvent
 
@@ -492,6 +493,21 @@ const layer = Layer.effect(
               sessionID: input.sessionID,
             })
           }
+          // Explicit preserved lineage: this auto-replay is not a new direct
+          // stakeholder request. Admission binds to the original message ID.
+          yield* session.updatePart({
+            id: PartID.ascending(),
+            messageID: replayMsg.id,
+            sessionID: input.sessionID,
+            type: "text",
+            synthetic: true,
+            metadata: { [DIRECT_SOURCE_KEY]: original.id },
+            text: `[Internal compaction replay of ${original.id}]`,
+            time: {
+              start: Date.now(),
+              end: Date.now(),
+            },
+          })
         }
 
         if (!replay) {
