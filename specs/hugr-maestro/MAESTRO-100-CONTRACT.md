@@ -130,15 +130,15 @@ enforcement before that adapter exists.
 
 ## Core Boundaries
 
-| Boundary | Core owns | Must not do |
-| --- | --- | --- |
-| authority | lifecycle state, approval binding, grants, policy, receipts | trust model prose or tool output as authority |
-| team | stable roster, routing, grants, independent review boundary | let a seat self-approve, self-review, merge, or expand grants |
-| Relay | immutable run/step state, gate result, retry, recovery | advance because Runner says done |
-| GitHub | operational Project/issue/PR state | replace technical receipts or overwrite human scope/priority/cancel decisions |
-| verification | required/skipped check plan and exact-SHA evidence | reduce checks when impact is unknown |
-| Atlas | optional current evidence/context capability | invent facts, paths, freshness, or use generic fallback retrieval |
-| ability | discoverable built-in domain capability | bypass core authority or mutate external state directly |
+| Boundary     | Core owns                                                   | Must not do                                                                   |
+| ------------ | ----------------------------------------------------------- | ----------------------------------------------------------------------------- |
+| authority    | lifecycle state, approval binding, grants, policy, receipts | trust model prose or tool output as authority                                 |
+| team         | stable roster, routing, grants, independent review boundary | let a seat self-approve, self-review, merge, or expand grants                 |
+| Relay        | immutable run/step state, gate result, retry, recovery      | advance because Runner says done                                              |
+| GitHub       | operational Project/issue/PR state                          | replace technical receipts or overwrite human scope/priority/cancel decisions |
+| verification | required/skipped check plan and exact-SHA evidence          | reduce checks when impact is unknown                                          |
+| Atlas        | optional current evidence/context capability                | invent facts, paths, freshness, or use generic fallback retrieval             |
+| ability      | discoverable built-in domain capability                     | bypass core authority or mutate external state directly                       |
 
 ## Lifecycle
 
@@ -159,21 +159,21 @@ recovery behavior. A model may propose content; it cannot create authority.
 
 ## Source-Cited Trace Matrix
 
-| Surface | Source anchor | From -> event/guard -> to | Input -> output | Authority | Evidence | Owner |
-| --- | --- | --- | --- | --- | --- | --- |
-| lifecycle methods | `specs/hugr-maestro/methods/*.md` | `FRAME/GROUND/CONTRACT` -> validated method event -> next phase or `HOLD` | durable Session/message/records -> versioned lifecycle event | core only | method acceptance plus EventV2 test | #172 / #185 |
-| actor identity | `actor-identity-contract.md` | unresolved actor -> canonicalization guard -> identified or `HOLD` | project, session, member -> canonical actor bytes | core only | actor collision/cross-project tests | #172 |
-| team roster | `maestro/packages/core/src/team.ts` V1 reference; `actor-identity-contract.md` | typed WP -> route/grant guard -> seat-bound or `HOLD` | WP type and actor -> fixed seat/grants/card | conductor routes; core enforces | route/grant/review mutations | #176 / #188-#190 |
-| RelayRun | `relay/SPEC.md` V1 reference; `packages/opencode/src/tool/task.ts` | `ARMED/RUNNING` -> gate receipt -> `STEP_HELD/STEP_ACCEPTED/COMPLETED` | immutable run plus bound child Session -> gate receipt and cursor | host state machine only | real Task resume seam and Relay integration tests | #178 / #181-#182-#179 |
-| Project ledger | GitHub Project #2; #169-#206 | receipt pending -> idempotent adapter mutation -> mapped Stage or `HOLD` | validated work receipt -> Project field update | GitHub adapter only | GitHub API receipt and exact issue/PR URL | #174 / #195-#194 |
-| repository delivery | `packages/opencode/src/tool/task.ts`; git worktree fixture contracts | planned -> lease guard -> worktree/PR receipt or `HOLD` | run/worktree/base SHA -> PR/head SHA receipt | repository adapter only | real git/worktree/PR fixtures | #174 / #193 |
-| verification and CI | `.github/workflows/test.yml`; `script/godfile.ts` | head known -> VerificationPlan -> exact-SHA CI verdict or `HOLD` | base/head/diff/risk -> required/skipped checks and CI receipt | verifier/CI adapter only | planner/gate/CI receipt tests | #170 / #191-#192 |
-| source size | `script/godfile.ts` | changed source -> LOC guard -> target/decision/block | source file plus Project size decision -> size receipt or `HOLD` | Godfile gate only | band fixtures and real mutation probe | #170 / #196 |
-| Atlas context | `atlas-context-envelope-contract.md`; `own-protocol.md` | `ABSENT/BOOTSTRAP/STALE/READY` -> receipt validation -> context or `HOLD` | capability/snapshot/unit -> verified context or HOLD | Atlas provider only | OCE acceptance and freshness tests | #173 / #200-#202 |
-| abilities | `packages/opencode/src/maestro/*`; V1 `tool-registry.ts` reference | config/grant unknown -> registry check -> available/unavailable | config/grants -> filtered ability inventory | core registry only | registry/transport parity tests | #175 / #198-#197-#199 |
-| recovery | `SESSION-STATE.md`; Relay state contract | failed receipt -> recovery classifier -> retry/hold/escalate/cancel/supersede | failed receipt -> terminal or recoverable state | core only | fault injection and replay tests | #171 / #203-#205 |
-| existing #113 scope | `ROADMAP.md`; #113 body | legacy active -> M0.4 contract audit -> normalized or explicitly superseded | legacy issue/receipt -> canonical contract state | lead then validator | body parse and dependency audit | #177 / #206 |
-| M0 program governance | [#177](https://github.com/gmhelmold/HuGR-Orchestra/issues/177); this contract | bootstrap `PLANNED` -> M0.1/M0.2/M0.3 receipts -> M0.4 conflict map or `HOLD` | five-axiom issue body plus records -> governed dispatch eligibility | lead until M4.1 adapter | contract parse, baseline record, validator tests, conflict-map review | #177 / #183-#184-#187-#206 |
+| Surface               | Source anchor                                                                  | From -> event/guard -> to                                                     | Input -> output                                                     | Authority                       | Evidence                                                              | Owner                      |
+| --------------------- | ------------------------------------------------------------------------------ | ----------------------------------------------------------------------------- | ------------------------------------------------------------------- | ------------------------------- | --------------------------------------------------------------------- | -------------------------- |
+| lifecycle methods     | `specs/hugr-maestro/methods/*.md`                                              | `FRAME/GROUND/CONTRACT` -> validated method event -> next phase or `HOLD`     | durable Session/message/records -> versioned lifecycle event        | core only                       | method acceptance plus EventV2 test                                   | #172 / #185                |
+| actor identity        | `actor-identity-contract.md`                                                   | unresolved actor -> canonicalization guard -> identified or `HOLD`            | project, session, member -> canonical actor bytes                   | core only                       | actor collision/cross-project tests                                   | #172                       |
+| team roster           | `maestro/packages/core/src/team.ts` V1 reference; `actor-identity-contract.md` | typed WP -> route/grant guard -> seat-bound or `HOLD`                         | WP type and actor -> fixed seat/grants/card                         | conductor routes; core enforces | route/grant/review mutations                                          | #176 / #188-#190           |
+| RelayRun              | `relay/SPEC.md` V1 reference; `packages/opencode/src/tool/task.ts`             | `ARMED/RUNNING` -> gate receipt -> `STEP_HELD/STEP_ACCEPTED/COMPLETED`        | immutable run plus bound child Session -> gate receipt and cursor   | host state machine only         | real Task resume seam and Relay integration tests                     | #178 / #181-#182-#179      |
+| Project ledger        | GitHub Project #2; #169-#206                                                   | receipt pending -> idempotent adapter mutation -> mapped Stage or `HOLD`      | validated work receipt -> Project field update                      | GitHub adapter only             | GitHub API receipt and exact issue/PR URL                             | #174 / #195-#194           |
+| repository delivery   | `packages/opencode/src/tool/task.ts`; git worktree fixture contracts           | planned -> lease guard -> worktree/PR receipt or `HOLD`                       | run/worktree/base SHA -> PR/head SHA receipt                        | repository adapter only         | real git/worktree/PR fixtures                                         | #174 / #193                |
+| verification and CI   | `.github/workflows/test.yml`; `script/godfile.ts`                              | head known -> VerificationPlan -> exact-SHA CI verdict or `HOLD`              | base/head/diff/risk -> required/skipped checks and CI receipt       | verifier/CI adapter only        | planner/gate/CI receipt tests                                         | #170 / #191-#192           |
+| source size           | `script/godfile.ts`                                                            | changed source -> LOC guard -> target/decision/block                          | source file plus Project size decision -> size receipt or `HOLD`    | Godfile gate only               | band fixtures and real mutation probe                                 | #170 / #196                |
+| Atlas context         | `atlas-context-envelope-contract.md`; `own-protocol.md`                        | `ABSENT/BOOTSTRAP/STALE/READY` -> receipt validation -> context or `HOLD`     | capability/snapshot/unit -> verified context or HOLD                | Atlas provider only             | OCE acceptance and freshness tests                                    | #173 / #200-#202           |
+| abilities             | `packages/opencode/src/maestro/*`; V1 `tool-registry.ts` reference             | config/grant unknown -> registry check -> available/unavailable               | config/grants -> filtered ability inventory                         | core registry only              | registry/transport parity tests                                       | #175 / #198-#197-#199      |
+| recovery              | `SESSION-STATE.md`; Relay state contract                                       | failed receipt -> recovery classifier -> retry/hold/escalate/cancel/supersede | failed receipt -> terminal or recoverable state                     | core only                       | fault injection and replay tests                                      | #171 / #203-#205           |
+| existing #113 scope   | `ROADMAP.md`; #113 body                                                        | legacy active -> M0.4 contract audit -> normalized or explicitly superseded   | legacy issue/receipt -> canonical contract state                    | lead then validator             | body parse and dependency audit                                       | #177 / #206                |
+| M0 program governance | [#177](https://github.com/gmhelmold/HuGR-Orchestra/issues/177); this contract  | bootstrap `PLANNED` -> M0.1/M0.2/M0.3 receipts -> M0.4 conflict map or `HOLD` | five-axiom issue body plus records -> governed dispatch eligibility | lead until M4.1 adapter         | contract parse, baseline record, validator tests, conflict-map review | #177 / #183-#184-#187-#206 |
 
 The V1 and Relay anchors are behavior references, not imported runtime. Any row
 without a current-base proof remains `blocked` in Project #2.
@@ -183,17 +183,17 @@ without a current-base proof remains `blocked` in Project #2.
 Maestro is one conductor, not a specialist seat. Team roster contains eight
 specialist seats, matching V1 `TEAM` exactly.
 
-| Actor | memberId | Role | Granted ability class | Required return card/evidence | Must not do |
-| --- | --- | --- | --- | --- | --- |
-| Maestro | `maestro` | conductor/integrator | lifecycle, routing, reconcile, integration | transition/Project/merge receipt | product implementation, self-approval, self-review |
-| Charlie | `charlie` | backend execution | scoped repository write | implementation card, gates, diff receipt | approve, review own work, merge |
-| Patty | `patty` | frontend execution | scoped repository write | implementation card, sensory evidence, diff receipt | approve, review own work, merge |
-| Lucy | `lucy` | cold review | read-only artifact review | cited APPROVE/FIX_FIRST/REJECT card | edit implementation, receive author transcript, merge |
-| Bobby | `bobby` | architecture | read-only contract review | seam/contract verdict | implement product or merge |
-| Billy | `billy` | security | read-only threat review | threat verdict and cited controls | implement product or merge |
-| Jimmy | `jimmy` | exploration | read-only discovery | grounded findings card | ratify alone or edit product |
-| Rosie | `rosie` | documentation | scoped docs write | docs evidence card | decide product behavior |
-| Frankie | `frankie` | process audit | read-only process/ledger audit | audit verdict | implement product or merge |
+| Actor   | memberId  | Role                 | Granted ability class                      | Required return card/evidence                       | Must not do                                           |
+| ------- | --------- | -------------------- | ------------------------------------------ | --------------------------------------------------- | ----------------------------------------------------- |
+| Maestro | `maestro` | conductor/integrator | lifecycle, routing, reconcile, integration | transition/Project/merge receipt                    | product implementation, self-approval, self-review    |
+| Charlie | `charlie` | backend execution    | scoped repository write                    | implementation card, gates, diff receipt            | approve, review own work, merge                       |
+| Patty   | `patty`   | frontend execution   | scoped repository write                    | implementation card, sensory evidence, diff receipt | approve, review own work, merge                       |
+| Lucy    | `lucy`    | cold review          | read-only artifact review                  | cited APPROVE/FIX_FIRST/REJECT card                 | edit implementation, receive author transcript, merge |
+| Bobby   | `bobby`   | architecture         | read-only contract review                  | seam/contract verdict                               | implement product or merge                            |
+| Billy   | `billy`   | security             | read-only threat review                    | threat verdict and cited controls                   | implement product or merge                            |
+| Jimmy   | `jimmy`   | exploration          | read-only discovery                        | grounded findings card                              | ratify alone or edit product                          |
+| Rosie   | `rosie`   | documentation        | scoped docs write                          | docs evidence card                                  | decide product behavior                               |
+| Frankie | `frankie` | process audit        | read-only process/ledger audit             | audit verdict                                       | implement product or merge                            |
 
 Roster identity is `memberId`, not display name, model, Task ID, or prompt.
 Each seat receives only its current scope, allowed abilities, and return-card
@@ -260,18 +260,18 @@ field `PVTSSF_lAHODZlCY84BkufizhjeEZQ` and `Stage` field
 adapter interface; it is not claim that every current Project item carries
 these values:
 
-| Maestro state | Project `Stage` | Project `Status` | Writer |
-| --- | --- | --- | --- |
-| `PLANNED` | Planned | Todo | lead or GitHub adapter |
-| `READY` | Ready | Todo | GitHub adapter after contract validation |
-| `RUNNING` | Running | In Progress | GitHub adapter after exact dispatch receipt |
-| `BLOCKED` | Blocked | Todo | GitHub adapter with named blocker |
-| `REVIEW` | Review | In Progress | GitHub adapter after review request |
-| `CI` | CI | In Progress | GitHub adapter after required CI starts |
-| `MERGE_READY` | Merge Ready | In Progress | merge adapter after exact-SHA evidence |
-| `CLOSED` | Closed | Done | merge/reconcile adapter |
-| `CANCELLED` | Cancelled | Done | lifecycle adapter |
-| `SUPERSEDED` | Superseded | Done | lifecycle adapter |
+| Maestro state | Project `Stage` | Project `Status` | Writer                                      |
+| ------------- | --------------- | ---------------- | ------------------------------------------- |
+| `PLANNED`     | Planned         | Todo             | lead or GitHub adapter                      |
+| `READY`       | Ready           | Todo             | GitHub adapter after contract validation    |
+| `RUNNING`     | Running         | In Progress      | GitHub adapter after exact dispatch receipt |
+| `BLOCKED`     | Blocked         | Todo             | GitHub adapter with named blocker           |
+| `REVIEW`      | Review          | In Progress      | GitHub adapter after review request         |
+| `CI`          | CI              | In Progress      | GitHub adapter after required CI starts     |
+| `MERGE_READY` | Merge Ready     | In Progress      | merge adapter after exact-SHA evidence      |
+| `CLOSED`      | Closed          | Done             | merge/reconcile adapter                     |
+| `CANCELLED`   | Cancelled       | Done             | lifecycle adapter                           |
+| `SUPERSEDED`  | Superseded      | Done             | lifecycle adapter                           |
 
 `Seat`, `Priority`, `Risk`, `CI`, and `Blocked reason` are separate fields.
 Project field values are current state, not authority: every Maestro-written
@@ -284,13 +284,13 @@ unexpected revision cause `HOLD` and reconciliation rather than overwrite.
 Maestro compiles a `VerificationPlan` from exact base/head SHA, changed paths,
 known package ownership, risk policy, workflow/gate changes, and Atlas impact.
 
-| Change class | Minimum verification |
-| --- | --- |
-| docs only | documentation/contract guards |
-| known package | affected package plus reverse dependencies |
-| workflow or gate | changed guard plus workflow validation |
+| Change class                            | Minimum verification                          |
+| --------------------------------------- | --------------------------------------------- |
+| docs only                               | documentation/contract guards                 |
+| known package                           | affected package plus reverse dependencies    |
+| workflow or gate                        | changed guard plus workflow validation        |
 | API, persistence, security, concurrency | expanded integration/platform/security checks |
-| unknown impact | expanded verification |
+| unknown impact                          | expanded verification                         |
 
 Every skipped check has a machine-readable reason. Every required check has a
 receipt for exact head SHA. CI cancellation applies only to superseded PR
@@ -303,12 +303,12 @@ Source includes implementation and test files. Markdown documentation is
 excluded. LOC is non-blank physical lines, including comments, so formatting
 cannot game the measure.
 
-| Band | Requirement |
-| --- | --- |
-| <=400 | normal target |
-| 401-600 | Maestro records size decision on WP/PR |
+| Band    | Requirement                                                        |
+| ------- | ------------------------------------------------------------------ |
+| <=400   | normal target                                                      |
+| 401-600 | Maestro records size decision on WP/PR                             |
 | 601-700 | Maestro records architecture exception; Bobby and Lucy review seam |
-| >700 | owned source blocks until split/refactor |
+| >700    | owned source blocks until split/refactor                           |
 
 Generated and vendor source require declared origin and regeneration evidence;
 they are not a generic waiver. Pre-existing over-cap files may not grow and
@@ -331,14 +331,14 @@ or substitutes generic retrieval.
 
 ## Atlas State Glossary
 
-| Term | Layer | Meaning | Dispatch result |
-| --- | --- | --- | --- |
-| `ABSENT` | Maestro capability | no Atlas provider/configuration exists | normal ungrounded work allowed; grounded work unavailable |
-| `BOOTSTRAP` | Maestro capability | explicit Atlas initialization or rematerialization is running | HOLD grounded dispatch |
-| `READY` | Maestro capability | provider, snapshot, catalog, and requested static Own receipts verify | eligible for grounded planning, never automatic dispatch |
-| `STALE` | Maestro capability | previously valid evidence/snapshot no longer verifies | HOLD grounded dispatch |
+| Term        | Layer                        | Meaning                                                                  | Dispatch result                                            |
+| ----------- | ---------------------------- | ------------------------------------------------------------------------ | ---------------------------------------------------------- |
+| `ABSENT`    | Maestro capability           | no Atlas provider/configuration exists                                   | normal ungrounded work allowed; grounded work unavailable  |
+| `BOOTSTRAP` | Maestro capability           | explicit Atlas initialization or rematerialization is running            | HOLD grounded dispatch                                     |
+| `READY`     | Maestro capability           | provider, snapshot, catalog, and requested static Own receipts verify    | eligible for grounded planning, never automatic dispatch   |
+| `STALE`     | Maestro capability           | previously valid evidence/snapshot no longer verifies                    | HOLD grounded dispatch                                     |
 | `UN-SEEDED` | Atlas orientation facet only | explicit provider declaration that a named orientation facet has no seed | never means context ready or permission to infer ownership |
-| `HOLD` | Maestro lifecycle outcome | proof is missing, malformed, ambiguous, incomplete, or unauthorized | no child Task or fallback retrieval |
+| `HOLD`      | Maestro lifecycle outcome    | proof is missing, malformed, ambiguous, incomplete, or unauthorized      | no child Task or fallback retrieval                        |
 
 Empty, missing, or malformed Own data is never `UN-SEEDED`; it is `HOLD`.
 `UN-SEEDED` must come from an explicit provider receipt and does not authorize
@@ -349,16 +349,16 @@ grounded dispatch.
 `v1-portability-register.md` is the source for this crosswalk. A V1 artifact
 may guide behavior or test cases; it is never a V2 runtime dependency.
 
-| V1 term | V2 term | V2 decision |
-| --- | --- | --- |
-| `TEAM` / named fleet | conductor plus eight specialist roster entries | preserve fixed roles and stable IDs in M3; do not port Claude agent files as authority |
-| Runner | `RelayRun` bound to one OpenCode child Session | preserve continuous context only through proven Task resume; otherwise `HOLD` |
-| Relay hook / `SubagentStop` | native Relay execution adapter | host evaluates gate and resumes exact child Session; no Claude hook runtime dependency |
-| Gate / DoD chain | versioned gate receipt | preserve external mechanical oracle and retry bound; Runner prose never advances state |
-| `ToolRegistry` | internal Ability registry plus scoped tool projection | preserve one discoverable registry; do not expose flat V1 tool catalog to every seat |
-| `.maestro` files and JSONL | EventV2 records plus typed receipts | retain portable evidence semantics; no V1 file store as authority |
-| V1 internal Atlas | optional Atlas capability provider/static Own boundary | no direct vendor import; `ABSENT` remains supported |
-| Claude plugin hooks | OpenCode lifecycle/Task/Tool adapters | hooks are compatibility adapter behavior, not V2 core architecture |
+| V1 term                     | V2 term                                                | V2 decision                                                                            |
+| --------------------------- | ------------------------------------------------------ | -------------------------------------------------------------------------------------- |
+| `TEAM` / named fleet        | conductor plus eight specialist roster entries         | preserve fixed roles and stable IDs in M3; do not port Claude agent files as authority |
+| Runner                      | `RelayRun` bound to one OpenCode child Session         | preserve continuous context only through proven Task resume; otherwise `HOLD`          |
+| Relay hook / `SubagentStop` | native Relay execution adapter                         | host evaluates gate and resumes exact child Session; no Claude hook runtime dependency |
+| Gate / DoD chain            | versioned gate receipt                                 | preserve external mechanical oracle and retry bound; Runner prose never advances state |
+| `ToolRegistry`              | internal Ability registry plus scoped tool projection  | preserve one discoverable registry; do not expose flat V1 tool catalog to every seat   |
+| `.maestro` files and JSONL  | EventV2 records plus typed receipts                    | retain portable evidence semantics; no V1 file store as authority                      |
+| V1 internal Atlas           | optional Atlas capability provider/static Own boundary | no direct vendor import; `ABSENT` remains supported                                    |
+| Claude plugin hooks         | OpenCode lifecycle/Task/Tool adapters                  | hooks are compatibility adapter behavior, not V2 core architecture                     |
 
 ## Internal Abilities
 
@@ -378,18 +378,18 @@ prove a common missing seam.
 
 ## Program Trace
 
-| Epic | Owns | Depends on | Initial child WPs |
-| --- | --- | --- | --- |
-| #177 M0 | program contract, baseline, five-axiom validation | none | #184, #187, #183 |
-| #178 M1 | Task resume proof and RelayRun | M0 | #181, #182, #179 |
-| #172 M2 | durable lifecycle and authority | M0, M1 for Relay dispatch | #185, #186, #180 |
-| #176 M3 | eight-seat roster, grants, review boundary | M0, M2 | #188, #189, #190 |
-| #174 M4 | Project ledger and repository operations | M0 | #195, #194, #193 |
-| #170 M5 | tests, CI, LOC policy | M0, M4 for reporting | #191, #192, #196 |
-| #175 M6 | internal abilities and discovery | M0, M2 | #198, #197, #199 |
-| #173 M7 | Atlas modes and context | M0, M2, M6, #94 | #200, #201, #202 |
-| #171 M8 | recovery, security, release proof | M1-M7 | #203, #204, #205 |
-| #113 | existing durable plan and Atlas context scope | existing DAG | #106-#114 and linked hardening |
+| Epic    | Owns                                              | Depends on                | Initial child WPs              |
+| ------- | ------------------------------------------------- | ------------------------- | ------------------------------ |
+| #177 M0 | program contract, baseline, five-axiom validation | none                      | #184, #187, #183               |
+| #178 M1 | Task resume proof and RelayRun                    | M0                        | #181, #182, #179               |
+| #172 M2 | durable lifecycle and authority                   | M0, M1 for Relay dispatch | #185, #186, #180               |
+| #176 M3 | eight-seat roster, grants, review boundary        | M0, M2                    | #188, #189, #190               |
+| #174 M4 | Project ledger and repository operations          | M0                        | #195, #194, #193               |
+| #170 M5 | tests, CI, LOC policy                             | M0, M4 for reporting      | #191, #192, #196               |
+| #175 M6 | internal abilities and discovery                  | M0, M2                    | #198, #197, #199               |
+| #173 M7 | Atlas modes and context                           | M0, M2, M6, #94           | #200, #201, #202               |
+| #171 M8 | recovery, security, release proof                 | M1-M7                     | #203, #204, #205               |
+| #113    | existing durable plan and Atlas context scope     | existing DAG              | #106-#114 and linked hardening |
 
 M0 additionally owns #206, which normalizes legacy work and freezes the first
 file-level conflict map after M0.1, M0.2, and M0.3 complete.
@@ -429,19 +429,19 @@ file makes WPs sequential unless the lead creates one explicit integration WP.
 
 ## First Execution Wave
 
-| WP | Owner | Status | Reason |
-| --- | --- | --- | --- |
-| #184 M0.1 | lead | review | contract source and evidence commit/PR pending |
-| #187 M0.2 | Jimmy-style read-only research | review | evidence record accepted; commit/PR pending |
-| #183 M0.3 | Charlie-style pure parser | blocked | wait for M0.1/M0.2 commit plus bootstrap packet |
-| #181 M1.1 | Charlie-style focused test | blocked | needs current baseline evidence from #187 |
-| #182 M1.2 | Charlie-style pure model | blocked | needs exact Relay contract from #184 |
-| #185 M2.1 | Charlie-style schema/fold | blocked | needs lifecycle transition table from #184 |
-| #195 M4.1 | Frankie-style configuration audit | blocked | needs GitHub Project credential and field census |
-| #191 M5.1 | Charlie-style pure planner | blocked | needs risk/verification contract from #184 |
-| #198 M6.1 | Charlie-style pure registry | blocked | needs ability boundary from #184 |
-| #200 M7.1 | Charlie-style pure provider | blocked | needs Atlas mode contract from #184 |
-| #206 M0.4 | lead | blocked | normalizes legacy items and freezes conflict map after #184, #187, #183 |
+| WP        | Owner                             | Status  | Reason                                                                  |
+| --------- | --------------------------------- | ------- | ----------------------------------------------------------------------- |
+| #184 M0.1 | lead                              | review  | contract source and evidence commit/PR pending                          |
+| #187 M0.2 | Jimmy-style read-only research    | review  | evidence record accepted; commit/PR pending                             |
+| #183 M0.3 | Charlie-style pure parser         | blocked | wait for M0.1/M0.2 commit plus bootstrap packet                         |
+| #181 M1.1 | Charlie-style focused test        | blocked | needs current baseline evidence from #187                               |
+| #182 M1.2 | Charlie-style pure model          | blocked | needs exact Relay contract from #184                                    |
+| #185 M2.1 | Charlie-style schema/fold         | blocked | needs lifecycle transition table from #184                              |
+| #195 M4.1 | Frankie-style configuration audit | blocked | needs GitHub Project credential and field census                        |
+| #191 M5.1 | Charlie-style pure planner        | blocked | needs risk/verification contract from #184                              |
+| #198 M6.1 | Charlie-style pure registry       | blocked | needs ability boundary from #184                                        |
+| #200 M7.1 | Charlie-style pure provider       | blocked | needs Atlas mode contract from #184                                     |
+| #206 M0.4 | lead                              | blocked | normalizes legacy items and freezes conflict map after #184, #187, #183 |
 
 No implementation agent is dispatched until its row changes from `blocked` to
 `ready` through a lead-owned contract update.
