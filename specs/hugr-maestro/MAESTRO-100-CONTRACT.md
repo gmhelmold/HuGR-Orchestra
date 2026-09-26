@@ -101,7 +101,9 @@ packages/opencode/test/maestro/work-contract.test.ts
 It exports a pure `validateWorkContract({ kind, body })` seam for `epic`,
 `issue`, `sub-issue`, `contract`, `task`, and `work-package` text. Unknown
 `kind` is `HOLD(unsupported-kind)`. It normalizes CRLF to LF, then scans lines
-outside fenced code blocks. A canonical delimiter begins at column zero and is
+outside complete fenced code blocks. A fence opens with a column-zero run of at
+least three identical backticks or tildes and closes only with same character
+run at least opener length. A canonical delimiter begins at column zero and is
 exactly `## ` plus one canonical name with no closing marker or extra text.
 The next column-zero Markdown heading of level one or two ends current section.
 Section content is its intervening non-blank text; empty content is invalid.
