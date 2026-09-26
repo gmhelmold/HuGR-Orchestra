@@ -112,6 +112,7 @@ describe("maestro.work-contract", () => {
       contractBody({ omit: "Definition of Done" }).replace("## Invariants", "> ## Definition of Done\nwrong\n\n## Invariants"),
       contractBody({ omit: "Definition of Done" }).replace("## Invariants", "- ## Definition of Done\nwrong\n\n## Invariants"),
       contractBody({ omit: "Definition of Done" }).replace("## Invariants", "## Definition of Done #\nwrong\n\n## Invariants"),
+      contractBody({ omit: "Definition of Done" }).replace("## Invariants", "## Definition of Done \nwrong\n\n## Invariants"),
     ]
 
     for (const body of malformedBodies) {
