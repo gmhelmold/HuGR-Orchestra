@@ -119,8 +119,9 @@ mutate GitHub, write Project state, or integrate a readiness writer.
 M0.3 tests valid extraction and every rejection class for each of six artifact
 kinds. Mutation probes separately remove each rejection guard and corrupt one
 kind branch; each must make its targeted
-`bun test packages/opencode/test/maestro/work-contract.test.ts` case fail,
-then restore. PR records all before/after outputs.
+`bun --cwd packages/opencode test --timeout 30000 --only-failures
+test/maestro/work-contract.test.ts` case fail, then restore. PR records all
+before/after outputs.
 `bun --cwd packages/opencode typecheck` is required before review.
 
 Until M4.1 wires Project mutation, lead enforces the validator receipt before
