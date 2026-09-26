@@ -1,6 +1,6 @@
 # Maestro V2 Session State
 
-Snapshot: 2026-09-25. Baseline: `fork/dev` at `102e763599` (`chore: generate`).
+Snapshot: 2026-09-25. Baseline: `fork/dev` at `ba2dcb664b` (`fix(core): close pending Windows watcher subscriptions (#127)`).
 
 This is the short operational snapshot. Read [ROADMAP.md](ROADMAP.md) for dependency order, work in progress, and cleanup rules. GitHub issues remain the acceptance-contract source of truth.
 
@@ -20,10 +20,11 @@ This is the short operational snapshot. Read [ROADMAP.md](ROADMAP.md) for depend
 
 - PR #124 made GitHub App credentials optional. Fork workflows use `GITHUB_TOKEN`; malformed partial App configuration fails closed.
 - PR #125 fixed malformed Atlas HTML, restored `generate`, and limits final `publish` to upstream `anomalyco/opencode`.
-- Generated successor baseline is `102e763599`; no workflow URL is recorded here.
+- PR #126 consolidated Maestro delivery roadmap and Atlas guard scope at `cdc16aea17`.
+- PR #127 fixed pending native watcher subscription teardown at `ba2dcb664b`; its focused lifecycle regression runs in CI. The Windows rerun passed: [36195034447](https://github.com/gmhelmold/HuGR-Orchestra/actions/runs/36195034447).
 - Fork `publish` is intentionally skipped.
-- Windows Core instability remains tracked in #102. A successful rerun is not root-cause evidence; require a reproducer and focused regression gate before claiming Windows stability.
-- GitHub Actions evidence must name its SHA. `102e763599` is generated successor baseline; do not inherit matrix evidence from parent `688d264010`.
+- Windows Core instability remains tracked in #102. Its initial watcher lifetime path has a focused regression, but a separate `SessionV2.create` Windows timeout remains owner-unproven; rerun success is not root-cause evidence.
+- GitHub Actions evidence must name its SHA. `ba2dcb664b` is current baseline; do not inherit matrix evidence from parent `688d264010`.
 
 ## Active Blockers
 
