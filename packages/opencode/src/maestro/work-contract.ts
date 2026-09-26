@@ -136,9 +136,12 @@ export function validateWorkContract(input: { kind: unknown; body: unknown }): W
   let current: string[] | undefined
 
   for (let index = 0; index < lines.length; index++) {
-    if (ignored[index]) continue
     const line = lines[index]
     const canonical = canonicalSection(line)
+    if (ignored[index]) {
+      if (canonical) malformed.add(canonical)
+      continue
+    }
     if (canonical) {
       const values = occurrences.get(canonical) ?? []
       current = []

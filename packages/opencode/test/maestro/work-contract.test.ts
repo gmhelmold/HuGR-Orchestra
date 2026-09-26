@@ -97,11 +97,49 @@ describe("maestro.work-contract", () => {
     expect(validateWorkContract({ kind: "issue", body })).toEqual({ status: "VALID", sections })
   })
 
-  test("treats canonical text only inside a complete fence as missing", () => {
+  test("treats canonical text only inside a complete fence as malformed", () => {
     const body = `\`\`\`markdown\n## Definition of Done\nignored\n\`\`\`\n\n${contractBody({ omit: "Definition of Done" })}`
     expect(validateWorkContract({ kind: "issue", body })).toEqual({
       status: "HOLD",
-      reasons: ["missing-section"],
+      reasons: ["malformed-heading"],
+    })
+  })
+
+  test("ends sections at column-zero H1 headings", () => {
+    const body = [
+      "## Definition of Done",
+      "observable completion",
+      "# Context",
+      "not definition content",
+      "## Invariants",
+      "state remains true",
+      "## Quality Standards",
+      "tests pass",
+      "## Completeness Criteria",
+      "all paths covered",
+      "## Success Criteria",
+      "user outcome reached",
+    ].join("\n")
+
+    expect(validateWorkContract({ kind: "issue", body })).toEqual({ status: "VALID", sections })
+  })
+
+  test("returns compound hold reasons in stable order", () => {
+    const body = [
+      "## Definition of Done",
+      "first completion condition",
+      "## Definition of Done",
+      "second completion condition",
+      "## Invariants",
+      "# Quality Standards",
+      "malformed quality heading",
+      "## Completeness Criteria",
+      "all paths covered",
+    ].join("\n")
+
+    expect(validateWorkContract({ kind: "issue", body })).toEqual({
+      status: "HOLD",
+      reasons: ["missing-section", "empty-section", "malformed-heading", "duplicate-section"],
     })
   })
 
