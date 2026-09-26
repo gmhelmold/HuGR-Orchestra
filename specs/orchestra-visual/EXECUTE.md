@@ -1,83 +1,48 @@
-# Orchestra — entrada de execução v3
+# Orchestra — entrada de execução v4
 
-Status: planejamento revisado. Nenhum código da interface, benchmark ou teste Electron foi executado por esta revisão.
+A v3 foi reprovada na revisão adversarial. Use **Orchestra_Codex_Execution_Plan_v4.zip**, entregue ao usuário. O pacote contém PLAN.json, SURFACES.json, CENSUS.json, SPEC.md, CONTRACTS.md, PERFORMANCE.md, BUDGETS.json, COVERAGE.json, RECEIPTS-v4.md, tools, issues/*.md, referência original e provas dos reparos.
 
-## Insumo obrigatório
+Este arquivo remoto é apenas o bootstrap. **O plano completo, os scripts e o PNG não foram integralmente publicados nesta branch.** Não alegar leitura desses insumos a partir deste resumo. Os corpos antigos de tickets não substituem os contratos v4 do pacote; a sincronização integral de corpos e relações nativas não foi executada nesta revisão.
 
-Use o pacote **Orchestra_Codex_Execution_Plan_v3.zip** entregue ao usuário. Ele substitui a v2 e contém o contrato completo: PLAN.json, SPEC.md, PERFORMANCE.md, CONTRACTS.md, MAP.md, SURFACES.json, OWNERSHIP.md, issues/*.md, ferramentas, provas da revisão e reference/approved.png.
+## Missão aprovada, sem redesign
 
-Este arquivo no repositório é a entrada resumida. **O PLAN.json completo, as ferramentas e a imagem não estão publicados nesta branch por esta revisão.** Não finja que os leu a partir deste arquivo. Obtenha o pacote antes da implementação visual; compare o destino existente antes de copiar para specs/orchestra-visual/, sem sobrescrever trabalho diferente.
+Migrar toda a UI desktop/web do Orchestra, com performance, leveza e acabamento simultâneos. Preservar o mock Approval flow refactor: sidebar estreita, conversa dominante, alterações/diff em paralelo, input inferior único, Dock acima de Tasks e Atividade à direita. Grafite discretamente azulado, azul contido, bordas finas, profundidade suave e montanhas dessaturadas. Sem roxo/ciano/neon, sem copiar os layouts exploratórios Claude/Replit.
 
-Leia EXECUTE.md do pacote, SPEC.md, PERFORMANCE.md, CONTRACTS.md, MAP.md e abra a referência. Depois carregue apenas a task selecionada, seus axiomas e dependências. Não injete os 140 nós em cada subagente.
+Referência: reference/approved.png, 1672×941, SHA-256 e839b759e0f93beca37b10cd45700725020a840fee6e97da1e67556b2ffb128d. Base examinada: 30d951fcc4a09e708768551c7c6fd38a0efe3da8; revalidar o checkout, não resetar para ela. Leia AGENTS.md. Preserve trabalho do usuário, permissões e contratos de execução. Não migrar framework nem criar outro runtime/browser/auth/store.
 
-Referência única: Approval flow refactor, 1672×941, SHA-256 `e839b759e0f93beca37b10cd45700725020a840fee6e97da1e67556b2ffb128d`. Base de código documentada: `30d951fcc4a09e708768551c7c6fd38a0efe3da8`. Revalidar checkout atual; não resetar para a base histórica.
+## Hierarquia e estágios
 
-## Missão fixa
+Mantidos os39tickets: épicos #130–133, issues #134–143, subissues #144–168. A v4 acrescenta somente S25-W0 dentro do integrador #168: agora143nós,38WPs,66tasks e1.936critérios nos cinco axiomas explícitos de cada nível.
 
-Migrar toda a interface desktop/web existente, não apenas uma demonstração. Preservar o layout aprovado: sidebar estreita; topbar de projeto/branch/sessão; conversa central dominante; lista de alterações e diff em paralelo; evidência de execução; um único input inferior no centro; Dock acima de Tasks e Atividade no rail direito, simultaneamente visíveis.
+1. S01 atualiza os canônicos PLAN/SURFACES/CENSUS e deriva MAP/OWNERSHIP/issues. Censo local ainda não foi realizado por esta entrega. Arquivos de UI descobertos precisam de classificação/owner/cobertura, não quatro mapas paralelos.
+2. S02 liga a coleta real à suíte de produção. O avaliador numérico v4 já existe no pacote e é recalculado pelo validador; não preencher PASS manualmente.
+3. Fundação S03/S04/S05 e entradas necessárias → **S25-W0-T1** produz piloto conectado com controllers existentes. São15pré-requisitos de task, não44. W0-T2 verifica macrocomposição/interações/custo inicial antes de home/settings/providers/Janitor completos. Não equivale a aceite final de microacabamento.
+4. S25-W1-T1 integra o restante e produz candidato; S23/S24 medem e revisam; S25-W1-T2 encerra. Critério do produtor não exige conclusão de consumidor futuro.
+5. S19/S20-W1 representam capacidades atuais ou ausência segura. W2-T1 entrega adapter/consumer local após autoridade e codegen confirmados; S25 importa quando disponível; W2-T2 prova o caminho live conectado. Ausência de W2 não autoriza dado fictício nem bloqueia UI independente.
 
-Grafite discretamente azulado, azul contido, bordas finas, profundidade suave e montanhas dessaturadas na sidebar. Sem roxo, neon, wash ciano, novo dashboard ou editor central imposto. A v3 não muda a escolha visual. Performance, leveza, funcionamento e microacabamento são critérios simultâneos.
+## Reparos que mudam a execução
 
-Reutilizar Solid, ThemeProvider V1/V2, stores, componentes, handlers e permissões existentes. Não criar runtime, browser, sistema de auth, biblioteca visual ou backend paralelo. Atlas é conhecimento, Dock é browser e Janitor permanece read-only. Progresso, testes aprovados, presença e autoridade precisam de fonte real. Conteúdo do site dentro do Dock não é uma nova aplicação a construir.
+- Contrato efetivo vincula task, regras contínuas dos ancestrais, normas, cobertura, fixture/master e leases. Não reutilizar recibos v3.
+- S01/piloto são milestones históricos. Alterar app.tsx legitimamente não invalida todo o programa. Outputs locais e gates finais possuem escopos de revalidação distintos; --affected-by é cone potencial, não reset global.
+- Scope vem do diff Git real BASE..HEAD, incluindo renames, dirty/index preexistentes e commits importados. Imports de S25 exigem recibos de origem e blobs finais correspondentes; conflitos voltam ao owner.
+- Codegen tem paths autorizados e lock serial. S01 confirma footprint local; o comando oficial gera src/generated e src/generated-effect em packages/client, seguido de check:generated. Não editar generated manualmente nem omitir saídas.
+- --jobs limita RUNNING+novas seleções. Excesso anterior gera zero novas alocações, sem cancelar trabalho. Benchmark exige host quieto.
+- Dependências externas exigem fonte presente no candidato ou artefato instalado+lockfile de hash conferido, testes públicos positivos/negativos e revisão.
+- Captura visual tem matriz de superfície/estado/viewport/DPR/zoom/host/build/fixture/master. PNG1×1 ou truncado não substitui cobertura. Decodificação e métricas não avaliam beleza nem autenticam o executor.
 
-## Trabalho publicado
-
-| Épico | Issues | Subissues |
-|---|---|---|
-| #130 Fundação | #134–#135 | #144–#148 |
-| #131 Aplicação inteira | #136–#138 | #149–#157 |
-| #132 Capacidades | #139–#141 | #158–#164 |
-| #133 Gates e entrega | #142–#143 | #165–#168 |
-
-Continuam 4 épicos, 10 issues, 25 subissues, 37 WPs e 64 tasks. Cada nó contém explicitamente DoD, Invariants, Quality standards, Completeness criteria e Success criteria. A revisão v3 materializa 1.898 critérios com IDs. PLAN.json do pacote v3 é a autoridade detalhada; as projeções Markdown locais são verificadas contra ele.
-
-## Ordem
-
-1. S01 confirma master, checkout, instruções, censo e ownership. O inventário inicial tem 68 registros mistos de UI, fonte, medida e lacuna; não são 68 telas testadas.
-2. S02 estabelece fixture e medição de produção. S03 tema e S05 assets avançam separados; S04 primitives segue tema.
-3. S16 bridge nativa e S17 dados não dependem de S22/tradução. Lanes de apresentação consomem o contrato de copy. S09 precede S11; S17 precede S18; S16 fornece fronteira nativa a overlays/Dock.
-4. S25-W1-T1 produz o build integrado; S23 e S24 verificam; S25-W1-T2 encerra. Não criar ciclo esperando fechamento de S25 antes de medir.
-5. S19/S20-W1 podem entregar UI segura unavailable/HOLD. W2 espera autoridade real das issues externas pertinentes. Não fingir W2 entregue nem bloquear frentes independentes.
-
-S25 é único writer de app.tsx, session.tsx, session-side-panel.tsx, settings context e wiring main/index/server. S22 possui traduções. Respeitar scopes/exclusões. Um coordenador controla progress.json; o seletor não adquire locks de sistema. Benchmark reserva hardware e não concorre com builds/capturas pesadas.
-
-## Gates e recibos v3
-
-Na raiz do pacote:
+## Executar no pacote
 
 ```sh
 python3 tools/validate_plan.py
+python3 tools/render_maps.py --check
 python3 tools/render_issues.py --check
 python3 -m unittest discover -s tools -p 'test_*.py' -v
-python3 tools/select_work.py --repo /caminho/real/HuGR-Orchestra --jobs 4
+python3 tools/select_work.py --repo /caminho/HuGR-Orchestra --jobs 4
 python3 tools/select_work.py --show S01-W1-T1
 ```
 
-Recibos schema 2 exigem três categorias explícitas: performance, visual, native. `evidence_requirements` e os arrays de gates definem a obrigatoriedade por task. NOT_RUN, ausência, estado arbitrário ou NOT_APPLICABLE em categoria obrigatória não desbloqueiam trabalho.
+Antes de escrever uma task, capture baseline com tools/capture_scope.py. Use recibo esquema3, critérios exatos, comandos/logs/revisão e --repo para validar a fonte. Sem --repo o seletor não consome PASSs como entregas verificadas. --census-strict reprova enquanto houver UI local não classificada. S25 é único writer dos hotspots; outros owners mantêm scopes disjuntos.
 
-Cada recibo vincula o contrato da task, SHA do código, hashes das provas, critérios exatos, comandos e revisão. Categorias PASS devem apontar ao mesmo build. Leia RECEIPTS-v3.md. O inventário de hashes não autentica resultados; abrir imagens, interpretar métricas/logs e revisar continua obrigatório.
+O pacote passou133testes únicos das ferramentas (83preexistentes adaptados +50regressões). Git, métricas, capturas e APIs desses testes são sintéticos. **Não houve implementação do frontend, benchmark do Orchestra, render do aplicativo ou teste Electron nesta correção.** Apenas S01-W1-T1 começa pronta; zero tasks do produto foram pré-aprovadas.
 
-```sh
-python3 tools/receipt_template.py S01-W1-T1 --out evidence/S01/W1-T1.draft.json
-# Executar, revisar e preencher com dados reais.
-python3 tools/seal_receipt.py evidence/S01/W1-T1.draft.json --out evidence/S01/W1-T1.json
-python3 tools/validate_evidence.py S01-W1-T1 evidence/S01/W1-T1.json
-```
-
-Com --repo, o seletor verifica ancestry e alterações relevantes commitadas/dirty. Sem --repo, source_revision_verified permanece false. Gravar recibos/progress.json não invalida o produto; mapas, fixtures e contratos não recebem exclusão genérica. Rework exige STALE e nova prova dos dependentes.
-
-## Performance e acabamento
-
-Os P01–P12 do pacote continuam alvos, não resultados atingidos: carga com 8 sessões/64 children, histórico longo e streaming; input p95≤50ms/p99≤100ms; hot-tab p95≤100ms; limites incrementais de bundle, memória e idle; zero polling cosmético; nenhum rescan global por delta; nenhuma view extra por layout. Comparar o mesmo build de produção, máquina, fixture, cache e energia. RAF gaps não comprovam frames do compositor.
-
-Q01–Q16 abrangem todas superfícies e microestados: geometria, tipografia, ícones, bordas, contraste, hover/foco, truncamento, loading/empty/error, rolagem e native overlays. Não esconder diferenças mascarando regiões inteiras nem aceitar placeholder de asset como final. Validadores de recibo não julgam beleza nem executam benchmarks.
-
-## GitHub nativo e estado real
-
-Os 39 tickets existem; não os recrie. Relações nativas **não foram aplicadas por esta revisão**. GET dos filhos de #130 retornou []; outras relações não foram auditadas exaustivamente. O script gh do pacote faz preflight, dry-run e leitura posterior, sem substituir pai, remover relações, criar ou fechar tickets.
-
-Projeção v3: 35 pais e 55 dependências não redundantes (118 antes da redução); 56 restrições finas/advisory continuam em PLAN.json. Não transformar uma dependência de task em ciclo de issues inteiras.
-
-A suite das ferramentas passou 83 testes locais, incluindo controles negativos e um repositório Git temporário sintético. Isso não significa Orchestra renderizado, rápido ou pronto. O Mac estava offline; não houve teste do aplicativo. A primeira task continua S01-W1-T1; zero tasks de implementação aprovadas.
-
-Entregue código funcionando, evidência por critério, comparação ao master, medições, run/rollback e estado exato de capacidades. Não faça reset/clean/force-push ou merge com gate falho. Não termine em outro planejamento ou em uma tela bonita isolada.
+Use REVIEW-v4.md, FINDINGS-RESOLUTION.json e QA_REPORT.md do ZIP para os reparos R01–R10/H01–H03 e seus limites. A escolha visual permanece intacta; o aceite do produto depende dos gates reais, no mesmo SHA/build, não da validação deste documento.
