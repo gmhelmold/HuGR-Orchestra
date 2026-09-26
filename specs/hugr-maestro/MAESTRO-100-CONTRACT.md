@@ -86,10 +86,10 @@ enough to enter the governed queue.
 
 ## M0.3 Bootstrap Exception
 
-M0.3 (#183) is the only implementation exception before M0.4: it creates the
-validator M0.4 requires. Lead may dispatch it sequentially only after M0.1
-and M0.2 records are cold-reviewed, committed, and linked from Project #2.
-No other implementation WP may use this exception.
+M0.3 (#183) is the only Maestro implementation exception before M0.4: it
+creates the validator M0.4 requires. Lead may dispatch it sequentially only
+after M0.1 and M0.2 records are cold-reviewed, committed, and linked from
+Project #2. No other Maestro implementation WP may use this exception.
 
 M0.3 owns exactly these files:
 
@@ -130,6 +130,29 @@ Until M4.1 wires Project mutation, lead enforces the validator receipt before
 manually moving a non-bootstrap item to `READY`, `QUEUED`, or `DISPATCHED`.
 M0.3 itself proves parser capability; it does not falsely claim GitHub
 enforcement before that adapter exists.
+
+## CI Health Unblocker
+
+A repository CI-health fix may run before M0.4 only to unblock a required
+exact-head verdict. It is not a Maestro implementation exception. Lead must
+freeze the affected owner files, interface, checks, and merge order before
+dispatch. Every condition below is mandatory:
+
+1. Same required CI job fails on one head and its single bounded retry.
+2. Failure target and candidate owner files have current source and CI evidence.
+3. Candidate files are disjoint from active Maestro owner files and shared
+   integration surfaces.
+4. Issue has canonical five-axiom contract and Project records `BLOCKED` with
+   named job/issue receipt.
+5. Fix adds a focused regression and preserves required full CI.
+
+No CI-health fix may skip a test, increase a timeout, force process exit, waive
+a gate, weaken a guard, change Maestro behavior, or open a second retry.
+Unknown ownership, interface, cause, or verification is `HOLD`.
+
+#209 is admitted only for lead-owned diagnosis of the Windows
+`file HttpApi > serves search endpoints` timeout. It may not receive a code
+agent until this exception's owner/interface/check conditions are frozen.
 
 ## Core Boundaries
 
@@ -399,8 +422,8 @@ file-level conflict map after M0.1, M0.2, and M0.3 complete.
 
 ## Conflict Map Rule
 
-An implementation WP other than controlled M0.3 is not dispatchable until M0.4
-records all of:
+An implementation WP other than controlled M0.3 or ratified CI-health
+unblocker is not dispatchable until M0.4 records all of:
 
 ```text
 owner files
