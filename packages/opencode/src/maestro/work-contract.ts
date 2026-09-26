@@ -32,21 +32,26 @@ function isKnownKind(value: unknown): value is WorkArtifactKind {
   return typeof value === "string" && kinds.includes(value as WorkArtifactKind)
 }
 
-function fenceMarker(line: string): "```" | "~~~" | undefined {
-  if (line.startsWith("```")) return "```"
-  if (line.startsWith("~~~")) return "~~~"
-  return undefined
+function fenceMarker(line: string): { character: "`" | "~"; length: number } | undefined {
+  const character = line[0]
+  if (character !== "`" && character !== "~") return undefined
+
+  let length = 0
+  while (line[length] === character) length++
+  if (length < 3) return undefined
+  return { character, length }
 }
 
 function completeFences(lines: string[]): boolean[] {
   const ignored = Array<boolean>(lines.length).fill(false)
 
   for (let start = 0; start < lines.length; start++) {
-    const marker = fenceMarker(lines[start])
-    if (!marker) continue
+    const opener = fenceMarker(lines[start])
+    if (!opener) continue
 
     for (let end = start + 1; end < lines.length; end++) {
-      if (!lines[end].startsWith(marker)) continue
+      const closer = fenceMarker(lines[end])
+      if (!closer || closer.character !== opener.character || closer.length < opener.length) continue
       for (let index = start; index <= end; index++) ignored[index] = true
       start = end
       break

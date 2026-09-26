@@ -105,6 +105,31 @@ describe("maestro.work-contract", () => {
     })
   })
 
+  test("does not close a four-backtick fence with three backticks", () => {
+    const body = [
+      "````markdown",
+      "## Definition of Done",
+      "first ignored heading",
+      "```",
+      "## Definition of Done",
+      "second ignored heading",
+      "````",
+      "## Invariants",
+      "state remains true",
+      "## Quality Standards",
+      "tests pass",
+      "## Completeness Criteria",
+      "all paths covered",
+      "## Success Criteria",
+      "user outcome reached",
+    ].join("\n")
+
+    expect(validateWorkContract({ kind: "issue", body })).toEqual({
+      status: "HOLD",
+      reasons: ["malformed-heading"],
+    })
+  })
+
   test("ends sections at column-zero H1 headings", () => {
     const body = [
       "## Definition of Done",
