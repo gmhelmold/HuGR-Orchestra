@@ -85,6 +85,12 @@ function hasH2SectionSpacingVariant(line: string, name: WorkContractSection): bo
   return (line[2] !== " " || index > 3) && line.slice(index).startsWith(name)
 }
 
+function hasUnspacedSectionHeading(line: string, name: WorkContractSection): boolean {
+  let index = 0
+  while (line[index] === "#") index++
+  return index > 0 && line.slice(index).startsWith(name)
+}
+
 function hasPrefixedDelimiter(line: string, delimiter: string): boolean {
   let index = 0
   let prefixed = false
@@ -130,6 +136,7 @@ function malformedSection(line: string): WorkContractSection | undefined {
     const delimiter = `## ${name}`
     if (line.startsWith(delimiter)) return name
     if (hasH2SectionSpacingVariant(line, name)) return name
+    if (hasUnspacedSectionHeading(line, name)) return name
     if (hasPrefixedDelimiter(line, delimiter)) return name
 
     const level = headingLevel(line)
