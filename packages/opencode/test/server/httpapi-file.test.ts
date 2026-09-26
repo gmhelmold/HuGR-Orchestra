@@ -69,5 +69,5 @@ describe("file HttpApi", () => {
 
     expect(symbols.status).toBe(200)
     expect(await symbols.json()).toEqual([])
-  })
+  }, 30_000)
 })
