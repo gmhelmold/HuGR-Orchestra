@@ -105,6 +105,14 @@ describe("maestro.work-contract", () => {
     })
   })
 
+  test("treats canonical text only inside a complete tilde fence as malformed", () => {
+    const body = `~~~markdown\n## Definition of Done\nignored\n~~~\n\n${contractBody({ omit: "Definition of Done" })}`
+    expect(validateWorkContract({ kind: "issue", body })).toEqual({
+      status: "HOLD",
+      reasons: ["malformed-heading"],
+    })
+  })
+
   test("does not close a four-backtick fence with three backticks", () => {
     const body = [
       "````markdown",
