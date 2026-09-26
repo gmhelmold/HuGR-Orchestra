@@ -77,6 +77,14 @@ function isSpace(value: string | undefined): boolean {
   return value === " " || value === "\t"
 }
 
+function hasH2SectionSpacingVariant(line: string, name: WorkContractSection): boolean {
+  if (!line.startsWith("##") || !isSpace(line[2])) return false
+
+  let index = 2
+  while (isSpace(line[index])) index++
+  return (line[2] !== " " || index > 3) && line.slice(index).startsWith(name)
+}
+
 function hasPrefixedDelimiter(line: string, delimiter: string): boolean {
   let index = 0
   let prefixed = false
@@ -121,6 +129,7 @@ function malformedSection(line: string): WorkContractSection | undefined {
   for (const name of sectionNames) {
     const delimiter = `## ${name}`
     if (line.startsWith(delimiter)) return name
+    if (hasH2SectionSpacingVariant(line, name)) return name
     if (hasPrefixedDelimiter(line, delimiter)) return name
 
     const level = headingLevel(line)

@@ -113,6 +113,14 @@ describe("maestro.work-contract", () => {
     })
   })
 
+  test("allows a longer tilde run to close a complete fence", () => {
+    const body = `~~~~markdown\n## Definition of Done\nignored\n~~~~~\n\n${contractBody({ omit: "Definition of Done" })}`
+    expect(validateWorkContract({ kind: "issue", body })).toEqual({
+      status: "HOLD",
+      reasons: ["malformed-heading"],
+    })
+  })
+
   test("does not close a four-backtick fence with three backticks", () => {
     const body = [
       "````markdown",
@@ -184,6 +192,8 @@ describe("maestro.work-contract", () => {
       contractBody({ omit: "Definition of Done" }).replace("## Invariants", "- ## Definition of Done\nwrong\n\n## Invariants"),
       contractBody({ omit: "Definition of Done" }).replace("## Invariants", "## Definition of Done #\nwrong\n\n## Invariants"),
       contractBody({ omit: "Definition of Done" }).replace("## Invariants", "## Definition of Done \nwrong\n\n## Invariants"),
+      contractBody({ omit: "Definition of Done" }).replace("## Invariants", "##\tDefinition of Done\nwrong\n\n## Invariants"),
+      contractBody({ omit: "Definition of Done" }).replace("## Invariants", "##  Definition of Done\nwrong\n\n## Invariants"),
     ]
 
     for (const body of malformedBodies) {
